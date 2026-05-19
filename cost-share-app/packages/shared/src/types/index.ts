@@ -388,6 +388,10 @@ export interface UserPreferences {
     notifications: boolean;
 }
 
+// ============================================
+// 6. PROFILE DASHBOARD (RPC payloads)
+// ============================================
+
 /**
  * Profile dashboard payload — supabase.rpc('get_user_dashboard')
  * Headlines (totalOwed / totalOwedToUser) are null when balances span multiple currencies.
@@ -403,6 +407,7 @@ export interface BalanceSummary {
     }[];
 }
 
+/** A peer with whom the user shares groups and has a non-zero net balance. */
 export interface FriendBalance {
     userId: string;
     name: string;
@@ -412,11 +417,13 @@ export interface FriendBalance {
     sharedGroupIds: string[];
 }
 
+/** Group-count statistics shown on the profile dashboard. */
 export interface DashboardStats {
     closedGroupsCount: number;
     activeGroupsCount: number;
 }
 
+/** Full payload returned by supabase.rpc('get_user_dashboard'). */
 export interface UserDashboard {
     balanceSummary: BalanceSummary;
     stats: DashboardStats;
