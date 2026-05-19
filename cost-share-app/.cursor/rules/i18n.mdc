@@ -1,0 +1,99 @@
+# Internationalization (i18n) Rules
+
+## Supported Languages
+
+- English (en) - Default
+- Hebrew (he) - RTL
+
+## Setup
+
+Using i18next + react-i18next
+
+## Usage
+
+### In Components
+
+```typescript
+import { useTranslation } from 'react-i18next';
+
+export function MyScreen() {
+  const { t } = useTranslation();
+  
+  return (
+    <View>
+      <Text>{t('groups.title')}</Text>
+      <Text>{t('groups.createGroup')}</Text>
+    </View>
+  );
+}
+```
+
+### Translation Files
+
+Located in `apps/mobile/i18n/locales/`
+
+**en.json:**
+```json
+{
+  "groups": {
+    "title": "Groups",
+    "createGroup": "Create Group"
+  }
+}
+```
+
+**he.json:**
+```json
+{
+  "groups": {
+    "title": "קבוצות",
+    "createGroup": "צור קבוצה"
+  }
+}
+```
+
+## Rules
+
+### NO Hardcoded Strings
+
+```typescript
+// ✅ CORRECT
+<Text>{t('common.loading')}</Text>
+
+// ❌ WRONG
+<Text>Loading...</Text>
+```
+
+### Organize by Feature
+
+```json
+{
+  "common": { ... },
+  "groups": { ... },
+  "history": { ... },
+  "profile": { ... }
+}
+```
+
+### Use Descriptive Keys
+
+```typescript
+// ✅ CORRECT
+t('groups.noGroups')
+
+// ❌ WRONG
+t('msg1')
+```
+
+## Changing Language
+
+```typescript
+import { changeLanguage } from '../i18n';
+
+await changeLanguage('he');
+```
+
+## RTL Support
+
+Hebrew automatically enables RTL layout.
+Language changes may require app restart.

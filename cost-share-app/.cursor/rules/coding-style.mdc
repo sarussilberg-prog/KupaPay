@@ -1,0 +1,203 @@
+# Coding Style Rules
+
+## TypeScript
+
+### Strict Mode
+
+- NO "any" types
+- Use strict TypeScript
+- Explicit return types for functions
+- Use interfaces over types for objects
+
+```typescript
+// ✅ CORRECT
+export async function fetchGroups(): Promise<Group[]> {
+  const response = await apiGet<Group[]>('/groups');
+  return response.data || [];
+}
+
+// ❌ WRONG
+export async function fetchGroups() {
+  const response: any = await apiGet('/groups');
+  return response.data;
+}
+```
+
+## Naming Conventions
+
+### Files
+
+- Components: `PascalCase.tsx`
+- Services: `kebab-case.service.ts`
+- Utils: `kebab-case.ts`
+- Types: `index.ts` in types/
+
+### Functions
+
+- Use descriptive names
+- Prefix with action verb
+
+```typescript
+// ✅ CORRECT
+fetchGroups()
+createExpense()
+updateUser()
+
+// ❌ WRONG
+groups()
+expense()
+user()
+```
+
+### Variables
+
+- Use camelCase
+- Be descriptive
+
+```typescript
+// ✅ CORRECT
+const currentUser = useAppStore();
+const isLoading = true;
+
+// ❌ WRONG
+const u = useAppStore();
+const loading = true;
+```
+
+## Comments
+
+### File Headers
+
+Every file must have a header comment:
+
+```typescript
+/**
+ * GroupsScreen
+ * Displays list of groups with create group button
+ * NO business logic - only UI composition
+ */
+```
+
+### Function Comments
+
+Document complex functions:
+
+```typescript
+/**
+ * Create a new group
+ * This is the ONLY way to create a group from the UI
+ */
+export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
+  // ...
+}
+```
+
+## Code Organization
+
+### Imports
+
+Group imports logically:
+
+```typescript
+// 1. External libraries
+import React, { useEffect } from 'react';
+import { View, Text } from 'react-native';
+
+// 2. Internal modules
+import { useAppStore } from '../../store';
+import { fetchGroups } from '../../services/groups.service';
+
+// 3. Types
+import { Group } from '@cost-share/shared';
+```
+
+### File Structure
+
+```typescript
+// 1. Imports
+// 2. Types/Interfaces
+// 3. Constants
+// 4. Main component/function
+// 5. Helper functions
+// 6. Exports
+```
+
+## Styling Enforcement
+
+### NO Inline Styles
+
+**CRITICAL:** Inline styles break RTL support and theme consistency.
+
+```typescript
+// ✅ CORRECT
+<View className="flex-1 bg-white p-4">
+  <Text className="text-lg font-bold">Title</Text>
+</View>
+
+// ❌ FORBIDDEN
+<View style={{ flex: 1, backgroundColor: '#fff', padding: 16 }}>
+  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Title</Text>
+</View>
+```
+
+### NO Hardcoded Colors
+
+**CRITICAL:** Use theme colors for consistency.
+
+```typescript
+// ✅ CORRECT
+import { colors } from '../../theme';
+<ActivityIndicator color={colors.primary} />
+
+// ❌ FORBIDDEN
+<ActivityIndicator color="#3B82F6" />
+<ActivityIndicator color="#0000ff" />
+<View style={{ backgroundColor: '#ffffff' }}>
+```
+
+### NO Directional Properties in Inline Styles
+
+**CRITICAL:** These break RTL support.
+
+```typescript
+// ❌ FORBIDDEN - Breaks RTL
+style={{ marginLeft: 10 }}
+style={{ marginRight: 10 }}
+style={{ paddingLeft: 10 }}
+style={{ paddingRight: 10 }}
+style={{ left: 0 }}
+style={{ right: 0 }}
+style={{ textAlign: 'left' }}
+style={{ textAlign: 'right' }}
+
+// ✅ CORRECT - Use NativeWind
+className="ml-2.5"
+className="mr-2.5"
+className="pl-2.5"
+className="pr-2.5"
+className="text-left"
+className="text-right"
+```
+
+### Code Review Checklist
+
+Before committing, verify:
+
+- [ ] NO inline styles (no `style={{}}`)
+- [ ] NO hardcoded colors (use `colors` from theme)
+- [ ] NO hardcoded spacing (use Tailwind classes)
+- [ ] NO left/right properties in styles
+- [ ] ALL text uses `t()` for i18n
+- [ ] Tested in both English and Hebrew
+
+## Best Practices
+
+- Keep functions small and focused
+- One responsibility per function
+- Avoid deep nesting
+- Use early returns
+- Prefer const over let
+- Use async/await over promises
+- Use NativeWind className ONLY
+- Import colors from theme
+- Test in both LTR and RTL

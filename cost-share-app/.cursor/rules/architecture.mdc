@@ -1,0 +1,81 @@
+# Architecture Rules
+
+## Core Principles
+
+This is a production-grade monorepo following strict architectural patterns.
+
+### Monorepo Structure
+
+```
+cost-share-app/
+├── apps/
+│   ├── mobile/     # React Native (Expo) frontend
+│   ├── server/     # NestJS backend
+├── packages/
+│   ├── shared/     # Shared TypeScript types
+```
+
+### Data Flow Architecture
+
+**CRITICAL RULE: ALL DATA MUTATIONS MUST GO THROUGH SERVICES LAYER**
+
+```
+UI → services/ → API → backend
+```
+
+#### Forbidden Patterns
+
+- ❌ Direct API calls from screens/components
+- ❌ Business logic in UI components
+- ❌ Data mutations outside services/
+
+#### Correct Pattern
+
+```typescript
+// ✅ CORRECT
+import { createGroup } from '../../services/groups.service';
+
+function MyScreen() {
+  const handleCreate = async () => {
+    await createGroup(data);
+  };
+}
+
+// ❌ WRONG
+function MyScreen() {
+  const handleCreate = async () => {
+    await fetch('/api/groups', { method: 'POST', body: data });
+  };
+}
+```
+
+### Layer Responsibilities
+
+#### Frontend (apps/mobile/)
+
+- **screens/**: Thin UI composition, NO business logic
+- **services/**: ALL API calls and data mutations
+- **store/**: Global state (Zustand)
+- **components/**: Reusable UI only
+- **navigation/**: React Navigation setup
+- **i18n/**: Internationalization
+
+#### Backend (apps/server/)
+
+- **controllers/**: Thin HTTP layer
+- **services/**: Business logic
+- **data/**: Mock in-memory data
+
+#### Shared (packages/shared/)
+
+- **types/**: TypeScript interfaces
+- **schemas/**: Zod validation (future)
+- **utils/**: Shared utilities
+
+### Scalability
+
+This architecture enables:
+- Easy migration to real database (Supabase)
+- Offline support without UI refactoring
+- Consistent AI code generation
+- Clean separation of concerns

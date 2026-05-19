@@ -1,0 +1,70 @@
+# Shared Package Rules
+
+## Purpose
+
+The shared package contains types, schemas, and utilities used by BOTH frontend and backend.
+
+## Structure
+
+```
+packages/shared/src/
+├── types/      # TypeScript interfaces
+├── schemas/    # Zod validation schemas
+├── utils/      # Shared utilities
+└── index.ts    # Export all
+```
+
+## Type Rules
+
+### All entities must be defined in shared/types/
+
+```typescript
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  memberIds: string[];
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### DTOs must be defined
+
+```typescript
+export interface CreateGroupDto {
+  name: string;
+  description?: string;
+  memberIds: string[];
+}
+```
+
+## Usage
+
+### Frontend
+
+```typescript
+import { Group, CreateGroupDto } from '@cost-share/shared';
+```
+
+### Backend
+
+```typescript
+import { Group, CreateGroupDto } from '@cost-share/shared';
+```
+
+## Rules
+
+- NO "any" types
+- All types must be exported
+- Use strict TypeScript
+- Document complex types
+- Keep types simple and focused

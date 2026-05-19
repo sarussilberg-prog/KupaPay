@@ -1,0 +1,91 @@
+# Backend Rules
+
+## Technology Stack
+
+- NestJS
+- TypeScript
+- In-memory mock data (NO database)
+
+## Structure
+
+```
+apps/server/src/
+├── controllers/    # Thin HTTP layer
+├── services/       # Business logic
+├── data/           # Mock data
+├── app.module.ts
+└── main.ts
+```
+
+## Controller Rules
+
+Controllers must be THIN:
+
+```typescript
+// ✅ CORRECT
+@Controller('groups')
+export class GroupsController {
+  constructor(private readonly groupsService: GroupsService) {}
+
+  @Get()
+  findAll(): ApiResponse<Group[]> {
+    const groups = this.groupsService.findAll();
+    return { success: true, data: groups };
+  }
+}
+
+// ❌ WRONG - Business logic in controller
+@Controller('groups')
+export class GroupsController {
+  @Get()
+  findAll(): ApiResponse<Group[]> {
+    const groups = mockData.filter(g => g.active);
+    return { success: true, data: groups };
+  }
+}
+```
+
+## Service Rules
+
+Business logic lives in services:
+
+```typescript
+@Injectable()
+export class GroupsService {
+  findAll(): Group[] {
+    return groups;
+  }
+
+  create(dto: CreateGroupDto, createdBy: string): Group {
+    const newGroup: Group = {
+      id: generateId(),
+      ...dto,
+      createdBy,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    groups.push(newGroup);
+    return newGroup;
+  }
+}
+```
+
+## Response Format
+
+ALL responses must use ApiResponse:
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+```
+
+## Mock Data
+
+- Use in-memory arrays
+- Simulate relational structure
+- NO persistence
+- Ready for future database migration

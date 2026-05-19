@@ -1,0 +1,398 @@
+/**
+ * Shared TypeScript types for the cost-sharing application
+ * These types match the DATABASE_ARCHITECTURE.md schema
+ * 
+ * Sections:
+ * 1. Core Entities (Database Tables)
+ * 2. View Types (Computed Data)
+ * 3. Enums & Constants
+ * 4. DTOs (Data Transfer Objects)
+ * 5. API Response Wrappers
+ */
+
+// ============================================
+// 1. CORE ENTITIES (Database Tables)
+// ============================================
+
+/**
+ * User entity - User profile information
+ * Maps to: profiles table
+ * Integrates with Supabase Auth (auth.users)
+ */
+export interface User {
+    id: string;  // UUID - references auth.users(id)
+    name: string;
+    email?: string;
+    avatarUrl?: string;
+    phone?: string;
+    defaultCurrency: string;  // 'USD', 'ILS', 'EUR', etc.
+    language: Language;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * Group entity - Expense-sharing group
+ * Maps to: groups table
+ */
+export interface Group {
+    id: string;  // UUID
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    groupType: GroupType;
+    defaultCurrency: string;
+    createdBy: string;  // Profile ID
+    isActive: boolean;  // Soft delete flag
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * GroupMember entity - Junction table for many-to-many relationship
+ * Maps to: group_members table
+ */
+export interface GroupMember {
+    id: string;  // UUID
+    groupId: string;
+    userId: string;  // Profile ID
+    joinedAt: Date;
+    leftAt?: Date;  // NULL if still active
+    isActive: boolean;
+}
+
+/**
+ * Expense entity - Shared expense
+ * Maps to: expenses table
+ */
+export interface Expense {
+    id: string;  // UUID
+    groupId: string;
+    description: string;
+    amount: number;  // DECIMAL(12,2) - precise monetary value
+    currency: string;
+    category?: ExpenseCategory;
+    expenseDate: Date;
+    receiptUrl?: string;
+    paidBy: string;  // Profile ID - who paid
+    createdBy: string;  // Profile ID - who recorded
+    isDeleted: boolean;  // Soft delete flag
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * ExpenseSplit entity - How an expense is split among participants
+ * Maps to: expense_splits table
+ */
+export interface ExpenseSplit {
+    id: string;  // UUID
+    expenseId: string;
+    userId: string;  // Profile ID
+    amount: number;  // DECIMAL(12,2) - amount owed by this user
+    createdAt: Date;
+}
+
+/**
+ * Settlement entity - Debt payment between users
+ * Maps to: settlements table
+ */
+export interface Settlement {
+    id: string;  // UUID
+    groupId: string;
+    fromUserId: string;  // Profile ID - who is paying
+    toUserId: string;  // Profile ID - who receives
+    amount: number;  // DECIMAL(12,2)
+    currency: string;
+    settlementDate: Date;
+    paymentMethod?: PaymentMethod;
+    createdBy: string;  // Profile ID
+    createdAt: Date;
+}
+
+// ============================================
+// 2. VIEW TYPES (Computed Data)
+// ============================================
+
+/**
+ * UserBalance - Calculated balance for a user in a group
+ * Implements: user_balances_view logic
+ */
+export interface UserBalance {
+    groupId: string;
+    userId: string;
+    currency: string;
+    totalPaid: number;  // What user paid
+    totalOwed: number;  // What user owes (from splits)
+    totalSettledPaid: number;  // Settlements paid by user
+    totalSettledReceived: number;  // Settlements received by user
+    netBalance: number;  // positive = owed to user, negative = user owes
+}
+
+/**
+ * GroupSummary - Summary statistics for a group
+ * Implements: group_summary_view logic
+ */
+export interface GroupSummary {
+    groupId: string;
+    name: string;
+    groupType: GroupType;
+    defaultCurrency: string;
+    memberCount: number;
+    expenseCount: number;
+    totalSpent: number;
+    lastExpenseDate?: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * DebtSummary - Simplified debt between two users
+ * Used for "who owes whom" calculations
+ */
+export interface DebtSummary {
+    fromUserId: string;
+    fromUserName: string;
+    toUserId: string;
+    toUserName: string;
+    amount: number;
+    currency: string;
+}
+
+/**
+ * UserExpenseView - Expense with user-specific details
+ * Implements: user_expenses_view logic
+ */
+export interface UserExpenseView {
+    expenseId: string;
+    groupId: string;
+    groupName: string;
+    description: string;
+    totalAmount: number;
+    currency: string;
+    category?: ExpenseCategory;
+    expenseDate: Date;
+    paidBy: string;
+    payerName: string;
+    userId: string;
+    userName: string;
+    userOwedAmount: number;
+    userPaid: boolean;  // Did this user pay the expense?
+    createdAt: Date;
+}
+
+/**
+ * RecentActivity - Combined feed of expenses and settlements
+ * Implements: recent_activity_view logic
+ */
+export interface RecentActivity {
+    id: string;
+    activityType: 'expense' | 'settlement';
+    groupId: string;
+    description: string;
+    amount: number;
+    currency: string;
+    userId: string;
+    userName: string;
+    activityDate: Date;
+    createdAt: Date;
+}
+
+// ============================================
+// 3. ENUMS & CONSTANTS
+// ============================================
+
+/**
+ * Group types for categorization
+ */
+export type GroupType = 'trip' | 'home' | 'couple' | 'general' | 'other';
+
+/**
+ * Expense categories
+ */
+export type ExpenseCategory =
+    | 'food'
+    | 'transport'
+    | 'accommodation'
+    | 'utilities'
+    | 'entertainment'
+    | 'shopping'
+    | 'healthcare'
+    | 'other';
+
+/**
+ * Payment methods for settlements
+ */
+export type PaymentMethod =
+    | 'cash'
+    | 'bank_transfer'
+    | 'venmo'
+    | 'paypal'
+    | 'credit_card'
+    | 'other';
+
+/**
+ * Language options for i18n
+ */
+export type Language = 'en' | 'he';
+
+/**
+ * Currency codes (ISO 4217)
+ */
+export type Currency = 'USD' | 'ILS' | 'EUR' | 'GBP' | 'JPY';
+
+// ============================================
+// 4. DTOs (Data Transfer Objects)
+// ============================================
+
+/**
+ * Create Expense DTO
+ */
+export interface CreateExpenseDto {
+    groupId: string;
+    description: string;
+    amount: number;
+    currency: string;
+    category?: ExpenseCategory;
+    expenseDate?: Date;  // Defaults to today
+    paidBy: string;  // Profile ID
+    splits: ExpenseSplitInput[];  // How to split the expense
+    receiptUrl?: string;
+}
+
+/**
+ * Expense split input for creating expenses
+ */
+export interface ExpenseSplitInput {
+    userId: string;
+    amount?: number;  // Optional - if omitted, split equally
+}
+
+/**
+ * Update Expense DTO
+ */
+export interface UpdateExpenseDto {
+    description?: string;
+    amount?: number;
+    currency?: string;
+    category?: ExpenseCategory;
+    expenseDate?: Date;
+    receiptUrl?: string;
+    splits?: ExpenseSplitInput[];
+}
+
+/**
+ * Create Settlement DTO
+ */
+export interface CreateSettlementDto {
+    groupId: string;
+    fromUserId: string;  // Who is paying
+    toUserId: string;  // Who receives
+    amount: number;
+    currency: string;
+    settlementDate?: Date;  // Defaults to today
+    paymentMethod?: PaymentMethod;
+}
+
+/**
+ * Create Group DTO
+ */
+export interface CreateGroupDto {
+    name: string;
+    description?: string;
+    groupType?: GroupType;  // Defaults to 'general'
+    defaultCurrency?: string;  // Defaults to 'USD'
+    memberIds: string[];  // Initial members (creator auto-included)
+    imageUrl?: string;
+}
+
+/**
+ * Update Group DTO
+ */
+export interface UpdateGroupDto {
+    name?: string;
+    description?: string;
+    groupType?: GroupType;
+    defaultCurrency?: string;
+    imageUrl?: string;
+}
+
+/**
+ * Add Group Member DTO
+ */
+export interface AddGroupMemberDto {
+    groupId: string;
+    userId: string;
+}
+
+/**
+ * Update Profile DTO
+ */
+export interface UpdateProfileDto {
+    name?: string;
+    email?: string;
+    phone?: string;
+    avatarUrl?: string;
+    defaultCurrency?: string;
+    language?: Language;
+}
+
+/**
+ * Create Profile DTO (for initial setup)
+ */
+export interface CreateProfileDto {
+    id: string;  // From auth.users
+    name: string;
+    email?: string;
+    avatarUrl?: string;
+    phone?: string;
+    defaultCurrency?: string;
+    language?: Language;
+}
+
+// ============================================
+// 5. API RESPONSE WRAPPERS
+// ============================================
+
+/**
+ * API Response wrapper for consistent response format
+ */
+export interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+    message?: string;
+}
+
+/**
+ * Paginated response wrapper
+ */
+export interface PaginatedResponse<T> {
+    success: boolean;
+    data: T[];
+    pagination: {
+        page: number;
+        pageSize: number;
+        totalItems: number;
+        totalPages: number;
+    };
+    error?: string;
+}
+
+/**
+ * User preferences
+ */
+export interface UserPreferences {
+    language: Language;
+    currency: string;
+    notifications: boolean;
+}
+
+// ============================================
+// LEGACY TYPES (for backward compatibility)
+// ============================================
+
+/**
+ * @deprecated Use User instead
+ */
+export type Profile = User;

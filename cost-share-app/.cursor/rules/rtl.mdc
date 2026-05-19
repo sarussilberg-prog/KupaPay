@@ -1,0 +1,323 @@
+# RTL (Right-to-Left) Support Rules
+
+## Overview
+
+This app supports dynamic RTL/LTR switching with language persistence via AsyncStorage.
+
+## Languages
+
+- **English (en)**: LTR (Left-to-Right)
+- **Hebrew (he)**: RTL (Right-to-Left)
+
+## Implementation
+
+### Language Persistence
+
+Language preference is saved to AsyncStorage and loaded on app start:
+
+```typescript
+// Saved to: @app_language
+// Values: 'en' | 'he'
+
+// On app start
+await initializeLanguage(); // Loads saved language
+
+// When user changes language
+const needsRestart = await changeLanguage('he'); // Saves to AsyncStorage
+```
+
+### RTL Direction Control
+
+Using React Native's `I18nManager`:
+
+```typescript
+import { I18nManager } from 'react-native';
+
+const isRTL = language === 'he';
+I18nManager.forceRTL(isRTL);
+```
+
+### Automatic Behavior
+
+When Hebrew is selected:
+- ✅ Text direction: RTL
+- ✅ Layout direction: RTL
+- ✅ Navigation: RTL
+- ✅ Flexbox: RTL
+- ✅ Margins/Padding: Flipped
+- ✅ Preference: Persisted
+
+## App Restart
+
+**IMPORTANT:** RTL changes require app restart to fully apply.
+
+User sees alert: "Please close and reopen the app for the language change to take full effect."
+
+## NativeWind & RTL
+
+NativeWind automatically handles RTL transformations:
+
+```typescript
+// LTR (English):
+<View className="ml-4">  // margin-left: 16px
+
+// RTL (Hebrew):
+<View className="ml-4">  // margin-right: 16px (auto-flipped!)
+```
+
+### What Gets Auto-Flipped
+
+✅ **Margins:**
+- `ml-*` ↔ `mr-*`
+- `mx-*` (stays same)
+
+✅ **Padding:**
+- `pl-*` ↔ `pr-*`
+- `px-*` (stays same)
+
+✅ **Flexbox:**
+- `flex-row` (reverses direction)
+- `flex-row-reverse` (reverses direction)
+
+✅ **Text Alignment:**
+- `text-left` ↔ `text-right`
+- `text-center` (stays same)
+
+✅ **Borders:**
+- `border-l-*` ↔ `border-r-*`
+
+### What Does NOT Get Flipped
+
+❌ **Absolute Positioning:**
+- `left-*` / `right-*` (use with caution)
+
+❌ **Border Radius:**
+- `rounded-tl-*` / `rounded-tr-*` (specific corners)
+
+❌ **Transform:**
+- `translate-x-*` (manual handling needed)
+
+## CRITICAL Rules for RTL Support
+
+### ✅ DO: Use NativeWind Classes
+
+```typescript
+// ✅ CORRECT - Auto-flips in RTL
+<View className="ml-4 pl-2">
+<Text className="text-left">Text</Text>
+<View className="flex-row">
+```
+
+### ❌ DON'T: Use Inline Styles with Directional Properties
+
+```typescript
+// ❌ WRONG - Breaks RTL
+<View style={{ marginLeft: 16 }}>
+<View style={{ paddingRight: 8 }}>
+<View style={{ left: 0 }}>
+<View style={{ textAlign: 'left' }}>
+```
+
+### ✅ DO: Use Theme Colors
+
+```typescript
+// ✅ CORRECT
+import { colors } from '../../theme';
+<ActivityIndicator color={colors.primary} />
+```
+
+### ❌ DON'T: Hardcode Colors
+
+```typescript
+// ❌ WRONG
+<ActivityIndicator color="#3B82F6" />
+```
+
+## Testing Checklist
+
+### Manual Testing
+
+Test EVERY screen in both languages:
+
+1. **Switch to Hebrew:**
+   - Go to Profile → Tap "עברית"
+   - Close and reopen app
+   - Verify RTL layout
+
+2. **Verify Each Screen:**
+   - [ ] Text flows right-to-left
+   - [ ] Navigation mirrors correctly
+   - [ ] Buttons align properly
+   - [ ] Lists display correctly
+   - [ ] Forms work properly
+   - [ ] Modals/Alerts display correctly
+
+3. **Switch to English:**
+   - Go to Profile → Tap "English"
+   - Close and reopen app
+   - Verify LTR layout
+
+### Automated Testing
+
+```typescript
+// Test language persistence
+const savedLang = await getSavedLanguage();
+expect(savedLang).toBe('he');
+
+// Test RTL setting
+expect(I18nManager.isRTL).toBe(true);
+```
+
+## Common RTL Issues & Solutions
+
+### Issue: Layout Breaks in RTL
+
+**Cause:** Using inline styles with left/right properties
+
+**Solution:** Use NativeWind classes
+```typescript
+// ❌ WRONG
+<View style={{ marginLeft: 10 }}>
+
+// ✅ CORRECT
+<View className="ml-2.5">
+```
+
+### Issue: Icons Don't Flip
+
+**Cause:** Icons that should mirror (arrows, chevrons) don't flip
+
+**Solution:** Use `transform: scaleX(-1)` conditionally
+```typescript
+import { I18nManager } from 'react-native';
+
+<Icon 
+  name="arrow-right" 
+  style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }}
+/>
+```
+
+### Issue: Text Alignment Wrong
+
+**Cause:** Hardcoded text alignment
+
+**Solution:** Use NativeWind classes
+```typescript
+// ❌ WRONG
+<Text style={{ textAlign: 'left' }}>
+
+// ✅ CORRECT
+<Text className="text-left">  // Auto-flips to text-right in RTL
+```
+
+## Best Practices
+
+### 1. Always Use NativeWind
+
+```typescript
+// ✅ CORRECT
+<View className="flex-1 bg-white p-4">
+  <Text className="text-lg font-bold mb-2">Title</Text>
+</View>
+```
+
+### 2. Import Theme Colors
+
+```typescript
+// ✅ CORRECT
+import { colors } from '../../theme';
+<ActivityIndicator color={colors.primary} />
+```
+
+### 3. Test in Both Languages
+
+- Develop in English
+- Test in Hebrew before committing
+- Check all screens, not just the one you changed
+
+### 4. Use Flexbox for Layouts
+
+```typescript
+// ✅ CORRECT - Auto-adapts to RTL
+<View className="flex-row items-center justify-between">
+  <Text>Start</Text>
+  <Text>End</Text>
+</View>
+```
+
+### 5. Avoid Absolute Positioning
+
+```typescript
+// ⚠️ USE WITH CAUTION
+<View className="absolute left-0">  // Won't flip in RTL
+
+// ✅ BETTER
+<View className="absolute" style={{ [I18nManager.isRTL ? 'right' : 'left']: 0 }}>
+```
+
+## Language Switching Flow
+
+```
+User taps language button
+  ↓
+changeLanguage('he') called
+  ↓
+i18next updates text
+  ↓
+I18nManager.forceRTL(true)
+  ↓
+AsyncStorage.setItem('@app_language', 'he')
+  ↓
+Returns: needsRestart = true
+  ↓
+Alert shown: "Restart Required"
+  ↓
+User closes app
+  ↓
+User reopens app
+  ↓
+initializeLanguage() called
+  ↓
+AsyncStorage.getItem('@app_language')
+  ↓
+Returns: 'he'
+  ↓
+i18next.changeLanguage('he')
+  ↓
+I18nManager.forceRTL(true)
+  ↓
+App renders in Hebrew with RTL layout ✅
+```
+
+## Debugging RTL Issues
+
+### Check Current RTL State
+
+```typescript
+import { I18nManager } from 'react-native';
+
+console.log('Is RTL:', I18nManager.isRTL);
+console.log('Current language:', i18n.language);
+```
+
+### Check Saved Language
+
+```typescript
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const saved = await AsyncStorage.getItem('@app_language');
+console.log('Saved language:', saved);
+```
+
+### Force RTL for Testing
+
+```typescript
+// In App.tsx (temporary, for testing)
+I18nManager.forceRTL(true);
+```
+
+## Resources
+
+- [React Native I18nManager Docs](https://reactnative.dev/docs/i18nmanager)
+- [NativeWind RTL Support](https://www.nativewind.dev/guides/rtl)
+- [i18next Documentation](https://www.i18next.com/)

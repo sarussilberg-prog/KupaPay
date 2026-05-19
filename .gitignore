@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env*.local
+!.env.example
+
+# Build & cache
+.next/
+dist/
+build/
+coverage/
+.turbo/
+.expo/
+.expo-shared/
+*.tsbuildinfo
+
+# Dev artifacts
+.dev-logs/
+supabase/.temp/
+
+# OS & IDE
+.DS_Store
+.vscode/
+.idea/

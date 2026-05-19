@@ -1,0 +1,152 @@
+# Frontend Rules
+
+## Technology Stack
+
+- React Native (Expo SDK 55)
+- React Navigation (bottom tabs)
+- NativeWind (Tailwind for React Native)
+- Zustand (state management)
+- i18next (internationalization)
+
+## Styling Rules
+
+### Use NativeWind ONLY - NO Inline Styles
+
+**CRITICAL:** All styling must use NativeWind className. Inline styles break RTL support.
+
+```typescript
+// ✅ CORRECT
+<View className="flex-1 bg-gray-50 p-4">
+  <Text className="text-lg font-bold">Hello</Text>
+</View>
+
+// ❌ WRONG - Inline styles break RTL
+<View style={{ flex: 1, backgroundColor: '#f9fafb', padding: 16 }}>
+  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Hello</Text>
+</View>
+```
+
+### NO Hardcoded Colors
+
+**CRITICAL:** Use theme colors from `theme/colors.ts` for consistency.
+
+```typescript
+// ✅ CORRECT
+import { colors } from '../../theme';
+<ActivityIndicator color={colors.primary} />
+
+// ❌ WRONG - Hardcoded colors
+<ActivityIndicator color="#3B82F6" />
+<ActivityIndicator color="#0000ff" />
+```
+
+### RTL-Safe Directional Properties
+
+**CRITICAL:** Never use left/right properties. Use NativeWind classes that auto-flip.
+
+```typescript
+// ✅ CORRECT - Auto-flips in RTL
+<View className="ml-4">  // margin-left in LTR, margin-right in RTL
+<View className="pl-2">  // padding-left in LTR, padding-right in RTL
+
+// ❌ WRONG - Breaks RTL
+<View style={{ marginLeft: 16 }}>
+<View style={{ paddingLeft: 8 }}>
+<View style={{ left: 0 }}>
+<View style={{ right: 0 }}>
+```
+
+### Forbidden Patterns
+
+These patterns will BREAK RTL support:
+
+```typescript
+// ❌ FORBIDDEN
+style={{ marginLeft: 10 }}
+style={{ marginRight: 10 }}
+style={{ paddingLeft: 10 }}
+style={{ paddingRight: 10 }}
+style={{ left: 0 }}
+style={{ right: 0 }}
+style={{ textAlign: 'left' }}
+style={{ textAlign: 'right' }}
+style={{ color: '#000000' }}
+style={{ backgroundColor: '#ffffff' }}
+```
+
+## Screen Rules
+
+### Screens Must Be Thin
+
+Screens are composition layers ONLY:
+
+```typescript
+// ✅ CORRECT
+export function GroupsScreen() {
+  const { groups } = useAppStore();
+  
+  useEffect(() => {
+    fetchGroups(); // Service call
+  }, []);
+
+  return <View>...</View>;
+}
+
+// ❌ WRONG - Business logic in screen
+export function GroupsScreen() {
+  const [groups, setGroups] = useState([]);
+  
+  useEffect(() => {
+    fetch('/api/groups')
+      .then(res => res.json())
+      .then(data => setGroups(data));
+  }, []);
+
+  return <View>...</View>;
+}
+```
+
+## Services Layer
+
+ALL data mutations go through services/:
+
+```typescript
+// services/groups.service.ts
+export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
+  const response = await apiPost<Group>('/groups', dto);
+  
+  if (response.success && response.data) {
+    useAppStore.getState().addGroup(response.data);
+    return response.data;
+  }
+  
+  return null;
+}
+```
+
+## State Management
+
+Use Zustand for global state:
+
+```typescript
+const { groups, setGroups } = useAppStore();
+```
+
+## Internationalization
+
+ALL text must use t():
+
+```typescript
+// ✅ CORRECT
+<Text>{t('groups.title')}</Text>
+
+// ❌ WRONG
+<Text>Groups</Text>
+```
+
+## Component Rules
+
+- Components in components/ must be reusable
+- NO business logic in components
+- Use TypeScript for all components
+- Style with NativeWind

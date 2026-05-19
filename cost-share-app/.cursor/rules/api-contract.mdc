@@ -1,0 +1,129 @@
+# API Contract Rules
+
+## Base URL
+
+```
+http://localhost:3000/api
+```
+
+## Response Format
+
+ALL API responses must follow this format:
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+```
+
+## Endpoints
+
+### Users
+
+```
+GET    /api/users           # Get all users
+GET    /api/users/:id       # Get user by ID
+PUT    /api/users/:id       # Update user
+```
+
+### Groups
+
+```
+GET    /api/groups          # Get all groups
+GET    /api/groups/:id      # Get group by ID
+POST   /api/groups          # Create group
+```
+
+### Expenses
+
+```
+GET    /api/expenses                # Get all expenses
+GET    /api/expenses?groupId=:id    # Get expenses by group
+GET    /api/expenses/:id            # Get expense by ID
+POST   /api/expenses                # Create expense
+```
+
+## Request/Response Examples
+
+### Create Group
+
+**Request:**
+```json
+POST /api/groups
+{
+  "name": "Weekend Trip",
+  "description": "Our amazing weekend",
+  "memberIds": ["user-1", "user-2"]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "group-123",
+    "name": "Weekend Trip",
+    "description": "Our amazing weekend",
+    "memberIds": ["user-1", "user-2"],
+    "createdBy": "user-1",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  "message": "Group created successfully"
+}
+```
+
+### Create Expense
+
+**Request:**
+```json
+POST /api/expenses
+{
+  "groupId": "group-1",
+  "description": "Dinner",
+  "amount": 120,
+  "currency": "USD",
+  "paidBy": "user-1",
+  "splitBetween": ["user-1", "user-2", "user-3"],
+  "category": "Food"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "expense-123",
+    "groupId": "group-1",
+    "description": "Dinner",
+    "amount": 120,
+    "currency": "USD",
+    "paidBy": "user-1",
+    "splitBetween": ["user-1", "user-2", "user-3"],
+    "date": "2024-01-01T00:00:00.000Z",
+    "category": "Food",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  "message": "Expense created successfully"
+}
+```
+
+## Error Handling
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "Group not found"
+}
+```
+
+## CORS
+
+Backend enables CORS for all origins (development only).

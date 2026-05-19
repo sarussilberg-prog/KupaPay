@@ -1,0 +1,338 @@
+# MASTER RULES - AI Development Guide
+
+**Purpose:** Quick reference for AI agents developing this project  
+**Last Updated:** May 18, 2026
+
+---
+
+## 🎨 STYLING RULES
+
+### ❌ NEVER:
+- Use inline styles: `style={{...}}`
+- Use hardcoded hex colors in style props: `style={{ color: '#000' }}`
+- Use directional properties in styles: `marginLeft`, `paddingRight`, `left`, `right`
+- Use hardcoded spacing values in styles
+
+### ✅ ALWAYS:
+- Use NativeWind className: `className="flex-1 bg-white p-4"`
+- Use Tailwind color classes: `className="bg-blue-500"` or `className="text-gray-600"`
+- Import theme colors for component props: `import { colors } from '../../theme'`
+- Use theme colors in components: `<ActivityIndicator color={colors.primary} />`
+- Use NativeWind directional classes: `ml-4`, `pr-2` (auto-flip in RTL)
+
+### ⚠️ EXCEPTION:
+- Dynamic RTL transforms for icons ONLY:
+  ```typescript
+  style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }}
+  ```
+
+---
+
+## 🏗️ ARCHITECTURE RULES
+
+### ❌ NEVER:
+- Make API calls directly from screens/components
+- Put business logic in UI components
+- Mutate data outside the services layer
+- Use `fetch()` directly in screens
+
+### ✅ ALWAYS:
+- Follow data flow: `UI → services/ → API → backend`
+- Import and use service functions: `import { fetchGroups } from '../../services/groups.service'`
+- Keep screens thin (UI composition only)
+- Put ALL API calls in `services/` directory
+- Put business logic in services (frontend) or services (backend)
+
+### Example:
+```typescript
+// ✅ CORRECT
+import { createGroup } from '../../services/groups.service';
+
+function MyScreen() {
+  const handleCreate = async () => {
+    await createGroup(data);
+  };
+}
+
+// ❌ WRONG
+function MyScreen() {
+  const handleCreate = async () => {
+    await fetch('/api/groups', { method: 'POST', body: data });
+  };
+}
+```
+
+---
+
+## 🌍 INTERNATIONALIZATION (i18n) RULES
+
+### ❌ NEVER:
+- Use hardcoded strings: `<Text>Loading...</Text>`
+- Use hardcoded strings in alerts, errors, or any user-facing text
+- Create translation keys deeper than 2 levels: `groups.list.empty.state`
+
+### ✅ ALWAYS:
+- Use `t()` for ALL user-facing text: `<Text>{t('common.loading')}</Text>`
+- Import useTranslation: `import { useTranslation } from 'react-i18next'`
+- Add translations to BOTH `en.json` AND `he.json`
+- Use camelCase for keys: `noGroups`, not `no_groups`
+- Keep keys max 2 levels deep: `groups.noGroups` ✓
+- Use descriptive key names: `groups.createGroup` not `groups.btn1`
+
+### Key Naming Convention:
+- Actions: `createGroup`, `deleteExpense`, `saveChanges`
+- States: `noGroups`, `loading`, `empty`
+- Errors: `createError`, `loadError`
+
+### Common vs Feature:
+- `common.*` - Used in 3+ places across features
+- `feature.*` - Used only in that specific feature
+
+---
+
+## 📱 COMPONENT RULES
+
+### ❌ NEVER:
+- Put business logic in components
+- Make API calls from components
+- Use components for one-time use (put in screen instead)
+
+### ✅ ALWAYS:
+- Create components in `apps/mobile/components/`
+- Make components reusable
+- Use PascalCase for component files: `Button.tsx`, `Card.tsx`
+- Keep components pure (UI only)
+- Accept props for customization
+
+---
+
+## 🔄 STATE MANAGEMENT RULES
+
+### ❌ NEVER:
+- Use global loading state for screen-specific operations
+- Store screen-specific state globally
+
+### ✅ ALWAYS:
+- Use `useLoading()` hook for loading states (each screen independent)
+- Use Zustand store (`useAppStore`) for truly global state:
+  - User data
+  - Groups list
+  - Expenses list
+- Use local `useState` for screen-specific state:
+  - Form inputs
+  - Modal visibility
+  - Screen-specific flags
+
+---
+
+## 🚨 ERROR HANDLING RULES
+
+### ❌ NEVER:
+- Use `Alert.alert()` for errors (interrupts user flow)
+- Ignore API errors
+- Use generic error messages
+
+### ✅ ALWAYS:
+- Use `react-native-toast-message` for error notifications
+- Show errors with Toast: `Toast.show({ type: 'error', text1: t('common.error') })`
+- Log errors to console: `console.error('Failed to fetch:', error)`
+- Use translated error messages: `t('groups.createError')`
+- Handle errors in services, return null/empty on failure
+
+### Pattern:
+```typescript
+const response = await apiGet<Group[]>('/groups');
+if (!response.success) {
+  console.error('Failed to fetch groups:', response.error);
+  Toast.show({ type: 'error', text1: t('groups.loadError') });
+  return [];
+}
+```
+
+---
+
+## 📂 FILE STRUCTURE RULES
+
+### ❌ NEVER:
+- Put files in wrong directories
+- Use inconsistent naming
+
+### ✅ ALWAYS:
+- Follow naming conventions:
+  - **Screens:** `PascalCase.tsx` → `GroupsScreen.tsx`
+  - **Components:** `PascalCase.tsx` → `Button.tsx`
+  - **Services:** `kebab-case.service.ts` → `groups.service.ts`
+  - **Utils:** `kebab-case.ts` → `date-utils.ts`
+  - **Hooks:** `camelCase.ts` → `useLoading.ts`
+- Place files in correct directories:
+  - Screens → `apps/mobile/screens/[feature]/`
+  - Components → `apps/mobile/components/`
+  - Services → `apps/mobile/services/`
+  - Hooks → `apps/mobile/hooks/`
+  - Types → `packages/shared/src/types/`
+
+---
+
+## 🔤 TYPESCRIPT RULES
+
+### ❌ NEVER:
+- Use `any` type
+- Skip type definitions
+- Use implicit types for function returns
+
+### ✅ ALWAYS:
+- Use strict TypeScript
+- Define explicit return types: `function fetchGroups(): Promise<Group[]>`
+- Import types from shared package: `import { Group } from '@cost-share/shared'`
+- Define interfaces for objects
+- Use `unknown` instead of `any` if type is truly unknown
+
+---
+
+## 🌐 RTL (Right-to-Left) RULES
+
+### ❌ NEVER:
+- Use `marginLeft`, `marginRight`, `paddingLeft`, `paddingRight` in styles
+- Use `left`, `right` positioning in styles
+- Use `textAlign: 'left'` or `textAlign: 'right'` in styles
+
+### ✅ ALWAYS:
+- Use NativeWind classes that auto-flip: `ml-4`, `pr-2`, `text-left`
+- Test in BOTH English (LTR) and Hebrew (RTL)
+- Use flexbox for layouts (auto-adapts to RTL)
+
+### What Auto-Flips:
+- ✅ Margins: `ml-*` ↔ `mr-*`
+- ✅ Padding: `pl-*` ↔ `pr-*`
+- ✅ Text align: `text-left` ↔ `text-right`
+- ✅ Flex direction: `flex-row` reverses
+
+### What Doesn't Flip:
+- ❌ Absolute positioning: `left-0`, `right-0`
+- ❌ Border radius corners: `rounded-tl-*`
+
+---
+
+## 🔧 BACKEND RULES
+
+### ❌ NEVER:
+- Put business logic in controllers
+- Access data directly from controllers
+- Return inconsistent response formats
+
+### ✅ ALWAYS:
+- Keep controllers thin (HTTP layer only)
+- Put business logic in services
+- Use consistent ApiResponse format:
+  ```typescript
+  {
+    success: boolean;
+    data?: T;
+    error?: string;
+    message?: string;
+  }
+  ```
+- Use dependency injection: `constructor(private readonly service: Service)`
+
+---
+
+## 📦 SHARED PACKAGE RULES
+
+### ❌ NEVER:
+- Define types separately in frontend and backend
+- Use `any` types in shared package
+- Put business logic in shared package
+
+### ✅ ALWAYS:
+- Define ALL entity types in `packages/shared/src/types/`
+- Define DTOs (Data Transfer Objects) in shared types
+- Import from shared: `import { Group, CreateGroupDto } from '@cost-share/shared'`
+- Keep shared package pure (types, schemas, utils only)
+
+---
+
+## 🎯 LOADING PATTERN
+
+### ✅ ALWAYS:
+- Use `useLoading()` hook for loading states:
+  ```typescript
+  import { useLoading } from '../../hooks/useLoading';
+  
+  const { isLoading, startLoading, stopLoading } = useLoading();
+  
+  const loadData = async () => {
+    startLoading();
+    await fetchData();
+    stopLoading();
+  };
+  ```
+- Use `LoadingIndicator` component for UI:
+  ```typescript
+  import { LoadingIndicator } from '../../components/LoadingIndicator';
+  
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+  
+  // Or with custom message:
+  if (isLoading) {
+    return <LoadingIndicator message={t('groups.loadingGroups')} />;
+  }
+  ```
+
+### ❌ NEVER:
+- Don't write loading UI inline - use LoadingIndicator component
+- Don't use global loading state from store
+
+---
+
+## 📝 CODE QUALITY RULES
+
+### ❌ NEVER:
+- Leave console.logs in production code (except error logging)
+- Use magic numbers (use constants)
+- Write functions longer than 50 lines
+- Nest code more than 3 levels deep
+
+### ✅ ALWAYS:
+- Add file header comments explaining purpose
+- Document complex functions
+- Use early returns to reduce nesting
+- Extract complex logic into separate functions
+- Use meaningful variable names
+- Group imports logically (external, internal, types)
+
+---
+
+## 🔍 TESTING CHECKLIST
+
+Before completing any task, verify:
+
+- [ ] No inline styles (except RTL icon transforms)
+- [ ] No hardcoded strings (all use `t()`)
+- [ ] No "any" types
+- [ ] All imports resolve correctly
+- [ ] TypeScript compiles without errors
+- [ ] Translations added to BOTH en.json AND he.json
+- [ ] Colors from theme, not hardcoded
+- [ ] API calls only in services/
+- [ ] Follows service layer pattern
+- [ ] Tested in English (LTR)
+- [ ] Tested in Hebrew (RTL)
+
+---
+
+## 📚 REFERENCE
+
+For detailed rules, see:
+- `cost-share-app/.cursor/rules/architecture.mdc` - Architecture patterns
+- `cost-share-app/.cursor/rules/frontend.mdc` - Frontend rules
+- `cost-share-app/.cursor/rules/backend.mdc` - Backend rules
+- `cost-share-app/.cursor/rules/coding-style.mdc` - Code style
+- `cost-share-app/.cursor/rules/i18n.mdc` - Internationalization
+- `cost-share-app/.cursor/rules/rtl.mdc` - RTL support
+- `cost-share-app/.cursor/rules/api-contract.mdc` - API contracts
+
+---
+
+**Remember:** These rules ensure consistency, maintainability, and RTL support. Follow them strictly for AI-driven development success! 🚀

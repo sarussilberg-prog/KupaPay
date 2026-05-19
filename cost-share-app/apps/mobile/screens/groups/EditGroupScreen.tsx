@@ -1,0 +1,193 @@
+/**
+ * EditGroupScreen
+ * Form to edit an existing group
+ * Uses NativeWind styling only, full i18n support
+ */
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { GroupType } from '@cost-share/shared';
+import { useLoading } from '../../hooks/useLoading';
+import { getGroupById, updateGroup } from '../../services/groups.service';
+import { uploadGroupImage } from '../../services/storage.service';
+import { GroupImagePicker } from '../../components/GroupImagePicker';
+import { Input } from '../../components/Input';
+import { Button } from '../../components/Button';
+import { CurrencyPicker } from '../../components/CurrencyPicker';
+import { LoadingIndicator } from '../../components/LoadingIndicator';
+
+const groupTypes: { key: GroupType; emoji: string }[] = [
+    { key: 'trip', emoji: '✈️' },
+    { key: 'home', emoji: '🏠' },
+    { key: 'couple', emoji: '💑' },
+    { key: 'general', emoji: '👥' },
+];
+
+export function EditGroupScreen() {
+    const { t } = useTranslation();
+    const navigation = useNavigation<any>();
+    const route = useRoute<any>();
+    const { groupId } = route.params;
+    const { isLoading, startLoading, stopLoading } = useLoading();
+
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [groupType, setGroupType] = useState<GroupType>('general');
+    const [currency, setCurrency] = useState('USD');
+    const [nameError, setNameError] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [imageUrl, setImageUrl] = useState<string | undefined>();
+    const [localImageUri, setLocalImageUri] = useState<string | null>(null);
+    const [imageRemoved, setImageRemoved] = useState(false);
+
+    useEffect(() => {
+        const loadGroup = async () => {
+            const group = await getGroupById(groupId);
+            if (group) {
+                setName(group.name);
+                setDescription(group.description || '');
+                setGroupType(group.groupType);
+                setCurrency(group.defaultCurrency);
+                setImageUrl(group.imageUrl);
+            }
+            setLoading(false);
+        };
+        void loadGroup();
+    }, [groupId]);
+
+    const validateForm = (): boolean => {
+        if (!name.trim()) {
+            setNameError(t('groups.nameRequired'));
+            return false;
+        }
+        setNameError('');
+        return true;
+    };
+
+    const handleUpdate = async () => {
+        if (!validateForm()) return;
+
+        startLoading();
+        let nextImageUrl: string | undefined = imageRemoved ? undefined : imageUrl;
+
+        if (localImageUri) {
+            const uploadedUrl = await uploadGroupImage(groupId, localImageUri);
+            if (uploadedUrl) {
+                nextImageUrl = uploadedUrl;
+            }
+        }
+
+        const result = await updateGroup(groupId, {
+            name: name.trim(),
+            description: description.trim() || undefined,
+            groupType,
+            defaultCurrency: currency,
+            imageUrl: imageRemoved ? '' : nextImageUrl,
+        });
+        stopLoading();
+
+        if (result) {
+            navigation.goBack();
+        }
+    };
+
+    const handleImageChange = (uri: string | null) => {
+        setLocalImageUri(uri);
+        if (uri === null) {
+            setImageRemoved(true);
+        } else {
+            setImageRemoved(false);
+        }
+    };
+
+    if (loading) {
+        return <LoadingIndicator />;
+    }
+
+    return (
+        <ScrollView className="flex-1 bg-slate-50">
+            <View className="p-4">
+                <GroupImagePicker
+                    imageUrl={imageRemoved ? null : imageUrl}
+                    localUri={localImageUri}
+                    groupType={groupType}
+                    onChange={handleImageChange}
+                />
+
+                {/* Group Name */}
+                <Input
+                    label={t('groups.groupName')}
+                    placeholder={t('groups.enterGroupName')}
+                    value={name}
+                    onChangeText={(text) => {
+                        setName(text);
+                        if (nameError) setNameError('');
+                    }}
+                    error={nameError}
+                />
+
+                {/* Description */}
+                <Input
+                    label={t('groups.description')}
+                    placeholder={t('groups.enterDescription')}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline
+                    numberOfLines={3}
+                />
+
+                {/* Group Type */}
+                <View className="mb-4">
+                    <Text className="text-sm font-medium text-gray-700 mb-2">
+                        {t('groups.groupType')}
+                    </Text>
+                    <View className="flex-row gap-2">
+                        {groupTypes.map((gt) => (
+                            <TouchableOpacity
+                                key={gt.key}
+                                onPress={() => setGroupType(gt.key)}
+                                activeOpacity={0.7}
+                                className={`flex-1 py-3 rounded-xl items-center ${groupType === gt.key
+                                    ? 'bg-primary-extra-light border border-primary'
+                                    : 'bg-white border border-gray-200'
+                                    }`}
+                            >
+                                <Text className="text-xl mb-1">{gt.emoji}</Text>
+                                <Text
+                                    className={`text-xs font-medium ${groupType === gt.key ? 'text-primary-dark' : 'text-gray-600'
+                                        }`}
+                                >
+                                    {t(`groups.types.${gt.key}`)}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                {/* Currency */}
+                <CurrencyPicker
+                    value={currency}
+                    onChange={setCurrency}
+                    label={t('groups.currency')}
+                />
+
+                {/* Action Buttons */}
+                <View className="mt-4 gap-2">
+                    <Button
+                        title={t('common.save')}
+                        onPress={handleUpdate}
+                        loading={isLoading}
+                        disabled={isLoading}
+                    />
+                    <Button
+                        title={t('common.cancel')}
+                        onPress={() => navigation.goBack()}
+                        variant="outline"
+                    />
+                </View>
+            </View>
+        </ScrollView>
+    );
+}
