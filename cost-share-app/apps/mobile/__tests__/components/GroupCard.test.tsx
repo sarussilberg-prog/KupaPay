@@ -9,6 +9,7 @@ const baseGroup: GroupWithMembers = {
     description: 'Summer trip',
     groupType: 'trip',
     defaultCurrency: 'EUR',
+    inviteToken: 'abc1234567',
     createdBy: 'u1',
     isActive: true,
     createdAt: new Date(),

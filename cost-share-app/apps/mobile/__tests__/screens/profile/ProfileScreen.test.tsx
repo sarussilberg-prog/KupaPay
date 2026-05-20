@@ -58,7 +58,7 @@ beforeEach(() => {
     mockedFetch.mockResolvedValue(dashboardPayload as any);
     useAppStore.setState({
         language: 'en',
-        currentUser: { id: 'u1', email: 'a@x.com', name: 'Alice', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date() },
+        currentUser: { id: 'u1', email: 'a@x.com', name: 'Alice', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date() },
     });
 });
 

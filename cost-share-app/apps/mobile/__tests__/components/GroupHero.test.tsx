@@ -14,6 +14,7 @@ const base: Group = {
     name: 'Trip to Paris',
     groupType: 'trip',
     defaultCurrency: 'EUR',
+    inviteToken: 'abc1234567',
     createdBy: 'u1',
     isActive: true,
     createdAt: new Date(),

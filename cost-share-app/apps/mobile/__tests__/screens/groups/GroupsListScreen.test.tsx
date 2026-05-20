@@ -43,6 +43,7 @@ const makeGroup = (overrides: Partial<{
     description: 'A trip',
     groupType: 'trip' as const,
     defaultCurrency: 'USD',
+    inviteToken: 'trip123456',
     createdBy: 'u1',
     isActive: true,
     createdAt: new Date(),

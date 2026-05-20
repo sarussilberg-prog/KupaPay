@@ -7,6 +7,7 @@ const makeGroup = (id: string, name = `Group ${id}`): GroupWithMembers => ({
     description: '',
     groupType: 'general',
     defaultCurrency: 'USD',
+    inviteToken: `token${id}`,
     createdBy: 'creator',
     isActive: true,
     createdAt: new Date(),

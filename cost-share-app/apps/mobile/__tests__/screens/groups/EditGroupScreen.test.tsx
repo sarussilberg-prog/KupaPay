@@ -59,6 +59,7 @@ const existingGroup = {
     description: 'Old desc',
     groupType: 'home' as const,
     defaultCurrency: 'EUR',
+    inviteToken: 'xyz1234567',
     createdBy: 'u1',
     isActive: true,
     createdAt: new Date(),

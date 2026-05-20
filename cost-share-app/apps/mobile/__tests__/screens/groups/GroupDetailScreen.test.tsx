@@ -88,6 +88,7 @@ const group = {
     name: 'Trip',
     groupType: 'trip' as const,
     defaultCurrency: 'USD',
+    inviteToken: 'trip123456',
     createdBy: 'me',
     isActive: true,
     createdAt: new Date(),

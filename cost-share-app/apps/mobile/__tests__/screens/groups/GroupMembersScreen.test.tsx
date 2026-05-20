@@ -35,6 +35,7 @@ const user = {
     id: 'u1',
     email: 'a@x.com',
     name: 'Alice',
+    inviteToken: 'alice123456',
     defaultCurrency: 'USD',
     language: 'en' as const,
     createdAt: new Date(),

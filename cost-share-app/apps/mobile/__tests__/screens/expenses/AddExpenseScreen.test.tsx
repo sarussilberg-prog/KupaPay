@@ -28,7 +28,7 @@ jest.mock('../../../services/groups.service', () => ({
 
 jest.mock('../../../services/users.service', () => ({
     fetchGroupUsers: jest.fn().mockResolvedValue([
-        { id: 'u1', name: 'Alice', email: 'a@x.com', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'u1', name: 'Alice', email: 'a@x.com', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date() },
     ]),
 }));
 
@@ -49,6 +49,7 @@ beforeEach(() => {
             id: 'u1',
             email: 'a@x.com',
             name: 'Alice',
+            inviteToken: 'alice123456',
             defaultCurrency: 'USD',
             language: 'en',
             createdAt: new Date(),
