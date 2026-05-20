@@ -170,6 +170,20 @@ export interface DebtSummary {
 }
 
 /**
+ * Result of debt simplification — list of transfers + metadata about
+ * how the result was computed.
+ *
+ * - `algorithm: 'exact'` means the transaction count is provably minimal.
+ * - `algorithm: 'greedy'` means a Splitwise-style heuristic was used
+ *   (small groups always get 'exact'; very large groups get 'greedy').
+ */
+export interface SimplifiedDebtsResult {
+    debts: DebtSummary[];
+    transactionCount: number;
+    algorithm: 'exact' | 'greedy';
+}
+
+/**
  * UserExpenseView - Expense with user-specific details
  * Implements: user_expenses_view logic
  */
