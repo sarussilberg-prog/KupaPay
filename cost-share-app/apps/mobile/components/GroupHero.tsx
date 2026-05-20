@@ -14,30 +14,14 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
-import { Group, GroupType } from '@cost-share/shared';
+import { Group } from '@cost-share/shared';
 import { useRtlLayout } from '../hooks/useRtlLayout';
+import { getGroupTypeVisual } from '../lib/groupTypeVisuals';
 import { AppIcon } from './AppIcon';
 import { Text } from './AppText';
-import { colors } from '../theme';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const HERO_HEIGHT = Math.round(SCREEN_HEIGHT * 0.26);
-
-const groupTypeGradient: Record<GroupType, [string, string]> = {
-    trip: ['#60A5FA', '#3B82F6'],
-    home: ['#34D399', '#10B981'],
-    couple: ['#F472B6', '#EC4899'],
-    general: ['#A78BFA', '#7C3AED'],
-    other: ['#94A3B8', '#475569'],
-};
-
-const groupTypeEmoji: Record<GroupType, string> = {
-    trip: '✈️',
-    home: '🏠',
-    couple: '💑',
-    general: '👥',
-    other: '📋',
-};
 
 interface GroupHeroProps {
     group: Group;
@@ -165,19 +149,22 @@ export function GroupHero({ group, memberCount, onBack, onSettings, onShare }: G
         );
     }
 
-    const colorsTuple = groupTypeGradient[group.groupType] ?? groupTypeGradient.general;
+    const visual = getGroupTypeVisual(group.groupType);
     return (
         <LinearGradient
-            colors={colorsTuple}
+            colors={visual.gradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{ width: '100%', height: HERO_HEIGHT }}
             testID="hero-gradient"
         >
             <View className="absolute inset-0 items-center justify-center">
-                <Text className="text-7xl opacity-30">
-                    {groupTypeEmoji[group.groupType] ?? '👥'}
-                </Text>
+                <AppIcon
+                    name={visual.icon}
+                    size={120}
+                    color="rgba(255,255,255,0.25)"
+                    testID="hero-type-icon"
+                />
             </View>
             <HeroChrome
                 group={group}

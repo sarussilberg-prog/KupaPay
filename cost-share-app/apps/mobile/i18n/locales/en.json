@@ -78,6 +78,9 @@
             "home": "Home",
             "couple": "Couple",
             "general": "General",
+            "work": "Work",
+            "event": "Event",
+            "friends": "Friends",
             "other": "Other"
         },
         "search": {
@@ -85,9 +88,19 @@
             "cancel": "Cancel"
         },
         "filters": {
-            "title": "Filters",
+            "title": "Filter & sort",
+            "subtitle": "Narrow the list or change how groups are ordered",
             "apply": "Apply",
             "clearAll": "Clear all",
+            "sort": {
+                "label": "Sort by",
+                "recentDesc": "Recently updated",
+                "recentAsc": "Oldest updated",
+                "nameAsc": "Name A–Z",
+                "nameDesc": "Name Z–A",
+                "balanceDesc": "Highest balance",
+                "balanceAsc": "Lowest balance"
+            },
             "balance": {
                 "label": "Balance",
                 "all": "All",
@@ -96,7 +109,8 @@
                 "settled": "Settled"
             },
             "type": {
-                "label": "Group type"
+                "label": "Group type",
+                "hint": "Pick one or more — empty means all types"
             },
             "status": {
                 "label": "Status",
