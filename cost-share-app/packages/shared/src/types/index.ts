@@ -25,6 +25,7 @@ export interface User {
     email?: string;
     avatarUrl?: string;
     phone?: string;
+    inviteToken: string;  // 10-char URL-safe slug; the value used to build https://kupa.pro/i/<token>
     defaultCurrency: string;  // 'USD', 'ILS', 'EUR', etc.
     language: Language;
     createdAt: Date;
@@ -42,6 +43,7 @@ export interface Group {
     imageUrl?: string;
     groupType: GroupType;
     defaultCurrency: string;
+    inviteToken: string;  // 10-char URL-safe slug; the value used to build https://kupa.pro/g/<token>
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
     createdAt: Date;
@@ -552,3 +554,11 @@ export interface UserDashboard {
  * @deprecated Use User instead
  */
 export type Profile = User;
+
+/**
+ * An invite link that arrived before the user was authenticated.
+ * The redemption handler will pick it up after sign-in.
+ */
+export type PendingInvite =
+    | { kind: 'friend'; token: string }
+    | { kind: 'group'; token: string };

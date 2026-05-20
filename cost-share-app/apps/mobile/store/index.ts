@@ -62,6 +62,7 @@ export const useAppStore = create<AppState>((set) => ({
                     email: session.user.email ?? '',
                     name: session.user.user_metadata?.full_name ?? session.user.email ?? '',
                     avatarUrl: session.user.user_metadata?.avatar_url ?? undefined,
+                    inviteToken: '',
                     defaultCurrency: DEFAULT_CURRENCY,
                     language: 'en' as const,
                     createdAt: new Date(session.user.created_at),
