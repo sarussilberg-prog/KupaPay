@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { UserBalance, DebtSummary } from '@cost-share/shared';
+import { UserBalance, SimplifiedDebtsResult, DebtSummary } from '@cost-share/shared';
 import { useLoading } from '../../hooks/useLoading';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { getGroupBalances, getGroupDebts } from '../../services/groups.service';
@@ -26,7 +26,11 @@ export function BalancesScreen() {
     const { isLoading, startLoading, stopLoading } = useLoading();
 
     const [balances, setBalances] = useState<UserBalance[]>([]);
-    const [debts, setDebts] = useState<DebtSummary[]>([]);
+    const [debtsResult, setDebtsResult] = useState<SimplifiedDebtsResult>({
+        debts: [],
+        transactionCount: 0,
+        algorithm: 'exact',
+    });
     const [refreshing, setRefreshing] = useState(false);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
 
@@ -37,7 +41,7 @@ export function BalancesScreen() {
             getGroupDebts(groupId),
         ]);
         setBalances(balancesData);
-        setDebts(debtsData);
+        setDebtsResult(debtsData);
         stopLoading();
     }, [groupId, startLoading, stopLoading]);
 
@@ -108,11 +112,32 @@ export function BalancesScreen() {
 
             {/* Simplified Debts */}
             <View className="px-4 mb-4">
-                <Text className="text-lg font-semibold text-gray-900 mb-3">
+                <Text className="text-lg font-semibold text-gray-900 mb-1">
                     {t('balances.simplifiedDebts')}
                 </Text>
-                {debts.length > 0 ? (
-                    debts.map((debt, index) => (
+                {debtsResult.debts.length > 0 && (
+                    <View
+                        testID="debts-summary"
+                        className="flex-row items-center mb-3"
+                        style={{ gap: 8 }}
+                    >
+                        <Text className="text-sm text-gray-500">
+                            {t('balances.paymentsToSettle', { count: debtsResult.transactionCount })}
+                        </Text>
+                        {debtsResult.algorithm === 'exact' && (
+                            <View
+                                testID="minimum-badge"
+                                className="bg-emerald-50 rounded-full px-2 py-0.5"
+                            >
+                                <Text className="text-xs font-medium text-emerald-700">
+                                    {t('balances.minimumBadge')}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                )}
+                {debtsResult.debts.length > 0 ? (
+                    debtsResult.debts.map((debt, index) => (
                         <View
                             key={`${debt.fromUserId}-${debt.toUserId}-${index}`}
                             className="bg-white rounded-xl p-4 mb-2"
