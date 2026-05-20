@@ -309,7 +309,15 @@ $$;
 -- ============================================================
 -- Grants
 -- ============================================================
+-- Public read: get_invite_preview is callable by anon for the Edge Function.
 GRANT EXECUTE ON FUNCTION get_invite_preview(TEXT) TO anon, authenticated;
+
+-- Authenticated only: revoke all (PUBLIC, anon, authenticated) first, then grant only to authenticated.
+REVOKE EXECUTE ON FUNCTION redeem_friend_invite(TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION redeem_group_invite(TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION rotate_friend_invite() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION rotate_group_invite(UUID) FROM PUBLIC, anon, authenticated;
+
 GRANT EXECUTE ON FUNCTION redeem_friend_invite(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION redeem_group_invite(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION rotate_friend_invite() TO authenticated;
