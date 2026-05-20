@@ -386,6 +386,45 @@
         "loadError": "Failed to load expenses",
         "createError": "Failed to create expense"
     },
+    "invite": {
+        "friend": {
+            "title": "Invite a friend to Kupa",
+            "subtitle": "Send a link via WhatsApp and more",
+            "cta": "Share link",
+            "shareMessage": "Hey! Let's split expenses together on Kupa. If you sign up through this link we'll automatically become friends: {{url}}",
+            "linkLabel": "My invite link",
+            "copyButton": "Copy",
+            "copied": "Link copied",
+            "rotate": "Rotate link",
+            "rotateConfirmTitle": "Rotate invite link?",
+            "rotateConfirmBody": "The previous link will stop working. Anyone holding the old link won't be able to become your friend until you send them the new one.",
+            "rotated": "Invite link updated",
+            "findEmpty": "Didn't find who you're looking for?",
+            "findEmptyCta": "Invite a new friend by link",
+            "findInviteName": "Invite {{name}} to Kupa"
+        },
+        "group": {
+            "title": "Share group link",
+            "shareMessage": "I added you to the '{{groupName}}' group on Kupa. Join via this link: {{url}}",
+            "linkLabel": "Invite link",
+            "rotate": "Rotate link",
+            "rotateConfirmTitle": "Rotate group invite link?",
+            "rotateConfirmBody": "Anyone holding the current link won't be able to join until you send them the new one. Members already in the group are unaffected.",
+            "rotated": "Group invite link updated",
+            "emptyStateLink": "or share group link"
+        },
+        "addMembers": {
+            "searchOthers": "Search other users",
+            "sendLink": "Share group link"
+        },
+        "redemption": {
+            "friendSuccess": "Added {{name}} as a friend",
+            "groupSuccess": "Joined '{{groupName}}'",
+            "alreadyMember": "You're already a member of this group",
+            "selfInvite": "That's your own invite link",
+            "invalid": "This invite link is no longer valid"
+        }
+    },
     "dashboard": {
         "appTitle": "Kupa",
         "youOwe": "You owe",

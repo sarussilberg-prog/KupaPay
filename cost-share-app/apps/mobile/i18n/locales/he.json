@@ -388,6 +388,45 @@
         "loadError": "טעינת ההוצאות נכשלה",
         "createError": "יצירת ההוצאה נכשלה"
     },
+    "invite": {
+        "friend": {
+            "title": "הזמן חבר ל-Kupa",
+            "subtitle": "שלח קישור דרך וואצאפ ועוד",
+            "cta": "שתף קישור",
+            "shareMessage": "היי! בוא נחלק הוצאות יחד דרך Kupa. אם תרשם דרך הקישור הזה — נהיה אוטומטית חברים: {{url}}",
+            "linkLabel": "קישור ההזמנה שלי",
+            "copyButton": "העתק",
+            "copied": "הקישור הועתק",
+            "rotate": "שנה קישור",
+            "rotateConfirmTitle": "לשנות את קישור ההזמנה?",
+            "rotateConfirmBody": "הקישור הקודם יפסיק לעבוד. כל מי שיש לו את הקישור הישן לא יוכל להפוך לחבר שלך עד שתשלח לו את החדש.",
+            "rotated": "קישור ההזמנה עודכן",
+            "findEmpty": "לא מצאת את מי שחיפשת?",
+            "findEmptyCta": "הזמן חבר חדש דרך קישור",
+            "findInviteName": "הזמן את {{name}} ל-Kupa"
+        },
+        "group": {
+            "title": "שתף קישור לקבוצה",
+            "shareMessage": "הוספתי אותך לקבוצת '{{groupName}}' ב-Kupa. הצטרף דרך הקישור: {{url}}",
+            "linkLabel": "קישור הזמנה",
+            "rotate": "שנה קישור",
+            "rotateConfirmTitle": "לשנות את קישור הקבוצה?",
+            "rotateConfirmBody": "כל מי שיש לו את הקישור הנוכחי לא יוכל להצטרף עד שתשלח לו את החדש. חברים שכבר בקבוצה לא מושפעים.",
+            "rotated": "קישור הקבוצה עודכן",
+            "emptyStateLink": "או שתף קישור לקבוצה"
+        },
+        "addMembers": {
+            "searchOthers": "חפש משתמשים אחרים",
+            "sendLink": "שלח קישור לקבוצה"
+        },
+        "redemption": {
+            "friendSuccess": "הוספת את {{name}} כחבר",
+            "groupSuccess": "הצטרפת לקבוצת '{{groupName}}'",
+            "alreadyMember": "אתה כבר חבר בקבוצה הזו",
+            "selfInvite": "זה הקישור שלך",
+            "invalid": "קישור ההזמנה כבר לא תקף"
+        }
+    },
     "dashboard": {
         "appTitle": "כופה",
         "youOwe": "אתה חייב",
