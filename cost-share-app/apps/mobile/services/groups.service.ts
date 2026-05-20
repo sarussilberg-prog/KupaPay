@@ -5,6 +5,7 @@
 import {
     Group,
     GroupMember,
+    GroupMemberLite,
     GroupWithMembers,
     UserBalance,
     SimplifiedDebtsResult,
@@ -129,12 +130,7 @@ export async function fetchGroups(): Promise<GroupWithMembers[]> {
         return groups;
     } catch (error) {
         console.error('Failed to fetch groups:', error);
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.loadError'),
-            text2: i18n.t('common.networkError'),
-        });
-        return [];
+        throw error;
     }
 }
 
@@ -323,6 +319,35 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
     return (data ?? []).map(groupMemberFromRow);
 }
 
+/** Resolve display names and avatars for feed participants (incl. former members). */
+export async function fetchProfilesByUserIds(
+    userIds: string[],
+): Promise<Record<string, GroupMemberLite>> {
+    const unique = [...new Set(userIds.filter(Boolean))];
+    if (unique.length === 0) return {};
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', unique);
+
+    if (error) {
+        console.error('Failed to fetch profiles:', error);
+        return {};
+    }
+
+    const map: Record<string, GroupMemberLite> = {};
+    (data ?? []).forEach(p => {
+        const id = p.id as string;
+        map[id] = {
+            userId: id,
+            displayName: (p.name as string) ?? '',
+            avatarUrl: (p.avatar_url as string | undefined) ?? undefined,
+        };
+    });
+    return map;
+}
+
 export async function addGroupMember(groupId: string, userId: string): Promise<GroupMember | null> {
     const { data, error } = await supabase
         .from('group_members')
@@ -384,15 +409,18 @@ export async function getGroupBalances(groupId: string, userId?: string): Promis
     }
 }
 
-export async function getGroupDebts(groupId: string): Promise<SimplifiedDebtsResult> {
+export async function getGroupDebts(
+    groupId: string,
+    balances?: UserBalance[],
+): Promise<SimplifiedDebtsResult> {
     const empty: SimplifiedDebtsResult = {
         debts: [],
         transactionCount: 0,
         algorithm: 'exact',
     };
     try {
-        const balances = await getGroupBalances(groupId);
-        const userIds = Array.from(new Set(balances.map(b => b.userId)));
+        const balanceList = balances ?? (await getGroupBalances(groupId));
+        const userIds = Array.from(new Set(balanceList.map(b => b.userId)));
         const nameById = new Map<string, string>();
 
         if (userIds.length > 0) {
@@ -404,7 +432,7 @@ export async function getGroupDebts(groupId: string): Promise<SimplifiedDebtsRes
             (data ?? []).forEach(p => nameById.set(p.id as string, p.name as string));
         }
 
-        return simplifyDebts(balances, nameById);
+        return simplifyDebts(balanceList, nameById);
     } catch (error) {
         if (error instanceof UnbalancedLedgerError) {
             console.warn('Skipping debt simplification: unbalanced ledger', error.message);

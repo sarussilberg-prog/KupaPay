@@ -220,6 +220,7 @@ export interface RecentActivity {
     currency: string;
     userId: string;
     userName: string;
+    userAvatarUrl?: string;
     activityDate: Date;
     createdAt: Date;
 }

@@ -270,11 +270,8 @@ CREATE POLICY "Users can view settlements in their groups" ON settlements
     FOR SELECT USING (public.is_group_member(group_id) AND deleted_at IS NULL);
 CREATE POLICY "Users can create settlements in their groups" ON settlements
     FOR INSERT WITH CHECK (public.is_group_member(group_id));
-CREATE POLICY "Either party can update settlement" ON settlements
-    FOR UPDATE USING (
-        public.is_group_member(group_id)
-        AND (auth.uid() = from_user_id OR auth.uid() = to_user_id)
-    );
+CREATE POLICY "Group members can update settlements" ON settlements
+    FOR UPDATE USING (public.is_group_member(group_id));
 CREATE POLICY "Either party can delete settlement" ON settlements
     FOR DELETE USING (
         public.is_group_member(group_id)

@@ -79,6 +79,14 @@ describe('GroupsListScreen', () => {
         expect(await findByText('groups.noGroups')).toBeTruthy();
     });
 
+    it('shows network error state when fetch fails', async () => {
+        mockFetchGroups.mockRejectedValue(new Error('Network error'));
+        const { findByText } = render(<GroupsListScreen />);
+        expect(await findByText('groups.loadError')).toBeTruthy();
+        expect(await findByText('common.networkError')).toBeTruthy();
+        expect(await findByText('common.retry')).toBeTruthy();
+    });
+
     it('renders groups from store', async () => {
         useAppStore.setState({ groups: [makeGroup({})] });
         const { findByText } = render(<GroupsListScreen />);
@@ -120,8 +128,6 @@ describe('GroupsListScreen', () => {
             ],
         });
         const { findByTestId, queryByText, getByText } = render(<GroupsListScreen />);
-        // Expand the search input.
-        fireEvent.press(await findByTestId('groups-search'));
         const input = await findByTestId('groups-search-input');
         fireEvent.changeText(input, 'bob');
         await waitFor(() => {
