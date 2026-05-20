@@ -5,6 +5,9 @@
     "paths": {
       "@cost-share/shared": [
         "../../packages/shared/src"
+      ],
+      "@cost-share/shared/*": [
+        "../../packages/shared/src/*"
       ]
     }
   },
