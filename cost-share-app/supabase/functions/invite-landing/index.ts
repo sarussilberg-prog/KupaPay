@@ -38,7 +38,9 @@ async function fetchPreview(token: string): Promise<Preview> {
 
 Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
-    const path = url.pathname;
+    // Supabase serves this function at /functions/v1/invite-landing/*; strip that prefix
+    // when present so the same routes work both behind kupa.pro and the direct project URL.
+    const path = url.pathname.replace(/^\/functions\/v1\/invite-landing/, '').replace(/^\/invite-landing/, '') || '/';
 
     // well-known files
     const wk = handleWellKnown(path);
