@@ -29,6 +29,7 @@ import {
 } from '../../hooks/queries/useFriendsQueries';
 import { User } from '@cost-share/shared';
 import { FriendRequest } from '../../services/friends.service';
+import { shareFriendInvite } from '../../services/invite.service';
 
 export function FriendsScreen() {
     const { t } = useTranslation();
@@ -99,6 +100,27 @@ export function FriendsScreen() {
                     />
                 }
             >
+                {/* Invite CTA */}
+                <TouchableOpacity
+                    onPress={() => {
+                        void shareFriendInvite();
+                    }}
+                    activeOpacity={0.7}
+                    className="mx-4 mt-4 mb-2 px-4 py-3 bg-primary/10 rounded-xl flex-row items-center"
+                    testID="friends-invite-cta"
+                >
+                    <AppIcon name="person-add-outline" size={22} color={colors.primary} />
+                    <View className="flex-1 ml-3">
+                        <Text className="text-sm font-semibold text-gray-800">
+                            {t('invite.friend.title')}
+                        </Text>
+                        <Text className="text-xs text-slate-500">
+                            {t('invite.friend.subtitle')}
+                        </Text>
+                    </View>
+                    <AppIcon name="chevron-forward" size={18} color={colors.gray400} />
+                </TouchableOpacity>
+
                 {/* Incoming requests */}
                 <View className="px-4 mb-4">
                     <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
