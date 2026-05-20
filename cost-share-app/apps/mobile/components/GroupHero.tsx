@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { Group, GroupType } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
+import { colors } from '../theme';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const HERO_HEIGHT = Math.round(SCREEN_HEIGHT * 0.26);
@@ -43,6 +44,7 @@ interface GroupHeroProps {
     memberCount: number;
     onBack: () => void;
     onSettings: () => void;
+    onOverflow?: () => void;
 }
 
 function HeroChrome({
@@ -50,6 +52,7 @@ function HeroChrome({
     memberCount,
     onBack,
     onSettings,
+    onOverflow,
     topInset,
 }: GroupHeroProps & { topInset: number }) {
     const { t } = useTranslation();
@@ -110,22 +113,36 @@ function HeroChrome({
                         color="#fff"
                     />
                 </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={onSettings}
-                    accessibilityRole="button"
-                    accessibilityLabel="Settings"
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    className="w-10 h-10 rounded-full bg-black/40 items-center justify-center"
-                    testID="hero-settings-btn"
-                >
-                    <AppIcon name="settings-outline" size={20} color="#fff" />
-                </TouchableOpacity>
+                <View className="flex-row items-center gap-2">
+                    <TouchableOpacity
+                        onPress={onSettings}
+                        accessibilityRole="button"
+                        accessibilityLabel="Settings"
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        className="w-10 h-10 rounded-full bg-black/40 items-center justify-center"
+                        testID="hero-settings-btn"
+                    >
+                        <AppIcon name="settings-outline" size={20} color="#fff" />
+                    </TouchableOpacity>
+                    {onOverflow && (
+                        <TouchableOpacity
+                            onPress={onOverflow}
+                            accessibilityRole="button"
+                            accessibilityLabel="More options"
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            className="mr-2"
+                            testID="group-overflow-button"
+                        >
+                            <AppIcon name="ellipsis-horizontal" size={22} color={colors.gray600} />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
         </>
     );
 }
 
-export function GroupHero({ group, memberCount, onBack, onSettings }: GroupHeroProps) {
+export function GroupHero({ group, memberCount, onBack, onSettings, onOverflow }: GroupHeroProps) {
     const insets = useSafeAreaInsets();
 
     if (group.imageUrl) {
@@ -141,6 +158,7 @@ export function GroupHero({ group, memberCount, onBack, onSettings }: GroupHeroP
                     memberCount={memberCount}
                     onBack={onBack}
                     onSettings={onSettings}
+                    onOverflow={onOverflow}
                     topInset={insets.top}
                 />
             </ImageBackground>
@@ -166,6 +184,7 @@ export function GroupHero({ group, memberCount, onBack, onSettings }: GroupHeroP
                 memberCount={memberCount}
                 onBack={onBack}
                 onSettings={onSettings}
+                onOverflow={onOverflow}
                 topInset={insets.top}
             />
         </LinearGradient>

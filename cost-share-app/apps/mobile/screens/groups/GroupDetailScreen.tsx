@@ -39,6 +39,7 @@ import {
     deleteMessage,
 } from '../../services/messages.service';
 import { exportGroupCsv } from '../../services/group-share.service';
+import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
 import { getCurrentUserId } from '../../lib/auth';
@@ -100,6 +101,8 @@ export function GroupDetailScreen() {
     const { isLoading, startLoading, stopLoading } = useLoading();
 
     const [group, setGroup] = useState<Group | null>(null);
+    const storeGroup = useAppStore(s => s.groups.find(g => g.id === groupId));
+    const displayGroup = storeGroup ?? group;
     const [memberLites, setMemberLites] = useState<GroupMemberLite[]>([]);
     const [currentUserId, setCurrentUserId] = useState<string>('');
     const [refreshing, setRefreshing] = useState(false);
@@ -270,12 +273,24 @@ export function GroupDetailScreen() {
     );
 
     const handleExport = useCallback(async () => {
-        if (!group) return;
+        if (!displayGroup) return;
         const filteredExpenses = filteredFeed
             .filter((i): i is Extract<FeedItem, { kind: 'expense' }> => i.kind === 'expense')
             .map(i => i.expense);
-        await exportGroupCsv(group, filteredExpenses, memberLites);
-    }, [group, filteredFeed, memberLites]);
+        await exportGroupCsv(displayGroup, filteredExpenses, memberLites);
+    }, [displayGroup, filteredFeed, memberLites]);
+
+    const handleOverflow = useCallback(() => {
+        Alert.alert(
+            '',
+            '',
+            [
+                { text: t('invite.group.title'), onPress: () => { void shareGroupInvite(groupId); } },
+                { text: t('common.cancel'), style: 'cancel' },
+            ],
+            { cancelable: true },
+        );
+    }, [groupId, t]);
 
     const handleMessageEdit = useCallback(
         (m: GroupMessage) =>
@@ -390,11 +405,11 @@ export function GroupDetailScreen() {
         [composer, groupId],
     );
 
-    if (isLoading && !group) {
+    if (isLoading && !displayGroup) {
         return <LoadingIndicator />;
     }
 
-    if (!group) {
+    if (!displayGroup) {
         return (
             <EmptyState
                 iconName="alert-circle-outline"
@@ -432,10 +447,11 @@ export function GroupDetailScreen() {
                 ListHeaderComponent={
                     <>
                         <GroupHero
-                            group={group}
+                            group={displayGroup}
                             memberCount={memberLites.length}
                             onBack={handleBack}
                             onSettings={handleSettings}
+                            onOverflow={handleOverflow}
                         />
                         <QuickActionsRow
                             onSettleUp={handleSettleUp}
@@ -489,6 +505,15 @@ export function GroupDetailScreen() {
                                 <AppIcon name="person-add-outline" size={18} color={colors.primary} />
                                 <Text className="text-sm font-semibold text-primary-dark ml-2">
                                     {t('groups.emptyFeed.addMembers')}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => { void shareGroupInvite(groupId); }}
+                                className="mt-4 self-center"
+                                testID="group-empty-share-link"
+                            >
+                                <Text className="text-sm text-primary">
+                                    {t('invite.group.emptyStateLink')}
                                 </Text>
                             </TouchableOpacity>
                         </View>
