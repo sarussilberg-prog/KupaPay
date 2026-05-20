@@ -4,14 +4,10 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    I18nManager,
-} from 'react-native';
+import { View, TextInput, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Text } from './AppText';
+import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon } from './AppIcon';
 import { colors } from '../theme';
 
@@ -33,6 +29,7 @@ export function SearchExpandable({
     testID,
 }: SearchExpandableProps) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     const inputRef = useRef<TextInput | null>(null);
 
     useEffect(() => {
@@ -66,11 +63,16 @@ export function SearchExpandable({
                     onChangeText={onChangeText}
                     placeholder={placeholder ?? t('groups.search.placeholder')}
                     placeholderTextColor={colors.gray400}
-                    className="flex-1 text-sm text-gray-900 mx-2"
+                    className={[
+                        'flex-1 text-sm text-gray-900 mx-2',
+                        rtlTextClassName(isRtl),
+                    ]
+                        .filter(Boolean)
+                        .join(' ')}
                     autoCorrect={false}
                     autoCapitalize="none"
                     returnKeyType="search"
-                    style={{ textAlign: I18nManager.isRTL ? 'right' : 'left' }}
+                    style={resolveAutoTextInputStyle(isRtl)}
                     testID={testID ? `${testID}-input` : undefined}
                 />
             </View>

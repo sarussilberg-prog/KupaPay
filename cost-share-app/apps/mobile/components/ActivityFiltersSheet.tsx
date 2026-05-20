@@ -21,6 +21,7 @@ import {
     ActivityTypeFilter,
     DEFAULT_ACTIVITY_FILTERS,
 } from '../lib/activityFilters';
+import { getCurrencySymbol } from '../lib/currencyDisplay';
 
 export type { ActivityFilters, ActivitySortOption, ActivityTypeFilter };
 export { DEFAULT_ACTIVITY_FILTERS, isAnyActivityFilterActive } from '../lib/activityFilters';
@@ -74,6 +75,21 @@ function toggle<T>(list: T[], value: T): T[] {
     return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
+function isAllMultiSelected<T>(selected: T[], allValues: T[]): boolean {
+    return selected.length === 0 || selected.length === allValues.length;
+}
+
+function isMultiItemActive<T>(selected: T[], value: T): boolean {
+    return selected.length === 0 || selected.includes(value);
+}
+
+function handleMultiToggle<T>(selected: T[], value: T, allValues: T[]): T[] {
+    if (selected.length === 0) return [value];
+    const next = toggle(selected, value);
+    if (next.length === 0 || next.length === allValues.length) return [];
+    return next;
+}
+
 export function ActivityFiltersSheet({
     visible,
     filters,
@@ -101,6 +117,9 @@ export function ActivityFiltersSheet({
         { key: 'settlement', label: t('activity.settlement') },
         { key: 'message', label: t('activity.message') },
     ];
+    const allTypeKeys = typeOptions.map((opt) => opt.key);
+    const allCurrencyCodes = availableCurrencies;
+    const allGroupIds = availableGroups.map((g) => g.id);
 
     return (
         <Modal
@@ -149,15 +168,26 @@ export function ActivityFiltersSheet({
                             {t('activity.filters.types.hint')}
                         </Text>
                         <View className="flex-row flex-wrap">
+                            <Chip
+                                label={t('activity.filterAll')}
+                                active={isAllMultiSelected(draft.types, allTypeKeys)}
+                                onPress={() =>
+                                    setDraft((d) => ({ ...d, types: [] }))
+                                }
+                            />
                             {typeOptions.map((opt) => (
                                 <Chip
                                     key={opt.key}
                                     label={opt.label}
-                                    active={draft.types.includes(opt.key)}
+                                    active={isMultiItemActive(draft.types, opt.key)}
                                     onPress={() =>
                                         setDraft((d) => ({
                                             ...d,
-                                            types: toggle(d.types, opt.key),
+                                            types: handleMultiToggle(
+                                                d.types,
+                                                opt.key,
+                                                allTypeKeys,
+                                            ),
                                         }))
                                     }
                                 />
@@ -170,15 +200,32 @@ export function ActivityFiltersSheet({
                                     {t('activity.filters.currency.label')}
                                 </Text>
                                 <View className="flex-row flex-wrap">
+                                    <Chip
+                                        label={t('activity.filterAll')}
+                                        active={isAllMultiSelected(
+                                            draft.currencies,
+                                            allCurrencyCodes,
+                                        )}
+                                        onPress={() =>
+                                            setDraft((d) => ({ ...d, currencies: [] }))
+                                        }
+                                    />
                                     {availableCurrencies.map((c) => (
                                         <Chip
                                             key={c}
-                                            label={c}
-                                            active={draft.currencies.includes(c)}
+                                            label={getCurrencySymbol(c)}
+                                            active={isMultiItemActive(
+                                                draft.currencies,
+                                                c,
+                                            )}
                                             onPress={() =>
                                                 setDraft((d) => ({
                                                     ...d,
-                                                    currencies: toggle(d.currencies, c),
+                                                    currencies: handleMultiToggle(
+                                                        d.currencies,
+                                                        c,
+                                                        allCurrencyCodes,
+                                                    ),
                                                 }))
                                             }
                                         />
@@ -193,15 +240,32 @@ export function ActivityFiltersSheet({
                                     {t('activity.filters.group.label')}
                                 </Text>
                                 <View className="flex-row flex-wrap">
+                                    <Chip
+                                        label={t('activity.filterAll')}
+                                        active={isAllMultiSelected(
+                                            draft.groupIds,
+                                            allGroupIds,
+                                        )}
+                                        onPress={() =>
+                                            setDraft((d) => ({ ...d, groupIds: [] }))
+                                        }
+                                    />
                                     {availableGroups.map((g) => (
                                         <Chip
                                             key={g.id}
                                             label={g.name}
-                                            active={draft.groupIds.includes(g.id)}
+                                            active={isMultiItemActive(
+                                                draft.groupIds,
+                                                g.id,
+                                            )}
                                             onPress={() =>
                                                 setDraft((d) => ({
                                                     ...d,
-                                                    groupIds: toggle(d.groupIds, g.id),
+                                                    groupIds: handleMultiToggle(
+                                                        d.groupIds,
+                                                        g.id,
+                                                        allGroupIds,
+                                                    ),
                                                 }))
                                             }
                                         />

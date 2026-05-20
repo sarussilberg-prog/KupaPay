@@ -50,16 +50,34 @@ start_mobile_auto_open() {
 
 cd "$MOBILE_DIR"
 
+if [[ "${EXPO_START_WEB:-0}" == "1" && "${DEV_AUTO_OPEN:-0}" == "1" ]]; then
+  (
+    for _ in $(seq 1 30); do
+      if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then
+        command -v open >/dev/null 2>&1 && open "http://127.0.0.1:${PORT}/" 2>/dev/null || true
+        break
+      fi
+      sleep 1
+    done
+  ) &
+fi
+
 run_expo() {
   start_mobile_auto_open
-  exec npx expo start --dev-client --localhost --port "$PORT"
+  local -a args=(start --dev-client --localhost --port "$PORT")
+  if [[ "${EXPO_START_WEB:-0}" == "1" ]]; then
+    args+=(--web)
+  fi
+  exec npx expo "${args[@]}"
 }
 
 # Node wrapper piped stdout and hid the QR / key menu. script(1) keeps a PTY in real terminals.
 if [[ -t 0 && -t 1 ]] && command -v script >/dev/null 2>&1; then
   start_ios_watcher
   start_mobile_auto_open
-  if script -q "$LOG" npx expo start --dev-client --localhost --port "$PORT"; then
+  WEB_FLAG=()
+  [[ "${EXPO_START_WEB:-0}" == "1" ]] && WEB_FLAG=(--web)
+  if script -q "$LOG" npx expo start --dev-client --localhost --port "$PORT" "${WEB_FLAG[@]}"; then
     :
   else
     kill "$WATCHER_PID" 2>/dev/null || true

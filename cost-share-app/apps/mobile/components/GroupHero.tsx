@@ -7,17 +7,17 @@
 import React from 'react';
 import {
     View,
-    Text,
     ImageBackground,
     TouchableOpacity,
     Dimensions,
-    I18nManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { Group, GroupType } from '@cost-share/shared';
+import { useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon } from './AppIcon';
+import { Text } from './AppText';
 import { colors } from '../theme';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -56,7 +56,7 @@ function HeroChrome({
     topInset,
 }: GroupHeroProps & { topInset: number }) {
     const { t } = useTranslation();
-    const isRtl = I18nManager.isRTL;
+    const isRtl = useRtlLayout();
     return (
         <>
             <View pointerEvents="none" className="absolute inset-0 bg-black/30" />

@@ -1,16 +1,21 @@
 import React, { createContext, useContext } from 'react';
-import { I18nManager, Platform, StyleProp, TextStyle, View, ViewStyle, StyleSheet } from 'react-native';
+import { Platform, StyleProp, TextStyle, View, ViewStyle, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useAppStore } from '../store';
 
 const RtlLayoutContext = createContext<boolean | null>(null);
 
-/** True when UI should mirror for Hebrew — works even if I18nManager.forceRTL needs a restart. */
+/** True when UI should mirror for Hebrew — driven by app language, not device locale. */
 export function useRtlLayout(): boolean {
     const fromContext = useContext(RtlLayoutContext);
     if (fromContext !== null) return fromContext;
 
+    const language = useAppStore((s) => s.language);
+    if (language === 'he') return true;
+    if (language === 'en') return false;
+
     const { i18n } = useTranslation();
-    return I18nManager.isRTL || i18n.language === 'he';
+    return i18n.language.startsWith('he');
 }
 
 export function rtlRowStyle(isRtl: boolean): ViewStyle {
@@ -39,23 +44,36 @@ export function rtlTrailingAlign(isRtl: boolean): 'flex-start' | 'flex-end' {
     return isRtl ? 'flex-start' : 'flex-end';
 }
 
-/** Applies language-aware text alignment unless the caller set textAlign explicitly or used text-center. */
+function hasExplicitTextAlign(className?: string, style?: StyleProp<TextStyle>): boolean {
+    if (
+        className?.includes('text-center') ||
+        className?.includes('text-left') ||
+        className?.includes('text-right')
+    ) {
+        return true;
+    }
+
+    return Boolean(StyleSheet.flatten(style)?.textAlign);
+}
+
+/** NativeWind className wins over the style prop — keep alignment in className on native. */
+export function rtlTextClassName(isRtl: boolean, className?: string, style?: StyleProp<TextStyle>): string {
+    if (hasExplicitTextAlign(className, style)) return '';
+
+    const align = isRtl ? 'text-right' : 'text-left';
+    return Platform.OS === 'web' ? align : `${align} self-stretch`;
+}
+
+/** Applies bidi direction unless the caller set textAlign explicitly in style. */
 export function resolveAutoTextStyle(
     isRtl: boolean,
     className?: string,
     style?: StyleProp<TextStyle>,
 ): TextStyle | undefined {
-    const flat = StyleSheet.flatten(style);
-    if (flat?.textAlign) return undefined;
-
-    const writingDirection = rtlWritingDirection(isRtl);
-    if (className?.includes('text-center')) {
-        return { textAlign: 'center', writingDirection };
-    }
+    if (StyleSheet.flatten(style)?.textAlign) return undefined;
 
     return {
-        textAlign: rtlTextAlign(isRtl),
-        writingDirection,
+        writingDirection: rtlWritingDirection(isRtl),
     };
 }
 

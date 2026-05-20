@@ -10,6 +10,11 @@ jest.mock('react-i18next', () => ({
     }),
 }));
 
+jest.mock('../../store', () => ({
+    useAppStore: (selector: (state: { language: 'he' | 'en' }) => unknown) =>
+        selector({ language: 'he' }),
+}));
+
 describe('AppText', () => {
     it('aligns Hebrew text to the right by default', () => {
         const { getByText } = render(
@@ -18,9 +23,10 @@ describe('AppText', () => {
             </RtlLayoutProvider>,
         );
 
+        expect(getByText('שלום').props.className).toContain('text-right');
         expect(getByText('שלום').props.style).toEqual(
             expect.arrayContaining([
-                expect.objectContaining({ textAlign: 'right', writingDirection: 'rtl' }),
+                expect.objectContaining({ writingDirection: 'rtl' }),
             ]),
         );
     });
@@ -32,9 +38,10 @@ describe('AppText', () => {
             </RtlLayoutProvider>,
         );
 
+        expect(getByText('מרכז').props.className).not.toContain('text-right');
         expect(getByText('מרכז').props.style).toEqual(
             expect.arrayContaining([
-                expect.objectContaining({ textAlign: 'center', writingDirection: 'rtl' }),
+                expect.objectContaining({ writingDirection: 'rtl' }),
             ]),
         );
     });

@@ -7,7 +7,8 @@ import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import i18n from '../i18n';
 
-export const ACTIVITY_PAGE_SIZE = 50;
+export const ACTIVITY_INITIAL_PAGE_SIZE = 15;
+export const ACTIVITY_PAGE_SIZE = 20;
 
 export interface ActivityPage {
     items: RecentActivity[];

@@ -5,7 +5,8 @@
 
 import { Text } from './AppText';
 import React from 'react';
-import { View, TouchableOpacity, I18nManager } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
 import { GroupBalance, GroupWithMembers } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
@@ -30,6 +31,7 @@ export function GroupCard({
     onPress,
 }: GroupCardProps) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
 
@@ -39,7 +41,7 @@ export function GroupCard({
             activeOpacity={0.7}
             className="bg-white rounded-2xl p-4 mb-3 border border-gray-100"
         >
-            <View className="flex-row items-center">
+            <View style={[rtlRowStyle(isRtl), { alignItems: 'center' }]}>
                 <View className="mr-3">
                     <GroupAvatar
                         imageUrl={group.imageUrl}
@@ -48,7 +50,7 @@ export function GroupCard({
                     />
                 </View>
 
-                <View className="flex-1 mr-2">
+                <View className="flex-1 mr-2 self-stretch" style={{ minWidth: 0 }}>
                     <HighlightedText
                         className="text-base font-semibold text-gray-900"
                         text={group.name}
@@ -58,7 +60,7 @@ export function GroupCard({
                     <Text className="text-xs text-gray-400 mt-1" numberOfLines={1}>
                         {t(`groups.types.${group.groupType}`)}
                         {memberCount > 0
-                            ? ` · ${memberCount} ${t('groups.members')}`
+                            ? ` · ${t('groups.memberCount', { count: memberCount })}`
                             : ''}
                     </Text>
                     {hasMatches && (
@@ -81,7 +83,7 @@ export function GroupCard({
 
                 <View className="ml-2">
                     <AppIcon
-                        name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                        name={isRtl ? 'chevron-back' : 'chevron-forward'}
                         size={20}
                         color={colors.gray300}
                     />

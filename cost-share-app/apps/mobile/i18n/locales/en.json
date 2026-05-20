@@ -48,7 +48,6 @@
         "currency": "Currency",
         "selectMembers": "Select Members",
         "addMember": "Add Member",
-        "members": "Members",
         "noMembers": "No members yet",
         "removeMember": "Remove Member",
         "removeMemberConfirm": "Are you sure you want to remove this member?",

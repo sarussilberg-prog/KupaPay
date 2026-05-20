@@ -1,4 +1,4 @@
-import { resolveAutoTextStyle, rtlTextAlign } from '../../hooks/useRtlLayout';
+import { resolveAutoTextStyle, rtlTextAlign, rtlTextClassName } from '../../hooks/useRtlLayout';
 
 describe('useRtlLayout helpers', () => {
     it('returns right alignment for Hebrew', () => {
@@ -6,17 +6,20 @@ describe('useRtlLayout helpers', () => {
         expect(rtlTextAlign(false)).toBe('left');
     });
 
+    it('adds nativewind alignment classes for Hebrew', () => {
+        expect(rtlTextClassName(true, 'text-sm')).toContain('text-right');
+        expect(rtlTextClassName(true, 'text-sm')).toContain('self-stretch');
+        expect(rtlTextClassName(false, 'text-sm')).toContain('text-left');
+    });
+
     it('applies RTL text styles unless textAlign is explicit', () => {
         expect(resolveAutoTextStyle(true, 'text-sm')).toEqual({
-            textAlign: 'right',
             writingDirection: 'rtl',
         });
         expect(resolveAutoTextStyle(false, 'text-sm')).toEqual({
-            textAlign: 'left',
             writingDirection: 'ltr',
         });
         expect(resolveAutoTextStyle(true, 'text-center')).toEqual({
-            textAlign: 'center',
             writingDirection: 'rtl',
         });
         expect(resolveAutoTextStyle(true, undefined, { textAlign: 'left' })).toBeUndefined();

@@ -89,33 +89,41 @@ export function EditGroupScreen() {
         if (!validateForm()) return;
 
         startLoading();
-        let nextImageUrl: string | undefined = imageRemoved ? undefined : imageUrl;
+        try {
+            let nextImageUrl: string | undefined = imageRemoved ? undefined : imageUrl;
 
-        if (localImageUri) {
-            const uploadedUrl = await uploadGroupImage(groupId, localImageUri);
-            if (!uploadedUrl) {
-                stopLoading();
-                Toast.show({
-                    type: 'error',
-                    text1: t('common.error'),
-                    text2: t('groups.imageUploadError'),
-                });
-                return;
+            if (localImageUri) {
+                const uploadedUrl = await uploadGroupImage(groupId, localImageUri);
+                if (!uploadedUrl) {
+                    Toast.show({
+                        type: 'error',
+                        text1: t('common.error'),
+                        text2: t('groups.imageUploadError'),
+                    });
+                    return;
+                }
+                nextImageUrl = uploadedUrl;
             }
-            nextImageUrl = uploadedUrl;
-        }
 
-        const result = await updateGroup(groupId, {
-            name: name.trim(),
-            description: description.trim() || undefined,
-            groupType,
-            defaultCurrency: currency,
-            imageUrl: imageRemoved ? '' : nextImageUrl,
-        });
-        stopLoading();
+            if (localImageUri || imageRemoved) {
+                const imageResult = await updateGroup(groupId, {
+                    imageUrl: imageRemoved ? '' : nextImageUrl,
+                });
+                if (!imageResult) return;
+            }
 
-        if (result) {
-            navigation.goBack();
+            const result = await updateGroup(groupId, {
+                name: name.trim(),
+                description: description.trim() || undefined,
+                groupType,
+                defaultCurrency: currency,
+            });
+
+            if (result) {
+                navigation.goBack();
+            }
+        } finally {
+            stopLoading();
         }
     };
 

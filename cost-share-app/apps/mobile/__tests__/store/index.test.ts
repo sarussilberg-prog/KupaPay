@@ -80,10 +80,12 @@ describe('useAppStore', () => {
             expect(useAppStore.getState().groups).toHaveLength(2);
         });
 
-        it('addGroup appends to the array', () => {
+        it('addGroup prepends to the array (newest first)', () => {
             useAppStore.getState().addGroup(makeGroup('a'));
             useAppStore.getState().addGroup(makeGroup('b'));
             expect(useAppStore.getState().groups).toHaveLength(2);
+            expect(useAppStore.getState().groups[0].id).toBe('b');
+            expect(useAppStore.getState().groups[1].id).toBe('a');
         });
 
         it('updateGroup replaces matching group by id', () => {

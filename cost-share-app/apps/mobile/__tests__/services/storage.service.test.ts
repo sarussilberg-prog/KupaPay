@@ -21,7 +21,7 @@ jest.mock('expo-file-system', () => ({
     })),
 }));
 
-import { uploadProfileImage } from '../../services/storage.service';
+import { uploadProfileImage, uploadGroupImage } from '../../services/storage.service';
 
 describe('storage.service uploadProfileImage', () => {
     const originalFetch = global.fetch;
@@ -65,6 +65,34 @@ describe('storage.service uploadProfileImage', () => {
         expect(mockFileBase64).toHaveBeenCalled();
         expect(mockUpload).toHaveBeenCalledWith(
             'user-1/avatar.png',
+            expect.any(Uint8Array),
+            { contentType: 'image/png', upsert: true },
+        );
+        expect(url).toMatch(/^https:\/\/cdn\.example\.com\/avatar\.jpg\?t=\d+$/);
+    });
+});
+
+describe('storage.service uploadGroupImage', () => {
+    const originalFetch = global.fetch;
+
+    beforeEach(() => {
+        mockUpload.mockClear();
+        mockGetPublicUrl.mockClear();
+        mockFileBase64.mockReset();
+        mockFileBase64.mockResolvedValue('Zm9v');
+    });
+
+    afterEach(() => {
+        global.fetch = originalFetch;
+    });
+
+    it('uploads to a fixed avatar.jpg path for consistent replacement', async () => {
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
+
+        const url = await uploadGroupImage('group-1', 'file:///tmp/photo.png');
+
+        expect(mockUpload).toHaveBeenCalledWith(
+            'group-1/avatar.jpg',
             expect.any(Uint8Array),
             { contentType: 'image/png', upsert: true },
         );

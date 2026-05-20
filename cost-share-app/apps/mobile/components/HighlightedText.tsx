@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { Text, TextProps } from 'react-native';
+import { TextProps } from 'react-native';
+import { Text } from './AppText';
 
 interface HighlightedTextProps extends TextProps {
     text: string;

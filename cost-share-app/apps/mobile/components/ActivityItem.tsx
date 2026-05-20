@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { RecentActivity } from '@cost-share/shared';
 import { AppIcon, AppIconName } from './AppIcon';
 import { colors } from '../theme';
+import { formatCurrencyAmount } from '../lib/currencyDisplay';
 
 interface ActivityItemProps {
     activity: RecentActivity;
@@ -43,7 +44,10 @@ function activityVisual(activity: RecentActivity): {
     }
 }
 
-export function ActivityItem({ activity, onPress }: ActivityItemProps) {
+export const ActivityItem = React.memo(function ActivityItem({
+    activity,
+    onPress,
+}: ActivityItemProps) {
     const { t } = useTranslation();
     const isMessage = activity.activityType === 'message';
     const isExpense = activity.activityType === 'expense';
@@ -92,10 +96,10 @@ export function ActivityItem({ activity, onPress }: ActivityItemProps) {
                             isExpense ? 'text-gray-900' : 'text-green-600'
                         }`}
                     >
-                        {activity.currency} {activity.amount.toFixed(2)}
+                        {formatCurrencyAmount(activity.amount, activity.currency)}
                     </Text>
                 )}
             </View>
         </TouchableOpacity>
     );
-}
+});

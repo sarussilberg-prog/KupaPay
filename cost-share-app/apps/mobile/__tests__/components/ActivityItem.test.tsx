@@ -32,7 +32,7 @@ describe('ActivityItem', () => {
 
     it('renders the amount with currency', () => {
         const { getByText } = render(<ActivityItem activity={expenseActivity} />);
-        expect(getByText(/USD 5\.50/)).toBeTruthy();
+        expect(getByText(/\$5\.50/)).toBeTruthy();
     });
 
     it('renders the expense icon for expense activities', () => {

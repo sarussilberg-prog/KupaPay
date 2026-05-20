@@ -19,6 +19,7 @@ import { GroupType, GroupWithMembers } from '@cost-share/shared';
 import { useAppStore } from '../../store';
 import { useLoading } from '../../hooks/useLoading';
 import { fetchGroups } from '../../services/groups.service';
+import { fetchBalanceSummary } from '../../services/users.service';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
@@ -84,7 +85,7 @@ export function GroupsListScreen() {
     const [filtersOpen, setFiltersOpen] = useState(false);
 
     const loadAll = useCallback(async () => {
-        await fetchGroups();
+        await Promise.all([fetchGroups(), fetchBalanceSummary()]);
     }, []);
 
     useEffect(() => {
@@ -174,10 +175,10 @@ export function GroupsListScreen() {
                             onPress={handleCreateGroup}
                             accessibilityRole="button"
                             accessibilityLabel={t('groups.createGroup')}
-                            className="h-9 w-9 items-center justify-center"
+                            className="h-9 w-9 items-center justify-center rounded-full bg-primary"
                             testID="groups-create-btn"
                         >
-                            <AppIcon name="add" size={26} color={colors.gray700} />
+                            <AppIcon name="add" size={22} color={colors.white} />
                         </TouchableOpacity>
                     </>
                 )}

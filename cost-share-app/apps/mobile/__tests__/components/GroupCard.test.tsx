@@ -33,7 +33,7 @@ describe('GroupCard', () => {
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
         expect(getByText(/groups\.types\.trip/)).toBeTruthy();
-        expect(getByText(/2/)).toBeTruthy();
+        expect(getByText(/groups\.memberCount/)).toBeTruthy();
     });
 
     it('renders a settled chip when no balance is provided', () => {

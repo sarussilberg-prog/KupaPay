@@ -65,10 +65,11 @@ beforeEach(() => {
 });
 
 describe('GroupsListScreen', () => {
-    it('calls fetchGroups on mount', async () => {
+    it('calls fetchGroups and fetchBalanceSummary on mount', async () => {
         render(<GroupsListScreen />);
         await waitFor(() => {
             expect(mockFetchGroups).toHaveBeenCalled();
+            expect(mockFetchSummary).toHaveBeenCalled();
         });
     });
 

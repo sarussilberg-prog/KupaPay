@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npm run build -w @cost-share/shared && cd apps/mobile && npm run build:web",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/((?!_expo/|favicon\\.ico|.*\\.(?:css|js|png|jpg|jpeg|gif|webp|svg|ttf|woff2?|ico)$).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.kupa.pro" }],
+      "destination": "https://kupa.pro/:path*",
+      "permanent": true
+    }
+  ]
+}

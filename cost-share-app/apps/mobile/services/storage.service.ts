@@ -91,12 +91,12 @@ async function uploadImageToBucket(
 
 export async function uploadGroupImage(
     groupId: string,
-    localUri: string
+    localUri: string,
 ): Promise<string | null> {
-    const ext = extensionFromUri(localUri);
+    // Fixed filename so replacements always overwrite the same object.
     return uploadImageToBucket(
         GROUP_IMAGES_BUCKET,
-        `${groupId}/avatar.${ext}`,
+        `${groupId}/avatar.jpg`,
         localUri,
         'group image',
     );

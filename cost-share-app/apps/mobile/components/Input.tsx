@@ -7,7 +7,7 @@
 import React from 'react';
 import { View, TextInput, TextInputProps } from 'react-native';
 import { Text } from './AppText';
-import { resolveAutoTextInputStyle, useRtlLayout } from '../hooks/useRtlLayout';
+import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../hooks/useRtlLayout';
 
 interface InputProps extends Omit<TextInputProps, 'className'> {
     label?: string;
@@ -32,8 +32,13 @@ export function Input({
                 </Text>
             )}
             <TextInput
-                className={`bg-white border rounded-xl px-4 py-3 text-base text-gray-900 ${error ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                className={[
+                    'bg-white border rounded-xl px-4 py-3 text-base text-gray-900',
+                    error ? 'border-red-500' : 'border-gray-300',
+                    rtlTextClassName(isRtl),
+                ]
+                    .filter(Boolean)
+                    .join(' ')}
                 style={[resolveAutoTextInputStyle(isRtl, style), style]}
                 placeholderTextColor="#9CA3AF"
                 {...textInputProps}

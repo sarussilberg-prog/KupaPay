@@ -15,7 +15,7 @@
 # Press i / a in the Expo terminal to open iOS / Android when you want.
 # First time on a new simulator: npm run mobile:ios && npm run mobile:android
 #
-# Env: WEB_PORT=3001 (Next.js). Data: Supabase via apps/mobile/.env
+# Env: WEB_PORT=8081 (Expo Web). Data: Supabase via apps/mobile/.env
 
 if [ -z "${BASH_VERSION:-}" ]; then
   exec bash "$0" "$@"
@@ -41,7 +41,7 @@ WEB_ENV="$WEB_DIR/.env.local"
 MOBILE_ENV="$MOBILE_DIR/.env"
 VERIFY_SCHEMA_SH="$SCRIPTS_DIR/verify-supabase-schema.sh"
 
-WEB_PORT="${WEB_PORT:-3001}"
+WEB_PORT="${WEB_PORT:-8081}"
 LOG_DIR="${LOG_DIR:-$ROOT_DIR/.dev-logs}"
 
 SKIP_CHECKS=false
@@ -229,12 +229,7 @@ check_env() {
     warn "Optional: supabase/.env (service role) — only needed for npm run seed"
   fi
 
-  if [[ "$WITH_WEB" == true ]]; then
-    check_env_file "Web" "$WEB_ENV" \
-      NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  fi
-
-  if [[ "$WITH_MOBILE" == true ]]; then
+  if [[ "$WITH_WEB" == true || "$WITH_MOBILE" == true ]]; then
     check_env_file "Mobile" "$MOBILE_ENV" \
       EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
   fi
@@ -251,9 +246,6 @@ check_typescript() {
   run_tsc "shared" "$SHARED_DIR"
   if [[ "$WITH_MOBILE" == true ]]; then
     run_tsc "mobile" "$MOBILE_DIR"
-  fi
-  if [[ "$WITH_WEB" == true ]]; then
-    run_tsc "web" "$WEB_DIR"
   fi
 }
 
@@ -336,12 +328,13 @@ wait_for_port() {
 open_web_browser() {
   [[ "$DEV_AUTO_OPEN" == "1" ]] || return 0
   [[ "$WITH_WEB" == true ]] || return 0
-  local url="http://localhost:${WEB_PORT}"
+  local port="${EXPO_METRO_PORT:-8081}"
+  local url="http://localhost:${port}"
   if command -v open >/dev/null 2>&1; then
-    log "Opening web app in browser: ${url}"
+    log "Opening Expo web app in browser: ${url}"
     open "$url" 2>/dev/null || warn "Could not open browser for ${url}"
   else
-    log "Web app ready at ${url}"
+    log "Expo web app ready at ${url}"
   fi
 }
 
@@ -378,12 +371,7 @@ start_background_stack() {
   start_bg "shared" npm run dev -w @cost-share/shared --silent
 
   if [[ "$WITH_WEB" == true ]]; then
-    require_free_port "$WEB_PORT" "Web"
-    log "Starting web app on port ${WEB_PORT}..."
-    start_bg "web" npm run dev -w @cost-share/web -- -p "$WEB_PORT"
-    log "Waiting for web..."
-    wait_for_port "$WEB_PORT" "Web" "$LOG_DIR/web.log" || true
-    open_web_browser
+    export EXPO_START_WEB=1
   fi
 }
 
@@ -401,7 +389,7 @@ start_expo_foreground() {
   echo "  First time on a simulator? npm run mobile:ios && npm run mobile:android"
   echo "  Metro: exp://127.0.0.1:8081"
   if [[ "$WITH_WEB" == true ]]; then
-    echo "  Next.js: http://localhost:${WEB_PORT}"
+    echo "  Expo Web: http://localhost:${EXPO_METRO_PORT:-8081}"
   fi
   echo "  Data: Supabase (apps/mobile/.env)"
   echo "  Ctrl+C stops Expo and background services"
@@ -409,6 +397,7 @@ start_expo_foreground() {
 
   unset CI
   export EXPO_METRO_PORT=8081
+  export DEV_AUTO_OPEN="$DEV_AUTO_OPEN"
   if [[ "$DEV_AUTO_OPEN_MOBILE" == "1" ]]; then
     export EXPO_AUTO_OPEN_MOBILE=1
     prepare_mobile_simulators
@@ -425,7 +414,7 @@ start_services() {
   echo "══════════════════════════════════════════"
   echo ""
   if [[ "$WITH_WEB" == true ]]; then
-    echo "  Web:  http://localhost:${WEB_PORT}"
+    echo "  Web:  http://localhost:${EXPO_METRO_PORT:-8081} (Expo Web)"
   fi
   if [[ "$WITH_MOBILE" == true ]]; then
     echo "  Expo: interactive below (Metro ~8081)"
@@ -439,11 +428,21 @@ start_services() {
 
   if [[ "$WITH_MOBILE" == true ]]; then
     start_expo_foreground
+  elif [[ "$WITH_WEB" == true ]]; then
+    echo ""
+    echo "══════════════════════════════════════════"
+    echo "  Expo Web — foreground (this terminal)"
+    echo "══════════════════════════════════════════"
+    echo "  URL: http://localhost:${WEB_PORT}"
+    echo "  Ctrl+C to stop"
+    echo ""
+    unset CI
+    cd "$MOBILE_DIR"
+    npx expo start --web --port "$WEB_PORT"
   else
     echo ""
     log "Tailing logs (Ctrl+C to stop)..."
     local -a logs=("$LOG_DIR/shared.log")
-    [[ "$WITH_WEB" == true ]] && logs+=("$LOG_DIR/web.log")
     tail -f "${logs[@]}"
   fi
 }

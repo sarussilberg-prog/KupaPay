@@ -2,6 +2,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as QueryParams from 'expo-auth-session/build/QueryParams';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -52,6 +53,9 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: Error
 }
 
 export function getAuthRedirectUri(): string {
+  if (Platform.OS === 'web' && typeof globalThis.location?.origin === 'string') {
+    return `${globalThis.location.origin}/auth/callback`;
+  }
   return redirectTo;
 }
 
@@ -62,10 +66,20 @@ export function isAuthCallbackUrl(url: string): boolean {
 }
 
 export async function signInWithGoogle(): Promise<{ error: Error | null }> {
+  const oauthRedirect = getAuthRedirectUri();
+
+  if (Platform.OS === 'web') {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: oauthRedirect },
+    });
+    return { error };
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo,
+      redirectTo: oauthRedirect,
       skipBrowserRedirect: true,
     },
   });
@@ -74,9 +88,9 @@ export async function signInWithGoogle(): Promise<{ error: Error | null }> {
     return { error: error ?? new Error('No OAuth URL returned') };
   }
 
-  console.log('[Auth] OAuth URL redirect_to =', redirectTo);
+  console.log('[Auth] OAuth URL redirect_to =', oauthRedirect);
 
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
+  const result = await WebBrowser.openAuthSessionAsync(data.url, oauthRedirect, {
     preferEphemeralSession: false,
   });
 

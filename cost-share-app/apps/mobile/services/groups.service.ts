@@ -193,10 +193,11 @@ export async function updateGroup(id: string, dto: UpdateGroupDto): Promise<Grou
         .maybeSingle();
 
     if (error || !data) {
+        console.error('Failed to update group:', error?.message ?? 'no rows updated');
         Toast.show({
             type: 'error',
-            text1: 'Failed to update group',
-            text2: i18n.t('common.networkError'),
+            text1: i18n.t('groups.updateError'),
+            text2: error?.message ?? i18n.t('common.networkError'),
         });
         return null;
     }

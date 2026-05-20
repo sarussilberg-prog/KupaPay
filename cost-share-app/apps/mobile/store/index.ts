@@ -83,7 +83,7 @@ export const useAppStore = create<AppState>((set) => ({
     // Groups state
     groups: [],
     setGroups: (groups) => set({ groups }),
-    addGroup: (group) => set((state) => ({ groups: [...state.groups, group] })),
+    addGroup: (group) => set((state) => ({ groups: [group, ...state.groups] })),
     updateGroup: (group) => set((state) => ({
         groups: state.groups.map((g) => (g.id === group.id ? group : g)),
     })),

@@ -92,7 +92,7 @@ describe('EditGroupScreen', () => {
 
     it('calls updateGroup with the new values', async () => {
         mockGetGroup.mockResolvedValueOnce(existingGroup);
-        mockUpdateGroup.mockResolvedValueOnce({ ...existingGroup, name: 'New' });
+        mockUpdateGroup.mockResolvedValue({ ...existingGroup, name: 'New' });
         const { findByDisplayValue, findByText } = render(<EditGroupScreen />);
         const nameInput = await findByDisplayValue('Old Name');
         fireEvent.changeText(nameInput, 'New');
@@ -103,6 +103,30 @@ describe('EditGroupScreen', () => {
                 expect.objectContaining({ name: 'New' })
             )
         );
+        expect(mockUpdateGroup).toHaveBeenCalledTimes(1);
+    });
+
+    it('uploads image and updates imageUrl before metadata', async () => {
+        mockGetGroup.mockResolvedValueOnce(existingGroup);
+        mockUpdateGroup.mockResolvedValue({ ...existingGroup });
+
+        const ImagePicker = require('expo-image-picker');
+        ImagePicker.launchImageLibraryAsync.mockResolvedValueOnce({
+            canceled: false,
+            assets: [{ uri: 'file:///picked.jpg' }],
+        });
+
+        const { findByText, findByTestId } = render(<EditGroupScreen />);
+        fireEvent.press(await findByTestId('group-image-picker'));
+        fireEvent.press(await findByText('common.save'));
+
+        await waitFor(() => expect(mockUploadGroupImage).toHaveBeenCalledWith('g1', 'file:///picked.jpg'));
+        expect(mockUpdateGroup).toHaveBeenNthCalledWith(
+            1,
+            'g1',
+            expect.objectContaining({ imageUrl: 'https://cdn.example.com/group.jpg' }),
+        );
+        expect(mockUpdateGroup).toHaveBeenCalledTimes(2);
     });
 
     it('cancel button navigates back', async () => {
