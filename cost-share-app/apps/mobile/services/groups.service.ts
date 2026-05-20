@@ -7,7 +7,7 @@ import {
     GroupMember,
     GroupWithMembers,
     UserBalance,
-    DebtSummary,
+    SimplifiedDebtsResult,
     GroupSummary,
     CreateGroupDto,
     UpdateGroupDto,
@@ -19,6 +19,7 @@ import {
     groupMemberFromRow,
     calculateUserBalancesFromData,
     simplifyDebts,
+    UnbalancedLedgerError,
 } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
@@ -304,7 +305,12 @@ export async function getGroupBalances(groupId: string, userId?: string): Promis
     }
 }
 
-export async function getGroupDebts(groupId: string): Promise<DebtSummary[]> {
+export async function getGroupDebts(groupId: string): Promise<SimplifiedDebtsResult> {
+    const empty: SimplifiedDebtsResult = {
+        debts: [],
+        transactionCount: 0,
+        algorithm: 'exact',
+    };
     try {
         const balances = await getGroupBalances(groupId);
         const userIds = Array.from(new Set(balances.map(b => b.userId)));
@@ -321,8 +327,12 @@ export async function getGroupDebts(groupId: string): Promise<DebtSummary[]> {
 
         return simplifyDebts(balances, nameById);
     } catch (error) {
+        if (error instanceof UnbalancedLedgerError) {
+            console.warn('Skipping debt simplification: unbalanced ledger', error.message);
+            return empty;
+        }
         console.error('Failed to fetch debts:', error);
-        return [];
+        return empty;
     }
 }
 
