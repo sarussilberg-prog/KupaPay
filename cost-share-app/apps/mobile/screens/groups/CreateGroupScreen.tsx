@@ -36,6 +36,7 @@ import { AddMembersSheet } from '../../components/AddMembersSheet';
 import { AppIcon } from '../../components/AppIcon';
 import { Text } from '../../components/AppText';
 import { colors } from '../../theme';
+import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 
 export function CreateGroupScreen() {
     const { t } = useTranslation();
@@ -309,7 +310,7 @@ export function CreateGroupScreen() {
                                     testID={`group-form-member-${m.id}`}
                                 >
                                     <View>
-                                        <MemberAvatar name={m.name} avatarUrl={m.avatarUrl} size="md" />
+                                        <MemberAvatar name={getDisplayName(m, t)} avatarUrl={getAvatarUrl(m) ?? undefined} size="md" />
                                         {!isSelf && (
                                             <TouchableOpacity
                                                 onPress={() => openRemoveDialog(m)}
@@ -328,7 +329,7 @@ export function CreateGroupScreen() {
                                         numberOfLines={1}
                                         className="text-xs text-gray-600 mt-1 w-14 text-center"
                                     >
-                                        {m.name}
+                                        {getDisplayName(m, t)}
                                     </Text>
                                 </View>
                             );

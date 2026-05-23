@@ -86,6 +86,7 @@ import {
     isAnyGroupFeedFilterActive,
 } from '../../components/GroupFeedFiltersSheet';
 import { filterAndSortGroupFeed } from '../../lib/groupFeedFilters';
+import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import {
     useDeleteSettlementMutation,
@@ -139,11 +140,11 @@ export function GroupDetailScreen() {
         if (storeGroup?.members?.length) return storeGroup.members;
         return groupUsers.map(u => ({
             userId: u.id,
-            displayName: u.name ?? u.id.slice(0, 8),
-            avatarUrl: u.avatarUrl,
+            displayName: getDisplayName(u, t),
+            avatarUrl: getAvatarUrl(u) ?? undefined,
             isActive: u.isActive,
         }));
-    }, [storeGroup?.members, groupUsers]);
+    }, [storeGroup?.members, groupUsers, t]);
     const [feedParticipants, setFeedParticipants] = useState<
         Record<string, GroupMemberLite>
     >({});
