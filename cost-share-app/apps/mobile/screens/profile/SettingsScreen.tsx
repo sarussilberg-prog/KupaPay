@@ -151,8 +151,12 @@ export function SettingsScreen() {
                         label={t('settings.deleteAccount')}
                         variant="danger"
                         onPress={async () => {
-                            const balances = await getMyOpenBalances();
-                            setOpenBalances(balances);
+                            try {
+                                const balances = await getMyOpenBalances();
+                                setOpenBalances(balances);
+                            } catch {
+                                setOpenBalances(null);
+                            }
                             setShowDeleteWarning(true);
                         }}
                     />
