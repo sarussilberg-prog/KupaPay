@@ -20,6 +20,10 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
     const docLocale = query.data?.locale ?? (i18n.language === 'he' ? 'he' : 'en');
     const isRtl = docLocale === 'he';
     const styles = useMemo(() => buildMarkdownStyles(isRtl), [isRtl]);
+    const contentMd = useMemo(
+        () => (isRtl && query.data ? prepareRtlMarkdown(query.data.contentMd) : query.data?.contentMd ?? ''),
+        [isRtl, query.data],
+    );
 
     if (!visible) return null;
 
@@ -86,7 +90,9 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
                                 showsVerticalScrollIndicator={true}
                                 nestedScrollEnabled={true}
                             >
-                                <Markdown style={styles}>{query.data.contentMd}</Markdown>
+                                <View style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+                                    <Markdown style={styles}>{contentMd}</Markdown>
+                                </View>
                             </ScrollView>
                         )}
                     </View>
@@ -100,6 +106,14 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
             </View>
         </Modal>
     );
+}
+
+// Hebrew Markdown headings that start with `## 10. Title` get bidi-reordered
+// awkwardly (the digits end up on the left side instead of the right). Rewrite
+// the leading section number to a trailing parenthesized form so each heading
+// line starts with Hebrew characters and renders naturally in RTL.
+function prepareRtlMarkdown(md: string): string {
+    return md.replace(/^(#{1,6})\s+(\d+)\.\s+(.+)$/gm, '$1 $3 ‏($2)');
 }
 
 function SkeletonBody() {
