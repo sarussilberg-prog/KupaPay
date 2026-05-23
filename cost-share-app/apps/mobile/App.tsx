@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Alert, LogBox, View, ActivityIndicator, Platform } from 'react-native';
+import { Alert, AppState, type AppStateStatus, LogBox, View, ActivityIndicator, Platform } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import Toast from 'react-native-toast-message';
@@ -18,6 +18,7 @@ import {
 } from './lib/authSessionLifecycle';
 import { supabase } from './lib/supabase';
 import { assertProfileActive } from './lib/auth';
+import { getSupportEmail, openSupportContact } from './lib/openMailto';
 import { hydrateCurrentUserProfile } from './services/users.service';
 import { queryClient } from './lib/queryClient';
 import { useAppStore } from './store';
@@ -84,10 +85,17 @@ export default function App() {
   const guardSession = useCallback(async () => {
     const status = await assertProfileActive();
     if (status === 'deactivated') {
+      const supportEmail = getSupportEmail();
       Alert.alert(
         i18n.t('deleteAccount.deactivatedTitle'),
-        i18n.t('deleteAccount.deactivatedMessage'),
-        [{ text: i18n.t('common.ok') }],
+        i18n.t('deleteAccount.deactivatedMessage', { email: supportEmail }),
+        [
+          { text: i18n.t('common.close'), style: 'cancel' },
+          {
+            text: i18n.t('common.openMail'),
+            onPress: () => { void openSupportContact(); },
+          },
+        ],
       );
     }
   }, []);
@@ -132,6 +140,15 @@ export default function App() {
       mounted = false;
       subscription.unsubscribe();
     };
+  }, [guardSession]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state === 'active') {
+        void guardSession();
+      }
+    });
+    return () => sub.remove();
   }, [guardSession]);
 
   if (!isReady) {
