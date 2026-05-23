@@ -55,3 +55,18 @@ ALTER TABLE storage_cleanup_queue ENABLE ROW LEVEL SECURITY;
 -- profiles: allow NULL name (display layer falls back to t('common.deletedUser'))
 -- ============================================
 ALTER TABLE profiles ALTER COLUMN name DROP NOT NULL;
+
+-- ============================================
+-- is_caller_active() — used by write RLS policies (Task A7)
+-- Fail-open on missing row to preserve the first-login race behaviour that
+-- existing assertProfileActive() relies on in lib/auth.ts.
+-- ============================================
+CREATE OR REPLACE FUNCTION public.is_caller_active() RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+    SELECT COALESCE(
+        (SELECT is_active FROM profiles WHERE id = auth.uid()),
+        TRUE
+    );
+$$;
+REVOKE EXECUTE ON FUNCTION public.is_caller_active() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_caller_active() TO anon, authenticated;
