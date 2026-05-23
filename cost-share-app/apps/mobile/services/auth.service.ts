@@ -72,7 +72,14 @@ function resolveWebOAuthRedirectUri(): string {
   return `https://kupa.pro/${AUTH_CALLBACK_PATH}`;
 }
 
-/** Prevents double exchange when WebBrowser and Linking both deliver the same callback URL. */
+/**
+ * Caches the result of each PKCE code-exchange for the lifetime of the app
+ * session (until signOut clears it). The native deep-link layer can deliver the
+ * same OAuth callback URL twice — once via WebBrowser's success result and once
+ * via Linking.getInitialURL on a cold start. The first call consumes the PKCE
+ * code verifier; a second exchange would throw "PKCE code verifier not found".
+ * Returning the cached promise instead makes the dup a no-op.
+ */
 const exchangeByCode = new Map<string, Promise<{ error: AuthError | null }>>();
 
 export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthError | null }> {
@@ -94,11 +101,7 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
     })();
 
     exchangeByCode.set(code, exchange);
-    try {
-      return await exchange;
-    } finally {
-      exchangeByCode.delete(code);
-    }
+    return exchange;
   }
 
   if (access_token && refresh_token) {

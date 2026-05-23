@@ -47,7 +47,12 @@ import {
 } from '../../services/auth.service';
 
 describe('auth.service', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+        // handleAuthRedirectUrl caches exchange results for the lifetime of the
+        // process so duplicate deep-link deliveries don't re-spend the PKCE
+        // verifier. Clear the cache between tests via signOut() to keep cases
+        // that reuse the same `code` (e.g. "abc") isolated.
+        await signOut();
         jest.clearAllMocks();
         mockMakeRedirectUri.mockReturnValue('com.kupa.mobile://auth/callback');
         mockExchangeCodeForSession.mockResolvedValue({ error: null });
@@ -85,6 +90,19 @@ describe('auth.service', () => {
 
             await Promise.all([first, second]);
             expect(mockExchangeCodeForSession).toHaveBeenCalledTimes(1);
+        });
+
+        it('returns the cached result on later calls with the same code', async () => {
+            mockExchangeCodeForSession.mockResolvedValueOnce({ error: null });
+
+            const first = await handleAuthRedirectUrl('com.kupa.mobile://auth/callback?code=cached');
+            // Even after the original promise settles, a delayed deep-link
+            // delivery hits the cache instead of re-exchanging the code.
+            const second = await handleAuthRedirectUrl('com.kupa.mobile://auth/callback?code=cached');
+
+            expect(mockExchangeCodeForSession).toHaveBeenCalledTimes(1);
+            expect(first.error).toBeNull();
+            expect(second.error).toBeNull();
         });
     });
 
