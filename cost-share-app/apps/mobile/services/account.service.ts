@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { clearLocalAuthSession } from './auth.service';
 
 export interface DeleteAccountResult {
     ok: boolean;
@@ -32,10 +33,9 @@ export async function deleteMyAccount(): Promise<DeleteAccountResult> {
         return { ok: false, error: 'deleteAccount.deleteFailed' };
     }
 
-    const { error: signOutError } = await supabase.auth.signOut({ scope: 'global' });
-    if (signOutError) {
-        console.warn('deleteMyAccount: signOut failed after deactivation', signOutError);
-    }
+    // delete_my_account bans auth.users server-side; skip global revoke and force a
+    // local session wipe + Zustand reset so App.tsx routes to Login immediately.
+    await clearLocalAuthSession();
 
     return { ok: true };
 }

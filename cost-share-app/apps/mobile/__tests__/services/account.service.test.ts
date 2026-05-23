@@ -1,44 +1,38 @@
 const mockRpc = jest.fn();
-const mockSignOut = jest.fn();
+const mockClearLocalAuthSession = jest.fn();
 jest.mock('../../lib/supabase', () => ({
-    supabase: { rpc: (...a: any[]) => mockRpc(...a), auth: { signOut: (...a: any[]) => mockSignOut(...a) } },
+    supabase: { rpc: (...a: any[]) => mockRpc(...a) },
+}));
+jest.mock('../../services/auth.service', () => ({
+    clearLocalAuthSession: (...a: unknown[]) => mockClearLocalAuthSession(...a),
 }));
 
 import { deleteMyAccount, getMyOpenBalances } from '../../services/account.service';
 
 beforeEach(() => {
     mockRpc.mockReset();
-    mockSignOut.mockReset();
-    mockSignOut.mockResolvedValue({ error: null });
+    mockClearLocalAuthSession.mockReset();
+    mockClearLocalAuthSession.mockResolvedValue(undefined);
 });
 
 describe('deleteMyAccount', () => {
-    it('calls RPC then signs out globally and returns ok on success', async () => {
+    it('calls RPC then clears the local auth session and returns ok on success', async () => {
         mockRpc.mockResolvedValue({ data: null, error: null });
 
         const result = await deleteMyAccount();
 
         expect(result).toEqual({ ok: true });
         expect(mockRpc).toHaveBeenCalledWith('delete_my_account');
-        expect(mockSignOut).toHaveBeenCalledWith({ scope: 'global' });
+        expect(mockClearLocalAuthSession).toHaveBeenCalled();
     });
 
-    it('returns error and does NOT sign out when RPC fails', async () => {
+    it('returns error and does NOT clear session when RPC fails', async () => {
         mockRpc.mockResolvedValue({ data: null, error: { message: 'boom' } });
 
         const result = await deleteMyAccount();
 
         expect(result).toEqual({ ok: false, error: 'deleteAccount.deleteFailed' });
-        expect(mockSignOut).not.toHaveBeenCalled();
-    });
-
-    it('returns ok even when signOut throws (account already deactivated)', async () => {
-        mockRpc.mockResolvedValue({ data: null, error: null });
-        mockSignOut.mockResolvedValue({ error: { message: 'network' } });
-
-        const result = await deleteMyAccount();
-
-        expect(result).toEqual({ ok: true });
+        expect(mockClearLocalAuthSession).not.toHaveBeenCalled();
     });
 });
 

@@ -102,7 +102,7 @@ BEGIN
     IF v_email IS NULL THEN
         RAISE EXCEPTION 'auth_user_missing';
     END IF;
-    v_hash := encode(digest(lower(trim(v_email)), 'sha256'), 'hex');
+    v_hash := encode(extensions.digest(lower(trim(v_email)), 'sha256'), 'hex');
 
     BEGIN
         v_balance := get_user_balance_summary(v_user_id);
@@ -165,7 +165,7 @@ BEGIN
     IF NEW.email IS NULL THEN
         RETURN NEW;
     END IF;
-    v_hash := encode(digest(lower(trim(NEW.email)), 'sha256'), 'hex');
+    v_hash := encode(extensions.digest(lower(trim(NEW.email)), 'sha256'), 'hex');
     IF EXISTS (SELECT 1 FROM deleted_account_emails WHERE email_hash = v_hash) THEN
         RAISE EXCEPTION 'email_was_deleted' USING ERRCODE = 'P0001';
     END IF;

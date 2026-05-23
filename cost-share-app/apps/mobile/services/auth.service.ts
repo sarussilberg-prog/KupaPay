@@ -5,7 +5,10 @@ import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 import { clearGroupFeedHydration } from '../lib/groupFeedCache';
 import { queryClient } from '../lib/queryClient';
+import { clearStaleAuthSession } from '../lib/authSessionLifecycle';
+import { isAuthSessionAllowed } from '../lib/auth';
 import { supabase } from '../lib/supabase';
+import { useAppStore } from '../store';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -103,7 +106,14 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
 
     const exchange = (async () => {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
-      return { error: error ? toAuthError(error) : null };
+      if (error) return { error: toAuthError(error) };
+
+      const allowed = await isAuthSessionAllowed();
+      if (!allowed) {
+        return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+      }
+
+      return { error: null };
     })();
 
     exchangeByCode.set(code, exchange);
@@ -112,7 +122,14 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
 
   if (access_token && refresh_token) {
     const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-    return { error: error ? toAuthError(error) : null };
+    if (error) return { error: toAuthError(error) };
+
+    const allowed = await isAuthSessionAllowed();
+    if (!allowed) {
+      return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+    }
+
+    return { error: null };
   }
 
   return { error: toAuthError(`No auth params in redirect URL: ${url}`) };
@@ -173,9 +190,19 @@ export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
   return handleAuthRedirectUrl(result.url);
 }
 
-export async function signOut(): Promise<void> {
+/** Clears cached app state, wipes the local Supabase session, and drops the Zustand session. */
+export async function clearLocalAuthSession(): Promise<void> {
   clearGroupFeedHydration();
   exchangeByCode.clear();
   queryClient.clear();
-  await supabase.auth.signOut({ scope: 'global' });
+  await clearStaleAuthSession();
+  useAppStore.getState().setSession(null);
+}
+
+export async function signOut(): Promise<void> {
+  const { error } = await supabase.auth.signOut({ scope: 'global' });
+  if (error) {
+    console.warn('signOut: global revoke failed, clearing local session', error);
+  }
+  await clearLocalAuthSession();
 }

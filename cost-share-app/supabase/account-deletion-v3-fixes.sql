@@ -25,7 +25,7 @@ WHERE is_active = FALSE
 -- BACKFILL: re-signup block + auth ban for v1 deletions missing v2 side-effects
 -- ============================================
 INSERT INTO deleted_account_emails (email_hash)
-SELECT encode(digest(lower(trim(u.email)), 'sha256'), 'hex')
+SELECT encode(extensions.digest(lower(trim(u.email)), 'sha256'), 'hex')
 FROM profiles p
 JOIN auth.users u ON u.id = p.id
 WHERE p.is_active = FALSE
@@ -90,7 +90,7 @@ BEGIN
         RAISE EXCEPTION 'profile_not_deleted';
     END IF;
 
-    v_hash := encode(digest(lower(trim(v_email)), 'sha256'), 'hex');
+    v_hash := encode(extensions.digest(lower(trim(v_email)), 'sha256'), 'hex');
 
     DELETE FROM deleted_account_emails WHERE email_hash = v_hash;
 

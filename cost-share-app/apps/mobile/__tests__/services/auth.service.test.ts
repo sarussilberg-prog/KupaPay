@@ -1,6 +1,6 @@
 const mockExchangeCodeForSession = jest.fn();
 const mockSignInWithOAuth = jest.fn();
-const mockSignOut = jest.fn();
+const mockSignOut = jest.fn().mockResolvedValue({ error: null });
 const mockOpenAuthSessionAsync = jest.fn();
 const mockMakeRedirectUri = jest.fn();
 
@@ -18,6 +18,27 @@ jest.mock('../../lib/supabase', () => ({
             signOut: (...args: unknown[]) => mockSignOut(...args),
         },
     },
+}));
+
+const mockClearStaleAuthSession = jest.fn().mockResolvedValue(undefined);
+const mockSetSession = jest.fn();
+
+jest.mock('../../lib/authSessionLifecycle', () => ({
+    clearStaleAuthSession: (...args: unknown[]) => mockClearStaleAuthSession(...args),
+}));
+
+jest.mock('../../store', () => ({
+    useAppStore: {
+        getState: () => ({ setSession: mockSetSession }),
+    },
+}));
+
+const mockAssertProfileActiveWithTimeout = jest.fn().mockResolvedValue('active');
+const mockIsAuthSessionAllowed = jest.fn().mockResolvedValue(true);
+
+jest.mock('../../lib/auth', () => ({
+    assertProfileActiveWithTimeout: (...args: unknown[]) => mockAssertProfileActiveWithTimeout(...args),
+    isAuthSessionAllowed: (...args: unknown[]) => mockIsAuthSessionAllowed(...args),
 }));
 
 jest.mock('../../lib/queryClient', () => ({
@@ -48,15 +69,14 @@ import {
 
 describe('auth.service', () => {
     beforeEach(async () => {
-        // handleAuthRedirectUrl caches exchange results for the lifetime of the
-        // process so duplicate deep-link deliveries don't re-spend the PKCE
-        // verifier. Clear the cache between tests via signOut() to keep cases
-        // that reuse the same `code` (e.g. "abc") isolated.
-        await signOut();
         jest.clearAllMocks();
         mockMakeRedirectUri.mockReturnValue('com.kupa.mobile://auth/callback');
         mockExchangeCodeForSession.mockResolvedValue({ error: null });
         mockSignOut.mockResolvedValue({ error: null });
+        mockClearStaleAuthSession.mockResolvedValue(undefined);
+        mockAssertProfileActiveWithTimeout.mockResolvedValue('active');
+        mockIsAuthSessionAllowed.mockResolvedValue(true);
+        await signOut();
     });
 
     describe('getAuthRedirectUri', () => {
@@ -103,6 +123,15 @@ describe('auth.service', () => {
             expect(mockExchangeCodeForSession).toHaveBeenCalledTimes(1);
             expect(first.error).toBeNull();
             expect(second.error).toBeNull();
+        });
+
+        it('returns account_deleted when the profile is deactivated after OAuth exchange', async () => {
+            mockIsAuthSessionAllowed.mockResolvedValueOnce(false);
+
+            const { error } = await handleAuthRedirectUrl('com.kupa.mobile://auth/callback?code=deleted-user');
+
+            expect(error?.code).toBe('account_deleted');
+            expect(mockIsAuthSessionAllowed).toHaveBeenCalled();
         });
     });
 
@@ -172,11 +201,17 @@ describe('auth.service', () => {
     });
 
     describe('signOut', () => {
-        it('clears cached data and signs out globally', async () => {
+        it('clears cached data, signs out globally, and resets the local session', async () => {
+            jest.clearAllMocks();
+            mockSignOut.mockResolvedValue({ error: null });
+            mockClearStaleAuthSession.mockResolvedValue(undefined);
+
             await signOut();
 
             expect(queryClient.clear).toHaveBeenCalledTimes(1);
             expect(mockSignOut).toHaveBeenCalledWith({ scope: 'global' });
+            expect(mockClearStaleAuthSession).toHaveBeenCalled();
+            expect(mockSetSession).toHaveBeenCalledWith(null);
         });
     });
 });

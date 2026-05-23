@@ -264,6 +264,8 @@
             "missingSomeoneCta": "לא מוצאים? הוסיפו חברים"
         },
         "memberCount_one": "חבר אחד",
+        "memberCount_two": "{{count}} חברים",
+        "memberCount_many": "{{count}} חברים",
         "memberCount_other": "{{count}} חברים"
     },
     "expenses": {
