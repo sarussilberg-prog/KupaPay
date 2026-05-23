@@ -50,3 +50,8 @@ CREATE INDEX IF NOT EXISTS idx_storage_cleanup_queue_pending
     ON storage_cleanup_queue(requested_at)
     WHERE processed_at IS NULL;
 ALTER TABLE storage_cleanup_queue ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- profiles: allow NULL name (display layer falls back to t('common.deletedUser'))
+-- ============================================
+ALTER TABLE profiles ALTER COLUMN name DROP NOT NULL;
