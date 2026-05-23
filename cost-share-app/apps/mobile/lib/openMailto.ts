@@ -16,10 +16,13 @@ export function getSupportMailtoUrl(email: string = getSupportEmail()): string {
 }
 
 export async function openSupportContact(): Promise<void> {
-    if (Platform.OS === 'web') return;
-
     const email = getSupportEmail();
     const url = buildMailtoUrl(email);
+
+    if (Platform.OS === 'web') {
+        globalThis.location.href = url;
+        return;
+    }
 
     try {
         await Linking.openURL(url);

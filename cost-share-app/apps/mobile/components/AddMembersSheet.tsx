@@ -24,7 +24,7 @@ import { colors } from '../theme';
 import { useFriendsQuery } from '../hooks/queries/useFriendsQueries';
 import { addGroupMember } from '../services/groups.service';
 import { shareGroupInvite } from '../services/invite.service';
-import { getDisplayName } from '../lib/userDisplay';
+import { getDisplayEmail, getDisplayName, isDeleted } from '../lib/userDisplay';
 
 interface AddMembersSheetProps {
     visible: boolean;
@@ -62,18 +62,16 @@ export function AddMembersSheet({
 
     const memberSet = useMemo(() => new Set(currentMemberIds), [currentMemberIds]);
     const eligible = useMemo<User[]>(
-        () => (friends ?? []).filter(f => !memberSet.has(f.id)),
+        () => (friends ?? []).filter(f => f.isActive !== false && !memberSet.has(f.id)),
         [friends, memberSet],
     );
     const filtered = useMemo<User[]>(() => {
         const q = query.trim().toLowerCase();
         if (!q) return eligible;
         return eligible.filter(u => {
-            // Friends list — deleted users surface as the localised "deleted user" label, which is fine here.
             const name = getDisplayName(u, t).toLowerCase();
-            const email = u.email?.toLowerCase() ?? '';
-            const phone = u.phone?.toLowerCase() ?? '';
-            return name.includes(q) || email.includes(q) || phone.includes(q);
+            const email = getDisplayEmail(u)?.toLowerCase() ?? '';
+            return name.includes(q) || email.includes(q);
         });
     }, [eligible, query, t]);
 

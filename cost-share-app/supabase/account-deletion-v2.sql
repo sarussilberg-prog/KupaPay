@@ -221,6 +221,7 @@ CREATE POLICY "Users can insert group members" ON group_members
     FOR INSERT
     WITH CHECK (
         public.is_caller_active()
+        AND EXISTS (SELECT 1 FROM profiles p WHERE p.id = user_id AND p.is_active = TRUE)
         AND (
             auth.uid() = user_id
             OR public.is_group_creator(group_id)

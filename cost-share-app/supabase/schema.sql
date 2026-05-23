@@ -850,6 +850,7 @@ CREATE POLICY "Users can insert group members" ON group_members
     FOR INSERT
     WITH CHECK (
         public.is_caller_active()
+        AND EXISTS (SELECT 1 FROM profiles p WHERE p.id = user_id AND p.is_active = TRUE)
         AND (
             auth.uid() = user_id
             OR public.is_group_creator(group_id)
@@ -913,3 +914,143 @@ CREATE POLICY "Either party can delete settlement" ON settlements
         AND public.is_group_member(group_id)
         AND (auth.uid() = from_user_id OR auth.uid() = to_user_id)
     );
+
+-- ============================================
+-- ACCOUNT RESTORATION (support-only) — mirrors account-deletion-v3-fixes.sql
+-- ============================================
+CREATE OR REPLACE FUNCTION restore_deleted_account(
+    p_user_id UUID,
+    p_restored_name TEXT DEFAULT NULL,
+    p_notes TEXT DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+    v_email     TEXT;
+    v_meta_name TEXT;
+    v_hash      TEXT;
+BEGIN
+    SELECT email, raw_user_meta_data->>'full_name'
+    INTO v_email, v_meta_name
+    FROM auth.users
+    WHERE id = p_user_id;
+
+    IF v_email IS NULL THEN
+        RAISE EXCEPTION 'auth_user_not_found';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM profiles WHERE id = p_user_id AND is_active = FALSE
+    ) THEN
+        RAISE EXCEPTION 'profile_not_deleted';
+    END IF;
+
+    v_hash := encode(digest(lower(trim(v_email)), 'sha256'), 'hex');
+
+    DELETE FROM deleted_account_emails WHERE email_hash = v_hash;
+
+    UPDATE auth.users
+        SET banned_until = NULL
+        WHERE id = p_user_id;
+
+    UPDATE profiles
+        SET is_active = TRUE,
+            deleted_at = NULL,
+            email = v_email,
+            name = COALESCE(
+                NULLIF(trim(p_restored_name), ''),
+                NULLIF(trim(v_meta_name), ''),
+                split_part(v_email, '@', 1)
+            ),
+            updated_at = NOW()
+        WHERE id = p_user_id;
+
+    UPDATE account_deletions_audit
+        SET restored_at = NOW(),
+            notes = COALESCE(p_notes, notes)
+        WHERE id = (
+            SELECT id
+            FROM account_deletions_audit
+            WHERE user_id = p_user_id
+              AND restored_at IS NULL
+            ORDER BY deleted_at DESC
+            LIMIT 1
+        );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION restore_deleted_account(UUID, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION restore_deleted_account(UUID, TEXT, TEXT) TO service_role;
+
+-- ============================================
+-- ACCOUNT RESTORATION (support-only) — mirrors account-deletion-v3-fixes.sql
+-- ============================================
+CREATE OR REPLACE FUNCTION restore_deleted_account(
+    p_user_id UUID,
+    p_restored_name TEXT DEFAULT NULL,
+    p_notes TEXT DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+    v_email     TEXT;
+    v_meta_name TEXT;
+    v_hash      TEXT;
+BEGIN
+    SELECT email, raw_user_meta_data->>'full_name'
+    INTO v_email, v_meta_name
+    FROM auth.users
+    WHERE id = p_user_id;
+
+    IF v_email IS NULL THEN
+        RAISE EXCEPTION 'auth_user_not_found';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM profiles WHERE id = p_user_id AND is_active = FALSE
+    ) THEN
+        RAISE EXCEPTION 'profile_not_deleted';
+    END IF;
+
+    v_hash := encode(digest(lower(trim(v_email)), 'sha256'), 'hex');
+
+    DELETE FROM deleted_account_emails WHERE email_hash = v_hash;
+
+    UPDATE auth.users
+        SET banned_until = NULL
+        WHERE id = p_user_id;
+
+    UPDATE profiles
+        SET is_active = TRUE,
+            deleted_at = NULL,
+            email = v_email,
+            name = COALESCE(
+                NULLIF(trim(p_restored_name), ''),
+                NULLIF(trim(v_meta_name), ''),
+                split_part(v_email, '@', 1)
+            ),
+            updated_at = NOW()
+        WHERE id = p_user_id;
+
+    UPDATE account_deletions_audit
+        SET restored_at = NOW(),
+            notes = COALESCE(p_notes, notes)
+        WHERE id = (
+            SELECT id
+            FROM account_deletions_audit
+            WHERE user_id = p_user_id
+              AND restored_at IS NULL
+            ORDER BY deleted_at DESC
+            LIMIT 1
+        );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION restore_deleted_account(UUID, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION restore_deleted_account(UUID, TEXT, TEXT) TO service_role;

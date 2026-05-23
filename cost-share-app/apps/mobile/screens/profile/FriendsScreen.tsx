@@ -32,7 +32,7 @@ import {
 import { User } from '@cost-share/shared';
 import { FriendRequest } from '../../services/friends.service';
 import { shareFriendInvite } from '../../services/invite.service';
-import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import { getAvatarUrl, getDisplayEmail, getDisplayName, isDeleted } from '../../lib/userDisplay';
 
 export function FriendsScreen() {
     const { t } = useTranslation();
@@ -229,9 +229,9 @@ export function FriendsScreen() {
                                         <Text className="text-sm font-medium text-gray-800">
                                             {getDisplayName(f, t)}
                                         </Text>
-                                        {f.email ? (
+                                        {getDisplayEmail(f) ? (
                                             <Text className="text-xs text-gray-500" numberOfLines={1}>
-                                                {f.email}
+                                                {getDisplayEmail(f)}
                                             </Text>
                                         ) : null}
                                     </View>
@@ -277,6 +277,8 @@ export function FriendsScreen() {
                     >
                         <TouchableOpacity
                             onPress={() => actionsFor && handleCreateGroupWith(actionsFor)}
+                            disabled={actionsFor ? isDeleted(actionsFor) : true}
+                            style={{ opacity: actionsFor && isDeleted(actionsFor) ? 0.4 : 1 }}
                             className="flex-row items-center px-4 py-4 border-b border-slate-100"
                             testID="friend-action-create-group"
                         >

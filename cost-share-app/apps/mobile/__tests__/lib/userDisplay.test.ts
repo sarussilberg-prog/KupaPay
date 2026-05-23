@@ -2,6 +2,8 @@ import {
     getAvatarUrl,
     getAvatarUrlForFriend,
     getAvatarUrlForMember,
+    getDisplayEmail,
+    getDisplayPhone,
     getDisplayName,
     getDisplayNameForFriend,
     getDisplayNameForMember,
@@ -10,8 +12,15 @@ import {
 
 const t = (key: string) => key;
 
-const active = { id: 'a', name: 'Alice', avatarUrl: 'https://x/a.png', isActive: true };
-const deleted = { id: 'd', name: null, avatarUrl: null, isActive: false };
+const active = {
+    id: 'a',
+    name: 'Alice',
+    avatarUrl: 'https://x/a.png',
+    email: 'alice@example.com',
+    phone: '+972501234567',
+    isActive: true,
+};
+const deleted = { id: 'd', name: null, avatarUrl: null, isActive: false, email: 'ghost@example.com' };
 const nameless = { id: 'n', name: '   ', avatarUrl: null, isActive: true };
 
 describe('userDisplay', () => {
@@ -42,6 +51,27 @@ describe('userDisplay', () => {
         });
         it('returns common.unknownUser when name is missing entirely', () => {
             expect(getDisplayName({ id: 'x' }, t as any)).toBe('common.unknownUser');
+        });
+    });
+
+    describe('getDisplayEmail', () => {
+        it('returns email for active users', () => {
+            expect(getDisplayEmail(active)).toBe('alice@example.com');
+        });
+        it('returns undefined for deleted users even when email is present on the row', () => {
+            expect(getDisplayEmail(deleted)).toBeUndefined();
+        });
+        it('returns undefined for null user', () => {
+            expect(getDisplayEmail(null)).toBeUndefined();
+        });
+    });
+
+    describe('getDisplayPhone', () => {
+        it('returns phone for active users', () => {
+            expect(getDisplayPhone(active)).toBe('+972501234567');
+        });
+        it('returns undefined for deleted users', () => {
+            expect(getDisplayPhone({ ...active, isActive: false })).toBeUndefined();
         });
     });
 

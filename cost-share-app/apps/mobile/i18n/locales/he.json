@@ -65,6 +65,7 @@
         "loadingGroups": "טוען קופות...",
         "loadError": "טעינת הקופות נכשלה",
         "createError": "פתיחת הקופה נכשלה",
+        "inactiveMemberSkipped": "לא ניתן להוסיף משתמשים שנמחקו לקופה",
         "updateError": "עדכון הקופה נכשל",
         "deleteGroup": "מחק קופה",
         "deleteForEveryone": "מחק קופה לכולם",

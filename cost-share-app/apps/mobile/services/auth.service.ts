@@ -20,7 +20,13 @@ function toAuthError(err: unknown): AuthError {
   const message = err instanceof Error ? err.message
     : (typeof err === 'object' && err !== null && 'message' in err) ? String((err as { message: unknown }).message)
     : String(err ?? 'Unknown error');
-  if (message.includes('email_was_deleted')) {
+  const lower = message.toLowerCase();
+  if (
+    lower.includes('email_was_deleted')
+    || lower.includes('user is banned')
+    || lower.includes('banned_until')
+    || lower.includes('account has been deleted')
+  ) {
     return { code: 'account_deleted', message };
   }
   return { code: 'generic', message };

@@ -65,6 +65,7 @@
         "loadingGroups": "Loading groups...",
         "loadError": "Failed to load groups",
         "createError": "Failed to create group",
+        "inactiveMemberSkipped": "Deleted users can't be added to a group",
         "updateError": "Failed to update group",
         "deleteGroup": "Delete Group",
         "deleteForEveryone": "Delete group for everyone",

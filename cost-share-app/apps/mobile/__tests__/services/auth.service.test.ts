@@ -119,6 +119,16 @@ describe('auth.service', () => {
             expect(error!.message).toContain('email_was_deleted');
         });
 
+        it('returns code=account_deleted when user is banned', async () => {
+            mockExchangeCodeForSession.mockResolvedValue({
+                error: { message: 'User is banned' },
+            });
+
+            const { error } = await handleAuthRedirectUrl('com.kupa.mobile://auth/callback?code=banned');
+
+            expect(error?.code).toBe('account_deleted');
+        });
+
         it('returns code=generic for any other error', async () => {
             mockExchangeCodeForSession.mockResolvedValue({
                 error: { message: 'invalid_grant' },

@@ -56,7 +56,7 @@ export function CreateGroupScreen() {
     const [localImageUri, setLocalImageUri] = useState<string | null>(null);
     const [imageRemoved, setImageRemoved] = useState(false);
     const [members, setMembers] = useState<User[]>(
-        !isEdit && initialMembers ? initialMembers : [],
+        !isEdit && initialMembers ? initialMembers.filter(m => m.isActive !== false) : [],
     );
     const [addMembersOpen, setAddMembersOpen] = useState(false);
     const [removeTarget, setRemoveTarget] = useState<User | null>(null);
@@ -134,7 +134,7 @@ export function CreateGroupScreen() {
         setMembers(prev => {
             const existing = new Set(prev.map(m => m.id));
             const next = [...prev];
-            users.forEach(u => {
+            users.filter(u => u.isActive !== false).forEach(u => {
                 if (!existing.has(u.id)) next.push(u);
             });
             return next;

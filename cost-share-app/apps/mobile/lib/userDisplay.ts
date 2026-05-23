@@ -10,6 +10,8 @@ export type UserLike = {
     id: string;
     name?: string | null;
     avatarUrl?: string | null;
+    email?: string | null;
+    phone?: string | null;
     isActive?: boolean;
 } | null | undefined;
 
@@ -25,6 +27,18 @@ export function getDisplayName(user: UserLike, t: TFunction): string {
 export function getAvatarUrl(user: UserLike): string | null {
     if (!user || user.isActive === false) return null;
     return user.avatarUrl ?? null;
+}
+
+/** Returns contact email only for active users — never expose PII after deletion. */
+export function getDisplayEmail(user: UserLike): string | undefined {
+    if (!user || user.isActive === false) return undefined;
+    return user.email?.trim() || undefined;
+}
+
+/** Returns phone only for active users — never expose PII after deletion. */
+export function getDisplayPhone(user: UserLike): string | undefined {
+    if (!user || user.isActive === false) return undefined;
+    return user.phone?.trim() || undefined;
 }
 
 /** Display helpers for `GroupMemberLite` (shape: {userId, displayName, avatarUrl, isActive}). */

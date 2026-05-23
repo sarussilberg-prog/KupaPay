@@ -16,7 +16,8 @@ import {
   setupSupabaseAuthAutoRefresh,
 } from './lib/authSessionLifecycle';
 import { supabase } from './lib/supabase';
-import { assertProfileActive } from './lib/auth';
+import { assertProfileActiveWithTimeout } from './lib/auth';
+import { signalDeactivatedAccount } from './lib/signalDeactivatedAccount';
 import { hydrateCurrentUserProfile } from './services/users.service';
 import { queryClient } from './lib/queryClient';
 import { useAppStore } from './store';
@@ -59,12 +60,13 @@ export default function App() {
   useEffect(() => {
     if (Platform.OS !== 'web' || !incomingUrl || session || !isAuthCallbackUrl(incomingUrl)) return;
     void handleAuthRedirectUrl(incomingUrl).then(({ error }) => {
-      // Duplicate deep-link deliveries hit the cached exchange result, so any
-      // surviving error here is informational (e.g. expired code). Demote to debug
-      // so we don't spam the console with the cosmetic PKCE noise.
+      if (error?.code === 'account_deleted') {
+        void signalDeactivatedAccount(setPendingDeactivationNotice);
+        return;
+      }
       if (error) console.debug('Deep link auth (handled):', error.message);
     });
-  }, [incomingUrl, session]);
+  }, [incomingUrl, session, setPendingDeactivationNotice]);
 
   // Native: in-app OAuth is completed in signInWithGoogle (WebBrowser result).
   // Only handle cold-start deep links so we do not exchange the same code twice.
@@ -87,12 +89,12 @@ export default function App() {
   // Fire-and-forget guard used by the AppState 'active' listener — re-checks the
   // profile when the app is foregrounded so a remote deactivation kicks the user
   // out. Routes the message through the same flag the SIGNED_IN path uses.
-  const guardSession = useCallback(async () => {
-    const status = await assertProfileActive();
-    if (status === 'deactivated') {
-      setPendingDeactivationNotice(true);
-    }
-  }, [setPendingDeactivationNotice]);
+    const guardSession = useCallback(async () => {
+        const status = await assertProfileActiveWithTimeout();
+        if (status === 'deactivated') {
+            void signalDeactivatedAccount(setPendingDeactivationNotice);
+        }
+    }, [setPendingDeactivationNotice]);
 
   useEffect(() => {
     let mounted = true;
@@ -104,10 +106,10 @@ export default function App() {
         if (mounted && session) {
           // For a hydrated cold-start session, gate setSession on profile status so
           // we never flash the authenticated UI for a deactivated account.
-          const status = await assertProfileActive();
+          const status = await assertProfileActiveWithTimeout();
           if (!mounted) return;
           if (status === 'deactivated') {
-            setPendingDeactivationNotice(true);
+            void signalDeactivatedAccount(setPendingDeactivationNotice);
             setSession(null);
           } else {
             void hydrateCurrentUserProfile(session.user.id);
@@ -137,9 +139,9 @@ export default function App() {
       // session — otherwise the authed stack mounts for a beat and we flash
       // protected UI before assertProfileActive's internal signOut fires.
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        const status = await assertProfileActive();
+        const status = await assertProfileActiveWithTimeout();
         if (status === 'deactivated') {
-          setPendingDeactivationNotice(true);
+          void signalDeactivatedAccount(setPendingDeactivationNotice);
           // Skip setSession — the signOut inside assertProfileActive will deliver
           // a SIGNED_OUT event that naturally clears the store.
           return;

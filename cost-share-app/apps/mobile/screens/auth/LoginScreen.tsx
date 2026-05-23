@@ -10,6 +10,7 @@ import { View, TouchableOpacity, Alert, Modal } from 'react-native';
 import { AppIcon } from '../../components/AppIcon';
 import { AppLogo } from '../../components/AppLogo';
 import { AppBrandTitle } from '../../components/AppBrandTitle';
+import { DeletedAccountNoticeDialog } from '../../components/DeletedAccountNoticeDialog';
 import { colors } from '../../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,10 @@ import { Button } from '../../components/Button';
 import Toast from 'react-native-toast-message';
 import { changeLanguage } from '../../i18n';
 import { useAppStore } from '../../store';
+import {
+    clearDeactivationNoticePending,
+    consumeDeactivationNoticePending,
+} from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
 
 export function LoginScreen() {
@@ -29,27 +34,38 @@ export function LoginScreen() {
     const setPendingDeactivationNotice = useAppStore((state) => state.setPendingDeactivationNotice);
     const { isLoading, startLoading, stopLoading } = useLoading();
     const [languagePickerVisible, setLanguagePickerVisible] = useState(false);
+    const [deletedNoticeVisible, setDeletedNoticeVisible] = useState(false);
 
-    // When App.tsx detects that the user signing in has been deleted, it flips
-    // pendingDeactivationNotice on the store and skips storing the session. We
-    // wait until LoginScreen is mounted before firing the Alert so the message
-    // can't race with the navigator transition.
+    const supportEmail = getSupportEmail();
+    const deletedNoticeMessage = t('deleteAccount.deactivatedMessage', { email: supportEmail });
+
+    const showDeletedAccountNotice = useCallback(() => {
+        setDeletedNoticeVisible(true);
+    }, []);
+
+    // Survives web OAuth full-page reload via localStorage; also handles in-memory flag from App.tsx.
     useEffect(() => {
-        if (!pendingDeactivationNotice) return;
-        const email = getSupportEmail();
-        Alert.alert(
-            t('deleteAccount.deactivatedTitle'),
-            t('deleteAccount.deactivatedMessage', { email }),
-            [
-                { text: t('common.close'), style: 'cancel' },
-                {
-                    text: t('common.openMail'),
-                    onPress: () => { void openSupportContact(); },
-                },
-            ],
-        );
-        setPendingDeactivationNotice(false);
-    }, [pendingDeactivationNotice, setPendingDeactivationNotice, t]);
+        let cancelled = false;
+
+        void (async () => {
+            if (pendingDeactivationNotice) {
+                if (cancelled) return;
+                setPendingDeactivationNotice(false);
+                await clearDeactivationNoticePending();
+                showDeletedAccountNotice();
+                return;
+            }
+
+            const persisted = await consumeDeactivationNoticePending();
+            if (!cancelled && persisted) {
+                showDeletedAccountNotice();
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [pendingDeactivationNotice, setPendingDeactivationNotice, showDeletedAccountNotice]);
 
     const handleLanguageChange = useCallback(
         async (lang: 'en' | 'he') => {
@@ -61,7 +77,7 @@ export function LoginScreen() {
                 Alert.alert(t('common.error'), t('profile.languageChangeError'));
             }
         },
-        [setLanguage, t]
+        [setLanguage, t],
     );
 
     const handleSignIn = async () => {
@@ -70,19 +86,7 @@ export function LoginScreen() {
             const { error } = await signInWithGoogle();
             if (error) {
                 if (error.code === 'account_deleted') {
-                    Alert.alert(
-                        t('deleteAccount.reSignupBlockedTitle'),
-                        t('deleteAccount.reSignupBlocked', { email: getSupportEmail() }),
-                        [
-                            { text: t('common.close'), style: 'cancel' },
-                            {
-                                text: t('common.openMail'),
-                                onPress: () => {
-                                    void openSupportContact();
-                                },
-                            },
-                        ],
-                    );
+                    showDeletedAccountNotice();
                     return;
                 }
                 Toast.show({
@@ -91,7 +95,7 @@ export function LoginScreen() {
                     text2: error.message,
                 });
             }
-        } catch (err) {
+        } catch {
             Toast.show({
                 type: 'error',
                 text1: t('auth.signInError'),
@@ -121,12 +125,10 @@ export function LoginScreen() {
 
                 <AppBrandTitle className="mb-2" />
 
-                {/* Subtitle */}
                 <Text className="text-base text-gray-500 text-center mb-12">
                     {t('auth.subtitle')}
                 </Text>
 
-                {/* Sign In Button */}
                 <Button
                     title={t('auth.signInWithGoogle')}
                     onPress={handleSignIn}
@@ -134,6 +136,20 @@ export function LoginScreen() {
                     disabled={isLoading}
                 />
             </View>
+
+            <DeletedAccountNoticeDialog
+                visible={deletedNoticeVisible}
+                title={t('deleteAccount.deactivatedTitle')}
+                message={deletedNoticeMessage}
+                closeLabel={t('common.close')}
+                contactLabel={t('common.openMail')}
+                onClose={() => setDeletedNoticeVisible(false)}
+                onContact={() => {
+                    void openSupportContact().catch(() => {
+                        Alert.alert(t('common.error'), supportEmail);
+                    });
+                }}
+            />
 
             <Modal
                 visible={languagePickerVisible}

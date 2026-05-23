@@ -8,6 +8,17 @@ export async function getCurrentUserId(): Promise<string | null> {
 
 export type ProfileStatus = 'active' | 'deactivated' | 'missing';
 
+const PROFILE_CHECK_TIMEOUT_MS = 8_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((resolve) => {
+            setTimeout(() => resolve(fallback), ms);
+        }),
+    ]);
+}
+
 /**
  * Verifies the signed-in user's profile is active.
  * - 'active'      : profile exists and is_active=true (or no user is signed in — caller decides what to do).
@@ -34,4 +45,15 @@ export async function assertProfileActive(): Promise<ProfileStatus> {
         return 'deactivated';
     }
     return 'active';
+}
+
+/**
+ * Same as assertProfileActive but bounded — prevents the app boot loader from
+ * hanging forever when the profile check stalls (common on flaky web networks).
+ * Fail-open on timeout, matching the transient-error behaviour above.
+ */
+export async function assertProfileActiveWithTimeout(
+    timeoutMs = PROFILE_CHECK_TIMEOUT_MS,
+): Promise<ProfileStatus> {
+    return withTimeout(assertProfileActive(), timeoutMs, 'active');
 }

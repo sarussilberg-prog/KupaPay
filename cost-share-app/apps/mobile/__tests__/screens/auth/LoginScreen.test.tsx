@@ -14,19 +14,32 @@ jest.mock('../../../lib/openMailto', () => ({
     openSupportContact: jest.fn(),
 }));
 
+jest.mock('../../../lib/deactivationNoticeStorage', () => ({
+    consumeDeactivationNoticePending: jest.fn().mockResolvedValue(false),
+    clearDeactivationNoticePending: jest.fn().mockResolvedValue(undefined),
+}));
+
 import { LoginScreen } from '../../../screens/auth/LoginScreen';
 import { signInWithGoogle } from '../../../services/auth.service';
 import { changeLanguage } from '../../../i18n';
 import { useAppStore } from '../../../store';
+import {
+    clearDeactivationNoticePending,
+    consumeDeactivationNoticePending,
+} from '../../../lib/deactivationNoticeStorage';
 import Toast from 'react-native-toast-message';
 
 const mockSignIn = signInWithGoogle as jest.MockedFunction<typeof signInWithGoogle>;
 const mockChangeLanguage = changeLanguage as jest.MockedFunction<typeof changeLanguage>;
+const mockConsumeNotice = consumeDeactivationNoticePending as jest.MockedFunction<
+    typeof consumeDeactivationNoticePending
+>;
 
 describe('LoginScreen', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         useAppStore.setState({ language: 'en', pendingDeactivationNotice: false });
+        mockConsumeNotice.mockResolvedValue(false);
     });
 
     it('renders the app logo, name and subtitle', () => {
@@ -69,54 +82,41 @@ describe('LoginScreen', () => {
         fireEvent.press(getByText('auth.signInWithGoogle'));
         await waitFor(() =>
             expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({ type: 'error' })
-            )
+                expect.objectContaining({ type: 'error' }),
+            ),
         );
     });
 
-    it('shows account-deleted Alert when signInWithGoogle returns code=account_deleted', async () => {
+    it('shows deleted-account dialog when signInWithGoogle returns code=account_deleted', async () => {
         mockSignIn.mockResolvedValueOnce({
             error: { code: 'account_deleted', message: 'email_was_deleted' },
         });
 
-        const alertSpy = jest
-            .spyOn(require('react-native').Alert, 'alert')
-            .mockImplementation(() => {});
-
-        const { getByText } = render(<LoginScreen />);
+        const { getByText, findByText } = render(<LoginScreen />);
         fireEvent.press(getByText('auth.signInWithGoogle'));
 
-        await waitFor(() => expect(alertSpy).toHaveBeenCalled());
-
-        const [titleArg] = alertSpy.mock.calls[0];
-        expect(titleArg).toBe('deleteAccount.reSignupBlockedTitle');
+        expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
         expect(Toast.show).not.toHaveBeenCalled();
-
-        alertSpy.mockRestore();
     });
 
-    it('shows the deactivation Alert and resets the flag when pendingDeactivationNotice flips on', async () => {
-        const alertSpy = jest
-            .spyOn(require('react-native').Alert, 'alert')
-            .mockImplementation(() => {});
+    it('shows deleted-account dialog when pendingDeactivationNotice flips on', async () => {
+        const { rerender, findByText } = render(<LoginScreen />);
 
-        const { rerender } = render(<LoginScreen />);
-        expect(alertSpy).not.toHaveBeenCalled();
-
-        // Simulate App.tsx flipping the flag after detecting a deactivated profile.
         act(() => {
             useAppStore.setState({ pendingDeactivationNotice: true });
         });
         rerender(<LoginScreen />);
 
-        await waitFor(() => expect(alertSpy).toHaveBeenCalled());
-
-        const [titleArg, bodyArg] = alertSpy.mock.calls[0];
-        expect(titleArg).toBe('deleteAccount.deactivatedTitle');
-        expect(bodyArg).toBe('deleteAccount.deactivatedMessage');
-        // After display the flag is reset so the Alert doesn't loop on re-renders.
+        expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
+        expect(clearDeactivationNoticePending).toHaveBeenCalled();
         expect(useAppStore.getState().pendingDeactivationNotice).toBe(false);
+    });
 
-        alertSpy.mockRestore();
+    it('shows deleted-account dialog when persisted notice is consumed on mount', async () => {
+        mockConsumeNotice.mockResolvedValueOnce(true);
+
+        const { findByText } = render(<LoginScreen />);
+
+        expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
     });
 });
