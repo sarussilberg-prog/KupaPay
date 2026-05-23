@@ -21,6 +21,12 @@ import { Text } from './AppText';
 import { MemberAvatar } from './MemberAvatar';
 import { Button } from './Button';
 import { resolveAutoTextInputStyle, useRtlLayout } from '../hooks/useRtlLayout';
+import { getAvatarUrl } from '../lib/userDisplay';
+
+function memberAvatar(m: GroupMemberLite | undefined): string | undefined {
+    if (!m) return undefined;
+    return getAvatarUrl({ id: m.userId, name: m.displayName, avatarUrl: m.avatarUrl, isActive: m.isActive }) ?? undefined;
+}
 
 export interface SettleUpFormValues {
     fromUserId: string;
@@ -171,7 +177,7 @@ export function SettleUpSheet({
                                 </Text>
                                 <MemberAvatar
                                     name={fromMember?.displayName ?? '?'}
-                                    avatarUrl={fromMember?.avatarUrl}
+                                    avatarUrl={memberAvatar(fromMember)}
                                     size="lg"
                                 />
                                 <Text className="text-sm font-medium text-gray-900 mt-2" numberOfLines={1}>
@@ -195,7 +201,7 @@ export function SettleUpSheet({
                                 </Text>
                                 <MemberAvatar
                                     name={toMember?.displayName ?? '?'}
-                                    avatarUrl={toMember?.avatarUrl}
+                                    avatarUrl={memberAvatar(toMember)}
                                     size="lg"
                                 />
                                 <Text className="text-sm font-medium text-gray-900 mt-2" numberOfLines={1}>

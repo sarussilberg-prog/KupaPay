@@ -18,6 +18,11 @@ import { Text } from '../AppText';
 import { MemberAvatar } from '../MemberAvatar';
 import { CurrencyAmountList } from './CurrencyAmountList';
 import type { BalanceMode } from './BalanceModeToggle';
+import { getAvatarUrl } from '../../lib/userDisplay';
+
+function memberAvatar(m: GroupMemberLite): string | undefined {
+    return getAvatarUrl({ id: m.userId, name: m.displayName, avatarUrl: m.avatarUrl, isActive: m.isActive }) ?? undefined;
+}
 
 interface MemberContributionBreakdownProps {
     /** Member whose breakdown we're rendering (the "self" of the dialog). */
@@ -84,7 +89,7 @@ export function MemberContributionBreakdown({
             <View className="flex-row items-center mb-4">
                 <MemberAvatar
                     name={member.displayName}
-                    avatarUrl={member.avatarUrl}
+                    avatarUrl={memberAvatar(member)}
                     size="lg"
                 />
                 <View className="flex-1 ml-3">
@@ -134,7 +139,7 @@ export function MemberContributionBreakdown({
                         <View className="flex-row items-center mb-1">
                             <MemberAvatar
                                 name={other.displayName}
-                                avatarUrl={other.avatarUrl}
+                                avatarUrl={memberAvatar(other)}
                                 size="xs"
                             />
                             <Text className="text-sm font-medium text-gray-700 ml-2">
