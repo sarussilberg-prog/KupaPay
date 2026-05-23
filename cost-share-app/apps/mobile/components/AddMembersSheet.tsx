@@ -24,6 +24,7 @@ import { colors } from '../theme';
 import { useFriendsQuery } from '../hooks/queries/useFriendsQueries';
 import { addGroupMember } from '../services/groups.service';
 import { shareGroupInvite } from '../services/invite.service';
+import { getDisplayName } from '../lib/userDisplay';
 
 interface AddMembersSheetProps {
     visible: boolean;
@@ -68,12 +69,13 @@ export function AddMembersSheet({
         const q = query.trim().toLowerCase();
         if (!q) return eligible;
         return eligible.filter(u => {
-            const name = u.name?.toLowerCase() ?? '';
+            // Friends list — deleted users surface as the localised "deleted user" label, which is fine here.
+            const name = getDisplayName(u, t).toLowerCase();
             const email = u.email?.toLowerCase() ?? '';
             const phone = u.phone?.toLowerCase() ?? '';
             return name.includes(q) || email.includes(q) || phone.includes(q);
         });
-    }, [eligible, query]);
+    }, [eligible, query, t]);
 
     const toggle = useCallback((userId: string) => {
         setSelectedIds(prev =>

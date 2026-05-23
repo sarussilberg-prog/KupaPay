@@ -8,6 +8,7 @@ import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 import { formatCurrencyAmount } from '../../lib/currencyDisplay';
 import { useRtlLayout, rtlRowStyle, rtlTrailingAlign } from '../../hooks/useRtlLayout';
+import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 
 interface Props {
     friend: FriendBalance;
@@ -22,6 +23,10 @@ export function FriendBalanceRow({ friend, display, onPress, testID, isLast = fa
     const isRtl = useRtlLayout();
     const isSettled = Math.abs(display.netBalance) < 0.01;
     const owesYou = display.netBalance > 0;
+    // FriendBalance uses `userId` (no `id`); adapt to UserLike for the display helpers.
+    const friendLike = { id: friend.userId, name: friend.name, avatarUrl: friend.avatarUrl };
+    const friendName = getDisplayName(friendLike, t);
+    const friendAvatar = getAvatarUrl(friendLike) ?? undefined;
 
     const amountText = isSettled
         ? formatCurrencyAmount(0, display.currency)
@@ -42,8 +47,8 @@ export function FriendBalanceRow({ friend, display, onPress, testID, isLast = fa
             accessibilityRole="button"
         >
             <MemberAvatar
-                name={friend.name}
-                avatarUrl={friend.avatarUrl}
+                name={friendName}
+                avatarUrl={friendAvatar}
                 size="md"
                 testID={`${testID}-avatar`}
             />
@@ -53,7 +58,7 @@ export function FriendBalanceRow({ friend, display, onPress, testID, isLast = fa
                     className="text-base font-medium text-slate-900"
                     numberOfLines={1}
                 >
-                    {friend.name}
+                    {friendName}
                 </Text>
             </View>
 

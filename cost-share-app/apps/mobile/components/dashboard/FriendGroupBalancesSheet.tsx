@@ -27,6 +27,7 @@ import { useAppStore } from '../../store';
 import { queryKeys } from '../../hooks/queries/keys';
 import { fetchGroupPairwiseDebts } from '../../services/settlements.service';
 import { fetchGroups } from '../../services/groups.service';
+import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 
 interface Props {
     visible: boolean;
@@ -136,14 +137,14 @@ export function FriendGroupBalancesSheet({
                     >
                         {friend && (
                             <MemberAvatar
-                                name={friend.name}
-                                avatarUrl={friend.avatarUrl}
+                                name={getDisplayName({ id: friend.userId, name: friend.name, avatarUrl: friend.avatarUrl }, t)}
+                                avatarUrl={getAvatarUrl({ id: friend.userId, name: friend.name, avatarUrl: friend.avatarUrl }) ?? undefined}
                                 size="md"
                             />
                         )}
                         <View style={{ flex: 1, marginHorizontal: 12, minWidth: 0 }}>
                             <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
-                                {friend?.name ?? ''}
+                                {friend ? getDisplayName({ id: friend.userId, name: friend.name, avatarUrl: friend.avatarUrl }, t) : ''}
                             </Text>
                             <Text className="text-xs text-slate-500 mt-0.5">
                                 {t('dashboard.friendBreakdownTitle')}
