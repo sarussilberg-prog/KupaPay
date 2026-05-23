@@ -6,6 +6,7 @@ const base = {
     userId: 'u2',
     name: 'Bob',
     avatarUrl: undefined,
+    isActive: true,
     sharedGroupIds: ['g1'],
     byCurrency: [{ currency: 'USD', netBalance: 25 }],
 };
