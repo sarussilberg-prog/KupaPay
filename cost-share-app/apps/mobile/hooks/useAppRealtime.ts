@@ -99,6 +99,16 @@ function handleMembershipEvent(payload: RealtimePayload): void {
     }
 }
 
+function handleFriendshipsEvent(): void {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+}
+
+function handleFriendRequestsEvent(): void {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.friendRequestsIncoming });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.friendRequestsOutgoing });
+}
+
 export function useAppRealtime(userId: string | undefined | null): void {
     useEffect(() => {
         if (!userId) return;
@@ -129,6 +139,28 @@ export function useAppRealtime(userId: string | undefined | null): void {
                         handleMembershipEvent(payload);
                     } catch (err) {
                         console.error('app realtime: memberships payload error:', err);
+                    }
+                },
+            )
+            .on(
+                'postgres_changes' as never,
+                { event: '*', schema: 'public', table: 'friendships' },
+                () => {
+                    try {
+                        handleFriendshipsEvent();
+                    } catch (err) {
+                        console.error('app realtime: friendships payload error:', err);
+                    }
+                },
+            )
+            .on(
+                'postgres_changes' as never,
+                { event: '*', schema: 'public', table: 'friend_requests' },
+                () => {
+                    try {
+                        handleFriendRequestsEvent();
+                    } catch (err) {
+                        console.error('app realtime: friend_requests payload error:', err);
                     }
                 },
             )
