@@ -70,6 +70,35 @@ function handleGroupsEvent(payload: RealtimePayload): void {
     // which refetches the full groups list with members joined.
 }
 
+function handleMembershipEvent(payload: RealtimePayload): void {
+    const store = useAppStore.getState();
+    void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+
+    if (payload.eventType === 'DELETE' && payload.old) {
+        const groupId = payload.old.group_id as string | undefined;
+        if (groupId) store.removeGroup(groupId);
+        return;
+    }
+
+    if (
+        payload.eventType === 'UPDATE' &&
+        payload.new &&
+        payload.new.is_active === false
+    ) {
+        const groupId = payload.new.group_id as string | undefined;
+        if (groupId) store.removeGroup(groupId);
+        return;
+    }
+
+    if (
+        payload.eventType === 'INSERT' ||
+        (payload.eventType === 'UPDATE' && payload.new?.is_active === true)
+    ) {
+        void fetchGroups();
+        void fetchBalanceSummary();
+    }
+}
+
 export function useAppRealtime(userId: string | undefined | null): void {
     useEffect(() => {
         if (!userId) return;
@@ -84,6 +113,22 @@ export function useAppRealtime(userId: string | undefined | null): void {
                         handleGroupsEvent(payload);
                     } catch (err) {
                         console.error('app realtime: groups payload error:', err);
+                    }
+                },
+            )
+            .on(
+                'postgres_changes' as never,
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'group_members',
+                    filter: `user_id=eq.${userId}`,
+                },
+                (payload: RealtimePayload) => {
+                    try {
+                        handleMembershipEvent(payload);
+                    } catch (err) {
+                        console.error('app realtime: memberships payload error:', err);
                     }
                 },
             )
