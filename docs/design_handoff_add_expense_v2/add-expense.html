@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Kupa · Add expense</title>
+<link rel="stylesheet" href="colors_and_type.css" />
+<style>
+    html, body { margin: 0; padding: 0; min-height: 100%; background: var(--bg-secondary); font-family: var(--font-sans); }
+    body { padding: 32px; box-sizing: border-box; }
+    @keyframes kupa-spin { to { transform: rotate(360deg); } }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    .pair {
+        display: flex; gap: 48px; justify-content: center; align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .frame-caption {
+        text-align: center; margin-top: 14px;
+        font-size: 13px; font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.02em;
+    }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+// ─────────────────────────────────────────────────────────────────────────
+// Shared data
+// ─────────────────────────────────────────────────────────────────────────
+const MEMBERS = [
+    { id: 'u1', name: 'You',   initials: 'YO', isCurrentUser: true },
+    { id: 'u2', name: 'Sarah', initials: 'S',  avatarUrl: 'https://i.pravatar.cc/120?img=47' },
+    { id: 'u3', name: 'David', initials: 'D',  avatarUrl: 'https://i.pravatar.cc/120?img=12' },
+    { id: 'u4', name: 'Maya',  initials: 'M',  avatarUrl: 'https://i.pravatar.cc/120?img=44' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────
+// Shared bits
+// ─────────────────────────────────────────────────────────────────────────
+function SheetHeader({ title, leftLabel = 'Cancel', rightLabel = 'Save', canSave }) {
+    return (
+        <>
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 4, background: '#fff' }}>
+                <div style={{ width: 40, height: 4, borderRadius: 9999, background: 'var(--gray-200)' }} />
+            </div>
+            <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '4px 8px 8px 8px', background: '#fff',
+                borderBottom: '1px solid var(--border-soft)',
+            }}>
+                <button style={{
+                    background: 'transparent', border: 0, padding: '6px 10px',
+                    fontSize: 15, fontWeight: 500, color: 'var(--gray-600)',
+                    cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                }}>{leftLabel}</button>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {title}
+                </span>
+                <button disabled={!canSave} style={{
+                    background: 'transparent', border: 0, padding: '6px 10px',
+                    fontSize: 15, fontWeight: 700,
+                    color: canSave ? 'var(--primary-dark)' : 'var(--gray-400)',
+                    cursor: canSave ? 'pointer' : 'not-allowed',
+                    fontFamily: 'var(--font-sans)',
+                }}>{rightLabel}</button>
+            </div>
+        </>
+    );
+}
+
+function QuietIcon({ icon, label, active }) {
+    return (
+        <button style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            padding: '5px 10px', borderRadius: 9999,
+            background: active ? 'var(--gray-50)' : 'transparent',
+            border: active ? '1px solid var(--border-card)' : '1px solid transparent',
+            color: active ? 'var(--text-secondary)' : 'var(--gray-400)',
+            cursor: 'pointer', fontFamily: 'var(--font-sans)',
+            fontSize: 11, fontWeight: 500,
+            WebkitTapHighlightColor: 'transparent',
+        }}>
+            <Icon name={icon} size={13} color={active ? 'var(--gray-600)' : 'var(--gray-400)'} />
+            {label}
+        </button>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// MAIN SCREEN — the Add / Edit Expense sheet
+// Combined Payer + Split button, quiet meta row docked above the keypad,
+// no bottom Save button (header Save commits).
+// ─────────────────────────────────────────────────────────────────────────
+function AddExpenseScreen() {
+    const amount = 84.20, currency = 'USD';
+    const keys = [['1','2','3'],['4','5','6'],['7','8','9'],['.','0','⌫']];
+
+    return (
+        <div style={{ height: '100%', background: '#fff', position: 'relative', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-sans)' }}>
+            <SheetHeader title="New expense" canSave label="Save" />
+
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 16px 0 16px', minHeight: 0 }}>
+                {/* Currency */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
+                    <button style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '4px 10px', borderRadius: 9999,
+                        background: 'var(--primary-extra-light)', color: 'var(--primary-dark)',
+                        border: 0, cursor: 'pointer',
+                        fontSize: 12, fontWeight: 700, letterSpacing: '0.04em',
+                    }}>{currency}<Icon name="chevron-down" size={12} color="var(--primary-dark)" /></button>
+                </div>
+
+                {/* Amount */}
+                <div style={{
+                    textAlign: 'center', fontSize: 64, fontWeight: 700,
+                    color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: '-0.03em', lineHeight: 1,
+                }}>{amount.toFixed(2)}</div>
+
+                {/* Description */}
+                <div style={{
+                    textAlign: 'center', fontSize: 17, fontWeight: 500,
+                    color: 'var(--text-primary)', padding: '12px 0 4px 0',
+                }}>Sushi on Friday</div>
+                <div style={{ margin: '0 auto', width: 56, height: 2, borderRadius: 9999, background: 'var(--primary-light)' }} />
+
+                {/* Combined Payer + Split button */}
+                <button style={{
+                    marginTop: 22,
+                    background: '#fff', border: '1px solid var(--border-card)',
+                    boxShadow: 'var(--shadow-sm)',
+                    borderRadius: 14, padding: '12px 14px',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                    WebkitTapHighlightColor: 'transparent',
+                }}>
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left' }}>
+                        <MemberAvatar initials="YO" size="sm" />
+                        <div style={{ minWidth: 0 }}>
+                            <div className="text-eyebrow" style={{ fontSize: 9 }}>Paid by</div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: 1 }}>You</div>
+                        </div>
+                    </div>
+
+                    <div style={{ width: 1, height: 32, background: 'var(--border-soft)', flexShrink: 0 }} />
+
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', paddingLeft: 6 }}>
+                            {MEMBERS.slice(0,4).map((m, i) => (
+                                <div key={m.id} style={{ marginLeft: i === 0 ? -6 : -10 }}>
+                                    <MemberAvatar initials={m.initials} avatarUrl={m.avatarUrl} size="xs" style={{
+                                        width: 22, height: 22, fontSize: 9,
+                                        border: '2px solid #fff', boxSizing: 'content-box',
+                                    }} />
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                            <div className="text-eyebrow" style={{ fontSize: 9 }}>Split</div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: 1 }}>Equally</div>
+                        </div>
+                        <Icon name="chevron-forward" size={14} color="var(--gray-400)" />
+                    </div>
+                </button>
+
+                {/* Quiet meta — date + receipt, just above the keypad */}
+                <div style={{
+                    marginTop: 'auto', marginBottom: 8,
+                    display: 'flex', justifyContent: 'center', gap: 8,
+                    paddingTop: 16,
+                }}>
+                    <QuietIcon icon="calendar-outline" label="Today" active />
+                    <QuietIcon icon="camera-outline" label="Receipt" />
+                </div>
+            </div>
+
+            {/* Keypad — header Save commits, no bottom button */}
+            <div style={{ background: 'var(--bg-tertiary)', padding: '10px 8px 22px 8px', borderTop: '1px solid var(--border-soft)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                    {keys.flat().map((k, i) => {
+                        const isErase = k === '⌫';
+                        return (
+                            <button key={i} style={{
+                                padding: '14px 0',
+                                background: '#fff',
+                                border: '1px solid var(--border-card)',
+                                borderRadius: 12,
+                                fontSize: 22, fontWeight: 600,
+                                color: isErase ? 'var(--gray-500)' : 'var(--text-primary)',
+                                fontVariantNumeric: 'tabular-nums',
+                                fontFamily: 'var(--font-sans)',
+                                cursor: 'pointer',
+                                boxShadow: 'var(--shadow-sm)',
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                                {isErase ? <Icon name="chevron-back" size={20} color="var(--gray-500)" /> : k}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// EDITOR SHEET — opens when the user taps the combined Payer + Split button
+// ─────────────────────────────────────────────────────────────────────────
+function PayerSplitEditor() {
+    const amount = 84.20, currency = 'USD';
+
+    return (
+        <div style={{ height: '100%', background: '#fff', position: 'relative', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-sans)' }}>
+            {/* Faded backdrop — the underlying screen */}
+            <div style={{ position: 'absolute', inset: 0, background: '#fff', filter: 'brightness(.92)' }}>
+                <SheetHeader title="New expense" canSave label="Save" />
+                <div style={{ padding: '24px 16px 0 16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 48, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>
+                        {amount.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginTop: 6 }}>Sushi on Friday</div>
+                </div>
+            </div>
+
+            {/* Scrim */}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.45)' }} />
+
+            {/* Bottom sheet */}
+            <div style={{
+                position: 'absolute', left: 0, right: 0, bottom: 0,
+                background: '#fff', borderRadius: '20px 20px 0 0',
+                boxShadow: '0 -8px 24px rgba(0,0,0,0.20)',
+                padding: '8px 16px 22px 16px',
+                maxHeight: '75%', overflow: 'hidden',
+                display: 'flex', flexDirection: 'column',
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 6 }}>
+                    <div style={{ width: 40, height: 4, borderRadius: 9999, background: 'var(--gray-200)' }} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>Who & how</span>
+                    <button style={{
+                        background: 'transparent', border: 0, padding: '4px 8px',
+                        fontSize: 14, fontWeight: 700, color: 'var(--primary-dark)',
+                        cursor: 'pointer',
+                    }}>Done</button>
+                </div>
+
+                {/* Paid by */}
+                <div className="text-eyebrow" style={{ fontSize: 9, marginBottom: 8 }}>Paid by</div>
+                <div className="no-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 16 }}>
+                    {MEMBERS.map(m => {
+                        const on = m.id === 'u1';
+                        return (
+                            <button key={m.id} style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                                padding: '8px 10px 6px 10px', minWidth: 72,
+                                borderRadius: 12,
+                                background: on ? 'var(--primary-extra-light)' : '#fff',
+                                border: `1px solid ${on ? 'var(--primary-light)' : 'var(--border-card)'}`,
+                                cursor: 'pointer', flexShrink: 0,
+                            }}>
+                                <MemberAvatar initials={m.initials} avatarUrl={m.avatarUrl} size="sm" />
+                                <span style={{
+                                    fontSize: 11, fontWeight: on ? 700 : 500,
+                                    color: on ? 'var(--primary-dark)' : 'var(--text-secondary)',
+                                }}>{m.isCurrentUser ? 'You' : m.name}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Split between */}
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span className="text-eyebrow" style={{ fontSize: 9 }}>Split between</span>
+                    <span style={{
+                        fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)',
+                        fontVariantNumeric: 'tabular-nums',
+                    }}>4 of 4 · {currency} {(amount/4).toFixed(2)} ea.</span>
+                </div>
+                <div style={{
+                    background: 'var(--gray-100)', borderRadius: 10, padding: 3,
+                    display: 'flex', gap: 2, marginBottom: 10,
+                }}>
+                    {['Equal', 'Percent', 'Exact'].map(m => {
+                        const on = m === 'Equal';
+                        return (
+                            <button key={m} style={{
+                                flex: 1, padding: '7px 0',
+                                background: on ? '#fff' : 'transparent',
+                                border: 0, borderRadius: 8,
+                                fontSize: 12, fontWeight: on ? 700 : 500,
+                                color: on ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                boxShadow: on ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                                cursor: 'pointer',
+                            }}>{m}</button>
+                        );
+                    })}
+                </div>
+                <div style={{
+                    background: '#fff', borderRadius: 12,
+                    border: '1px solid var(--border-card)', overflow: 'hidden',
+                }}>
+                    {MEMBERS.map((m, i) => (
+                        <div key={m.id} style={{
+                            display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
+                            borderTop: i === 0 ? 0 : '1px solid var(--border-soft)',
+                        }}>
+                            <div style={{
+                                width: 20, height: 20, borderRadius: 6,
+                                background: 'var(--primary)',
+                                border: '1.5px solid var(--primary)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0,
+                            }}>
+                                <Icon name="checkmark-circle" size={12} color="#fff" />
+                            </div>
+                            <MemberAvatar initials={m.initials} avatarUrl={m.avatarUrl} size="xs" />
+                            <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {m.isCurrentUser ? 'You' : m.name}
+                            </div>
+                            <div style={{
+                                fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)',
+                                fontVariantNumeric: 'tabular-nums',
+                            }}>{currency} {(amount/4).toFixed(2)}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Layout — two iOS frames side-by-side
+// ─────────────────────────────────────────────────────────────────────────
+function Phone({ children }) {
+    return (
+        <IOSDevice width={402} height={874}>
+            <div style={{ position: 'relative', height: '100%' }}>
+                <div style={{ height: 62, background: 'var(--bg-secondary)' }} />
+                <div style={{ position: 'absolute', left: 0, right: 0, top: 62, bottom: 0 }}>
+                    {children}
+                </div>
+            </div>
+        </IOSDevice>
+    );
+}
+
+function App() {
+    return (
+        <div className="pair">
+            <div>
+                <Phone><AddExpenseScreen /></Phone>
+                <div className="frame-caption">1 · Add expense</div>
+            </div>
+            <div>
+                <Phone><PayerSplitEditor /></Phone>
+                <div className="frame-caption">2 · Tap the combined button → edit payer &amp; split</div>
+            </div>
+        </div>
+    );
+}
+
+ReactDOM.createRoot(document.getElementById('stage')).render(<App />);
+</script>
+</body>
+</html>
