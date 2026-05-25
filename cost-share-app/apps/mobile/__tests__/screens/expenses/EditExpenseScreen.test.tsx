@@ -16,9 +16,36 @@ jest.mock('@react-navigation/native', () => {
     };
 });
 
+jest.mock('react-native-calendars', () => {
+    const React = require('react');
+    const { Pressable, Text, View } = require('react-native');
+    function Calendar(props: any) {
+        return (
+            <View testID="mock-calendar">
+                <Pressable
+                    testID="mock-day-2026-06-15"
+                    onPress={() =>
+                        props.onDayPress?.({
+                            dateString: '2026-06-15',
+                            day: 15,
+                            month: 6,
+                            year: 2026,
+                            timestamp: 0,
+                        })
+                    }
+                >
+                    <Text>tap-day</Text>
+                </Pressable>
+            </View>
+        );
+    }
+    return { Calendar, LocaleConfig: { locales: {}, defaultLocale: 'en' } };
+});
+
 jest.mock('../../../services/groups.service', () => ({
     getGroupMembers: jest.fn().mockResolvedValue([
         { id: 'm1', groupId: 'g1', userId: 'u1', role: 'member', isActive: true, joinedAt: new Date() },
+        { id: 'm2', groupId: 'g1', userId: 'u2', role: 'member', isActive: true, joinedAt: new Date() },
     ]),
     getGroupById: jest.fn().mockResolvedValue({
         id: 'g1',
@@ -30,6 +57,7 @@ jest.mock('../../../services/groups.service', () => ({
 jest.mock('../../../services/users.service', () => ({
     fetchGroupUsers: jest.fn().mockResolvedValue([
         { id: 'u1', name: 'Alice', email: 'a@x.com', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'u2', name: 'Bob', email: 'b@x.com', inviteToken: 'bob12345678', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date() },
     ]),
 }));
 
@@ -89,28 +117,34 @@ beforeEach(() => {
     });
 });
 
-describe('AddExpenseScreen edit mode', () => {
-    it('loads existing expense data into form', async () => {
-        const { findByDisplayValue } = renderWithQuery(<AddExpenseScreen />);
+describe('AddExpenseScreen — edit mode (v2)', () => {
+    it('shows the EDIT EXPENSE header and prefills description + amount', async () => {
+        const { findByText, findByDisplayValue } = renderWithQuery(<AddExpenseScreen />);
+        expect(await findByText('expenses.v2.headerEdit')).toBeTruthy();
         expect(await findByDisplayValue('Coffee')).toBeTruthy();
         expect(await findByDisplayValue('5')).toBeTruthy();
     });
 
-    it('calls updateExpense with new values', async () => {
+    it('shows the Delete row in edit mode', async () => {
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        expect(await findByTestId('add-expense-delete')).toBeTruthy();
+    });
+
+    it('calls updateExpense with new values on Save', async () => {
         mockUpdate.mockResolvedValueOnce({ ...expense, description: 'Tea' });
-        const { findByDisplayValue, findByText } = renderWithQuery(<AddExpenseScreen />);
+        const { findByDisplayValue, findByTestId } = renderWithQuery(<AddExpenseScreen />);
         const descInput = await findByDisplayValue('Coffee');
         fireEvent.changeText(descInput, 'Tea');
-        fireEvent.press(await findByText('common.save'));
+        fireEvent.press(await findByTestId('add-expense-submit'));
         await waitFor(() =>
             expect(mockUpdate).toHaveBeenCalledWith(
                 'e1',
-                expect.objectContaining({ description: 'Tea' })
-            )
+                expect.objectContaining({ description: 'Tea' }),
+            ),
         );
     });
 
-    it('sends equal splits without amounts when switching from unequal to equal', async () => {
+    it('switching from unequal to equal sends equal splits without amounts', async () => {
         mockGet.mockResolvedValue({
             expense: { ...expense, amount: 100 },
             splits: [
@@ -120,24 +154,18 @@ describe('AddExpenseScreen edit mode', () => {
         });
         mockUpdate.mockResolvedValueOnce({ ...expense, amount: 100 });
 
-        const { findByTestId, findByText } = renderWithQuery(<AddExpenseScreen />);
-        await findByTestId('split-type-unequal');
-        fireEvent.press(await findByTestId('split-type-equal'));
-        fireEvent.press(await findByText('common.save'));
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.press(await findByTestId('combined-payer-split'));
+        fireEvent.press(await findByTestId('split-mode-equal'));
+        fireEvent.press(await findByTestId('edit-payer-split-done'));
+        fireEvent.press(await findByTestId('add-expense-submit'));
 
         await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
         expect(mockUpdate).toHaveBeenCalledWith(
             'e1',
             expect.objectContaining({
-                amount: 100,
                 splits: [{ userId: 'u1' }, { userId: 'u2' }],
             }),
         );
-    });
-
-    it('does not show cancel-only button in edit mode', async () => {
-        const { queryByText } = renderWithQuery(<AddExpenseScreen />);
-        await waitFor(() => expect(mockGet).toHaveBeenCalled());
-        expect(queryByText('common.cancel')).toBeNull();
     });
 });

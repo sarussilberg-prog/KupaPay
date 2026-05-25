@@ -16,6 +16,32 @@ jest.mock('@react-navigation/native', () => {
     };
 });
 
+jest.mock('react-native-calendars', () => {
+    const React = require('react');
+    const { Pressable, Text, View } = require('react-native');
+    function Calendar(props: any) {
+        return (
+            <View testID="mock-calendar">
+                <Pressable
+                    testID="mock-day-2026-06-15"
+                    onPress={() =>
+                        props.onDayPress?.({
+                            dateString: '2026-06-15',
+                            day: 15,
+                            month: 6,
+                            year: 2026,
+                            timestamp: 0,
+                        })
+                    }
+                >
+                    <Text>tap-day</Text>
+                </Pressable>
+            </View>
+        );
+    }
+    return { Calendar, LocaleConfig: { locales: {}, defaultLocale: 'en' } };
+});
+
 jest.mock('../../../services/expenses.service', () => ({
     createExpense: jest.fn(),
     updateExpense: jest.fn(),
@@ -88,37 +114,56 @@ beforeEach(() => {
     });
 });
 
-describe('AddExpenseScreen', () => {
-    it('renders the description and amount inputs', async () => {
+describe('AddExpenseScreen — v2', () => {
+    it('shows header title NEW EXPENSE in create mode', async () => {
         const { findByText } = renderWithQuery(<AddExpenseScreen />);
         await waitFor(() => expect(mockGetGroupMembers).toHaveBeenCalled());
-        expect(await findByText('expenses.description')).toBeTruthy();
-        expect(await findByText('expenses.amount')).toBeTruthy();
+        expect(await findByText('expenses.v2.headerNew')).toBeTruthy();
     });
 
-    it('keeps submit disabled without description or amount', async () => {
-        const { findByTestId, getByPlaceholderText } = renderWithQuery(<AddExpenseScreen />);
+    it('opens the numeric system keyboard on the amount field', async () => {
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        const amount = await findByTestId('amount-display');
+        expect(amount.props.placeholder).toBe('0.00');
+        expect(amount.props.keyboardType).toBe('decimal-pad');
+        expect(amount.props.editable).not.toBe(false);
+    });
+
+    it('sanitizes the amount input — letters dropped, one dot max, 2 decimal cap', async () => {
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        const amount = await findByTestId('amount-display');
+        fireEvent.changeText(amount, '12a.34b');
+        await waitFor(() => expect(amount.props.value).toBe('12.34'));
+        fireEvent.changeText(amount, '12.34.56');
+        await waitFor(() => expect(amount.props.value).toBe('12.34'));
+        fireEvent.changeText(amount, '12,5');
+        await waitFor(() => expect(amount.props.value).toBe('12.5'));
+        fireEvent.changeText(amount, '1.999');
+        await waitFor(() => expect(amount.props.value).toBe('1.99'));
+    });
+
+    it('keeps Save disabled until description AND amount are set', async () => {
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
         const submit = await findByTestId('add-expense-submit');
-        expect(submit.props.accessibilityState?.disabled ?? submit.props.disabled).toBe(true);
+        expect(submit.props.accessibilityState?.disabled).toBe(true);
 
-        fireEvent.changeText(getByPlaceholderText('0.00'), '10');
-        expect(submit.props.accessibilityState?.disabled ?? submit.props.disabled).toBe(true);
+        fireEvent.changeText(await findByTestId('description-input'), 'Coffee');
+        expect(submit.props.accessibilityState?.disabled).toBe(true);
 
-        fireEvent.changeText(getByPlaceholderText('expenses.enterDescription'), 'Coffee');
+        fireEvent.changeText(await findByTestId('amount-display'), '10');
         await waitFor(() => {
-            expect(submit.props.accessibilityState?.disabled ?? submit.props.disabled).toBe(false);
+            expect(submit.props.accessibilityState?.disabled).toBe(false);
         });
-        expect(mockCreateExpense).not.toHaveBeenCalled();
     });
 
-    it('calls createExpense with proper DTO', async () => {
+    it('calls createExpense with the correct DTO on Save', async () => {
         mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
-        const { findByText, getByPlaceholderText, findAllByText } = renderWithQuery(<AddExpenseScreen />);
-        await findByText('expenses.description');
-        fireEvent.changeText(getByPlaceholderText('expenses.enterDescription'), 'Coffee');
-        fireEvent.changeText(getByPlaceholderText('0.00'), '10');
-        const addButtons = await findAllByText('expenses.addExpense');
-        fireEvent.press(addButtons[addButtons.length - 1]);
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.changeText(await findByTestId('description-input'), 'Coffee');
+        fireEvent.changeText(await findByTestId('amount-display'), '10');
+
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
         await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
         expect(mockCreateExpense).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -126,53 +171,120 @@ describe('AddExpenseScreen', () => {
                 description: 'Coffee',
                 amount: 10,
                 paidBy: 'u1',
-            })
-        );
-    });
-
-    it('shows unequal split panel when unequal is selected', async () => {
-        const { findByText, getByTestId } = renderWithQuery(<AddExpenseScreen />);
-        await findByText('expenses.description');
-        fireEvent.press(getByTestId('split-type-unequal'));
-        expect(await findByText('expenses.unequalSplitTitle')).toBeTruthy();
-        expect(getByTestId('unequal-split-panel')).toBeTruthy();
-    });
-
-    it('disables submit until description and amount are filled', async () => {
-        const { findByTestId, getByPlaceholderText } = renderWithQuery(<AddExpenseScreen />);
-        const submit = await findByTestId('add-expense-submit');
-        expect(submit.props.accessibilityState?.disabled ?? submit.props.disabled).toBe(true);
-
-        fireEvent.changeText(getByPlaceholderText('expenses.enterDescription'), 'Coffee');
-        expect(submit.props.accessibilityState?.disabled ?? submit.props.disabled).toBe(true);
-
-        fireEvent.changeText(getByPlaceholderText('0.00'), '10');
-        await waitFor(() => {
-            expect(submit.props.accessibilityState?.disabled ?? submit.props.disabled).toBe(false);
-        });
-    });
-
-    it('creates expense with unequal percent splits', async () => {
-        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
-        const { findByText, getByPlaceholderText, getByTestId, findByTestId } =
-            renderWithQuery(<AddExpenseScreen />);
-        await findByText('expenses.description');
-        fireEvent.changeText(getByPlaceholderText('expenses.enterDescription'), 'Dinner');
-        fireEvent.changeText(getByPlaceholderText('0.00'), '100');
-        fireEvent.press(getByTestId('split-type-unequal'));
-        await findByTestId('unequal-split-panel');
-        fireEvent.changeText(getByTestId('split-input-u1'), '60');
-        fireEvent.changeText(getByTestId('split-input-u2'), '40');
-        fireEvent.press(await findByTestId('add-expense-submit'));
-        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
-        expect(mockCreateExpense).toHaveBeenCalledWith(
-            expect.objectContaining({
-                amount: 100,
-                splits: expect.arrayContaining([
-                    expect.objectContaining({ userId: 'u1', amount: 60 }),
-                    expect.objectContaining({ userId: 'u2', amount: 40 }),
-                ]),
+                expenseDate: expect.any(Date),
             }),
         );
+    });
+
+    it('opens the editor sheet from the combined payer/split button', async () => {
+        const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
+        await findByTestId('combined-payer-split');
+        expect(queryByTestId('edit-payer-split-done')).toBeNull();
+        fireEvent.press(await findByTestId('combined-payer-split'));
+        expect(await findByTestId('edit-payer-split-done')).toBeTruthy();
+    });
+
+    it('commits payer/split changes when Done is pressed in the editor', async () => {
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        await findByTestId('combined-payer-split');
+        fireEvent.press(await findByTestId('combined-payer-split'));
+
+        fireEvent.press(await findByTestId('payer-cell-u2'));
+        fireEvent.press(await findByTestId('edit-payer-split-done'));
+
+        fireEvent.changeText(await findByTestId('description-input'), 'Dinner');
+        fireEvent.changeText(await findByTestId('amount-display'), '20');
+
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
+        expect(mockCreateExpense).toHaveBeenCalledWith(
+            expect.objectContaining({ paidBy: 'u2', amount: 20 }),
+        );
+    });
+
+    it('discards editor changes when the scrim is tapped', async () => {
+        const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.press(await findByTestId('combined-payer-split'));
+        fireEvent.press(await findByTestId('payer-cell-u2'));
+        fireEvent.press(await findByTestId('edit-payer-split-scrim'));
+
+        await waitFor(() => {
+            expect(queryByTestId('edit-payer-split-done')).toBeNull();
+        });
+
+        // Re-open: the editor's draft should reset to the unchanged payer (u1).
+        fireEvent.press(await findByTestId('combined-payer-split'));
+        fireEvent.press(await findByTestId('edit-payer-split-done'));
+
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        fireEvent.changeText(await findByTestId('description-input'), 'X');
+        fireEvent.changeText(await findByTestId('amount-display'), '5');
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
+        expect(mockCreateExpense).toHaveBeenCalledWith(
+            expect.objectContaining({ paidBy: 'u1' }),
+        );
+    });
+
+    it('defaults the date pill to Today', async () => {
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        const dateP = await findByTestId('meta-date');
+        const labelText = dateP.findAllByType('Text' as any)
+            .map((n: any) => n.props.children)
+            .filter(Boolean)
+            .join('');
+        expect(labelText).toContain('expenses.v2.today');
+    });
+
+    it('opens the date picker, sends the picked date to createExpense', async () => {
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
+
+        fireEvent.changeText(await findByTestId('description-input'), 'Coffee');
+        fireEvent.changeText(await findByTestId('amount-display'), '10');
+
+        expect(queryByTestId('date-picker-popup')).toBeNull();
+        fireEvent.press(await findByTestId('meta-date'));
+        expect(await findByTestId('date-picker-popup')).toBeTruthy();
+
+        fireEvent.press(await findByTestId('mock-day-2026-06-15'));
+        fireEvent.press(await findByTestId('date-picker-done'));
+
+        fireEvent.press(await findByTestId('add-expense-submit'));
+        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
+        const dto = mockCreateExpense.mock.calls[0][0] as { expenseDate: Date };
+        expect(dto.expenseDate.getFullYear()).toBe(2026);
+        expect(dto.expenseDate.getMonth()).toBe(5);
+        expect(dto.expenseDate.getDate()).toBe(15);
+    });
+
+    it('keeps the original date when the picker is cancelled', async () => {
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        const before = new Date();
+        const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
+
+        fireEvent.press(await findByTestId('meta-date'));
+        await findByTestId('date-picker-popup');
+        fireEvent.press(await findByTestId('mock-day-2026-06-15'));
+        fireEvent.press(await findByTestId('date-picker-cancel'));
+        await waitFor(() => expect(queryByTestId('date-picker-popup')).toBeNull());
+
+        fireEvent.changeText(await findByTestId('description-input'), 'Coffee');
+        fireEvent.changeText(await findByTestId('amount-display'), '10');
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
+        const dto = mockCreateExpense.mock.calls[0][0] as { expenseDate: Date };
+        expect(dto.expenseDate.getFullYear()).toBe(before.getFullYear());
+        expect(dto.expenseDate.getMonth()).toBe(before.getMonth());
+        expect(dto.expenseDate.getDate()).toBe(before.getDate());
+        expect(
+            dto.expenseDate.getFullYear() === 2026 &&
+            dto.expenseDate.getMonth() === 5 &&
+            dto.expenseDate.getDate() === 15,
+        ).toBe(false);
     });
 });

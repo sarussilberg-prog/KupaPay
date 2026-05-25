@@ -1,39 +1,79 @@
 /**
- * AddExpenseScreen
- * Create or edit an expense with equal / custom splits.
+ * AddExpenseScreen (v2)
+ * Sheet-style create/edit expense flow. Amount uses the system numeric keyboard,
+ * description uses the regular keyboard. The combined payer/split button opens
+ * an editor sheet. Presented as a modal (see AppNavigator) — header is hidden.
  */
 
-import { Text } from '../../components/AppText';
-import React, { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react';
-import { View, ScrollView, TextInput, StyleSheet } from 'react-native';
-import { resolveAutoTextInputStyle, rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
-import { useTranslation } from 'react-i18next';
+import React, {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useState,
+} from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ExpenseCategory, ExpenseSplitInput, DEFAULT_CURRENCY } from '@cost-share/shared';
+import { useTranslation } from 'react-i18next';
+import * as ImagePicker from 'expo-image-picker';
+
+import { Text } from '../../components/AppText';
+import { LoadingIndicator } from '../../components/LoadingIndicator';
+import { CurrencyPicker } from '../../components/CurrencyPicker';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+
+import { CurrencyPill } from '../../components/expenseV2/CurrencyPill';
+import { QuietIconPill } from '../../components/expenseV2/QuietIconPill';
+import { CombinedPayerSplitButton } from '../../components/expenseV2/CombinedPayerSplitButton';
+import {
+    EditPayerSplitSheet,
+    EditPayerSplitDraft,
+    UiSplitMode,
+} from '../../components/expenseV2/EditPayerSplitSheet';
+import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
+import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
+
+/**
+ * Keep only digits and a single decimal separator (`.` or `,` → `.`),
+ * trim to two decimal places.
+ */
+function sanitizeAmountInput(text: string): string {
+    const normalized = text.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    const firstDot = normalized.indexOf('.');
+    if (firstDot === -1) return normalized;
+    const whole = normalized.slice(0, firstDot);
+    const frac = normalized.slice(firstDot + 1).replace(/\./g, '').slice(0, 2);
+    return `${whole}.${frac}`;
+}
+
 import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { useGroupMembersQuery } from '../../hooks/queries/useGroupMembersQuery';
 import {
     createExpense,
-    updateExpense,
     deleteExpense,
     getExpenseWithSplits,
+    updateExpense,
 } from '../../services/expenses.service';
-import { Input } from '../../components/Input';
-import { Button } from '../../components/Button';
-import { CategoryPicker } from '../../components/CategoryPicker';
-import { CurrencyPicker } from '../../components/CurrencyPicker';
-import { SplitTypeSelector } from '../../components/SplitTypeSelector';
-import { MemberSelector } from '../../components/MemberSelector';
-import { PayerPicker } from '../../components/PayerPicker';
-import { LoadingIndicator } from '../../components/LoadingIndicator';
-import { UnequalSplitPanel } from '../../components/UnequalSplitPanel';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { ReceiptImagePicker } from '../../components/ReceiptImagePicker';
 import { uploadExpenseReceipt } from '../../services/storage.service';
 import Toast from 'react-native-toast-message';
 import { resolveGroupMemberUsers } from '../../lib/groupMemberUsers';
+import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import {
+    DEFAULT_CURRENCY,
+    ExpenseCategory,
+    ExpenseSplitInput,
+} from '@cost-share/shared';
 import {
     UnequalSplitMode,
     areSplitsEqual,
@@ -41,24 +81,30 @@ import {
     computeUnequalTotal,
     inferUnequalModeFromSplits,
 } from '../../lib/expenseSplitForm';
+import { colors } from '../../theme';
 
-/**
- * Keep only digits and a single decimal separator.
- * Accepts both `.` and `,` from locale keyboards; normalizes to `.`.
- */
-function sanitizeAmountInput(text: string): string {
-    const normalized = text.replace(/,/g, '.').replace(/[^0-9.]/g, '');
-    const firstDot = normalized.indexOf('.');
-    if (firstDot === -1) return normalized;
+function uiToUnequalMode(mode: UiSplitMode): UnequalSplitMode {
+    return mode === 'percent' ? 'percent' : 'amount';
+}
+
+function unequalToUiMode(mode: UnequalSplitMode): UiSplitMode {
+    return mode === 'percent' ? 'percent' : 'exact';
+}
+
+function isSameDay(a: Date, b: Date): boolean {
     return (
-        normalized.slice(0, firstDot + 1) +
-        normalized.slice(firstDot + 1).replace(/\./g, '')
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
     );
+}
+
+function formatShortDate(date: Date): string {
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 export function AddExpenseScreen() {
     const { t } = useTranslation();
-    const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const routeParams = route.params ?? {};
@@ -78,21 +124,22 @@ export function AddExpenseScreen() {
     const [currency, setCurrency] = useState<string>(
         storeGroup?.defaultCurrency ?? DEFAULT_CURRENCY,
     );
-    const [category, setCategory] = useState<ExpenseCategory>('other');
-    const [splitType, setSplitType] = useState<'equal' | 'unequal'>('equal');
+    // Category not exposed in v2 UI; defaults to 'other'.
+    const [category] = useState<ExpenseCategory>('other');
     const [paidBy, setPaidBy] = useState<string | undefined>(currentUser?.id);
     const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+    const [splitMode, setSplitMode] = useState<UiSplitMode>('equal');
+    const [unequalValues, setUnequalValues] = useState<Record<string, string>>({});
     const [membersInitialized, setMembersInitialized] = useState(false);
     const [expenseLoading, setExpenseLoading] = useState(isEditMode);
-    const [unequalMode, setUnequalMode] = useState<UnequalSplitMode>('percent');
-    const [unequalValues, setUnequalValues] = useState<Record<string, string>>({});
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
     const [localReceiptUri, setLocalReceiptUri] = useState<string | null>(null);
+    const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
     const [receiptRemoved, setReceiptRemoved] = useState(false);
-    const [descriptionError, setDescriptionError] = useState('');
-    const [amountError, setAmountError] = useState('');
-    const [splitError, setSplitError] = useState('');
+    const [date, setDate] = useState<Date>(new Date());
+    const [editorVisible, setEditorVisible] = useState(false);
+    const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
 
     const { data: membersData = [], isLoading: membersLoading } = useGroupMembersQuery(groupId);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
@@ -100,7 +147,6 @@ export function AddExpenseScreen() {
         () => membersData.filter(m => m.isActive),
         [membersData],
     );
-
     const memberUsers = useMemo(
         () =>
             resolveGroupMemberUsers(
@@ -112,16 +158,9 @@ export function AddExpenseScreen() {
         [activeMembers, allUsers, storeGroup?.members, currency],
     );
 
-    const selectedMemberUsers = useMemo(
-        () => memberUsers.filter(u => selectedMemberIds.includes(u.id)),
-        [memberUsers, selectedMemberIds],
-    );
-
     useLayoutEffect(() => {
-        navigation.setOptions({
-            title: t(isEditMode ? 'expenses.editExpense' : 'expenses.addExpense'),
-        });
-    }, [navigation, t, isEditMode]);
+        navigation.setOptions({ headerShown: false });
+    }, [navigation]);
 
     useEffect(() => {
         if (!isEditMode && storeGroup?.defaultCurrency) {
@@ -129,53 +168,53 @@ export function AddExpenseScreen() {
         }
     }, [storeGroup?.defaultCurrency, isEditMode]);
 
+    // Create mode: select all active members by default.
     useEffect(() => {
         if (isEditMode || membersInitialized || activeMembers.length === 0) return;
         setSelectedMemberIds(activeMembers.map(m => m.userId));
         setMembersInitialized(true);
     }, [isEditMode, membersInitialized, activeMembers]);
 
+    // Create mode: default payer to current user.
     useEffect(() => {
         if (isEditMode) return;
         if (!paidBy && currentUser?.id) setPaidBy(currentUser.id);
     }, [isEditMode, paidBy, currentUser?.id]);
 
+    // Edit mode: load the existing expense and prefill the form.
     useEffect(() => {
         if (!isEditMode || !expenseId) return;
-
-        const loadExpense = async () => {
+        const load = async () => {
             setExpenseLoading(true);
             const data = await getExpenseWithSplits(expenseId);
             if (data) {
                 const activeGroupId = routeGroupId ?? data.expense.groupId;
                 setResolvedGroupId(activeGroupId);
-
                 const { expense, splits } = data;
                 setDescription(expense.description);
                 setAmount(String(expense.amount));
                 setCurrency(expense.currency);
-                setCategory(expense.category || 'other');
                 setPaidBy(expense.paidBy);
                 setReceiptUrl(expense.receiptUrl ?? null);
                 setLocalReceiptUri(null);
                 setReceiptRemoved(false);
+                if (expense.expenseDate instanceof Date) setDate(expense.expenseDate);
                 if (splits.length > 0) {
                     setSelectedMemberIds(splits.map(s => s.userId));
                     setMembersInitialized(true);
                     const splitAmounts = splits.map(s => s.amount);
                     if (areSplitsEqual(splitAmounts)) {
-                        setSplitType('equal');
+                        setSplitMode('equal');
                     } else {
-                        setSplitType('unequal');
                         const inferred = inferUnequalModeFromSplits(splits, expense.amount);
-                        setUnequalMode(inferred.mode);
+                        setSplitMode(unequalToUiMode(inferred.mode));
                         setUnequalValues(inferred.values);
                     }
                 }
             }
             setExpenseLoading(false);
         };
-        void loadExpense();
+        void load();
     }, [expenseId, isEditMode, routeGroupId]);
 
     useEffect(() => {
@@ -184,123 +223,110 @@ export function AddExpenseScreen() {
             setSelectedMemberIds(activeMembers.map(m => m.userId));
         }
         setMembersInitialized(true);
-    }, [
-        isEditMode,
-        membersInitialized,
-        activeMembers,
-        selectedMemberIds.length,
-    ]);
+    }, [isEditMode, membersInitialized, activeMembers, selectedMemberIds.length]);
 
     const parsedAmount = Number.parseFloat(amount);
 
     const unequalCheck = useMemo(() => {
-        if (splitType !== 'unequal' || selectedMemberIds.length === 0) {
-            return { isValid: true };
+        if (splitMode === 'equal' || selectedMemberIds.length === 0) {
+            return { isValid: true } as const;
         }
         return computeUnequalTotal(
-            unequalMode,
+            uiToUnequalMode(splitMode),
             unequalValues,
             selectedMemberIds,
             parsedAmount,
         );
-    }, [splitType, selectedMemberIds, unequalMode, unequalValues, parsedAmount]);
+    }, [splitMode, selectedMemberIds, unequalValues, parsedAmount]);
 
-    const isSubmitReady = useMemo(() => {
+    const canSave = useMemo(() => {
         const hasDescription = description.trim().length > 0;
         const hasValidAmount =
             amount.length > 0 && Number.isFinite(parsedAmount) && parsedAmount > 0;
         const hasMembers = selectedMemberIds.length > 0;
-        const unequalReady = splitType !== 'unequal' || unequalCheck.isValid;
+        const unequalReady = splitMode === 'equal' || unequalCheck.isValid;
         return hasDescription && hasValidAmount && hasMembers && unequalReady;
-    }, [description, amount, parsedAmount, selectedMemberIds.length, splitType, unequalCheck.isValid]);
-
-    const handleSplitTypeChange = useCallback((type: 'equal' | 'unequal') => {
-        setSplitType(type);
-        setSplitError('');
-        if (type === 'unequal') {
-            setUnequalValues(prev => {
-                const next = { ...prev };
-                selectedMemberIds.forEach(id => {
-                    if (next[id] === undefined) next[id] = '';
-                });
-                return next;
-            });
-        }
-    }, [selectedMemberIds]);
-
-    const handleUnequalValueChange = useCallback((userId: string, value: string) => {
-        setUnequalValues(prev => ({ ...prev, [userId]: value }));
-        setSplitError('');
-    }, []);
-
-    const handleUnequalModeChange = useCallback((mode: UnequalSplitMode) => {
-        setUnequalMode(mode);
-        setSplitError('');
-    }, []);
-
-    const handleToggleMember = useCallback((userId: string) => {
-        setSelectedMemberIds(prev => {
-            const next = prev.includes(userId)
-                ? prev.filter(id => id !== userId)
-                : [...prev, userId];
-            setUnequalValues(values => {
-                const updated = { ...values };
-                if (!next.includes(userId)) delete updated[userId];
-                else if (updated[userId] === undefined) updated[userId] = '';
-                return updated;
-            });
-            setSplitError('');
-            return next;
-        });
-    }, []);
+    }, [description, amount, parsedAmount, selectedMemberIds.length, splitMode, unequalCheck.isValid]);
 
     const buildSplits = useCallback((): ExpenseSplitInput[] | null => {
         if (selectedMemberIds.length === 0) return null;
-        if (splitType === 'equal') {
-            return selectedMemberIds.map(userId => ({ userId }));
-        }
-        return buildUnequalSplits(unequalMode, unequalValues, selectedMemberIds, parsedAmount);
-    }, [selectedMemberIds, splitType, unequalMode, unequalValues, parsedAmount]);
+        if (splitMode === 'equal') return selectedMemberIds.map(userId => ({ userId }));
+        return buildUnequalSplits(
+            uiToUnequalMode(splitMode),
+            unequalValues,
+            selectedMemberIds,
+            parsedAmount,
+        );
+    }, [selectedMemberIds, splitMode, unequalValues, parsedAmount]);
 
-    const validateForm = (): boolean => {
-        let valid = true;
-        if (!description.trim()) {
-            setDescriptionError(t('expenses.descriptionRequired'));
-            valid = false;
-        } else setDescriptionError('');
+    const handleReceiptPress = useCallback(() => {
+        const takePhoto = async () => {
+            const perm = await ImagePicker.requestCameraPermissionsAsync();
+            if (!perm.granted) {
+                Alert.alert(
+                    t('expenses.receiptPermissionTitle'),
+                    t('expenses.receiptCameraPermissionMessage'),
+                );
+                return;
+            }
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.4,
+            });
+            if (!result.canceled && result.assets[0]?.uri) {
+                setLocalReceiptUri(result.assets[0].uri);
+                setReceiptRemoved(false);
+            }
+        };
+        const pickFromLibrary = async () => {
+            const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!perm.granted) {
+                Alert.alert(
+                    t('expenses.receiptPermissionTitle'),
+                    t('expenses.receiptLibraryPermissionMessage'),
+                );
+                return;
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.4,
+            });
+            if (!result.canceled && result.assets[0]?.uri) {
+                setLocalReceiptUri(result.assets[0].uri);
+                setReceiptRemoved(false);
+            }
+        };
+        const removeReceipt = () => {
+            setLocalReceiptUri(null);
+            setReceiptUrl(null);
+            setReceiptRemoved(true);
+        };
+        const hasReceipt = Boolean(localReceiptUri || (receiptUrl && !receiptRemoved));
+        const buttons: Parameters<typeof Alert.alert>[2] = [
+            { text: t('expenses.takePhoto'), onPress: takePhoto },
+            { text: t('expenses.chooseFromLibrary'), onPress: pickFromLibrary },
+        ];
+        if (hasReceipt) buttons.push({ text: t('expenses.removeReceipt'), onPress: removeReceipt, style: 'destructive' });
+        buttons.push({ text: t('common.cancel'), style: 'cancel' });
+        Alert.alert(t('expenses.receipt'), undefined, buttons, { cancelable: true });
+    }, [t, localReceiptUri, receiptUrl, receiptRemoved]);
 
-        if (!amount || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-            setAmountError(t('expenses.invalidAmount'));
-            valid = false;
-        } else setAmountError('');
-
-        if (selectedMemberIds.length === 0) {
-            setSplitError(t('expenses.noMembersSelected'));
-            valid = false;
-        } else if (splitType === 'unequal' && !unequalCheck.isValid) {
-            setSplitError(t('expenses.splitMismatch'));
-            valid = false;
-        } else setSplitError('');
-
-        return valid;
-    };
-
-    const handleReceiptChange = useCallback((uri: string | null) => {
-        setLocalReceiptUri(uri);
-        setReceiptRemoved(uri === null);
+    const handleEditorDone = useCallback((draft: EditPayerSplitDraft) => {
+        setPaidBy(draft.payerId);
+        setSplitMode(draft.splitMode);
+        setSelectedMemberIds(draft.selectedMemberIds);
+        setUnequalValues(draft.unequalValues);
+        setEditorVisible(false);
     }, []);
 
-    const handleSubmit = async () => {
-        if (!validateForm() || !currentUser || !groupId) return;
+    const handleSubmit = useCallback(async () => {
+        if (!canSave || !currentUser || !groupId) return;
         const splits = buildSplits();
-        if (!splits) {
-            setSplitError(t('expenses.noMembersSelected'));
-            return;
-        }
-
+        if (!splits) return;
         const payerId = paidBy ?? currentUser.id;
         startLoading();
-
         let uploadedReceiptUrl: string | undefined;
         if (localReceiptUri) {
             const uploaded = await uploadExpenseReceipt(groupId, localReceiptUri);
@@ -315,15 +341,11 @@ export function AddExpenseScreen() {
             }
             uploadedReceiptUrl = uploaded;
         }
-
-        // Edit mode: send a value only if the user touched the receipt field.
-        // Empty string clears the column (matches the avatar-clear pattern).
         const receiptUpdate: { receiptUrl?: string } = uploadedReceiptUrl
             ? { receiptUrl: uploadedReceiptUrl }
             : receiptRemoved
                 ? { receiptUrl: '' }
                 : {};
-
         const result = isEditMode
             ? expenseId
                 ? await updateExpense(expenseId, {
@@ -332,6 +354,7 @@ export function AddExpenseScreen() {
                       currency,
                       category,
                       paidBy: payerId,
+                      expenseDate: date,
                       splits,
                       ...receiptUpdate,
                   })
@@ -343,140 +366,237 @@ export function AddExpenseScreen() {
                   currency,
                   category,
                   paidBy: payerId,
+                  expenseDate: date,
                   splits,
                   ...(uploadedReceiptUrl ? { receiptUrl: uploadedReceiptUrl } : {}),
               });
         stopLoading();
-        if (result) navigation.goBack();
-    };
+        if (result) {
+            navigation.navigate('Groups', { screen: 'GroupDetail', params: { groupId } });
+        }
+    }, [
+        canSave,
+        currentUser,
+        groupId,
+        buildSplits,
+        paidBy,
+        localReceiptUri,
+        receiptRemoved,
+        isEditMode,
+        expenseId,
+        description,
+        parsedAmount,
+        currency,
+        category,
+        date,
+        navigation,
+        startLoading,
+        stopLoading,
+        t,
+    ]);
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!expenseId) return;
         setShowDeleteDialog(false);
         startLoading();
         const success = await deleteExpense(expenseId);
         stopLoading();
         if (success) navigation.goBack();
+    }, [expenseId, navigation, startLoading, stopLoading]);
+
+    if (isEditMode && expenseLoading) {
+        return (
+            <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+                <LoadingIndicator />
+            </SafeAreaView>
+        );
+    }
+
+    const payerUser = memberUsers.find(u => u.id === paidBy) ?? null;
+    const splitUsers = memberUsers.filter(u => selectedMemberIds.includes(u.id));
+    const payerForButton = payerUser
+        ? {
+              id: payerUser.id,
+              name: payerUser.id === currentUser?.id ? t('common.you') : getDisplayName(payerUser, t),
+              avatarUrl: getAvatarUrl(payerUser) ?? undefined,
+          }
+        : null;
+    const splitMembersForButton = splitUsers.map(u => ({
+        id: u.id,
+        name: u.id === currentUser?.id ? t('common.you') : getDisplayName(u, t),
+        avatarUrl: getAvatarUrl(u) ?? undefined,
+    }));
+    const splitLabel = t(`expenses.v2.summary.${splitMode}`);
+
+    const hasReceipt = Boolean(localReceiptUri || (receiptUrl && !receiptRemoved));
+    const receiptLabel = hasReceipt
+        ? localReceiptUri
+            ? t('expenses.v2.receipt')
+            : t('expenses.v2.receipt')
+        : t('expenses.v2.receipt');
+    const dateLabel = isSameDay(date, new Date())
+        ? t('expenses.v2.today')
+        : formatShortDate(date);
+    const headerTitle = isEditMode ? t('expenses.v2.headerEdit') : t('expenses.v2.headerNew');
+
+    const editorInitial: EditPayerSplitDraft = {
+        payerId: paidBy ?? currentUser?.id ?? '',
+        splitMode,
+        selectedMemberIds,
+        unequalValues,
     };
 
-    if (isEditMode && expenseLoading) return <LoadingIndicator />;
-
-    const showMembers = memberUsers.length > 0;
-    const showUnequalPanel = splitType === 'unequal' && selectedMemberIds.length > 0;
-
     return (
-        <>
-            <ScrollView className="flex-1 bg-slate-50">
-                <View className="p-4">
-                    <Input
-                        label={t('expenses.description')}
-                        placeholder={t('expenses.enterDescription')}
-                        value={description}
-                        onChangeText={text => {
-                            setDescription(text);
-                            if (descriptionError) setDescriptionError('');
-                        }}
-                        error={descriptionError}
+        <SafeAreaView edges={['top']} style={styles.root}>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    activeOpacity={0.7}
+                    style={styles.headerSide}
+                    testID="add-expense-cancel"
+                >
+                    <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{headerTitle}</Text>
+                <TouchableOpacity
+                    onPress={handleSubmit}
+                    activeOpacity={0.7}
+                    disabled={!canSave || isLoading}
+                    style={styles.headerSide}
+                    testID="add-expense-submit"
+                    accessibilityState={{ disabled: !canSave || isLoading }}
+                >
+                    <Text style={[styles.saveText, !canSave || isLoading ? styles.saveTextDisabled : null]}>
+                        {t('common.save')}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Hero */}
+            <View style={styles.hero}>
+                <View style={styles.heroTop}>
+                    <CurrencyPill
+                        currency={currency}
+                        onPress={() => setCurrencyPickerVisible(true)}
                     />
+                    <View style={{ height: 24 }} />
+                    <TextInput
+                        value={amount}
+                        onChangeText={text => setAmount(sanitizeAmountInput(text))}
+                        keyboardType="decimal-pad"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        placeholderTextColor={colors.gray300}
+                        style={styles.amountInput}
+                        testID="amount-display"
+                    />
+                    <TextInput
+                        value={description}
+                        onChangeText={setDescription}
+                        placeholder={t('expenses.v2.descriptionPlaceholder')}
+                        placeholderTextColor={colors.gray300}
+                        style={styles.descriptionInput}
+                        textAlign="center"
+                        testID="description-input"
+                        returnKeyType="done"
+                    />
+                    <View style={styles.descriptionUnderline} />
+                </View>
 
-                    <View className="mb-4">
-                        <Text className="text-sm font-medium text-gray-700 mb-2">{t('expenses.amount')}</Text>
-                        <View style={[rtlRowStyle(isRtl), styles.amountRow]}>
-                            <TextInput
-                                className={`flex-1 bg-white border rounded-xl px-4 text-3xl font-semibold text-gray-900 ${amountError ? 'border-red-500' : 'border-gray-300'}`}
-                                style={[resolveAutoTextInputStyle(isRtl), styles.amountInput]}
-                                placeholder="0.00"
-                                placeholderTextColor="#9CA3AF"
-                                value={amount}
-                                onChangeText={text => {
-                                    const clean = sanitizeAmountInput(text);
-                                    setAmount(clean);
-                                    if (amountError) setAmountError('');
-                                    if (splitType === 'unequal') setSplitError('');
-                                }}
-                                keyboardType="decimal-pad"
-                                inputMode="decimal"
+                <View style={{ marginTop: 22 }}>
+                    {memberUsers.length > 0 ? (
+                        <>
+                            <CombinedPayerSplitButton
+                                payer={payerForButton}
+                                splitMembers={splitMembersForButton}
+                                splitModeLabel={splitLabel}
+                                onPress={() => setEditorVisible(true)}
+                                payerEyebrow={t('expenses.v2.paidByEyebrow')}
                             />
-                            <View style={styles.currencyPickerWrap}>
-                                <CurrencyPicker value={currency} onChange={setCurrency} compact />
-                            </View>
-                        </View>
-                        {amountError ? <Text className="text-sm text-red-500 mt-1">{amountError}</Text> : null}
-                    </View>
-
-                    <CategoryPicker value={category} onChange={setCategory} label={t('expenses.category')} />
-
-                    {memberUsers.length > 0 && (
-                        <PayerPicker
-                            members={memberUsers}
-                            value={paidBy}
-                            onChange={setPaidBy}
-                            label={t('expenses.paidBy')}
-                        />
-                    )}
-
-                    <SplitTypeSelector value={splitType} onChange={handleSplitTypeChange} label={t('expenses.splitType')} />
-
-                    {showMembers ? (
-                        <MemberSelector
-                            members={memberUsers}
-                            selectedIds={selectedMemberIds}
-                            onToggle={handleToggleMember}
-                            label={t('expenses.splitBetween')}
-                            variant="pills"
-                        />
-                    ) : membersLoading && groupId ? (
+                            <SplitBreakdownAccordion
+                                members={splitMembersForButton}
+                                currency={currency}
+                                totalAmount={Number.isFinite(parsedAmount) ? parsedAmount : 0}
+                                splitMode={splitMode}
+                                unequalValues={unequalValues}
+                                payerId={paidBy}
+                                paidLabel={t('groups.expense.paidBadge')}
+                            />
+                        </>
+                    ) : membersLoading ? (
                         <LoadingIndicator />
                     ) : null}
-
-                    {showUnequalPanel && (
-                        <UnequalSplitPanel
-                            members={selectedMemberUsers}
-                            totalAmount={Number.isFinite(parsedAmount) ? parsedAmount : 0}
-                            currency={currency}
-                            mode={unequalMode}
-                            values={unequalValues}
-                            onChangeMode={handleUnequalModeChange}
-                            onChangeValue={handleUnequalValueChange}
-                        />
-                    )}
-
-                    {splitType === 'unequal' && splitError ? (
-                        <Text className="text-sm text-red-500 mb-4">{splitError}</Text>
-                    ) : null}
-
-                    {splitType === 'equal' && selectedMemberIds.length > 0 && amount && Number.isFinite(parsedAmount) && (
-                        <Text className="text-sm text-gray-600 text-center mb-4">
-                            {t('expenses.eachPays')}: {currency}{' '}
-                            {(parsedAmount / selectedMemberIds.length).toFixed(2)}
-                        </Text>
-                    )}
-
-                    <ReceiptImagePicker
-                        imageUrl={receiptRemoved ? null : receiptUrl}
-                        localUri={localReceiptUri}
-                        onChange={handleReceiptChange}
-                    />
-
-                    <View style={styles.actions}>
-                        <Button
-                            title={isEditMode ? t('common.save') : t('expenses.addExpense')}
-                            onPress={handleSubmit}
-                            loading={isLoading}
-                            disabled={!isSubmitReady || isLoading}
-                            testID="add-expense-submit"
-                        />
-                        {isEditMode && (
-                            <Button
-                                title={t('common.delete')}
-                                onPress={() => setShowDeleteDialog(true)}
-                                variant="danger"
-                            />
-                        )}
-                    </View>
                 </View>
-            </ScrollView>
 
+                <View style={{ flex: 1 }} />
+
+                {isEditMode && (
+                    <TouchableOpacity
+                        onPress={() => setShowDeleteDialog(true)}
+                        activeOpacity={0.7}
+                        style={styles.deleteRow}
+                        testID="add-expense-delete"
+                    >
+                        <Text style={styles.deleteText}>{t('common.delete')}</Text>
+                    </TouchableOpacity>
+                )}
+
+                <View style={styles.metaRow}>
+                    <QuietIconPill
+                        icon="calendar-outline"
+                        label={dateLabel}
+                        active
+                        onPress={() => setDatePickerVisible(true)}
+                        testID="meta-date"
+                    />
+                    <QuietIconPill
+                        icon="camera-outline"
+                        label={receiptLabel}
+                        active={hasReceipt}
+                        onPress={handleReceiptPress}
+                        testID="meta-receipt"
+                    />
+                    {hasReceipt && (localReceiptUri || receiptUrl) ? (
+                        <ReceiptThumbnail
+                            uri={localReceiptUri ?? receiptUrl ?? null}
+                            onPress={handleReceiptPress}
+                        />
+                    ) : null}
+                </View>
+            </View>
+
+            {/* Editor sheet */}
+            <EditPayerSplitSheet
+                visible={editorVisible}
+                members={memberUsers}
+                currentUserId={currentUser?.id}
+                currency={currency}
+                totalAmount={Number.isFinite(parsedAmount) ? parsedAmount : 0}
+                initial={editorInitial}
+                onCancel={() => setEditorVisible(false)}
+                onDone={handleEditorDone}
+            />
+
+            {/* Currency picker (controlled — keep existing modal UI) */}
+            <CurrencyPicker
+                value={currency}
+                onChange={setCurrency}
+                visible={currencyPickerVisible}
+                onClose={() => setCurrencyPickerVisible(false)}
+            />
+
+            <DatePickerPopup
+                visible={datePickerVisible}
+                initialDate={date}
+                onCancel={() => setDatePickerVisible(false)}
+                onConfirm={next => {
+                    setDate(next);
+                    setDatePickerVisible(false);
+                }}
+            />
+
+            {/* Delete confirmation */}
             {isEditMode && (
                 <ConfirmDialog
                     visible={showDeleteDialog}
@@ -489,27 +609,143 @@ export function AddExpenseScreen() {
                     destructive
                 />
             )}
-        </>
+
+            {isLoading ? (
+                <View style={styles.loadingOverlay} pointerEvents="auto" testID="save-loading-overlay">
+                    <ActivityIndicator size="large" color={colors.primaryDark} />
+                </View>
+            ) : null}
+        </SafeAreaView>
+    );
+}
+
+/** Small circular receipt thumbnail rendered next to the Receipt pill. Tap to re-open the picker. */
+const RECEIPT_THUMB_SIZE = 32;
+function ReceiptThumbnail({ uri, onPress }: { uri: string | null; onPress: () => void }) {
+    if (!uri) return null;
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            activeOpacity={0.85}
+            testID="receipt-thumbnail"
+            style={{
+                width: RECEIPT_THUMB_SIZE,
+                height: RECEIPT_THUMB_SIZE,
+                borderRadius: RECEIPT_THUMB_SIZE / 2,
+                borderWidth: 1,
+                borderColor: '#E2E8F0',
+                backgroundColor: '#FFFFFF',
+                overflow: 'hidden',
+            }}
+        >
+            <Image
+                source={{ uri }}
+                resizeMode="cover"
+                style={{ width: RECEIPT_THUMB_SIZE, height: RECEIPT_THUMB_SIZE }}
+            />
+        </TouchableOpacity>
     );
 }
 
 const styles = StyleSheet.create({
-    amountRow: {
-        gap: 8,
-        alignItems: 'stretch',
+    root: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 8,
+        paddingTop: 4,
+        paddingBottom: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9',
+    },
+    headerSide: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+    },
+    headerTitle: {
+        fontSize: 12,
+        fontWeight: '600',
+        letterSpacing: 0.72,
+        textTransform: 'uppercase',
+        color: colors.text.secondary,
+    },
+    cancelText: {
+        fontSize: 15,
+        fontWeight: '500',
+        color: colors.gray600,
+    },
+    saveText: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: colors.primaryDark,
+    },
+    saveTextDisabled: {
+        color: colors.gray400,
+    },
+    hero: {
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingTop: 20,
+    },
+    heroTop: {
+        alignItems: 'center',
     },
     amountInput: {
-        flex: 1,
-        minWidth: 0,
-        height: 64,
+        fontSize: 64,
+        fontWeight: '700',
+        color: colors.text.primary,
+        letterSpacing: -1.9,
+        lineHeight: 78,
         textAlign: 'center',
+        padding: 0,
+        marginVertical: 0,
+        paddingTop: 8,
+        fontVariant: ['tabular-nums'],
+        minWidth: 120,
     },
-    currencyPickerWrap: {
-        width: 100,
-        flexShrink: 0,
+    descriptionInput: {
+        marginTop: 12,
+        fontSize: 17,
+        fontWeight: '500',
+        color: colors.text.primary,
+        textAlign: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 0,
+        minWidth: 200,
     },
-    actions: {
-        marginTop: 16,
+    descriptionUnderline: {
+        marginTop: 4,
+        width: 56,
+        height: 2,
+        borderRadius: 9999,
+        backgroundColor: colors.primaryLight,
+    },
+    metaRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
         gap: 8,
+        paddingTop: 16,
+        marginBottom: 8,
+    },
+    deleteRow: {
+        alignSelf: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+    },
+    deleteText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.error,
+    },
+    loadingOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
