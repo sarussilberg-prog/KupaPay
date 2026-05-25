@@ -369,7 +369,38 @@
             "healthcare": "בריאות",
             "other": "אחר"
         },
-        "paidBySub": "{{amount}} · שולם על ידי {{name}}"
+        "paidBySub": "{{amount}} · שולם על ידי {{name}}",
+        "v2": {
+            "headerNew": "הוצאה חדשה",
+            "headerEdit": "עריכת הוצאה",
+            "amountPlaceholder": "0.00",
+            "descriptionPlaceholder": "על מה זה היה?",
+            "today": "היום",
+            "datePickerTitle": "בחר תאריך",
+            "receipt": "קבלה",
+            "paidByEyebrow": "שולם על ידי",
+            "splitEyebrow": "חלוקה",
+            "whoAndHow": "מי ואיך",
+            "sectionPaidBy": "שולם על ידי",
+            "sectionSplitBetween": "חלוקה בין",
+            "modes": {
+                "equal": "שווה",
+                "percent": "אחוזים",
+                "exact": "סכום"
+            },
+            "summary": {
+                "equal": "שווה בשווה",
+                "percent": "לפי אחוז",
+                "exact": "לפי סכום"
+            },
+            "errors": {
+                "percentUnder": "חסר {{value}}% מ-100%",
+                "percentOver": "{{value}}% מעל 100%",
+                "amountUnder": "חסר {{currency}} {{value}} מתוך {{currency}} {{total}}",
+                "amountOver": "{{currency}} {{value}} מעל {{currency}} {{total}}"
+            },
+            "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד"
+        }
     },
     "balances": {
         "title": "יתרות",

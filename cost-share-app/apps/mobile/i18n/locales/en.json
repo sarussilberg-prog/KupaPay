@@ -355,7 +355,38 @@
             "healthcare": "Healthcare",
             "other": "Other"
         },
-        "paidBySub": "{{amount}} · paid by {{name}}"
+        "paidBySub": "{{amount}} · paid by {{name}}",
+        "v2": {
+            "headerNew": "NEW EXPENSE",
+            "headerEdit": "EDIT EXPENSE",
+            "amountPlaceholder": "0.00",
+            "descriptionPlaceholder": "What was this for?",
+            "today": "Today",
+            "datePickerTitle": "Pick date",
+            "receipt": "Receipt",
+            "paidByEyebrow": "Paid by",
+            "splitEyebrow": "Split",
+            "whoAndHow": "Who & how",
+            "sectionPaidBy": "PAID BY",
+            "sectionSplitBetween": "SPLIT BETWEEN",
+            "modes": {
+                "equal": "Equal",
+                "percent": "Percent",
+                "exact": "Exact"
+            },
+            "summary": {
+                "equal": "Equally",
+                "percent": "By percent",
+                "exact": "By amount"
+            },
+            "errors": {
+                "percentUnder": "{{value}}% short of 100%",
+                "percentOver": "{{value}}% over 100%",
+                "amountUnder": "{{currency}} {{value}} short of {{currency}} {{total}}",
+                "amountOver": "{{currency}} {{value}} over {{currency}} {{total}}"
+            },
+            "splitMeta": "{{selected}} of {{total}} · {{currency}} {{each}} ea."
+        }
     },
     "balances": {
         "title": "Balances",
