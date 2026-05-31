@@ -391,13 +391,15 @@
     "balances": {
         "title": "Balances",
         "settledUp": "Settled up",
+        "groupTotals": "Group totals",
+        "totalSpent": "Total spent",
+        "unsettled": "Unsettled",
+        "expenseCount_one": "1 expense",
+        "expenseCount_other": "{{count}} expenses",
+        "membersSectionLabel": "Members",
         "getsBack": "Gets back",
         "owes": "Owes",
         "paid": "Paid",
-        "modeToggle": {
-            "paid": "Paid",
-            "spentOn": "Spent on"
-        },
         "paidMode": {
             "row": "{{name}} paid",
             "rowYou": "You paid",
@@ -583,6 +585,7 @@
         "toastUpdated": "Payment updated",
         "toastDeleted": "Payment deleted",
         "notInvolved": "You're not in this debt",
+        "othersToggle": "Settlements that don't involve you ({{count}})",
         "detailHeaderLabel": "Settlement",
         "payment": "Payment",
         "paid": "PAID",
@@ -611,7 +614,9 @@
         "recordPaymentWithAmount": "Record payment · {{currencyAndAmount}}",
         "openPaymentApp": "Open {{app}}",
         "paymentAppErrorTitle": "Can't open payment",
-        "paymentAppOpenFailed": "Couldn't open the payment app. Make sure it is installed."
+        "paymentAppOpenFailed": "Couldn't open the payment app. Make sure it is installed.",
+        "currencyPickerTitle": "Choose currency",
+        "amountOwed": "{{amount}} owed"
     },
     "feed": {
         "settlement": "{{from}} paid {{to}} {{amount}}",

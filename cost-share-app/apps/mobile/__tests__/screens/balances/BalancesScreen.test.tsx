@@ -1,19 +1,18 @@
 import React from 'react';
-import { fireEvent, act } from '@testing-library/react-native';
+import { fireEvent } from '@testing-library/react-native';
 import { renderWithQuery } from '../../helpers/renderWithQuery';
 
 jest.mock('@react-navigation/native', () => {
     const actual = jest.requireActual('@react-navigation/native');
     return {
         ...actual,
-        useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+        useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn(), setOptions: jest.fn() }),
         useRoute: () => ({ params: { groupId: 'g1' } }),
         useFocusEffect: (cb: () => void) => cb(),
         useIsFocused: () => true,
     };
 });
 
-// Stub SettleUpSheet so we can detect when it opens and assert prefill.
 jest.mock('../../../components/SettleUpSheet', () => {
     const React = require('react');
     const { Text, View } = require('react-native');
@@ -61,9 +60,13 @@ const members = [
     { id: 'bob', name: 'Bob', email: 'b@x.com', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), inviteToken: 'b-token' },
 ];
 
-function setContributions(totals: any[], matrix: any[] = []) {
+function setContributions(opts: { totals?: any[]; matrix?: any[]; expenseCount?: number }) {
     mockContributionsQuery.mockReturnValue({
-        data: { totals, matrix },
+        data: {
+            totals: opts.totals ?? [],
+            matrix: opts.matrix ?? [],
+            expenseCount: opts.expenseCount ?? 0,
+        },
         isLoading: false,
         isFetching: false,
         refetch: jest.fn(),
@@ -73,6 +76,7 @@ function setContributions(totals: any[], matrix: any[] = []) {
 function setSimplifiedDebts(entries: any[]) {
     mockSimplifiedDebtsQuery.mockReturnValue({
         data: entries,
+        isLoading: false,
         isFetching: false,
         refetch: jest.fn(),
     });
@@ -102,90 +106,78 @@ beforeEach(() => {
             updatedAt: new Date(),
             inviteToken: 'me-token',
         } as any,
+        groups: [
+            {
+                id: 'g1',
+                name: 'Trip',
+                defaultCurrency: 'USD',
+                groupType: 'travel',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            } as any,
+        ],
     });
 });
 
 describe('BalancesScreen', () => {
-    it('renders the mode toggle and defaults to Paid', () => {
-        setContributions([], []);
+    it('no longer renders the mode toggle', () => {
+        setContributions({});
         setSimplifiedDebts([]);
-        const { getByTestId } = renderWithQuery(<BalancesScreen />);
-        const paidBtn = getByTestId('balance-mode-toggle-paid');
-        const spentOnBtn = getByTestId('balance-mode-toggle-spentOn');
-        expect(paidBtn.props.accessibilityState?.selected).toBe(true);
-        expect(spentOnBtn.props.accessibilityState?.selected).toBe(false);
+        const { queryByTestId } = renderWithQuery(<BalancesScreen />);
+        expect(queryByTestId('balance-mode-toggle')).toBeNull();
+        expect(queryByTestId('balance-mode-toggle-paid')).toBeNull();
+        expect(queryByTestId('balance-mode-toggle-spentOn')).toBeNull();
     });
 
-    it('renders all members in roster order (current user first as "You")', () => {
-        setContributions(
-            [
-                { userId: 'me', paid: [], owed: [] },
-                { userId: 'alice', paid: [], owed: [] },
-                { userId: 'bob', paid: [], owed: [] },
+    it('renders the Group Totals card with summed paid amounts and expense count', () => {
+        setContributions({
+            totals: [
+                { userId: 'me', paid: [{ currency: 'USD', amount: 100 }], owed: [] },
+                {
+                    userId: 'alice',
+                    paid: [
+                        { currency: 'USD', amount: 50 },
+                        { currency: 'ILS', amount: 200 },
+                    ],
+                    owed: [],
+                },
             ],
-            [],
-        );
+            expenseCount: 4,
+        });
+        setSimplifiedDebts([]);
+        const { getByTestId, getByText, getAllByText } = renderWithQuery(<BalancesScreen />);
+        expect(getByTestId('group-totals-card')).toBeTruthy();
+        // USD total is the SUM of paid amounts and appears only in the totals card.
+        expect(getByText('USD 150.00')).toBeTruthy();
+        // ILS 200 appears both in alice's member row AND the totals card.
+        expect(getAllByText('ILS 200.00').length).toBe(2);
+        // 4 expenses → uses the plural form key in tests.
+        expect(getAllByText(/balances\.expenseCount/i).length).toBeGreaterThan(0);
+    });
+
+    it('renders all members with paid amounts (current user first as "You")', () => {
+        setContributions({
+            totals: [
+                { userId: 'alice', paid: [{ currency: 'USD', amount: 50 }], owed: [] },
+                { userId: 'bob', paid: [], owed: [] },
+                { userId: 'me', paid: [{ currency: 'USD', amount: 100 }], owed: [] },
+            ],
+            expenseCount: 2,
+        });
         setSimplifiedDebts([]);
         const { getByTestId, getAllByText } = renderWithQuery(<BalancesScreen />);
         expect(getByTestId('member-row-me')).toBeTruthy();
         expect(getByTestId('member-row-alice')).toBeTruthy();
         expect(getByTestId('member-row-bob')).toBeTruthy();
-        // "You" appears via i18n key — t() returns key in tests, but the row
-        // still uses the translated string-shape. Verify by ensuring the
-        // "common.you" key is referenced via the paidMode.row label string.
-        expect(getAllByText(/balances\.paidMode\.row/).length).toBeGreaterThan(0);
-    });
-
-    it('shows per-currency paid amounts in Paid mode and switches to owed in Spent on', () => {
-        setContributions(
-            [
-                {
-                    userId: 'me',
-                    paid: [{ currency: 'USD', amount: 100 }],
-                    owed: [{ currency: 'USD', amount: 50 }],
-                },
-                {
-                    userId: 'alice',
-                    paid: [],
-                    owed: [{ currency: 'USD', amount: 50 }],
-                },
-                { userId: 'bob', paid: [], owed: [] },
-            ],
-            [],
-        );
-        setSimplifiedDebts([]);
-        const { getByText, getByTestId, queryByText } = renderWithQuery(
-            <BalancesScreen />,
-        );
-        expect(getByText('USD 100.00')).toBeTruthy();
-        expect(queryByText('USD 50.00')).toBeNull();
-
-        fireEvent.press(getByTestId('balance-mode-toggle-spentOn'));
-        // Now Alice's owed (USD 50) and Me's owed (USD 50) should appear.
-        // Use getAllByText to find both.
-        // After toggle: paid 100 should be gone from the me row.
-        expect(queryByText('USD 100.00')).toBeNull();
-    });
-
-    it('shows "No activity" line for members with zero activity in the selected mode', () => {
-        setContributions(
-            [
-                { userId: 'me', paid: [{ currency: 'USD', amount: 10 }], owed: [] },
-                { userId: 'alice', paid: [], owed: [] },
-                { userId: 'bob', paid: [], owed: [] },
-            ],
-            [],
-        );
-        setSimplifiedDebts([]);
-        const { getAllByText } = renderWithQuery(<BalancesScreen />);
-        // Alice and Bob both have no paid activity — two "No activity" lines.
-        const noActivity = getAllByText('balances.noActivityInMode');
-        expect(noActivity.length).toBeGreaterThanOrEqual(2);
+        // USD 100 appears in me's row only (USD total = 150, not 100).
+        expect(getAllByText('USD 100.00').length).toBe(1);
+        // USD 50 appears in alice's row only (USD total = 150).
+        expect(getAllByText('USD 50.00').length).toBe(1);
     });
 
     it('opens MemberContributionDialog when a member row is tapped', () => {
-        setContributions(
-            [
+        setContributions({
+            totals: [
                 {
                     userId: 'me',
                     paid: [{ currency: 'USD', amount: 60 }],
@@ -194,29 +186,22 @@ describe('BalancesScreen', () => {
                 { userId: 'alice', paid: [], owed: [{ currency: 'USD', amount: 20 }] },
                 { userId: 'bob', paid: [], owed: [{ currency: 'USD', amount: 20 }] },
             ],
-            [
+            matrix: [
                 { payerId: 'me', consumerId: 'me', currency: 'USD', amount: 20 },
                 { payerId: 'me', consumerId: 'alice', currency: 'USD', amount: 20 },
                 { payerId: 'me', consumerId: 'bob', currency: 'USD', amount: 20 },
             ],
-        );
+            expenseCount: 1,
+        });
         setSimplifiedDebts([]);
         const { getByTestId } = renderWithQuery(<BalancesScreen />);
         fireEvent.press(getByTestId('member-row-me'));
-        // Dialog renders a section per counterparty.
         expect(getByTestId('contribution-section-alice')).toBeTruthy();
         expect(getByTestId('contribution-section-bob')).toBeTruthy();
     });
 
-    it('renders the simplified-debts section per currency and shows the Minimum badge when all currencies are exact', () => {
-        setContributions(
-            [
-                { userId: 'me', paid: [], owed: [] },
-                { userId: 'alice', paid: [], owed: [] },
-                { userId: 'bob', paid: [], owed: [] },
-            ],
-            [],
-        );
+    it('renders the simplified-debts section with the Minimum badge when all-exact', () => {
+        setContributions({});
         setSimplifiedDebts([
             {
                 currency: 'USD',
@@ -235,58 +220,53 @@ describe('BalancesScreen', () => {
                     algorithm: 'exact',
                 },
             },
-            {
-                currency: 'ILS',
-                result: {
-                    debts: [
-                        {
-                            fromUserId: 'bob',
-                            fromUserName: 'Bob',
-                            toUserId: 'me',
-                            toUserName: 'Me',
-                            amount: 75,
-                            currency: 'ILS',
-                        },
-                    ],
-                    transactionCount: 1,
-                    algorithm: 'exact',
-                },
-            },
         ]);
-        const { getByText, getByTestId } = renderWithQuery(<BalancesScreen />);
-        expect(getByText('USD 25.00')).toBeTruthy();
-        expect(getByText('ILS 75.00')).toBeTruthy();
+        const { getAllByText, getByTestId } = renderWithQuery(<BalancesScreen />);
+        // USD 25.00 appears in both the GroupTotalsCard unsettled row and the DebtRow.
+        expect(getAllByText('USD 25.00').length).toBe(2);
         expect(getByTestId('minimum-badge')).toBeTruthy();
     });
 
-    it('hides the Minimum badge when any currency simplification is greedy', () => {
-        setContributions([], []);
+    it('collapses non-involved debts behind a toggle and expands on press', () => {
+        setContributions({});
         setSimplifiedDebts([
             {
                 currency: 'USD',
                 result: {
                     debts: [
+                        // involved
+                        {
+                            fromUserId: 'me',
+                            fromUserName: 'Me',
+                            toUserId: 'alice',
+                            toUserName: 'Alice',
+                            amount: 30,
+                            currency: 'USD',
+                        },
+                        // not involved
                         {
                             fromUserId: 'alice',
                             fromUserName: 'Alice',
-                            toUserId: 'me',
-                            toUserName: 'Me',
-                            amount: 25,
+                            toUserId: 'bob',
+                            toUserName: 'Bob',
+                            amount: 50,
                             currency: 'USD',
                         },
                     ],
-                    transactionCount: 1,
-                    algorithm: 'greedy',
+                    transactionCount: 2,
+                    algorithm: 'exact',
                 },
             },
         ]);
-        const { queryByTestId, getByTestId } = renderWithQuery(<BalancesScreen />);
-        expect(getByTestId('debts-summary')).toBeTruthy();
-        expect(queryByTestId('minimum-badge')).toBeNull();
+        const { getByTestId, queryByTestId } = renderWithQuery(<BalancesScreen />);
+        expect(getByTestId('settle-debt-me-alice-USD')).toBeTruthy();
+        expect(queryByTestId('settle-debt-alice-bob-USD')).toBeNull();
+        fireEvent.press(getByTestId('settle-others-toggle'));
+        expect(getByTestId('settle-debt-alice-bob-USD')).toBeTruthy();
     });
 
     it('shows the "all settled" empty state when no currency has debts', () => {
-        setContributions([], []);
+        setContributions({});
         setSimplifiedDebts([]);
         const { getByText, queryByTestId } = renderWithQuery(<BalancesScreen />);
         expect(getByText('balances.allSettled')).toBeTruthy();
@@ -294,7 +274,7 @@ describe('BalancesScreen', () => {
     });
 
     it('opens SettleUpSheet pre-filled with the tapped simplified-debt row', () => {
-        setContributions([], []);
+        setContributions({});
         setSimplifiedDebts([
             {
                 currency: 'USD',

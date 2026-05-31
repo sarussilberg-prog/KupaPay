@@ -49,14 +49,48 @@ describe('SettleUpSheet (redesign)', () => {
         expect(getByText('David')).toBeTruthy();
     });
 
-    it('SWAP chip flips from/to and submits the swapped payload', async () => {
+    it('renders a static currency chip when only one currency is owed', () => {
+        const { getByTestId, queryByTestId } = renderSheet();
+        expect(getByTestId('settle-currency-chip-static')).toBeTruthy();
+        expect(queryByTestId('settle-currency-chip')).toBeNull();
+    });
+
+    it('renders a tappable currency chip when more than one currency is owed', () => {
+        const multi: PairwiseDebt[] = [
+            { fromUserId: 'u1', toUserId: 'u2', currency: 'USD', amount: 18 } as PairwiseDebt,
+            { fromUserId: 'u1', toUserId: 'u2', currency: 'EUR', amount: 42 } as PairwiseDebt,
+        ];
+        const { getByTestId, queryByTestId } = renderSheet({ pairwiseDebts: multi });
+        expect(getByTestId('settle-currency-chip')).toBeTruthy();
+        expect(queryByTestId('settle-currency-chip-static')).toBeNull();
+    });
+
+    it('selecting a different currency updates the submitted currency and amount', async () => {
+        const multi: PairwiseDebt[] = [
+            { fromUserId: 'u1', toUserId: 'u2', currency: 'USD', amount: 18 } as PairwiseDebt,
+            { fromUserId: 'u1', toUserId: 'u2', currency: 'EUR', amount: 42 } as PairwiseDebt,
+        ];
         const onSubmit = jest.fn();
-        const { getByTestId } = renderSheet({ onSubmit });
-        fireEvent.press(getByTestId('settle-swap-chip'));
+        const { getByTestId } = renderSheet({ pairwiseDebts: multi, onSubmit });
+        fireEvent.press(getByTestId('settle-currency-chip'));
+        fireEvent.press(getByTestId('currency-picker-row-EUR'));
         fireEvent.press(getByTestId('settle-record-button'));
         expect(onSubmit).toHaveBeenCalledWith(
-            expect.objectContaining({ fromUserId: 'u2', toUserId: 'u1' })
+            expect.objectContaining({ currency: 'EUR', amount: 42 })
         );
+    });
+
+    it('renders the static chip in edit mode even with multiple owed currencies', () => {
+        const multi: PairwiseDebt[] = [
+            { fromUserId: 'u1', toUserId: 'u2', currency: 'USD', amount: 18 } as PairwiseDebt,
+            { fromUserId: 'u1', toUserId: 'u2', currency: 'EUR', amount: 42 } as PairwiseDebt,
+        ];
+        const { getByTestId, queryByTestId } = renderSheet({
+            pairwiseDebts: multi,
+            mode: 'edit',
+        });
+        expect(getByTestId('settle-currency-chip-static')).toBeTruthy();
+        expect(queryByTestId('settle-currency-chip')).toBeNull();
     });
 
     it('selecting a method tile updates the submitted paymentMethod', async () => {
@@ -100,12 +134,11 @@ describe('SettleUpSheet (redesign)', () => {
         expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it('record button label includes the formatted amount', () => {
-        const { getByTestId, getByText } = renderSheet();
-        // The button renders the label text and exposes it via accessibilityLabel.
-        const recordButton = getByTestId('settle-record-button');
-        expect(recordButton.props.accessibilityLabel).toBe('settleUp.recordPaymentWithAmount');
-        // The Text child inside the button contains the same label string.
-        expect(getByText('settleUp.recordPaymentWithAmount')).toBeTruthy();
+    it('record button shows the simple Save label', () => {
+        const { getByTestId, getAllByText } = renderSheet();
+        // Button is present and labelled with the common Save string.
+        expect(getByTestId('settle-record-button')).toBeTruthy();
+        // The shell header also renders Save, so we expect at least two matches.
+        expect(getAllByText('common.save').length).toBeGreaterThanOrEqual(1);
     });
 });

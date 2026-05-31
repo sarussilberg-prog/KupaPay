@@ -84,7 +84,8 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to set a group or profile image."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "extra": {
       "eas": {

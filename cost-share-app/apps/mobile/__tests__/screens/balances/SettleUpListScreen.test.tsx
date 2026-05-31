@@ -152,7 +152,7 @@ describe('SettleUpListScreen', () => {
         expect(getByText('settleUp.empty')).toBeTruthy();
     });
 
-    it('renders one row per pairwise debt, including multiple rows for the same pair with different currencies', () => {
+    it('renders one row per debt that involves the current user, including multiple currencies for the same pair', () => {
         setSimplifiedQueryResult({
             data: [
                 { fromUserId: 'me', toUserId: 'bob', currency: 'USD', amount: 10 },
@@ -160,24 +160,56 @@ describe('SettleUpListScreen', () => {
                 { fromUserId: 'carol', toUserId: 'dan', currency: 'USD', amount: 25 },
             ],
         });
-        const { getByTestId } = renderWithQuery(<SettleUpListScreen />);
+        const { getByTestId, queryByTestId } = renderWithQuery(<SettleUpListScreen />);
         expect(getByTestId('settle-debt-me-bob-USD')).toBeTruthy();
         expect(getByTestId('settle-debt-me-bob-EUR')).toBeTruthy();
-        expect(getByTestId('settle-debt-carol-dan-USD')).toBeTruthy();
+        // Debts that don't involve the current user are hidden behind the toggle.
+        expect(queryByTestId('settle-debt-carol-dan-USD')).toBeNull();
+        expect(getByTestId('settle-others-toggle')).toBeTruthy();
     });
 
-    it('pins debts the current user is involved in before unrelated debts', () => {
+    it('reveals debts that do not involve the current user only after tapping the toggle', () => {
         setSimplifiedQueryResult({
             data: [
                 { fromUserId: 'carol', toUserId: 'dan', currency: 'USD', amount: 30 },
                 { fromUserId: 'me', toUserId: 'bob', currency: 'USD', amount: 5 },
             ],
         });
-        const { getAllByTestId } = renderWithQuery(<SettleUpListScreen />);
-        const rows = getAllByTestId(/^settle-debt-/);
-        // First row must be the one where current user is involved.
-        expect(rows[0].props.testID).toBe('settle-debt-me-bob-USD');
-        expect(rows[1].props.testID).toBe('settle-debt-carol-dan-USD');
+        const { getByTestId, queryByTestId } = renderWithQuery(<SettleUpListScreen />);
+        // Involved row visible up-front; uninvolved row collapsed.
+        expect(getByTestId('settle-debt-me-bob-USD')).toBeTruthy();
+        expect(queryByTestId('settle-debt-carol-dan-USD')).toBeNull();
+
+        fireEvent.press(getByTestId('settle-others-toggle'));
+
+        expect(getByTestId('settle-debt-carol-dan-USD')).toBeTruthy();
+    });
+
+    it('does not show the others toggle when every debt involves the current user', () => {
+        setSimplifiedQueryResult({
+            data: [
+                { fromUserId: 'me', toUserId: 'bob', currency: 'USD', amount: 5 },
+            ],
+        });
+        const { queryByTestId } = renderWithQuery(<SettleUpListScreen />);
+        expect(queryByTestId('settle-others-toggle')).toBeNull();
+    });
+
+    it('still shows the others toggle when the current user has no open debts', () => {
+        setSimplifiedQueryResult({
+            data: [
+                { fromUserId: 'carol', toUserId: 'dan', currency: 'USD', amount: 30 },
+            ],
+        });
+        const { getByTestId, queryByTestId, getByText } = renderWithQuery(<SettleUpListScreen />);
+        // Empty state shown for the current user's own debts.
+        expect(getByText('settleUp.empty')).toBeTruthy();
+        // Others toggle still available; uninvolved row collapsed until pressed.
+        expect(getByTestId('settle-others-toggle')).toBeTruthy();
+        expect(queryByTestId('settle-debt-carol-dan-USD')).toBeNull();
+
+        fireEvent.press(getByTestId('settle-others-toggle'));
+        expect(getByTestId('settle-debt-carol-dan-USD')).toBeTruthy();
     });
 
     it('opens the settle-up sheet pre-filled with the tapped debt', () => {

@@ -29,7 +29,6 @@ interface GroupSummaryCardProps {
     members: GroupMemberLite[];
     balance: GroupSummaryBalance;
     settlementCount: number;
-    noteHasContent: boolean;
     onBack: () => void;
     onShare: () => void;
     onMenu: () => void;
@@ -43,7 +42,6 @@ export function GroupSummaryCard({
     members,
     balance,
     settlementCount,
-    noteHasContent,
     onBack,
     onShare,
     onMenu,
@@ -81,7 +79,6 @@ export function GroupSummaryCard({
             />
             <SummaryFooter
                 settlementCount={settlementCount}
-                noteHasContent={noteHasContent}
                 onOpenNote={onOpenNote}
                 onOpenSettleUp={onOpenSettleUp}
             />

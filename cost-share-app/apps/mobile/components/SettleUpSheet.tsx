@@ -15,11 +15,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import type { GroupMemberLite, PairwiseDebt, PaymentMethod } from '@cost-share/shared';
 import { Text } from './AppText';
+import { Button } from './Button';
 import { MemberAvatar } from './MemberAvatar';
 import { AppIcon } from './AppIcon';
 import type { AppIconName } from './AppIcon';
 import { BottomSheetShell } from './BottomSheetShell';
 import { DatePickerPopup } from './expenseV2/DatePickerPopup';
+import {
+    CurrencyPickerPopup,
+    type CurrencyPickerOption,
+} from './expenseV2/CurrencyPickerPopup';
 import { rtlRowStyle, useRtlLayout } from '../hooks/useRtlLayout';
 import { getAvatarUrlForMember } from '../lib/userDisplay';
 import { openPaymentApp, type IsraeliPaymentApp } from '../lib/israeliPaymentLinks';
@@ -83,7 +88,7 @@ const BOTTOM_DOCK_PADDING = 132;
 export function SettleUpSheet({
     visible,
     members,
-    pairwiseDebts: _pairwiseDebts,
+    pairwiseDebts,
     currentUserId: _currentUserId,
     initial,
     groupName,
@@ -95,9 +100,9 @@ export function SettleUpSheet({
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
 
-    const [fromUserId, setFromUserId] = useState(initial.fromUserId);
-    const [toUserId, setToUserId] = useState(initial.toUserId);
-    const [currency] = useState(initial.currency);
+    const fromUserId = initial.fromUserId;
+    const toUserId = initial.toUserId;
+    const [currency, setCurrency] = useState(initial.currency);
     const [amountText, setAmountText] = useState(formatAmountText(initial.amount));
     const [paymentMethod, setPaymentMethod] = useState<MethodKey>(
         normalizeMethodKey(initial.paymentMethod),
@@ -106,22 +111,39 @@ export function SettleUpSheet({
         initial.settlementDate ?? new Date()
     );
     const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false);
 
     useEffect(() => {
         if (!visible) return;
-        setFromUserId(initial.fromUserId);
-        setToUserId(initial.toUserId);
+        setCurrency(initial.currency);
         setAmountText(formatAmountText(initial.amount));
         setPaymentMethod(normalizeMethodKey(initial.paymentMethod));
         setSettlementDate(initial.settlementDate ?? new Date());
     }, [
         visible,
-        initial.fromUserId,
-        initial.toUserId,
+        initial.currency,
         initial.amount,
         initial.paymentMethod,
         initial.settlementDate,
     ]);
+
+    const owedCurrencyOptions = useMemo<CurrencyPickerOption[]>(() => {
+        const filtered = pairwiseDebts
+            .filter(
+                d =>
+                    d.fromUserId === initial.fromUserId &&
+                    d.toUserId === initial.toUserId &&
+                    d.amount > 0,
+            )
+            .map(d => ({ currency: d.currency, amount: d.amount }));
+        if (filtered.some(o => o.currency === initial.currency)) return filtered;
+        return [
+            { currency: initial.currency, amount: initial.amount },
+            ...filtered,
+        ];
+    }, [pairwiseDebts, initial.fromUserId, initial.toUserId, initial.currency, initial.amount]);
+
+    const canPickCurrency = mode === 'create' && owedCurrencyOptions.length > 1;
 
     const parsedAmount = useMemo(() => {
         const n = parseFloat(amountText.replace(',', '.'));
@@ -140,10 +162,14 @@ export function SettleUpSheet({
     const recordDisabled =
         submitting || !Number.isFinite(parsedAmount) || parsedAmount <= 0;
 
-    const handleSwap = useCallback(() => {
-        setFromUserId(toUserId);
-        setToUserId(fromUserId);
-    }, [fromUserId, toUserId]);
+    const handleCurrencySelected = useCallback(
+        (option: CurrencyPickerOption) => {
+            setCurrency(option.currency);
+            setAmountText(formatAmountText(option.amount));
+            setCurrencyPickerOpen(false);
+        },
+        [],
+    );
 
     const handleSubmit = useCallback(async () => {
         if (recordDisabled) return;
@@ -167,9 +193,6 @@ export function SettleUpSheet({
     ]);
 
     const label = mode === 'edit' ? t('settleUp.edit') : t('settleUp.title');
-    const formattedAmountForButton = Number.isFinite(parsedAmount)
-        ? `${currency} ${parsedAmount.toFixed(2)}`
-        : `${currency} 0.00`;
 
     return (
         <BottomSheetShell
@@ -193,7 +216,8 @@ export function SettleUpSheet({
                         currency={currency}
                         amountText={amountText}
                         onAmountChange={setAmountText}
-                        onSwap={handleSwap}
+                        canPickCurrency={canPickCurrency}
+                        onOpenCurrencyPicker={() => setCurrencyPickerOpen(true)}
                         groupName={groupName}
                         isRtl={isRtl}
                     />
@@ -211,9 +235,8 @@ export function SettleUpSheet({
                     onOpenDatePicker={() => setDatePickerOpen(true)}
                     onRecord={handleSubmit}
                     recordDisabled={recordDisabled}
-                    label={t('settleUp.recordPaymentWithAmount', {
-                        currencyAndAmount: formattedAmountForButton,
-                    })}
+                    saveLabel={t('common.save')}
+                    submitting={submitting}
                 />
 
                 <DatePickerPopup
@@ -224,6 +247,14 @@ export function SettleUpSheet({
                         setSettlementDate(next);
                         setDatePickerOpen(false);
                     }}
+                />
+
+                <CurrencyPickerPopup
+                    visible={currencyPickerOpen}
+                    options={owedCurrencyOptions}
+                    selectedCurrency={currency}
+                    onCancel={() => setCurrencyPickerOpen(false)}
+                    onConfirm={handleCurrencySelected}
                 />
 
             </View>
@@ -239,7 +270,8 @@ interface SettleUpHeroProps {
     currency: string;
     amountText: string;
     onAmountChange: (v: string) => void;
-    onSwap: () => void;
+    canPickCurrency: boolean;
+    onOpenCurrencyPicker: () => void;
     groupName?: string;
     isRtl: boolean;
 }
@@ -250,7 +282,8 @@ function SettleUpHero({
     currency,
     amountText,
     onAmountChange,
-    onSwap,
+    canPickCurrency,
+    onOpenCurrencyPicker,
     groupName,
     isRtl,
 }: SettleUpHeroProps) {
@@ -301,16 +334,6 @@ function SettleUpHero({
                                 borderColor: 'rgba(255,255,255,0.32)',
                             }}
                         >
-                            <Text
-                                className="text-[11px] font-bold me-1.5"
-                                style={{
-                                    color: 'rgba(255,255,255,0.78)',
-                                    letterSpacing: 0.04 * 11,
-                                }}
-                            >
-                                {currency}
-                            </Text>
-                            <AppIcon name="chevron-down" size={10} color="rgba(255,255,255,0.78)" />
                             <TextInput
                                 value={amountText}
                                 onChangeText={onAmountChange}
@@ -322,7 +345,6 @@ function SettleUpHero({
                                     fontWeight: '700',
                                     fontVariant: ['tabular-nums'],
                                     letterSpacing: -0.02 * 26,
-                                    marginStart: 6,
                                     minWidth: 80,
                                     padding: 0,
                                     textAlign: 'center',
@@ -331,6 +353,13 @@ function SettleUpHero({
                             />
                         </View>
 
+                        <CurrencyChip
+                            currency={currency}
+                            canPick={canPickCurrency}
+                            onPress={onOpenCurrencyPicker}
+                            label={t('settleUp.currency')}
+                        />
+
                         <View className="flex-row items-center mt-2 w-3/4">
                             <View className="flex-1 h-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.85)' }} />
                             <AppIcon
@@ -338,25 +367,8 @@ function SettleUpHero({
                                 size={18}
                                 color="rgba(255,255,255,0.95)"
                             />
+                            <View className="flex-1 h-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.85)' }} />
                         </View>
-
-                        <Pressable
-                            onPress={onSwap}
-                            testID="settle-swap-chip"
-                            className="flex-row items-center mt-2 rounded-full px-2 py-0.5"
-                            style={{
-                                backgroundColor: 'rgba(255,255,255,0.18)',
-                                borderWidth: 1,
-                                borderColor: 'rgba(255,255,255,0.35)',
-                            }}
-                            accessibilityRole="button"
-                            accessibilityLabel={t('settleUp.swap')}
-                        >
-                            <AppIcon name="swap-horizontal-outline" size={11} color="#FFFFFF" />
-                            <Text className="text-white text-[10px] font-bold ms-1">
-                                {t('settleUp.swap')}
-                            </Text>
-                        </Pressable>
                     </View>
 
                     <FlowAvatar member={toMember} label={t('settleUp.to')} />
@@ -404,6 +416,49 @@ function FlowAvatar({ member, label }: { member: GroupMemberLite | undefined; la
                 {label}
             </Text>
         </View>
+    );
+}
+
+/* ----- Currency chip ------------------------------------------------------- */
+
+interface CurrencyChipProps {
+    currency: string;
+    canPick: boolean;
+    onPress: () => void;
+    label: string;
+}
+
+function CurrencyChip({ currency, canPick, onPress, label }: CurrencyChipProps) {
+    const chipStyle = {
+        backgroundColor: 'rgba(255,255,255,0.18)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.35)',
+    } as const;
+
+    if (!canPick) {
+        return (
+            <View
+                testID="settle-currency-chip-static"
+                className="flex-row items-center mt-2 rounded-full px-2 py-0.5"
+                style={chipStyle}
+            >
+                <Text className="text-white text-[10px] font-bold">{currency}</Text>
+            </View>
+        );
+    }
+
+    return (
+        <Pressable
+            onPress={onPress}
+            testID="settle-currency-chip"
+            className="flex-row items-center mt-2 rounded-full px-2 py-0.5"
+            style={chipStyle}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+        >
+            <Text className="text-white text-[10px] font-bold mr-1">{currency}</Text>
+            <AppIcon name="chevron-down" size={10} color="#FFFFFF" />
+        </Pressable>
     );
 }
 
@@ -520,7 +575,13 @@ function MethodTiles({ selected, onSelect, t, isRtl }: MethodTilesProps) {
     );
 }
 
-function PaymentAppTiles({ t, isRtl }: { t: (key: string) => string; isRtl: boolean }) {
+function PaymentAppTiles({
+    t,
+    isRtl,
+}: {
+    t: (key: string, opts?: Record<string, unknown>) => string;
+    isRtl: boolean;
+}) {
     const handleOpenApp = useCallback(
         async (app: IsraeliPaymentApp) => {
             try {
@@ -594,7 +655,8 @@ interface SettleUpBottomDockProps {
     onOpenDatePicker: () => void;
     onRecord: () => void;
     recordDisabled: boolean;
-    label: string;
+    saveLabel: string;
+    submitting: boolean;
 }
 
 function SettleUpBottomDock({
@@ -603,7 +665,8 @@ function SettleUpBottomDock({
     onOpenDatePicker,
     onRecord,
     recordDisabled,
-    label,
+    saveLabel,
+    submitting,
 }: SettleUpBottomDockProps) {
     return (
         <View
@@ -616,7 +679,7 @@ function SettleUpBottomDock({
                 paddingBottom: 22,
             }}
         >
-            <View className="items-center mb-2">
+            <View className="items-center mb-3">
                 <Pressable
                     onPress={onOpenDatePicker}
                     className="flex-row items-center bg-white border border-border-card rounded-full px-3 py-1"
@@ -638,43 +701,20 @@ function SettleUpBottomDock({
                 </Pressable>
             </View>
 
-            <Pressable
-                onPress={onRecord}
-                disabled={recordDisabled}
-                testID="settle-record-button"
-                accessibilityRole="button"
-                accessibilityLabel={label}
-                className={
-                    recordDisabled
-                        ? 'flex-row items-center justify-center rounded-2xl bg-gray-200 px-5 py-3.5'
-                        : 'flex-row items-center justify-center rounded-2xl bg-primary px-5 py-3.5'
-                }
-                style={
-                    recordDisabled
-                        ? undefined
-                        : {
-                              shadowColor: '#3B82F6',
-                              shadowOpacity: 0.35,
-                              shadowRadius: 16,
-                              shadowOffset: { width: 0, height: 6 },
-                          }
-                }
+            <View
+                className="items-center"
+                style={recordDisabled ? { opacity: 0.55 } : null}
             >
-                <AppIcon
-                    name="checkmark-circle"
-                    size={20}
-                    color={recordDisabled ? '#9CA3AF' : '#FFFFFF'}
+                <Button
+                    title={saveLabel}
+                    onPress={onRecord}
+                    variant="secondary"
+                    loading={submitting}
+                    disabled={recordDisabled}
+                    fullWidth={false}
+                    testID="settle-record-button"
                 />
-                <Text
-                    className={
-                        recordDisabled
-                            ? 'text-[16px] font-bold text-gray-400 ms-2'
-                            : 'text-[16px] font-bold text-white ms-2'
-                    }
-                >
-                    {label}
-                </Text>
-            </Pressable>
+            </View>
         </View>
     );
 }

@@ -17,7 +17,7 @@ import {
 import { Text } from '../AppText';
 import { MemberAvatar } from '../MemberAvatar';
 import { CurrencyAmountList } from './CurrencyAmountList';
-import type { BalanceMode } from './BalanceModeToggle';
+import type { BalanceMode } from './balanceMode';
 import { getAvatarUrlForMember } from '../../lib/userDisplay';
 
 interface MemberContributionBreakdownProps {

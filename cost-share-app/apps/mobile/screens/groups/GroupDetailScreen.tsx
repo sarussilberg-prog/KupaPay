@@ -122,9 +122,14 @@ export function GroupDetailScreen() {
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
-    const { groupId, focusFeedItem: focusFeedItemParam } = route.params as {
+    const {
+        groupId,
+        focusFeedItem: focusFeedItemParam,
+        editSettlementId: editSettlementIdParam,
+    } = route.params as {
         groupId: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
+        editSettlementId?: string;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusConsumedRef = useRef(false);
@@ -217,7 +222,6 @@ export function GroupDetailScreen() {
         };
     }, [balanceDisplay, displayGroup?.defaultCurrency]);
 
-    const noteHasContent = Boolean(displayGroup?.note?.trim());
     const settlementCount = simplifiedEntries.reduce(
         (n, e) => n + e.result.debts.length,
         0,
@@ -391,6 +395,14 @@ export function GroupDetailScreen() {
         navigation,
         groupId,
     ]);
+
+    useEffect(() => {
+        if (!editSettlementIdParam) return;
+        const target = settlements.find(s => s.id === editSettlementIdParam);
+        if (!target) return;
+        setEditingSettlement(target);
+        navigation.setParams({ groupId, editSettlementId: undefined });
+    }, [editSettlementIdParam, settlements, navigation, groupId]);
 
     const handleClearFeedSearchAndFilters = useCallback(() => {
         setSearchQuery('');
@@ -686,7 +698,6 @@ export function GroupDetailScreen() {
                             members={memberLites}
                             balance={balance}
                             settlementCount={settlementCount}
-                            noteHasContent={noteHasContent}
                             onBack={handleBack}
                             onShare={handleShare}
                             onMenu={handleOpenGroupMenu}
@@ -872,6 +883,8 @@ export function GroupDetailScreen() {
                         toUserId: editingSettlement.toUserId,
                         currency: editingSettlement.currency,
                         amount: editingSettlement.amount,
+                        settlementDate: editingSettlement.settlementDate,
+                        paymentMethod: editingSettlement.paymentMethod,
                     }}
                     mode="edit"
                     submitting={updateSettlementMutation.isPending}

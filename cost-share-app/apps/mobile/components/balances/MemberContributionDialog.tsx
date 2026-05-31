@@ -22,7 +22,7 @@ import {
 import { Text } from '../AppText';
 import { Button } from '../Button';
 import { MemberContributionBreakdown } from './MemberContributionBreakdown';
-import type { BalanceMode } from './BalanceModeToggle';
+import type { BalanceMode } from './balanceMode';
 
 interface MemberContributionDialogProps {
     open: boolean;

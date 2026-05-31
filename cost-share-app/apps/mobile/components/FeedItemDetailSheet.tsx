@@ -1034,6 +1034,7 @@ function SettlementHero({
                         <FlowPerson
                             name={fromName}
                             avatarUrl={fromAvatarUrl}
+                            label={t('settleUp.from')}
                         />
                     }
                     center={
@@ -1046,6 +1047,7 @@ function SettlementHero({
                         <FlowPerson
                             name={toName}
                             avatarUrl={toAvatarUrl}
+                            label={t('settleUp.to')}
                         />
                     }
                 />

@@ -2,15 +2,15 @@
  * BalancesScreen
  *
  * Top-level layout (top → bottom):
- *   • Mode toggle (Paid / Spent on) — defaults to Paid on every screen entry.
- *   • Per-member list — one row per group member, with per-currency totals
- *     in the chosen mode. Tapping a row opens MemberContributionDialog.
- *   • Simplified-debts section — per-currency runs of simplifyDebts; each
- *     row has a "Settle debt" button that opens SettleUpSheet pre-filled.
+ *   • GroupTotalsCard — total spent / unsettled / expense count.
+ *   • Members card — one row per group member, paid per currency.
+ *     Tapping a row opens MemberContributionDialog (unchanged).
+ *   • SimplifiedDebtsSection — per-currency runs of simplifyDebts.
+ *     Debts that don't involve the current user are collapsed behind
+ *     a toggle (mirrors SettleUpListScreen).
  *
- * Multi-currency-aware: amounts are never silently collapsed across
- * currencies. Drill-in shows gross "X paid for Y" matrix rows; net
- * resolution lives only in the simplified-debts section.
+ * Multi-currency-aware throughout; amounts are never silently
+ * collapsed across currencies.
  */
 
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
@@ -22,11 +22,12 @@ import {
     DebtSummary,
     GroupMemberLite,
     PairwiseDebt,
+    calculateGroupTotalUnsettled,
 } from '@cost-share/shared';
 import { Text } from '../../components/AppText';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
-import { BalanceModeToggle, type BalanceMode } from '../../components/balances/BalanceModeToggle';
+import { GroupTotalsCard } from '../../components/balances/GroupTotalsCard';
 import { MemberContributionRow } from '../../components/balances/MemberContributionRow';
 import { MemberContributionDialog } from '../../components/balances/MemberContributionDialog';
 import { SimplifiedDebtsSection } from '../../components/balances/SimplifiedDebtsSection';
@@ -50,15 +51,32 @@ interface SettleTarget {
     amount: number;
 }
 
+function sumPaidByCurrency(
+    totals: { paid: CurrencyAmount[] }[],
+): CurrencyAmount[] {
+    const acc = new Map<string, number>();
+    for (const t of totals) {
+        for (const row of t.paid) {
+            acc.set(row.currency, (acc.get(row.currency) ?? 0) + row.amount);
+        }
+    }
+    return Array.from(acc.entries())
+        .map(([currency, amount]) => ({
+            currency,
+            amount: Number(amount.toFixed(2)),
+        }))
+        .filter(row => row.amount >= 0.01);
+}
+
 export function BalancesScreen() {
     const { t } = useTranslation();
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
     const { groupId } = route.params;
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
-    const groupName = useAppStore(
-        s => s.groups.find(g => g.id === groupId)?.name,
-    );
+    const group = useAppStore(s => s.groups.find(g => g.id === groupId));
+    const groupName = group?.name;
+    const defaultCurrency = group?.defaultCurrency ?? 'USD';
 
     useLayoutEffect(() => {
         if (groupName) {
@@ -66,7 +84,6 @@ export function BalancesScreen() {
         }
     }, [navigation, groupName]);
 
-    const [mode, setMode] = useState<BalanceMode>('paid');
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [settleTarget, setSettleTarget] = useState<SettleTarget | null>(null);
 
@@ -122,19 +139,37 @@ export function BalancesScreen() {
 
     const totalsByUser = useMemo(() => {
         const map = new Map<string, { paid: CurrencyAmount[]; owed: CurrencyAmount[] }>();
-        for (const t of contributions?.totals ?? []) {
-            map.set(t.userId, { paid: t.paid, owed: t.owed });
+        for (const row of contributions?.totals ?? []) {
+            map.set(row.userId, { paid: row.paid, owed: row.owed });
         }
         return map;
     }, [contributions]);
 
-    const amountsForRow = useCallback(
+    const totalSpent: CurrencyAmount[] = useMemo(
+        () => sumPaidByCurrency(contributions?.totals ?? []),
+        [contributions],
+    );
+
+    const unsettledTotal: CurrencyAmount[] = useMemo(() => {
+        const flat: PairwiseDebt[] =
+            simplifiedByCurrency?.flatMap(e =>
+                e.result.debts.map(d => ({
+                    fromUserId: d.fromUserId,
+                    toUserId: d.toUserId,
+                    currency: d.currency,
+                    amount: d.amount,
+                })),
+            ) ?? [];
+        return calculateGroupTotalUnsettled(flat);
+    }, [simplifiedByCurrency]);
+
+    const expenseCount = contributions?.expenseCount ?? 0;
+
+    const paidForUser = useCallback(
         (userId: string): CurrencyAmount[] => {
-            const entry = totalsByUser.get(userId);
-            if (!entry) return [];
-            return mode === 'paid' ? entry.paid : entry.owed;
+            return totalsByUser.get(userId)?.paid ?? [];
         },
-        [totalsByUser, mode],
+        [totalsByUser],
     );
 
     const handleMemberPress = useCallback((userId: string) => {
@@ -181,14 +216,11 @@ export function BalancesScreen() {
 
     const dialogSelfTotals: CurrencyAmount[] = useMemo(() => {
         if (!selectedMemberId) return [];
-        return amountsForRow(selectedMemberId);
-    }, [selectedMemberId, amountsForRow]);
+        return paidForUser(selectedMemberId);
+    }, [selectedMemberId, paidForUser]);
 
     const pairwiseDebtsForSettle: PairwiseDebt[] = useMemo(() => {
         if (!settleTarget) return pairwiseDebts;
-        // Ensure the (from, to, currency) at the offered amount is in the
-        // sheet's debts so currency picker shows it even if the RPC view
-        // doesn't surface a perfect pair.
         const seed: PairwiseDebt = {
             fromUserId: settleTarget.fromUserId,
             toUserId: settleTarget.toUserId,
@@ -223,25 +255,32 @@ export function BalancesScreen() {
                 }
             >
                 <View className="px-4 pt-4">
-                    <BalanceModeToggle mode={mode} onChange={setMode} />
+                    <GroupTotalsCard
+                        totalSpent={totalSpent}
+                        unsettled={unsettledTotal}
+                        expenseCount={expenseCount}
+                        defaultCurrency={defaultCurrency}
+                    />
                 </View>
 
                 <View className="px-4 pt-4">
-                    <Text className="text-lg font-semibold text-gray-900 mb-3">
-                        {t('balances.title')}
+                    <Text className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-2">
+                        {t('balances.membersSectionLabel')}
                     </Text>
-                    {sortedMembers.map(member => (
-                        <MemberContributionRow
-                            key={member.userId}
-                            userId={member.userId}
-                            name={member.displayName}
-                            avatarUrl={member.avatarUrl}
-                            amounts={amountsForRow(member.userId)}
-                            mode={mode}
-                            isCurrentUser={member.userId === currentUserId}
-                            onPress={() => handleMemberPress(member.userId)}
-                        />
-                    ))}
+                    <View className="bg-white rounded-xl overflow-hidden">
+                        {sortedMembers.map((member, idx) => (
+                            <MemberContributionRow
+                                key={member.userId}
+                                userId={member.userId}
+                                name={member.displayName}
+                                avatarUrl={member.avatarUrl}
+                                amounts={paidForUser(member.userId)}
+                                isCurrentUser={member.userId === currentUserId}
+                                isLast={idx === sortedMembers.length - 1}
+                                onPress={() => handleMemberPress(member.userId)}
+                            />
+                        ))}
+                    </View>
                 </View>
 
                 <View className="px-4 pt-4 pb-8">
@@ -258,13 +297,14 @@ export function BalancesScreen() {
                 </View>
             </ScrollView>
 
+            {/* Toggle was removed; the breakdown always shows what each member paid. */}
             <MemberContributionDialog
                 open={selectedMember !== null}
                 member={selectedMember}
                 allMembers={sortedMembers}
                 matrix={contributions?.matrix ?? []}
                 selfTotals={dialogSelfTotals}
-                mode={mode}
+                mode="paid"
                 currentUserId={currentUserId}
                 onClose={() => setSelectedMemberId(null)}
             />

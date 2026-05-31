@@ -5,7 +5,6 @@ import { SummaryFooter } from '../../components/groupDetail/SummaryFooter';
 describe('SummaryFooter', () => {
   const base = {
     settlementCount: 1,
-    noteHasContent: false,
     onOpenNote: jest.fn(),
     onOpenSettleUp: jest.fn(),
   };
@@ -20,18 +19,6 @@ describe('SummaryFooter', () => {
       <SummaryFooter {...base} settlementCount={0} />,
     );
     expect(getByText(/groups\.summary\.noOpenPayments/i)).toBeTruthy();
-  });
-
-  it('shows the amber dot when noteHasContent is true', () => {
-    const { getByTestId } = render(
-      <SummaryFooter {...base} noteHasContent />,
-    );
-    expect(getByTestId('summary-note-dot')).toBeTruthy();
-  });
-
-  it('hides the amber dot when noteHasContent is false', () => {
-    const { queryByTestId } = render(<SummaryFooter {...base} />);
-    expect(queryByTestId('summary-note-dot')).toBeNull();
   });
 
   it('keeps the settle-up pill enabled when there are no open payments', () => {

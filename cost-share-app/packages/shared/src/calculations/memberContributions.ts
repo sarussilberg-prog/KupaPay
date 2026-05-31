@@ -33,6 +33,7 @@ export interface MemberContributionTotals {
 export interface MemberContributionsResult {
     totals: MemberContributionTotals[];
     matrix: PaidByMatrixRow[];
+    expenseCount: number;
 }
 
 export interface BalanceExpenseRowWithCurrency {
@@ -158,7 +159,7 @@ export function calculateMemberContributions(args: {
         return a.currency.localeCompare(b.currency);
     });
 
-    return { totals, matrix };
+    return { totals, matrix, expenseCount: expenses.length };
 }
 
 export interface UserBalanceByCurrencyRow {

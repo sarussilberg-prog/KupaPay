@@ -405,13 +405,15 @@
     "balances": {
         "title": "יתרות",
         "settledUp": "מסודר",
+        "groupTotals": "סיכום קבוצה",
+        "totalSpent": "סה״כ הוצאות",
+        "unsettled": "פתוח לסגירה",
+        "expenseCount_one": "הוצאה אחת",
+        "expenseCount_other": "{{count}} הוצאות",
+        "membersSectionLabel": "חברי הקבוצה",
         "getsBack": "מקבל בחזרה",
         "owes": "חייב",
         "paid": "שילם",
-        "modeToggle": {
-            "paid": "שילם",
-            "spentOn": "הוצא על"
-        },
         "paidMode": {
             "row": "{{name}} שילם",
             "rowYou": "שילמת",
@@ -599,6 +601,7 @@
         "toastUpdated": "התשלום עודכן",
         "toastDeleted": "התשלום נמחק",
         "notInvolved": "אינך מעורב/ת בחוב הזה",
+        "othersToggle": "סגירות חשבון שאינך מעורב/ת בהן ({{count}})",
         "detailHeaderLabel": "תשלום",
         "payment": "תשלום",
         "paid": "שולם",
@@ -615,7 +618,6 @@
         "newPayment": "תשלום חדש",
         "from": "מאת",
         "to": "אל",
-        "swap": "החלף",
         "method": "אמצעי תשלום",
         "methodType": "סוג אמצעי תשלום",
         "paymentApps": "אפליקציות תשלום",
@@ -627,7 +629,9 @@
         "recordPaymentWithAmount": "רשום תשלום · {{currencyAndAmount}}",
         "openPaymentApp": "פתח {{app}}",
         "paymentAppErrorTitle": "לא ניתן לפתוח תשלום",
-        "paymentAppOpenFailed": "פתיחת אפליקציית התשלום נכשלה. ודא שהאפליקציה מותקנת."
+        "paymentAppOpenFailed": "פתיחת אפליקציית התשלום נכשלה. ודא שהאפליקציה מותקנת.",
+        "currencyPickerTitle": "בחר מטבע",
+        "amountOwed": "חוב {{amount}}"
     },
     "feed": {
         "settlement": "{{from}} שילם/ה ל-{{to}} {{amount}}",

@@ -119,6 +119,26 @@ describe('calculateMemberContributions', () => {
         });
         expect(totals[0].paid).toEqual([{ currency: 'USD', amount: 0.3 }]);
     });
+
+    it('returns expenseCount equal to the number of input expenses', () => {
+        const empty = calculateMemberContributions({
+            userIds: ['A'],
+            expenses: [],
+            splits: [],
+        });
+        expect(empty.expenseCount).toBe(0);
+
+        const populated = calculateMemberContributions({
+            userIds: ['A', 'B'],
+            expenses: [
+                { id: 'e1', paidBy: 'A', amount: 100, currency: 'USD' },
+                { id: 'e2', paidBy: 'B', amount: 60, currency: 'ILS' },
+                { id: 'e3', paidBy: 'A', amount: 20, currency: 'USD' },
+            ],
+            splits: [],
+        });
+        expect(populated.expenseCount).toBe(3);
+    });
 });
 
 describe('calculateUserBalancesByCurrencyFromData', () => {

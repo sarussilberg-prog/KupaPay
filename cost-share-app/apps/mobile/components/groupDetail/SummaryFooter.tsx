@@ -1,7 +1,6 @@
 /**
  * SummaryFooter — bottom region of GroupSummaryCard.
  * "N payments to settle" on the left; Note + Settle-up pills on the right.
- * Note pill is always rendered; the amber dot toggles on noteHasContent.
  */
 
 import React from 'react';
@@ -18,14 +17,12 @@ const BORDER_SOFT = '#F1F5F9'; // slate-100; design "border.soft"
 
 interface SummaryFooterProps {
     settlementCount: number;
-    noteHasContent: boolean;
     onOpenNote: () => void;
     onOpenSettleUp: () => void;
 }
 
 export function SummaryFooter({
     settlementCount,
-    noteHasContent,
     onOpenNote,
     onOpenSettleUp,
 }: SummaryFooterProps) {
@@ -61,9 +58,6 @@ export function SummaryFooter({
                     >
                         {t('groups.actions.note')}
                     </Text>
-                    {noteHasContent && (
-                        <View testID="summary-note-dot" style={styles.noteDot} />
-                    )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -119,17 +113,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 5,
-    },
-    noteDot: {
-        position: 'absolute',
-        top: 4,
-        right: 4,
-        width: 7,
-        height: 7,
-        borderRadius: 9999,
-        backgroundColor: colors.warning,
-        borderWidth: 1.5,
-        borderColor: '#fff',
     },
     settlePill: {
         borderRadius: 9999,

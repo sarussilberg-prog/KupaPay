@@ -8,9 +8,18 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { I18nManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
+import * as Updates from 'expo-updates';
 import en from './locales/en.json';
 import he from './locales/he.json';
 import { useAppStore } from '../store';
+
+type SupportedLanguage = 'en' | 'he';
+
+const resolveDeviceLanguage = (): SupportedLanguage => {
+    const code = Localization.getLocales()[0]?.languageCode;
+    return code === 'he' ? 'he' : 'en';
+};
 
 I18nManager.allowRTL(true);
 
@@ -55,11 +64,24 @@ export const initializeLanguage = async (): Promise<void> => {
             useAppStore.getState().setLanguage(savedLanguage);
 
             console.log(`Language loaded from storage: ${savedLanguage}`);
-        } else {
-            console.log('No saved language found, using default: en');
+            return;
+        }
+
+        // First launch — seed from device locale.
+        const deviceLanguage = resolveDeviceLanguage();
+        await i18n.changeLanguage(deviceLanguage);
+        useAppStore.getState().setLanguage(deviceLanguage);
+        await AsyncStorage.setItem(LANGUAGE_KEY, deviceLanguage);
+        console.log(`Language seeded from device locale: ${deviceLanguage}`);
+
+        const desiredRTL = deviceLanguage === 'he';
+        if (I18nManager.isRTL !== desiredRTL) {
+            I18nManager.forceRTL(desiredRTL);
+            await Updates.reloadAsync();
+            // Execution stops here — the app reloads.
         }
     } catch (error) {
-        console.error('Failed to load language from storage:', error);
+        console.error('Failed to initialize language:', error);
     }
 };
 

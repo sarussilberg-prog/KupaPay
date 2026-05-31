@@ -22,7 +22,6 @@ const baseProps = {
   members,
   balance: { net: 42, currency: 'USD', isSettled: false },
   settlementCount: 1,
-  noteHasContent: false,
   onBack: noop,
   onShare: noop,
   onMenu: noop,

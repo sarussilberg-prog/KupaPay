@@ -1,6 +1,6 @@
 /**
  * BottomSheetShell — reusable bottom-sheet wrapper.
- * Provides: scrim, sheet container (62% height, rounded top, sheet shadow),
+ * Provides: scrim, sheet container (75% height, rounded top, sheet shadow),
  * drag handle, header row (Cancel · uppercase label · Save), hairline divider.
  * Children render in a scrollable body below the header.
  */
@@ -35,7 +35,7 @@ export function BottomSheetShell({
 }: BottomSheetShellProps) {
     const { t } = useTranslation();
     const { height } = useWindowDimensions();
-    const sheetHeight = Math.round(height * 0.62);
+    const sheetHeight = Math.round(height * 0.75);
 
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>

@@ -2,8 +2,8 @@
  * SettleUpListScreen
  * Lists the simplified settle-up plan in a group (per currency) — the same
  * set of transfers that the Balances screen's simplified-debts section shows.
- * Rows where the current user is involved are pinned at the top with "you" labels.
- * Rows where the current user is not involved are visible but disabled.
+ * Rows where the current user is involved are shown directly; debts that
+ * don't involve the current user are collapsed behind a toggle.
  */
 
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
@@ -115,6 +115,7 @@ export function SettleUpListScreen() {
     const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
     const [pendingDeleteSettlement, setPendingDeleteSettlement] =
         useState<Settlement | null>(null);
+    const [othersExpanded, setOthersExpanded] = useState(false);
 
     const memberMap = useMemo<Record<string, GroupMemberLite>>(() => {
         const map: Record<string, GroupMemberLite> = {};
@@ -143,12 +144,9 @@ export function SettleUpListScreen() {
         [debts, currentUserId],
     );
 
-    const sections = useMemo(
-        () => [
-            ...youInvolved.map(d => ({ debt: d, involved: true as const })),
-            ...others.map(d => ({ debt: d, involved: false as const })),
-        ],
-        [youInvolved, others],
+    const involvedItems = useMemo(
+        () => youInvolved.map(d => ({ debt: d, involved: true as const })),
+        [youInvolved],
     );
 
     const displayName = useCallback(
@@ -238,13 +236,13 @@ export function SettleUpListScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']}>
             <FlatList
-                data={sections}
+                data={involvedItems}
                 keyExtractor={(item, idx) =>
                     `${item.debt.fromUserId}:${item.debt.toUserId}:${item.debt.currency}:${idx}`
                 }
                 contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
                 ListHeaderComponent={
-                    sections.length > 0 ? (
+                    involvedItems.length > 0 ? (
                         <Text className="mb-3 px-1 text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
                             {t('settleUp.openDebts')}
                         </Text>
@@ -271,38 +269,76 @@ export function SettleUpListScreen() {
                     )
                 }
                 ListFooterComponent={
-                    sortedSettlements.length > 0 ? (
-                        <View className="mt-8 mb-4">
-                            <View className="flex-row items-center mb-3 px-1">
-                                <View className="flex-1 h-px bg-gray-300" />
-                                <View className="flex-row items-center mx-3">
+                    <>
+                        {others.length > 0 ? (
+                            <View className={involvedItems.length > 0 ? 'mt-2' : 'mt-4'}>
+                                <TouchableOpacity
+                                    onPress={() => setOthersExpanded(v => !v)}
+                                    activeOpacity={0.7}
+                                    accessibilityRole="button"
+                                    className="flex-row items-center px-3 py-2.5 rounded-2xl bg-slate-100/70 border border-gray-200"
+                                    testID="settle-others-toggle"
+                                >
                                     <AppIcon
-                                        name="time-outline"
-                                        size={14}
+                                        name={othersExpanded ? 'chevron-up' : 'chevron-down'}
+                                        size={16}
                                         color={colors.gray500}
                                     />
-                                    <Text className="ml-1.5 text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                                        {t('balances.settlementHistory')}
+                                    <Text className="ml-2 flex-1 text-[13px] font-medium text-gray-600">
+                                        {t('settleUp.othersToggle', { count: others.length })}
                                     </Text>
+                                </TouchableOpacity>
+                                {othersExpanded && (
+                                    <View className="mt-2">
+                                        {others.map(d => (
+                                            <DebtRow
+                                                key={`${d.fromUserId}:${d.toUserId}:${d.currency}`}
+                                                debt={d}
+                                                involved={false}
+                                                fromName={displayName(d.fromUserId)}
+                                                toName={displayName(d.toUserId)}
+                                                fromAvatar={memberAvatarFor(d.fromUserId)}
+                                                toAvatar={memberAvatarFor(d.toUserId)}
+                                                onPress={() => handleRowPress(d)}
+                                            />
+                                        ))}
+                                    </View>
+                                )}
+                            </View>
+                        ) : null}
+                        {sortedSettlements.length > 0 ? (
+                            <View className="mt-8 mb-4">
+                                <View className="flex-row items-center mb-3 px-1">
+                                    <View className="flex-1 h-px bg-gray-300" />
+                                    <View className="flex-row items-center mx-3">
+                                        <AppIcon
+                                            name="time-outline"
+                                            size={14}
+                                            color={colors.gray500}
+                                        />
+                                        <Text className="ml-1.5 text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+                                            {t('balances.settlementHistory')}
+                                        </Text>
+                                    </View>
+                                    <View className="flex-1 h-px bg-gray-300" />
                                 </View>
-                                <View className="flex-1 h-px bg-gray-300" />
+                                <View className="rounded-2xl bg-slate-100/70 border border-gray-200 overflow-hidden">
+                                    {sortedSettlements.map((s, idx) => (
+                                        <SettlementHistoryRow
+                                            key={s.id}
+                                            settlement={s}
+                                            fromName={displayName(s.fromUserId)}
+                                            toName={displayName(s.toUserId)}
+                                            fromAvatar={memberAvatarFor(s.fromUserId)}
+                                            toAvatar={memberAvatarFor(s.toUserId)}
+                                            isLast={idx === sortedSettlements.length - 1}
+                                            onPress={() => handleSettlementRowPress(s)}
+                                        />
+                                    ))}
+                                </View>
                             </View>
-                            <View className="rounded-2xl bg-slate-100/70 border border-gray-200 overflow-hidden">
-                                {sortedSettlements.map((s, idx) => (
-                                    <SettlementHistoryRow
-                                        key={s.id}
-                                        settlement={s}
-                                        fromName={displayName(s.fromUserId)}
-                                        toName={displayName(s.toUserId)}
-                                        fromAvatar={memberAvatarFor(s.fromUserId)}
-                                        toAvatar={memberAvatarFor(s.toUserId)}
-                                        isLast={idx === sortedSettlements.length - 1}
-                                        onPress={() => handleSettlementRowPress(s)}
-                                    />
-                                ))}
-                            </View>
-                        </View>
-                    ) : null
+                        ) : null}
+                    </>
                 }
                 refreshControl={
                     <RefreshControl
@@ -369,6 +405,8 @@ export function SettleUpListScreen() {
                         toUserId: editingSettlement.toUserId,
                         currency: editingSettlement.currency,
                         amount: editingSettlement.amount,
+                        settlementDate: editingSettlement.settlementDate,
+                        paymentMethod: editingSettlement.paymentMethod,
                     }}
                     mode="edit"
                     submitting={updateSettlementMutation.isPending}

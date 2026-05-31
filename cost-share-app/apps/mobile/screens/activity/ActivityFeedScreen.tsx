@@ -440,8 +440,13 @@ export function ActivityFeedScreen() {
             return;
         }
         const { groupId, id } = detailItem.settlement;
-        navigateToGroupWithFocus(groupId, { kind: 'settlement', id });
-    }, [detailItem, navigateToGroupWithFocus]);
+        setDetailItem(null);
+        navigation.navigate('Groups', {
+            screen: 'GroupDetail',
+            params: { groupId, editSettlementId: id },
+            merge: true,
+        });
+    }, [detailItem, navigation]);
 
     const handleDetailDeleteRequest = useCallback(() => {
         if (!detailItem) return;

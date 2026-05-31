@@ -532,7 +532,7 @@ export async function getGroupContributions(
         return calculateMemberContributions({ userIds, expenses, splits });
     } catch (error) {
         console.error('Failed to fetch member contributions:', error);
-        return { totals: [], matrix: [] };
+        return { totals: [], matrix: [], expenseCount: 0 };
     }
 }
 
