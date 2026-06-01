@@ -1,0 +1,11 @@
+# Minimal Supabase CLI config for remote migrations (CI: supabase db push).
+# Local `supabase start` is optional; most schema work uses linked remote projects.
+# See docs/SSOT/SUPABASE_ENVIRONMENTS.md
+
+project_id = "drxfbicunusmipdgbgdk"
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true

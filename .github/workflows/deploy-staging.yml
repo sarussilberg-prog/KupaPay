@@ -1,0 +1,35 @@
+# Apply pending Supabase migrations to development when dev is updated.
+name: Deploy staging — Supabase migrations
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'cost-share-app/supabase/migrations/**'
+      - 'cost-share-app/supabase/config.toml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging-supabase
+  cancel-in-progress: false
+
+jobs:
+  supabase-migrations:
+    name: Push migrations to development
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply pending migrations
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
+        run: |
+          DB_URL="postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.drxfbicunusmipdgbgdk.supabase.co:5432/postgres"
+          supabase db push --db-url "$DB_URL" --yes

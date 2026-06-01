@@ -39,8 +39,11 @@ if [[ -z "${VERCEL:-}" && "${VERCEL_PROJECT_ID:-}" != "$KUPA_DEV_VERCEL_PROJECT_
 fi
 
 
-# Expo build; also accepts Next.js and Vercel Supabase integration variable names
+# Expo build; also accepts Next.js and Vercel Supabase integration variable names.
+# Treat empty dashboard vars as unset so committed *.defaults are not wiped.
 export EXPO_PUBLIC_SUPABASE_URL="${EXPO_PUBLIC_SUPABASE_URL:-${NEXT_PUBLIC_SUPABASE_URL:-${SUPABASE_URL:-}}}"
+if [[ -z "${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}" ]]; then unset NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; fi
+if [[ -z "${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}" ]]; then unset NEXT_PUBLIC_SUPABASE_ANON_KEY; fi
 export EXPO_PUBLIC_SUPABASE_ANON_KEY="${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-${NEXT_PUBLIC_SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}}}}"
 
 if [[ -z "$EXPO_PUBLIC_SUPABASE_URL" || -z "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ]]; then
