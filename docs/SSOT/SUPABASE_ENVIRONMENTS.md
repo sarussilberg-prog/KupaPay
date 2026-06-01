@@ -110,6 +110,55 @@ SUPABASE_ENV=production bash scripts/supabase-bootstrap-production.sh
 
 ---
 
+## CI — automatic migrations (GitHub Actions)
+
+When migration files under `cost-share-app/supabase/migrations/` change:
+
+| Branch | Workflow | Supabase project |
+|--------|----------|------------------|
+| `dev` | `.github/workflows/deploy-staging.yml` | `drxfbicunusmipdgbgdk` |
+| `main` | `.github/workflows/deploy-production.yml` | `jfqxjjjbpxbwwvoygahu` |
+
+Merging `dev` → `main` updates `main` and runs the production workflow (only if migration paths changed in that push).
+
+### One-time GitHub setup
+
+1. **Personal access token** — [Supabase Account → Access Tokens](https://supabase.com/dashboard/account/tokens) → create token with project access.
+2. **Repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Used for |
+|--------|----------|
+| `SUPABASE_ACCESS_TOKEN` | CLI auth (staging + production) |
+| `SUPABASE_DEV_DB_PASSWORD` | Dev DB password (`deploy-staging.yml`) |
+| `SUPABASE_PROD_DB_PASSWORD` | Prod DB password (`deploy-production.yml`) |
+
+   DB password: Supabase Dashboard → Project → **Database** → connection string / reset password.
+
+3. **Environment `production`** (Settings → Environments → New → name `production`):
+   - Optional: required reviewers before prod migrations run.
+   - Can store the same secrets at environment scope instead of repo scope.
+
+### Migration file naming
+
+CLI only applies files matching `<timestamp>_name.sql` (example: `20260526122059_add_expense_split_mode.sql`).
+
+Create new migrations from `cost-share-app/`:
+
+```bash
+supabase migration new my_change_name
+```
+
+Do **not** use dated names like `2026-05-26-my-change.sql` — they are skipped by `supabase db push`.
+
+### What CI does *not* run
+
+- `npm run seed` — never on any environment in CI
+- `npm run supabase:fix` (loose `.sql` patches under `supabase/`) — run manually when needed; not part of `db push`
+
+Only files in `supabase/migrations/` are applied. Historical schema applied via MCP without a committed migration file is **not** replayed on production; add a matching migration file or bootstrap prod once.
+
+---
+
 ## CLI link helper
 
 ```bash
@@ -124,6 +173,9 @@ SUPABASE_ENV=production bash cost-share-app/scripts/supabase-link.sh
 
 ## Related files
 
+- `.github/workflows/deploy-staging.yml` — migrations on push to `dev`
+- `.github/workflows/deploy-production.yml` — migrations on push to `main`
+- `cost-share-app/supabase/config.toml` — minimal CLI config for `db push`
 - `.mcp.json` — MCP → dev only
 - `cost-share-app/apps/web/supabase-public.{development,production}.defaults`
 - `cost-share-app/scripts/supabase-env.sh` — prints active env from `SUPABASE_ENV` or git branch

@@ -10,9 +10,8 @@
 -- DEFAULT 'equal' assigns the default to every existing row in a single
 -- statement, then the backfill below tightens the guess where it can.
 --
--- Apply order (per docs/SSOT/SUPABASE_ENVIRONMENTS.md):
---   1. dev   (drxfbicunusmipdgbgdk)  — run automatically
---   2. prod  (jfqxjjjbpxbwwvoygahu)  — only with explicit user approval
+-- Apply order: dev via deploy-staging.yml; prod via deploy-production.yml on merge to main.
+-- See docs/SSOT/SUPABASE_ENVIRONMENTS.md → CI — automatic migrations.
 
 BEGIN;
 

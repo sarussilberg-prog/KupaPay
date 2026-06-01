@@ -1,0 +1,36 @@
+# Apply pending Supabase migrations to production when main is updated (e.g. dev → main merge).
+# Requires GitHub Environment "production" and secrets (see docs/SSOT/SUPABASE_ENVIRONMENTS.md).
+name: Deploy production — Supabase migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cost-share-app/supabase/migrations/**'
+      - 'cost-share-app/supabase/config.toml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production-supabase
+  cancel-in-progress: false
+
+jobs:
+  supabase-migrations:
+    name: Push migrations to production
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply pending migrations
+        env:
+          SUPABASE_ENV: production
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+        run: bash scripts/supabase-ci-db-push.sh
