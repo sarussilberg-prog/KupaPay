@@ -33,6 +33,4 @@ jobs:
         env:
           SUPABASE_ENV: production
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
-        run: |
-          DB_URL="$(bash scripts/supabase-migration-db-url.sh)"
-          supabase db push --db-url "$DB_URL" --yes
+        run: bash scripts/supabase-ci-db-push.sh
