@@ -8,12 +8,8 @@ import { queryClient } from '../lib/queryClient';
 import { clearStaleAuthSession } from '../lib/authSessionLifecycle';
 import { clearNavigationState } from '../lib/navigationPersistence';
 import { isAuthSessionAllowed } from '../lib/auth';
-import { presentGoogleSignInSheet } from '../lib/googleSignInSheet';
-import {
-  isNativeGoogleSignInEnabled,
-  signInWithGoogleNative,
-  signOutNativeGoogle,
-} from '../lib/googleSignInNative';
+import { openOAuthSession } from '../lib/openOAuthSession';
+import { signOutNativeGoogle } from '../lib/googleSignInNative';
 import { APP_WEB_ORIGIN } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { useAppStore } from '../store';
@@ -197,31 +193,9 @@ async function signInWithGoogleBrowser(): Promise<{ error: AuthError | null }> {
     return { error: toAuthError(error ?? new Error('No OAuth URL returned')) };
   }
 
-  const result = await WebBrowser.openAuthSessionAsync(data.url, oauthRedirect, {
-    preferEphemeralSession: true,
-  });
+  const result = await openOAuthSession(data.url, oauthRedirect);
 
   return resolveOAuthBrowserResult(result, oauthRedirect);
-}
-
-async function signInWithGoogleAndroidNative(): Promise<{ error: AuthError | null }> {
-  const native = await signInWithGoogleNative();
-  if ('error' in native) {
-    return { error: toAuthError(native.error) };
-  }
-
-  const { error } = await supabase.auth.signInWithIdToken({
-    provider: 'google',
-    token: native.idToken,
-  });
-  if (error) return { error: toAuthError(error) };
-
-  const allowed = await isAuthSessionAllowed();
-  if (!allowed) {
-    return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
-  }
-
-  return { error: null };
 }
 
 type OAuthBrowserResult =
@@ -254,21 +228,8 @@ function resolveOAuthBrowserResult(
 }
 
 export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
-  if (isNativeGoogleSignInEnabled()) {
-    if (__DEV__) {
-      console.info('[Auth] Using native Google Sign-In (Android)');
-    }
-    if (Platform.OS === 'android') {
-      return presentGoogleSignInSheet(() => signInWithGoogleAndroidNative());
-    }
-    return signInWithGoogleAndroidNative();
-  }
-
   if (Platform.OS === 'android' && __DEV__) {
-    console.warn(
-      '[Auth] EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID is unset — using Chrome Custom Tab. '
-      + 'Set the Web client ID for native sign-in inside the bottom sheet.',
-    );
+    console.info('[Auth] Google OAuth in partial Chrome bottom sheet (~80%)');
   }
 
   return signInWithGoogleBrowser();

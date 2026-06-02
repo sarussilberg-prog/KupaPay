@@ -47,7 +47,7 @@
         "signInError": "Sign in failed. Please try again.",
         "signingIn": "Signing in...",
         "googleSignInSheetTitle": "Sign in with Google",
-        "googleSignInSheetHint": "Choose your Google account in the window that appears."
+        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet."
     },
     "onboarding": {
         "skip": "Skip",

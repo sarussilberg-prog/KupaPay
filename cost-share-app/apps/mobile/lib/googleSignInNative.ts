@@ -11,6 +11,23 @@ export function getGoogleWebClientId(): string | undefined {
   return id || undefined;
 }
 
+/** Dev-only: catch swapping Android vs Web client IDs in `.env`. */
+export function warnIfGoogleWebClientIdMisconfigured(): void {
+  if (!__DEV__) return;
+
+  const id = getGoogleWebClientId();
+  if (!id) return;
+
+  // Android OAuth client (package + SHA-1) — must NOT be used as webClientId.
+  if (id.includes('k0qh0eapsk135jvm7omass90hluoq67e')) {
+    console.error(
+      '[Auth] EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID is set to the Android OAuth client. '
+      + 'Use the Web application client (…8m4mo0bu7edbsh2l9nd6bpbkq6ai2a20…). '
+      + 'The Android client is registered only in Google Cloud (package + SHA-1).',
+    );
+  }
+}
+
 export function isNativeGoogleSignInEnabled(): boolean {
   return Platform.OS === 'android' && Boolean(getGoogleWebClientId());
 }
@@ -19,10 +36,16 @@ export function configureNativeGoogleSignIn(): void {
   const webClientId = getGoogleWebClientId();
   if (!webClientId || Platform.OS !== 'android') return;
 
+  warnIfGoogleWebClientIdMisconfigured();
+
   GoogleSignin.configure({
     webClientId,
     offlineAccess: false,
   });
+
+  if (__DEV__) {
+    console.info('[Auth] Google Sign-In configured with Web application client ID');
+  }
 }
 
 export async function signInWithGoogleNative(): Promise<

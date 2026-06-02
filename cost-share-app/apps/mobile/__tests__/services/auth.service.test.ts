@@ -4,9 +4,7 @@ const mockSignInWithOAuth = jest.fn();
 const mockSignOut = jest.fn().mockResolvedValue({ error: null });
 const mockSignOutNativeGoogle = jest.fn().mockResolvedValue(undefined);
 const mockOpenAuthSessionAsync = jest.fn();
-const mockPresentGoogleSignInSheet = jest.fn();
-const mockIsNativeGoogleSignInEnabled = jest.fn().mockReturnValue(false);
-const mockSignInWithGoogleNative = jest.fn();
+const mockOpenOAuthSession = jest.fn();
 let mockPlatformOs: 'ios' | 'android' = 'ios';
 const mockMakeRedirectUri = jest.fn();
 
@@ -28,13 +26,11 @@ jest.mock('../../lib/supabase', () => ({
 }));
 
 jest.mock('../../lib/googleSignInNative', () => ({
-    isNativeGoogleSignInEnabled: () => mockIsNativeGoogleSignInEnabled(),
-    signInWithGoogleNative: (...args: unknown[]) => mockSignInWithGoogleNative(...args),
     signOutNativeGoogle: (...args: unknown[]) => mockSignOutNativeGoogle(...args),
 }));
 
-jest.mock('../../lib/googleSignInSheet', () => ({
-    presentGoogleSignInSheet: (run: () => Promise<unknown>) => mockPresentGoogleSignInSheet(run),
+jest.mock('../../lib/openOAuthSession', () => ({
+    openOAuthSession: (...args: unknown[]) => mockOpenOAuthSession(...args),
 }));
 
 const mockClearStaleAuthSession = jest.fn().mockResolvedValue(undefined);
@@ -198,50 +194,43 @@ describe('auth.service', () => {
     });
 
     describe('signInWithGoogle', () => {
-        it('uses native Google Sign-In inside the bottom sheet on Android when configured', async () => {
+        it('uses partial Chrome bottom sheet OAuth on Android', async () => {
             setPlatformOs('android');
-            mockIsNativeGoogleSignInEnabled.mockReturnValueOnce(true);
-            mockPresentGoogleSignInSheet.mockImplementationOnce(async (run: () => Promise<unknown>) => run());
-            mockSignInWithGoogleNative.mockResolvedValueOnce({ idToken: 'google-id-token' });
-            mockSignInWithIdToken.mockResolvedValueOnce({ error: null });
-
-            const result = await signInWithGoogle();
-
-            expect(mockPresentGoogleSignInSheet).toHaveBeenCalled();
-            expect(mockSignInWithGoogleNative).toHaveBeenCalled();
-            expect(mockSignInWithIdToken).toHaveBeenCalledWith({
-                provider: 'google',
-                token: 'google-id-token',
-            });
-            expect(mockSignInWithOAuth).not.toHaveBeenCalled();
-            expect(result.error).toBeNull();
-        });
-
-        it('requests account selection and uses an ephemeral browser session on iOS', async () => {
-            setPlatformOs('ios');
             mockSignInWithOAuth.mockResolvedValue({
                 data: { url: 'https://accounts.google.com/o/oauth2/auth' },
                 error: null,
             });
-            mockOpenAuthSessionAsync.mockResolvedValue({
+            mockOpenOAuthSession.mockResolvedValue({
                 type: 'success',
                 url: 'com.kupay.mobile://auth/callback?code=abc',
             });
 
             const result = await signInWithGoogle();
 
-            expect(mockSignInWithOAuth).toHaveBeenCalledWith({
-                provider: 'google',
-                options: expect.objectContaining({
-                    redirectTo: 'com.kupay.mobile://auth/callback',
-                    skipBrowserRedirect: true,
-                    queryParams: { prompt: 'select_account' },
-                }),
-            });
-            expect(mockOpenAuthSessionAsync).toHaveBeenCalledWith(
+            expect(mockOpenOAuthSession).toHaveBeenCalledWith(
                 'https://accounts.google.com/o/oauth2/auth',
                 'com.kupay.mobile://auth/callback',
-                { preferEphemeralSession: true },
+            );
+            expect(mockOpenAuthSessionAsync).not.toHaveBeenCalled();
+            expect(result.error).toBeNull();
+        });
+
+        it('uses an ephemeral browser session on iOS', async () => {
+            setPlatformOs('ios');
+            mockSignInWithOAuth.mockResolvedValue({
+                data: { url: 'https://accounts.google.com/o/oauth2/auth' },
+                error: null,
+            });
+            mockOpenOAuthSession.mockResolvedValue({
+                type: 'success',
+                url: 'com.kupay.mobile://auth/callback?code=abc',
+            });
+
+            const result = await signInWithGoogle();
+
+            expect(mockOpenOAuthSession).toHaveBeenCalledWith(
+                'https://accounts.google.com/o/oauth2/auth',
+                'com.kupay.mobile://auth/callback',
             );
             expect(result.error).toBeNull();
         });
@@ -252,7 +241,7 @@ describe('auth.service', () => {
                 data: { url: 'https://accounts.google.com/o/oauth2/auth' },
                 error: null,
             });
-            mockOpenAuthSessionAsync.mockResolvedValue({
+            mockOpenOAuthSession.mockResolvedValue({
                 type: 'success',
                 url: 'https://kupa.pro/?code=abc',
             });

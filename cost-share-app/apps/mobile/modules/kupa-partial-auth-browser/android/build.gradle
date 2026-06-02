@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.kupapartialauth'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.kupapartialauth"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+
+dependencies {
+  implementation "androidx.browser:browser:1.8.0"
+  implementation "androidx.core:core-ktx:1.13.1"
+}

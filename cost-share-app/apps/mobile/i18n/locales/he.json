@@ -46,7 +46,7 @@
         },
         "signInError": "הכניסה נכשלה. אנא נסה שוב.",
         "googleSignInSheetTitle": "התחברות עם Google",
-        "googleSignInSheetHint": "בחרו את חשבון Google בחלון שיופיע.",
+        "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה.",
         "signingIn": "מתחבר..."
     },
     "onboarding": {
