@@ -1252,6 +1252,59 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.group_is_auto_archived(UUID) FROM PUBLIC;
 -- Not granted to authenticated: only SECURITY DEFINER callers use it.
 
+CREATE OR REPLACE FUNCTION public.admin_get_platform_metrics()
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_registered_users BIGINT;
+    v_deleted_users    BIGINT;
+    v_active_groups    BIGINT;
+    v_archived_groups  BIGINT;
+    v_deleted_groups   BIGINT;
+    v_manual_archive_rows BIGINT;
+BEGIN
+    IF NOT public.is_app_admin() THEN
+        RAISE EXCEPTION 'not_authorized' USING ERRCODE = '42501';
+    END IF;
+
+    SELECT COUNT(*) INTO v_registered_users FROM profiles WHERE is_active = TRUE;
+    SELECT COUNT(*) INTO v_deleted_users FROM profiles WHERE is_active = FALSE;
+
+    SELECT COUNT(*) INTO v_active_groups
+    FROM groups g
+    WHERE g.is_active = TRUE AND NOT public.group_is_auto_archived(g.id);
+
+    SELECT COUNT(*) INTO v_archived_groups
+    FROM groups g
+    WHERE g.is_active = TRUE AND public.group_is_auto_archived(g.id);
+
+    SELECT COUNT(*) INTO v_deleted_groups FROM groups WHERE is_active = FALSE;
+    SELECT COUNT(*) INTO v_manual_archive_rows FROM group_user_archive;
+
+    RETURN jsonb_build_object(
+        'version', 1,
+        'generatedAt', NOW(),
+        'users', jsonb_build_object(
+            'registered', v_registered_users,
+            'deleted', v_deleted_users
+        ),
+        'groups', jsonb_build_object(
+            'active', v_active_groups,
+            'archived', v_archived_groups,
+            'deleted', v_deleted_groups,
+            'manualArchiveMemberships', v_manual_archive_rows
+        )
+    );
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.admin_get_platform_metrics() FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION public.admin_get_platform_metrics() TO authenticated;
+
 -- ============================================
 -- get_user_groups_archive_state()
 -- Returns one row per active group the caller belongs to, with both
