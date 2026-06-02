@@ -107,6 +107,12 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 | REQ-NFR-05 | ⬜ | Offline support | Local queue + sync without screen refactor |
 | REQ-NFR-06 | ⬜ | Push notifications | — |
 
+### 3.7 Admin
+
+| ID | Status | Requirement | Acceptance criteria |
+|----|--------|-------------|---------------------|
+| REQ-ADMIN-01 | ⬜ | App admin platform metrics | Admin portal shows registered user count and active vs auto-archived group counts from `admin_get_platform_metrics()`; non-admins get `not_authorized` |
+
 ---
 
 ## 4. Business rules (normative)
