@@ -54,6 +54,13 @@ export function AdminPortalScreen() {
                         testID="admin-portal-deleted-users"
                     />
                     <SettingsRow
+                        iconName="bug-outline"
+                        label={t('admin.errors.portalRow')}
+                        variant="chevron"
+                        onPress={() => navigation.navigate('AdminErrors')}
+                        testID="admin-portal-errors"
+                    />
+                    <SettingsRow
                         iconName="refresh-outline"
                         label={t('admin.portal.resetOnboardingRow')}
                         variant="chevron"

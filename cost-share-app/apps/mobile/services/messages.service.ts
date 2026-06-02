@@ -2,7 +2,7 @@
  * Messages Service — Supabase RPCs (get_/create_/update_/delete_group_message).
  */
 
-import * as Sentry from '@sentry/react-native';
+import { captureError } from '../lib/captureError';
 import { GroupMessage } from '@cost-share/shared';
 import { groupMessageFromRow } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
@@ -20,7 +20,7 @@ export async function fetchMessages(groupId: string): Promise<GroupMessage[]> {
         useAppStore.getState().setGroupMessages(groupId, messages);
         return messages;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'messages', op: 'fetch' },
             extra: { groupId },
         });
@@ -46,7 +46,7 @@ export async function createMessage(
         useAppStore.getState().upsertGroupMessage(message);
         return message;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'messages', op: 'create' },
             extra: { groupId, bodyLength: trimmed.length },
         });
@@ -72,7 +72,7 @@ export async function updateMessage(
         useAppStore.getState().upsertGroupMessage(message);
         return message;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'messages', op: 'update' },
             extra: { messageId, bodyLength: trimmed.length },
         });
@@ -94,7 +94,7 @@ export async function deleteMessage(
         useAppStore.getState().removeGroupMessage(groupId, messageId);
         return true;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'messages', op: 'delete' },
             extra: { groupId, messageId },
         });

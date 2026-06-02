@@ -69,6 +69,9 @@ import { FindFriendsScreen } from '../screens/profile/FindFriendsScreen';
 import { AdminPortalScreen } from '../screens/admin/AdminPortalScreen';
 import { AdminOnboardingPreviewScreen } from '../screens/admin/AdminOnboardingPreviewScreen';
 import { AdminDeletedUsersScreen } from '../screens/admin/AdminDeletedUsersScreen';
+import { AdminErrorsScreen } from '../screens/admin/AdminErrorsScreen';
+import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen';
+import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -253,6 +256,25 @@ function ProfileStack() {
                 name="AdminOnboardingPreview"
                 component={AdminOnboardingPreviewScreen}
                 options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="AdminErrors"
+                component={AdminErrorsScreen}
+                options={{ title: t('admin.errors.screenTitle') }}
+            />
+            <Stack.Screen
+                name="AdminErrorDetail"
+                component={AdminErrorDetailScreen}
+                options={({ route }) => ({
+                    title:
+                        (route.params as { title?: string } | undefined)?.title ??
+                        t('admin.errors.detailTitle'),
+                })}
+            />
+            <Stack.Screen
+                name="AdminErrorEvent"
+                component={AdminErrorEventScreen}
+                options={{ title: t('admin.errors.eventTitle') }}
             />
             <Stack.Screen
                 name="Friends"

@@ -27,7 +27,7 @@ import {
     simplifyDebts,
     UnbalancedLedgerError,
 } from '@cost-share/shared';
-import * as Sentry from '@sentry/react-native';
+import { captureError } from '../lib/captureError';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { useAppStore } from '../store';
@@ -316,7 +316,7 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
         showSuccessToast('groups.groupCreated');
         return group;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'groups', op: 'create' },
             extra: { memberCount: dto.memberIds.length, groupType: dto.groupType },
         });
@@ -511,7 +511,7 @@ export async function getGroupContributions(
         const { expenses, splits, userIds } = await loadBalanceData(groupId);
         return calculateMemberContributions({ userIds, expenses, splits });
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'groups', op: 'getContributions' },
             extra: { groupId },
         });
@@ -533,7 +533,7 @@ export async function getGroupBalancesByCurrency(
             settlements,
         });
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'groups', op: 'getBalancesByCurrency' },
             extra: { groupId },
         });
@@ -602,7 +602,7 @@ export async function getGroupSimplifiedDebtsByCurrency(
         out.sort((a, b) => a.currency.localeCompare(b.currency));
         return out;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'groups', op: 'getSimplifiedDebts' },
             extra: { groupId },
         });

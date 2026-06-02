@@ -20,6 +20,16 @@ export const queryKeys = {
     legalDocument: (slug: 'terms' | 'privacy', locale: 'en' | 'he') =>
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
+    adminSentryIssues: (params: {
+        environment: 'dev' | 'prod';
+        status: 'unresolved' | 'all';
+        timeRange: '24h' | '7d' | '30d';
+    }) =>
+        ['adminSentryIssues', params.environment, params.status, params.timeRange] as const,
+    adminSentryIssueDetail: (issueId: string) =>
+        ['adminSentryIssueDetail', issueId] as const,
+    adminSentryIssueEvents: (issueId: string) =>
+        ['adminSentryIssueEvents', issueId] as const,
     exchangeRates: (base: string, symbolsKey: string) =>
         ['exchangeRates', base, symbolsKey] as const,
 };

@@ -6,6 +6,7 @@ import { AppState, type AppStateStatus, LogBox, View, ActivityIndicator, Platfor
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import * as Sentry from '@sentry/react-native';
+import { applySentryUser, applySentryLanguage } from './lib/sentryIdentity';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './lib/toastConfig';
 import { handleAuthRedirectUrl, isAuthCallbackUrl } from './services/auth.service';
@@ -72,21 +73,11 @@ function App() {
   const incomingUrl = Linking.useURL();
 
   useEffect(() => {
-    if (currentUser) {
-      Sentry.setUser({
-        id: currentUser.id,
-        email: currentUser.email,
-        username: currentUser.name,
-      });
-      Sentry.setTag('default_currency', currentUser.defaultCurrency);
-    } else {
-      Sentry.setUser(null);
-      Sentry.setTag('default_currency', undefined);
-    }
+    applySentryUser(currentUser ?? null);
   }, [currentUser]);
 
   useEffect(() => {
-    Sentry.setTag('app_language', language);
+    applySentryLanguage(language);
   }, [language]);
 
   const rejectDeactivatedSession = useCallback(async () => {

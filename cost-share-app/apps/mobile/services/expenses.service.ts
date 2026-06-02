@@ -16,7 +16,7 @@ import {
     calculateEqualSplit,
     validateExpenseSplits,
 } from '@cost-share/shared';
-import * as Sentry from '@sentry/react-native';
+import { captureError } from '../lib/captureError';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { markGroupExpensesHydrated } from '../lib/groupFeedCache';
@@ -73,7 +73,7 @@ export async function fetchExpenses(groupId?: string): Promise<ExpenseWithSplits
         }
         return expenses;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'expenses', op: 'fetch' },
             extra: { groupId },
         });
@@ -169,7 +169,7 @@ export async function createExpense(dto: CreateExpenseDto): Promise<Expense | nu
         showSuccessToast('expenses.expenseCreated');
         return expense;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'expenses', op: 'create' },
             extra: { groupId: dto.groupId, amount: dto.amount, currency: dto.currency },
         });
@@ -256,7 +256,7 @@ export async function updateExpense(id: string, dto: UpdateExpenseDto): Promise<
         showSuccessToast('expenses.expenseUpdated');
         return baseExpense;
     } catch (error) {
-        Sentry.captureException(error, {
+        captureError(error, {
             tags: { service: 'expenses', op: 'update' },
             extra: { expenseId: id, patchKeys: Object.keys(dto) },
         });

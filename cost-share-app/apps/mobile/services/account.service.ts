@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react-native';
+import { captureError } from '../lib/captureError';
 import { supabase } from '../lib/supabase';
 import { clearLocalAuthSession } from './auth.service';
 
@@ -30,7 +30,7 @@ const FALLBACK_CURRENCY = 'ILS';
 export async function deleteMyAccount(): Promise<DeleteAccountResult> {
     const { error: rpcError } = await supabase.rpc('delete_my_account');
     if (rpcError) {
-        Sentry.captureException(rpcError, {
+        captureError(rpcError, {
             tags: { service: 'account', op: 'deleteMyAccount' },
         });
         console.error('deleteMyAccount: RPC failed', rpcError);
@@ -54,7 +54,7 @@ export async function getMyOpenBalances(): Promise<OpenBalancesSummary> {
 
     if (error || !data) {
         if (error) {
-            Sentry.captureException(error, {
+            captureError(error, {
                 tags: { service: 'account', op: 'getMyOpenBalances' },
             });
             console.warn('getMyOpenBalances: RPC failed', error);
