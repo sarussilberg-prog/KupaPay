@@ -569,7 +569,28 @@
         "emailOpenFailed": "Could not open email app",
         "copyEmail": "Copy address",
         "contactEmailCopied": "Email address copied",
-        "deleteAccount": "Delete account"
+        "deleteAccount": "Delete account",
+        "adminPortal": "Admin Portal"
+    },
+    "admin": {
+        "portal": {
+            "title": "Admin Portal",
+            "sectionLabel": "Tools",
+            "deletedUsersRow": "Deleted users"
+        },
+        "deletedUsers": {
+            "title": "Deleted users",
+            "empty": "No deleted users at the moment",
+            "deletedAtRelative": "Deleted {{when}}",
+            "restoreCta": "Restore",
+            "confirmTitle": "Restore {{email}}?",
+            "confirmMessage": "The user will be able to sign in again and recover all their groups, friends and expenses.",
+            "restoreSuccess": "User restored",
+            "restoreError": "Restore failed. Please try again."
+        },
+        "errors": {
+            "notAuthorized": "You don't have permission for this action"
+        }
     },
     "profile": {
         "title": "Profile",

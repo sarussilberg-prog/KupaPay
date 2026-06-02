@@ -585,7 +585,28 @@
         "emailOpenFailed": "לא ניתן לפתוח את אפליקציית המייל",
         "copyEmail": "העתק כתובת",
         "contactEmailCopied": "כתובת המייל הועתקה",
-        "deleteAccount": "מחק חשבון"
+        "deleteAccount": "מחק חשבון",
+        "adminPortal": "פורטל מנהלים"
+    },
+    "admin": {
+        "portal": {
+            "title": "פורטל מנהלים",
+            "sectionLabel": "כלי ניהול",
+            "deletedUsersRow": "משתמשים שנמחקו"
+        },
+        "deletedUsers": {
+            "title": "משתמשים שנמחקו",
+            "empty": "אין משתמשים שנמחקו כרגע",
+            "deletedAtRelative": "נמחק {{when}}",
+            "restoreCta": "שחזר",
+            "confirmTitle": "לשחזר את {{email}}?",
+            "confirmMessage": "המשתמש יוכל להתחבר מחדש ויראה את כל הקבוצות, החברים וההוצאות שלו.",
+            "restoreSuccess": "המשתמש שוחזר",
+            "restoreError": "השחזור נכשל. נסה שוב."
+        },
+        "errors": {
+            "notAuthorized": "אין לך הרשאה לפעולה הזו"
+        }
     },
     "profile": {
         "title": "פרופיל",
