@@ -4,7 +4,7 @@
 
 **Goal:** Land an in-app admin portal that lets `sarussilberg@gmail.com` (and any future admin) list soft-deleted accounts and restore them, gated by a single DB-enforced boolean.
 
-**Architecture:** New `profiles.is_admin` column drives a `SECURITY DEFINER` helper `is_app_admin()`. Two new admin RPCs (`admin_list_deleted_accounts`, `admin_restore_deleted_account`) gate every call through `is_app_admin()`. Mobile mirrors the flag onto `User.isAdmin`, conditionally renders a Settings entry, and routes through a new `AdminPortal` hub screen with a `AdminDeletedUsers` list screen.
+**Architecture:** New `public.app_admins` table (RLS enabled, no policies — reachable only via `service_role` / SECURITY DEFINER) drives a `SECURITY DEFINER` helper `is_app_admin()`. Two new admin RPCs (`admin_list_deleted_accounts`, `admin_restore_deleted_account`) gate every call through `is_app_admin()`. Mobile resolves the caller's admin status by calling `is_app_admin()` during profile hydration, stores it on `User.isAdmin`, conditionally renders a Settings entry, and routes through a new `AdminPortal` hub screen with a `AdminDeletedUsers` list screen.
 
 **Tech Stack:**
 - DB: Postgres on Supabase (dev project `drxfbicunusmipdgbgdk`), idempotent migration files under `cost-share-app/supabase/migrations/`
@@ -32,12 +32,11 @@
 **Modified:**
 - `cost-share-app/supabase/schema.sql` — append admin block to SSOT mirror
 - `cost-share-app/packages/shared/src/types/index.ts` — `User.isAdmin`
-- `cost-share-app/packages/shared/src/mappers/index.ts` — map `is_admin`
+- `cost-share-app/packages/shared/src/mappers/index.ts` — defaults `isAdmin: false`
+- `cost-share-app/apps/mobile/services/users.service.ts` — `hydrateCurrentUserProfile` calls `is_app_admin()` RPC and merges result onto user
 - `cost-share-app/apps/mobile/screens/profile/SettingsScreen.tsx` — conditional admin row
 - `cost-share-app/apps/mobile/navigation/AppNavigator.tsx` — 2 new stack screens
 - `cost-share-app/apps/mobile/i18n/locales/he.json`, `cost-share-app/apps/mobile/i18n/locales/en.json`
-
-`users.service.ts`'s `hydrateCurrentUserProfile` already does `select('*')` so it picks up `is_admin` automatically once the column exists — no change needed there.
 
 ---
 
@@ -215,10 +214,14 @@ BEGIN
         (v_alice, 'ap-alice@test.local'),
         (v_bob,   'ap-bob@test.local');
 
-    INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, is_admin, invite_token) VALUES
-        (v_admin, 'ap-admin@test.local', 'Admin', 'USD', 'en', TRUE, TRUE,  'tt_ap_admin'),
-        (v_alice, 'ap-alice@test.local', 'Alice', 'USD', 'en', TRUE, FALSE, 'tt_ap_alice'),
-        (v_bob,   'ap-bob@test.local',   'Bob',   'USD', 'en', TRUE, FALSE, 'tt_ap_bob');
+    INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, invite_token) VALUES
+        (v_admin, 'ap-admin@test.local', 'Admin', 'USD', 'en', TRUE, 'tt_ap_admin'),
+        (v_alice, 'ap-alice@test.local', 'Alice', 'USD', 'en', TRUE, 'tt_ap_alice'),
+        (v_bob,   'ap-bob@test.local',   'Bob',   'USD', 'en', TRUE, 'tt_ap_bob');
+
+    -- Promote the admin (app_admins is RLS-locked; this only works because the test
+    -- runs in session_replication_role = replica, which bypasses RLS).
+    INSERT INTO public.app_admins (user_id) VALUES (v_admin);
 
     -- Simulate two soft-deletions: Alice (currently deleted), Bob (deleted then restored).
     UPDATE profiles SET is_active = FALSE, deleted_at = NOW(), email = NULL, name = NULL
@@ -295,6 +298,27 @@ BEGIN
         RAISE EXCEPTION 'Case 3c failed: after restore expected 0 rows, got %', v_rows;
     END IF;
 
+    -- ---- CASE 4: app_admins is locked (no RLS policy) -----------------
+    -- Re-enable RLS enforcement for this case by clearing replica role,
+    -- then attempt a direct INSERT as a non-admin authenticated session.
+    SET LOCAL session_replication_role = origin;
+    SET LOCAL ROLE authenticated;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+
+    v_caught := FALSE;
+    BEGIN
+        INSERT INTO public.app_admins (user_id) VALUES (v_alice);
+    EXCEPTION WHEN insufficient_privilege OR check_violation OR OTHERS THEN
+        v_caught := TRUE;
+    END;
+    IF NOT v_caught THEN
+        RAISE EXCEPTION 'Case 4 failed: non-admin INSERT into app_admins should be blocked by RLS';
+    END IF;
+
+    -- Restore replica role for clean ROLLBACK.
+    RESET ROLE;
+    SET LOCAL session_replication_role = replica;
+
     RAISE NOTICE 'admin_portal.test.sql — all cases passed';
 END;
 $outer$;
@@ -340,23 +364,25 @@ Project: `drxfbicunusmipdgbgdk`
 SQL:
 
 ```sql
-SELECT p.id, u.email, p.is_admin
-FROM profiles p
-JOIN auth.users u ON u.id = p.id
-WHERE p.is_admin = TRUE;
+SELECT a.user_id, u.email, a.granted_at
+FROM public.app_admins a
+JOIN auth.users u ON u.id = a.user_id;
 ```
 
-Expected: exactly one row, `email = sarussilberg@gmail.com`, `is_admin = TRUE`. If zero rows: the auth user doesn't exist yet — the admin must sign up first, then re-run the seed.
+Expected: exactly one row, `email = sarussilberg@gmail.com`. If zero rows: the auth user doesn't exist yet — the admin must sign up first, then re-run the seed by executing the migration's `INSERT INTO public.app_admins …` statement again.
 
 - [ ] **Step 3: No commit** (DB-only change; the migration file was already committed in Task 1).
 
 ---
 
-## Task 4: Shared type — `User.isAdmin`
+## Task 4: Shared type `User.isAdmin` + hydration RPC call
+
+**Architecture note:** Because `app_admins` is RLS-locked, clients **cannot** read it directly. The mapper defaults `isAdmin: false`. After `hydrateCurrentUserProfile` loads the profile, it calls `supabase.rpc('is_app_admin')` to learn the caller's own admin status and merges the result onto the user before `setCurrentUser`. One extra RPC call per login; trivial latency for a single boolean.
 
 **Files:**
 - Modify: `cost-share-app/packages/shared/src/types/index.ts:22-34`
 - Modify: `cost-share-app/packages/shared/src/mappers/index.ts:20-35`
+- Modify: `cost-share-app/apps/mobile/services/users.service.ts:23-40` (the `hydrateCurrentUserProfile` body)
 
 - [ ] **Step 1: Add `isAdmin` to the `User` interface**
 
@@ -364,39 +390,72 @@ In `packages/shared/src/types/index.ts`, in the `User` interface (currently line
 
 ```ts
 isActive: boolean;  // Soft-delete flag — false means the user has deleted their account
-isAdmin: boolean;   // App-admin flag (gates admin portal entry in Settings)
+isAdmin: boolean;   // App-admin flag (gates admin portal entry in Settings) — set by hydrateCurrentUserProfile via is_app_admin() RPC
 createdAt: Date;
 updatedAt: Date;
 ```
 
-- [ ] **Step 2: Map `is_admin` in `profileFromRow`**
+- [ ] **Step 2: Default `isAdmin: false` in `profileFromRow`**
 
 In `packages/shared/src/mappers/index.ts`, inside `profileFromRow` (currently lines 20–35), add the field right after `isActive`:
 
 ```ts
 isActive: r.is_active === undefined ? true : (r.is_active as boolean),
-isAdmin: r.is_admin === true,
+isAdmin: false,  // The profiles table does NOT carry admin status; populated by hydrateCurrentUserProfile via is_app_admin() RPC.
 createdAt: toDate(r.created_at),
 ```
 
-The defensive `=== true` default to `false` matters: any call site that select-projects without `is_admin` will treat the user as non-admin.
+This is intentional: the mapper always returns `isAdmin: false`. The real value is set at hydration time (Step 3). Any non-hydrated code path that constructs a `User` from a row will treat them as non-admin, which is the safe default.
 
-- [ ] **Step 3: Typecheck**
+- [ ] **Step 3: Update `hydrateCurrentUserProfile` to call `is_app_admin()`**
+
+In `cost-share-app/apps/mobile/services/users.service.ts`, replace the body of `hydrateCurrentUserProfile` (currently lines 23–40):
+
+```ts
+export async function hydrateCurrentUserProfile(userId: string): Promise<ProfileHydrationResult> {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (error || !data) return 'unknown';
+
+    const profile = profileFromRow(data);
+    if (profile.isActive === false) {
+        await clearLocalAuthSession();
+        return 'deactivated';
+    }
+
+    // Resolve the caller's admin status via the SECURITY DEFINER RPC.
+    // app_admins is RLS-locked; this RPC is the only client-facing read path.
+    const { data: isAdminFlag } = await supabase.rpc('is_app_admin');
+    const user = { ...profile, isAdmin: isAdminFlag === true };
+
+    useAppStore.getState().setCurrentUser(user);
+    return 'active';
+}
+```
+
+If `is_app_admin()` RPC fails (network blip, etc.), `isAdminFlag` will be `null`/`undefined` and the user is treated as non-admin — same safe default as the mapper. We do NOT block the hydration path on the admin lookup.
+
+- [ ] **Step 4: Typecheck**
 
 From repo root:
 
 ```bash
-cd cost-share-app && pnpm -F @cost-share/shared build
+cd cost-share-app && pnpm -F @cost-share/shared build && pnpm -F mobile typecheck
 ```
 
-Expected: clean build, no TS errors.
+Expected: clean. If `pnpm -F mobile typecheck` is not a defined script, fall back to `pnpm -F mobile exec tsc --noEmit` after `cd cost-share-app/apps/mobile`.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add cost-share-app/packages/shared/src/types/index.ts \
-        cost-share-app/packages/shared/src/mappers/index.ts
-git commit -m "Add User.isAdmin (shared types + mapper)."
+        cost-share-app/packages/shared/src/mappers/index.ts \
+        cost-share-app/apps/mobile/services/users.service.ts
+git commit -m "Add User.isAdmin; resolve via is_app_admin() RPC during hydration."
 ```
 
 ---
@@ -1105,7 +1164,7 @@ Expected: push succeeds. Supabase migration CI will re-apply the (idempotent) mi
 
 | Spec section | Covered by |
 |---|---|
-| `profiles.is_admin` column + index + seed | Task 1 |
+| `app_admins` table + seed (replaces planned `profiles.is_admin` after security review) | Task 1 (b4a334c) |
 | `is_app_admin()` helper | Task 1 |
 | `admin_list_deleted_accounts()` RPC | Task 1 |
 | `admin_restore_deleted_account()` RPC | Task 1 |
