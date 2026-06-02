@@ -16,6 +16,11 @@ DECLARE
     v_notes  TEXT;
     v_email  TEXT;
     v_caught BOOLEAN;
+    v_metrics            JSONB;
+    v_base_active        INT;
+    v_base_archived      INT;
+    v_base_deleted_grp   INT;
+    v_base_registered    INT;
 BEGIN
     -- ---- seed users ----------------------------------------------------
     INSERT INTO auth.users (id, email) VALUES
@@ -43,6 +48,25 @@ BEGIN
     -- Bob is already restored (older audit row remains, restored_at set).
     UPDATE account_deletions_audit SET restored_at = NOW() WHERE user_id = v_bob;
     UPDATE profiles SET is_active = TRUE, email = 'ap-bob@test.local', name = 'Bob' WHERE id = v_bob;
+
+    -- ---- Baseline counts BEFORE seeding test groups (admin metrics use deltas) ----
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    SELECT public.admin_get_platform_metrics() INTO v_metrics;
+    v_base_registered  := (v_metrics->'users'->>'registered')::INT;
+    v_base_active      := (v_metrics->'groups'->>'active')::INT;
+    v_base_archived    := (v_metrics->'groups'->>'archived')::INT;
+    v_base_deleted_grp := (v_metrics->'groups'->>'deleted')::INT;
+
+    -- Groups for auto-archive metrics (fixed UUIDs).
+    -- No expenses → member_balances is empty → all_settled = TRUE.
+    INSERT INTO groups (id, name, default_currency, is_active, last_activity_at, created_by, invite_token) VALUES
+        ('00000000-0000-0000-0000-0000000ad010', 'Active Group',   'ILS', TRUE,  NOW(),                       v_admin, 'tt_ap_grp_active'),
+        ('00000000-0000-0000-0000-0000000ad011', 'Archived Group', 'ILS', TRUE,  NOW() - INTERVAL '3 months', v_admin, 'tt_ap_grp_archived'),
+        ('00000000-0000-0000-0000-0000000ad012', 'Deleted Group',  'ILS', FALSE, NOW(),                       v_admin, 'tt_ap_grp_deleted');
+    INSERT INTO group_members (group_id, user_id, is_active) VALUES
+        ('00000000-0000-0000-0000-0000000ad010', v_admin, TRUE),
+        ('00000000-0000-0000-0000-0000000ad011', v_admin, TRUE),
+        ('00000000-0000-0000-0000-0000000ad012', v_admin, TRUE);
 
     -- ---- CASE 1: is_app_admin() ---------------------------------------
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
@@ -132,6 +156,49 @@ BEGIN
     -- Restore replica role for clean ROLLBACK.
     RESET ROLE;
     SET LOCAL session_replication_role = replica;
+
+    -- ---- CASE 5: admin_get_platform_metrics() -------------------------
+    -- 5a: non-admin → not_authorized
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_bob::text)::text, TRUE);
+    v_caught := FALSE;
+    BEGIN
+        PERFORM public.admin_get_platform_metrics();
+    EXCEPTION WHEN OTHERS THEN
+        IF SQLERRM = 'not_authorized' THEN v_caught := TRUE; END IF;
+    END;
+    IF NOT v_caught THEN
+        RAISE EXCEPTION 'Case 5a failed: non-admin should get not_authorized';
+    END IF;
+
+    -- 5b: admin sees post-seed deltas matching the seeded groups
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    SELECT public.admin_get_platform_metrics() INTO v_metrics;
+
+    -- Registered users: baseline was taken after seeding admin+bob as active (alice was
+    -- soft-deleted). CASE 3 restores Alice, adding +1 to is_active count. Net delta >= 1.
+    IF (v_metrics->'users'->>'registered')::INT - v_base_registered < 1 THEN
+        RAISE EXCEPTION 'Case 5b failed: registered delta expected >= 1, got %',
+            (v_metrics->'users'->>'registered')::INT - v_base_registered;
+    END IF;
+
+    IF (v_metrics->'groups'->>'active')::INT - v_base_active <> 1 THEN
+        RAISE EXCEPTION 'Case 5c failed: active groups delta expected 1, got %',
+            (v_metrics->'groups'->>'active')::INT - v_base_active;
+    END IF;
+
+    IF (v_metrics->'groups'->>'archived')::INT - v_base_archived <> 1 THEN
+        RAISE EXCEPTION 'Case 5d failed: archived groups delta expected 1, got %',
+            (v_metrics->'groups'->>'archived')::INT - v_base_archived;
+    END IF;
+
+    IF (v_metrics->'groups'->>'deleted')::INT - v_base_deleted_grp <> 1 THEN
+        RAISE EXCEPTION 'Case 5e failed: deleted groups delta expected 1, got %',
+            (v_metrics->'groups'->>'deleted')::INT - v_base_deleted_grp;
+    END IF;
+
+    IF (v_metrics->>'version')::INT <> 1 THEN
+        RAISE EXCEPTION 'Case 5f failed: expected version 1, got %', v_metrics->>'version';
+    END IF;
 
     RAISE NOTICE 'admin_portal.test.sql — all cases passed';
 END;
