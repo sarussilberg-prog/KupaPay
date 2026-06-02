@@ -10,10 +10,11 @@ import { useRtlLayout, rtlRowStyle } from '../../hooks/useRtlLayout';
 interface Props {
     name: string;
     avatarUrl?: string;
+    onSharePress: () => void;
     onEditPress: () => void;
 }
 
-export function ProfileHeaderRow({ name, avatarUrl, onEditPress }: Props) {
+export function ProfileHeaderRow({ name, avatarUrl, onSharePress, onEditPress }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
 
@@ -32,15 +33,26 @@ export function ProfileHeaderRow({ name, avatarUrl, onEditPress }: Props) {
                         {name}
                     </Text>
                 </View>
-                <TouchableOpacity
-                    onPress={onEditPress}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    testID="profile-header-edit"
-                    accessibilityLabel={t('profile.editProfile')}
-                    className="w-10 h-10 items-center justify-center rounded-full bg-slate-50 border border-slate-200/80"
-                >
-                    <AppIcon name="create-outline" size={18} color={colors.gray600} />
-                </TouchableOpacity>
+                <View style={rtlRowStyle(isRtl)} className="items-center gap-2">
+                    <TouchableOpacity
+                        onPress={onSharePress}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        testID="profile-header-share"
+                        accessibilityLabel={t('invite.friend.cta')}
+                        className="w-10 h-10 items-center justify-center rounded-full bg-slate-50 border border-slate-200/80"
+                    >
+                        <AppIcon name="share-outline" size={18} color={colors.gray600} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={onEditPress}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        testID="profile-header-edit"
+                        accessibilityLabel={t('profile.editProfile')}
+                        className="w-10 h-10 items-center justify-center rounded-full bg-slate-50 border border-slate-200/80"
+                    >
+                        <AppIcon name="create-outline" size={18} color={colors.gray600} />
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );

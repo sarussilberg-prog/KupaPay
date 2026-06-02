@@ -11,7 +11,7 @@ import {
 import { settlementFromRow } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
-import { showAppToast, showSuccessToast, showErrorToast } from '../lib/appToast';
+import { showSuccessToast, showErrorToast } from '../lib/appToast';
 
 export async function fetchSettlements(groupId?: string): Promise<Settlement[]> {
     try {

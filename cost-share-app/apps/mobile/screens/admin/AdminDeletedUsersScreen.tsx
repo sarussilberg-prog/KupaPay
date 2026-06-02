@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Toast from 'react-native-toast-message';
+import { showAppToast, showSuccessMessage } from '../../lib/appToast';
 import { Text } from '../../components/AppText';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { listDeletedAccounts, restoreDeletedAccount, type DeletedAccount } from '../../services/admin.service';
@@ -36,10 +36,13 @@ export function AdminDeletedUsersScreen() {
         setPending(null);
         const result = await restoreDeletedAccount(target.userId);
         if (result.ok) {
-            Toast.show({ type: 'success', text1: t('admin.deletedUsers.restoreSuccess') });
+            showSuccessMessage('admin.deletedUsers.restoreSuccess');
             await load();
         } else {
-            Toast.show({ type: 'error', text1: t(result.error ?? 'admin.deletedUsers.restoreError') });
+            showAppToast({
+                type: 'error',
+                titleKey: result.error ?? 'admin.deletedUsers.restoreError',
+            });
         }
     }, [pending, t, load]);
 

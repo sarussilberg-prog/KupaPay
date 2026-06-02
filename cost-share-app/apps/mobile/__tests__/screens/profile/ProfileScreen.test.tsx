@@ -23,6 +23,14 @@ jest.mock('../../../hooks/useProfileBalanceSummary', () => ({
     }),
 }));
 
+jest.mock('../../../hooks/queries/useExchangeRatesQuery', () => ({
+    useExchangeRatesQuery: () => ({
+        data: undefined,
+        isLoading: false,
+        isError: false,
+    }),
+}));
+
 import { fetchDashboard } from '../../../services/dashboard.service';
 import { ProfileScreen } from '../../../screens/profile/ProfileScreen';
 import { useAppStore } from '../../../store';

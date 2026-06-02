@@ -6,12 +6,7 @@
 
 import { Text } from '../../components/AppText';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-    View,
-    TouchableOpacity,
-    StyleSheet,
-    ActivityIndicator,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { platformAlert } from '../../lib/platformAlert';
 import { AppIcon } from '../../components/AppIcon';
@@ -25,7 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useLoading } from '../../hooks/useLoading';
 import { signInWithGoogle } from '../../services/auth.service';
-import Toast from 'react-native-toast-message';
+import { showAppToast } from '../../lib/appToast';
 import { LanguageSheet } from '../../components/settings/LanguageSheet';
 import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
 import { centeredTextStyle, useAppLanguage } from '../../hooks/useRtlLayout';
@@ -93,17 +88,14 @@ export function LoginScreen() {
                     showDeletedAccountNotice();
                     return;
                 }
-                Toast.show({
+                showAppToast({
                     type: 'error',
-                    text1: t('auth.signInError'),
-                    text2: error.message,
+                    titleKey: 'auth.signInError',
+                    message: error.message,
                 });
             }
         } catch {
-            Toast.show({
-                type: 'error',
-                text1: t('auth.signInError'),
-            });
+            showAppToast({ type: 'error', titleKey: 'auth.signInError' });
         } finally {
             stopLoading();
         }
@@ -163,15 +155,12 @@ export function LoginScreen() {
                         disabled={isLoading}
                     />
                     {isLoading ? (
-                        <View style={styles.signingHint}>
-                            <ActivityIndicator size="small" color={colors.primary} />
-                            <Text
-                                className="text-sm text-gray-400 mt-2 text-center"
-                                style={centeredTextStyle}
-                            >
-                                {t('auth.signingIn')}
-                            </Text>
-                        </View>
+                        <Text
+                            className="text-sm text-gray-400 mt-3 text-center"
+                            style={[centeredTextStyle, styles.signingHint]}
+                        >
+                            {t('auth.signingIn')}
+                        </Text>
                     ) : null}
                 </View>
             </SafeAreaView>
@@ -253,7 +242,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(96,165,250,0.18)',
     },
     signingHint: {
-        alignItems: 'center',
-        marginTop: 12,
+        alignSelf: 'stretch',
     },
 });

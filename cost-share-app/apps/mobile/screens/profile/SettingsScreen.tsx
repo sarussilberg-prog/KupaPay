@@ -18,7 +18,7 @@ import { ContactSupportRow } from '../../components/settings/ContactSupportRow';
 import { LegalDocumentSheet } from '../../components/settings/LegalDocumentSheet';
 import { LanguageSheet } from '../../components/settings/LanguageSheet';
 import { CurrencyPicker } from '../../components/CurrencyPicker';
-import Toast from 'react-native-toast-message';
+import { showAppToast, showErrorToast, showSuccessMessage } from '../../lib/appToast';
 import { deleteMyAccount, getMyOpenBalances, type OpenBalancesSummary } from '../../services/account.service';
 import { useNavigation } from '@react-navigation/native';
 import { DeleteAccountWarningSheet } from '../../components/settings/DeleteAccountWarningSheet';
@@ -69,17 +69,13 @@ export function SettingsScreen() {
 
         const result = await updateUser(currentUser.id, { defaultCurrency: nextCurrency });
         if (result) {
-            Toast.show({
+            showAppToast({
                 type: 'success',
-                text1: t('common.success'),
-                text2: t('profile.profileUpdated'),
+                titleKey: 'common.success',
+                messageKey: 'profile.profileUpdated',
             });
         } else {
-            Toast.show({
-                type: 'error',
-                text1: t('common.error'),
-                text2: t('profile.updateError'),
-            });
+            showErrorToast('common.error', 'profile.updateError');
         }
     }, [currentUser, t]);
 
@@ -101,11 +97,11 @@ export function SettingsScreen() {
         const result = await deleteMyAccount();
         if (result.ok) {
             setShowDeleteConfirm(false);
-            Toast.show({ type: 'success', text1: t('deleteAccount.deletedToast') });
+            showSuccessMessage('deleteAccount.deletedToast');
         } else {
-            Toast.show({
+            showAppToast({
                 type: 'error',
-                text1: t(result.error ?? 'deleteAccount.deleteFailed'),
+                titleKey: result.error ?? 'deleteAccount.deleteFailed',
             });
         }
     }, [t]);

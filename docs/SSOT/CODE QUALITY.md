@@ -110,6 +110,12 @@ netBalance = totalPaid - totalOwed + totalSettledReceived - totalSettledPaid
 |------|-------|
 | [PENDING REFACTOR]: Move balance fetch to Supabase RPC/view | Optional server-side aggregation |
 | [PENDING REFACTOR]: Prune stale superpowers plans referencing `apps/server` | Historical docs under `docs/superpowers/` |
+| [PENDING REFACTOR]: Replace RPC error-message string matching with structured `{ ok, error_code }` | KI-017. Service callers (`groups.service.ts:224`, `deepLinks.service.ts:128–140`) parse English messages. See TECHNICAL_DEBT.md §5. |
+| [PENDING REFACTOR]: Wrap multi-table writes in SECURITY DEFINER RPCs | KI-019. `createExpense`, `createSettlement`, `redeemInvite` currently sequence client-side inserts with no rollback. See TECHNICAL_DEBT.md §6. |
+| [PENDING REFACTOR]: Lock down `SECURITY DEFINER` functions — `REVOKE EXECUTE FROM PUBLIC` / `GRANT TO authenticated` | KI-006. 17 functions on prod are anon-callable per `get_advisors(security)`. Helpers used in RLS (`is_group_member`, `is_group_creator`, `is_app_admin`, `is_caller_active`) must keep policy access — test in dev branch first. |
+| [PENDING REFACTOR]: Wrap `auth.uid()` in `(SELECT auth.uid())` across ~12 RLS policies | Performance at scale only. Deferred — see TECHNICAL_DEBT.md §4. |
+| [PENDING REFACTOR]: Add `tsc --noEmit` job to `.github/workflows/ci.yml` | KI-015. Sequenced after fixing KI-004 (9 outstanding type errors). |
+| [PENDING REFACTOR]: Tests for `groups.service.ts`, `messages.service.ts`, `AuthenticatedAppGate`, `OnboardingPreAuthFlow`, `OnboardingCreateGroupScreen` | KI-010 + KI-018. High-blast-radius modules without coverage. |
 
 **Bugs and launch gaps:** [KNOWN_ISSUES.md](./KNOWN_ISSUES.md). **Deferred features:** [TECHNICAL_DEBT.md](./TECHNICAL_DEBT.md).
 
@@ -129,6 +135,7 @@ netBalance = totalPaid - totalOwed + totalSettledReceived - totalSettledPaid
 
 | Date | Change |
 |------|--------|
+| 2026-06-02 | Pre-Google-Play audit: added 6 pending refactors (RPC error contract, atomic writes, SECURITY DEFINER lockdown, RLS perf, CI typecheck, critical-path tests). |
 | 2026-05-20 | Added `supabase/group-images-bucket.sql` + `fix-groups-update-members.sql` — group avatar storage + member UPDATE RLS |
 | 2026-05-19 | v0.2 — Removed NestJS; Supabase-only architecture |
 | 2026-05-19 | v0.1 — Initial CODE QUALITY |

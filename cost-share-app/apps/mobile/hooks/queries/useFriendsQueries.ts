@@ -18,10 +18,13 @@ export function useFriendsQuery() {
     });
 }
 
+export const INCOMING_REQUESTS_STALE_MS = 120_000;
+
 export function useIncomingFriendRequestsQuery() {
     return useQuery({
         queryKey: queryKeys.friendRequestsIncoming,
         queryFn: fetchIncomingRequests,
+        staleTime: INCOMING_REQUESTS_STALE_MS,
     });
 }
 

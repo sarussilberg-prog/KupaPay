@@ -19,6 +19,10 @@ jest.mock('../../../lib/deactivationNoticeStorage', () => ({
     clearDeactivationNoticePending: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../../../lib/appToast', () => ({
+    showAppToast: jest.fn(),
+}));
+
 import { LoginScreen } from '../../../screens/auth/LoginScreen';
 import { signInWithGoogle } from '../../../services/auth.service';
 import { useChangeAppLanguage } from '../../../hooks/useChangeAppLanguage';
@@ -27,7 +31,7 @@ import {
     clearDeactivationNoticePending,
     consumeDeactivationNoticePending,
 } from '../../../lib/deactivationNoticeStorage';
-import Toast from 'react-native-toast-message';
+import { showAppToast } from '../../../lib/appToast';
 
 const mockSignIn = signInWithGoogle as jest.MockedFunction<typeof signInWithGoogle>;
 const mockUseChangeAppLanguage = useChangeAppLanguage as jest.MockedFunction<
@@ -93,7 +97,7 @@ describe('LoginScreen', () => {
         const { getByTestId } = render(<LoginScreen />);
         fireEvent.press(getByTestId('login-google-button'));
         await waitFor(() =>
-            expect(Toast.show).toHaveBeenCalledWith(
+            expect(showAppToast).toHaveBeenCalledWith(
                 expect.objectContaining({ type: 'error' }),
             ),
         );
@@ -108,7 +112,7 @@ describe('LoginScreen', () => {
         fireEvent.press(getByTestId('login-google-button'));
 
         expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
-        expect(Toast.show).not.toHaveBeenCalled();
+        expect(showAppToast).not.toHaveBeenCalled();
     });
 
     it('shows deleted-account dialog when pendingDeactivationNotice flips on', async () => {

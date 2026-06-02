@@ -40,8 +40,6 @@ import {
     showSuccessMessage,
     showSuccessToast,
 } from '../lib/appToast';
-import i18n from '../i18n';
-
 type GroupArchiveState = { mine: boolean; auto: boolean };
 
 async function fetchGroupsArchiveState(): Promise<Map<string, GroupArchiveState>> {
@@ -281,10 +279,7 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
         const requestedIds = dto.memberIds.filter(id => id !== createdBy);
         const activeMemberIds = await filterActiveMemberIds(requestedIds);
         if (activeMemberIds.length < requestedIds.length) {
-            Toast.show({
-                type: 'error',
-                text1: i18n.t('groups.inactiveMemberSkipped'),
-            });
+            showAppToast({ type: 'error', titleKey: 'groups.inactiveMemberSkipped' });
         }
 
         const { data: groupRow, error: groupErr } = await supabase
@@ -318,11 +313,7 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
             isAutoArchived: false,
         };
         useAppStore.getState().addGroup(group);
-        Toast.show({
-            type: 'success',
-            text1: i18n.t('common.success'),
-            text2: i18n.t('groups.createGroup'),
-        });
+        showSuccessToast('groups.groupCreated');
         return group;
     } catch (error) {
         Sentry.captureException(error, {
@@ -330,11 +321,7 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
             extra: { memberCount: dto.memberIds.length, groupType: dto.groupType },
         });
         console.error('Failed to create group:', error);
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.createError'),
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.createError', 'common.networkError');
         return null;
     }
 }
@@ -358,11 +345,11 @@ export async function updateGroup(id: string, dto: UpdateGroupDto): Promise<Grou
 
     if (error || !data) {
         console.error('Failed to update group:', error?.message ?? 'no rows updated');
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.updateError'),
-            text2: error?.message ?? i18n.t('common.networkError'),
-        });
+        showErrorToast(
+            'groups.updateError',
+            error?.message ? undefined : 'common.networkError',
+            error?.message,
+        );
         return null;
     }
 
@@ -378,7 +365,7 @@ export async function updateGroup(id: string, dto: UpdateGroupDto): Promise<Grou
     if (dto.defaultCurrency !== undefined) {
         void fetchBalanceSummary();
     }
-    Toast.show({ type: 'success', text1: i18n.t('common.success'), text2: 'Group updated' });
+    showSuccessToast('groups.groupUpdated');
     return group;
 }
 
@@ -391,16 +378,12 @@ export async function deleteGroup(id: string): Promise<boolean> {
         .maybeSingle();
 
     if (error || !data) {
-        Toast.show({
-            type: 'error',
-            text1: 'Failed to delete group',
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.deleteError', 'common.networkError');
         return false;
     }
 
     useAppStore.getState().removeGroup(id);
-    Toast.show({ type: 'success', text1: 'Group deleted' });
+    showSuccessMessage('groups.groupDeleted');
     return true;
 }
 
@@ -492,16 +475,12 @@ export async function addGroupMember(groupId: string, userId: string): Promise<G
         .single();
 
     if (error || !data) {
-        Toast.show({
-            type: 'error',
-            text1: 'Failed to add member',
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.memberAddError', 'common.networkError');
         return null;
     }
 
     await syncGroupMembershipState(groupId);
-    Toast.show({ type: 'success', text1: 'Member added' });
+    showSuccessMessage('groups.memberAdded');
     return groupMemberFromRow(data);
 }
 
@@ -516,16 +495,12 @@ export async function removeGroupMember(groupId: string, userId: string): Promis
         .maybeSingle();
 
     if (error || !data) {
-        Toast.show({
-            type: 'error',
-            text1: 'Failed to remove member',
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.memberRemoveError', 'common.networkError');
         return false;
     }
 
     await syncGroupMembershipState(groupId);
-    Toast.show({ type: 'success', text1: 'Member removed' });
+    showSuccessMessage('groups.memberRemoved');
     return true;
 }
 

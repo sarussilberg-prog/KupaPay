@@ -79,6 +79,12 @@ jest.mock('../../../services/group-share.service', () => ({
     exportGroupCsv: jest.fn().mockResolvedValue(true),
 }));
 
+const mockShareGroupInvite = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('../../../services/invite.service', () => ({
+    shareGroupInvite: (...args: unknown[]) => mockShareGroupInvite(...args),
+}));
+
 jest.mock('../../../hooks/useGroupMessagesRealtime', () => ({
     useGroupMessagesRealtime: jest.fn(),
 }));
@@ -188,10 +194,17 @@ describe('GroupDetailScreen', () => {
         expect(mockNavigate).toHaveBeenCalledWith('EditGroup', { groupId: 'g1' });
     });
 
-    it('invokes exportGroupCsv when Export is chosen from the share sheet', async () => {
+    it('invokes shareGroupInvite when the share button is tapped', async () => {
+        useAppStore.setState({ groups: [group] });
         const { findByTestId } = renderWithQuery(<GroupDetailScreen />);
         fireEvent.press(await findByTestId('appbar-share'));
-        fireEvent.press(await findByTestId('share-sheet-export'));
+        await waitFor(() => expect(mockShareGroupInvite).toHaveBeenCalledWith('g1'));
+    });
+
+    it('invokes exportGroupCsv when Export is chosen from the group menu', async () => {
+        const { findByTestId } = renderWithQuery(<GroupDetailScreen />);
+        fireEvent.press(await findByTestId('appbar-menu'));
+        fireEvent.press(await findByTestId('group-menu-export'));
         await waitFor(() => expect(mockExport).toHaveBeenCalled());
     });
 

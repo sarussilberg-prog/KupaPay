@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { platformAlert } from '../lib/platformAlert';
 import { useTranslation } from 'react-i18next';
-import Toast from 'react-native-toast-message';
+import { showAppToast, showErrorToast, showSuccessMessage } from '../lib/appToast';
 import { useAppStore } from '../store';
 import {
     buildInviteUrl,
@@ -19,7 +19,6 @@ import {
     shareFriendInvite,
     shareGroupInvite,
 } from '../services/invite.service';
-import i18n from '../i18n';
 
 export interface UseInviteLinkResult {
     url: string;
@@ -47,7 +46,7 @@ export function useInviteLink(groupId?: string): UseInviteLinkResult {
             else await shareFriendInvite();
         } catch (err) {
             console.error('Invite share failed:', err);
-            Toast.show({ type: 'error', text1: i18n.t('common.error') });
+            showAppToast({ type: 'error', titleKey: 'common.error' });
         }
     }, [groupId]);
 
@@ -71,10 +70,10 @@ export function useInviteLink(groupId?: string): UseInviteLinkResult {
                             try {
                                 if (groupId) await rotateGroupInvite(groupId);
                                 else await rotateFriendInvite();
-                                Toast.show({ type: 'success', text1: t(successKey) });
+                                showSuccessMessage(successKey);
                             } catch (err) {
                                 console.error('Invite rotation failed:', err);
-                                Toast.show({ type: 'error', text1: t('common.networkError') });
+                                showErrorToast('common.networkError');
                             } finally {
                                 resolve();
                             }

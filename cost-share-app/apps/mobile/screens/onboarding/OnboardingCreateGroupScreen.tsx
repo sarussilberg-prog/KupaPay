@@ -4,16 +4,17 @@
 
 import React, { useCallback, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { platformAlert } from '../../lib/platformAlert';
 import { useTranslation } from 'react-i18next';
 import { GroupType, User } from '@cost-share/shared';
-import Toast from 'react-native-toast-message';
+import { showAppToast, showInfoToast } from '../../lib/appToast';
 import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
 import { createGroup, updateGroup } from '../../services/groups.service';
 import { uploadGroupImage } from '../../services/storage.service';
 import { markPostLoginOnboardingComplete } from '../../lib/onboardingStorage';
-import { Button } from '../../components/Button';
+import { CreateGroupFloatingButton } from '../../components/groups/CreateGroupFloatingButton';
 import { Text } from '../../components/AppText';
 import { AppIcon } from '../../components/AppIcon';
 import { AddMembersSheet } from '../../components/AddMembersSheet';
@@ -33,6 +34,7 @@ type Props = {
 
 export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Props) {
     const { t } = useTranslation();
+    const { bottom: safeBottom } = useSafeAreaInsets();
     const isRtl = useRtlLayout();
     const appLanguage = useAppLanguage();
     const currentUser = useAppStore((s) => s.currentUser);
@@ -80,10 +82,7 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
 
     const handleFindFriends = useCallback(() => {
         setAddMembersOpen(false);
-        Toast.show({
-            type: 'info',
-            text1: t('onboarding.create.findFriendsAfterCreate'),
-        });
+        showInfoToast('onboarding.create.findFriendsAfterCreate');
     }, [t]);
 
     const handleCreate = useCallback(async () => {
@@ -101,7 +100,7 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
                 memberIds: members.map((m) => m.id),
             });
             if (!group) {
-                Toast.show({ type: 'error', text1: t('common.error') });
+                showAppToast({ type: 'error', titleKey: 'common.error' });
                 return;
             }
             if (localImageUri) {
@@ -138,6 +137,7 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
         <>
             <CreateGroupFormShell
                 testID="onboarding-create-group-screen"
+                extraBottomInset={safeBottom}
                 title={t('onboarding.create.header')}
                 guidance={
                     <OnboardingCreateGroupHero
@@ -175,7 +175,7 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
                     </TouchableOpacity>
                 }
                 footer={
-                    <Button
+                    <CreateGroupFloatingButton
                         title={t(
                             hasName
                                 ? 'onboarding.create.submitReady'

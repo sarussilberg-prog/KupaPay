@@ -13,7 +13,7 @@ import {
     RefreshControl,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Toast from 'react-native-toast-message';
+import { showAppToast, showSuccessMessage } from '../../lib/appToast';
 import { Text } from '../../components/AppText';
 import { MemberAvatar } from '../../components/MemberAvatar';
 import { AppIcon } from '../../components/AppIcon';
@@ -50,9 +50,9 @@ export function FindFriendsScreen() {
         async (userId: string) => {
             try {
                 await sendM.mutateAsync(userId);
-                Toast.show({ type: 'success', text1: t('friends.toasts.requestSent') });
+                showSuccessMessage('friends.toasts.requestSent');
             } catch {
-                Toast.show({ type: 'error', text1: t('friends.toasts.requestSentError') });
+                showAppToast({ type: 'error', titleKey: 'friends.toasts.requestSentError' });
             }
         },
         [sendM, t],
@@ -62,9 +62,9 @@ export function FindFriendsScreen() {
         async (requestId: string) => {
             try {
                 await acceptM.mutateAsync(requestId);
-                Toast.show({ type: 'success', text1: t('friends.toasts.accepted') });
+                showSuccessMessage('friends.toasts.accepted');
             } catch {
-                Toast.show({ type: 'error', text1: t('friends.toasts.error') });
+                showAppToast({ type: 'error', titleKey: 'friends.toasts.error' });
             }
         },
         [acceptM, t],
@@ -74,9 +74,9 @@ export function FindFriendsScreen() {
         async (requestId: string) => {
             try {
                 await rejectM.mutateAsync(requestId);
-                Toast.show({ type: 'success', text1: t('friends.toasts.rejected') });
+                showSuccessMessage('friends.toasts.rejected');
             } catch {
-                Toast.show({ type: 'error', text1: t('friends.toasts.error') });
+                showAppToast({ type: 'error', titleKey: 'friends.toasts.error' });
             }
         },
         [rejectM, t],

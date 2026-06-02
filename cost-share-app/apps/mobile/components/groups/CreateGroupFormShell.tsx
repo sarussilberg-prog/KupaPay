@@ -1,14 +1,17 @@
 /**
- * CreateGroupFormShell — shared layout (header, scroll, gradient footer).
- * Visual language aligned with AddExpenseScreen v2.
+ * CreateGroupFormShell — shared layout (header, scroll, floating footer CTA).
+ * Visual language aligned with GroupsListScreen bottom pill.
  */
 
 import React from 'react';
 import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from '../AppText';
 import { colors } from '../../theme';
+import {
+    CreateGroupFabAnchor,
+    createGroupFabScrollPadding,
+} from './CreateGroupFabAnchor';
 
 type Props = {
     title: string;
@@ -17,6 +20,8 @@ type Props = {
     guidance?: React.ReactNode;
     children: React.ReactNode;
     footer: React.ReactNode;
+    /** Full-screen flows without tab bar — pass safe-area bottom inset. */
+    extraBottomInset?: number;
     testID?: string;
 };
 
@@ -27,10 +32,13 @@ export function CreateGroupFormShell({
     guidance,
     children,
     footer,
+    extraBottomInset = 0,
     testID,
 }: Props) {
+    const scrollBottomPadding = createGroupFabScrollPadding(extraBottomInset);
+
     return (
-        <SafeAreaView edges={['top', 'bottom']} style={styles.root} testID={testID}>
+        <SafeAreaView edges={['top']} style={styles.root} testID={testID}>
             <KeyboardAvoidingView
                 style={styles.flex}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -49,7 +57,10 @@ export function CreateGroupFormShell({
 
                 <ScrollView
                     style={styles.scroll}
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        { paddingBottom: scrollBottomPadding },
+                    ]}
                     keyboardShouldPersistTaps="handled"
                     keyboardDismissMode="on-drag"
                     showsVerticalScrollIndicator={false}
@@ -58,15 +69,9 @@ export function CreateGroupFormShell({
                     {children}
                 </ScrollView>
 
-                <View style={styles.footer}>
-                    <LinearGradient
-                        pointerEvents="none"
-                        colors={['rgba(248,250,252,0)', 'rgba(248,250,252,0.97)']}
-                        locations={[0, 0.45]}
-                        style={StyleSheet.absoluteFill}
-                    />
+                <CreateGroupFabAnchor extraBottomInset={extraBottomInset}>
                     {footer}
-                </View>
+                </CreateGroupFabAnchor>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -132,16 +137,6 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: 16,
         paddingTop: 4,
-        paddingBottom: 120,
-    },
-    footer: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 8,
     },
     sectionShadow: {
         shadowColor: '#0F172A',

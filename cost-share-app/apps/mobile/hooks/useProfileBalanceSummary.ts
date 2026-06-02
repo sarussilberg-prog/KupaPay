@@ -1,13 +1,10 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
     aggregateBalanceInBaseCurrency,
     aggregateBalanceWithoutFx,
     BalanceSummary,
 } from '@cost-share/shared';
-import { fetchExchangeRates, ExchangeRatesPayload } from '../services/exchangeRates.service';
-
-const CACHE_STALE_MS = 24 * 60 * 60 * 1000;
+import type { ExchangeRatesPayload } from '../services/exchangeRates.service';
 
 export type ProfileBalanceConversion = {
     isConverted: boolean;
@@ -74,51 +71,36 @@ export function deriveProfileBalanceSummary(
     };
 }
 
+type FxQueryState = {
+    data: ExchangeRatesPayload | undefined;
+    isLoading: boolean;
+    isError: boolean;
+};
+
 /**
- * Owns headline aggregation for the profile screen. Fetches FX rates only when
- * the user has at least one foreign-currency balance, then delegates to
- * `deriveProfileBalanceSummary` to compute totals in `defaultCurrency`.
+ * Headline aggregation for the profile screen. FX is loaded once via
+ * `useExchangeRatesQuery` on ProfileScreen and passed in as `fxQuery`.
  */
 export function useProfileBalanceSummary(
     raw: BalanceSummary | undefined,
+    fxQuery: FxQueryState,
 ): { summary: BalanceSummary | undefined; conversion: ProfileBalanceConversion } {
-    const foreignCurrencies = useMemo(() => {
-        if (!raw) return [];
-        return raw.byCurrency
-            .map((r) => r.currency)
-            .filter((c) => c !== raw.defaultCurrency);
-    }, [raw]);
-
-    const sortedForeign = useMemo(
-        () => [...foreignCurrencies].sort((a, b) => a.localeCompare(b)),
-        [foreignCurrencies],
-    );
-
     const preview = useMemo(() => deriveProfileBalanceSummary(raw, undefined), [raw]);
     const fxEnabled = preview.needsRates;
 
-    const ratesQuery = useQuery<ExchangeRatesPayload>({
-        queryKey: ['exchangeRates', raw?.defaultCurrency, sortedForeign.join(',')],
-        queryFn: () => fetchExchangeRates(raw!.defaultCurrency, sortedForeign),
-        enabled: fxEnabled,
-        staleTime: CACHE_STALE_MS,
-        gcTime: CACHE_STALE_MS,
-        retry: 2,
-    });
-
     const derived = useMemo(
-        () => deriveProfileBalanceSummary(raw, ratesQuery.data?.rates),
-        [raw, ratesQuery.data],
+        () => deriveProfileBalanceSummary(raw, fxQuery.data?.rates),
+        [raw, fxQuery.data],
     );
 
     const conversion: ProfileBalanceConversion = {
         isConverted: derived.fxApplied,
-        ratesDate: derived.fxApplied ? ratesQuery.data?.date ?? null : null,
-        isLoading: fxEnabled && ratesQuery.isLoading,
+        ratesDate: derived.fxApplied ? fxQuery.data?.date ?? null : null,
+        isLoading: fxEnabled && fxQuery.isLoading,
         failed:
             fxEnabled &&
-            !ratesQuery.isLoading &&
-            (ratesQuery.isError || !ratesQuery.data || derived.needsRates),
+            !fxQuery.isLoading &&
+            (fxQuery.isError || !fxQuery.data || derived.needsRates),
     };
 
     return { summary: derived.summary, conversion };

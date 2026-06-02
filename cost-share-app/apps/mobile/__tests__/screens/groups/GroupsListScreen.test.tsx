@@ -16,6 +16,14 @@ jest.mock('@react-navigation/native', () => {
     };
 });
 
+jest.mock('@react-navigation/bottom-tabs', () => {
+    const actual = jest.requireActual('@react-navigation/bottom-tabs');
+    return {
+        ...actual,
+        useBottomTabBarHeight: () => 0,
+    };
+});
+
 jest.mock('../../../services/groups.service', () => ({
     fetchGroups: jest.fn().mockResolvedValue([]),
 }));
@@ -107,10 +115,10 @@ describe('GroupsListScreen', () => {
         expect(await findByTestId('groups-bottom-cta')).toBeTruthy();
     });
 
-    it('does not render the big create CTA when list is empty', async () => {
-        const { queryByTestId } = render(<GroupsListScreen />);
+    it('renders the bottom create CTA even when the filtered list is empty', async () => {
+        const { findByTestId } = render(<GroupsListScreen />);
         await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
-        expect(queryByTestId('groups-bottom-cta')).toBeNull();
+        expect(await findByTestId('groups-bottom-cta')).toBeTruthy();
     });
 
     it('filters groups by member name', async () => {

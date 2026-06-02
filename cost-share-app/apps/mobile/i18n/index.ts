@@ -57,7 +57,7 @@ async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
             initPromise = i18n.use(initReactI18next).init({
                 ...i18nInitOptions,
                 lng: language,
-            });
+            }).then(() => undefined);
         }
         await initPromise;
         return;
@@ -115,7 +115,7 @@ export const initializeLanguage = async (): Promise<void> => {
         await ensureI18nReady(language);
         useAppStore.getState().setLanguage(language);
         await syncNativeRtl(language);
-        console.log(`Language initialized: ${language}`);
+        if (__DEV__) console.log(`Language initialized: ${language}`);
     } catch (error) {
         console.error('Failed to initialize language:', error);
         await ensureI18nReady('en');
@@ -133,7 +133,7 @@ export const changeLanguage = async (language: 'en' | 'he'): Promise<void> => {
         await i18n.changeLanguage(language);
         await AsyncStorage.setItem(LANGUAGE_KEY, language);
         useAppStore.getState().setLanguage(language);
-        console.log(`Language saved to storage: ${language}`);
+        if (__DEV__) console.log(`Language saved to storage: ${language}`);
         await syncNativeRtl(language);
     } catch (error) {
         console.error('Failed to change language:', error);

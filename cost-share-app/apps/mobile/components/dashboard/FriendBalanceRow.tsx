@@ -18,7 +18,7 @@ interface Props {
     isLast?: boolean;
 }
 
-export function FriendBalanceRow({ friend, display, onPress, testID, isLast = false }: Props) {
+function FriendBalanceRowInner({ friend, display, onPress, testID, isLast = false }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const isSettled = Math.abs(display.netBalance) < 0.01;
@@ -85,3 +85,5 @@ export function FriendBalanceRow({ friend, display, onPress, testID, isLast = fa
         </TouchableOpacity>
     );
 }
+
+export const FriendBalanceRow = React.memo(FriendBalanceRowInner);

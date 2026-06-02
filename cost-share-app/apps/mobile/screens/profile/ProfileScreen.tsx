@@ -1,14 +1,25 @@
 import { Text } from '../../components/AppText';
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, ScrollView, RefreshControl, TouchableOpacity, type DimensionValue } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+    View,
+    FlatList,
+    RefreshControl,
+    TouchableOpacity,
+    type DimensionValue,
+    type ListRenderItem,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
 import { FriendBalance } from '@cost-share/shared';
 import { useAppStore } from '../../store';
 import { useDashboardQuery } from '../../hooks/queries/useDashboardQuery';
+import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
 import { useProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
 import { useFriendBalancesDisplay } from '../../hooks/useFriendBalancesDisplay';
+import { collectProfileFxCurrencies } from '../../lib/collectProfileFxCurrencies';
+import { queryKeys } from '../../hooks/queries/keys';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/EmptyState';
 import { ProfileHeaderRow } from '../../components/dashboard/ProfileHeaderRow';
@@ -19,8 +30,8 @@ import { FriendGroupBalancesSheet } from '../../components/dashboard/FriendGroup
 import { colors, shadows } from '../../theme';
 import { useRtlLayout, rtlRowStyle } from '../../hooks/useRtlLayout';
 import { useIncomingFriendRequestsQuery } from '../../hooks/queries/useFriendsQueries';
-import { getCurrentUserId } from '../../lib/auth';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import { shareFriendInvite } from '../../services/invite.service';
 
 function SkeletonBar({ width, height = 12 }: { width: DimensionValue; height?: number }) {
     return <View className="bg-slate-100 rounded" style={{ width, height }} />;
@@ -88,17 +99,124 @@ function FriendListSkeleton({ rows = 3 }: { rows?: number }) {
     );
 }
 
+type ProfileDashboardBodyProps = {
+    balanceSummary: ReturnType<typeof useProfileBalanceSummary>['summary'];
+    conversion: ReturnType<typeof useProfileBalanceSummary>['conversion'];
+    dashboard: NonNullable<ReturnType<typeof useDashboardQuery>['data']>;
+    pendingCount: number;
+    isRtl: boolean;
+    onNavigateGroups: (params: { balanceState: 'unsettled' | 'settled' }) => void;
+    onNavigateFriends: () => void;
+    friendsCountLabel: string | null;
+};
+
+const ProfileDashboardBody = React.memo(function ProfileDashboardBody({
+    balanceSummary,
+    conversion,
+    dashboard,
+    pendingCount,
+    isRtl,
+    onNavigateGroups,
+    onNavigateFriends,
+    friendsCountLabel,
+}: ProfileDashboardBodyProps) {
+    const { t } = useTranslation();
+
+    return (
+        <>
+            <BalanceHeroCard
+                summary={balanceSummary ?? dashboard.balanceSummary}
+                conversion={conversion}
+            />
+
+            <StatGroup>
+                <StatTile
+                    label={t('dashboard.activeGroups')}
+                    value={dashboard.stats.activeGroupsCount}
+                    onPress={() => onNavigateGroups({ balanceState: 'unsettled' })}
+                    testID="stat-active"
+                />
+                <StatDivider />
+                <StatTile
+                    label={t('dashboard.closedGroups')}
+                    value={dashboard.stats.closedGroupsCount}
+                    onPress={() => onNavigateGroups({ balanceState: 'settled' })}
+                    testID="stat-closed"
+                />
+            </StatGroup>
+
+            <TouchableOpacity
+                onPress={onNavigateFriends}
+                activeOpacity={0.7}
+                className="mx-4 mb-4 px-4 py-3 bg-white rounded-xl border border-slate-200/80 flex-row items-center"
+                style={shadows.sm}
+                testID="profile-friends-row"
+            >
+                <AppIcon name="people-outline" size={22} color={colors.primary} />
+                <Text className="flex-1 ml-3 text-sm font-semibold text-gray-800">
+                    {t('friends.title')}
+                </Text>
+                {pendingCount > 0 && (
+                    <View
+                        className="bg-primary rounded-full px-2 mr-2"
+                        style={{ minWidth: 22, height: 22, justifyContent: 'center', alignItems: 'center' }}
+                    >
+                        <Text className="text-xs font-bold text-white">{pendingCount}</Text>
+                    </View>
+                )}
+                <AppIcon
+                    name={isRtl ? 'chevron-back' : 'chevron-forward'}
+                    size={18}
+                    color={colors.gray400}
+                />
+            </TouchableOpacity>
+
+            {friendsCountLabel ? (
+                <Text className="text-xs font-semibold text-slate-400 text-center mb-2 mx-4">
+                    {friendsCountLabel}
+                </Text>
+            ) : null}
+        </>
+    );
+});
+
 export function ProfileScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
+    const queryClient = useQueryClient();
     const currentUser = useAppStore((s) => s.currentUser);
 
     const { data: dashboard, isLoading, refetch, isError } = useDashboardQuery();
     const [isManualRefreshing, setIsManualRefreshing] = useState(false);
-    const { summary: balanceSummary, conversion } = useProfileBalanceSummary(dashboard?.balanceSummary);
+
+    const baseCurrency = useMemo(
+        () =>
+            dashboard?.balanceSummary.defaultCurrency ??
+            currentUser?.defaultCurrency ??
+            'ILS',
+        [dashboard, currentUser?.defaultCurrency],
+    );
+
+    const fxSymbols = useMemo(
+        () =>
+            collectProfileFxCurrencies(
+                dashboard?.balanceSummary,
+                dashboard?.friends,
+                baseCurrency,
+            ),
+        [dashboard, baseCurrency],
+    );
+
+    const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
+
+    const { summary: balanceSummary, conversion } = useProfileBalanceSummary(
+        dashboard?.balanceSummary,
+        ratesQuery,
+    );
     const friendDisplays = useFriendBalancesDisplay(
         dashboard?.friends,
-        balanceSummary?.defaultCurrency ?? dashboard?.balanceSummary.defaultCurrency,
+        baseCurrency,
+        ratesQuery.data?.rates,
     );
     const incomingQ = useIncomingFriendRequestsQuery();
     const pendingCount = incomingQ.data?.length ?? 0;
@@ -106,20 +224,24 @@ export function ProfileScreen() {
     const handleRefresh = useCallback(async () => {
         setIsManualRefreshing(true);
         try {
-            await refetch();
+            await Promise.all([
+                refetch(),
+                queryClient.invalidateQueries({ queryKey: queryKeys.friendRequestsIncoming }),
+                fxSymbols.length > 0 ? ratesQuery.refetch() : Promise.resolve(),
+            ]);
         } finally {
             setIsManualRefreshing(false);
         }
-    }, [refetch]);
+    }, [refetch, queryClient, fxSymbols.length, ratesQuery]);
+
     const handleOpenSettings = useCallback(() => navigation.navigate('Settings'), [navigation]);
     const handleEditProfile = useCallback(() => navigation.navigate('EditProfile'), [navigation]);
+    const handleShareFriendInvite = useCallback(() => {
+        void shareFriendInvite();
+    }, []);
 
     const [selectedFriend, setSelectedFriend] = useState<FriendBalance | null>(null);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-    useEffect(() => {
-        void getCurrentUserId().then(setCurrentUserId);
-    }, []);
+    const currentUserId = currentUser?.id ?? null;
 
     const handleFriendPress = useCallback((friend: FriendBalance) => {
         setSelectedFriend(friend);
@@ -132,10 +254,125 @@ export function ProfileScreen() {
         navigation.navigate('Groups', { screen: 'GroupDetail', params: { groupId } });
     }, [navigation]);
 
+    const handleNavigateGroups = useCallback(
+        (params: { balanceState: 'unsettled' | 'settled' }) => {
+            navigation.navigate('Groups', {
+                screen: 'GroupsList',
+                params: { balanceState: params.balanceState, showArchived: true },
+            });
+        },
+        [navigation],
+    );
+
+    const handleNavigateFriends = useCallback(() => navigation.navigate('Friends'), [navigation]);
+
     const isRtl = useRtlLayout();
 
     const showLoadingSkeletons = isLoading && !dashboard;
     const showError = isError || (!isLoading && !dashboard);
+
+    const friends = dashboard?.friends ?? [];
+    const friendsCountLabel =
+        dashboard && friends.length > 0
+            ? t('dashboard.friendsCount', { count: friends.length })
+            : null;
+
+    const listHeader = useMemo(
+        () => (
+            <>
+                <ProfileHeaderRow
+                    name={getDisplayName(currentUser, t)}
+                    avatarUrl={getAvatarUrl(currentUser) ?? undefined}
+                    onSharePress={handleShareFriendInvite}
+                    onEditPress={handleEditProfile}
+                />
+                {showError ? (
+                    <EmptyState
+                        iconName="alert-circle-outline"
+                        title={t('dashboard.loadError')}
+                        message={t('common.networkError')}
+                        actionTitle={t('common.retry')}
+                        onAction={handleRefresh}
+                    />
+                ) : null}
+                {showLoadingSkeletons ? (
+                    <>
+                        <BalanceHeroCardSkeleton />
+                        <StatGroupSkeleton />
+                        <FriendListSkeleton />
+                    </>
+                ) : null}
+                {dashboard && !showError ? (
+                    <ProfileDashboardBody
+                        balanceSummary={balanceSummary}
+                        conversion={conversion}
+                        dashboard={dashboard}
+                        pendingCount={pendingCount}
+                        isRtl={isRtl}
+                        onNavigateGroups={handleNavigateGroups}
+                        onNavigateFriends={handleNavigateFriends}
+                        friendsCountLabel={friendsCountLabel}
+                    />
+                ) : null}
+            </>
+        ),
+        [
+            balanceSummary,
+            conversion,
+            currentUser,
+            dashboard,
+            friendsCountLabel,
+            handleEditProfile,
+            handleNavigateFriends,
+            handleNavigateGroups,
+            handleRefresh,
+            handleShareFriendInvite,
+            isRtl,
+            pendingCount,
+            showError,
+            showLoadingSkeletons,
+            t,
+        ],
+    );
+
+    const renderFriendRow: ListRenderItem<FriendBalance> = useCallback(
+        ({ item, index }) => {
+            const display = friendDisplays.get(item.userId);
+            if (!display) return null;
+            const isFirst = index === 0;
+            const isLast = index === friends.length - 1;
+            return (
+                <View
+                    className="mx-4 bg-white border-x border-slate-200/80"
+                    style={[
+                        isFirst && {
+                            borderTopWidth: 1,
+                            borderTopColor: 'rgba(226,232,240,0.8)',
+                            borderTopLeftRadius: 12,
+                            borderTopRightRadius: 12,
+                        },
+                        isLast && {
+                            borderBottomWidth: 1,
+                            borderBottomColor: 'rgba(226,232,240,0.8)',
+                            borderBottomLeftRadius: 12,
+                            borderBottomRightRadius: 12,
+                            marginBottom: 32,
+                            ...shadows.sm,
+                        },
+                    ]}
+                >
+                    <FriendBalanceRow
+                        friend={item}
+                        display={display}
+                        onPress={handleFriendPress}
+                        testID={`friend-${item.userId}`}
+                        isLast={isLast}
+                    />
+                </View>
+            );
+        },
+        [friendDisplays, friends.length, handleFriendPress],
+    );
 
     return (
         <SafeAreaView className="flex-1 bg-slate-100" edges={['top']}>
@@ -154,9 +391,17 @@ export function ProfileScreen() {
                     <AppIcon name="settings-outline" size={22} color={colors.gray600} />
                 </TouchableOpacity>
             </View>
-            <ScrollView
+            <FlatList
                 className="flex-1"
+                data={dashboard && !showError ? friends : []}
+                keyExtractor={(item) => item.userId}
+                renderItem={renderFriendRow}
+                ListHeaderComponent={listHeader}
                 contentContainerClassName="pb-10"
+                initialNumToRender={12}
+                maxToRenderPerBatch={8}
+                windowSize={7}
+                removeClippedSubviews
                 refreshControl={
                     <RefreshControl
                         refreshing={isManualRefreshing}
@@ -164,123 +409,16 @@ export function ProfileScreen() {
                         tintColor={colors.primary}
                     />
                 }
-            >
-            <ProfileHeaderRow
-                name={getDisplayName(currentUser, t)}
-                avatarUrl={getAvatarUrl(currentUser) ?? undefined}
-                onEditPress={handleEditProfile}
             />
-
-            {showError ? (
-                <EmptyState
-                    iconName="alert-circle-outline"
-                    title={t('dashboard.loadError')}
-                    message={t('common.networkError')}
-                    actionTitle={t('common.retry')}
-                    onAction={handleRefresh}
+            {selectedFriend !== null ? (
+                <FriendGroupBalancesSheet
+                    visible
+                    friend={selectedFriend}
+                    currentUserId={currentUserId}
+                    onClose={handleCloseFriendSheet}
+                    onSelectGroup={handleSelectGroup}
                 />
-            ) : showLoadingSkeletons ? (
-                <>
-                    <BalanceHeroCardSkeleton />
-                    <StatGroupSkeleton />
-                    <FriendListSkeleton />
-                </>
-            ) : dashboard ? (
-                <>
-                    <BalanceHeroCard
-                        summary={balanceSummary ?? dashboard.balanceSummary}
-                        conversion={conversion}
-                    />
-
-                    <StatGroup>
-                        <StatTile
-                            label={t('dashboard.activeGroups')}
-                            value={dashboard.stats.activeGroupsCount}
-                            onPress={() =>
-                                navigation.navigate('Groups', {
-                                    screen: 'GroupsList',
-                                    params: { balanceState: 'unsettled', showArchived: true },
-                                })
-                            }
-                            testID="stat-active"
-                        />
-                        <StatDivider />
-                        <StatTile
-                            label={t('dashboard.closedGroups')}
-                            value={dashboard.stats.closedGroupsCount}
-                            onPress={() =>
-                                navigation.navigate('Groups', {
-                                    screen: 'GroupsList',
-                                    params: { balanceState: 'settled', showArchived: true },
-                                })
-                            }
-                            testID="stat-closed"
-                        />
-                    </StatGroup>
-
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Friends')}
-                        activeOpacity={0.7}
-                        className="mx-4 mb-4 px-4 py-3 bg-white rounded-xl border border-slate-200/80 flex-row items-center"
-                        style={shadows.sm}
-                        testID="profile-friends-row"
-                    >
-                        <AppIcon name="people-outline" size={22} color={colors.primary} />
-                        <Text className="flex-1 ml-3 text-sm font-semibold text-gray-800">
-                            {t('friends.title')}
-                        </Text>
-                        {pendingCount > 0 && (
-                            <View
-                                className="bg-primary rounded-full px-2 mr-2"
-                                style={{ minWidth: 22, height: 22, justifyContent: 'center', alignItems: 'center' }}
-                            >
-                                <Text className="text-xs font-bold text-white">{pendingCount}</Text>
-                            </View>
-                        )}
-                        <AppIcon
-                            name={isRtl ? 'chevron-back' : 'chevron-forward'}
-                            size={18}
-                            color={colors.gray400}
-                        />
-                    </TouchableOpacity>
-
-
-                    {dashboard.friends.length > 0 ? (
-                        <View className="mx-4 mb-8">
-                            <Text className="text-xs font-semibold text-slate-400 text-center mb-2">
-                                {t('dashboard.friendsCount', { count: dashboard.friends.length })}
-                            </Text>
-                            <View
-                                className="rounded-xl bg-white border border-slate-200/80 overflow-hidden"
-                                style={shadows.sm}
-                            >
-                                {dashboard.friends.map((f, index) => {
-                                    const display = friendDisplays.get(f.userId);
-                                    if (!display) return null;
-                                    return (
-                                        <FriendBalanceRow
-                                            key={f.userId}
-                                            friend={f}
-                                            display={display}
-                                            onPress={handleFriendPress}
-                                            testID={`friend-${f.userId}`}
-                                            isLast={index === dashboard.friends.length - 1}
-                                        />
-                                    );
-                                })}
-                            </View>
-                        </View>
-                    ) : null}
-                </>
             ) : null}
-            </ScrollView>
-            <FriendGroupBalancesSheet
-                visible={selectedFriend !== null}
-                friend={selectedFriend}
-                currentUserId={currentUserId}
-                onClose={handleCloseFriendSheet}
-                onSelectGroup={handleSelectGroup}
-            />
         </SafeAreaView>
     );
 }

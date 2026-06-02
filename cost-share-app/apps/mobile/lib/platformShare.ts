@@ -5,8 +5,7 @@
 
 import { Platform, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import Toast from 'react-native-toast-message';
-import i18n from '../i18n';
+import { showSuccessMessage } from './appToast';
 
 export async function shareTextMessage(message: string): Promise<void> {
     if (Platform.OS !== 'web') {
@@ -27,5 +26,5 @@ export async function shareTextMessage(message: string): Promise<void> {
     }
 
     await Clipboard.setStringAsync(message);
-    Toast.show({ type: 'success', text1: i18n.t('common.linkCopied') });
+    showSuccessMessage('common.linkCopied');
 }

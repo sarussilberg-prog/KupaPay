@@ -7,8 +7,7 @@ import { GroupMessage } from '@cost-share/shared';
 import { groupMessageFromRow } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { useAppStore } from '../store';
-import Toast from 'react-native-toast-message';
-import i18n from '../i18n';
+import { showErrorToast } from '../lib/appToast';
 
 export async function fetchMessages(groupId: string): Promise<GroupMessage[]> {
     try {
@@ -52,11 +51,7 @@ export async function createMessage(
             extra: { groupId, bodyLength: trimmed.length },
         });
         console.error('Failed to create message:', error);
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.message.sendError'),
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.message.sendError', 'common.networkError');
         return null;
     }
 }
@@ -82,11 +77,7 @@ export async function updateMessage(
             extra: { messageId, bodyLength: trimmed.length },
         });
         console.error('Failed to update message:', error);
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.message.sendError'),
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.message.sendError', 'common.networkError');
         return null;
     }
 }
@@ -108,11 +99,7 @@ export async function deleteMessage(
             extra: { groupId, messageId },
         });
         console.error('Failed to delete message:', error);
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.message.sendError'),
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.message.sendError', 'common.networkError');
         return false;
     }
 }

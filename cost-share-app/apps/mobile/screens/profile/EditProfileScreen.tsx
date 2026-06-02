@@ -19,7 +19,7 @@ import { ProfileImagePicker } from '../../components/ProfileImagePicker';
 import { InviteLinkBlock } from '../../components/InviteLinkBlock';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
 import { defaultCurrencyForAppLanguage } from '../../lib/appDefaultCurrency';
-import Toast from 'react-native-toast-message';
+import { showErrorToast, showSuccessToast } from '../../lib/appToast';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 
 export function EditProfileScreen() {
@@ -65,11 +65,7 @@ export function EditProfileScreen() {
             const uploadedUrl = await uploadProfileImage(currentUser.id, localAvatarUri);
             if (!uploadedUrl) {
                 stopLoading();
-                Toast.show({
-                    type: 'error',
-                    text1: t('common.error'),
-                    text2: t('profile.imageUploadError'),
-                });
+                showErrorToast('common.error', 'profile.imageUploadError');
                 return;
             }
             nextAvatarUrl = uploadedUrl;
@@ -84,18 +80,10 @@ export function EditProfileScreen() {
         stopLoading();
 
         if (result) {
-            Toast.show({
-                type: 'success',
-                text1: t('common.success'),
-                text2: t('profile.profileUpdated'),
-            });
+            showSuccessToast('profile.profileUpdated');
             navigation.goBack();
         } else {
-            Toast.show({
-                type: 'error',
-                text1: t('common.error'),
-                text2: t('profile.updateError'),
-            });
+            showErrorToast('common.error', 'profile.updateError');
         }
     };
 

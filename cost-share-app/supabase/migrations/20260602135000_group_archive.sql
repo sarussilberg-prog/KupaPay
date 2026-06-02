@@ -1,10 +1,11 @@
 -- =============================================================================
+-- 20260602135000_group_archive.sql
 -- Per-user archive mechanism + group-wide auto-archive support.
 --
--- NOTE (2026-06-02): The deployable copy of this file lives in
--- migrations/20260602135000_group_archive.sql. Keep them in sync — edit the
--- migration, then mirror the change here (the one-off script remains for
--- documentation / ad-hoc re-runs against a local pgcli).
+-- Migration copy of cost-share-app/supabase/group-archive.sql (the one-off file
+-- was already MCP-applied to dev; this migration ensures the prod deploy
+-- pipeline applies the same DDL before 20260602140000_admin_platform_metrics,
+-- which depends on groups.last_activity_at and the group_user_archive table.
 --
 -- Implements docs/archive-mechanism-plan.md:
 --   * group_user_archive table (Type 2 — manual, per-user)
@@ -14,7 +15,9 @@
 --   * cascade-clear trigger that removes a user's manual archive row
 --     whenever they're involved in a new qualifying action.
 --
--- Idempotent: safe to re-run.
+-- Idempotent: safe to re-run. Every CREATE uses IF NOT EXISTS / CREATE OR
+-- REPLACE; every DROP uses IF EXISTS. The backfill UPDATE is a no-op on
+-- subsequent runs because the column already has the correct value.
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------

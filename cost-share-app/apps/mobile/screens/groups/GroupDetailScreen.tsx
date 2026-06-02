@@ -99,7 +99,7 @@ import { useGroupBalanceDisplay } from '../../hooks/useGroupBalancesDisplay';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
-import Toast from 'react-native-toast-message';
+import { showInfoToast } from '../../lib/appToast';
 
 type ComposerState =
     | { open: false }
@@ -181,7 +181,6 @@ export function GroupDetailScreen() {
         | null
     >(null);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [shareSheetOpen, setShareSheetOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
 
@@ -474,13 +473,10 @@ export function GroupDetailScreen() {
         ]);
     }, [groupId, navigation, t]);
     const handleExport = useCallback(async () => {
-        setShareSheetOpen(false);
+        setMenuOpen(false);
         if (!displayGroup || exporting) return;
         setExporting(true);
-        Toast.show({
-            type: 'info',
-            text1: t('groups.share.exporting'),
-        });
+        showInfoToast('groups.share.exporting');
         try {
             await exportGroupCsv(displayGroup, {
                 feed,
@@ -525,11 +521,6 @@ export function GroupDetailScreen() {
     );
 
     const handleShare = useCallback(() => {
-        setShareSheetOpen(true);
-    }, []);
-
-    const handleShareInvite = useCallback(() => {
-        setShareSheetOpen(false);
         void shareGroupInvite(groupId);
     }, [groupId]);
 
@@ -919,6 +910,12 @@ export function GroupDetailScreen() {
                             onPress={handleEditGroup}
                         />
                         <DetailMenuRow
+                            label={t('groups.share.exportOption')}
+                            onPress={handleExport}
+                            disabled={exporting}
+                            testID="group-menu-export"
+                        />
+                        <DetailMenuRow
                             label={
                                 isArchivedByMe
                                     ? t('groups.archive.unarchiveCta')
@@ -940,51 +937,6 @@ export function GroupDetailScreen() {
                     </View>
                 </Pressable>
             </Modal>
-
-            <Modal
-                visible={shareSheetOpen}
-                transparent
-                animationType="slide"
-                onRequestClose={() => setShareSheetOpen(false)}
-            >
-                <View className="flex-1 justify-end bg-black/45">
-                    <Pressable
-                        className="flex-1"
-                        onPress={() => setShareSheetOpen(false)}
-                        accessibilityRole="button"
-                        accessibilityLabel={t('groups.filters.close')}
-                    />
-                    <View
-                        className="bg-white rounded-t-3xl px-5 pt-3"
-                        style={{ paddingBottom: insets.bottom + 16 }}
-                        testID="share-sheet"
-                    >
-                        <View className="self-center w-12 h-1 rounded-full bg-gray-200 mb-4" />
-                        <Text className="text-lg font-bold text-gray-900 mb-3">
-                            {t('groups.share.menuTitle')}
-                        </Text>
-                        <ShareSheetOption
-                            iconName="person-add-outline"
-                            iconBg="bg-primary-extra-light"
-                            iconColor={colors.primary}
-                            title={t('groups.share.inviteOption')}
-                            description={t('groups.share.inviteDescription')}
-                            onPress={handleShareInvite}
-                            testID="share-sheet-invite"
-                        />
-                        <ShareSheetOption
-                            iconName="document-text-outline"
-                            iconBg="bg-gray-100"
-                            iconColor={colors.gray600}
-                            title={t('groups.share.exportOption')}
-                            description={t('groups.share.exportDescription')}
-                            onPress={handleExport}
-                            disabled={exporting}
-                            testID="share-sheet-export"
-                        />
-                    </View>
-                </View>
-            </Modal>
         </View>
     );
 }
@@ -994,15 +946,17 @@ interface DetailMenuRowProps {
     onPress: () => void;
     disabled?: boolean;
     destructive?: boolean;
+    testID?: string;
 }
 
-function DetailMenuRow({ label, onPress, disabled, destructive }: DetailMenuRowProps) {
+function DetailMenuRow({ label, onPress, disabled, destructive, testID }: DetailMenuRowProps) {
     return (
         <TouchableOpacity
             onPress={onPress}
             disabled={disabled}
             activeOpacity={0.6}
             className="px-4 py-3"
+            testID={testID}
         >
             <Text
                 className={
@@ -1015,56 +969,6 @@ function DetailMenuRow({ label, onPress, disabled, destructive }: DetailMenuRowP
             >
                 {label}
             </Text>
-        </TouchableOpacity>
-    );
-}
-
-interface ShareSheetOptionProps {
-    iconName: React.ComponentProps<typeof AppIcon>['name'];
-    iconBg: string;
-    iconColor: string;
-    title: string;
-    description: string;
-    onPress: () => void;
-    disabled?: boolean;
-    testID?: string;
-}
-
-function ShareSheetOption({
-    iconName,
-    iconBg,
-    iconColor,
-    title,
-    description,
-    onPress,
-    disabled,
-    testID,
-}: ShareSheetOptionProps) {
-    return (
-        <TouchableOpacity
-            onPress={onPress}
-            disabled={disabled}
-            activeOpacity={0.6}
-            className="flex-row items-center py-3"
-            testID={testID}
-        >
-            <View
-                className={`w-11 h-11 rounded-full items-center justify-center ${iconBg}`}
-            >
-                <AppIcon name={iconName} size={22} color={iconColor} />
-            </View>
-            <View className="flex-1 mx-3">
-                <Text
-                    className={
-                        disabled
-                            ? 'text-base font-semibold text-gray-400'
-                            : 'text-base font-semibold text-gray-900'
-                    }
-                >
-                    {title}
-                </Text>
-                <Text className="text-xs text-gray-500 mt-0.5">{description}</Text>
-            </View>
         </TouchableOpacity>
     );
 }

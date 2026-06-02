@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
+import { showAppToast, showSuccessMessage } from '../../lib/appToast';
 import { Text } from '../../components/AppText';
 import { MemberAvatar } from '../../components/MemberAvatar';
 import { AppIcon } from '../../components/AppIcon';
@@ -57,9 +57,9 @@ export function FriendsScreen() {
         async (req: FriendRequest) => {
             try {
                 await acceptM.mutateAsync(req.id);
-                Toast.show({ type: 'success', text1: t('friends.toasts.accepted') });
+                showSuccessMessage('friends.toasts.accepted');
             } catch {
-                Toast.show({ type: 'error', text1: t('friends.toasts.error') });
+                showAppToast({ type: 'error', titleKey: 'friends.toasts.error' });
             }
         },
         [acceptM, t],
@@ -69,9 +69,9 @@ export function FriendsScreen() {
         async (req: FriendRequest) => {
             try {
                 await rejectM.mutateAsync(req.id);
-                Toast.show({ type: 'success', text1: t('friends.toasts.rejected') });
+                showSuccessMessage('friends.toasts.rejected');
             } catch {
-                Toast.show({ type: 'error', text1: t('friends.toasts.error') });
+                showAppToast({ type: 'error', titleKey: 'friends.toasts.error' });
             }
         },
         [rejectM, t],
@@ -83,9 +83,9 @@ export function FriendsScreen() {
         setConfirmRemove(null);
         try {
             await removeM.mutateAsync(friend.id);
-            Toast.show({ type: 'success', text1: t('friends.toasts.removed') });
+            showSuccessMessage('friends.toasts.removed');
         } catch {
-            Toast.show({ type: 'error', text1: t('friends.toasts.error') });
+            showAppToast({ type: 'error', titleKey: 'friends.toasts.error' });
         }
     }, [confirmRemove, removeM, t]);
 

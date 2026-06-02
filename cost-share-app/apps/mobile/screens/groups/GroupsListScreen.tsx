@@ -14,7 +14,7 @@ import {
     TextInput,
     ListRenderItem,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { GroupWithMembers } from '@cost-share/shared';
@@ -28,6 +28,9 @@ import { useGroupBalancesDisplay } from '../../hooks/useGroupBalancesDisplay';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
+import { CreateGroupFabAnchor, createGroupFabScrollPadding } from '../../components/groups/CreateGroupFabAnchor';
+import { CreateGroupFloatingButton } from '../../components/groups/CreateGroupFloatingButton';
+import { FAB_LIST_GAP } from '../../components/GroupDetailFloatingActions';
 import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 import {
     BalanceState,
@@ -41,7 +44,7 @@ import {
     sortGroups,
 } from '../../lib/groupListQuery';
 import { AppIcon } from '../../components/AppIcon';
-import { colors, shadows } from '../../theme';
+import { colors } from '../../theme';
 
 function unique<T>(values: T[]): T[] {
     return Array.from(new Set(values));
@@ -58,9 +61,9 @@ function memberMatches(group: GroupWithMembers, q: string): string[] {
 export function GroupsListScreen() {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
-    const insets = useSafeAreaInsets();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
+    const listBottomPadding = createGroupFabScrollPadding() + FAB_LIST_GAP;
     const { isLoading, startLoading, stopLoading } = useLoading();
     const groups = useAppStore(s => s.groups);
     const groupBalances = useAppStore(s => s.groupBalances);
@@ -260,7 +263,7 @@ export function GroupsListScreen() {
                     className="flex-1"
                     contentContainerStyle={{
                         paddingHorizontal: 16,
-                        paddingBottom: insets.bottom + 80,
+                        paddingBottom: listBottomPadding,
                     }}
                     refreshControl={
                         <RefreshControl
@@ -296,31 +299,16 @@ export function GroupsListScreen() {
                     }
                 />
 
-                {filteredRows.length > 0 && (
-                    <View
-                        pointerEvents="box-none"
-                        style={{
-                            position: 'absolute',
-                            left: 16,
-                            right: 16,
-                            bottom: insets.bottom + 8,
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress={handleCreateGroup}
-                            activeOpacity={0.85}
-                            className="h-14 rounded-2xl bg-primary items-center justify-center flex-row"
-                            style={shadows.lg}
-                            testID="groups-bottom-cta"
-                        >
-                            <AppIcon name="add" size={22} color="#fff" />
-                            <Text className="text-base font-semibold text-white ml-2">
-                                {t('groups.bigCreateCta')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
             </View>
+
+            <CreateGroupFabAnchor>
+                <CreateGroupFloatingButton
+                    title={t('groups.createGroup')}
+                    onPress={handleCreateGroup}
+                    icon="add"
+                    testID="groups-bottom-cta"
+                />
+            </CreateGroupFabAnchor>
 
             <FiltersSheet
                 visible={filtersOpen}

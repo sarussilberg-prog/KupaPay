@@ -49,6 +49,50 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 
 ---
 
+## Observability & ops (deferred from 2026-06-02 pre-Play audit)
+
+### 1. Crash & error reporting (Sentry / Crashlytics)
+- **What:** Native + JS crash capture, source-map upload, breadcrumbs, release tagging tied to EAS Updates.
+- **Why deferred:** First internal track is for our own developer testing — we're the only testers and we'll see crashes in `adb logcat`/Xcode. Worth adding before external beta when a tester silence ≠ a working app.
+- **Revisit when:** Opening external testing track, OR after the first round of internal feedback if we lose data on a reproducible crash.
+
+### 2. Product analytics (PostHog / Amplitude / similar)
+- **What:** Funnel events for sign-in, onboarding completion, first expense, settle-up.
+- **Why deferred:** Pre-product-market-fit; no funnel decisions in flight that need data yet. GDPR/consent banner work isn't budgeted.
+- **Revisit when:** First marketing campaign launches OR product asks "where do users drop off in onboarding."
+
+### 3. CI: TypeScript strict gate + workspace `tsc` in `ci.yml`
+- **What:** Add a `typecheck` job that runs `npx tsc --noEmit` for `apps/mobile` and `packages/shared`. Currently only lint + jest run on PRs.
+- **Why deferred from immediate fix:** Lower priority than fixing the 9 outstanding TS errors first (KI-004). The CI gap (KI-015) is logged but adding the job before zero-erroring locally would just block every PR. Sequence: fix KI-004 → then add the CI gate.
+- **Revisit when:** KI-004 reaches zero errors.
+
+### 4. RLS performance optimization at scale (`auth.uid()` → `(SELECT auth.uid())`)
+- **What:** Wrap every `auth.uid()` call inside RLS policies in `(SELECT …)` to prevent per-row re-evaluation. Supabase advisor flags ~12 policies on prod (`profiles`, `groups`, `settlements`, `group_members`, `friendships`, `friend_requests`, `friend_blocks`, `group_messages`, `activity_events`).
+- **Why deferred:** Cosmetic until tables grow. At internal-tester scale (~10 rows/table) the difference is unmeasurable. Worth a bulk migration before public launch when group counts climb.
+- **Revisit when:** Any single user has > 50 groups, OR any group has > 500 expenses, OR p95 query time on `groups`/`expenses` SELECTs exceeds 200ms in prod logs.
+
+### 5. RPC error-code contract
+- **What:** Migrate Postgres RPCs (especially `redeem_group_invite`, `delete_my_account`, `delete_group`) from raising exceptions with English message strings to returning `JSONB { ok, error_code, message? }`. Clients today match `error.message?.includes('has_balance')` / `'invite_not_found'` / `'cannot_self_invite'` (KI-017), which is brittle.
+- **Why deferred:** Touches every RPC + every service caller + every error toast. Not a beta blocker — the strings work today. Worth doing once we add a second client (e.g. web shell).
+- **Revisit when:** A Postgres upgrade changes an error format, OR we add a second consumer of these RPCs, OR i18n on RPC errors becomes a release requirement.
+
+### 6. Atomic multi-table writes via SECURITY DEFINER RPCs
+- **What:** Wrap `createExpense` (expense + N splits), `createSettlement` (settlement + activity emission), and `acceptInvite` (membership + activity + notification) in single-transaction RPCs. Today they're sequential client-side inserts with no rollback (KI-019).
+- **Why deferred:** Orphan rows are recoverable manually; risk surface is small at tester scale. Refactoring all three at once is the right unit, not piecemeal.
+- **Revisit when:** First orphan-row support ticket, OR external testers start hitting flaky networks.
+
+### 7. Pagination on `fetchMessages` / activity feed
+- **What:** `messages.service.ts` calls `get_group_messages` with hardcoded `p_limit: 100`. No cursor / `offset`. Activity feed has similar full-fetch pattern.
+- **Why deferred:** No group has > 100 messages today. Pagination + `hasMore` flag is the right pattern but premature without real users.
+- **Revisit when:** Any internal group has > 80 messages, OR scroll perf on `GroupNoteScreen` degrades.
+
+### 8. Drop unused indexes flagged by Supabase advisor
+- **What:** 14 indexes flagged as never-used on prod: `idx_groups_created_by`, `idx_groups_is_active`, `idx_group_members_group`, `idx_expenses_paid_by`, `idx_expenses_created_by`, `idx_expenses_date`, `idx_expenses_category`, `idx_expense_splits_user`, `idx_settlements_group`, `idx_settlements_from_user`, `idx_settlements_to_user`, `idx_settlements_date`, `idx_profiles_is_active`, `idx_activity_events_user_kind_created`, `legal_documents_lookup`.
+- **Why deferred:** They cost write overhead but are harmless. Dropping prematurely risks slow queries we haven't observed yet because we don't have prod traffic.
+- **Revisit when:** First prod traffic baseline (4 weeks of real usage) shows the queries that would use them still don't fire.
+
+---
+
 ## Invitations & Sharing (deferred from 2026-05-20 spec)
 
 Source spec: `docs/superpowers/specs/2026-05-20-invites-and-sharing-design.md`

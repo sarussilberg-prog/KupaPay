@@ -19,7 +19,7 @@ import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
 import { prefetchGroupsList } from '../hooks/queries/prefetchGroupsList';
-import { prefetchDashboard } from '../hooks/queries/prefetchDashboard';
+import { prefetchProfileWarmup } from '../hooks/queries/prefetchProfileWarmup';
 import { useActivityUnreadCount } from '../hooks/queries/useActivityUnreadCount';
 
 function HeaderBackButton({ onPress }: { onPress: () => void }) {
@@ -276,7 +276,7 @@ export function AppNavigator() {
 
     useEffect(() => {
         prefetchGroupsList();
-        prefetchDashboard();
+        prefetchProfileWarmup();
     }, []);
 
     return (

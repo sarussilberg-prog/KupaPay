@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { fetchDashboard } from '../../services/dashboard.service';
 import { queryKeys } from './keys';
 
@@ -9,5 +9,6 @@ export function useDashboardQuery() {
         queryKey: queryKeys.dashboard,
         queryFn: fetchDashboard,
         staleTime: DASHBOARD_STALE_MS,
+        placeholderData: keepPreviousData,
     });
 }

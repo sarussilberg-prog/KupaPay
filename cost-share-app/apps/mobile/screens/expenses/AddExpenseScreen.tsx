@@ -69,7 +69,7 @@ import {
     updateExpense,
 } from '../../services/expenses.service';
 import { uploadExpenseReceipt } from '../../services/storage.service';
-import Toast from 'react-native-toast-message';
+import { showErrorToast } from '../../lib/appToast';
 import { resolveGroupMemberUsers } from '../../lib/groupMemberUsers';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import {
@@ -450,11 +450,7 @@ export function AddExpenseScreen() {
             const uploaded = await uploadExpenseReceipt(groupId, localReceiptUri);
             if (!uploaded) {
                 stopLoading();
-                Toast.show({
-                    type: 'error',
-                    text1: t('common.error'),
-                    text2: t('expenses.receiptUploadError'),
-                });
+                showErrorToast('common.error', 'expenses.receiptUploadError');
                 return;
             }
             uploadedReceiptUrl = uploaded;

@@ -5,7 +5,7 @@ const mockSignOut = jest.fn().mockResolvedValue({ error: null });
 const mockSignOutNativeGoogle = jest.fn().mockResolvedValue(undefined);
 const mockOpenAuthSessionAsync = jest.fn();
 const mockOpenOAuthSession = jest.fn();
-let mockPlatformOs: 'ios' | 'android' = 'ios';
+let mockPlatformOs: 'ios' | 'android' | 'web' = 'ios';
 const mockMakeRedirectUri = jest.fn();
 
 jest.mock('expo-constants', () => ({
@@ -81,9 +81,16 @@ import {
     signOut,
 } from '../../services/auth.service';
 
-function setPlatformOs(os: 'ios' | 'android') {
+function setPlatformOs(os: 'ios' | 'android' | 'web') {
     mockPlatformOs = os;
     Object.defineProperty(Platform, 'OS', { configurable: true, get: () => mockPlatformOs });
+}
+
+function setWebLocationOrigin(origin: string | undefined) {
+    Object.defineProperty(globalThis, 'location', {
+        configurable: true,
+        value: origin ? { origin } : undefined,
+    });
 }
 
 describe('auth.service', () => {
@@ -100,9 +107,44 @@ describe('auth.service', () => {
     });
 
     describe('getAuthRedirectUri', () => {
+        const previousWebAppUrl = process.env.EXPO_PUBLIC_WEB_APP_URL;
+
+        afterEach(() => {
+            if (previousWebAppUrl === undefined) {
+                delete process.env.EXPO_PUBLIC_WEB_APP_URL;
+            } else {
+                process.env.EXPO_PUBLIC_WEB_APP_URL = previousWebAppUrl;
+            }
+            // @ts-expect-error test cleanup
+            delete globalThis.location;
+        });
+
         it('uses native scheme redirect on dev/production builds', () => {
             expect(getAuthRedirectUri()).toBe('com.kupay.mobile://auth/callback');
             expect(mockMakeRedirectUri).not.toHaveBeenCalled();
+        });
+
+        it('uses localhost origin on web even when EXPO_PUBLIC_WEB_APP_URL is set', () => {
+            process.env.EXPO_PUBLIC_WEB_APP_URL = 'https://kupa-s1lb.vercel.app';
+            setPlatformOs('web');
+            setWebLocationOrigin('http://localhost:8081');
+
+            expect(getAuthRedirectUri()).toBe('http://localhost:8081/auth/callback');
+        });
+
+        it('uses the current tab origin on deployed web', () => {
+            setPlatformOs('web');
+            setWebLocationOrigin('https://kupa-s1lb.vercel.app');
+
+            expect(getAuthRedirectUri()).toBe('https://kupa-s1lb.vercel.app/auth/callback');
+        });
+
+        it('falls back to EXPO_PUBLIC_WEB_APP_URL on web when location is unavailable', () => {
+            process.env.EXPO_PUBLIC_WEB_APP_URL = 'https://kupa.pro';
+            setPlatformOs('web');
+            setWebLocationOrigin(undefined);
+
+            expect(getAuthRedirectUri()).toBe('https://kupa.pro/auth/callback');
         });
     });
 

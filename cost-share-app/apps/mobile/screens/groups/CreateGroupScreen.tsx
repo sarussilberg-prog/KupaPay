@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { TouchableOpacity, Modal, Pressable } from 'react-native';
 import { platformAlert } from '../../lib/platformAlert';
-import Toast from 'react-native-toast-message';
+import { showErrorToast } from '../../lib/appToast';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { GroupType, User } from '@cost-share/shared';
@@ -21,7 +21,7 @@ import { fetchGroupPairwiseDebts } from '../../services/settlements.service';
 import { fetchGroupUsers } from '../../services/users.service';
 import { uploadGroupImage } from '../../services/storage.service';
 import { getCurrentUserId } from '../../lib/auth';
-import { Button } from '../../components/Button';
+import { CreateGroupFloatingButton } from '../../components/groups/CreateGroupFloatingButton';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { AddMembersSheet } from '../../components/AddMembersSheet';
 import { Text } from '../../components/AppText';
@@ -158,11 +158,7 @@ export function CreateGroupScreen() {
             if (localImageUri) {
                 const uploadedUrl = await uploadGroupImage(result.id, localImageUri);
                 if (!uploadedUrl) {
-                    Toast.show({
-                        type: 'error',
-                        text1: t('common.error'),
-                        text2: t('groups.imageUploadError'),
-                    });
+                    showErrorToast('common.error', 'groups.imageUploadError');
                 } else {
                     await updateGroup(result.id, { imageUrl: uploadedUrl });
                 }
@@ -182,11 +178,7 @@ export function CreateGroupScreen() {
             if (localImageUri) {
                 const uploadedUrl = await uploadGroupImage(groupId, localImageUri);
                 if (!uploadedUrl) {
-                    Toast.show({
-                        type: 'error',
-                        text1: t('common.error'),
-                        text2: t('groups.imageUploadError'),
-                    });
+                    showErrorToast('common.error', 'groups.imageUploadError');
                     return;
                 }
                 nextImageUrl = uploadedUrl;
@@ -255,11 +247,12 @@ export function CreateGroupScreen() {
                     </TouchableOpacity>
                 }
                 footer={
-                    <Button
+                    <CreateGroupFloatingButton
                         title={submitLabel}
                         onPress={handleSubmit}
                         loading={isLoading}
                         disabled={isLoading}
+                        icon={isEdit ? undefined : 'add'}
                         testID="create-group-submit"
                     />
                 }

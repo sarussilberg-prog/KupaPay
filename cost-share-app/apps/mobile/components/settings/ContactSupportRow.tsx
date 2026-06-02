@@ -3,7 +3,7 @@ import { Platform, TouchableOpacity, View } from 'react-native';
 import { platformAlert } from '../../lib/platformAlert';
 import { useTranslation } from 'react-i18next';
 import * as Clipboard from 'expo-clipboard';
-import Toast from 'react-native-toast-message';
+import { showSuccessMessage } from '../../lib/appToast';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
@@ -35,7 +35,7 @@ export function ContactSupportRow() {
                     text: t('settings.copyEmail'),
                     onPress: () => {
                         void Clipboard.setStringAsync(email).then(() => {
-                            Toast.show({ type: 'success', text1: t('settings.contactEmailCopied') });
+                            showSuccessMessage('settings.contactEmailCopied');
                         });
                     },
                 },

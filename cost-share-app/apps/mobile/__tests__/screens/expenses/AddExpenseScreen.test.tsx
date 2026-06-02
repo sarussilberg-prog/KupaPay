@@ -84,8 +84,8 @@ beforeEach(() => {
     mockCreateExpense.mockReset();
     mockFetchGroupUsers.mockReset();
     mockFetchGroupUsers.mockResolvedValue([
-        { id: 'u1', name: 'Alice', email: 'a@x.com', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: true },
-        { id: 'u2', name: 'Bob', email: 'b@x.com', inviteToken: 'bob12345678', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: true },
+        { id: 'u1', name: 'Alice', email: 'a@x.com', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: true, isAdmin: false },
+        { id: 'u2', name: 'Bob', email: 'b@x.com', inviteToken: 'bob12345678', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: true, isAdmin: false },
     ]);
     useAppStore.setState({
         groups: [
@@ -327,12 +327,12 @@ describe('AddExpenseScreen — v2', () => {
 
     it('does not include soft-deleted users in the split selections when creating a new expense', async () => {
         mockFetchGroupUsers.mockResolvedValueOnce([
-            { id: 'u1', name: 'Alice', email: 'a@x.com', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: true },
-            { id: 'u2', name: 'Bob', email: 'b@x.com', inviteToken: 'bob12345678', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: false }, // inactive
+            { id: 'u1', name: 'Alice', email: 'a@x.com', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: true, isAdmin: false },
+            { id: 'u2', name: 'Bob', email: 'b@x.com', inviteToken: 'bob12345678', defaultCurrency: 'USD', language: 'en', createdAt: new Date(), updatedAt: new Date(), isActive: false, isAdmin: false }, // inactive
         ]);
         mockGetGroupMembers.mockResolvedValueOnce([
-            { id: 'm1', groupId: 'g1', userId: 'u1', role: 'member', isActive: true, joinedAt: new Date() },
-            { id: 'm2', groupId: 'g1', userId: 'u2', role: 'member', isActive: true, joinedAt: new Date() },
+            { id: 'm1', groupId: 'g1', userId: 'u1', isActive: true, joinedAt: new Date() },
+            { id: 'm2', groupId: 'g1', userId: 'u2', isActive: true, joinedAt: new Date() },
         ]);
 
         mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);

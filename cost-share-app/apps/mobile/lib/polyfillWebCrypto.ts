@@ -7,10 +7,13 @@ import { Platform } from 'react-native';
 export function ensureWebCryptoPolyfill(): void {
   if (Platform.OS === 'web') return;
 
-  const cryptoRef = globalThis.crypto ?? (globalThis.crypto = {} as Crypto);
+  const cryptoRef = (globalThis.crypto ?? (globalThis.crypto = {} as Crypto)) as unknown as {
+    getRandomValues?: Crypto['getRandomValues'];
+    subtle?: SubtleCrypto;
+  };
 
   if (typeof cryptoRef.getRandomValues !== 'function') {
-    cryptoRef.getRandomValues = Crypto.getRandomValues.bind(Crypto);
+    cryptoRef.getRandomValues = Crypto.getRandomValues.bind(Crypto) as Crypto['getRandomValues'];
   }
 
   if (cryptoRef.subtle) return;

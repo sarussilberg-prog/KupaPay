@@ -75,17 +75,15 @@ function resolveNativeOAuthRedirectUri(): string {
 
 function resolveWebOAuthRedirectUri(): string {
   const origin = globalThis.location?.origin;
-  if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+  // Always follow the tab the user is on (including localhost). EXPO_PUBLIC_WEB_APP_URL
+  // is for native/SSR fallbacks only — using it on local web sent OAuth to kupa.pro/dev.
+  if (origin) {
     return `${origin}/${AUTH_CALLBACK_PATH}`;
   }
 
   const configured = process.env.EXPO_PUBLIC_WEB_APP_URL?.replace(/\/$/, '');
   if (configured) {
     return `${configured}/${AUTH_CALLBACK_PATH}`;
-  }
-
-  if (origin) {
-    return `${origin}/${AUTH_CALLBACK_PATH}`;
   }
 
   return `${APP_WEB_ORIGIN}/${AUTH_CALLBACK_PATH}`;
