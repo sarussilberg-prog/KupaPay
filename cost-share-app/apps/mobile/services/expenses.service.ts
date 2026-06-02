@@ -22,7 +22,6 @@ import { markGroupExpensesHydrated } from '../lib/groupFeedCache';
 import { useAppStore } from '../store';
 import {
     expenseSplitValidationMessage,
-    showAppToast,
     showErrorToast,
     showSuccessMessage,
     showSuccessToast,
@@ -263,16 +262,12 @@ export async function deleteExpense(id: string): Promise<boolean> {
         .maybeSingle();
 
     if (error || !data) {
-        Toast.show({
-            type: 'error',
-            text1: 'Failed to delete expense',
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('expenses.deleteError', 'common.networkError');
         return false;
     }
 
     useAppStore.getState().removeExpense(id);
-    Toast.show({ type: 'success', text1: 'Expense deleted' });
+    showSuccessMessage('expenses.expenseDeleted');
     return true;
 }
 
