@@ -5,8 +5,8 @@ jest.mock('../../../services/auth.service', () => ({
     signInWithGoogle: jest.fn(),
 }));
 
-jest.mock('../../../i18n', () => ({
-    changeLanguage: jest.fn().mockResolvedValue(undefined),
+jest.mock('../../../hooks/useChangeAppLanguage', () => ({
+    useChangeAppLanguage: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
 }));
 
 jest.mock('../../../lib/openMailto', () => ({
@@ -21,7 +21,7 @@ jest.mock('../../../lib/deactivationNoticeStorage', () => ({
 
 import { LoginScreen } from '../../../screens/auth/LoginScreen';
 import { signInWithGoogle } from '../../../services/auth.service';
-import { changeLanguage } from '../../../i18n';
+import { useChangeAppLanguage } from '../../../hooks/useChangeAppLanguage';
 import { useAppStore } from '../../../store';
 import {
     clearDeactivationNoticePending,
@@ -30,7 +30,9 @@ import {
 import Toast from 'react-native-toast-message';
 
 const mockSignIn = signInWithGoogle as jest.MockedFunction<typeof signInWithGoogle>;
-const mockChangeLanguage = changeLanguage as jest.MockedFunction<typeof changeLanguage>;
+const mockUseChangeAppLanguage = useChangeAppLanguage as jest.MockedFunction<
+    typeof useChangeAppLanguage
+>;
 const mockConsumeNotice = consumeDeactivationNoticePending as jest.MockedFunction<
     typeof consumeDeactivationNoticePending
 >;
@@ -40,6 +42,9 @@ describe('LoginScreen', () => {
         jest.clearAllMocks();
         useAppStore.setState({ language: 'en', pendingDeactivationNotice: false });
         mockConsumeNotice.mockResolvedValue(false);
+        mockUseChangeAppLanguage.mockImplementation(() =>
+            jest.fn().mockResolvedValue(undefined),
+        );
     });
 
     it('renders the app logo, name, tagline and feature chips', () => {
@@ -61,10 +66,13 @@ describe('LoginScreen', () => {
     });
 
     it('changes language when Hebrew is selected from picker', () => {
+        const changeAppLanguage = jest.fn().mockResolvedValue(undefined);
+        mockUseChangeAppLanguage.mockReturnValue(changeAppLanguage);
+
         const { getByTestId, getByText } = render(<LoginScreen />);
         fireEvent.press(getByTestId('login-language-button'));
         fireEvent.press(getByText('profile.hebrew'));
-        expect(mockChangeLanguage).toHaveBeenCalledWith('he');
+        expect(changeAppLanguage).toHaveBeenCalledWith('he');
     });
 
     it('renders the Google sign-in button', () => {

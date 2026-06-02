@@ -37,6 +37,8 @@ const resources = {
 };
 
 const LANGUAGE_KEY = '@app_language';
+/** Last language we already ran forceRTL + reload for (prevents Android dev reload loops). */
+const RTL_NATIVE_APPLIED_KEY = '@rtl_native_applied';
 
 const i18nInitOptions = {
     resources,
@@ -68,11 +70,27 @@ async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
 
 async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
     const desiredRTL = language === 'he';
-    if (I18nManager.isRTL !== desiredRTL) {
-        I18nManager.forceRTL(desiredRTL);
-        await Updates.reloadAsync();
-        // Execution stops here — the app reloads.
+    if (I18nManager.isRTL === desiredRTL) {
+        await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
+        return;
     }
+
+    const applied = await AsyncStorage.getItem(RTL_NATIVE_APPLIED_KEY);
+    if (applied === language) {
+        // forceRTL + reload already ran for this language but native isRTL can stay
+        // wrong on Android dev builds — RtlLayoutProvider still mirrors from store.
+        if (__DEV__) {
+            console.warn(
+                '[i18n] Native I18nManager.isRTL still mismatched after reload; using logical RTL.',
+            );
+        }
+        return;
+    }
+
+    I18nManager.forceRTL(desiredRTL);
+    await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
+    await Updates.reloadAsync();
+    // Execution stops here — the app reloads.
 }
 
 async function resolveStartupLanguage(): Promise<SupportedLanguage> {

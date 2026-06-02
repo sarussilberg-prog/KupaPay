@@ -1,13 +1,13 @@
 import { Text } from '../../components/AppText';
 import React, { useCallback, useState } from 'react';
 import { View, ScrollView, Linking, Platform } from 'react-native';
-import { platformAlert } from '../../lib/platformAlert';
 import { useTranslation } from 'react-i18next';
 import Constants from 'expo-constants';
 import * as StoreReview from 'expo-store-review';
 import { Language, DEFAULT_CURRENCY } from '@cost-share/shared';
 import { useAppStore } from '../../store';
-import { changeLanguage } from '../../i18n';
+import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
+import { useAppLanguage } from '../../hooks/useRtlLayout';
 import { signOut } from '../../services/auth.service';
 import { updateUser } from '../../services/users.service';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -32,8 +32,8 @@ const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 export function SettingsScreen() {
     const { t } = useTranslation();
-    const language = useAppStore((s) => s.language);
-    const setLanguage = useAppStore((s) => s.setLanguage);
+    const language = useAppLanguage();
+    const changeAppLanguage = useChangeAppLanguage();
     const currentUser = useAppStore((s) => s.currentUser);
 
     const [showLogout, setShowLogout] = useState(false);
@@ -47,15 +47,13 @@ export function SettingsScreen() {
 
     const navigation = useNavigation<any>();
 
-    const handleLanguagePick = useCallback(async (lang: Language) => {
-        setShowLanguage(false);
-        try {
-            await changeLanguage(lang);
-            setLanguage(lang);
-        } catch {
-            platformAlert(t('common.error'), t('profile.languageChangeError'));
-        }
-    }, [setLanguage, t]);
+    const handleLanguagePick = useCallback(
+        async (lang: Language) => {
+            setShowLanguage(false);
+            await changeAppLanguage(lang);
+        },
+        [changeAppLanguage],
+    );
 
     const currencyCode = currentUser?.defaultCurrency ?? DEFAULT_CURRENCY;
     const currencyMeta = currencyCodes.code(currencyCode);

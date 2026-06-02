@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
     View,
     TouchableOpacity,
-    Modal,
     StyleSheet,
     ActivityIndicator,
 } from 'react-native';
@@ -26,21 +25,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useLoading } from '../../hooks/useLoading';
 import { signInWithGoogle } from '../../services/auth.service';
-import { Button } from '../../components/Button';
 import Toast from 'react-native-toast-message';
-import { changeLanguage } from '../../i18n';
+import { LanguageSheet } from '../../components/settings/LanguageSheet';
+import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
+import { centeredTextStyle, useAppLanguage } from '../../hooks/useRtlLayout';
 import { useAppStore } from '../../store';
 import {
     clearDeactivationNoticePending,
     consumeDeactivationNoticePending,
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
-import { centeredTextStyle } from '../../hooks/useRtlLayout';
 
 export function LoginScreen() {
     const { t } = useTranslation();
-    const language = useAppStore((state) => state.language);
-    const setLanguage = useAppStore((state) => state.setLanguage);
+    const language = useAppLanguage();
+    const changeAppLanguage = useChangeAppLanguage();
     const pendingDeactivationNotice = useAppStore((state) => state.pendingDeactivationNotice);
     const setPendingDeactivationNotice = useAppStore((state) => state.setPendingDeactivationNotice);
     const { isLoading, startLoading, stopLoading } = useLoading();
@@ -80,14 +79,9 @@ export function LoginScreen() {
     const handleLanguageChange = useCallback(
         async (lang: 'en' | 'he') => {
             setLanguagePickerVisible(false);
-            try {
-                await changeLanguage(lang);
-                setLanguage(lang);
-            } catch {
-                platformAlert(t('common.error'), t('profile.languageChangeError'));
-            }
+            await changeAppLanguage(lang);
         },
-        [setLanguage, t],
+        [changeAppLanguage],
     );
 
     const handleSignIn = async () => {
@@ -196,40 +190,13 @@ export function LoginScreen() {
                 }}
             />
 
-            <Modal
+            <LanguageSheet
+                testID="login-language-picker"
                 visible={languagePickerVisible}
-                animationType="fade"
-                transparent
-                onRequestClose={() => setLanguagePickerVisible(false)}
-            >
-                <View className="flex-1 bg-black/50 justify-end">
-                    <View
-                        testID="login-language-picker"
-                        className="bg-white rounded-t-2xl px-4 pt-4 pb-8"
-                    >
-                        <Text className="text-lg font-bold text-gray-900 mb-4 px-1">
-                            {t('settings.language')}
-                        </Text>
-                        <View className="gap-2">
-                            <Button
-                                title={t('profile.english')}
-                                onPress={() => handleLanguageChange('en')}
-                                variant={language === 'en' ? 'primary' : 'outline'}
-                            />
-                            <Button
-                                title={t('profile.hebrew')}
-                                onPress={() => handleLanguageChange('he')}
-                                variant={language === 'he' ? 'primary' : 'outline'}
-                            />
-                            <Button
-                                title={t('common.cancel')}
-                                onPress={() => setLanguagePickerVisible(false)}
-                                variant="outline"
-                            />
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+                current={language}
+                onSelect={handleLanguageChange}
+                onClose={() => setLanguagePickerVisible(false)}
+            />
         </View>
     );
 }

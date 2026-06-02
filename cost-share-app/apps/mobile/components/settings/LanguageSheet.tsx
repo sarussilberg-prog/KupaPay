@@ -11,6 +11,7 @@ interface Props {
     current: Language;
     onSelect: (lang: Language) => void;
     onClose: () => void;
+    testID?: string;
 }
 
 const OPTIONS: { code: Language; labelKey: string }[] = [
@@ -18,13 +19,17 @@ const OPTIONS: { code: Language; labelKey: string }[] = [
     { code: 'he', labelKey: 'profile.hebrew' },
 ];
 
-export function LanguageSheet({ visible, current, onSelect, onClose }: Props) {
+export function LanguageSheet({ visible, current, onSelect, onClose, testID }: Props) {
     const { t } = useTranslation();
     if (!visible) return null;
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
             <Pressable className="flex-1 bg-black/40" onPress={onClose}>
-                <Pressable onPress={(e) => e.stopPropagation()} className="bg-white rounded-t-2xl absolute bottom-0 inset-x-0">
+                <Pressable
+                    testID={testID}
+                    onPress={(e) => e.stopPropagation()}
+                    className="bg-white rounded-t-2xl absolute bottom-0 inset-x-0"
+                >
                     <View className="items-center pt-2 pb-1">
                         <View className="w-10 h-1 bg-gray-300 rounded-full" />
                     </View>
