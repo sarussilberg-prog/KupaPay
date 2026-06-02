@@ -339,65 +339,6 @@ BEGIN
         WHERE gm.user_id = v_user_id
           AND gm.is_active = TRUE
           AND g.is_active = TRUE
-    ),
-    members AS (
-        SELECT gm.group_id, gm.user_id
-        FROM group_members gm
-        WHERE gm.is_active = TRUE
-          AND gm.group_id IN (SELECT id FROM my_groups)
-    ),
-    paid AS (
-        SELECT e.group_id, e.paid_by AS user_id, e.currency, SUM(e.amount) AS amount
-        FROM expenses e
-        WHERE e.is_deleted = FALSE AND e.group_id IN (SELECT id FROM my_groups)
-        GROUP BY e.group_id, e.paid_by, e.currency
-    ),
-    owed AS (
-        SELECT e.group_id, es.user_id, e.currency, SUM(es.amount) AS amount
-        FROM expense_splits es
-        JOIN expenses e ON e.id = es.expense_id
-        WHERE e.is_deleted = FALSE AND e.group_id IN (SELECT id FROM my_groups)
-        GROUP BY e.group_id, es.user_id, e.currency
-    ),
-    settled_in AS (
-        SELECT s.group_id, s.to_user_id AS user_id, s.currency, SUM(s.amount) AS amount
-        FROM settlements s
-        WHERE s.deleted_at IS NULL AND s.group_id IN (SELECT id FROM my_groups)
-        GROUP BY s.group_id, s.to_user_id, s.currency
-    ),
-    settled_out AS (
-        SELECT s.group_id, s.from_user_id AS user_id, s.currency, SUM(s.amount) AS amount
-        FROM settlements s
-        WHERE s.deleted_at IS NULL AND s.group_id IN (SELECT id FROM my_groups)
-        GROUP BY s.group_id, s.from_user_id, s.currency
-    ),
-    currency_keys AS (
-        SELECT group_id, user_id, currency FROM paid
-        UNION SELECT group_id, user_id, currency FROM owed
-        UNION SELECT group_id, user_id, currency FROM settled_in
-        UNION SELECT group_id, user_id, currency FROM settled_out
-    ),
-    member_balances AS (
-        SELECT ck.group_id, ck.user_id, ck.currency,
-            COALESCE(p.amount, 0) - COALESCE(o.amount, 0)
-              + COALESCE(si.amount, 0) - COALESCE(so.amount, 0) AS net
-        FROM currency_keys ck
-        LEFT JOIN paid p USING (group_id, user_id, currency)
-        LEFT JOIN owed o USING (group_id, user_id, currency)
-        LEFT JOIN settled_in si USING (group_id, user_id, currency)
-        LEFT JOIN settled_out so USING (group_id, user_id, currency)
-        WHERE EXISTS (
-            SELECT 1 FROM members m
-            WHERE m.group_id = ck.group_id AND m.user_id = ck.user_id
-        )
-    ),
-    group_no_balance AS (
-        SELECT mg.id AS group_id,
-            NOT EXISTS (
-                SELECT 1 FROM member_balances mb
-                WHERE mb.group_id = mg.id AND ABS(mb.net) >= 0.01
-            ) AS all_settled
-        FROM my_groups mg
     )
     SELECT
         mg.id,
@@ -405,12 +346,8 @@ BEGIN
             SELECT 1 FROM group_user_archive gua
             WHERE gua.user_id = v_user_id AND gua.group_id = mg.id
         ) AS is_archived_by_me,
-        (
-            mg.last_activity_at < (NOW() - INTERVAL '2 months')
-            AND COALESCE(gnb.all_settled, TRUE)
-        ) AS is_auto_archived
-    FROM my_groups mg
-    LEFT JOIN group_no_balance gnb ON gnb.group_id = mg.id;
+        public.group_is_auto_archived(mg.id) AS is_auto_archived
+    FROM my_groups mg;
 END;
 $$;
 
