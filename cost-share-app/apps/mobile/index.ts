@@ -1,3 +1,7 @@
+import { ensureWebCryptoPolyfill } from './lib/polyfillWebCrypto';
+
+ensureWebCryptoPolyfill();
+
 import { registerRootComponent } from 'expo';
 
 import App from './App';

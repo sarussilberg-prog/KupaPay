@@ -11,8 +11,15 @@ export async function openOAuthSession(
   redirectUri: string,
 ): Promise<OAuthSessionResult> {
   if (Platform.OS === 'android') {
-    const { openPartialAuthSessionAsync } = require('./openPartialAuthSession.android') as typeof import('./openPartialAuthSession.android');
-    return openPartialAuthSessionAsync(authUrl, redirectUri);
+    try {
+      const { openPartialAuthSessionAsync } = require('./openPartialAuthSession.android') as typeof import('./openPartialAuthSession.android');
+      return await openPartialAuthSessionAsync(authUrl, redirectUri);
+    } catch (e) {
+      console.warn('[Auth] Partial Custom Tab failed, falling back to full Custom Tab', e);
+      return WebBrowser.openAuthSessionAsync(authUrl, redirectUri, {
+        preferEphemeralSession: true,
+      });
+    }
   }
 
   return WebBrowser.openAuthSessionAsync(authUrl, redirectUri, {
