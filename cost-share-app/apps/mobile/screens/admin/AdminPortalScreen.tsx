@@ -1,28 +1,28 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import Toast from 'react-native-toast-message';
+import { showSuccessMessage } from '../../lib/appToast';
 import { clearOnboardingFlags } from '../../lib/onboardingStorage';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { SettingsSection } from '../../components/settings/SettingsSection';
 import { SettingsRow } from '../../components/settings/SettingsRow';
+import { AdminMetricsPanel } from '../../components/admin/AdminMetricsPanel';
+import { useAdminPlatformMetricsQuery } from '../../hooks/queries/useAdminPlatformMetricsQuery';
 
 export function AdminPortalScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
     const [resetting, setResetting] = useState(false);
+    const metricsQuery = useAdminPlatformMetricsQuery();
 
     const onConfirmReset = useCallback(async () => {
         setResetting(true);
         try {
             await clearOnboardingFlags();
             setResetConfirmOpen(false);
-            Toast.show({
-                type: 'success',
-                text1: t('admin.onboarding.resetSuccess'),
-            });
+            showSuccessMessage('admin.onboarding.resetSuccess');
             navigation.navigate('AdminOnboardingPreview');
         } finally {
             setResetting(false);
@@ -31,7 +31,20 @@ export function AdminPortalScreen() {
 
     return (
         <>
-            <ScrollView className="flex-1 bg-slate-50">
+            <ScrollView
+                className="flex-1 bg-slate-50"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={metricsQuery.isRefetching}
+                        onRefresh={() => void metricsQuery.refetch()}
+                    />
+                }
+            >
+                <AdminMetricsPanel
+                    metrics={metricsQuery.data ?? null}
+                    isLoading={metricsQuery.isLoading}
+                    isError={metricsQuery.isError}
+                />
                 <SettingsSection title={t('admin.portal.sectionLabel')}>
                     <SettingsRow
                         iconName="trash-outline"

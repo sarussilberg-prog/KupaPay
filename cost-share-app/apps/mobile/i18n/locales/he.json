@@ -629,6 +629,14 @@
         },
         "errors": {
             "notAuthorized": "אין לך הרשאה לפעולה הזו"
+        },
+        "metrics": {
+            "sectionLabel": "סקירה",
+            "registeredUsers": "משתמשים רשומים",
+            "activeGroups": "קבוצות פעילות",
+            "archivedGroups": "קבוצות בארכיון",
+            "archiveFootnote": "ארכיון = ללא פעילות במשך חודשיים ויתרות אפס (לכל המשתמשים). ארכיון ידני אישי לא נספר כאן.",
+            "loadError": "לא ניתן לטעון נתונים. נסו שוב מאוחר יותר."
         }
     },
     "profile": {

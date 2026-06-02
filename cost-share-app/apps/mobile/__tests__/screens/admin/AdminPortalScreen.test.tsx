@@ -1,12 +1,26 @@
 const mockNavigate = jest.fn();
 
+jest.mock('../../../hooks/queries/useAdminPlatformMetricsQuery', () => ({
+    useAdminPlatformMetricsQuery: () => ({
+        data: {
+            version: 1,
+            generatedAt: '2026-06-02T12:00:00Z',
+            users: { registered: 1, deleted: 0 },
+            groups: { active: 2, archived: 1, deleted: 0, manualArchiveMemberships: 0 },
+        },
+        isLoading: false,
+        isError: false,
+        isRefetching: false,
+        refetch: jest.fn(),
+    }),
+}));
+
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
 }));
 
-jest.mock('react-native-toast-message', () => ({
-    __esModule: true,
-    default: { show: jest.fn() },
+jest.mock('../../../lib/appToast', () => ({
+    showSuccessMessage: jest.fn(),
 }));
 
 jest.mock('../../../lib/onboardingStorage', () => ({
@@ -15,7 +29,7 @@ jest.mock('../../../lib/onboardingStorage', () => ({
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import Toast from 'react-native-toast-message';
+import { showSuccessMessage } from '../../../lib/appToast';
 import { AdminPortalScreen } from '../../../screens/admin/AdminPortalScreen';
 import { clearOnboardingFlags } from '../../../lib/onboardingStorage';
 
@@ -31,13 +45,16 @@ describe('AdminPortalScreen onboarding tools', () => {
 
         await waitFor(() => expect(clearOnboardingFlags).toHaveBeenCalled());
         expect(mockNavigate).toHaveBeenCalledWith('AdminOnboardingPreview');
-        expect(Toast.show).toHaveBeenCalledWith(
-            expect.objectContaining({ type: 'success' }),
-        );
+        expect(showSuccessMessage).toHaveBeenCalledWith('admin.onboarding.resetSuccess');
     });
 
     it('renders preview onboarding row', () => {
         const { getByTestId } = render(<AdminPortalScreen />);
         expect(getByTestId('admin-portal-preview-onboarding')).toBeTruthy();
+    });
+
+    it('renders AdminMetricsPanel with metrics data', () => {
+        const { getByTestId } = render(<AdminPortalScreen />);
+        expect(getByTestId('admin-metrics-panel')).toBeTruthy();
     });
 });

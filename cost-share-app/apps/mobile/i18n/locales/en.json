@@ -613,6 +613,14 @@
         },
         "errors": {
             "notAuthorized": "You don't have permission for this action"
+        },
+        "metrics": {
+            "sectionLabel": "Overview",
+            "registeredUsers": "Registered users",
+            "activeGroups": "Active groups",
+            "archivedGroups": "Archived groups",
+            "archiveFootnote": "Archived = inactive 2+ months with zero balances (app-wide). Per-user manual archive is not included.",
+            "loadError": "Could not load metrics. Pull to refresh or try again later."
         }
     },
     "profile": {
