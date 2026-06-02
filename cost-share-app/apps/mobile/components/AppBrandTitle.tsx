@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { Text } from './AppText';
 import { APP_BRAND_TITLE } from '../theme/brand';
+import { centeredTextStyle } from '../hooks/useRtlLayout';
 
 interface AppBrandTitleProps {
     className?: string;
@@ -19,8 +20,8 @@ export function AppBrandTitle({
     return (
         <Text
             testID={testID}
-            className={`text-3xl font-bold text-primary-dark text-center self-stretch ${className ?? ''}`}
-            style={style}
+            className={`text-3xl font-bold text-primary-dark text-center ${className ?? ''}`}
+            style={[centeredTextStyle, style]}
         >
             {APP_BRAND_TITLE}
         </Text>

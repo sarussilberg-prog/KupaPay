@@ -109,25 +109,33 @@
             "balanceDefaultLabel": "היתרה שלך"
         },
         "create": {
-            "header": "קופה חדשה",
-            "namePlaceholder": "שם הקופה",
-            "nameInputPlaceholder": "טיול לים · ארוחת שישי · דירה משותפת...",
-            "backgroundLabel": "תמונת רקע",
-            "heroSea": "ים",
-            "heroMountains": "הרים",
-            "heroForest": "יער",
-            "heroFlowers": "פרחים",
-            "heroWaves": "גלים",
-            "uploadHint": "העלאת תמונה",
-            "membersLabel": "חברי הקופה",
-            "adminHint": "מנהל/ת הקופה",
-            "addMembers": "הוסיפו חברים",
-            "inviteHint": "שולחים בוואטסאפ, לינק או מאנשי קשר — וכל החבר'ה בקופה",
-            "submit": "צרו את הקופה",
+            "header": "הקופה הראשונה",
+            "hero": {
+                "eyebrow": "צעד אחרון",
+                "title": "עוד קופה אחת — ואפשר לחלק",
+                "subtitle": "שם, סוג ומטבע. שאר החברים יכולים להצטרף אחרי שתפתחו.",
+                "checkName": "שם לקופה",
+                "checkDefaults": "סוג ומטבע (ברירת מחדל)",
+                "checkMembers": "הזמנת חברים",
+                "optional": "לא חובה",
+                "win1": "הוצאות מתחלקות לבד",
+                "win2": "סוג ומטבע — ניתן לשנות",
+                "win3": "הזמנה בלינק או וואטסאפ"
+            },
+            "suggestions": {
+                "label": "רעיונות לשם",
+                "trip": "טיול לים",
+                "flat": "שותפים לדירה",
+                "games": "ערב משחקים",
+                "friday": "ארוחת שישי"
+            },
+            "membersHint": "אפשר להזמין עכשיו — או אחרי שתפתחו את הקופה.",
+            "submit": "פתיחת הקופה",
+            "submitReady": "יאללה, פותחים",
             "skipTitle": "לדלג על יצירת קופה?",
-            "skipMessage": "אפשר לפתוח קופה אחר כך ממסך הקופות.",
-            "skipConfirm": "דלג לעכשיו",
-            "findFriendsAfterCreate": "מיד אחרי פתיחת הקופה — מחפשים חברים ושולחים הזמנה"
+            "skipMessage": "בלי קופה אין הוצאות. אפשר לפתוח קופה מתפריט הקופות בכל רגע.",
+            "skipConfirm": "דילוג",
+            "findFriendsAfterCreate": "אחרי פתיחת הקופה — לינק, וואטסאפ או אנשי קשר."
         }
     },
     "groups": {
@@ -594,7 +602,16 @@
         "portal": {
             "title": "פורטל מנהלים",
             "sectionLabel": "כלי ניהול",
-            "deletedUsersRow": "משתמשים שנמחקו"
+            "deletedUsersRow": "משתמשים שנמחקו",
+            "resetOnboardingRow": "איפוס אונבורדינג",
+            "previewCreateGroupRow": "תצוגה מקדימה — יצירת קופה ראשונה"
+        },
+        "onboarding": {
+            "resetTitle": "לאפס את האונבורדינג?",
+            "resetMessage": "הדגלים יאופסו ומסך יצירת הקופה הראשונה ייפתח. אונבורדינג לפני התחברות דורש התנתקות והפעלה מחדש.",
+            "resetConfirm": "איפוס",
+            "resetSuccess": "האונבורדינג אופס",
+            "previewTitle": "תצוגה מקדימה"
         },
         "deletedUsers": {
             "title": "משתמשים שנמחקו",

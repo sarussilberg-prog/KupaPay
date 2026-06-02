@@ -36,6 +36,9 @@ export type CreateGroupFormFieldsProps = {
     currentUser: User | null | undefined;
     onAddMembers: () => void;
     onRemoveMember: (member: User) => void;
+    membersHintKey?: string;
+    /** Rendered above the group name field (onboarding suggestions, etc.). */
+    nameAccessory?: React.ReactNode;
 };
 
 export function CreateGroupFormFields({
@@ -55,6 +58,8 @@ export function CreateGroupFormFields({
     currentUser,
     onAddMembers,
     onRemoveMember,
+    membersHintKey = 'groups.createForm.membersHint',
+    nameAccessory,
 }: CreateGroupFormFieldsProps) {
     const { t } = useTranslation();
 
@@ -101,6 +106,7 @@ export function CreateGroupFormFields({
             ) : null}
 
             <GroupFormSection title={t('groups.createForm.sectionIdentity')}>
+                {nameAccessory}
                 <Input
                     label={t('groups.groupName')}
                     placeholder={t('groups.createForm.namePlaceholder')}
@@ -126,7 +132,7 @@ export function CreateGroupFormFields({
                 testID="group-form-members-section"
             >
                 <Text className="text-sm text-gray-500 mb-3 leading-relaxed">
-                    {t('groups.createForm.membersHint')}
+                    {t(membersHintKey)}
                 </Text>
                 <ScrollView
                     horizontal

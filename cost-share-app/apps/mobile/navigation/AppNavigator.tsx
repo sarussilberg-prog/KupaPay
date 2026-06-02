@@ -67,6 +67,7 @@ import { SettingsScreen } from '../screens/profile/SettingsScreen';
 import { FriendsScreen } from '../screens/profile/FriendsScreen';
 import { FindFriendsScreen } from '../screens/profile/FindFriendsScreen';
 import { AdminPortalScreen } from '../screens/admin/AdminPortalScreen';
+import { AdminOnboardingPreviewScreen } from '../screens/admin/AdminOnboardingPreviewScreen';
 import { AdminDeletedUsersScreen } from '../screens/admin/AdminDeletedUsersScreen';
 
 const Tab = createBottomTabNavigator();
@@ -247,6 +248,11 @@ function ProfileStack() {
                 name="AdminDeletedUsers"
                 component={AdminDeletedUsersScreen}
                 options={{ title: t('admin.deletedUsers.title') }}
+            />
+            <Stack.Screen
+                name="AdminOnboardingPreview"
+                component={AdminOnboardingPreviewScreen}
+                options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="Friends"

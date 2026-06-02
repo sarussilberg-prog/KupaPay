@@ -1,4 +1,5 @@
 import {
+    centeredTextStyle,
     feedActorNameStyle,
     resolveAutoTextStyle,
     rtlTextAlign,
@@ -18,6 +19,14 @@ describe('useRtlLayout helpers', () => {
         });
         expect(feedActorNameStyle(false)).toEqual({
             textAlign: 'left',
+            alignSelf: 'stretch',
+        });
+    });
+
+    it('exposes centeredTextStyle for hero and marketing copy', () => {
+        expect(centeredTextStyle).toEqual({
+            width: '100%',
+            textAlign: 'center',
             alignSelf: 'stretch',
         });
     });

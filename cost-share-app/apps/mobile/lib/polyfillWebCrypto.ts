@@ -1,22 +1,31 @@
 /**
- * Supabase PKCE needs `crypto.subtle` (SHA-256). Without this, auth warns and uses `plain`.
+ * Supabase PKCE needs `crypto.getRandomValues` + `crypto.subtle.digest` (SHA-256).
  */
+import * as Crypto from 'expo-crypto';
 import { Platform } from 'react-native';
 
 export function ensureWebCryptoPolyfill(): void {
   if (Platform.OS === 'web') return;
-  if (globalThis.crypto?.subtle) return;
 
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('react-native-get-random-values');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { install } = require('react-native-quick-crypto') as { install: () => void };
-    install();
-    if (__DEV__) {
-      console.info('[Auth] WebCrypto polyfill installed for PKCE');
-    }
-  } catch (e) {
-    console.warn('[Auth] WebCrypto polyfill failed — PKCE may use plain', e);
+  const cryptoRef = globalThis.crypto ?? (globalThis.crypto = {} as Crypto);
+
+  if (typeof cryptoRef.getRandomValues !== 'function') {
+    cryptoRef.getRandomValues = Crypto.getRandomValues.bind(Crypto);
+  }
+
+  if (cryptoRef.subtle) return;
+
+  cryptoRef.subtle = {
+    async digest(algorithm: AlgorithmIdentifier, data: ArrayBuffer): Promise<ArrayBuffer> {
+      const name = typeof algorithm === 'string' ? algorithm : algorithm.name;
+      if (name !== 'SHA-256') {
+        throw new Error(`Unsupported algorithm: ${name}`);
+      }
+      return Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new Uint8Array(data));
+    },
+  } as SubtleCrypto;
+
+  if (__DEV__) {
+    console.info('[Auth] WebCrypto polyfill installed (expo-crypto)');
   }
 }

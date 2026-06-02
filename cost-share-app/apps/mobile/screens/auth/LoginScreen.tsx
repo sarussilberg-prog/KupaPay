@@ -35,11 +35,10 @@ import {
     consumeDeactivationNoticePending,
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
-import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { centeredTextStyle } from '../../hooks/useRtlLayout';
 
 export function LoginScreen() {
     const { t } = useTranslation();
-    const isRtl = useRtlLayout();
     const language = useAppStore((state) => state.language);
     const setLanguage = useAppStore((state) => state.setLanguage);
     const pendingDeactivationNotice = useAppStore((state) => state.pendingDeactivationNotice);
@@ -147,18 +146,14 @@ export function LoginScreen() {
                         </View>
                         <AppBrandTitle className="mt-5 mb-1" />
                         <Text
-                            className={rtlTextClassName(
-                                isRtl,
-                                'text-xl font-bold text-primary-dark text-center',
-                            )}
+                            className="text-xl font-bold text-primary-dark text-center"
+                            style={centeredTextStyle}
                         >
                             {t('auth.tagline')}
                         </Text>
                         <Text
-                            className={rtlTextClassName(
-                                isRtl,
-                                'text-[15px] leading-relaxed text-gray-500 text-center mt-3 px-1',
-                            )}
+                            className="text-[15px] leading-relaxed text-gray-500 text-center mt-3 px-1"
+                            style={centeredTextStyle}
                         >
                             {t('auth.description')}
                         </Text>
@@ -176,7 +171,10 @@ export function LoginScreen() {
                     {isLoading ? (
                         <View style={styles.signingHint}>
                             <ActivityIndicator size="small" color={colors.primary} />
-                            <Text className="text-sm text-gray-400 mt-2 text-center">
+                            <Text
+                                className="text-sm text-gray-400 mt-2 text-center"
+                                style={centeredTextStyle}
+                            >
                                 {t('auth.signingIn')}
                             </Text>
                         </View>
@@ -253,6 +251,8 @@ const styles = StyleSheet.create({
     },
     hero: {
         alignItems: 'center',
+        alignSelf: 'stretch',
+        width: '100%',
     },
     logoRing: {
         padding: 20,

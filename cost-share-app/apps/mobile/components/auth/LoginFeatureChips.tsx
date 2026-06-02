@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { AppIcon, type AppIconName } from '../AppIcon';
 import { colors } from '../../theme';
-import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { centeredTextStyle } from '../../hooks/useRtlLayout';
 
 const FEATURES: { key: 'groups' | 'expenses' | 'balances'; icon: AppIconName }[] = [
     { key: 'groups', icon: 'people-outline' },
@@ -14,8 +14,6 @@ const FEATURES: { key: 'groups' | 'expenses' | 'balances'; icon: AppIconName }[]
 
 export function LoginFeatureChips() {
     const { t } = useTranslation();
-    const isRtl = useRtlLayout();
-
     return (
         <View
             style={styles.row}
@@ -28,11 +26,8 @@ export function LoginFeatureChips() {
                         <AppIcon name={icon} size={18} color={colors.primaryDark} />
                     </View>
                     <Text
-                        className={rtlTextClassName(
-                            isRtl,
-                            'text-xs font-semibold text-gray-700 text-center',
-                        )}
-                        style={styles.chipLabel}
+                        className="text-xs font-semibold text-gray-700 text-center"
+                        style={centeredTextStyle}
                         numberOfLines={1}
                     >
                         {t(`auth.feature.${key}`)}
@@ -70,10 +65,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 6,
-    },
-    chipLabel: {
-        width: '100%',
-        alignSelf: 'stretch',
-        textAlign: 'center',
     },
 });

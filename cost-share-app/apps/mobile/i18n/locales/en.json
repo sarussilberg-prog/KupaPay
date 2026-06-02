@@ -109,25 +109,33 @@
             "balanceDefaultLabel": "Your balance"
         },
         "create": {
-            "header": "New group",
-            "namePlaceholder": "Group name",
-            "nameInputPlaceholder": "Beach trip · Dinner · Shared flat...",
-            "backgroundLabel": "Cover image",
-            "heroSea": "Sea",
-            "heroMountains": "Mountains",
-            "heroForest": "Forest",
-            "heroFlowers": "Flowers",
-            "heroWaves": "Waves",
-            "uploadHint": "Upload photo",
-            "membersLabel": "Group members",
-            "adminHint": "Group admin",
-            "addMembers": "Add members",
-            "inviteHint": "WhatsApp, link, or contacts — get everyone into the group",
+            "header": "Your first group",
+            "hero": {
+                "eyebrow": "Last step",
+                "title": "One group — then you can split",
+                "subtitle": "Name, type, and currency. Friends can join after you open it.",
+                "checkName": "Group name",
+                "checkDefaults": "Type & currency (defaults)",
+                "checkMembers": "Invite members",
+                "optional": "Optional",
+                "win1": "Splits calculate for you",
+                "win2": "Type & currency — editable",
+                "win3": "Invite via link or WhatsApp"
+            },
+            "suggestions": {
+                "label": "Name ideas",
+                "trip": "Beach trip",
+                "flat": "Flatmates",
+                "games": "Game night",
+                "friday": "Friday dinner"
+            },
+            "membersHint": "Invite now — or after the group is open.",
             "submit": "Create group",
+            "submitReady": "Open it",
             "skipTitle": "Skip creating a group?",
-            "skipMessage": "You can create a group later from the Groups tab.",
-            "skipConfirm": "Skip for now",
-            "findFriendsAfterCreate": "Right after you create the group — find friends and send invites"
+            "skipMessage": "No group means no expenses. You can open one anytime from Groups.",
+            "skipConfirm": "Skip",
+            "findFriendsAfterCreate": "After opening the group — link, WhatsApp, or contacts."
         }
     },
     "groups": {
@@ -578,7 +586,16 @@
         "portal": {
             "title": "Admin Portal",
             "sectionLabel": "Tools",
-            "deletedUsersRow": "Deleted users"
+            "deletedUsersRow": "Deleted users",
+            "resetOnboardingRow": "Reset onboarding",
+            "previewCreateGroupRow": "Preview first-group screen"
+        },
+        "onboarding": {
+            "resetTitle": "Reset onboarding?",
+            "resetMessage": "Flags will be cleared and the first-group screen opens. Pre-login onboarding requires signing out and restarting the app.",
+            "resetConfirm": "Reset",
+            "resetSuccess": "Onboarding reset",
+            "previewTitle": "Preview"
         },
         "deletedUsers": {
             "title": "Deleted users",

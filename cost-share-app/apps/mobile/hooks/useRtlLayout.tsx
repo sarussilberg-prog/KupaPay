@@ -61,6 +61,13 @@ export function feedActorNameStyle(isRtl: boolean): TextStyle {
     };
 }
 
+/** Reliable center alignment in LTR and RTL (className text-center alone is insufficient on native). */
+export const centeredTextStyle: TextStyle = {
+    width: '100%',
+    textAlign: 'center',
+    alignSelf: 'stretch',
+};
+
 function hasExplicitTextAlign(className?: string, style?: StyleProp<TextStyle>): boolean {
     if (
         className?.includes('text-center') ||
