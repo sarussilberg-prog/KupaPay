@@ -2,7 +2,7 @@
  * Android OAuth in a partial-height Chrome Custom Tab (bottom sheet).
  * Google account UI renders inside Chrome — not a WebView (allowed by Google policy).
  */
-import { Dimensions, Linking } from 'react-native';
+import { Dimensions, Linking, PixelRatio } from 'react-native';
 import { openPartialCustomTabAsync } from 'kupa-partial-auth-browser';
 
 export type PartialAuthSessionResult =
@@ -55,7 +55,10 @@ export async function openPartialAuthSessionAsync(
     throw new Error('An auth session is already in progress');
   }
 
-  const heightPx = Math.round(Dimensions.get('window').height * SHEET_HEIGHT_RATIO);
+  // Chrome ignores partial heights below ~50% of physical screen and falls back to full-screen.
+  // Dimensions returns dp; setInitialActivityHeightPx expects physical pixels.
+  const heightDp = Dimensions.get('window').height * SHEET_HEIGHT_RATIO;
+  const heightPx = PixelRatio.getPixelSizeForLayoutSize(heightDp);
 
   try {
     const opened = await openPartialCustomTabAsync(startUrl, heightPx);
