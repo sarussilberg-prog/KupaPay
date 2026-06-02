@@ -1060,34 +1060,42 @@ GRANT EXECUTE ON FUNCTION restore_deleted_account(UUID, TEXT, TEXT) TO service_r
 -- ============================================
 -- ADMIN PORTAL v1 (also lives in migrations/20260602100000_admin_portal_v1.sql)
 -- ============================================
+-- 20260602100000_admin_portal_v1.sql
+-- Admin portal v1: app_admins table + is_app_admin() helper + 2 admin RPCs.
+-- Idempotent. Safe to re-run.
+--
+-- Why a dedicated table (not a column on profiles):
+--   profiles has permissive RLS (own-row UPDATE, public SELECT). Adding
+--   is_admin there would let users self-promote and let anyone enumerate
+--   admins. A dedicated table with no RLS policies is reachable only by
+--   service_role and SECURITY DEFINER functions.
 
 -- ============================================
--- profiles.is_admin
+-- app_admins
 -- ============================================
-ALTER TABLE profiles
-    ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
-
-CREATE INDEX IF NOT EXISTS idx_profiles_is_admin
-    ON profiles(is_admin) WHERE is_admin = TRUE;
+CREATE TABLE IF NOT EXISTS public.app_admins (
+    user_id    UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    granted_by UUID REFERENCES auth.users(id)
+);
+ALTER TABLE public.app_admins ENABLE ROW LEVEL SECURITY;
+-- No RLS policies on purpose: only service_role and SECURITY DEFINER funcs reach it.
 
 -- ============================================
 -- Seed: bootstrap the single app admin
 -- ============================================
-UPDATE profiles
-    SET is_admin = TRUE
-    WHERE id = (
-        SELECT id FROM auth.users WHERE lower(email) = 'sarussilberg@gmail.com'
-    )
-    AND is_admin = FALSE;
+INSERT INTO public.app_admins (user_id)
+SELECT id FROM auth.users WHERE lower(email) = 'sarussilberg@gmail.com'
+ON CONFLICT (user_id) DO NOTHING;
 
 -- ============================================
--- is_app_admin() — used by every admin RPC
+-- is_app_admin() — used by every admin RPC and by the mobile client
 -- ============================================
 CREATE OR REPLACE FUNCTION public.is_app_admin() RETURNS BOOLEAN
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
     SELECT CASE
         WHEN auth.uid() IS NULL THEN FALSE
-        ELSE COALESCE((SELECT is_admin FROM profiles WHERE id = auth.uid()), FALSE)
+        ELSE EXISTS (SELECT 1 FROM public.app_admins WHERE user_id = auth.uid())
     END;
 $$;
 REVOKE EXECUTE ON FUNCTION public.is_app_admin() FROM PUBLIC;
@@ -1117,7 +1125,7 @@ BEGIN
     WITH latest AS (
         SELECT DISTINCT ON (a.user_id)
             a.user_id, a.deleted_at, a.reason, a.open_balance_snapshot, a.notes, a.restored_at
-        FROM account_deletions_audit a
+        FROM public.account_deletions_audit a
         ORDER BY a.user_id, a.deleted_at DESC
     )
     SELECT
