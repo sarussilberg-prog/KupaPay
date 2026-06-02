@@ -9,3 +9,10 @@ major_version = 17
 
 [db.migrations]
 enabled = true
+
+# invite-landing serves public web pages (assetlinks.json, legal/*, /i/*, /g/*,
+# account-deletion). Browsers, Google crawlers, and Play App Links verification
+# do NOT send a JWT, so JWT verification must be disabled. RLS still protects
+# the underlying tables — the function uses the anon key.
+[functions.invite-landing]
+verify_jwt = false
