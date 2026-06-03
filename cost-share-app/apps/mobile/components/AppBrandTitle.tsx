@@ -11,7 +11,7 @@ interface AppBrandTitleProps {
     testID?: string;
 }
 
-/** Standalone "Kupay" wordmark — same color and weight everywhere in the app. */
+/** Standalone "CoPay" wordmark — same color and weight everywhere in the app. */
 export function AppBrandTitle({
     className,
     style,

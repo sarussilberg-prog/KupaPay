@@ -22,6 +22,7 @@ import { CreateGroupFormShell } from '../../components/groups/CreateGroupFormShe
 import { CreateGroupFormFields } from '../../components/groups/CreateGroupFormFields';
 import { OnboardingCreateGroupHero } from '../../components/onboarding/OnboardingCreateGroupHero';
 import { OnboardingNameSuggestions } from '../../components/onboarding/OnboardingNameSuggestions';
+import { OnboardingLanguageToggle } from '../../components/onboarding/OnboardingLanguageToggle';
 import { colors } from '../../theme';
 import { useAppLanguage, useRtlLayout } from '../../hooks/useRtlLayout';
 import { initialCreateGroupCurrency } from '../../lib/appDefaultCurrency';
@@ -164,15 +165,21 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
                     </TouchableOpacity>
                 }
                 headerEnd={
-                    <TouchableOpacity
-                        onPress={handleExit}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        testID="onboarding-create-skip"
-                    >
-                        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.gray500 }}>
-                            {t(previewMode ? 'common.close' : 'onboarding.skip')}
-                        </Text>
-                    </TouchableOpacity>
+                    <View className="flex-row items-center gap-2">
+                        <OnboardingLanguageToggle
+                            variant="form"
+                            testID="onboarding-create-language-button"
+                        />
+                        <TouchableOpacity
+                            onPress={handleExit}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                            testID="onboarding-create-skip"
+                        >
+                            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.gray500 }}>
+                                {t(previewMode ? 'common.close' : 'onboarding.skip')}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 }
                 footer={
                     <CreateGroupFloatingButton

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../../components/AppText';
 import { OnboardingHeroImage } from '../../components/onboarding/OnboardingHeroImage';
 import { OnboardingFloatingCard } from '../../components/onboarding/OnboardingFloatingCard';
+import { OnboardingLanguageToggle } from '../../components/onboarding/OnboardingLanguageToggle';
 import { onboardingColors } from '../../theme/onboardingColors';
 import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 
@@ -33,6 +34,10 @@ export function OnboardingWelcomeScreen({ onStart, onExistingAccount }: Props) {
     return (
         <View style={styles.root}>
             <StatusBar barStyle="light-content" />
+
+            <View style={[styles.langRow, { top: insets.top + 8 }]}>
+                <OnboardingLanguageToggle variant="onDark" testID="onboarding-welcome-language-button" />
+            </View>
 
             <View style={[styles.heroWrap, { height: heroHeight }]}>
                 <OnboardingHeroImage variant="mountains" height={heroHeight} />
@@ -126,6 +131,11 @@ const styles = StyleSheet.create({
     root: {
         flex: 1,
         backgroundColor: onboardingColors.navy,
+    },
+    langRow: {
+        position: 'absolute',
+        end: 20,
+        zIndex: 4,
     },
     heroWrap: {
         position: 'absolute',

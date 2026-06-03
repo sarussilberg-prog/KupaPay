@@ -14,6 +14,7 @@ import {
     OnboardingMockupHighlight,
 } from '../../components/onboarding/OnboardingAppMockup';
 import { OnboardingPagerDots } from '../../components/onboarding/OnboardingPagerDots';
+import { OnboardingLanguageToggle } from '../../components/onboarding/OnboardingLanguageToggle';
 import { onboardingColors } from '../../theme/onboardingColors';
 import type { OnboardingHeroVariant } from '../../theme/onboardingColors';
 import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
@@ -52,7 +53,10 @@ export function OnboardingFeatureScreen({
             <StatusBar barStyle="dark-content" />
 
             <View style={[styles.topBar, { paddingTop: insets.top + 4 }]}>
-                <View style={styles.topBarSpacer} />
+                <OnboardingLanguageToggle
+                    variant="onLight"
+                    testID="onboarding-feature-language-button"
+                />
                 <TouchableOpacity
                     onPress={onSkip}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -131,9 +135,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 22,
-    },
-    topBarSpacer: {
-        width: 48,
     },
     mockupArea: {
         flex: 1,

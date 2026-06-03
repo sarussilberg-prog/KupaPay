@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Kupay",
-    "slug": "mobile",
+    "name": "CoPay",
+    "slug": "kupay",
     "scheme": "com.kupay.mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,8 +23,8 @@
       ],
       "icon": "./assets/icon.png",
       "infoPlist": {
-        "CFBundleDisplayName": "Kupay",
-        "CFBundleName": "Kupay",
+        "CFBundleDisplayName": "CoPay",
+        "CFBundleName": "CoPay",
         "LSApplicationQueriesSchemes": [
           "bit",
           "paybox",
@@ -34,7 +34,7 @@
     },
     "android": {
       "package": "com.kupay.mobile",
-      "label": "Kupay",
+      "label": "CoPay",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -78,8 +78,8 @@
       ]
     },
     "web": {
-      "name": "Kupay",
-      "shortName": "Kupay",
+      "name": "CoPay",
+      "shortName": "CoPay",
       "description": "Split expenses with friends",
       "themeColor": "#3B82F6",
       "backgroundColor": "#ffffff",
@@ -132,9 +132,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "ecf771fd-38ce-480e-afc6-b443606f6cef"
+        "projectId": "eb2614a0-ce69-402b-9cbb-668108a9ef27"
       }
     },
-    "owner": "navesarussi1"
+    "owner": "saussilberg"
   }
 }

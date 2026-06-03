@@ -34,7 +34,7 @@
         "profile": "פרופיל"
     },
     "auth": {
-        "appName": "Kupay",
+        "appName": "CoPay",
         "signInWithGoogle": "המשך עם Google",
         "subtitle": "חלוקת הוצאות עם חברים",
         "tagline": "הקופה עם החבר'ה",
@@ -53,20 +53,20 @@
         "skip": "דלג",
         "next": "הבא",
         "welcome": {
-            "brand": "פשוט",
+            "brand": "CoPay",
             "tagline": "הקופה עם החבר'ה.\nבלי אקסל, בלי חישובים בוואטסאפ.",
             "start": "יאללה, נתחיל",
             "existingAccount": "כבר יש לי חשבון",
             "card1Title": "דלק לים",
             "card1Subtitle": "3 מתוך 5 בחלוקה · ₪180",
-            "card2Title": "אברהם חייב לך",
+            "card2Title": "אבי חייב לך",
             "card2Subtitle": "+ ₪770",
             "card3Title": "הזמנת חברים",
             "card3Subtitle": "וואטסאפ · לינק · אנשי קשר"
         },
         "feature1": {
             "eyebrow": "חלוקה לפי מי באמת",
-            "title": "בוחרים מי משלם — לא חייבים על כול הקופה",
+            "title": "בוחרים מי משלם — לא חייבים על כל הקופה",
             "body": "בכל הוצאה מסמנים מי בחלוקה: דלק רק לשלושה, ארוחה בלי מי שלא הגיע. מי שלא מסומן — לא משלם ולא רואה חוב עליה."
         },
         "feature2": {
@@ -87,9 +87,9 @@
             "body": "במקום שלוש העברות בביט, מחשבים את המינימום: מי משלם למי וכמה. לחיצה — וכולם מאוזנים."
         },
         "mockup": {
-            "groupName": "טיול לים",
+            "groupName": "סוף שבוע באילת",
             "expense1Title": "סופר לשבת",
-            "expense1Sub": "נוה שילם · ₪320 · כל הקופה",
+            "expense1Sub": "נועם שילם · ₪320 · כל הקופה",
             "partialSplitCallout": "מסמנים מי בחלוקה — לא חייבים את כולם",
             "partialSplitBadge": "{{count}} מתוך {{total}} בחלוקה",
             "expense2Title": "דלק",
@@ -98,14 +98,14 @@
             "expense3Sub": "דנה שילמה · ₪900 · 4 בחלוקה",
             "invite1Title": "דנה",
             "invite1Sub": "בקופה",
-            "invite2Title": "נוה",
+            "invite2Title": "נועם",
             "invite2Sub": "הוזמן · ממתין",
             "invite3Title": "הזמנה חדשה",
             "invite3Sub": "וואטסאפ · לינק · אנשי קשר",
-            "debt1Title": "אברהם",
+            "debt1Title": "אבי",
             "debt1Sub": "חייב לך · ₪770",
-            "debt2Title": "נוה",
-            "debt2Sub": "חייבים לו · ₪120",
+            "debt2Title": "נועם",
+            "debt2Sub": "את/ה חייב/ה לו · ₪120",
             "balanceDefaultLabel": "היתרה שלך"
         },
         "create": {
@@ -124,9 +124,9 @@
             },
             "suggestions": {
                 "label": "רעיונות לשם",
-                "trip": "טיול לים",
-                "flat": "שותפים לדירה",
-                "games": "ערב משחקים",
+                "trip": "סוף שבוע באילת",
+                "flat": "דירת שותפים",
+                "games": "ערב קלפים",
                 "friday": "ארוחת שישי"
             },
             "membersHint": "אפשר להזמין עכשיו — או אחרי שתפתחו את הקופה.",
@@ -341,7 +341,7 @@
             "typeExpense": "הוצאה",
             "typeMessage": "הודעה",
             "typeSettlement": "סגירת חשבון",
-            "footer": "נוצר על ידי Kupay"
+            "footer": "נוצר על ידי CoPay"
         },
         "expense": {
             "youLent": "הלוויתָ {{amount}}",
@@ -850,21 +850,21 @@
     },
     "invite": {
         "friend": {
-            "title": "הזמן חבר ל-Kupay",
+            "title": "הזמן חבר ל-CoPay",
             "subtitle": "שלח קישור דרך וואצאפ ועוד",
             "cta": "שתף קישור חברות",
-            "shareMessage": "היי! בוא נחלק הוצאות יחד דרך Kupay. אם תרשם דרך הקישור הזה — נהיה אוטומטית חברים: {{url}}",
+            "shareMessage": "היי! בוא נחלק הוצאות יחד דרך CoPay. אם תרשם דרך הקישור הזה — נהיה אוטומטית חברים: {{url}}",
             "rotate": "שנה קישור",
             "rotateConfirmTitle": "לשנות את קישור ההזמנה?",
             "rotateConfirmBody": "הקישור הקודם יפסיק לעבוד. כל מי שיש לו את הקישור הישן לא יוכל להפוך לחבר שלך עד שתשלח לו את החדש.",
             "rotated": "קישור ההזמנה עודכן",
             "findEmpty": "לא מצאת את מי שחיפשת?",
             "findEmptyCta": "הזמן חבר חדש דרך קישור",
-            "findInviteName": "הזמן את {{name}} ל-Kupay"
+            "findInviteName": "הזמן את {{name}} ל-CoPay"
         },
         "group": {
             "title": "שתף קישור לקופה",
-            "shareMessage": "הוספתי אותך לקופת '{{groupName}}' ב-Kupay. הצטרף דרך הקישור: {{url}}",
+            "shareMessage": "הוספתי אותך לקופת '{{groupName}}' ב-CoPay. הצטרף דרך הקישור: {{url}}",
             "rotate": "שנה קישור",
             "rotateConfirmTitle": "לשנות את קישור הקופה?",
             "rotateConfirmBody": "כל מי שיש לו את הקישור הנוכחי לא יוכל להצטרף עד שתשלח לו את החדש. חברים שכבר בקופה לא מושפעים.",
@@ -884,7 +884,7 @@
         }
     },
     "dashboard": {
-        "appTitle": "Kupay",
+        "appTitle": "CoPay",
         "youOwe": "אתה חייב",
         "youAreOwed": "חייבים לך",
         "balanceOverview": "סיכום יתרות",

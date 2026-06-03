@@ -34,7 +34,7 @@
         "profile": "Profile"
     },
     "auth": {
-        "appName": "Kupay",
+        "appName": "CoPay",
         "signInWithGoogle": "Continue with Google",
         "subtitle": "Split expenses with friends",
         "tagline": "Your shared kitty with friends",
@@ -53,16 +53,16 @@
         "skip": "Skip",
         "next": "Next",
         "welcome": {
-            "brand": "Pashut",
-            "tagline": "The kitty with your crew.\nNo spreadsheets, no WhatsApp math.",
+            "brand": "CoPay",
+            "tagline": "Split expenses with your crew.\nNo spreadsheets, no group-chat math.",
             "start": "Let's go",
             "existingAccount": "I already have an account",
-            "card1Title": "Gas for the trip",
-            "card1Subtitle": "3 of 5 in the split · ₪180",
-            "card2Title": "Avraham owes you",
-            "card2Subtitle": "+ ₪770",
+            "card1Title": "Road trip gas",
+            "card1Subtitle": "3 of 5 in the split · $65",
+            "card2Title": "Mike owes you",
+            "card2Subtitle": "+ $210",
             "card3Title": "Invite friends",
-            "card3Subtitle": "WhatsApp · link · contacts"
+            "card3Subtitle": "iMessage · link · contacts"
         },
         "feature1": {
             "eyebrow": "Split with who matters",
@@ -72,40 +72,40 @@
         "feature2": {
             "eyebrow": "Invite your crew",
             "title": "Send a link — they're in",
-            "body": "Contacts, WhatsApp, or a group link. No need to explain the app — they tap and join the group."
+            "body": "Contacts, iMessage, or a group link. No need to explain the app — they tap and join the group."
         },
         "feature3": {
             "eyebrow": "No guesswork",
             "title": "See who owes whom — no mental math",
-            "body": "Balances update on their own. No more \"wait, let me calculate and get back to you\" — everyone in the group sees the same numbers.",
+            "body": "Balances update on their own. No more \"hang on, I'll Venmo you after I do the math\" — everyone in the group sees the same numbers.",
             "balanceLabel": "In your favor",
-            "balanceAmount": "+ ₪138"
+            "balanceAmount": "+ $38"
         },
         "feature4": {
             "eyebrow": "Settle up",
             "title": "One payment — done",
-            "body": "Instead of a chain of transfers, we find the minimum: who pays whom, and how much. One tap — and you're square."
+            "body": "Instead of a ping-pong of Venmo requests, we find the minimum: who pays whom and how much. One tap — and you're square."
         },
         "mockup": {
-            "groupName": "Beach trip",
-            "expense1Title": "Shabbat groceries",
-            "expense1Sub": "Noah paid · ₪320 · whole group",
+            "groupName": "Beach weekend",
+            "expense1Title": "Grocery run",
+            "expense1Sub": "Jake paid · $88 · whole group",
             "partialSplitCallout": "Choose who's in the split — not everyone",
             "partialSplitBadge": "{{count}} of {{total}} in split",
             "expense2Title": "Gas",
-            "expense2Sub": "You paid · ₪180",
+            "expense2Sub": "You paid · $65",
             "expense3Title": "Airbnb",
-            "expense3Sub": "Dana paid · ₪900 · split with 4",
-            "invite1Title": "Dana",
+            "expense3Sub": "Sarah paid · $248 · split with 4",
+            "invite1Title": "Sarah",
             "invite1Sub": "In the group",
-            "invite2Title": "Noah",
+            "invite2Title": "Jake",
             "invite2Sub": "Invited · pending",
             "invite3Title": "New invite",
-            "invite3Sub": "WhatsApp · link · contacts",
-            "debt1Title": "Avraham",
-            "debt1Sub": "Owes you · ₪770",
-            "debt2Title": "Noah",
-            "debt2Sub": "You owe · ₪120",
+            "invite3Sub": "iMessage · link · contacts",
+            "debt1Title": "Mike",
+            "debt1Sub": "Owes you · $210",
+            "debt2Title": "Jake",
+            "debt2Sub": "You owe · $42",
             "balanceDefaultLabel": "Your balance"
         },
         "create": {
@@ -120,14 +120,14 @@
                 "optional": "Optional",
                 "win1": "Splits calculate for you",
                 "win2": "Type & currency — editable",
-                "win3": "Invite via link or WhatsApp"
+                "win3": "Invite via link or text"
             },
             "suggestions": {
                 "label": "Name ideas",
-                "trip": "Beach trip",
-                "flat": "Flatmates",
+                "trip": "Beach weekend",
+                "flat": "Roommates",
                 "games": "Game night",
-                "friday": "Friday dinner"
+                "friday": "Friendsgiving"
             },
             "membersHint": "Invite now — or after the group is open.",
             "submit": "Create group",
@@ -135,7 +135,7 @@
             "skipTitle": "Skip creating a group?",
             "skipMessage": "No group means no expenses. You can open one anytime from Groups.",
             "skipConfirm": "Skip",
-            "findFriendsAfterCreate": "After opening the group — link, WhatsApp, or contacts."
+            "findFriendsAfterCreate": "After opening the group — link, text, or contacts."
         }
     },
     "groups": {
@@ -341,7 +341,7 @@
             "typeExpense": "Expense",
             "typeMessage": "Message",
             "typeSettlement": "Settlement",
-            "footer": "Generated by Kupay"
+            "footer": "Generated by CoPay"
         },
         "expense": {
             "youLent": "You lent {{amount}}",
@@ -835,21 +835,21 @@
     },
     "invite": {
         "friend": {
-            "title": "Invite a friend to Kupay",
+            "title": "Invite a friend to CoPay",
             "subtitle": "Send a link via WhatsApp and more",
             "cta": "Share link",
-            "shareMessage": "Hey! Let's split expenses together on Kupay. If you sign up through this link we'll automatically become friends: {{url}}",
+            "shareMessage": "Hey! Let's split expenses together on CoPay. If you sign up through this link we'll automatically become friends: {{url}}",
             "rotate": "Rotate link",
             "rotateConfirmTitle": "Rotate invite link?",
             "rotateConfirmBody": "The previous link will stop working. Anyone holding the old link won't be able to become your friend until you send them the new one.",
             "rotated": "Invite link updated",
             "findEmpty": "Didn't find who you're looking for?",
             "findEmptyCta": "Invite a new friend by link",
-            "findInviteName": "Invite {{name}} to Kupay"
+            "findInviteName": "Invite {{name}} to CoPay"
         },
         "group": {
             "title": "Share group link",
-            "shareMessage": "I added you to the '{{groupName}}' group on Kupay. Join via this link: {{url}}",
+            "shareMessage": "I added you to the '{{groupName}}' group on CoPay. Join via this link: {{url}}",
             "rotate": "Rotate link",
             "rotateConfirmTitle": "Rotate group invite link?",
             "rotateConfirmBody": "Anyone holding the current link won't be able to join until you send them the new one. Members already in the group are unaffected.",
@@ -869,7 +869,7 @@
         }
     },
     "dashboard": {
-        "appTitle": "Kupay",
+        "appTitle": "CoPay",
         "youOwe": "You owe",
         "youAreOwed": "You're owed",
         "balanceOverview": "Balance overview",

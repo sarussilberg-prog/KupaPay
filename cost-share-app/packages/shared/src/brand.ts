@@ -1,5 +1,5 @@
 /** App brand name — always English in headers (not i18n). */
-export const APP_BRAND_TITLE = 'Kupay';
+export const APP_BRAND_TITLE = 'CoPay';
 
 /** Production web hostname (DNS). Brand display name is {@link APP_BRAND_TITLE}. */
 export const APP_WEB_HOST = 'kupa.pro';
