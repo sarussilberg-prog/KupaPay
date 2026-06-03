@@ -45,7 +45,7 @@ Thumbs.db
 # Accidental `expo prebuild` from monorepo root (use apps/mobile instead)
 /android
 /ios
-app.json
+/app.json
 
 # React Native
 *.jks
