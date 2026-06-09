@@ -36,6 +36,7 @@
     "auth": {
         "appName": "CoPay",
         "signInWithGoogle": "Continue with Google",
+        "signInWithApple": "Continue with Apple",
         "subtitle": "Split expenses with friends",
         "tagline": "Your shared kitty with friends",
         "description": "Groups, expenses, and settle-up — no spreadsheets, no WhatsApp math.",

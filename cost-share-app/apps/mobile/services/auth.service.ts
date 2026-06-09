@@ -160,32 +160,37 @@ export function isAuthCallbackUrl(url: string): boolean {
   return hasAuthCallbackParams(url);
 }
 
-const googleOAuthOptions = (oauthRedirect: string) => ({
-  redirectTo: oauthRedirect,
-  queryParams: { prompt: 'select_account' },
-});
+type BrowserOAuthProvider = 'google' | 'apple';
 
-async function signInWithGoogleBrowser(): Promise<{ error: AuthError | null }> {
+function browserOAuthOptions(provider: BrowserOAuthProvider, oauthRedirect: string) {
+  if (provider === 'apple') {
+    // Request name + email so a first Android sign-in can populate the profile.
+    return { redirectTo: oauthRedirect, scopes: 'name email' };
+  }
+  return { redirectTo: oauthRedirect, queryParams: { prompt: 'select_account' } };
+}
+
+// Shared browser OAuth flow for providers without a usable native SDK on the
+// current platform: Google everywhere, and Apple on Android/web (iOS Apple uses
+// the native sheet — see signInWithApple).
+async function signInWithProviderBrowser(
+  provider: BrowserOAuthProvider,
+): Promise<{ error: AuthError | null }> {
   const oauthRedirect = getAuthRedirectUri();
+  const options = browserOAuthOptions(provider, oauthRedirect);
 
   if (__DEV__) {
-    console.info('[Auth] OAuth redirectTo =', oauthRedirect);
+    console.info(`[Auth] ${provider} OAuth redirectTo =`, oauthRedirect);
   }
 
   if (Platform.OS === 'web') {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: googleOAuthOptions(oauthRedirect),
-    });
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options });
     return { error: error ? toAuthError(error) : null };
   }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      ...googleOAuthOptions(oauthRedirect),
-      skipBrowserRedirect: true,
-    },
+    provider,
+    options: { ...options, skipBrowserRedirect: true },
   });
 
   if (error || !data.url) {
@@ -231,7 +236,7 @@ export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
     console.info('[Auth] Google OAuth in partial Chrome bottom sheet (~80%)');
   }
 
-  return signInWithGoogleBrowser();
+  return signInWithProviderBrowser('google');
 }
 
 function isAppleCancel(err: unknown): boolean {
@@ -239,7 +244,7 @@ function isAppleCancel(err: unknown): boolean {
     && (err as { code?: string }).code === 'ERR_REQUEST_CANCELED';
 }
 
-export async function signInWithApple(): Promise<{ error: AuthError | null }> {
+async function signInWithAppleNative(): Promise<{ error: AuthError | null }> {
   try {
     const rawNonce = Crypto.randomUUID();
     const hashedNonce = await Crypto.digestStringAsync(
@@ -290,6 +295,15 @@ export async function signInWithApple(): Promise<{ error: AuthError | null }> {
     if (isAppleCancel(err)) return { error: null };
     return { error: toAuthError(err) };
   }
+}
+
+export async function signInWithApple(): Promise<{ error: AuthError | null }> {
+  // iOS uses the App Store-preferred native Apple sheet. Android/web have no native
+  // Apple SDK, so they sign in through the same browser OAuth flow Google uses.
+  if (Platform.OS === 'ios') {
+    return signInWithAppleNative();
+  }
+  return signInWithProviderBrowser('apple');
 }
 
 /** Clears cached app state, wipes the local Supabase session, and drops the Zustand session. */

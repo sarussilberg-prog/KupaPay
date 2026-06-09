@@ -187,7 +187,11 @@ export function LoginScreen() {
                         disabled={isLoading}
                     />
                     <View className="h-3" />
-                    <LoginAppleButton onPress={handleAppleSignIn} disabled={isLoading} />
+                    <LoginAppleButton
+                        title={t('auth.signInWithApple')}
+                        onPress={handleAppleSignIn}
+                        disabled={isLoading}
+                    />
                     {isLoading ? (
                         <Text
                             className="text-sm text-gray-400 mt-3 text-center"

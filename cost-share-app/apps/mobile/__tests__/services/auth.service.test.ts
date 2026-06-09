@@ -385,6 +385,34 @@ describe('auth.service', () => {
             expect(result.error?.code).toBe('generic');
             expect(mockSignInWithIdToken).not.toHaveBeenCalled();
         });
+
+        it('uses the browser OAuth flow on Android (no native Apple SDK)', async () => {
+            setPlatformOs('android');
+            mockSignInWithOAuth.mockResolvedValue({
+                data: { url: 'https://appleid.apple.com/auth/authorize' },
+                error: null,
+            });
+            mockOpenOAuthSession.mockResolvedValue({
+                type: 'success',
+                url: 'com.kupay.mobile://auth/callback?code=apple-code',
+            });
+
+            const result = await signInWithApple();
+
+            expect(mockSignInWithOAuth).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    provider: 'apple',
+                    options: expect.objectContaining({ scopes: 'name email', skipBrowserRedirect: true }),
+                }),
+            );
+            expect(mockOpenOAuthSession).toHaveBeenCalledWith(
+                'https://appleid.apple.com/auth/authorize',
+                'com.kupay.mobile://auth/callback',
+            );
+            expect(mockAppleSignInAsync).not.toHaveBeenCalled();
+            expect(mockExchangeCodeForSession).toHaveBeenCalledWith('apple-code');
+            expect(result.error).toBeNull();
+        });
     });
 
     describe('signOut', () => {

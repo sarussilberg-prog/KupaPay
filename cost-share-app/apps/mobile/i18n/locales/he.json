@@ -36,6 +36,7 @@
     "auth": {
         "appName": "CoPay",
         "signInWithGoogle": "המשך עם Google",
+        "signInWithApple": "המשך עם Apple",
         "subtitle": "חלוקת הוצאות עם חברים",
         "tagline": "הקופה עם החבר'ה",
         "description": "קבוצות, הוצאות וסגירת חשבונות — בלי אקסל ובלי חישובים בוואטסאפ.",
