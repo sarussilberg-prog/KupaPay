@@ -85,7 +85,7 @@ const RootStack = createNativeStackNavigator();
 function stackScreenOptions(isRtl: boolean): NativeStackNavigationOptions {
     return {
         animation: isRtl ? 'slide_from_left' : 'slide_from_right',
-        animationDuration: 250,
+        animationDuration: 200,
         headerTintColor: colors.primary,
         headerBackTitle: '',
     };

@@ -29,7 +29,8 @@
           "bit",
           "paybox",
           "PayBox"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
