@@ -75,13 +75,13 @@ iOS uses the native Apple SDK; Android (and web) have none, so they sign in with
 
 **Apple Developer — one-time:**
 1. **Identifiers → + → Services IDs** → create e.g. `com.kupay.web` (description "CoPay Web"), enable **Sign in with Apple**.
-2. Configure it → Primary App ID `com.kupay.mobile`; **Domains** `kupa.pro`; **Return URLs**:
+2. Configure it → Primary App ID `com.kupay.mobile`; **Domains and Subdomains** = the Supabase project domains `jfqxjjjbpxbwwvoygahu.supabase.co` (prod) + `drxfbicunusmipdgbgdk.supabase.co` (dev) — NOT kupa.pro (the OAuth round-trip goes through Supabase's callback); **Return URLs**:
    - `https://jfqxjjjbpxbwwvoygahu.supabase.co/auth/v1/callback` (prod)
    - `https://drxfbicunusmipdgbgdk.supabase.co/auth/v1/callback` (dev)
 3. **Keys → +** → enable **Sign in with Apple**, configure (Primary App ID `com.kupay.mobile`), **download the `.p8`** (one-time download). Note the **Key ID** and your **Team ID** (Membership page).
 
 **Supabase — Authentication → Providers → Apple (do on prod `jfqxjjjbpxbwwvoygahu` and dev `drxfbicunusmipdgbgdk`):**
-- **Client IDs**: keep `com.kupay.mobile` (native) and add the Services ID `com.kupay.web` (web).
+- **Client IDs** (⚠️ order matters — **Services ID FIRST**): `com.kupay.web,com.kupay.mobile`. Supabase sends the *first* entry as the web OAuth `client_id`; it MUST be the Services ID. Putting the bundle ID first makes Apple reject the web/Android flow with `invalid_request: Invalid client id or web redirect url`. The bundle ID stays in the list so native iOS `signInWithIdToken` validation still passes.
 - **Secret Key (for OAuth)**: provide Services ID (`com.kupay.web`), Team ID, Key ID, and paste the `.p8`. Supabase builds the client secret.
 - The app redirect `com.kupay.mobile://auth/callback` is already in **URL Configuration → Redirect URLs** (Google uses it).
 
