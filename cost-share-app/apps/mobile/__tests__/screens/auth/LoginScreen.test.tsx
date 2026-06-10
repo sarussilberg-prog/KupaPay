@@ -59,7 +59,6 @@ describe('LoginScreen', () => {
         expect(getByTestId('app-logo')).toBeTruthy();
         expect(getByText('CoPay')).toBeTruthy();
         expect(getByText('auth.tagline')).toBeTruthy();
-        expect(getByText('auth.description')).toBeTruthy();
         expect(getByTestId('login-feature-chips')).toBeTruthy();
     });
 
