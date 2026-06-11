@@ -56,7 +56,7 @@ describe('LoginScreen', () => {
         const { getByText, getByTestId } = render(<LoginScreen />);
         expect(getByTestId('login-screen')).toBeTruthy();
         expect(getByTestId('app-logo')).toBeTruthy();
-        expect(getByText('CoPay')).toBeTruthy();
+        expect(getByText('KupaPay')).toBeTruthy();
         expect(getByText('auth.tagline')).toBeTruthy();
         expect(getByText('auth.description')).toBeTruthy();
         expect(getByTestId('login-feature-chips')).toBeTruthy();
