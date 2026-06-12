@@ -58,6 +58,7 @@ import {
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import type { GroupDetailFocusFeedItem } from '../../lib/groupDetailFocus';
+import { setBadgeCount } from '../../lib/pushNotifications';
 
 function unique<T>(values: T[]): T[] {
     return Array.from(new Set(values));
@@ -190,6 +191,7 @@ export function ActivityFeedScreen() {
                     void queryClient.invalidateQueries({
                         queryKey: queryKeys.activityUnreadCount,
                     });
+                    void setBadgeCount(0);
                 }
             })();
             if (isStale) void refetch();
