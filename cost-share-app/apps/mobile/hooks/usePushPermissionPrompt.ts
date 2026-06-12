@@ -18,10 +18,12 @@ export function usePushPermissionPrompt(): PushPromptState {
     const [cooldownPassed, setCooldownPassed] = useState(false);
 
     const refresh = useCallback(async () => {
-        const s = await getPermissionStatus();
-        setStatus(s === 'granted' ? 'granted' : s === 'denied' ? 'denied' : 'undetermined');
-        const last = Number((await AsyncStorage.getItem(COOLDOWN_KEY)) ?? 0);
-        setCooldownPassed(Date.now() - last > COOLDOWN_MS);
+        try {
+            const s = await getPermissionStatus();
+            setStatus(s === 'granted' ? 'granted' : s === 'denied' ? 'denied' : 'undetermined');
+            const last = Number((await AsyncStorage.getItem(COOLDOWN_KEY)) ?? 0);
+            setCooldownPassed(Date.now() - last > COOLDOWN_MS);
+        } catch { /* keep current state on failure */ }
     }, []);
 
     useEffect(() => { void refresh(); }, [refresh]);

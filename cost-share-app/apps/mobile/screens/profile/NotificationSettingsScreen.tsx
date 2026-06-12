@@ -36,7 +36,7 @@ export function NotificationSettingsScreen() {
                     />
                 </SettingsSection>
 
-                <SettingsSection title={t('notifications.title')}>
+                <SettingsSection title={t('notifications.categoriesTitle')}>
                     <SettingsToggleRow iconName="receipt-outline" label={t('notifications.categoryExpenses')}
                         value={prefs.expensesPush} disabled={masterOff} onValueChange={(v) => patch('expensesPush', v)} />
                     <SettingsToggleRow iconName="cash-outline" label={t('notifications.categorySettlements')}

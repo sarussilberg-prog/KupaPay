@@ -963,6 +963,7 @@
     },
     "notifications": {
         "title": "התראות",
+        "categoriesTitle": "לפי קטגוריה",
         "pushMaster": "התראות פוש",
         "categoryExpenses": "הוצאות",
         "categorySettlements": "תשלומים",

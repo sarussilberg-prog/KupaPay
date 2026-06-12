@@ -26,7 +26,7 @@ export function EnableNotificationsBanner({ mode, onEnable, onDismiss }: Props) 
                     <Text className="text-sm font-semibold" style={{ color: colors.primary }}>{label}</Text>
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onDismiss} testID="banner-dismiss">
+            <TouchableOpacity onPress={onDismiss} testID="banner-dismiss" accessibilityRole="button" accessibilityLabel={t('common.close')}>
                 <AppIcon name="close" size={18} color={colors.gray400} />
             </TouchableOpacity>
         </View>

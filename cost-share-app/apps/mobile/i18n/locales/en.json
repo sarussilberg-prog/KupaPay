@@ -948,6 +948,7 @@
     },
     "notifications": {
         "title": "Notifications",
+        "categoriesTitle": "By category",
         "pushMaster": "Push notifications",
         "categoryExpenses": "Expenses",
         "categorySettlements": "Payments",

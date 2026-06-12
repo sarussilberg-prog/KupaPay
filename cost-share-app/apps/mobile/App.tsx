@@ -202,7 +202,6 @@ function App() {
           if (event === 'SIGNED_IN') {
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');
-              void syncPushRegistrationOnSignIn();
             }, 0);
             return;
           }

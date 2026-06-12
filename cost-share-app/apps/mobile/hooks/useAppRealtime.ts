@@ -268,8 +268,10 @@ export function useAppRealtime(userId: string | undefined | null): void {
                     try {
                         invalidateActivityDebounced();
                         void queryClient.invalidateQueries({ queryKey: queryKeys.activityUnreadCount });
-                        void supabase.rpc('get_activity_unread_count').then(({ data }) => {
+                        void Promise.resolve(supabase.rpc('get_activity_unread_count')).then(({ data }) => {
                             void setBadgeCount(typeof data === 'number' ? data : 0);
+                        }).catch((err: unknown) => {
+                            Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
                         });
                     } catch (err) {
                         Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
