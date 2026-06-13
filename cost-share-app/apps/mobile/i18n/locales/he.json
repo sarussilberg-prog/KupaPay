@@ -961,6 +961,22 @@
             "error": "משהו השתבש"
         }
     },
+    "notifications": {
+        "title": "התראות",
+        "categoriesTitle": "לפי קטגוריה",
+        "pushMaster": "התראות פוש",
+        "categoryExpenses": "הוצאות",
+        "categorySettlements": "תשלומים",
+        "categoryMessages": "הודעות צ'אט",
+        "categoryFriends": "בקשות חברות",
+        "categoryGroups": "קבוצות",
+        "systemDisabled": "ההתראות כבויות עבור האפליקציה",
+        "openSettings": "פתח הגדרות",
+        "primingTitle": "אל תפספס כלום",
+        "primingBody": "קבל עדכון כשחבר מוסיף הוצאה או משלם לך.",
+        "primingEnable": "הפעל התראות",
+        "primingLater": "לא עכשיו"
+    },
     "deleteAccount": {
         "warningTitle": "למחוק את החשבון?",
         "warningBullet1": "לא תוכל להתחבר יותר.",

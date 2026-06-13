@@ -946,6 +946,22 @@
             "error": "Something went wrong"
         }
     },
+    "notifications": {
+        "title": "Notifications",
+        "categoriesTitle": "By category",
+        "pushMaster": "Push notifications",
+        "categoryExpenses": "Expenses",
+        "categorySettlements": "Payments",
+        "categoryMessages": "Group chat",
+        "categoryFriends": "Friend requests",
+        "categoryGroups": "Groups",
+        "systemDisabled": "Notifications are turned off for this app",
+        "openSettings": "Open settings",
+        "primingTitle": "Stay in the loop",
+        "primingBody": "Get notified when a friend adds an expense or pays you back.",
+        "primingEnable": "Enable notifications",
+        "primingLater": "Not now"
+    },
     "deleteAccount": {
         "warningTitle": "Delete account?",
         "warningBullet1": "You will no longer be able to sign in.",

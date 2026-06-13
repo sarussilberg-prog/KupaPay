@@ -20,6 +20,7 @@ import { queryClient } from '../lib/queryClient';
 import { sweepIfOnline } from '../lib/zombieSweep';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
+import { setBadgeCount } from '../lib/pushNotifications';
 
 type RealtimePayload = {
     eventType: 'INSERT' | 'UPDATE' | 'DELETE';
@@ -267,6 +268,11 @@ export function useAppRealtime(userId: string | undefined | null): void {
                     try {
                         invalidateActivityDebounced();
                         void queryClient.invalidateQueries({ queryKey: queryKeys.activityUnreadCount });
+                        void Promise.resolve(supabase.rpc('get_activity_unread_count')).then(({ data }) => {
+                            void setBadgeCount(typeof data === 'number' ? data : 0);
+                        }).catch((err: unknown) => {
+                            Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
+                        });
                     } catch (err) {
                         Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
                     }
