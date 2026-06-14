@@ -1,5 +1,5 @@
 /* eslint-disable */
-// CoPay · ProfileScreen — header row, BalanceHeroCard, stat tiles, friends list.
+// KupaPay · ProfileScreen — header row, BalanceHeroCard, stat tiles, friends list.
 
 function ProfileScreen({ currentUser, balanceSummary, groupsCount, settledCount, friends, onSettings, onSignOut }) {
   const [expanded, setExpanded] = React.useState(false);

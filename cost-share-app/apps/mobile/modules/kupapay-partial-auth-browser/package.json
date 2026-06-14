@@ -1,5 +1,5 @@
 {
-  "name": "copay-partial-auth-browser",
+  "name": "kupapay-partial-auth-browser",
   "version": "1.0.0",
   "main": "src/index.ts",
   "peerDependencies": {

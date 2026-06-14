@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate CoPay brand PNGs (mobile + web) from assets/brand/logo-master.png.
+Generate KupaPay brand PNGs (mobile + web) from assets/brand/logo-master.png.
 
 The master is transparent. Background treatment per surface:
 - WHITE (flattened) — launcher/installable icons only: iOS icon.png and the web

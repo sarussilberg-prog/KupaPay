@@ -34,5 +34,5 @@ supabase functions deploy send-push --project-ref <PROJECT_REF>
 ## 4. EAS push credentials (Phase 4)
 
 - iOS: `eas credentials` → push key (APNs) under Apple Team `K3M6R85KA6`.
-- Android: create a Firebase project for `com.copay.mobile`, upload the FCM v1 service account
+- Android: create a Firebase project for `com.kupapay.mobile`, upload the FCM v1 service account
   key to EAS (`eas credentials` → Android → FCM V1).

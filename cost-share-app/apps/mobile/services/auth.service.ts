@@ -40,7 +40,7 @@ function toAuthError(err: unknown): AuthError {
   return { code: 'generic', message };
 }
 
-const NATIVE_SCHEME = 'com.copay.mobile';
+const NATIVE_SCHEME = 'com.kupapay.mobile';
 const AUTH_CALLBACK_PATH = 'auth/callback';
 
 /**
