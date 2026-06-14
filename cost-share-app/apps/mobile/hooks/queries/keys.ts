@@ -23,6 +23,7 @@ export const queryKeys = {
     legalDocument: (slug: 'terms' | 'privacy', locale: 'en' | 'he') =>
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
+    adminSupportMessages: ['admin', 'support-messages'] as const,
     adminSentryIssues: (params: {
         environment: 'dev' | 'prod';
         status: 'unresolved' | 'all';

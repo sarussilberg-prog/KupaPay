@@ -251,6 +251,22 @@ function App() {
     return () => sub.remove();
   }, [guardSession]);
 
+  if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined' && globalThis.location.pathname === '/.well-known/apple-app-site-association') {
+    const aasa = {
+      applinks: {
+        apps: [],
+        details: [{ appID: 'K3M6R85KA6.com.kupapay.mobile', paths: ['/i/*', '/g/*'] }],
+      },
+    };
+    // Write raw JSON directly — this path must return JSON, not a React screen.
+    if (typeof globalThis.document !== 'undefined') {
+      globalThis.document.open('application/json');
+      globalThis.document.write(JSON.stringify(aasa));
+      globalThis.document.close();
+    }
+    return null;
+  }
+
   if (!isReady) {
     return (
       <SafeAreaProvider>

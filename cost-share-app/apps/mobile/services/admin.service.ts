@@ -53,6 +53,58 @@ export async function restoreDeletedAccount(userId: string): Promise<RestoreResu
     return { ok: false, error: 'admin.deletedUsers.restoreError' };
 }
 
+export async function submitSupportMessage(params: { name: string; email: string; message: string }): Promise<boolean> {
+    const { error } = await supabase.from('support_messages').insert(params);
+    if (error) {
+        console.warn('submitSupportMessage: insert failed', error);
+        return false;
+    }
+    return true;
+}
+
+export interface SupportMessage {
+    id: string;
+    name: string;
+    email: string;
+    message: string;
+    status: 'open' | 'closed';
+    createdAt: Date;
+}
+
+type SupportMessageRow = {
+    id: string;
+    name: string;
+    email: string;
+    message: string;
+    status: 'open' | 'closed';
+    created_at: string;
+};
+
+export async function listSupportMessages(): Promise<SupportMessage[]> {
+    const { data, error } = await supabase.rpc('admin_list_support_messages');
+    if (error || !data) {
+        if (error) console.warn('listSupportMessages: RPC failed', error);
+        return [];
+    }
+    return (data as SupportMessageRow[]).map((r) => ({
+        id: r.id,
+        name: r.name,
+        email: r.email,
+        message: r.message,
+        status: r.status,
+        createdAt: new Date(r.created_at),
+    }));
+}
+
+export async function updateSupportMessageStatus(id: string, status: 'open' | 'closed'): Promise<boolean> {
+    const { error } = await supabase.rpc('admin_update_support_message_status', { p_id: id, p_status: status });
+    if (error) {
+        console.warn('updateSupportMessageStatus: RPC failed', error);
+        return false;
+    }
+    return true;
+}
+
 import type { AdminPlatformMetrics } from '@cost-share/shared';
 
 type MetricsRow = {

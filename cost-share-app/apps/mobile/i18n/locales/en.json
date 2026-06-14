@@ -574,6 +574,13 @@
         "support": "Support",
         "rateUs": "Rate us",
         "contactUs": "Contact us",
+        "contactUsName": "Your name",
+        "contactUsEmail": "Email",
+        "contactUsMessage": "Message",
+        "contactUsMessagePlaceholder": "How can we help you?",
+        "contactUsSend": "Send Message",
+        "contactUsSent": "Message sent!",
+        "contactUsError": "Failed to send. Please try again.",
         "legal": "Legal",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy",
@@ -649,6 +656,15 @@
             "user": "User",
             "noEvents": "No events captured for this issue",
             "noStack": "No stack trace available"
+        },
+        "supportMessages": {
+            "title": "Support Messages",
+            "portalRow": "Support messages",
+            "empty": "No support messages yet",
+            "statusOpen": "Open",
+            "statusClosed": "Closed",
+            "markClosed": "Mark as resolved",
+            "markOpen": "Reopen"
         },
         "metrics": {
             "sectionLabel": "Overview",
