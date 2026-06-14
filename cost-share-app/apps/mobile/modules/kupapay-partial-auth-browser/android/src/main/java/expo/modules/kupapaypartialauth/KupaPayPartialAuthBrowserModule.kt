@@ -1,4 +1,4 @@
-package expo.modules.copaypartialauth
+package expo.modules.kupapaypartialauth
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
@@ -16,9 +16,9 @@ import expo.modules.kotlin.modules.ModuleDefinition
 
 private const val DUMMY_URL = "https://expo.dev"
 
-class CopayPartialAuthBrowserModule : Module() {
+class KupaPayPartialAuthBrowserModule : Module() {
   override fun definition() = ModuleDefinition {
-    Name("CopayPartialAuthBrowser")
+    Name("KupaPayPartialAuthBrowser")
 
     // Emitted when the Custom Tab is hidden/closed (user dismiss or a redirect closing it).
     Events("onPartialTabDismiss")
@@ -77,7 +77,7 @@ class CopayPartialAuthBrowserModule : Module() {
     val dismissCallback = object : CustomTabsCallback() {
       override fun onNavigationEvent(navigationEvent: Int, extras: Bundle?) {
         if (navigationEvent == CustomTabsCallback.TAB_HIDDEN) {
-          this@CopayPartialAuthBrowserModule.sendEvent("onPartialTabDismiss", emptyMap<String, Any?>())
+          this@KupaPayPartialAuthBrowserModule.sendEvent("onPartialTabDismiss", emptyMap<String, Any?>())
         }
       }
     }

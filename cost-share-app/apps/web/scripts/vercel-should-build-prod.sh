@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# copay-prod Ignored Build Step: exit 0 = skip, exit 1 = build.
+# kupapay-prod Ignored Build Step: exit 0 = skip, exit 1 = build.
 # Build only on main.
 if [ "$VERCEL_GIT_COMMIT_REF" = "main" ]; then
   exit 1

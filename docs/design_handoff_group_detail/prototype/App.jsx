@@ -1,5 +1,5 @@
 /* eslint-disable */
-// CoPay · App — click-thru prototype.
+// KupaPay · App — click-thru prototype.
 // Flow: login → groups list → group detail (feed + FAB) → add expense (modal).
 // Bottom tab: Groups · Activity · Profile.
 
@@ -22,10 +22,10 @@ function App() {
   const [tab, setTab] = React.useState('groups');
   const [openGroupId, setOpenGroupId] = React.useState(null);
   const [showAddExpense, setShowAddExpense] = React.useState(false);
-  const [groups] = React.useState(window.COPAY_DATA.groups);
-  const [expenses, setExpenses] = React.useState(window.COPAY_DATA.expenses);
+  const [groups] = React.useState(window.KUPAPAY_DATA.groups);
+  const [expenses, setExpenses] = React.useState(window.KUPAPAY_DATA.expenses);
 
-  const data = window.COPAY_DATA;
+  const data = window.KUPAPAY_DATA;
   const openGroup = openGroupId ? groups.find(g => g.id === openGroupId) : null;
 
   const friends = React.useMemo(() => {

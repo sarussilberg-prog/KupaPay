@@ -36,7 +36,7 @@ function toastTextStyles(isRtl: boolean) {
     };
 }
 
-function CopayBaseToast(props: BaseToastProps) {
+function KupaPayBaseToast(props: BaseToastProps) {
     const isRtl = useToastRtl();
     const textStyles = toastTextStyles(isRtl);
     return (
@@ -52,7 +52,7 @@ function CopayBaseToast(props: BaseToastProps) {
     );
 }
 
-function CopayErrorToast(props: BaseToastProps) {
+function KupaPayErrorToast(props: BaseToastProps) {
     const isRtl = useToastRtl();
     const textStyles = toastTextStyles(isRtl);
     return (
@@ -68,7 +68,7 @@ function CopayErrorToast(props: BaseToastProps) {
     );
 }
 
-function CopayInfoToast(props: BaseToastProps) {
+function KupaPayInfoToast(props: BaseToastProps) {
     const isRtl = useToastRtl();
     const textStyles = toastTextStyles(isRtl);
     return (
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
 
 export const toastConfig = {
     success: (props: BaseToastProps) => (
-        <CopayBaseToast
+        <KupaPayBaseToast
             {...props}
             style={[
                 styles.base,
@@ -125,10 +125,10 @@ export const toastConfig = {
             ]}
         />
     ),
-    error: (props: BaseToastProps) => <CopayErrorToast {...props} />,
-    info: (props: BaseToastProps) => <CopayInfoToast {...props} />,
+    error: (props: BaseToastProps) => <KupaPayErrorToast {...props} />,
+    info: (props: BaseToastProps) => <KupaPayInfoToast {...props} />,
     warning: (props: BaseToastProps) => (
-        <CopayBaseToast
+        <KupaPayBaseToast
             {...props}
             style={[
                 styles.base,

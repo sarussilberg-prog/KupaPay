@@ -10,7 +10,7 @@ type NativeModule = {
 
 const NativePartialAuthBrowser =
   Platform.OS === 'android'
-    ? requireNativeModule<NativeModule>('CopayPartialAuthBrowser')
+    ? requireNativeModule<NativeModule>('KupaPayPartialAuthBrowser')
     : null;
 
 export async function openPartialCustomTabAsync(
@@ -18,7 +18,7 @@ export async function openPartialCustomTabAsync(
   initialHeightPx: number,
 ): Promise<{ type: 'opened' }> {
   if (!NativePartialAuthBrowser) {
-    throw new Error('CopayPartialAuthBrowser is only available on Android');
+    throw new Error('KupaPayPartialAuthBrowser is only available on Android');
   }
   return NativePartialAuthBrowser.openPartialCustomTabAsync(url, initialHeightPx);
 }
