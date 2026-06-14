@@ -68,8 +68,8 @@ describe('ExpenseListScreen', () => {
 
     it('navigates to ExpenseDetail when an expense is pressed', async () => {
         queryClient.setQueryData(queryKeys.groupExpenses('g1'), [expense]);
-        const { findByText } = render(<ExpenseListScreen />);
-        fireEvent.press(await findByText('Coffee'));
+        const { findByTestId } = render(<ExpenseListScreen />);
+        fireEvent.press(await findByTestId('expense-card-e1'));
         expect(mockNavigate).toHaveBeenCalledWith('ExpenseDetail', {
             expenseId: 'e1',
             groupId: 'g1',
