@@ -676,7 +676,11 @@
         "supportMessages": {
             "title": "הודעות תמיכה",
             "portalRow": "הודעות תמיכה",
-            "empty": "אין הודעות תמיכה עדיין"
+            "empty": "אין הודעות תמיכה עדיין",
+            "statusOpen": "פתוח",
+            "statusClosed": "סגור",
+            "markClosed": "סמן כטופל",
+            "markOpen": "פתח מחדש"
         },
         "metrics": {
             "sectionLabel": "סקירה",

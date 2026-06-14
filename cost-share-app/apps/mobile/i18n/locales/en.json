@@ -660,7 +660,11 @@
         "supportMessages": {
             "title": "Support Messages",
             "portalRow": "Support messages",
-            "empty": "No support messages yet"
+            "empty": "No support messages yet",
+            "statusOpen": "Open",
+            "statusClosed": "Closed",
+            "markClosed": "Mark as resolved",
+            "markOpen": "Reopen"
         },
         "metrics": {
             "sectionLabel": "Overview",

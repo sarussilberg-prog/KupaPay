@@ -67,6 +67,7 @@ export interface SupportMessage {
     name: string;
     email: string;
     message: string;
+    status: 'open' | 'closed';
     createdAt: Date;
 }
 
@@ -75,6 +76,7 @@ type SupportMessageRow = {
     name: string;
     email: string;
     message: string;
+    status: 'open' | 'closed';
     created_at: string;
 };
 
@@ -89,8 +91,18 @@ export async function listSupportMessages(): Promise<SupportMessage[]> {
         name: r.name,
         email: r.email,
         message: r.message,
+        status: r.status,
         createdAt: new Date(r.created_at),
     }));
+}
+
+export async function updateSupportMessageStatus(id: string, status: 'open' | 'closed'): Promise<boolean> {
+    const { error } = await supabase.rpc('admin_update_support_message_status', { p_id: id, p_status: status });
+    if (error) {
+        console.warn('updateSupportMessageStatus: RPC failed', error);
+        return false;
+    }
+    return true;
 }
 
 import type { AdminPlatformMetrics } from '@cost-share/shared';

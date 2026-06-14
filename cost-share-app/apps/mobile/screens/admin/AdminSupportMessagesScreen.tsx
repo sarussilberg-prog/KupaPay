@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
-import { View, FlatList, RefreshControl, Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, FlatList, RefreshControl, Modal, Pressable, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as Clipboard from 'expo-clipboard';
 import { Text } from '../../components/AppText';
 import { useAdminSupportMessagesQuery } from '../../hooks/queries/useAdminSupportMessagesQuery';
 import { toDate } from '../../lib/dateUtils';
 import { showSuccessMessage } from '../../lib/appToast';
-import type { SupportMessage } from '../../services/admin.service';
+import { updateSupportMessageStatus, type SupportMessage } from '../../services/admin.service';
 
 export function AdminSupportMessagesScreen() {
     const { t } = useTranslation();
     const query = useAdminSupportMessagesQuery();
     const [selected, setSelected] = useState<SupportMessage | null>(null);
+    const [toggling, setToggling] = useState(false);
+
+    const handleToggleStatus = useCallback(async () => {
+        if (!selected || toggling) return;
+        const next = selected.status === 'open' ? 'closed' : 'open';
+        setToggling(true);
+        try {
+            const ok = await updateSupportMessageStatus(selected.id, next);
+            if (ok) {
+                setSelected({ ...selected, status: next });
+                void query.refetch();
+            }
+        } finally {
+            setToggling(false);
+        }
+    }, [selected, toggling, query]);
 
     if (!query.isLoading && (query.data ?? []).length === 0) {
         return (
@@ -38,10 +54,13 @@ export function AdminSupportMessagesScreen() {
                         <View className="bg-white px-4 py-3 mx-3 mb-2 rounded-xl">
                             <View className="flex-row items-center justify-between mb-1">
                                 <Text className="text-base font-semibold text-gray-900">{item.name}</Text>
-                                <Text className="text-xs text-gray-400">
-                                    {toDate(item.createdAt).toLocaleDateString()}
-                                </Text>
+                                <View style={[styles.badge, item.status === 'open' ? styles.badgeOpen : styles.badgeClosed]}>
+                                    <Text style={[styles.badgeText, item.status === 'open' ? styles.badgeTextOpen : styles.badgeTextClosed]}>
+                                        {item.status === 'open' ? t('admin.supportMessages.statusOpen') : t('admin.supportMessages.statusClosed')}
+                                    </Text>
+                                </View>
                             </View>
+                            <Text className="text-xs text-gray-400 mb-1">{toDate(item.createdAt).toLocaleDateString()}</Text>
                             <Text className="text-xs text-primary mb-2">{item.email}</Text>
                             <Text className="text-sm text-gray-700" numberOfLines={2}>{item.message}</Text>
                         </View>
@@ -59,10 +78,12 @@ export function AdminSupportMessagesScreen() {
                     <Pressable style={styles.sheet} onPress={() => {}}>
                         <View style={styles.handle} />
                         <View style={styles.header}>
-                            <Text className="text-base font-semibold text-gray-900">{selected?.name}</Text>
-                            <Text className="text-xs text-gray-400 mt-0.5">
-                                {selected ? toDate(selected.createdAt).toLocaleDateString() : ''}
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Text className="text-base font-semibold text-gray-900">{selected?.name}</Text>
+                                <Text className="text-xs text-gray-400">
+                                    {selected ? toDate(selected.createdAt).toLocaleDateString() : ''}
+                                </Text>
+                            </View>
                         </View>
                         <Pressable onPress={() => {
                             if (selected?.email) {
@@ -71,7 +92,7 @@ export function AdminSupportMessagesScreen() {
                                 });
                             }
                         }}>
-                            <Text className="text-xs text-primary px-5 mb-3">{selected?.email}</Text>
+                            <Text className="text-xs text-primary px-5 mb-4">{selected?.email}</Text>
                         </Pressable>
                         <ScrollView
                             style={styles.body}
@@ -80,6 +101,17 @@ export function AdminSupportMessagesScreen() {
                         >
                             <Text className="text-sm text-gray-800 leading-6">{selected?.message}</Text>
                         </ScrollView>
+                        <TouchableOpacity
+                            onPress={() => void handleToggleStatus()}
+                            disabled={toggling}
+                            style={[styles.toggleBtn, selected?.status === 'open' ? styles.toggleBtnOpen : styles.toggleBtnClosed]}
+                        >
+                            <Text style={styles.toggleBtnText}>
+                                {selected?.status === 'open'
+                                    ? t('admin.supportMessages.markClosed')
+                                    : t('admin.supportMessages.markOpen')}
+                            </Text>
+                        </TouchableOpacity>
                     </Pressable>
                 </Pressable>
             </Modal>
@@ -117,6 +149,45 @@ const styles = StyleSheet.create({
     },
     bodyContent: {
         paddingHorizontal: 20,
-        paddingBottom: 32,
+        paddingBottom: 16,
+    },
+    badge: {
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 99,
+    },
+    badgeOpen: {
+        backgroundColor: '#fee2e2',
+    },
+    badgeClosed: {
+        backgroundColor: '#dcfce7',
+    },
+    badgeText: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    badgeTextOpen: {
+        color: '#dc2626',
+    },
+    badgeTextClosed: {
+        color: '#16a34a',
+    },
+    toggleBtn: {
+        marginHorizontal: 20,
+        marginBottom: 24,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    toggleBtnOpen: {
+        backgroundColor: '#16a34a',
+    },
+    toggleBtnClosed: {
+        backgroundColor: '#dc2626',
+    },
+    toggleBtnText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 15,
     },
 });
