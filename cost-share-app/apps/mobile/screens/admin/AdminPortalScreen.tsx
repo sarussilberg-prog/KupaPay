@@ -61,6 +61,13 @@ export function AdminPortalScreen() {
                         testID="admin-portal-errors"
                     />
                     <SettingsRow
+                        iconName="chatbubble-ellipses-outline"
+                        label={t('admin.supportMessages.portalRow')}
+                        variant="chevron"
+                        onPress={() => navigation.navigate('AdminSupportMessages')}
+                        testID="admin-portal-support-messages"
+                    />
+                    <SettingsRow
                         iconName="refresh-outline"
                         label={t('admin.portal.resetOnboardingRow')}
                         variant="chevron"

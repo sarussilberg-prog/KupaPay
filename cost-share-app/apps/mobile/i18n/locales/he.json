@@ -590,6 +590,13 @@
         "support": "תמיכה",
         "rateUs": "דרגו אותנו",
         "contactUs": "צור קשר",
+        "contactUsName": "שמך",
+        "contactUsEmail": "אימייל",
+        "contactUsMessage": "הודעה",
+        "contactUsMessagePlaceholder": "במה נוכל לעזור לך?",
+        "contactUsSend": "שלח הודעה",
+        "contactUsSent": "ההודעה נשלחה!",
+        "contactUsError": "שליחה נכשלה. נסה שוב.",
         "legal": "משפטי",
         "terms": "תנאי שירות",
         "privacy": "מדיניות פרטיות",
@@ -665,6 +672,11 @@
             "user": "משתמש",
             "noEvents": "לא נתפסו אירועים עבור התקלה הזו",
             "noStack": "אין מחסנית קריאה"
+        },
+        "supportMessages": {
+            "title": "הודעות תמיכה",
+            "portalRow": "הודעות תמיכה",
+            "empty": "אין הודעות תמיכה עדיין"
         },
         "metrics": {
             "sectionLabel": "סקירה",
