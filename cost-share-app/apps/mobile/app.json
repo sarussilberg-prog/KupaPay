@@ -21,7 +21,7 @@
       "buildNumber": "4",
       "usesAppleSignIn": true,
       "associatedDomains": [
-        "applinks:kupa.pro"
+        "applinks:kupa-pay.com"
       ],
       "icon": "./assets/icon.png",
       "infoPlist": {
@@ -69,12 +69,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "kupa.pro",
+              "host": "kupa-pay.com",
               "pathPattern": "/i/.*"
             },
             {
               "scheme": "https",
-              "host": "kupa.pro",
+              "host": "kupa-pay.com",
               "pathPattern": "/g/.*"
             }
           ],

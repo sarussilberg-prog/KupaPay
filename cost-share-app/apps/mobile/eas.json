@@ -17,13 +17,13 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa.pro"
+        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa-pay.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa.pro",
+        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa-pay.com",
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     }

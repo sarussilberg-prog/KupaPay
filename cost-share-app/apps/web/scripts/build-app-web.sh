@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the Expo Web export for production (kupa.pro).
+# Builds the Expo Web export for production (kupa-pay.com).
 # Maps Vercel web env vars to Expo public env when needed.
 set -euo pipefail
 
@@ -7,7 +7,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 WEB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Committed defaults for CI/Vercel when dashboard env is unset (public anon key only).
-# kupapay-dev Vercel project → always development Supabase (never kupa.pro prod DB).
+# kupapay-dev Vercel project → always development Supabase (never kupa-pay.com prod DB).
 # kupapay-prod / VERCEL_ENV=production → production; other previews → development.
 # See docs/SSOT/SUPABASE_ENVIRONMENTS.md
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -2,13 +2,13 @@ import { parseIncomingUrl } from '../../services/deepLinks.service';
 
 describe('parseIncomingUrl', () => {
     it('parses https friend link', () => {
-        expect(parseIncomingUrl('https://kupa.pro/i/AbC123def_')).toEqual({
+        expect(parseIncomingUrl('https://kupa-pay.com/i/AbC123def_')).toEqual({
             kind: 'friend',
             token: 'AbC123def_',
         });
     });
     it('parses https group link', () => {
-        expect(parseIncomingUrl('https://kupa.pro/g/XYZ9876543')).toEqual({
+        expect(parseIncomingUrl('https://kupa-pay.com/g/XYZ9876543')).toEqual({
             kind: 'group',
             token: 'XYZ9876543',
         });
@@ -29,10 +29,10 @@ describe('parseIncomingUrl', () => {
         expect(parseIncomingUrl('https://example.com/foo')).toEqual({ kind: 'unknown' });
     });
     it('returns unknown for malformed invite URL', () => {
-        expect(parseIncomingUrl('https://kupa.pro/x/abc')).toEqual({ kind: 'unknown' });
+        expect(parseIncomingUrl('https://kupa-pay.com/x/abc')).toEqual({ kind: 'unknown' });
     });
     it('handles trailing slash + query string', () => {
-        expect(parseIncomingUrl('https://kupa.pro/g/AbCdEfGhIj?utm=foo')).toEqual({
+        expect(parseIncomingUrl('https://kupa-pay.com/g/AbCdEfGhIj?utm=foo')).toEqual({
             kind: 'group',
             token: 'AbCdEfGhIj',
         });

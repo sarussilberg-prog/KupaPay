@@ -37,8 +37,8 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.kupa.pro" }],
-      "destination": "https://kupa.pro/:path*",
+      "has": [{ "type": "host", "value": "www.kupa-pay.com" }],
+      "destination": "https://kupa-pay.com/:path*",
       "permanent": true
     }
   ]

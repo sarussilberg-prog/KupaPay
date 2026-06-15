@@ -22,27 +22,27 @@ import {
 describe('invite.service', () => {
     describe('buildInviteUrl', () => {
         it('builds friend URL from token', () => {
-            expect(buildInviteUrl('friend', 'AbCd123_-9')).toBe('https://kupa.pro/i/AbCd123_-9');
+            expect(buildInviteUrl('friend', 'AbCd123_-9')).toBe('https://kupa-pay.com/i/AbCd123_-9');
         });
         it('builds group URL from token', () => {
-            expect(buildInviteUrl('group', 'XyZ4567890')).toBe('https://kupa.pro/g/XyZ4567890');
+            expect(buildInviteUrl('group', 'XyZ4567890')).toBe('https://kupa-pay.com/g/XyZ4567890');
         });
     });
 
     describe('buildFriendInviteMessage', () => {
         it('interpolates inviter name and url', () => {
-            const msg = buildFriendInviteMessage('נווה', 'https://kupa.pro/i/AAA');
+            const msg = buildFriendInviteMessage('נווה', 'https://kupa-pay.com/i/AAA');
             expect(msg).toContain('נווה');
-            expect(msg).toContain('https://kupa.pro/i/AAA');
+            expect(msg).toContain('https://kupa-pay.com/i/AAA');
         });
     });
 
     describe('buildGroupInviteMessage', () => {
         it('interpolates inviter, group name, and url', () => {
-            const msg = buildGroupInviteMessage('נווה', 'טיול ביוון', 'https://kupa.pro/g/BBB');
+            const msg = buildGroupInviteMessage('נווה', 'טיול ביוון', 'https://kupa-pay.com/g/BBB');
             expect(msg).toContain('נווה');
             expect(msg).toContain('טיול ביוון');
-            expect(msg).toContain('https://kupa.pro/g/BBB');
+            expect(msg).toContain('https://kupa-pay.com/g/BBB');
         });
     });
 });
