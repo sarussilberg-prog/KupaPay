@@ -15,9 +15,13 @@ function useToastRtl(): boolean {
     return language === 'he';
 }
 
-function toastTextStyles(isRtl: boolean) {
+export function toastTextStyles(isRtl: boolean) {
     const align = rtlTextAlign(isRtl);
     const writingDirection = rtlWritingDirection(isRtl);
+    // On native, textAlign alone doesn't move the text: the <Text> box hugs its
+    // content at the container's start (left in logical-RTL mode) so right-aligned
+    // Hebrew looks stuck left. Stretching the box to full width makes textAlign
+    // take effect — same pattern as centeredTextStyle/feedActorNameStyle.
     return {
         text1: {
             fontSize: 15,
@@ -25,6 +29,8 @@ function toastTextStyles(isRtl: boolean) {
             color: colors.gray900,
             textAlign: align,
             writingDirection,
+            alignSelf: 'stretch' as const,
+            width: '100%' as const,
         },
         text2: {
             fontSize: 13,
@@ -32,6 +38,8 @@ function toastTextStyles(isRtl: boolean) {
             color: colors.gray600,
             textAlign: align,
             writingDirection,
+            alignSelf: 'stretch' as const,
+            width: '100%' as const,
         },
     };
 }
@@ -42,7 +50,7 @@ function KupaPayBaseToast(props: BaseToastProps) {
     return (
         <BaseToast
             {...props}
-            style={[styles.base, props.style]}
+            style={[styles.base, { direction: isRtl ? 'rtl' : 'ltr' }, props.style]}
             contentContainerStyle={[styles.content, props.contentContainerStyle]}
             text1Style={[textStyles.text1, props.text1Style]}
             text2Style={[textStyles.text2, props.text2Style]}
@@ -58,7 +66,7 @@ function KupaPayErrorToast(props: BaseToastProps) {
     return (
         <ErrorToast
             {...props}
-            style={[styles.base, styles.error, props.style]}
+            style={[styles.base, styles.error, { direction: isRtl ? 'rtl' : 'ltr' }, props.style]}
             contentContainerStyle={[styles.content, props.contentContainerStyle]}
             text1Style={[textStyles.text1, props.text1Style]}
             text2Style={[textStyles.text2, props.text2Style]}
@@ -74,7 +82,7 @@ function KupaPayInfoToast(props: BaseToastProps) {
     return (
         <InfoToast
             {...props}
-            style={[styles.base, styles.info, props.style]}
+            style={[styles.base, styles.info, { direction: isRtl ? 'rtl' : 'ltr' }, props.style]}
             contentContainerStyle={[styles.content, props.contentContainerStyle]}
             text1Style={[textStyles.text1, props.text1Style]}
             text2Style={[textStyles.text2, props.text2Style]}
