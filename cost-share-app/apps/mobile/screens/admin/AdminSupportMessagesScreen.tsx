@@ -21,7 +21,7 @@ export function AdminSupportMessagesScreen() {
         try {
             const ok = await updateSupportMessageStatus(selected.id, next);
             if (ok) {
-                setSelected({ ...selected, status: next });
+                setSelected(null);
                 void query.refetch();
             }
         } finally {
@@ -189,5 +189,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: '600',
         fontSize: 15,
+        textAlign: 'center',
     },
 });
