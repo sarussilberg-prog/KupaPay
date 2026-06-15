@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getPermissionStatus, requestPermission } from '../lib/pushNotifications';
 import { syncPushRegistrationOnSignIn } from '../lib/pushRegistrationLifecycle';
@@ -9,7 +10,9 @@ const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 export interface PushPromptState {
     status: 'unknown' | 'granted' | 'denied' | 'undetermined';
     showBanner: boolean;
+    mode: 'soft-ask' | 'open-settings';
     promptSoftAsk: () => Promise<void>;
+    dismiss: () => Promise<void>;
     refresh: () => Promise<void>;
 }
 
@@ -28,6 +31,15 @@ export function usePushPermissionPrompt(): PushPromptState {
 
     useEffect(() => { void refresh(); }, [refresh]);
 
+    // Re-check when the app returns to foreground — catches the user enabling
+    // notifications in the OS Settings, so the banner disappears without a restart.
+    useEffect(() => {
+        const sub = AppState.addEventListener('change', (s) => {
+            if (s === 'active') void refresh();
+        });
+        return () => sub.remove();
+    }, [refresh]);
+
     const promptSoftAsk = useCallback(async () => {
         const granted = await requestPermission();
         if (granted) {
@@ -38,8 +50,17 @@ export function usePushPermissionPrompt(): PushPromptState {
         await refresh();
     }, [refresh]);
 
-    // Banner shows only when not granted AND the 7-day cooldown has elapsed.
-    const showBanner = status !== 'granted' && status !== 'unknown' && cooldownPassed;
+    // Dismissing snoozes the banner for the cooldown window and persists across
+    // navigations (otherwise it would re-appear every time the screen remounts).
+    const dismiss = useCallback(async () => {
+        await AsyncStorage.setItem(COOLDOWN_KEY, String(Date.now()));
+        setCooldownPassed(false);
+    }, []);
 
-    return { status, showBanner, promptSoftAsk, refresh };
+    // Show only for not-yet-granted users who haven't declined/dismissed within the
+    // cooldown. Granted users (status === 'granted') never see it.
+    const showBanner = (status === 'undetermined' || status === 'denied') && cooldownPassed;
+    const mode: 'soft-ask' | 'open-settings' = status === 'denied' ? 'open-settings' : 'soft-ask';
+
+    return { status, showBanner, mode, promptSoftAsk, dismiss, refresh };
 }
