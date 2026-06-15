@@ -19,9 +19,9 @@ describe('shareTextMessage (web)', () => {
     it('copies to clipboard when Web Share API is unavailable', async () => {
         const setString = jest.spyOn(Clipboard, 'setStringAsync').mockResolvedValue(true);
 
-        await shareTextMessage('https://kupa.pro/g/abc');
+        await shareTextMessage('https://kupa-pay.com/g/abc');
 
-        expect(setString).toHaveBeenCalledWith('https://kupa.pro/g/abc');
+        expect(setString).toHaveBeenCalledWith('https://kupa-pay.com/g/abc');
     });
 
     it('uses navigator.share when available', async () => {
