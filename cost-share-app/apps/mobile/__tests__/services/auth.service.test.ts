@@ -153,19 +153,19 @@ describe('auth.service', () => {
         });
 
         it('falls back to EXPO_PUBLIC_WEB_APP_URL on web when location is unavailable', () => {
-            process.env.EXPO_PUBLIC_WEB_APP_URL = 'https://kupa.pro';
+            process.env.EXPO_PUBLIC_WEB_APP_URL = 'https://kupa-pay.com';
             setPlatformOs('web');
             setWebLocationOrigin(undefined);
 
-            expect(getAuthRedirectUri()).toBe('https://kupa.pro/auth/callback');
+            expect(getAuthRedirectUri()).toBe('https://kupa-pay.com/auth/callback');
         });
     });
 
     describe('isAuthCallbackUrl', () => {
         it('detects OAuth callback URLs', () => {
             expect(isAuthCallbackUrl('com.kupapay.mobile://auth/callback?code=abc')).toBe(true);
-            expect(isAuthCallbackUrl('https://kupa.pro/?code=abc')).toBe(true);
-            expect(isAuthCallbackUrl('https://kupa.pro/auth/callback?code=abc')).toBe(true);
+            expect(isAuthCallbackUrl('https://kupa-pay.com/?code=abc')).toBe(true);
+            expect(isAuthCallbackUrl('https://kupa-pay.com/auth/callback?code=abc')).toBe(true);
             expect(isAuthCallbackUrl('com.kupapay.mobile://invite/i/token')).toBe(false);
         });
     });
@@ -298,7 +298,7 @@ describe('auth.service', () => {
             });
             mockOpenOAuthSession.mockResolvedValue({
                 type: 'success',
-                url: 'https://kupa.pro/?code=abc',
+                url: 'https://kupa-pay.com/?code=abc',
             });
 
             const result = await signInWithGoogle();

@@ -5,7 +5,7 @@
 // publication time; before publication, the env var falls back to the marketing
 // site itself. Set KUPAPAY_APP_STORE_URL once the app is published (KUPAY_*/KUPA_* still accepted).
 const APP_STORE_URL =
-    Deno.env.get('KUPAPAY_APP_STORE_URL') ?? Deno.env.get('KUPAY_APP_STORE_URL') ?? Deno.env.get('KUPA_APP_STORE_URL') ?? 'https://kupa.pro/';
+    Deno.env.get('KUPAPAY_APP_STORE_URL') ?? Deno.env.get('KUPAY_APP_STORE_URL') ?? Deno.env.get('KUPA_APP_STORE_URL') ?? 'https://kupa-pay.com/';
 const PLAY_STORE_URL =
     Deno.env.get('KUPAPAY_PLAY_STORE_URL') ?? Deno.env.get('KUPAY_PLAY_STORE_URL') ?? Deno.env.get('KUPA_PLAY_STORE_URL')
         ?? 'https://play.google.com/store/apps/details?id=com.kupapay.mobile';
@@ -45,7 +45,7 @@ function shell({
 <meta property="og:title" content="${t}" />
 <meta property="og:description" content="${d}" />
 <meta property="og:url" content="${c}" />
-<meta property="og:image" content="https://kupa.pro/og/default.png" />
+<meta property="og:image" content="https://kupa-pay.com/og/default.png" />
 <style>
   :root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;}
   body{margin:0;background:#0f172a;color:#e2e8f0;display:flex;min-height:100vh;align-items:center;justify-content:center;}
@@ -108,7 +108,7 @@ export function renderFriendInvite(
     return shell({
         title: `${preview.inviter.name} הזמין אותך ל-KupaPay`,
         description: 'הצטרף ל-KupaPay וחלוק הוצאות בקלות.',
-        canonical: `https://kupa.pro/i/${token}`,
+        canonical: `https://kupa-pay.com/i/${token}`,
         body,
     });
 }
@@ -146,7 +146,7 @@ export function renderGroupInvite(
     return shell({
         title: `הוזמנת לקופת '${g.name}' ב-KupaPay`,
         description: `${g.member_count} חברים · מטבע ${g.currency} · הצטרף בקלות`,
-        canonical: `https://kupa.pro/g/${token}`,
+        canonical: `https://kupa-pay.com/g/${token}`,
         body,
     });
 }
@@ -155,7 +155,7 @@ export function renderInvalid(): string {
     return shell({
         title: 'קישור לא תקף',
         description: 'הקישור הזה כבר לא תקף או הסתיים.',
-        canonical: 'https://kupa.pro/',
+        canonical: 'https://kupa-pay.com/',
         body: `
             <h1>קישור לא תקף</h1>
             <p>הקישור הזה כבר לא פעיל. בקש מהאדם שהזמין אותך לשלוח קישור חדש.</p>
@@ -167,7 +167,7 @@ export function renderRoot(): string {
     return shell({
         title: APP_BRAND_TITLE,
         description: 'חלקו הוצאות בקלות.',
-        canonical: 'https://kupa.pro/',
+        canonical: 'https://kupa-pay.com/',
         body: `
             <h1 class="brand-title">${APP_BRAND_TITLE}</h1>
             <p>חלקו את חשבון המסעדה, הטיול, והדירה — בלי לעשות חשבונות.</p>
