@@ -13,6 +13,7 @@ import { toastConfig } from './lib/toastConfig';
 import { handleAuthRedirectUrl, isAuthCallbackUrl } from './services/auth.service';
 import { AuthenticatedAppGate } from './components/AuthenticatedAppGate';
 import { LoginScreen } from './screens/auth/LoginScreen';
+import { PublicSupportScreen } from './screens/auth/PublicSupportScreen';
 import { OnboardingPreAuthFlow } from './screens/onboarding/OnboardingPreAuthFlow';
 import { hasCompletedPreLoginOnboarding } from './lib/onboardingStorage';
 import { initializeLanguage } from './i18n';
@@ -281,12 +282,18 @@ function App() {
 
   if (!session) {
     const showPreOnboarding = preOnboardingDone === false;
+    const isPublicSupportPath =
+      Platform.OS === 'web' &&
+      typeof globalThis.location !== 'undefined' &&
+      globalThis.location.pathname.replace(/\/+$/, '') === '/support';
 
     return (
       <SafeAreaProvider>
         <RtlLayoutProvider>
           <WebFrame>
-            {preOnboardingDone === null ? (
+            {isPublicSupportPath ? (
+              <PublicSupportScreen />
+            ) : preOnboardingDone === null ? (
               <AppGateSkeleton />
             ) : showPreOnboarding ? (
               <OnboardingPreAuthFlow onFinished={() => setPreOnboardingDone(true)} />
