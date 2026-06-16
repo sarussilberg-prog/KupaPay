@@ -136,7 +136,12 @@
           "color": "#ffffff"
         }
       ],
-      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.93908207560-0fel0f2qk3oi5gpbj242nhumr3j5cfqp"
+        }
+      ],
       "expo-apple-authentication",
       [
         "@sentry/react-native/expo",
