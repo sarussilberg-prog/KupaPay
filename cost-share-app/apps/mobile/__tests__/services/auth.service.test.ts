@@ -3,6 +3,8 @@ const mockSignInWithIdToken = jest.fn();
 const mockSignInWithOAuth = jest.fn();
 const mockSignOut = jest.fn().mockResolvedValue({ error: null });
 const mockSignOutNativeGoogle = jest.fn().mockResolvedValue(undefined);
+const mockSignInWithGoogleNative = jest.fn();
+const mockIsNativeGoogleSignInEnabled = jest.fn().mockReturnValue(false);
 const mockOpenAuthSessionAsync = jest.fn();
 const mockOpenOAuthSession = jest.fn();
 let mockPlatformOs: 'ios' | 'android' | 'web' = 'ios';
@@ -32,6 +34,8 @@ jest.mock('../../lib/supabase', () => ({
 
 jest.mock('../../lib/googleSignInNative', () => ({
     signOutNativeGoogle: (...args: unknown[]) => mockSignOutNativeGoogle(...args),
+    signInWithGoogleNative: (...args: unknown[]) => mockSignInWithGoogleNative(...args),
+    isNativeGoogleSignInEnabled: (...args: unknown[]) => mockIsNativeGoogleSignInEnabled(...args),
 }));
 
 jest.mock('../../lib/openOAuthSession', () => ({
@@ -116,6 +120,7 @@ describe('auth.service', () => {
         mockClearStaleAuthSession.mockResolvedValue(undefined);
         mockAssertProfileActiveWithTimeout.mockResolvedValue('active');
         mockIsAuthSessionAllowed.mockResolvedValue(true);
+        mockIsNativeGoogleSignInEnabled.mockReturnValue(false);
         await signOut();
     });
 
@@ -270,8 +275,9 @@ describe('auth.service', () => {
             expect(result.error).toBeNull();
         });
 
-        it('uses an ephemeral browser session on iOS', async () => {
+        it('falls back to an ephemeral browser session on iOS when native is unavailable', async () => {
             setPlatformOs('ios');
+            mockIsNativeGoogleSignInEnabled.mockReturnValue(false);
             mockSignInWithOAuth.mockResolvedValue({
                 data: { url: 'https://accounts.google.com/o/oauth2/auth' },
                 error: null,
@@ -307,6 +313,61 @@ describe('auth.service', () => {
             expect(result.error?.message).toContain('com.kupapay.mobile://auth/callback');
             expect(result.error?.message).toContain('Redirect URLs');
             expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('signInWithGoogle — native iOS', () => {
+        beforeEach(() => {
+            setPlatformOs('ios');
+            mockIsNativeGoogleSignInEnabled.mockReturnValue(true);
+            mockSignInWithIdToken.mockResolvedValue({
+                data: { user: { id: 'user-1' } },
+                error: null,
+            });
+        });
+
+        it('exchanges the native Google id token with Supabase', async () => {
+            mockSignInWithGoogleNative.mockResolvedValue({ type: 'success', idToken: 'g-id-token' });
+
+            const result = await signInWithGoogle();
+
+            expect(mockSignInWithIdToken).toHaveBeenCalledWith({
+                provider: 'google',
+                token: 'g-id-token',
+            });
+            expect(mockOpenOAuthSession).not.toHaveBeenCalled();
+            expect(result.error).toBeNull();
+        });
+
+        it('treats a native cancel as a silent no-op', async () => {
+            mockSignInWithGoogleNative.mockResolvedValue({ type: 'cancelled' });
+
+            const result = await signInWithGoogle();
+
+            expect(mockSignInWithIdToken).not.toHaveBeenCalled();
+            expect(result.error).toBeNull();
+        });
+
+        it('surfaces a native error without falling back to the browser', async () => {
+            mockSignInWithGoogleNative.mockResolvedValue({
+                type: 'error',
+                error: new Error('Google Play Services is not available on this device'),
+            });
+
+            const result = await signInWithGoogle();
+
+            expect(mockSignInWithIdToken).not.toHaveBeenCalled();
+            expect(mockOpenOAuthSession).not.toHaveBeenCalled();
+            expect(result.error?.code).toBe('generic');
+        });
+
+        it('returns account_deleted when the profile is deactivated after token exchange', async () => {
+            mockSignInWithGoogleNative.mockResolvedValue({ type: 'success', idToken: 'g-id-token' });
+            mockIsAuthSessionAllowed.mockResolvedValueOnce(false);
+
+            const result = await signInWithGoogle();
+
+            expect(result.error?.code).toBe('account_deleted');
         });
     });
 

@@ -10,7 +10,11 @@ import { clearStaleAuthSession } from '../lib/authSessionLifecycle';
 import { clearNavigationState } from '../lib/navigationPersistence';
 import { isAuthSessionAllowed } from '../lib/auth';
 import { openOAuthSession } from '../lib/openOAuthSession';
-import { signOutNativeGoogle } from '../lib/googleSignInNative';
+import {
+  signOutNativeGoogle,
+  signInWithGoogleNative,
+  isNativeGoogleSignInEnabled,
+} from '../lib/googleSignInNative';
 import { APP_WEB_ORIGIN } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { useAppStore } from '../store';
@@ -231,7 +235,34 @@ function resolveOAuthBrowserResult(
   return handleAuthRedirectUrl(result.url);
 }
 
+async function signInWithGoogleNativeIos(): Promise<{ error: AuthError | null }> {
+  const result = await signInWithGoogleNative();
+
+  // User dismissed the account picker — silent no-op, matching Apple cancel handling.
+  if (result.type === 'cancelled') return { error: null };
+  if (result.type === 'error') return { error: toAuthError(result.error) };
+
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: result.idToken,
+  });
+  if (error) return { error: toAuthError(error) };
+
+  const allowed = await isAuthSessionAllowed();
+  if (!allowed) {
+    return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+  }
+
+  return { error: null };
+}
+
 export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
+  // iOS uses the native Google account-picker sheet (no browser). Android keeps the partial
+  // Chrome Custom Tab; web uses the standard browser OAuth redirect.
+  if (Platform.OS === 'ios' && isNativeGoogleSignInEnabled()) {
+    return signInWithGoogleNativeIos();
+  }
+
   if (Platform.OS === 'android' && __DEV__) {
     console.info('[Auth] Google OAuth in partial Chrome bottom sheet (~80%)');
   }
