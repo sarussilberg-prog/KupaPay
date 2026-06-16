@@ -15,6 +15,7 @@ export interface ExpoSendResult {
 interface ExpoTicket {
     status: 'ok' | 'error';
     id?: string;
+    message?: string;
     details?: { error?: string };
 }
 
@@ -34,12 +35,20 @@ export async function sendExpoPush(
     const json = (await res.json()) as { data?: ExpoTicket[] };
     const ticketIds: string[] = [];
     const invalidTokens: string[] = [];
+    const errors: string[] = [];
     (json.data ?? []).forEach((ticket, i) => {
         if (ticket.status === 'ok' && ticket.id) {
             ticketIds.push(ticket.id);
         } else if (ticket.details?.error === 'DeviceNotRegistered') {
             invalidTokens.push(messages[i].to);
+        } else if (ticket.status === 'error') {
+            errors.push(ticket.details?.error ?? ticket.message ?? 'unknown');
         }
     });
+    // Surface hard send errors (e.g. InvalidCredentials, MessageTooBig) so the delivery is
+    // marked failed instead of masquerading as 'sent' with no tickets.
+    if (ticketIds.length === 0 && errors.length > 0) {
+        throw new Error(`expo_push_errors: ${errors.join(', ')}`);
+    }
     return { ticketIds, invalidTokens };
 }

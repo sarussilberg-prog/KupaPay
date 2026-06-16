@@ -22,3 +22,19 @@ Deno.test('empty message list short-circuits', async () => {
     const res = await sendExpoPush([], fetch);
     assertEquals(res, { ticketIds: [], invalidTokens: [] });
 });
+
+Deno.test('throws when all tickets error (e.g. InvalidCredentials)', async () => {
+    const fakeFetch = ((_url: string | URL | Request, _init?: RequestInit) =>
+        Promise.resolve(new Response(JSON.stringify({
+            data: [{ status: 'error', message: 'no creds', details: { error: 'InvalidCredentials' } }],
+        }), { status: 200 }))) as typeof fetch;
+
+    let threw = false;
+    try {
+        await sendExpoPush([msg], fakeFetch);
+    } catch (e) {
+        threw = true;
+        assertEquals((e as Error).message, 'expo_push_errors: InvalidCredentials');
+    }
+    assertEquals(threw, true);
+});

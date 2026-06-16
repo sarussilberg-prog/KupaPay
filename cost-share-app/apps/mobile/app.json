@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "KupaPay",
-    "slug": "copay",
+    "slug": "kupapay",
     "scheme": "com.kupapay.mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -41,6 +41,7 @@
     },
     "android": {
       "package": "com.kupapay.mobile",
+      "googleServicesFile": "./google-services.json",
       "label": "KupaPay",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
@@ -156,7 +157,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "920bd760-9307-4aab-8126-bd38f86f45cd"
+        "projectId": "e4a625dc-b8f9-47da-9e9b-9dd4a4e370b0"
       }
     },
     "owner": "saussilberg"

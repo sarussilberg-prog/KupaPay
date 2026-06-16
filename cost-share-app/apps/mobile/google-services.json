@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1033818560268",
+    "project_id": "kupapay-14906",
+    "storage_bucket": "kupapay-14906.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033818560268:android:bd2289d2b2a64d1c365b29",
+        "android_client_info": {
+          "package_name": "com.kupapay.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSDwoeCEqSV3Vn_9JXPLO-WqPORy3xQ2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

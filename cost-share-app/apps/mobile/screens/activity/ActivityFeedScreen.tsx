@@ -147,8 +147,7 @@ export function ActivityFeedScreen() {
     // stays put after mark_activity_seen advances the live watermark to NOW.
     const [freezeWatermark, setFreezeWatermark] = useState<Date | null>(null);
     const canLoadMoreRef = useRef(false);
-    const { status, showBanner, promptSoftAsk } = usePushPermissionPrompt();
-    const [dismissed, setDismissed] = useState(false);
+    const { showBanner, mode: bannerMode, promptSoftAsk, dismiss: dismissBanner } = usePushPermissionPrompt();
 
     const activities: ActivityEvent[] = useMemo(
         () => data?.pages.flatMap(page => page.items) ?? [],
@@ -606,11 +605,11 @@ export function ActivityFeedScreen() {
                 </TouchableOpacity>
             </View>
 
-            {!dismissed && (status === 'undetermined' || showBanner) && (
+            {showBanner && (
                 <EnableNotificationsBanner
-                    mode={status === 'undetermined' ? 'soft-ask' : 'open-settings'}
+                    mode={bannerMode}
                     onEnable={() => void promptSoftAsk()}
-                    onDismiss={() => setDismissed(true)}
+                    onDismiss={() => void dismissBanner()}
                 />
             )}
 
