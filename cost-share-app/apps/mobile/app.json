@@ -146,7 +146,8 @@
         }
       ],
       "./plugins/withFastStackTransitions",
-      "./plugins/withReleaseNodeEnv"
+      "./plugins/withReleaseNodeEnv",
+      "./plugins/withModularHeaders"
     ],
     "extra": {
       "eas": {
