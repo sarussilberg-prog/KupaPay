@@ -270,7 +270,7 @@ CREATE POLICY "Users can delete expense splits" ON expense_splits
     );
 
 CREATE POLICY "Users can view settlements in their groups" ON settlements
-    FOR SELECT USING (public.is_group_member(group_id) AND deleted_at IS NULL);
+    FOR SELECT USING (public.is_group_member(group_id));
 CREATE POLICY "Users can create settlements in their groups" ON settlements
     FOR INSERT WITH CHECK (public.is_group_member(group_id));
 CREATE POLICY "Group members can update settlements" ON settlements
