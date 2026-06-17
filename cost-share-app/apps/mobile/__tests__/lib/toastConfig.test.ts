@@ -1,27 +1,37 @@
-import { toastTextStyles } from '../../lib/toastConfig';
+import { StyleSheet } from 'react-native';
+import { render } from '@testing-library/react-native';
+import { toastConfig } from '../../lib/toastConfig';
+import { useAppStore } from '../../store';
+import type { BaseToastProps } from 'react-native-toast-message';
 
-// Guards the toast RTL fix: on native, textAlign alone does not move the text —
-// the <Text> must be stretched to full width or Hebrew stays stuck to the left.
-describe('toastTextStyles', () => {
-    it('right-aligns and stretches for Hebrew (RTL)', () => {
-        const { text1, text2 } = toastTextStyles(true);
+type ToastType = keyof typeof toastConfig;
 
-        for (const line of [text1, text2]) {
-            expect(line.textAlign).toBe('right');
-            expect(line.writingDirection).toBe('rtl');
-            expect(line.alignSelf).toBe('stretch');
-            expect(line.width).toBe('100%');
-        }
+function renderToast(type: ToastType, language: 'en' | 'he') {
+    useAppStore.setState({ language });
+    return render(toastConfig[type]({ text1: 'כותרת', text2: 'פירוט' } as BaseToastProps));
+}
+
+// Guards the iOS RTL fix: toast text must render through <AppText> so Hebrew
+// right-aligns like the rest of the app. The library's raw <Text> doesn't
+// right-align Hebrew on iOS. <AppText> stamps writingDirection onto the text
+// style — if a future change swaps back to the library's <Text>, that signal
+// disappears and these tests fail.
+describe('toastConfig', () => {
+    afterEach(() => {
+        useAppStore.setState({ language: 'en' });
     });
 
-    it('left-aligns and stretches for English (LTR)', () => {
-        const { text1, text2 } = toastTextStyles(false);
+    it.each(['success', 'error', 'info', 'warning'] as const)(
+        'renders %s toast text right-to-left for Hebrew',
+        (type) => {
+            const { getByText } = renderToast(type, 'he');
+            expect(StyleSheet.flatten(getByText('כותרת').props.style).writingDirection).toBe('rtl');
+            expect(StyleSheet.flatten(getByText('פירוט').props.style).writingDirection).toBe('rtl');
+        },
+    );
 
-        for (const line of [text1, text2]) {
-            expect(line.textAlign).toBe('left');
-            expect(line.writingDirection).toBe('ltr');
-            expect(line.alignSelf).toBe('stretch');
-            expect(line.width).toBe('100%');
-        }
+    it('renders toast text left-to-right for English', () => {
+        const { getByText } = renderToast('success', 'en');
+        expect(StyleSheet.flatten(getByText('כותרת').props.style).writingDirection).toBe('ltr');
     });
 });
