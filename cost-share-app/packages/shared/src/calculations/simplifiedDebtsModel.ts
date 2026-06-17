@@ -182,7 +182,9 @@ function buildFriendBalances(
             name: profile.name,
             avatarUrl: profile.avatarUrl,
             isActive: true,
-            sharedGroupIds: [...(sharedGroupsByFriend.get(friendId) ?? [])].sort(),
+            sharedGroupIds: [...(sharedGroupsByFriend.get(friendId) ?? [])].sort(
+                (a, b) => a.localeCompare(b),
+            ),
             byCurrency,
         });
     });

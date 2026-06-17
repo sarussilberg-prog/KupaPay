@@ -285,7 +285,7 @@ function App() {
     const isPublicSupportPath =
       Platform.OS === 'web' &&
       typeof globalThis.location !== 'undefined' &&
-      globalThis.location.pathname.replace(/\/+$/, '') === '/support';
+      globalThis.location.pathname.replace(/\/{1,256}$/, '') === '/support';
 
     return (
       <SafeAreaProvider>

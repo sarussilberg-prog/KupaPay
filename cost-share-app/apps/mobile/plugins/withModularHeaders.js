@@ -19,7 +19,7 @@ function injectIntoPodfile(filePath) {
     const contents = fs.readFileSync(filePath, 'utf8');
     if (contents.includes(MARKER)) return;
     const updated = contents.replace(
-        /(^\s*use_expo_modules!\s*$\n)/m,
+        /(^[ \t]{0,16}use_expo_modules![ \t]{0,16}$\n)/m,
         `$1\n${BLOCK}`,
     );
     if (updated === contents) {
