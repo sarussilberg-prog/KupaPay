@@ -1,17 +1,20 @@
 /**
  * BalanceChip — small pill summarising a single group's net balance for the user.
  * Variants by sign: positive = owed (green), negative = owe (red), zero/undefined = settled (gray).
- * The `display` prop carries the amount already resolved to the user's default currency
- * (with a `conversionFailed` fallback to the group's own currency when FX is unavailable).
+ *
+ * Consumes a `GroupRollup` from the canonical simplifier output. The primary
+ * entry (largest |net|) is rendered as the chip; when `others` is non-empty we
+ * append a small "+N" suffix so the row signals more currencies exist without
+ * growing taller.
  */
 
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { GroupBalanceDisplay } from '@cost-share/shared';
+import { GroupRollup } from '@cost-share/shared';
 
 interface BalanceChipProps {
-    display?: GroupBalanceDisplay;
+    rollup?: GroupRollup;
     /** Currency to use in the "settled" / no-data state. Usually the group's default currency. */
     defaultCurrency: string;
 }
@@ -20,13 +23,16 @@ function formatAmount(amount: number, currency: string): string {
     return `${currency} ${Math.abs(amount).toFixed(2)}`;
 }
 
-export function BalanceChip({ display, defaultCurrency }: BalanceChipProps) {
+export function BalanceChip({ rollup, defaultCurrency }: BalanceChipProps) {
     const { t } = useTranslation();
-    const net = display?.net ?? 0;
+    const primary = rollup?.primary;
+    const extraCount = (rollup?.others ?? []).filter(
+        o => Math.abs(o.net) >= 0.01,
+    ).length;
 
-    if (!display || Math.abs(net) < 0.01) {
+    if (!primary || Math.abs(primary.net) < 0.01) {
         return (
-            <View className="rounded-full bg-gray-100 px-2.5 py-1 max-w-[120px]">
+            <View className="rounded-full bg-gray-100 px-2.5 py-1 max-w-[140px]">
                 <Text
                     className="text-xs font-medium text-gray-500"
                     numberOfLines={1}
@@ -38,10 +44,10 @@ export function BalanceChip({ display, defaultCurrency }: BalanceChipProps) {
         );
     }
 
-    const isOwed = net > 0;
+    const isOwed = primary.net > 0;
     const containerClass = isOwed
-        ? 'rounded-full bg-green-50 px-2.5 py-1 max-w-[120px]'
-        : 'rounded-full bg-red-50 px-2.5 py-1 max-w-[120px]';
+        ? 'rounded-full bg-green-50 px-2.5 py-1 max-w-[140px] flex-row items-center'
+        : 'rounded-full bg-red-50 px-2.5 py-1 max-w-[140px] flex-row items-center';
     const textClass = isOwed
         ? 'text-xs font-semibold text-green-600'
         : 'text-xs font-semibold text-red-500';
@@ -50,8 +56,18 @@ export function BalanceChip({ display, defaultCurrency }: BalanceChipProps) {
     return (
         <View className={containerClass}>
             <Text className={textClass} numberOfLines={1} ellipsizeMode="tail">
-                {`${prefix}${formatAmount(net, display.currency || defaultCurrency)}`}
+                {`${prefix}${formatAmount(primary.net, primary.currency || defaultCurrency)}`}
             </Text>
+            {extraCount > 0 && (
+                <Text
+                    className={`ml-1 text-[10px] font-semibold ${
+                        isOwed ? 'text-green-600/70' : 'text-red-500/70'
+                    }`}
+                    testID="balance-chip-others"
+                >
+                    {`+${extraCount}`}
+                </Text>
+            )}
         </View>
     );
 }
