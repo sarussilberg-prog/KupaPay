@@ -20,6 +20,7 @@ import { handleError } from '../lib/handleError';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { queryClient } from '../lib/queryClient';
+import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
 import { queryKeys } from '../hooks/queries/keys';
 import {
     expenseSplitValidationMessage,
@@ -246,6 +247,7 @@ export async function updateExpense(id: string, dto: UpdateExpenseDto): Promise<
                 ? list.map(e => (e.id === id ? merged : e))
                 : [merged, ...list];
         });
+        invalidateBalanceCaches(groupId);
         showSuccessToast('expenses.expenseUpdated');
         return baseExpense;
     } catch (error) {
@@ -280,6 +282,7 @@ export async function deleteExpense(id: string): Promise<boolean> {
         queryClient.setQueryData<ExpenseWithSplits[]>(queryKeys.groupExpenses(groupId), (prev) =>
             (prev ?? []).filter(e => e.id !== id),
         );
+        invalidateBalanceCaches(groupId);
     }
     showSuccessMessage('expenses.expenseDeleted');
     return true;

@@ -15,42 +15,10 @@ import * as Sentry from '@sentry/react-native';
 import type { ExpenseWithSplits } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getExpenseWithSplitsById } from '../services/expenses.service';
-import { fetchBalanceSummary } from '../services/users.service';
 import { queryClient } from '../lib/queryClient';
+import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
-
-const BALANCE_REFETCH_DEBOUNCE_MS = 500;
-const balanceTimers = new Map<string, ReturnType<typeof setTimeout>>();
-
-function scheduleBalanceRefetch(groupId: string): void {
-    const existing = balanceTimers.get(groupId);
-    if (existing) clearTimeout(existing);
-    const timer = setTimeout(() => {
-        balanceTimers.delete(groupId);
-        void fetchBalanceSummary();
-    }, BALANCE_REFETCH_DEBOUNCE_MS);
-    balanceTimers.set(groupId, timer);
-}
-
-function invalidateGroupDerivedCaches(groupId: string): void {
-    void queryClient.invalidateQueries({
-        queryKey: queryKeys.groupSettlements(groupId),
-    });
-    void queryClient.invalidateQueries({
-        queryKey: queryKeys.groupPairwiseDebts(groupId),
-    });
-    void queryClient.invalidateQueries({
-        queryKey: queryKeys.groupContributions(groupId),
-    });
-    void queryClient.invalidateQueries({
-        queryKey: queryKeys.groupSimplifiedDebtsByCurrency(groupId),
-    });
-    void queryClient.invalidateQueries({
-        queryKey: queryKeys.dashboard,
-    });
-    scheduleBalanceRefetch(groupId);
-}
 
 function removeExpenseFromCache(groupId: string, expenseId: string): void {
     queryClient.setQueryData<ExpenseWithSplits[]>(
@@ -96,7 +64,7 @@ export function useGroupExpensesRealtime(groupId: string | undefined | null): vo
                             if (payload.eventType === 'DELETE' && payload.old) {
                                 const oldId = payload.old.id as string | undefined;
                                 if (oldId) removeExpenseFromCache(groupId, oldId);
-                                invalidateGroupDerivedCaches(groupId);
+                                invalidateBalanceCaches(groupId);
                                 return;
                             }
 
@@ -111,18 +79,18 @@ export function useGroupExpensesRealtime(groupId: string | undefined | null): vo
 
                                 if (isDeleted) {
                                     removeExpenseFromCache(groupId, id);
-                                    invalidateGroupDerivedCaches(groupId);
+                                    invalidateBalanceCaches(groupId);
                                     return;
                                 }
 
                                 const expense = await getExpenseWithSplitsById(id);
                                 if (!expense) {
-                                    invalidateGroupDerivedCaches(groupId);
+                                    invalidateBalanceCaches(groupId);
                                     return;
                                 }
 
                                 upsertExpenseInCache(groupId, expense);
-                                invalidateGroupDerivedCaches(groupId);
+                                invalidateBalanceCaches(groupId);
                             }
                         } catch (err) {
                             Sentry.captureException(err, {
