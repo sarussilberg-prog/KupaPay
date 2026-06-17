@@ -11,7 +11,7 @@ import {
     SARUS,
     BLALA,
     PARIS,
-} from './fixtures/simplifiedInputs';
+} from '../../__fixtures__/simplifiedInputs';
 
 describe('deriveSimplifiedDebts', () => {
     describe('all_settled', () => {

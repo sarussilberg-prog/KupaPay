@@ -278,7 +278,9 @@
         "summary": {
             "youAreOwed": "You have <1>{{amount}}</1> to your credit",
             "youOwe": "You owe <1>{{amount}}</1>",
-            "noOpenPayments": "No open payments"
+            "noOpenPayments": "No open payments",
+            "showMore": "Show {{count}} more",
+            "showLess": "Show less"
         },
         "hero": {
             "spentTogether": "Spent together",

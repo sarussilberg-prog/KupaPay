@@ -8,7 +8,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -150,9 +152,17 @@ export function EditPayerSplitSheet({
 
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
-            <View style={styles.backdrop}>
-                <Pressable style={styles.scrim} onPress={onCancel} testID="edit-payer-split-scrim" />
-                <View style={styles.sheet}>
+            <KeyboardAvoidingView
+                style={styles.kavRoot}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
+                <View style={styles.backdrop}>
+                    <Pressable
+                        style={styles.scrim}
+                        onPress={onCancel}
+                        testID="edit-payer-split-scrim"
+                    />
+                    <View style={styles.sheet}>
                     <View style={styles.grabber} />
                     <View style={styles.titleRow}>
                         <Text style={styles.title}>{t('expenses.v2.whoAndHow')}</Text>
@@ -172,7 +182,11 @@ export function EditPayerSplitSheet({
                         </TouchableOpacity>
                     </View>
 
-                    <ScrollView contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
+                    <ScrollView
+                        contentContainerStyle={{ paddingBottom: 8 }}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
                         {/* Section: Paid by */}
                         <Text style={styles.eyebrow}>{t('expenses.v2.sectionPaidBy')}</Text>
                         <ScrollView
@@ -298,11 +312,15 @@ export function EditPayerSplitSheet({
                     </ScrollView>
                 </View>
             </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 }
 
 const styles = StyleSheet.create({
+    kavRoot: {
+        flex: 1,
+    },
     backdrop: {
         flex: 1,
         backgroundColor: 'rgba(15, 23, 42, 0.45)',

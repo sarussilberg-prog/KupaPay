@@ -31,7 +31,10 @@ export {
     UnbalancedLedgerError,
 } from './simplifyDebts';
 
-export { deriveSimplifiedDebts } from './simplifiedDebtsModel';
+export {
+    deriveSimplifiedDebts,
+    deriveBalanceSummary,
+} from './simplifiedDebtsModel';
 
 export {
     calculateGroupTotalSpent,

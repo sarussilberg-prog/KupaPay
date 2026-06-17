@@ -12,13 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
-import { FriendBalanceSummary } from '@cost-share/shared';
+import { deriveBalanceSummary, FriendBalanceSummary } from '@cost-share/shared';
 import { useAppStore } from '../../store';
-import { useDashboardQuery } from '../../hooks/queries/useDashboardQuery';
 import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
 import { useProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
 import { collectProfileFxCurrencies } from '../../lib/collectProfileFxCurrencies';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
+import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { queryKeys } from '../../hooks/queries/keys';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/EmptyState';
@@ -102,7 +102,7 @@ function FriendListSkeleton({ rows = 3 }: { rows?: number }) {
 type ProfileDashboardBodyProps = {
     balanceSummary: ReturnType<typeof useProfileBalanceSummary>['summary'];
     conversion: ReturnType<typeof useProfileBalanceSummary>['conversion'];
-    dashboard: NonNullable<ReturnType<typeof useDashboardQuery>['data']>;
+    stats: { activeGroupsCount: number; closedGroupsCount: number };
     pendingCount: number;
     isRtl: boolean;
     onNavigateGroups: (params: { balanceState: 'unsettled' | 'settled' }) => void;
@@ -113,7 +113,7 @@ type ProfileDashboardBodyProps = {
 const ProfileDashboardBody = React.memo(function ProfileDashboardBody({
     balanceSummary,
     conversion,
-    dashboard,
+    stats,
     pendingCount,
     isRtl,
     onNavigateGroups,
@@ -158,22 +158,24 @@ const ProfileDashboardBody = React.memo(function ProfileDashboardBody({
                 />
             </TouchableOpacity>
 
-            <BalanceHeroCard
-                summary={balanceSummary ?? dashboard.balanceSummary}
-                conversion={conversion}
-            />
+            {balanceSummary ? (
+                <BalanceHeroCard
+                    summary={balanceSummary}
+                    conversion={conversion}
+                />
+            ) : null}
 
             <StatGroup>
                 <StatTile
                     label={t('dashboard.activeGroups')}
-                    value={dashboard.stats.activeGroupsCount}
+                    value={stats.activeGroupsCount}
                     onPress={() => onNavigateGroups({ balanceState: 'unsettled' })}
                     testID="stat-active"
                 />
                 <StatDivider />
                 <StatTile
                     label={t('dashboard.closedGroups')}
-                    value={dashboard.stats.closedGroupsCount}
+                    value={stats.closedGroupsCount}
                     onPress={() => onNavigateGroups({ balanceState: 'settled' })}
                     testID="stat-closed"
                 />
@@ -188,34 +190,73 @@ export function ProfileScreen() {
     const queryClient = useQueryClient();
     const currentUser = useAppStore((s) => s.currentUser);
 
-    const { data: dashboard, isLoading, refetch, isError } = useDashboardQuery();
     const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+    const { data: simplified, isLoading: isLoadingSimplified } = useSimplifiedDebts();
+    const groupsQuery = useGroupsQuery();
+    const isLoading = isLoadingSimplified || groupsQuery.isLoading;
+    const isError = groupsQuery.isError;
 
     const baseCurrency = useMemo(
+        () => currentUser?.defaultCurrency ?? 'ILS',
+        [currentUser?.defaultCurrency],
+    );
+
+    const rawBalanceSummary = useMemo(
         () =>
-            dashboard?.balanceSummary.defaultCurrency ??
-            currentUser?.defaultCurrency ??
-            'ILS',
-        [dashboard, currentUser?.defaultCurrency],
+            simplified && currentUser?.id
+                ? deriveBalanceSummary(simplified, currentUser.id, baseCurrency)
+                : undefined,
+        [simplified, currentUser?.id, baseCurrency],
+    );
+
+    const friendsList = useMemo(
+        () => simplified ? [...simplified.friendBalances.values()] : [],
+        [simplified],
     );
 
     const fxSymbols = useMemo(
         () =>
             collectProfileFxCurrencies(
-                dashboard?.balanceSummary,
-                dashboard?.friends,
+                rawBalanceSummary,
+                friendsList.map(f => ({
+                    userId: f.userId,
+                    name: f.name,
+                    avatarUrl: f.avatarUrl ?? undefined,
+                    isActive: f.isActive,
+                    sharedGroupIds: f.sharedGroupIds,
+                    byCurrency: f.byCurrency.map(c => ({
+                        currency: c.currency,
+                        netBalance: c.net,
+                    })),
+                })),
                 baseCurrency,
             ),
-        [dashboard, baseCurrency],
+        [rawBalanceSummary, friendsList, baseCurrency],
     );
 
     const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
 
     const { summary: balanceSummary, conversion } = useProfileBalanceSummary(
-        dashboard?.balanceSummary,
+        rawBalanceSummary,
         ratesQuery,
     );
-    const { data: simplified } = useSimplifiedDebts();
+
+    const stats = useMemo(() => {
+        const allGroups = groupsQuery.data ?? [];
+        const activeIds = new Set<string>();
+        simplified?.groupRollups.forEach((_, gid) => activeIds.add(gid));
+        return {
+            activeGroupsCount: activeIds.size,
+            closedGroupsCount: Math.max(allGroups.length - activeIds.size, 0),
+        };
+    }, [simplified, groupsQuery.data]);
+
+    const refetch = useCallback(async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: queryKeys.simplifiedDebts }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.groups }),
+        ]);
+    }, [queryClient]);
     const incomingQ = useIncomingFriendRequestsQuery();
     const pendingCount = incomingQ.data?.length ?? 0;
     const friendsQ = useFriendsQuery();
@@ -269,8 +310,8 @@ export function ProfileScreen() {
 
     const isRtl = useRtlLayout();
 
-    const showLoadingSkeletons = isLoading && !dashboard;
-    const showError = isError || (!isLoading && !dashboard);
+    const showLoadingSkeletons = isLoading && !simplified;
+    const showError = isError && !simplified;
 
     const friends = useMemo<FriendBalanceSummary[]>(
         () => simplified
@@ -306,11 +347,11 @@ export function ProfileScreen() {
                         <FriendListSkeleton />
                     </>
                 ) : null}
-                {dashboard && !showError ? (
+                {simplified && !showError ? (
                     <ProfileDashboardBody
                         balanceSummary={balanceSummary}
                         conversion={conversion}
-                        dashboard={dashboard}
+                        stats={stats}
                         pendingCount={pendingCount}
                         isRtl={isRtl}
                         onNavigateGroups={handleNavigateGroups}
@@ -324,7 +365,8 @@ export function ProfileScreen() {
             balanceSummary,
             conversion,
             currentUser,
-            dashboard,
+            simplified,
+            stats,
             friendsCount,
             handleEditProfile,
             handleNavigateFriends,
@@ -394,7 +436,7 @@ export function ProfileScreen() {
             </View>
             <FlatList
                 className="flex-1"
-                data={dashboard && !showError ? friends : []}
+                data={simplified && !showError ? friends : []}
                 keyExtractor={(item) => item.userId}
                 renderItem={renderFriendRow}
                 ListHeaderComponent={listHeader}

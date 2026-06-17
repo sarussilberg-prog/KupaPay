@@ -6,7 +6,6 @@ import {
     Settlement,
     CreateSettlementDto,
     UpdateSettlementDto,
-    PairwiseDebt,
 } from '@cost-share/shared';
 import { settlementFromRow } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
@@ -139,24 +138,6 @@ export async function deleteSettlement(id: string): Promise<boolean> {
             extra: { settlementId: id },
         });
         return false;
-    }
-}
-
-export async function fetchGroupPairwiseDebts(groupId: string): Promise<PairwiseDebt[]> {
-    try {
-        const { data, error } = await supabase.rpc('get_group_pairwise_debts', {
-            p_group_id: groupId,
-        });
-        if (error) throw error;
-        return (data ?? []).map((row: Record<string, unknown>) => ({
-            fromUserId: row.from_user_id as string,
-            toUserId: row.to_user_id as string,
-            currency: row.currency as string,
-            amount: Number(row.amount),
-        }));
-    } catch (error) {
-        console.error('Failed to fetch pairwise debts:', error);
-        return [];
     }
 }
 

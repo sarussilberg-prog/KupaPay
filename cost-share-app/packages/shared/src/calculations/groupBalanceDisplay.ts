@@ -1,4 +1,4 @@
-import type { GroupBalance } from '../types';
+import type { GroupBalance, GroupBalanceOther } from '../types';
 import { convertToBaseCurrency, type RatesFromBase } from './fxConversion';
 
 export type GroupBalanceDisplay = {
@@ -12,8 +12,55 @@ export type GroupBalanceDisplay = {
     conversionFailed?: boolean;
 };
 
+/** Primary + secondary currency rows resolved for display, for a single group. */
+export type GroupBalanceDisplayBundle = {
+    primary: GroupBalanceDisplay;
+    others: GroupBalanceDisplay[];
+};
+
 function roundMoney(value: number): number {
     return Number(value.toFixed(2));
+}
+
+function resolveSingle(
+    net: number,
+    sourceCurrency: string,
+    defaultCurrency: string,
+    ratesFromBase?: RatesFromBase,
+): GroupBalanceDisplay {
+    if (sourceCurrency === defaultCurrency) {
+        return { net, currency: defaultCurrency, isConverted: false };
+    }
+    if (Math.abs(net) < 0.01) {
+        return { net: 0, currency: defaultCurrency, isConverted: false };
+    }
+    if (!ratesFromBase) {
+        return {
+            net,
+            currency: sourceCurrency,
+            isConverted: false,
+            conversionFailed: true,
+        };
+    }
+    const converted = convertToBaseCurrency(
+        Math.abs(net),
+        sourceCurrency,
+        defaultCurrency,
+        ratesFromBase,
+    );
+    if (converted === null) {
+        return {
+            net,
+            currency: sourceCurrency,
+            isConverted: false,
+            conversionFailed: true,
+        };
+    }
+    return {
+        net: roundMoney(net >= 0 ? converted : -converted),
+        currency: defaultCurrency,
+        isConverted: true,
+    };
 }
 
 /**
@@ -27,43 +74,33 @@ export function resolveGroupBalanceDisplay(
     ratesFromBase?: RatesFromBase,
 ): GroupBalanceDisplay | undefined {
     if (!balance) return undefined;
+    return resolveSingle(balance.net, balance.currency, defaultCurrency, ratesFromBase);
+}
 
-    if (balance.currency === defaultCurrency) {
-        return { net: balance.net, currency: defaultCurrency, isConverted: false };
-    }
-
-    if (Math.abs(balance.net) < 0.01) {
-        return { net: 0, currency: defaultCurrency, isConverted: false };
-    }
-
-    if (!ratesFromBase) {
-        return {
-            net: balance.net,
-            currency: balance.currency,
-            isConverted: false,
-            conversionFailed: true,
-        };
-    }
-
-    const converted = convertToBaseCurrency(
-        Math.abs(balance.net),
+/**
+ * Resolve a group's primary balance plus any secondary per-currency balances
+ * for display. The primary entry is FX-converted to `defaultCurrency` when a
+ * rate is available; each `others` entry is resolved independently with the
+ * same rules.
+ */
+export function resolveGroupBalanceDisplayBundle(
+    balance: GroupBalance | undefined,
+    defaultCurrency: string,
+    ratesFromBase?: RatesFromBase,
+): GroupBalanceDisplayBundle | undefined {
+    if (!balance) return undefined;
+    const primary = resolveSingle(
+        balance.net,
         balance.currency,
         defaultCurrency,
         ratesFromBase,
     );
-    if (converted === null) {
-        return {
-            net: balance.net,
-            currency: balance.currency,
-            isConverted: false,
-            conversionFailed: true,
-        };
-    }
-    return {
-        net: roundMoney(balance.net >= 0 ? converted : -converted),
-        currency: defaultCurrency,
-        isConverted: true,
-    };
+    const others: GroupBalanceDisplay[] = (balance.others ?? [])
+        .map((o: GroupBalanceOther) =>
+            resolveSingle(o.net, o.currency, defaultCurrency, ratesFromBase),
+        )
+        .filter(d => Math.abs(d.net) >= 0.01);
+    return { primary, others };
 }
 
 /** Foreign currencies (vs. `defaultCurrency`) across all groups that have a non-zero net. */
@@ -73,9 +110,15 @@ export function collectGroupFxCurrencies(
 ): string[] {
     const set = new Set<string>();
     for (const b of balances) {
-        if (!b || b.currency === defaultCurrency) continue;
-        if (Math.abs(b.net) < 0.01) continue;
-        set.add(b.currency);
+        if (!b) continue;
+        if (b.currency !== defaultCurrency && Math.abs(b.net) >= 0.01) {
+            set.add(b.currency);
+        }
+        for (const o of b.others ?? []) {
+            if (o.currency !== defaultCurrency && Math.abs(o.net) >= 0.01) {
+                set.add(o.currency);
+            }
+        }
     }
     return [...set].sort((a, b) => a.localeCompare(b));
 }
@@ -89,15 +132,22 @@ export function collectGroupListFxBases(
     defaultCurrencyByGroupId: Record<string, string | undefined>,
 ): Map<string, string[]> {
     const byBase = new Map<string, Set<string>>();
-    for (const b of balances) {
-        const base = defaultCurrencyByGroupId[b.groupId];
-        if (!base || b.currency === base || Math.abs(b.net) < 0.01) continue;
+    const add = (base: string, currency: string, net: number) => {
+        if (currency === base || Math.abs(net) < 0.01) return;
         let set = byBase.get(base);
         if (!set) {
             set = new Set();
             byBase.set(base, set);
         }
-        set.add(b.currency);
+        set.add(currency);
+    };
+    for (const b of balances) {
+        const base = defaultCurrencyByGroupId[b.groupId];
+        if (!base) continue;
+        add(base, b.currency, b.net);
+        for (const o of b.others ?? []) {
+            add(base, o.currency, o.net);
+        }
     }
     const out = new Map<string, string[]>();
     byBase.forEach((set, base) => {

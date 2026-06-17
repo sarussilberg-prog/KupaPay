@@ -1,4 +1,5 @@
 import {
+    BalanceSummary,
     FriendBalanceSummary,
     GroupRollup,
     SimplifiedDebts,
@@ -190,4 +191,55 @@ function buildFriendBalances(
 
 function round2(n: number): number {
     return Number(n.toFixed(2));
+}
+
+/**
+ * Derive the profile-screen BalanceSummary shape from canonical user transfers.
+ *
+ * For each currency the user has at least one transfer in:
+ *   owed       = Σ amount where user is fromUserId (i.e. user owes)
+ *   owedToUser = Σ amount where user is toUserId   (i.e. user is owed)
+ *
+ * The totalOwed / totalOwedToUser scalars are intentionally null; the profile
+ * hook (`useProfileBalanceSummary`) re-derives them in the user's default
+ * currency with FX so the displayed amount + currency tag stay in lockstep.
+ */
+export function deriveBalanceSummary(
+    simplified: SimplifiedDebts,
+    currentUserId: string,
+    defaultCurrency: string,
+): BalanceSummary {
+    const owedByCurrency = new Map<string, number>();
+    const owedToUserByCurrency = new Map<string, number>();
+    for (const t of simplified.userTransfers) {
+        if (t.fromUserId === currentUserId) {
+            owedByCurrency.set(
+                t.currency,
+                (owedByCurrency.get(t.currency) ?? 0) + t.amount,
+            );
+        } else if (t.toUserId === currentUserId) {
+            owedToUserByCurrency.set(
+                t.currency,
+                (owedToUserByCurrency.get(t.currency) ?? 0) + t.amount,
+            );
+        }
+    }
+    const currencies = new Set([
+        ...owedByCurrency.keys(),
+        ...owedToUserByCurrency.keys(),
+    ]);
+    const byCurrency = [...currencies]
+        .map(currency => ({
+            currency,
+            owed: round2(owedByCurrency.get(currency) ?? 0),
+            owedToUser: round2(owedToUserByCurrency.get(currency) ?? 0),
+        }))
+        .filter(r => r.owed >= 0.01 || r.owedToUser >= 0.01)
+        .sort((a, b) => a.currency.localeCompare(b.currency));
+    return {
+        totalOwed: null,
+        totalOwedToUser: null,
+        defaultCurrency,
+        byCurrency,
+    };
 }
