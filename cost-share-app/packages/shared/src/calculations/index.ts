@@ -19,7 +19,9 @@ export {
     collectGroupFxCurrencies,
     collectGroupListFxBases,
     resolveGroupBalanceDisplay,
+    resolveGroupBalanceDisplayBundle,
     type GroupBalanceDisplay,
+    type GroupBalanceDisplayBundle,
 } from './groupBalanceDisplay';
 
 export {
@@ -28,6 +30,8 @@ export {
     simplifyDebtsGreedy,
     UnbalancedLedgerError,
 } from './simplifyDebts';
+
+export { deriveSimplifiedDebts } from './simplifiedDebtsModel';
 
 export {
     calculateGroupTotalSpent,
