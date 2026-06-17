@@ -46,8 +46,8 @@ export function parseIncomingUrl(rawUrl: string): InviteLink {
         }
     }
 
-    // com.copay.mobile://invite/i/<token> | /g/<token>
-    if (parsed.protocol === 'com.copay.mobile:' && parsed.hostname === 'invite') {
+    // com.kupapay.mobile://invite/i/<token> | /g/<token>
+    if (parsed.protocol === 'com.kupapay.mobile:' && parsed.hostname === 'invite') {
         const m = parsed.pathname.match(/^\/(i|g)\/([^/?#]+)\/?$/);
         if (m && TOKEN_RE.test(m[2])) {
             return m[1] === 'i'

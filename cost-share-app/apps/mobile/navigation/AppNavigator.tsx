@@ -23,6 +23,7 @@ import { AppIcon, AppIconName } from '../components/AppIcon';
 import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
+import { usePushNotificationListeners } from '../hooks/usePushNotificationListeners';
 import { prefetchGroupsList } from '../hooks/queries/prefetchGroupsList';
 import { prefetchProfileWarmup } from '../hooks/queries/prefetchProfileWarmup';
 import { prefetchAddExpensePrerequisitesForAllGroups } from '../hooks/queries/prefetchAddExpenseForAllGroups';
@@ -70,14 +71,17 @@ import { ActivityFeedScreen } from '../screens/activity/ActivityFeedScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
 import { SettingsScreen } from '../screens/profile/SettingsScreen';
+import { ContactUsScreen } from '../screens/profile/ContactUsScreen';
 import { FriendsScreen } from '../screens/profile/FriendsScreen';
 import { FindFriendsScreen } from '../screens/profile/FindFriendsScreen';
+import { NotificationSettingsScreen } from '../screens/profile/NotificationSettingsScreen';
 import { AdminPortalScreen } from '../screens/admin/AdminPortalScreen';
 import { AdminOnboardingPreviewScreen } from '../screens/admin/AdminOnboardingPreviewScreen';
 import { AdminDeletedUsersScreen } from '../screens/admin/AdminDeletedUsersScreen';
 import { AdminErrorsScreen } from '../screens/admin/AdminErrorsScreen';
 import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen';
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
+import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -325,6 +329,7 @@ export function AppNavigator() {
     const isRtl = useRtlLayout();
     useInviteRedemption();
     usePendingNavigationFlush();
+    usePushNotificationListeners();
 
     useEffect(() => {
         prefetchGroupsList();
@@ -356,6 +361,16 @@ export function AppNavigator() {
                 options={{ title: t('settings.title') }}
             />
             <RootStack.Screen
+                name="NotificationSettings"
+                component={NotificationSettingsScreen}
+                options={{ title: t('notifications.title') }}
+            />
+            <RootStack.Screen
+                name="ContactUs"
+                component={ContactUsScreen}
+                options={{ title: t('settings.contactUs') }}
+            />
+            <RootStack.Screen
                 name="AdminPortal"
                 component={AdminPortalScreen}
                 options={{ title: t('admin.portal.title') }}
@@ -374,6 +389,11 @@ export function AppNavigator() {
                 name="AdminErrors"
                 component={AdminErrorsScreen}
                 options={{ title: t('admin.errors.screenTitle') }}
+            />
+            <RootStack.Screen
+                name="AdminSupportMessages"
+                component={AdminSupportMessagesScreen}
+                options={{ title: t('admin.supportMessages.title') }}
             />
             <RootStack.Screen
                 name="AdminErrorDetail"

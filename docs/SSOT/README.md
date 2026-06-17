@@ -1,4 +1,4 @@
-# SSOT — Single Source of Truth (CoPay)
+# SSOT — Single Source of Truth (KupaPay)
 
 **Product:** Shared expense / cost-splitting app (Splitwise-like).  
 **Monorepo:** `cost-share-app/` (mobile, web, shared, Supabase).  
@@ -43,7 +43,7 @@
 ## Repo map (quick)
 
 ```
-copay/ (repo folder may still be named `kupa` locally)
+kupapay/ (repo folder may still be named `kupa` locally)
 ├── docs/SSOT/
 ├── DATABASE_ARCHITECTURE.md
 └── cost-share-app/

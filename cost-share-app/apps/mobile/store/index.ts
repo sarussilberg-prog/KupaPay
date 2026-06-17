@@ -3,13 +3,7 @@ import { persist, type PersistStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SuperJSON from 'superjson';
 import { Session } from '@supabase/supabase-js';
-import {
-    User,
-    BalanceSummaryRow,
-    GroupBalance,
-    BalanceSummaryResponse,
-    PendingInvite,
-} from '@cost-share/shared';
+import { User, PendingInvite } from '@cost-share/shared';
 
 interface AppState {
     // Auth state
@@ -19,11 +13,6 @@ interface AppState {
     // User state
     currentUser: User | null;
     setCurrentUser: (user: User | null) => void;
-
-    // Balance summary state
-    balanceSummary: BalanceSummaryRow[];
-    groupBalances: Record<string, GroupBalance>;
-    setBalanceSummary: (payload: BalanceSummaryResponse) => void;
 
     // Language state
     language: 'en' | 'he';
@@ -37,6 +26,7 @@ interface AppState {
     pendingNavigation:
         | { target: 'friends' }
         | { target: 'groupDetail'; groupId: string }
+        | { target: 'groupsList' }
         | null;
     setPendingNavigation: (
         nav: AppState['pendingNavigation'],
@@ -68,21 +58,6 @@ export const useAppStore = create<AppState>()(
             // User state
             currentUser: null,
             setCurrentUser: (user) => set({ currentUser: user }),
-
-            // Balance summary state
-            balanceSummary: [],
-            groupBalances: {},
-            setBalanceSummary: (payload) =>
-                set({
-                    balanceSummary: payload.summary,
-                    groupBalances: payload.byGroup.reduce<Record<string, GroupBalance>>(
-                        (acc, row) => {
-                            acc[row.groupId] = row;
-                            return acc;
-                        },
-                        {},
-                    ),
-                }),
 
             // Language state
             language: 'en',

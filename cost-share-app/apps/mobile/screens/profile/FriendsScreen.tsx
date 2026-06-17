@@ -14,7 +14,7 @@ import {
     Pressable,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { showSuccessMessage } from '../../lib/appToast';
 import { handleError } from '../../lib/handleError';
 import { Text } from '../../components/AppText';
@@ -48,11 +48,38 @@ export function FriendsScreen() {
     const [confirmRemove, setConfirmRemove] = useState<User | null>(null);
     const [actionsFor, setActionsFor] = useState<User | null>(null);
 
-    const refreshing = friendsQ.isRefetching || incomingQ.isRefetching;
-    const onRefresh = useCallback(() => {
-        void friendsQ.refetch();
-        void incomingQ.refetch();
+    // Pull-to-refresh spinner state is local — we don't bind it to
+    // `isRefetching`, because background refetches (e.g. on screen focus)
+    // would otherwise flash the spinner even when the user didn't pull.
+    const [manualRefreshing, setManualRefreshing] = useState(false);
+    const onRefresh = useCallback(async () => {
+        setManualRefreshing(true);
+        try {
+            await Promise.all([friendsQ.refetch(), incomingQ.refetch()]);
+        } finally {
+            setManualRefreshing(false);
+        }
     }, [friendsQ, incomingQ]);
+
+    // Refetch both lists every time the screen gains focus so freshly-changed
+    // server state appears immediately:
+    //  - incoming requests: a new request that arrived while the screen was
+    //    not mounted (e.g. user tapped the push notification while the
+    //    screen was already mounted in the stack).
+    //  - friends: a newly-formed friendship after the other party accepted
+    //    our outgoing request. Realtime invalidates the cache but the
+    //    queryClient default `refetchOnMount: false` + `staleTime: 60s`
+    //    would otherwise serve the pre-accept list until manual pull-to-refresh.
+    // Runs silently — `manualRefreshing` stays false so the RefreshControl
+    // spinner doesn't appear.
+    const incomingRefetch = incomingQ.refetch;
+    const friendsRefetch = friendsQ.refetch;
+    useFocusEffect(
+        useCallback(() => {
+            void incomingRefetch();
+            void friendsRefetch();
+        }, [incomingRefetch, friendsRefetch]),
+    );
 
     const handleAccept = useCallback(
         async (req: FriendRequest) => {
@@ -127,7 +154,7 @@ export function FriendsScreen() {
                 contentContainerStyle={{ paddingVertical: 12 }}
                 refreshControl={
                     <RefreshControl
-                        refreshing={refreshing}
+                        refreshing={manualRefreshing}
                         onRefresh={onRefresh}
                         tintColor={colors.primary}
                     />

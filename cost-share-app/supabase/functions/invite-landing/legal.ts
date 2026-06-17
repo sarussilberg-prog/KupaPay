@@ -8,7 +8,7 @@ type Locale = 'he' | 'en';
 type Slug = 'privacy' | 'terms';
 
 const SUPPORT_EMAIL =
-    Deno.env.get('COPAY_SUPPORT_EMAIL') ?? Deno.env.get('KUPAY_SUPPORT_EMAIL') ?? Deno.env.get('KUPA_SUPPORT_EMAIL') ?? 'sarussilberg@gmail.com';
+    Deno.env.get('KUPAPAY_SUPPORT_EMAIL') ?? Deno.env.get('KUPAY_SUPPORT_EMAIL') ?? Deno.env.get('KUPA_SUPPORT_EMAIL') ?? 'sarussilberg@gmail.com';
 
 interface LegalRow {
     slug: Slug;
@@ -68,14 +68,14 @@ function legalShell({ title, locale, body }: { title: string; locale: Locale; bo
 </head>
 <body>
 <div class="wrap">
-  <header><a href="https://kupa.pro/">KupaPay</a></header>
+  <header><a href="https://kupa-pay.com/">KupaPay</a></header>
   ${body}
   <footer>
-    <a href="https://kupa.pro/legal/privacy">${locale === 'he' ? 'מדיניות פרטיות' : 'Privacy'}</a>
+    <a href="https://kupa-pay.com/legal/privacy">${locale === 'he' ? 'מדיניות פרטיות' : 'Privacy'}</a>
     &nbsp;·&nbsp;
-    <a href="https://kupa.pro/legal/terms">${locale === 'he' ? 'תנאי שימוש' : 'Terms'}</a>
+    <a href="https://kupa-pay.com/legal/terms">${locale === 'he' ? 'תנאי שימוש' : 'Terms'}</a>
     &nbsp;·&nbsp;
-    <a href="https://kupa.pro/account-deletion">${locale === 'he' ? 'מחיקת חשבון' : 'Account deletion'}</a>
+    <a href="https://kupa-pay.com/account-deletion">${locale === 'he' ? 'מחיקת חשבון' : 'Account deletion'}</a>
   </footer>
 </div>
 </body></html>`;

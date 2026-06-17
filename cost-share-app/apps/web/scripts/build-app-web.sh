@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the Expo Web export for production (kupa.pro).
+# Builds the Expo Web export for production (kupa-pay.com).
 # Maps Vercel web env vars to Expo public env when needed.
 set -euo pipefail
 
@@ -7,12 +7,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 WEB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Committed defaults for CI/Vercel when dashboard env is unset (public anon key only).
-# copay-dev Vercel project → always development Supabase (never kupa.pro prod DB).
-# copay-prod / VERCEL_ENV=production → production; other previews → development.
+# kupapay-dev Vercel project → always development Supabase (never kupa-pay.com prod DB).
+# kupapay-prod / VERCEL_ENV=production → production; other previews → development.
 # See docs/SSOT/SUPABASE_ENVIRONMENTS.md
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COPAY_DEV_VERCEL_PROJECT_ID="prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"
-if [[ "${VERCEL_PROJECT_ID:-}" == "$COPAY_DEV_VERCEL_PROJECT_ID" ]]; then
+KUPAPAY_DEV_VERCEL_PROJECT_ID="prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"
+if [[ "${VERCEL_PROJECT_ID:-}" == "$KUPAPAY_DEV_VERCEL_PROJECT_ID" ]]; then
   DEFAULTS_FILE="$SCRIPT_DIR/supabase-public.development.defaults"
 elif [[ "${VERCEL_ENV:-}" == "production" ]]; then
   DEFAULTS_FILE="$SCRIPT_DIR/supabase-public.production.defaults"
@@ -30,8 +30,8 @@ for defaults_file in "$DEFAULTS_FILE"; do
 done
 
 # Local-only override (never on Vercel). Committed apps/web/.env.production had prod keys
-# and overwrote copay-dev preview — use supabase-public.*.defaults + dashboard env on CI.
-if [[ -z "${VERCEL:-}" && "${VERCEL_PROJECT_ID:-}" != "$COPAY_DEV_VERCEL_PROJECT_ID" && -f "$WEB_DIR/.env.production" ]]; then
+# and overwrote kupapay-dev preview — use supabase-public.*.defaults + dashboard env on CI.
+if [[ -z "${VERCEL:-}" && "${VERCEL_PROJECT_ID:-}" != "$KUPAPAY_DEV_VERCEL_PROJECT_ID" && -f "$WEB_DIR/.env.production" ]]; then
   set -a
   # shellcheck disable=SC1090
   source "$WEB_DIR/.env.production"

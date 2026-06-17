@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship link-based invitations for CoPay — both personal friend invite links (`https://kupa.pro/i/<token>`) and group invite links (`https://kupa.pro/g/<token>`) — with auto-join semantics and rotation-based security, surfaced across Settings/EditProfile/Friends/FindFriends/EditGroup/GroupDetail/AddMembersSheet.
+**Goal:** Ship link-based invitations for KupaPay — both personal friend invite links (`https://kupa.pro/i/<token>`) and group invite links (`https://kupa.pro/g/<token>`) — with auto-join semantics and rotation-based security, surfaced across Settings/EditProfile/Friends/FindFriends/EditGroup/GroupDetail/AddMembersSheet.
 
 **Architecture:**
 - DB: `invite_token` column on `profiles` and `groups` (no separate token table), five `SECURITY DEFINER` RPCs.
@@ -851,13 +851,13 @@ describe('parseIncomingUrl', () => {
         });
     });
     it('parses custom-scheme friend link', () => {
-        expect(parseIncomingUrl('com.copay.mobile://invite/i/ZZZ0000111')).toEqual({
+        expect(parseIncomingUrl('com.kupapay.mobile://invite/i/ZZZ0000111')).toEqual({
             kind: 'friend',
             token: 'ZZZ0000111',
         });
     });
     it('parses custom-scheme group link', () => {
-        expect(parseIncomingUrl('com.copay.mobile://invite/g/AAA1112223')).toEqual({
+        expect(parseIncomingUrl('com.kupapay.mobile://invite/g/AAA1112223')).toEqual({
             kind: 'group',
             token: 'AAA1112223',
         });
@@ -929,8 +929,8 @@ export function parseIncomingUrl(rawUrl: string): InviteLink {
         }
     }
 
-    // com.copay.mobile://invite/i/<token> | /g/<token>
-    if (parsed.protocol === 'com.copay.mobile:' && parsed.host === 'invite') {
+    // com.kupapay.mobile://invite/i/<token> | /g/<token>
+    if (parsed.protocol === 'com.kupapay.mobile:' && parsed.host === 'invite') {
         const m = parsed.pathname.match(/^\/(i|g)\/([^/?#]+)\/?$/);
         if (m && TOKEN_RE.test(m[2])) {
             return m[1] === 'i'
@@ -1231,10 +1231,10 @@ Open `cost-share-app/apps/mobile/i18n/locales/en.json` and add at the top level 
 ```json
 "invite": {
     "friend": {
-        "title": "Invite a friend to CoPay",
+        "title": "Invite a friend to KupaPay",
         "subtitle": "Send a link via WhatsApp and more",
         "cta": "Share link",
-        "shareMessage": "Hey! Let's split expenses together on CoPay. If you sign up through this link we'll automatically become friends: {{url}}",
+        "shareMessage": "Hey! Let's split expenses together on KupaPay. If you sign up through this link we'll automatically become friends: {{url}}",
         "linkLabel": "My invite link",
         "copyButton": "Copy",
         "copied": "Link copied",
@@ -1244,11 +1244,11 @@ Open `cost-share-app/apps/mobile/i18n/locales/en.json` and add at the top level 
         "rotated": "Invite link updated",
         "findEmpty": "Didn't find who you're looking for?",
         "findEmptyCta": "Invite a new friend by link",
-        "findInviteName": "Invite {{name}} to CoPay"
+        "findInviteName": "Invite {{name}} to KupaPay"
     },
     "group": {
         "title": "Share group link",
-        "shareMessage": "I added you to the '{{groupName}}' group on CoPay. Join via this link: {{url}}",
+        "shareMessage": "I added you to the '{{groupName}}' group on KupaPay. Join via this link: {{url}}",
         "linkLabel": "Invite link",
         "rotate": "Rotate link",
         "rotateConfirmTitle": "Rotate group invite link?",
@@ -1277,10 +1277,10 @@ Open `cost-share-app/apps/mobile/i18n/locales/he.json` and add the corresponding
 ```json
 "invite": {
     "friend": {
-        "title": "הזמן חבר ל-CoPay",
+        "title": "הזמן חבר ל-KupaPay",
         "subtitle": "שלח קישור דרך וואצאפ ועוד",
         "cta": "שתף קישור",
-        "shareMessage": "היי! בוא נחלק הוצאות יחד דרך CoPay. אם תרשם דרך הקישור הזה — נהיה אוטומטית חברים: {{url}}",
+        "shareMessage": "היי! בוא נחלק הוצאות יחד דרך KupaPay. אם תרשם דרך הקישור הזה — נהיה אוטומטית חברים: {{url}}",
         "linkLabel": "קישור ההזמנה שלי",
         "copyButton": "העתק",
         "copied": "הקישור הועתק",
@@ -1290,11 +1290,11 @@ Open `cost-share-app/apps/mobile/i18n/locales/he.json` and add the corresponding
         "rotated": "קישור ההזמנה עודכן",
         "findEmpty": "לא מצאת את מי שחיפשת?",
         "findEmptyCta": "הזמן חבר חדש דרך קישור",
-        "findInviteName": "הזמן את {{name}} ל-CoPay"
+        "findInviteName": "הזמן את {{name}} ל-KupaPay"
     },
     "group": {
         "title": "שתף קישור לקבוצה",
-        "shareMessage": "הוספתי אותך לקבוצת '{{groupName}}' ב-CoPay. הצטרף דרך הקישור: {{url}}",
+        "shareMessage": "הוספתי אותך לקבוצת '{{groupName}}' ב-KupaPay. הצטרף דרך הקישור: {{url}}",
         "linkLabel": "קישור הזמנה",
         "rotate": "שנה קישור",
         "rotateConfirmTitle": "לשנות את קישור הקבוצה?",
@@ -1926,10 +1926,10 @@ Existing keys stay intact. Final shape:
 ```json
 "ios": {
     "supportsTablet": true,
-    "bundleIdentifier": "com.copay.mobile",
+    "bundleIdentifier": "com.kupapay.mobile",
     "associatedDomains": ["applinks:kupa.pro"],
     "infoPlist": {
-        "CFBundleDisplayName": "CoPay"
+        "CFBundleDisplayName": "KupaPay"
     }
 }
 ```
@@ -2128,7 +2128,7 @@ cat > cost-share-app/supabase/functions/invite-landing/render.ts <<'EOF'
 export function renderFriendInvite(_p: any, _t: string): string { return '<html><body>TBD</body></html>'; }
 export function renderGroupInvite(_p: any, _t: string): string { return '<html><body>TBD</body></html>'; }
 export function renderInvalid(): string { return '<html><body>Invalid</body></html>'; }
-export function renderRoot(): string { return '<html><body>CoPay</body></html>'; }
+export function renderRoot(): string { return '<html><body>KupaPay</body></html>'; }
 EOF
 cat > cost-share-app/supabase/functions/invite-landing/well-known.ts <<'EOF'
 // Filled in Task 22.
@@ -2158,24 +2158,24 @@ Before writing this code, obtain:
 - Android release SHA-256: from EAS — `eas credentials` → Android → keystore details → "SHA256 Certificate Fingerprint".
 
 Record these as env vars used by the function:
-- `COPAY_IOS_TEAM_ID`
-- `COPAY_ANDROID_DEBUG_SHA256`
-- `COPAY_ANDROID_RELEASE_SHA256`
+- `KUPAPAY_IOS_TEAM_ID`
+- `KUPAPAY_ANDROID_DEBUG_SHA256`
+- `KUPAPAY_ANDROID_RELEASE_SHA256`
 
 Set them on the Supabase project via the Supabase dashboard → Project Settings → Edge Functions → Secrets, or via the CLI.
 
 - [ ] **Step 2: Replace the stub with real handlers**
 
 ```typescript
-const TEAM_ID = Deno.env.get('COPAY_IOS_TEAM_ID') ?? '';
-const ANDROID_DEBUG_SHA = Deno.env.get('COPAY_ANDROID_DEBUG_SHA256') ?? '';
-const ANDROID_RELEASE_SHA = Deno.env.get('COPAY_ANDROID_RELEASE_SHA256') ?? '';
+const TEAM_ID = Deno.env.get('KUPAPAY_IOS_TEAM_ID') ?? '';
+const ANDROID_DEBUG_SHA = Deno.env.get('KUPAPAY_ANDROID_DEBUG_SHA256') ?? '';
+const ANDROID_RELEASE_SHA = Deno.env.get('KUPAPAY_ANDROID_RELEASE_SHA256') ?? '';
 
 const AASA_JSON = JSON.stringify({
     applinks: {
         apps: [],
         details: [{
-            appID: `${TEAM_ID}.com.copay.mobile`,
+            appID: `${TEAM_ID}.com.kupapay.mobile`,
             paths: ['/i/*', '/g/*'],
         }],
     },
@@ -2185,7 +2185,7 @@ const ANDROID_LINKS_JSON = JSON.stringify([{
     relation: ['delegate_permission/common.handle_all_urls'],
     target: {
         namespace: 'android_app',
-        package_name: 'com.copay.mobile',
+        package_name: 'com.kupapay.mobile',
         sha256_cert_fingerprints: [ANDROID_RELEASE_SHA, ANDROID_DEBUG_SHA].filter(Boolean),
     },
 }]);
@@ -2235,9 +2235,9 @@ git commit -m "feat(edge): serve apple-app-site-association + assetlinks.json"
 
 // App Store URL is read from an env var because Apple assigns the numeric ID at
 // publication time; before publication, the env var falls back to the marketing
-// site itself. Set COPAY_APP_STORE_URL once the app is published.
-const APP_STORE_URL = Deno.env.get('COPAY_APP_STORE_URL') ?? 'https://kupa.pro/';
-const PLAY_STORE_URL = Deno.env.get('COPAY_PLAY_STORE_URL') ?? 'https://play.google.com/store/apps/details?id=com.copay.mobile';
+// site itself. Set KUPAPAY_APP_STORE_URL once the app is published.
+const APP_STORE_URL = Deno.env.get('KUPAPAY_APP_STORE_URL') ?? 'https://kupa.pro/';
+const PLAY_STORE_URL = Deno.env.get('KUPAPAY_PLAY_STORE_URL') ?? 'https://play.google.com/store/apps/details?id=com.kupapay.mobile';
 
 function escapeHtml(s: string): string {
     return s.replace(/[&<>"']/g, (c) => ({
@@ -2298,7 +2298,7 @@ function shell({
   // Best-effort custom-scheme attempt for users who land here despite app being installed.
   setTimeout(() => {
     const m = location.pathname.match(/^\\/(i|g)\\/([A-Za-z0-9_-]{10})$/);
-    if (m) location.href = 'com.copay.mobile://invite/' + m[1] + '/' + m[2];
+    if (m) location.href = 'com.kupapay.mobile://invite/' + m[1] + '/' + m[2];
   }, 100);
 </script>
 </body></html>`;
@@ -2320,15 +2320,15 @@ export function renderFriendInvite(
         : `<div class="avatar"></div>`;
     const body = `
         ${avatar}
-        <h1>${inviterName} רוצה לחלוק איתך הוצאות דרך CoPay</h1>
+        <h1>${inviterName} רוצה לחלוק איתך הוצאות דרך KupaPay</h1>
         <p>חלקו את חשבון המסעדה, הטיול, והדירה — בלי לעשות חשבונות.</p>
-        <a class="btn primary" href="com.copay.mobile://invite/i/${escapeHtml(token)}">פתח את CoPay</a>
+        <a class="btn primary" href="com.kupapay.mobile://invite/i/${escapeHtml(token)}">פתח את KupaPay</a>
         ${platformButtons()}
         <p class="footnote">אחרי ההורדה — חזור לקישור הזה.</p>
     `;
     return shell({
-        title: `${preview.inviter.name} הזמין אותך ל-CoPay`,
-        description: 'הצטרף ל-CoPay וחלוק הוצאות בקלות.',
+        title: `${preview.inviter.name} הזמין אותך ל-KupaPay`,
+        description: 'הצטרף ל-KupaPay וחלוק הוצאות בקלות.',
         canonical: `https://kupa.pro/i/${token}`,
         body,
     });
@@ -2356,16 +2356,16 @@ export function renderGroupInvite(
     ).join('');
 
     const body = `
-        <h1>הוזמנת לקבוצה ב-CoPay</h1>
+        <h1>הוזמנת לקבוצה ב-KupaPay</h1>
         <h2>${name}</h2>
         <div class="members">${memberAvatars}</div>
         <div class="meta">${g.member_count} חברים · ${escapeHtml(g.currency)}</div>
-        <a class="btn primary" href="com.copay.mobile://invite/g/${escapeHtml(token)}">הצטרף לקבוצה ב-CoPay</a>
+        <a class="btn primary" href="com.kupapay.mobile://invite/g/${escapeHtml(token)}">הצטרף לקבוצה ב-KupaPay</a>
         ${platformButtons()}
         <p class="footnote">אחרי ההורדה — חזור לקישור הזה.</p>
     `;
     return shell({
-        title: `הוזמנת לקבוצת '${g.name}' ב-CoPay`,
+        title: `הוזמנת לקבוצת '${g.name}' ב-KupaPay`,
         description: `${g.member_count} חברים · מטבע ${g.currency} · הצטרף בקלות`,
         canonical: `https://kupa.pro/g/${token}`,
         body,
@@ -2386,11 +2386,11 @@ export function renderInvalid(): string {
 
 export function renderRoot(): string {
     return shell({
-        title: 'CoPay',
+        title: 'KupaPay',
         description: 'חלקו הוצאות בקלות.',
         canonical: 'https://kupa.pro/',
         body: `
-            <h1>CoPay</h1>
+            <h1>KupaPay</h1>
             <p>חלקו את חשבון המסעדה, הטיול, והדירה — בלי לעשות חשבונות.</p>
             ${platformButtons()}
         `,
@@ -2463,7 +2463,7 @@ Expected: all return HTTP 200 with the right content types.
 - [ ] **Step 5: Validate iOS association**
 
 Use Apple's validator: `https://app-site-association.cdn-apple.com/a/v1/kupa.pro` (may take 24h to propagate).
-Expected: `applinks.details[0].appID` matches `<TEAM_ID>.com.copay.mobile` and paths include `/i/*` and `/g/*`.
+Expected: `applinks.details[0].appID` matches `<TEAM_ID>.com.kupapay.mobile` and paths include `/i/*` and `/g/*`.
 
 - [ ] **Step 6: Validate Android association**
 

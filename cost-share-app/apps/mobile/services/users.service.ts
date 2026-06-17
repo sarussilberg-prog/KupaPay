@@ -2,7 +2,7 @@
  * Users Service — Supabase direct (profiles table)
  */
 
-import { User, UpdateProfileDto, BalanceSummaryResponse } from '@cost-share/shared';
+import { User, UpdateProfileDto } from '@cost-share/shared';
 import { profileFromRow } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
@@ -92,27 +92,6 @@ export async function fetchGroupUsers(groupId: string): Promise<User[]> {
         return [];
     }
     return (data ?? []).map(profileFromRow);
-}
-
-const EMPTY_SUMMARY: BalanceSummaryResponse = { summary: [], byGroup: [] };
-
-export async function fetchBalanceSummary(): Promise<BalanceSummaryResponse> {
-    const userId = await getCurrentUserId();
-    if (!userId) {
-        useAppStore.getState().setBalanceSummary(EMPTY_SUMMARY);
-        return EMPTY_SUMMARY;
-    }
-    const { data, error } = await supabase.rpc('get_user_balance_summary', {
-        p_user_id: userId,
-    });
-    if (error) {
-        console.error('fetchBalanceSummary failed:', error);
-        useAppStore.getState().setBalanceSummary(EMPTY_SUMMARY);
-        return EMPTY_SUMMARY;
-    }
-    const payload = (data as BalanceSummaryResponse | null) ?? EMPTY_SUMMARY;
-    useAppStore.getState().setBalanceSummary(payload);
-    return payload;
 }
 
 export async function updateUser(id: string, dto: UpdateProfileDto): Promise<User | null> {

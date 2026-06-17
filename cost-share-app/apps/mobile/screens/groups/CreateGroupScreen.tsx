@@ -18,7 +18,8 @@ import {
     removeGroupMember,
     updateGroup,
 } from '../../services/groups.service';
-import { fetchGroupPairwiseDebts } from '../../services/settlements.service';
+import { fetchSimplifiedInputs } from '../../services/simplifiedDebts.service';
+import { deriveSimplifiedDebts } from '@cost-share/shared';
 import { fetchGroupUsers } from '../../services/users.service';
 import { uploadGroupImage } from '../../services/storage.service';
 import { getCurrentUserId } from '../../lib/auth';
@@ -66,20 +67,26 @@ export function CreateGroupScreen() {
         void getCurrentUserId().then(setCurrentUserId);
     }, []);
 
+    const currentUserIdFromStore = useAppStore(s => s.currentUser?.id ?? '');
     const loadMembers = useCallback(async () => {
         if (!groupId) return;
-        const [users, debts] = await Promise.all([
+        const [users, payload] = await Promise.all([
             fetchGroupUsers(groupId),
-            fetchGroupPairwiseDebts(groupId),
+            fetchSimplifiedInputs(),
         ]);
         setMembers(users);
+        const simplified = currentUserIdFromStore
+            ? deriveSimplifiedDebts(payload, currentUserIdFromStore)
+            : null;
         const unsettled = new Set<string>();
-        debts.forEach((d) => {
-            unsettled.add(d.fromUserId);
-            unsettled.add(d.toUserId);
+        simplified?.byGroupCurrency.get(groupId)?.forEach(transfers => {
+            transfers.forEach(t => {
+                unsettled.add(t.fromUserId);
+                unsettled.add(t.toUserId);
+            });
         });
         setUnsettledMemberIds(unsettled);
-    }, [groupId]);
+    }, [groupId, currentUserIdFromStore]);
 
     useEffect(() => {
         if (!isEdit || !groupId) return;

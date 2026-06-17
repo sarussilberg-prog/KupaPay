@@ -58,6 +58,9 @@ import {
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import type { GroupDetailFocusFeedItem } from '../../lib/groupDetailFocus';
+import { setBadgeCount } from '../../lib/pushNotifications';
+import { usePushPermissionPrompt } from '../../hooks/usePushPermissionPrompt';
+import { EnableNotificationsBanner } from '../../components/notifications/EnableNotificationsBanner';
 
 function unique<T>(values: T[]): T[] {
     return Array.from(new Set(values));
@@ -144,6 +147,7 @@ export function ActivityFeedScreen() {
     // stays put after mark_activity_seen advances the live watermark to NOW.
     const [freezeWatermark, setFreezeWatermark] = useState<Date | null>(null);
     const canLoadMoreRef = useRef(false);
+    const { showBanner, mode: bannerMode, promptSoftAsk, dismiss: dismissBanner } = usePushPermissionPrompt();
 
     const activities: ActivityEvent[] = useMemo(
         () => data?.pages.flatMap(page => page.items) ?? [],
@@ -190,6 +194,7 @@ export function ActivityFeedScreen() {
                     void queryClient.invalidateQueries({
                         queryKey: queryKeys.activityUnreadCount,
                     });
+                    void setBadgeCount(0);
                 }
             })();
             if (isStale) void refetch();
@@ -599,6 +604,14 @@ export function ActivityFeedScreen() {
                     )}
                 </TouchableOpacity>
             </View>
+
+            {showBanner && (
+                <EnableNotificationsBanner
+                    mode={bannerMode}
+                    onEnable={() => void promptSoftAsk()}
+                    onDismiss={() => void dismissBanner()}
+                />
+            )}
 
             <FlatList
                 data={displayedItems}

@@ -278,7 +278,9 @@
         "summary": {
             "youAreOwed": "You have <1>{{amount}}</1> to your credit",
             "youOwe": "You owe <1>{{amount}}</1>",
-            "noOpenPayments": "No open payments"
+            "noOpenPayments": "No open payments",
+            "showMore": "Show {{count}} more",
+            "showLess": "Show less"
         },
         "hero": {
             "spentTogether": "Spent together",
@@ -574,6 +576,13 @@
         "support": "Support",
         "rateUs": "Rate us",
         "contactUs": "Contact us",
+        "contactUsName": "Your name",
+        "contactUsEmail": "Email",
+        "contactUsMessage": "Message",
+        "contactUsMessagePlaceholder": "How can we help you?",
+        "contactUsSend": "Send Message",
+        "contactUsSent": "Message sent!",
+        "contactUsError": "Failed to send. Please try again.",
         "legal": "Legal",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy",
@@ -649,6 +658,15 @@
             "user": "User",
             "noEvents": "No events captured for this issue",
             "noStack": "No stack trace available"
+        },
+        "supportMessages": {
+            "title": "Support Messages",
+            "portalRow": "Support messages",
+            "empty": "No support messages yet",
+            "statusOpen": "Open",
+            "statusClosed": "Closed",
+            "markClosed": "Mark as resolved",
+            "markOpen": "Reopen"
         },
         "metrics": {
             "sectionLabel": "Overview",
@@ -945,6 +963,22 @@
             "removed": "Friend removed",
             "error": "Something went wrong"
         }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "categoriesTitle": "By category",
+        "pushMaster": "Push notifications",
+        "categoryExpenses": "Expenses",
+        "categorySettlements": "Payments",
+        "categoryMessages": "Group chat",
+        "categoryFriends": "Friend requests",
+        "categoryGroups": "Groups",
+        "systemDisabled": "Notifications are turned off for this app",
+        "openSettings": "Open settings",
+        "primingTitle": "Stay in the loop",
+        "primingBody": "Get notified when a friend adds an expense or pays you back.",
+        "primingEnable": "Enable notifications",
+        "primingLater": "Not now"
     },
     "deleteAccount": {
         "warningTitle": "Delete account?",

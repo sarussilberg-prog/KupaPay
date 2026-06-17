@@ -278,7 +278,9 @@
         "summary": {
             "youAreOwed": "יש לך <1>{{amount}}</1> לזכות",
             "youOwe": "אתה חייב <1>{{amount}}</1>",
-            "noOpenPayments": "אין תשלומים פתוחים"
+            "noOpenPayments": "אין תשלומים פתוחים",
+            "showMore": "הצג עוד {{count}}",
+            "showLess": "הצג פחות"
         },
         "hero": {
             "spentTogether": "הוציאו ביחד",
@@ -590,6 +592,13 @@
         "support": "תמיכה",
         "rateUs": "דרגו אותנו",
         "contactUs": "צור קשר",
+        "contactUsName": "שמך",
+        "contactUsEmail": "אימייל",
+        "contactUsMessage": "הודעה",
+        "contactUsMessagePlaceholder": "במה נוכל לעזור לך?",
+        "contactUsSend": "שלח הודעה",
+        "contactUsSent": "ההודעה נשלחה!",
+        "contactUsError": "שליחה נכשלה. נסה שוב.",
         "legal": "משפטי",
         "terms": "תנאי שירות",
         "privacy": "מדיניות פרטיות",
@@ -665,6 +674,15 @@
             "user": "משתמש",
             "noEvents": "לא נתפסו אירועים עבור התקלה הזו",
             "noStack": "אין מחסנית קריאה"
+        },
+        "supportMessages": {
+            "title": "הודעות תמיכה",
+            "portalRow": "הודעות תמיכה",
+            "empty": "אין הודעות תמיכה עדיין",
+            "statusOpen": "פתוח",
+            "statusClosed": "סגור",
+            "markClosed": "סמן כטופל",
+            "markOpen": "פתח מחדש"
         },
         "metrics": {
             "sectionLabel": "סקירה",
@@ -960,6 +978,22 @@
             "removed": "החבר הוסר",
             "error": "משהו השתבש"
         }
+    },
+    "notifications": {
+        "title": "התראות",
+        "categoriesTitle": "לפי קטגוריה",
+        "pushMaster": "התראות פוש",
+        "categoryExpenses": "הוצאות",
+        "categorySettlements": "תשלומים",
+        "categoryMessages": "הודעות צ'אט",
+        "categoryFriends": "בקשות חברות",
+        "categoryGroups": "קבוצות",
+        "systemDisabled": "ההתראות כבויות עבור האפליקציה",
+        "openSettings": "פתח הגדרות",
+        "primingTitle": "אל תפספס כלום",
+        "primingBody": "קבל עדכון כשחבר מוסיף הוצאה או משלם לך.",
+        "primingEnable": "הפעל התראות",
+        "primingLater": "לא עכשיו"
     },
     "deleteAccount": {
         "warningTitle": "למחוק את החשבון?",

@@ -9,6 +9,7 @@ export const queryKeys = {
     groupExpenses: (groupId: string) => ['groupExpenses', groupId] as const,
     groupMessages: (groupId: string) => ['groupMessages', groupId] as const,
     balanceSummary: ['balanceSummary'] as const,
+    simplifiedDebts: ['simplifiedDebts'] as const,
     friends: ['friends'] as const,
     friendRequestsIncoming: ['friend-requests', 'incoming'] as const,
     friendRequestsOutgoing: ['friend-requests', 'outgoing'] as const,
@@ -23,6 +24,7 @@ export const queryKeys = {
     legalDocument: (slug: 'terms' | 'privacy', locale: 'en' | 'he') =>
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
+    adminSupportMessages: ['admin', 'support-messages'] as const,
     adminSentryIssues: (params: {
         environment: 'dev' | 'prod';
         status: 'unresolved' | 'all';

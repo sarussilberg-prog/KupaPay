@@ -20,6 +20,20 @@ jest.mock('expo-apple-authentication', () => ({
     signInAsync: jest.fn(),
 }));
 
+jest.mock('expo-notifications', () => ({
+    setNotificationHandler: jest.fn(),
+    setNotificationChannelAsync: jest.fn().mockResolvedValue(undefined),
+    getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+    requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+    getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: 'ExponentPushToken[test]' }),
+    setBadgeCountAsync: jest.fn().mockResolvedValue(true),
+    getBadgeCountAsync: jest.fn().mockResolvedValue(0),
+    addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+    addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+    getLastNotificationResponseAsync: jest.fn().mockResolvedValue(null),
+    AndroidImportance: { MIN: 1, LOW: 2, DEFAULT: 3, HIGH: 4, MAX: 5 },
+}));
+
 jest.mock('expo-file-system', () => {
     class Directory {
         public uri: string;

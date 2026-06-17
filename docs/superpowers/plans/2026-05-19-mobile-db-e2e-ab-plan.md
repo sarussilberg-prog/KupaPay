@@ -52,7 +52,7 @@
 Supabase → **Authentication** → **URL Configuration** → **Redirect URLs** — add:
 
 ```
-com.copay.mobile://auth/callback
+com.kupapay.mobile://auth/callback
 exp://YOUR_LAN_IP:8081/--/auth/callback
 ```
 

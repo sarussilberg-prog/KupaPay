@@ -35,13 +35,13 @@ import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import {
     useGroupContributionsQuery,
-    useGroupSimplifiedDebtsByCurrencyQuery,
 } from '../../hooks/queries/useGroupBalancesQueries';
-import {
-    useCreateSettlementMutation,
-    useGroupPairwiseDebtsQuery,
-} from '../../hooks/queries/useSettlementQueries';
+import { useCreateSettlementMutation } from '../../hooks/queries/useSettlementQueries';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
+import { queryClient } from '../../lib/queryClient';
+import { queryKeys } from '../../hooks/queries/keys';
 import { useAppStore } from '../../store';
+import type { SimplifiedDebtsByCurrencyEntry } from '../../services/groups.service';
 import { colors } from '../../theme';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 
@@ -96,14 +96,52 @@ export function BalancesScreen() {
         isFetching: isFetchingContributions,
         refetch: refetchContributions,
     } = useGroupContributionsQuery(groupId);
-    const {
-        data: simplifiedByCurrency,
-        isLoading: isLoadingDebts,
-        isFetching: isFetchingDebts,
-        refetch: refetchDebts,
-    } = useGroupSimplifiedDebtsByCurrencyQuery(groupId);
-    const { data: pairwiseDebts = [], refetch: refetchPairwise } =
-        useGroupPairwiseDebtsQuery(groupId);
+    const { data: simplified, isLoading: isLoadingDebts } = useSimplifiedDebts();
+    const isFetchingDebts = isLoadingDebts;
+    const refetchDebts = useCallback(() => {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.simplifiedDebts });
+    }, []);
+    const simplifiedByCurrency = useMemo<SimplifiedDebtsByCurrencyEntry[]>(() => {
+        const perCurrency = simplified?.byGroupCurrency.get(groupId);
+        if (!perCurrency) return [];
+        const out: SimplifiedDebtsByCurrencyEntry[] = [];
+        perCurrency.forEach((transfers, currency) => {
+            const debts = transfers.map(t => ({
+                fromUserId: t.fromUserId,
+                fromUserName: '',
+                toUserId: t.toUserId,
+                toUserName: '',
+                amount: t.amount,
+                currency,
+            }));
+            out.push({
+                currency,
+                result: {
+                    debts,
+                    transactionCount: debts.length,
+                    algorithm: 'exact',
+                },
+            });
+        });
+        return out.sort((a, b) => a.currency.localeCompare(b.currency));
+    }, [simplified, groupId]);
+    const pairwiseDebts = useMemo<PairwiseDebt[]>(() => {
+        const perCurrency = simplified?.byGroupCurrency.get(groupId);
+        if (!perCurrency) return [];
+        const out: PairwiseDebt[] = [];
+        perCurrency.forEach((transfers, currency) => {
+            transfers.forEach(t =>
+                out.push({
+                    fromUserId: t.fromUserId,
+                    toUserId: t.toUserId,
+                    currency,
+                    amount: t.amount,
+                }),
+            );
+        });
+        return out;
+    }, [simplified, groupId]);
+    const refetchPairwise = refetchDebts;
     const createMutation = useCreateSettlementMutation(groupId);
 
     const members: GroupMemberLite[] = useMemo(

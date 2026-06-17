@@ -6,7 +6,7 @@ const mockShare = jest.fn();
 const mockRotate = jest.fn();
 jest.mock('../../hooks/useInviteLink', () => ({
     useInviteLink: () => ({
-        url: 'https://kupa.pro/i/AbCdEfGhIj',
+        url: 'https://kupa-pay.com/i/AbCdEfGhIj',
         isReady: true,
         share: mockShare,
         rotate: mockRotate,

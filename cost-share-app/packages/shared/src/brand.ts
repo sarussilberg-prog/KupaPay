@@ -2,7 +2,7 @@
 export const APP_BRAND_TITLE = 'KupaPay';
 
 /** Production web hostname (DNS). Brand display name is {@link APP_BRAND_TITLE}. */
-export const APP_WEB_HOST = 'kupa.pro';
+export const APP_WEB_HOST = 'kupa-pay.com';
 
 /** Canonical HTTPS origin for invites, auth callbacks, and legal URLs. */
 export const APP_WEB_ORIGIN = `https://${APP_WEB_HOST}`;

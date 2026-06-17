@@ -1,15 +1,14 @@
 /**
- * GroupSummaryCard — composite hero card replacing GroupHero +
- * GroupBalanceBanner. Composes SummaryCover (with overlaid app-bar
- * buttons), SummaryBalanceStrip, and SummaryFooter inside one
- * flat-top / rounded-bottom card frame that fills the top region of
- * the screen edge-to-edge.
+ * GroupSummaryCard — composite hero card for the GroupDetail screen.
+ * Composes SummaryCover (with overlaid app-bar buttons), SummaryBalanceStrip,
+ * and SummaryFooter inside one flat-top / rounded-bottom card frame that
+ * fills the top region of the screen edge-to-edge.
  */
 
 import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Group, GroupMemberLite } from '@cost-share/shared';
+import { Group, GroupMemberLite, GroupRollup } from '@cost-share/shared';
 import { SummaryCover } from './SummaryCover';
 import { SummaryBalanceStrip } from './SummaryBalanceStrip';
 import { SummaryFooter } from './SummaryFooter';
@@ -18,16 +17,11 @@ import { shadows } from '../../theme';
 // Design token "border.card" (#E2E8F0 / slate-200) is not in theme/colors.ts.
 const BORDER_CARD = '#E2E8F0';
 
-export interface GroupSummaryBalance {
-    net: number;
-    currency: string;
-    isSettled: boolean;
-}
-
 interface GroupSummaryCardProps {
     group: Group;
     members: GroupMemberLite[];
-    balance: GroupSummaryBalance;
+    /** Undefined ⇒ "all settled" in the strip. */
+    rollup?: GroupRollup;
     settlementCount: number;
     onBack: () => void;
     onShare: () => void;
@@ -40,7 +34,7 @@ interface GroupSummaryCardProps {
 export function GroupSummaryCard({
     group,
     members,
-    balance,
+    rollup,
     settlementCount,
     onBack,
     onShare,
@@ -73,7 +67,7 @@ export function GroupSummaryCard({
                 onMenu={onMenu}
             />
             <SummaryBalanceStrip
-                balance={balance}
+                rollup={rollup}
                 onPress={onOpenBalances}
                 testID="summary-balance-strip"
             />

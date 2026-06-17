@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "KupaPay",
-    "slug": "copay",
-    "scheme": "com.copay.mobile",
+    "slug": "kupapay",
+    "scheme": "com.kupapay.mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,11 +17,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.copay.mobile",
+      "bundleIdentifier": "com.kupapay.mobile",
       "buildNumber": "4",
       "usesAppleSignIn": true,
       "associatedDomains": [
-        "applinks:kupa.pro"
+        "applinks:kupa-pay.com"
       ],
       "icon": "./assets/icon.png",
       "infoPlist": {
@@ -32,12 +32,16 @@
           "paybox",
           "PayBox"
         ],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       },
       "appleTeamId": "K3M6R85KA6"
     },
     "android": {
-      "package": "com.copay.mobile",
+      "package": "com.kupapay.mobile",
+      "googleServicesFile": "./google-services.json",
       "label": "KupaPay",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
@@ -50,7 +54,8 @@
         "android.permission.INTERNET",
         "android.permission.CAMERA",
         "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
@@ -65,12 +70,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "kupa.pro",
+              "host": "kupa-pay.com",
               "pathPattern": "/i/.*"
             },
             {
               "scheme": "https",
-              "host": "kupa.pro",
+              "host": "kupa-pay.com",
               "pathPattern": "/g/.*"
             }
           ],
@@ -125,19 +130,35 @@
         }
       ],
       "expo-localization",
-      "@react-native-google-signin/google-signin",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.93908207560-0fel0f2qk3oi5gpbj242nhumr3j5cfqp"
+        }
+      ],
       "expo-apple-authentication",
       [
         "@sentry/react-native/expo",
         {
           "organization": "kupay-hb",
-          "project": "copay-mobile-prod"
+          "project": "kupapay-mobile-prod"
         }
       ],
-      "./plugins/withFastStackTransitions"
+      "./plugins/withFastStackTransitions",
+      "./plugins/withReleaseNodeEnv",
+      "./plugins/withModularHeaders"
     ],
     "extra": {
-      "eas": {}
+      "eas": {
+        "projectId": "e4a625dc-b8f9-47da-9e9b-9dd4a4e370b0"
+      }
     },
     "owner": "saussilberg"
   }

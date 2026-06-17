@@ -1,7 +1,12 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { GroupCard } from '../../components/GroupCard';
-import type { GroupBalanceDisplay, GroupWithMembers } from '@cost-share/shared';
+import type { GroupRollup, GroupWithMembers } from '@cost-share/shared';
+
+const rollupOf = (
+    primary: { currency: string; net: number },
+    others: { currency: string; net: number }[] = [],
+): GroupRollup => ({ groupId: 'g1', primary, others });
 
 const baseGroup: GroupWithMembers = {
     id: 'g1',
@@ -38,27 +43,46 @@ describe('GroupCard', () => {
         expect(getByText(/groups\.memberCount/)).toBeTruthy();
     });
 
-    it('renders a settled chip when no balance is provided', () => {
+    it('renders a settled chip when no rollup is provided', () => {
         const { getByText } = render(
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
         expect(getByText('groups.card.settled')).toBeTruthy();
     });
 
-    it('renders an "owed" chip when display.net > 0', () => {
-        const display: GroupBalanceDisplay = { net: 42.5, currency: 'EUR', isConverted: false };
+    it('renders an "owed" chip when primary.net > 0', () => {
         const { getByText } = render(
-            <GroupCard group={baseGroup} balanceDisplay={display} onPress={() => {}} />,
+            <GroupCard
+                group={baseGroup}
+                rollup={rollupOf({ currency: 'EUR', net: 42.5 })}
+                onPress={() => {}}
+            />,
         );
         expect(getByText(/\+EUR\s*42\.50/)).toBeTruthy();
     });
 
-    it('renders an "owe" chip when display.net < 0', () => {
-        const display: GroupBalanceDisplay = { net: -10, currency: 'EUR', isConverted: false };
+    it('renders an "owe" chip when primary.net < 0', () => {
         const { getByText } = render(
-            <GroupCard group={baseGroup} balanceDisplay={display} onPress={() => {}} />,
+            <GroupCard
+                group={baseGroup}
+                rollup={rollupOf({ currency: 'EUR', net: -10 })}
+                onPress={() => {}}
+            />,
         );
         expect(getByText(/EUR\s*10\.00/)).toBeTruthy();
+    });
+
+    it('appends "+N" when the rollup has additional non-zero currencies', () => {
+        const { getByTestId } = render(
+            <GroupCard
+                group={baseGroup}
+                rollup={rollupOf({ currency: 'EUR', net: 50 }, [
+                    { currency: 'USD', net: 30 },
+                ])}
+                onPress={() => {}}
+            />,
+        );
+        expect(getByTestId('balance-chip-others').props.children).toBe('+1');
     });
 
     it('shows "incl. {names}" subtitle when matchedMemberNames is set', () => {

@@ -18,9 +18,15 @@ export function usePendingNavigationFlush(): void {
             navigation.navigate('Profile', { screen: 'Friends' });
             return;
         }
-        navigation.navigate('Groups', {
-            screen: 'GroupDetail',
-            params: { groupId: pendingNavigation.groupId },
-        });
+        if (pendingNavigation.target === 'groupDetail') {
+            navigation.navigate('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: pendingNavigation.groupId },
+            });
+            return;
+        }
+        if (pendingNavigation.target === 'groupsList') {
+            navigation.navigate('Groups', { screen: 'GroupsList', merge: true });
+        }
     }, [pendingNavigation, navigation, setPendingNavigation]);
 }

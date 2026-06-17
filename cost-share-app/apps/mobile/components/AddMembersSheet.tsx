@@ -280,7 +280,14 @@ function AddMembersSheetWithNavigation(
     const navigation = useNavigation<any>();
     const onFindFriends = useCallback(() => {
         props.onClose();
-        navigation.navigate('Profile', { screen: 'FindFriends' });
+        // Fully-qualified nested path: works from screens inside the Main tab
+        // navigator AND from RootStack-level screens like CreateGroupScreen.
+        // The shorter `navigate('Profile', ...)` only walks up the navigator
+        // tree, so it silently drops the action from RootStack siblings.
+        navigation.navigate('Main', {
+            screen: 'Profile',
+            params: { screen: 'FindFriends' },
+        });
     }, [navigation, props.onClose]);
 
     return <AddMembersSheetView {...props} onFindFriends={onFindFriends} />;

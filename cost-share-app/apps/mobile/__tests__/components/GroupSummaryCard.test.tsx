@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { GroupSummaryCard } from '../../components/groupDetail/GroupSummaryCard';
-import { Group, GroupMemberLite } from '@cost-share/shared';
+import { Group, GroupMemberLite, GroupRollup } from '@cost-share/shared';
 
 const group = {
   id: 'g1',
@@ -17,10 +17,16 @@ const members: GroupMemberLite[] = [
 
 const noop = () => {};
 
+const rollup: GroupRollup = {
+  groupId: 'g1',
+  primary: { currency: 'USD', net: 42 },
+  others: [],
+};
+
 const baseProps = {
   group,
   members,
-  balance: { net: 42, currency: 'USD', isSettled: false },
+  rollup,
   settlementCount: 1,
   onBack: noop,
   onShare: noop,

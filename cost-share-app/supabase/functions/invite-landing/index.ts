@@ -1,5 +1,5 @@
 // Edge Function: invite-landing
-// Serves https://kupa.pro/i/<token>, /g/<token>, /.well-known/*, and a minimal root page.
+// Serves https://kupa-pay.com/i/<token>, /g/<token>, /.well-known/*, and a minimal root page.
 // See docs/superpowers/specs/2026-05-20-invites-and-sharing-design.md
 
 import { createClient } from 'supabase';
@@ -40,7 +40,7 @@ async function fetchPreview(token: string): Promise<Preview> {
 Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     // Supabase serves this function at /functions/v1/invite-landing/*; strip that prefix
-    // when present so the same routes work both behind kupa.pro and the direct project URL.
+    // when present so the same routes work both behind kupa-pay.com and the direct project URL.
     const path = url.pathname.replace(/^\/functions\/v1\/invite-landing/, '').replace(/^\/invite-landing/, '') || '/';
 
     // well-known files

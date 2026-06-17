@@ -36,6 +36,20 @@ jest.mock('react-native-calendars', () => {
                 >
                     <Text>tap-day</Text>
                 </Pressable>
+                <Pressable
+                    testID="mock-day-2099-12-31"
+                    onPress={() =>
+                        props.onDayPress?.({
+                            dateString: '2099-12-31',
+                            day: 31,
+                            month: 12,
+                            year: 2099,
+                            timestamp: 0,
+                        })
+                    }
+                >
+                    <Text>tap-day-sentinel</Text>
+                </Pressable>
             </View>
         );
     }
@@ -310,7 +324,7 @@ describe('AddExpenseScreen — v2', () => {
 
         fireEvent.press(await findByTestId('meta-date'));
         await findByTestId('date-picker-popup');
-        fireEvent.press(await findByTestId('mock-day-2026-06-15'));
+        fireEvent.press(await findByTestId('mock-day-2099-12-31'));
         fireEvent.press(await findByTestId('date-picker-cancel'));
         await waitFor(() => expect(queryByTestId('date-picker-popup')).toBeNull());
 
@@ -324,9 +338,9 @@ describe('AddExpenseScreen — v2', () => {
         expect(dto.expenseDate.getMonth()).toBe(before.getMonth());
         expect(dto.expenseDate.getDate()).toBe(before.getDate());
         expect(
-            dto.expenseDate.getFullYear() === 2026 &&
-            dto.expenseDate.getMonth() === 5 &&
-            dto.expenseDate.getDate() === 15,
+            dto.expenseDate.getFullYear() === 2099 &&
+            dto.expenseDate.getMonth() === 11 &&
+            dto.expenseDate.getDate() === 31,
         ).toBe(false);
     });
 

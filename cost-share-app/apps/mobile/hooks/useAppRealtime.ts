@@ -15,11 +15,12 @@ import { useEffect } from 'react';
 import * as Sentry from '@sentry/react-native';
 import { groupFromRow, type GroupWithMembers } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
-import { fetchBalanceSummary } from '../services/users.service';
+import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
 import { queryClient } from '../lib/queryClient';
 import { sweepIfOnline } from '../lib/zombieSweep';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
+import { setBadgeCount } from '../lib/pushNotifications';
 
 type RealtimePayload = {
     eventType: 'INSERT' | 'UPDATE' | 'DELETE';
@@ -29,7 +30,7 @@ type RealtimePayload = {
 
 function snapshotRefetch(): void {
     void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
-    void fetchBalanceSummary();
+    invalidateBalanceCaches();
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
     void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
     void queryClient.invalidateQueries({ queryKey: queryKeys.friendRequestsIncoming });
@@ -137,7 +138,7 @@ function handleMembershipEvent(payload: RealtimePayload): void {
         (payload.eventType === 'UPDATE' && payload.new?.is_active === true)
     ) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
-        void fetchBalanceSummary();
+        invalidateBalanceCaches();
     }
 }
 
@@ -267,6 +268,11 @@ export function useAppRealtime(userId: string | undefined | null): void {
                     try {
                         invalidateActivityDebounced();
                         void queryClient.invalidateQueries({ queryKey: queryKeys.activityUnreadCount });
+                        void Promise.resolve(supabase.rpc('get_activity_unread_count')).then(({ data }) => {
+                            void setBadgeCount(typeof data === 'number' ? data : 0);
+                        }).catch((err: unknown) => {
+                            Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
+                        });
                     } catch (err) {
                         Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
                     }

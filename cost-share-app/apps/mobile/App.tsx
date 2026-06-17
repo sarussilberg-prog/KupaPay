@@ -13,6 +13,7 @@ import { toastConfig } from './lib/toastConfig';
 import { handleAuthRedirectUrl, isAuthCallbackUrl } from './services/auth.service';
 import { AuthenticatedAppGate } from './components/AuthenticatedAppGate';
 import { LoginScreen } from './screens/auth/LoginScreen';
+import { PublicSupportScreen } from './screens/auth/PublicSupportScreen';
 import { OnboardingPreAuthFlow } from './screens/onboarding/OnboardingPreAuthFlow';
 import { hasCompletedPreLoginOnboarding } from './lib/onboardingStorage';
 import { initializeLanguage } from './i18n';
@@ -22,6 +23,7 @@ import {
   isInvalidRefreshTokenError,
   setupSupabaseAuthAutoRefresh,
 } from './lib/authSessionLifecycle';
+import { syncPushRegistrationOnSignIn, clearPushRegistrationOnSignOut } from './lib/pushRegistrationLifecycle';
 import { configureNativeGoogleSignIn } from './lib/googleSignInNative';
 import { supabase } from './lib/supabase';
 import { assertProfileActiveWithTimeout } from './lib/auth';
@@ -84,6 +86,10 @@ function App() {
   useEffect(() => {
     applySentryUser(currentUser ?? null);
   }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUserId) void syncPushRegistrationOnSignIn();
+  }, [currentUserId]);
 
   useEffect(() => {
     applySentryLanguage(language);
@@ -188,6 +194,7 @@ function App() {
 
           if (event === 'SIGNED_OUT') {
             useAppStore.getState().setSession(null);
+            void clearPushRegistrationOnSignOut();
             return;
           }
 
@@ -245,6 +252,22 @@ function App() {
     return () => sub.remove();
   }, [guardSession]);
 
+  if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined' && globalThis.location.pathname === '/.well-known/apple-app-site-association') {
+    const aasa = {
+      applinks: {
+        apps: [],
+        details: [{ appID: 'K3M6R85KA6.com.kupapay.mobile', paths: ['/i/*', '/g/*'] }],
+      },
+    };
+    // Write raw JSON directly — this path must return JSON, not a React screen.
+    if (typeof globalThis.document !== 'undefined') {
+      globalThis.document.open('application/json');
+      globalThis.document.write(JSON.stringify(aasa));
+      globalThis.document.close();
+    }
+    return null;
+  }
+
   if (!isReady) {
     return (
       <SafeAreaProvider>
@@ -259,12 +282,18 @@ function App() {
 
   if (!session) {
     const showPreOnboarding = preOnboardingDone === false;
+    const isPublicSupportPath =
+      Platform.OS === 'web' &&
+      typeof globalThis.location !== 'undefined' &&
+      globalThis.location.pathname.replace(/\/{1,256}$/, '') === '/support';
 
     return (
       <SafeAreaProvider>
         <RtlLayoutProvider>
           <WebFrame>
-            {preOnboardingDone === null ? (
+            {isPublicSupportPath ? (
+              <PublicSupportScreen />
+            ) : preOnboardingDone === null ? (
               <AppGateSkeleton />
             ) : showPreOnboarding ? (
               <OnboardingPreAuthFlow onFinished={() => setPreOnboardingDone(true)} />

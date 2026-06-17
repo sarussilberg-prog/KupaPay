@@ -7,6 +7,8 @@ import {
     Pressable,
     TextInput,
     ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -50,9 +52,14 @@ export function DeleteAccountConfirmSheet({ visible, expectedEmail, onClose, onC
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
             <Pressable className="flex-1 bg-black/40" onPress={handleClose}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1, justifyContent: 'flex-end' }}
+                    pointerEvents="box-none"
+                >
                 <Pressable
                     onPress={(e) => e?.stopPropagation()}
-                    className="bg-white rounded-t-2xl absolute bottom-0 inset-x-0"
+                    className="bg-white rounded-t-2xl"
                 >
                     <View className="items-center pt-2 pb-1">
                         <View className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -94,6 +101,7 @@ export function DeleteAccountConfirmSheet({ visible, expectedEmail, onClose, onC
                         <Text className="text-center text-sm text-gray-500">{t('common.cancel')}</Text>
                     </TouchableOpacity>
                 </Pressable>
+                </KeyboardAvoidingView>
             </Pressable>
         </Modal>
     );

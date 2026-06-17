@@ -38,6 +38,7 @@ export function ExpenseCard({ expense, payerName, onPress }: ExpenseCardProps) {
             onPress={() => onPress?.(expense.id)}
             activeOpacity={onPress ? 0.7 : 1}
             className="bg-white rounded-xl p-4 mb-2 border border-gray-100"
+            testID={`expense-card-${expense.id}`}
         >
             <View className="flex-row items-center">
                 {/* Category Icon */}
