@@ -96,12 +96,10 @@ import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import {
     useDeleteSettlementMutation,
-    useGroupPairwiseDebtsQuery,
     useGroupSettlementsQuery,
     useUpdateSettlementMutation,
 } from '../../hooks/queries/useSettlementQueries';
-import { useGroupSimplifiedDebtsByCurrencyQuery } from '../../hooks/queries/useGroupBalancesQueries';
-import { useGroupBalanceDisplay } from '../../hooks/useGroupBalancesDisplay';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
@@ -209,7 +207,8 @@ export function GroupDetailScreen() {
     const storeGroup = groupsQuery.data?.find((g) => g.id === groupId);
     const displayGroup = storeGroup ?? group;
     const isArchivedByMe = storeGroup?.isArchivedByMe ?? false;
-    const hasOpenBalance = useAppStore(s => Boolean(s.groupBalances[groupId]));
+    const { data: simplified } = useSimplifiedDebts();
+    const hasOpenBalance = Boolean(simplified?.groupRollups.get(groupId));
     const insets = useSafeAreaInsets();
     const listBottomPadding = FAB_BOTTOM_GAP + FAB_ROW_HEIGHT + FAB_LIST_GAP;
     const { data: groupUsers = [], refetch: refetchGroupUsers } =
@@ -251,9 +250,6 @@ export function GroupDetailScreen() {
     const [exporting, setExporting] = useState(false);
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
-    const { data: pairwiseDebts = [] } = useGroupPairwiseDebtsQuery(groupId);
-    const { data: simplifiedEntries = [] } =
-        useGroupSimplifiedDebtsByCurrencyQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
     const deleteSettlementMutation = useDeleteSettlementMutation(groupId);
 
@@ -274,24 +270,24 @@ export function GroupDetailScreen() {
     useGroupExpensesRealtime(groupId);
     useGroupSettlementsRealtime(groupId);
 
-    const groupBalance = useAppStore(s => s.groupBalances[groupId]);
-    const balanceDisplay = useGroupBalanceDisplay(
-        groupBalance,
-        displayGroup?.defaultCurrency,
-    );
-    const balance = useMemo(() => {
-        const net = balanceDisplay?.net ?? 0;
-        return {
-            net,
-            currency: balanceDisplay?.currency ?? displayGroup?.defaultCurrency ?? 'USD',
-            isSettled: Math.abs(net) < 0.01,
-        };
-    }, [balanceDisplay, displayGroup?.defaultCurrency]);
-
-    const settlementCount = simplifiedEntries.reduce(
-        (n, e) => n + e.result.debts.length,
-        0,
-    );
+    const rollup = simplified?.groupRollups.get(groupId);
+    const pairwiseDebts = useMemo(() => {
+        const perCurrency = simplified?.byGroupCurrency.get(groupId);
+        if (!perCurrency) return [];
+        const out: { fromUserId: string; toUserId: string; currency: string; amount: number }[] = [];
+        perCurrency.forEach((transfers, currency) => {
+            transfers.forEach(t => {
+                out.push({
+                    fromUserId: t.fromUserId,
+                    toUserId: t.toUserId,
+                    currency,
+                    amount: t.amount,
+                });
+            });
+        });
+        return out;
+    }, [simplified, groupId]);
+    const settlementCount = pairwiseDebts.length;
 
     const feedUserIds = useMemo(
         () => collectFeedUserIds(groupExpenses, messages, settlements),
@@ -781,7 +777,7 @@ export function GroupDetailScreen() {
                         <GroupSummaryCard
                             group={displayGroup}
                             members={memberLites}
-                            balance={balance}
+                            rollup={rollup}
                             settlementCount={settlementCount}
                             onBack={handleBack}
                             onShare={handleShare}

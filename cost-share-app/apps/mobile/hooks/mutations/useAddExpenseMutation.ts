@@ -26,6 +26,7 @@ import {
     takePendingFollowUp,
     type PendingFollowUp,
 } from '../../lib/pendingFollowUps';
+import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { SENTRY_TAGS } from '../../lib/sentryTags';
 
 /**
@@ -159,6 +160,14 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
                     tags: { tag: SENTRY_TAGS.MUTATION_OFFLINE_ADD },
                 });
             }
+
+            // Derived caches (simplified debts, settlements, pairwise debts,
+            // dashboard, balance summary) are not updated by the expense write
+            // itself. Without this proactive invalidation the settle-up and
+            // balances screens stay stale until the realtime echo from
+            // useGroupExpensesRealtime arrives — which only fires while
+            // GroupDetailScreen is mounted and the channel is connected.
+            invalidateBalanceCaches(groupId);
 
             if (serverRow?.id && pendingId) {
                 const followUp = takePendingFollowUp(pendingId);

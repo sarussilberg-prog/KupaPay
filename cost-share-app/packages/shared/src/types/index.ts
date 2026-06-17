@@ -512,6 +512,84 @@ export interface GroupWithMembers extends Group {
     isAutoArchived: boolean;
 }
 
+// ============================================
+// SIMPLIFIED DEBTS — canonical source for every balance UI
+// See packages/shared/src/calculations/simplifiedDebtsModel.ts
+// ============================================
+
+/** RPC payload returned by supabase.rpc('get_user_simplified_inputs'). */
+export interface SimplifiedInputsPayload {
+    groups: SimplifiedInputsGroup[];
+}
+
+export interface SimplifiedInputsGroup {
+    groupId: string;
+    members: SimplifiedInputsMember[];
+    currencies: SimplifiedInputsCurrency[];
+}
+
+export interface SimplifiedInputsMember {
+    userId: string;
+    name: string;
+    avatarUrl: string | null;
+}
+
+export interface SimplifiedInputsCurrency {
+    currency: string;
+    nets: SimplifiedInputsNet[];
+}
+
+export interface SimplifiedInputsNet {
+    userId: string;
+    /** paid - owed + settledPaid - settledReceived for this user, this currency, this group. */
+    net: number;
+}
+
+/** A single simplified transfer; output of simplifyDebts per (group, currency). */
+export interface Transfer {
+    groupId: string;
+    currency: string;
+    fromUserId: string;
+    toUserId: string;
+    amount: number;
+}
+
+/** Per-group rollup for the current user. Primary = currency with largest |net|. */
+export interface GroupRollup {
+    groupId: string;
+    primary: { currency: string; net: number };
+    others: { currency: string; net: number }[];
+}
+
+/** Per-friend balance for the current user, across all shared groups. */
+export interface FriendBalanceSummary {
+    userId: string;
+    name: string;
+    avatarUrl: string | null;
+    /** false when profile is_active = false; populated by client from store. */
+    isActive: boolean;
+    sharedGroupIds: string[];
+    byCurrency: { currency: string; net: number }[];
+}
+
+/**
+ * Full canonical struct — output of deriveSimplifiedDebts. Every UI surface
+ * that shows a debt number reads from here. If two surfaces disagree it is a
+ * bug in deriveSimplifiedDebts, not a "different RPC" mismatch.
+ */
+export interface SimplifiedDebts {
+    /** Canonical list of all simplified transfers across all groups/currencies. */
+    transfers: Transfer[];
+    /** byGroupCurrency.get(groupId)?.get(currency) ⇒ Transfer[] (settle-up & breakdown sheet). */
+    byGroupCurrency: Map<string, Map<string, Transfer[]>>;
+    /** Transfers where currentUserId is from or to. */
+    userTransfers: Transfer[];
+    /** Per-group, per-current-user rollup (header + list chip). Absent ⇒ group is settled. */
+    groupRollups: Map<string, GroupRollup>;
+    /** Per-friend rollup (profile screen tile). Absent ⇒ no non-zero balance with that friend. */
+    friendBalances: Map<string, FriendBalanceSummary>;
+}
+
 /** One row of the per-currency balance summary for the current user. */
 export interface BalanceSummaryRow {
     currency: string;
@@ -520,11 +598,23 @@ export interface BalanceSummaryRow {
     net: number;  // owed - owe
 }
 
-/** Per-group net balance for the current user. Positive = I'm owed; negative = I owe. */
+/** Additional non-zero currency net within the same group. */
+export interface GroupBalanceOther {
+    currency: string;
+    net: number;
+}
+
+/**
+ * Per-group net balance for the current user. Positive = I'm owed; negative = I owe.
+ * `currency` / `net` are the primary entry (the currency with the largest |net|).
+ * `others` carries any additional non-zero currencies for this group so the UI can
+ * render a chip stack instead of cherry-picking one.
+ */
 export interface GroupBalance {
     groupId: string;
     currency: string;
     net: number;
+    others?: GroupBalanceOther[];
 }
 
 /** Payload returned by supabase.rpc('get_user_balance_summary'). */

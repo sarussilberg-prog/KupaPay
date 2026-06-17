@@ -93,6 +93,7 @@
     "@testing-library/react-native": "^12.5.3",
     "@types/jest": "^29.5.12",
     "@types/react": "~19.1.10",
+    "fast-check": "^4.8.0",
     "jest": "^29.7.0",
     "jest-expo": "~54.0.0",
     "lightningcss": "^1.32.0",

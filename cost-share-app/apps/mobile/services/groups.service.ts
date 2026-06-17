@@ -33,7 +33,7 @@ import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
-import { fetchBalanceSummary } from './users.service';
+import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
 import {
     showAppToast,
     showSuccessMessage,
@@ -377,7 +377,7 @@ export async function updateGroup(id: string, dto: UpdateGroupDto): Promise<Grou
         (prev ?? []).map((g) => (g.id === id ? group : g)),
     );
     if (dto.defaultCurrency !== undefined) {
-        void fetchBalanceSummary();
+        invalidateBalanceCaches();
     }
     showSuccessToast('groups.groupUpdated');
     return group;
@@ -481,7 +481,7 @@ async function syncGroupMembershipState(groupId: string): Promise<void> {
 
     void queryClient.invalidateQueries({ queryKey: queryKeys.groupUsers(groupId) });
     void queryClient.invalidateQueries({ queryKey: queryKeys.groupMembers(groupId) });
-    void fetchBalanceSummary();
+    invalidateBalanceCaches();
 }
 
 export async function addGroupMember(groupId: string, userId: string): Promise<GroupMember | null> {
@@ -581,70 +581,6 @@ export async function getGroupBalancesByCurrency(
 export interface SimplifiedDebtsByCurrencyEntry {
     currency: string;
     result: SimplifiedDebtsResult;
-}
-
-export async function getGroupSimplifiedDebtsByCurrency(
-    groupId: string,
-): Promise<SimplifiedDebtsByCurrencyEntry[]> {
-    try {
-        const balancesByCurrency = await getGroupBalancesByCurrency(groupId);
-        if (balancesByCurrency.length === 0) return [];
-
-        const userIds = Array.from(new Set(balancesByCurrency.map(b => b.userId)));
-        const nameById = new Map<string, string>();
-        if (userIds.length > 0) {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, name')
-                .in('id', userIds);
-            if (error) throw error;
-            (data ?? []).forEach(p => nameById.set(p.id as string, p.name as string));
-        }
-
-        // Pivot: currency -> [{ userId, currency, netBalance, ... }]
-        const byCurrency = new Map<string, UserBalance[]>();
-        for (const entry of balancesByCurrency) {
-            for (const row of entry.byCurrency) {
-                const bucket = byCurrency.get(row.currency) ?? [];
-                bucket.push({
-                    groupId,
-                    userId: entry.userId,
-                    currency: row.currency,
-                    totalPaid: row.totalPaid,
-                    totalOwed: row.totalOwed,
-                    totalSettledPaid: row.totalSettledPaid,
-                    totalSettledReceived: row.totalSettledReceived,
-                    netBalance: row.netBalance,
-                });
-                byCurrency.set(row.currency, bucket);
-            }
-        }
-
-        const out: SimplifiedDebtsByCurrencyEntry[] = [];
-        for (const [currency, balances] of byCurrency) {
-            try {
-                out.push({ currency, result: simplifyDebts(balances, nameById) });
-            } catch (err) {
-                if (err instanceof UnbalancedLedgerError) {
-                    console.warn(
-                        `Skipping simplification for ${currency}: ${err.message}`,
-                    );
-                    continue;
-                }
-                throw err;
-            }
-        }
-        // Sort currencies alphabetically for stable rendering.
-        out.sort((a, b) => a.currency.localeCompare(b.currency));
-        return out;
-    } catch (error) {
-        captureError(error, {
-            tags: { service: 'groups', op: 'getSimplifiedDebts' },
-            extra: { groupId },
-        });
-        console.error('Failed to fetch simplified debts by currency:', error);
-        return [];
-    }
 }
 
 export async function getGroupSummary(groupId: string): Promise<GroupSummary | null> {

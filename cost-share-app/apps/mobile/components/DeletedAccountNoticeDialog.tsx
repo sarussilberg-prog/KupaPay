@@ -43,7 +43,7 @@ export function DeletedAccountNoticeDialog({
                             className="flex-1 py-3 rounded-xl border border-gray-200 items-center"
                             accessibilityRole="button"
                         >
-                            <Text className="text-base font-semibold text-gray-700">{closeLabel}</Text>
+                            <Text className="text-base font-semibold text-gray-700 text-center">{closeLabel}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={onContact}
@@ -51,7 +51,7 @@ export function DeletedAccountNoticeDialog({
                             accessibilityRole="button"
                             testID="deleted-account-contact-support"
                         >
-                            <Text className="text-base font-semibold text-white">{contactLabel}</Text>
+                            <Text className="text-base font-semibold text-white text-center">{contactLabel}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

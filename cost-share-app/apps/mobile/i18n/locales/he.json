@@ -278,7 +278,9 @@
         "summary": {
             "youAreOwed": "יש לך <1>{{amount}}</1> לזכות",
             "youOwe": "אתה חייב <1>{{amount}}</1>",
-            "noOpenPayments": "אין תשלומים פתוחים"
+            "noOpenPayments": "אין תשלומים פתוחים",
+            "showMore": "הצג עוד {{count}}",
+            "showLess": "הצג פחות"
         },
         "hero": {
             "spentTogether": "הוציאו ביחד",

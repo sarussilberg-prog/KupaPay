@@ -18,16 +18,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { GroupWithMembers } from '@cost-share/shared';
-import { useAppStore } from '../../store';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
-import { fetchBalanceSummary } from '../../services/users.service';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
 import { prefetchAddExpensePrerequisitesForGroup } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
-import { useGroupBalancesDisplay } from '../../hooks/useGroupBalancesDisplay';
-import { GroupsListSkeleton } from '../../components/skeletons/GroupsListSkeleton';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
+import { AppGateSkeleton } from '../../components/skeletons/AppGateSkeleton';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
 import { CreateGroupFabAnchor, createGroupFabScrollPadding } from '../../components/groups/CreateGroupFabAnchor';
@@ -68,17 +66,20 @@ export function GroupsListScreen() {
     const listBottomPadding = createGroupFabScrollPadding() + FAB_LIST_GAP;
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
-    const isLoading = groupsQuery.isLoading;
-    const groupBalances = useAppStore(s => s.groupBalances);
+    // Suppress the empty state while any fetch is in flight and we have no
+    // data yet — covers the cold-start case where a persisted-empty cache
+    // briefly resolves with `isLoading=false` while the background refetch
+    // is still loading the user's groups.
+    const isInitialLoading = groupsQuery.isFetching && groups.length === 0;
 
-    const balanceDisplays = useGroupBalancesDisplay(groupBalances, groups);
+    const { data: simplified } = useSimplifiedDebts();
     const balanceNetsByGroup = useMemo(() => {
         const out: Record<string, { net: number }> = {};
-        balanceDisplays.forEach((display, groupId) => {
-            out[groupId] = { net: display.net };
+        simplified?.groupRollups.forEach((rollup, groupId) => {
+            out[groupId] = { net: rollup.primary.net };
         });
         return out;
-    }, [balanceDisplays]);
+    }, [simplified]);
 
     const [refreshing, setRefreshing] = useState(false);
     const loadError = groupsQuery.isError;
@@ -114,7 +115,7 @@ export function GroupsListScreen() {
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         await queryClient.invalidateQueries({ queryKey: queryKeys.groups });
-        void fetchBalanceSummary();
+        void queryClient.invalidateQueries({ queryKey: queryKeys.simplifiedDebts });
         void prefetchActivityFeed();
         setRefreshing(false);
     }, []);
@@ -174,7 +175,7 @@ export function GroupsListScreen() {
         ({ item }) => (
             <GroupCard
                 group={item.group}
-                balanceDisplay={balanceDisplays.get(item.group.id)}
+                rollup={simplified?.groupRollups.get(item.group.id)}
                 searchQuery={trimmedQuery || undefined}
                 matchedMemberNames={
                     item.matched.length > 0 ? item.matched : undefined
@@ -182,11 +183,11 @@ export function GroupsListScreen() {
                 onPress={handleGroupPress}
             />
         ),
-        [balanceDisplays, trimmedQuery, handleGroupPress],
+        [simplified, trimmedQuery, handleGroupPress],
     );
 
-    if (isLoading && groups.length === 0) {
-        return <GroupsListSkeleton />;
+    if (isInitialLoading) {
+        return <AppGateSkeleton />;
     }
 
     return (

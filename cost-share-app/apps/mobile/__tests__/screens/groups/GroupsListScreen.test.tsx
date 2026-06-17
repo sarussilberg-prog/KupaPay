@@ -28,20 +28,20 @@ jest.mock('../../../services/groups.service', () => ({
     fetchGroups: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('../../../services/users.service', () => ({
-    fetchBalanceSummary: jest.fn().mockResolvedValue({ summary: [], byGroup: [] }),
+jest.mock('../../../services/simplifiedDebts.service', () => ({
+    fetchSimplifiedInputs: jest.fn().mockResolvedValue({ groups: [] }),
 }));
 
 import { GroupsListScreen } from '../../../screens/groups/GroupsListScreen';
 import { useAppStore } from '../../../store';
 import { fetchGroups } from '../../../services/groups.service';
-import { fetchBalanceSummary } from '../../../services/users.service';
+import { fetchSimplifiedInputs } from '../../../services/simplifiedDebts.service';
 import { queryClient } from '../../../lib/queryClient';
 import { queryKeys } from '../../../hooks/queries/keys';
 
 const mockFetchGroups = fetchGroups as jest.MockedFunction<typeof fetchGroups>;
-const mockFetchSummary = fetchBalanceSummary as jest.MockedFunction<
-    typeof fetchBalanceSummary
+const mockFetchSummary = fetchSimplifiedInputs as jest.MockedFunction<
+    typeof fetchSimplifiedInputs
 >;
 
 const makeGroup = (overrides: Partial<{
@@ -70,10 +70,6 @@ beforeEach(() => {
     mockGoBack.mockClear();
     mockFetchGroups.mockClear();
     mockFetchSummary.mockClear();
-    useAppStore.setState({
-        balanceSummary: [],
-        groupBalances: {},
-    });
     queryClient.clear();
 });
 

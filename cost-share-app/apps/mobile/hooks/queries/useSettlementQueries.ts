@@ -1,6 +1,6 @@
 /**
- * Settlement queries + mutations — pairwise debts, group settlements list,
- * and create / update / delete mutations that invalidate related caches.
+ * Settlement queries + mutations — group settlements list + create/update/
+ * delete mutations that invalidate the canonical balance cache.
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -11,23 +11,11 @@ import {
 import {
     createSettlement,
     deleteSettlement,
-    fetchGroupPairwiseDebts,
     fetchSettlements,
     updateSettlement,
 } from '../../services/settlements.service';
-import { fetchBalanceSummary } from '../../services/users.service';
+import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { queryKeys } from './keys';
-
-export function useGroupPairwiseDebtsQuery(
-    groupId: string,
-    options?: { enabled?: boolean },
-) {
-    return useQuery({
-        queryKey: queryKeys.groupPairwiseDebts(groupId),
-        queryFn: () => fetchGroupPairwiseDebts(groupId),
-        enabled: Boolean(groupId) && (options?.enabled ?? true),
-    });
-}
 
 export function useGroupSettlementsQuery(groupId: string) {
     return useQuery({
@@ -40,21 +28,11 @@ export function useGroupSettlementsQuery(groupId: string) {
 function useInvalidateAfterSettlementChange(groupId: string) {
     const queryClient = useQueryClient();
     return () => {
-        void queryClient.invalidateQueries({
-            queryKey: queryKeys.groupPairwiseDebts(groupId),
-        });
-        void queryClient.invalidateQueries({
-            queryKey: queryKeys.groupSettlements(groupId),
-        });
+        invalidateBalanceCaches(groupId);
         void queryClient.invalidateQueries({
             queryKey: queryKeys.groupContributions(groupId),
         });
-        void queryClient.invalidateQueries({
-            queryKey: queryKeys.groupSimplifiedDebtsByCurrency(groupId),
-        });
         void queryClient.invalidateQueries({ queryKey: queryKeys.activity });
-        void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
-        void fetchBalanceSummary();
     };
 }
 

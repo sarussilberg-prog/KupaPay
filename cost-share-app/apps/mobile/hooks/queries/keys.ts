@@ -9,6 +9,7 @@ export const queryKeys = {
     groupExpenses: (groupId: string) => ['groupExpenses', groupId] as const,
     groupMessages: (groupId: string) => ['groupMessages', groupId] as const,
     balanceSummary: ['balanceSummary'] as const,
+    simplifiedDebts: ['simplifiedDebts'] as const,
     friends: ['friends'] as const,
     friendRequestsIncoming: ['friend-requests', 'incoming'] as const,
     friendRequestsOutgoing: ['friend-requests', 'outgoing'] as const,

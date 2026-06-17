@@ -27,7 +27,9 @@ import {
     useGroupSettlementsQuery,
     useUpdateSettlementMutation,
 } from '../../hooks/queries/useSettlementQueries';
-import { useGroupSimplifiedDebtsByCurrencyQuery } from '../../hooks/queries/useGroupBalancesQueries';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
+import { queryClient } from '../../lib/queryClient';
+import { queryKeys } from '../../hooks/queries/keys';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsRealtime';
@@ -85,25 +87,28 @@ export function SettleUpListScreen() {
         [members, t],
     );
 
-    const {
-        data: simplifiedEntries = [],
-        isLoading,
-        isFetching,
-        isRefetching,
-        refetch,
-    } = useGroupSimplifiedDebtsByCurrencyQuery(groupId);
-    const debts = useMemo<PairwiseDebt[]>(
-        () =>
-            simplifiedEntries.flatMap(entry =>
-                entry.result.debts.map(d => ({
-                    fromUserId: d.fromUserId,
-                    toUserId: d.toUserId,
-                    currency: d.currency,
-                    amount: d.amount,
-                })),
-            ),
-        [simplifiedEntries],
-    );
+    const { data: simplified, isLoading } = useSimplifiedDebts();
+    const isFetching = isLoading;
+    const isRefetching = false;
+    const debts = useMemo<PairwiseDebt[]>(() => {
+        const perCurrency = simplified?.byGroupCurrency.get(groupId);
+        if (!perCurrency) return [];
+        const out: PairwiseDebt[] = [];
+        perCurrency.forEach((transfers, currency) => {
+            transfers.forEach(t =>
+                out.push({
+                    fromUserId: t.fromUserId,
+                    toUserId: t.toUserId,
+                    currency,
+                    amount: t.amount,
+                }),
+            );
+        });
+        return out;
+    }, [simplified, groupId]);
+    const refetch = useCallback(() => {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.simplifiedDebts });
+    }, []);
     const { data: settlements = [], refetch: refetchSettlements } =
         useGroupSettlementsQuery(groupId);
     const createMutation = useCreateSettlementMutation(groupId);
@@ -263,7 +268,7 @@ export function SettleUpListScreen() {
                     />
                 )}
                 ListEmptyComponent={
-                    isFetching ? null : (
+                    isFetching || others.length > 0 ? null : (
                         <EmptyState
                             iconName="checkmark-circle-outline"
                             title={t('settleUp.empty')}
