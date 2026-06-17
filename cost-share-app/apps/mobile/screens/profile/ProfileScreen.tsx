@@ -12,13 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
-import { FriendBalance } from '@cost-share/shared';
+import { FriendBalanceSummary } from '@cost-share/shared';
 import { useAppStore } from '../../store';
 import { useDashboardQuery } from '../../hooks/queries/useDashboardQuery';
 import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
 import { useProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
-import { useFriendBalancesDisplay } from '../../hooks/useFriendBalancesDisplay';
 import { collectProfileFxCurrencies } from '../../lib/collectProfileFxCurrencies';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { queryKeys } from '../../hooks/queries/keys';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/EmptyState';
@@ -215,11 +215,7 @@ export function ProfileScreen() {
         dashboard?.balanceSummary,
         ratesQuery,
     );
-    const friendDisplays = useFriendBalancesDisplay(
-        dashboard?.friends,
-        baseCurrency,
-        ratesQuery.data?.rates,
-    );
+    const { data: simplified } = useSimplifiedDebts();
     const incomingQ = useIncomingFriendRequestsQuery();
     const pendingCount = incomingQ.data?.length ?? 0;
     const friendsQ = useFriendsQuery();
@@ -245,10 +241,10 @@ export function ProfileScreen() {
         void shareFriendInvite();
     }, []);
 
-    const [selectedFriend, setSelectedFriend] = useState<FriendBalance | null>(null);
+    const [selectedFriend, setSelectedFriend] = useState<FriendBalanceSummary | null>(null);
     const currentUserId = currentUser?.id ?? null;
 
-    const handleFriendPress = useCallback((friend: FriendBalance) => {
+    const handleFriendPress = useCallback((friend: FriendBalanceSummary) => {
         setSelectedFriend(friend);
     }, []);
 
@@ -276,7 +272,14 @@ export function ProfileScreen() {
     const showLoadingSkeletons = isLoading && !dashboard;
     const showError = isError || (!isLoading && !dashboard);
 
-    const friends = dashboard?.friends ?? [];
+    const friends = useMemo<FriendBalanceSummary[]>(
+        () => simplified
+            ? [...simplified.friendBalances.values()].sort((a, b) =>
+                  a.name.localeCompare(b.name),
+              )
+            : [],
+        [simplified],
+    );
 
     const listHeader = useMemo(
         () => (
@@ -336,10 +339,8 @@ export function ProfileScreen() {
         ],
     );
 
-    const renderFriendRow: ListRenderItem<FriendBalance> = useCallback(
+    const renderFriendRow: ListRenderItem<FriendBalanceSummary> = useCallback(
         ({ item, index }) => {
-            const display = friendDisplays.get(item.userId);
-            if (!display) return null;
             const isFirst = index === 0;
             const isLast = index === friends.length - 1;
             return (
@@ -364,7 +365,6 @@ export function ProfileScreen() {
                 >
                     <FriendBalanceRow
                         friend={item}
-                        display={display}
                         onPress={handleFriendPress}
                         testID={`friend-${item.userId}`}
                         isLast={isLast}
@@ -372,7 +372,7 @@ export function ProfileScreen() {
                 </View>
             );
         },
-        [friendDisplays, friends.length, handleFriendPress],
+        [friends.length, handleFriendPress],
     );
 
     return (

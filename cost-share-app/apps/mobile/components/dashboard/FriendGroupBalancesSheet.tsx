@@ -2,6 +2,12 @@
  * FriendGroupBalancesSheet
  * Modal popup that breaks a friend's balance down by group.
  * Each row tap navigates to that group and closes the sheet.
+ *
+ * Reads from the canonical simplifier output (useSimplifiedDebts) — the same
+ * source the group screen uses — so the per-group rows align with the
+ * settle-up plan. Cycle phantoms (where Ari→Bar pair-net is non-zero but the
+ * 3-way cycle cancels at user level) no longer appear because simplification
+ * removes them upstream.
  */
 
 import React, { useMemo } from 'react';
@@ -11,11 +17,10 @@ import {
     View,
     TouchableOpacity,
     ScrollView,
-    ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { FriendBalance, PairwiseDebt } from '@cost-share/shared';
+import { useQuery } from '@tanstack/react-query';
+import { FriendBalanceSummary } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { MemberAvatar } from '../MemberAvatar';
 import { GroupAvatar } from '../GroupAvatar';
@@ -24,13 +29,13 @@ import { colors } from '../../theme';
 import { formatCurrencyAmount } from '../../lib/currencyDisplay';
 import { useRtlLayout, rtlRowStyle } from '../../hooks/useRtlLayout';
 import { queryKeys } from '../../hooks/queries/keys';
-import { fetchGroupPairwiseDebts } from '../../services/settlements.service';
 import { fetchGroups } from '../../services/groups.service';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { getAvatarUrlForFriend, getDisplayNameForFriend } from '../../lib/userDisplay';
 
 interface Props {
     visible: boolean;
-    friend: FriendBalance | null;
+    friend: FriendBalanceSummary | null;
     currentUserId: string | null;
     onClose: () => void;
     onSelectGroup: (groupId: string) => void;
@@ -46,29 +51,6 @@ interface GroupBreakdown {
     groupId: string;
     lines: CurrencyLine[];
     isSettled: boolean;
-    isLoading: boolean;
-}
-
-function netLinesFromDebts(
-    debts: PairwiseDebt[] | undefined,
-    currentUserId: string,
-    friendId: string,
-): CurrencyLine[] {
-    if (!debts) return [];
-    const byCurrency = new Map<string, number>();
-    for (const d of debts) {
-        const involvesPair =
-            (d.fromUserId === currentUserId && d.toUserId === friendId) ||
-            (d.fromUserId === friendId && d.toUserId === currentUserId);
-        if (!involvesPair) continue;
-        const sign = d.fromUserId === friendId ? 1 : -1;
-        byCurrency.set(d.currency, (byCurrency.get(d.currency) ?? 0) + sign * d.amount);
-    }
-    const lines: CurrencyLine[] = [];
-    byCurrency.forEach((netAmount, currency) => {
-        if (Math.abs(netAmount) >= 0.01) lines.push({ currency, netAmount });
-    });
-    return lines;
 }
 
 export function FriendGroupBalancesSheet({
@@ -80,6 +62,7 @@ export function FriendGroupBalancesSheet({
 }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
+    const { data: simplified } = useSimplifiedDebts();
     const sharedGroupIds = useMemo(() => friend?.sharedGroupIds ?? [], [friend]);
 
     const groupsQuery = useQuery({
@@ -100,29 +83,33 @@ export function FriendGroupBalancesSheet({
     }, [groups]);
     const friendId = friend?.userId ?? null;
 
-    const debtQueries = useQueries({
-        queries: sharedGroupIds.map(groupId => ({
-            queryKey: queryKeys.groupPairwiseDebts(groupId),
-            queryFn: () => fetchGroupPairwiseDebts(groupId),
-            enabled: visible && Boolean(currentUserId) && Boolean(friendId),
-        })),
-    });
-
     const breakdowns: GroupBreakdown[] = useMemo(() => {
-        if (!friendId || !currentUserId) return [];
-        return sharedGroupIds.map((groupId, idx) => {
-            const q = debtQueries[idx];
-            const lines = netLinesFromDebts(q?.data, currentUserId, friendId);
-            return {
-                groupId,
-                lines,
-                isSettled: lines.length === 0 && !q?.isLoading,
-                isLoading: Boolean(q?.isLoading),
-            };
+        if (!friendId || !currentUserId || !simplified) return [];
+        return sharedGroupIds.map(groupId => {
+            const perCurrency = simplified.byGroupCurrency.get(groupId);
+            const lines: CurrencyLine[] = [];
+            perCurrency?.forEach((transfers, currency) => {
+                let net = 0;
+                transfers.forEach(tx => {
+                    if (
+                        tx.fromUserId === currentUserId &&
+                        tx.toUserId === friendId
+                    ) {
+                        net -= tx.amount;
+                    } else if (
+                        tx.fromUserId === friendId &&
+                        tx.toUserId === currentUserId
+                    ) {
+                        net += tx.amount;
+                    }
+                });
+                if (Math.abs(net) >= 0.01) {
+                    lines.push({ currency, netAmount: net });
+                }
+            });
+            return { groupId, lines, isSettled: lines.length === 0 };
         });
-    }, [sharedGroupIds, debtQueries, friendId, currentUserId]);
-
-    const anyLoading = breakdowns.some(b => b.isLoading);
+    }, [sharedGroupIds, simplified, friendId, currentUserId]);
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -159,11 +146,7 @@ export function FriendGroupBalancesSheet({
                     </View>
 
                     {/* Body */}
-                    {anyLoading && breakdowns.every(b => b.isLoading) ? (
-                        <View className="py-10 items-center">
-                            <ActivityIndicator color={colors.primary} />
-                        </View>
-                    ) : breakdowns.length === 0 ? (
+                    {breakdowns.length === 0 ? (
                         <View className="py-10 px-6 items-center">
                             <Text className="text-sm text-slate-500 text-center">
                                 {t('dashboard.friendBreakdownEmpty')}
@@ -196,11 +179,7 @@ export function FriendGroupBalancesSheet({
                                                 {group?.name
                                                     ?? (groupsQuery.isLoading ? '…' : t('common.unknown'))}
                                             </Text>
-                                            {b.isLoading ? (
-                                                <Text className="text-xs text-slate-400 mt-0.5">
-                                                    …
-                                                </Text>
-                                            ) : b.isSettled ? (
+                                            {b.isSettled ? (
                                                 <Text className="text-xs text-slate-400 mt-0.5">
                                                     {t('dashboard.settled')}
                                                 </Text>
