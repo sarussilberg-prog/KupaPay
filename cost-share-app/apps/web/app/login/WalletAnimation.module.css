@@ -1,0 +1,74 @@
+/* Transfer-Loop animation — direct CSS port of the approved KupaPay HTML design.
+   Geometry (source stage 1100×967, arrow slots, translate distances) is applied via
+   CSS custom properties set on the wrapper element so the whole thing scales by
+   changing a single --size variable. */
+
+.wrap {
+  position: relative;
+  overflow: hidden;
+  /* size is set inline */
+}
+
+/* The canvas that holds the three raster layers.
+   Centered vertically inside the square wrap (logo is wider than tall). */
+.stage {
+  position: absolute;
+  left: 0;
+  overflow: hidden;
+  /* top / width / height set inline */
+}
+
+.base {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* width / height set inline */
+}
+
+/* clip layer — overflow:hidden clips arrows to the stage edges so they appear
+   to emerge from / vanish into the wallet's sides */
+.clip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.arrow {
+  position: absolute;
+  /* slot geometry set inline */
+}
+
+.arrowTop {
+  animation: flowTop 3.6s linear infinite;
+}
+
+.arrowBot {
+  animation: flowBot 3.6s linear infinite;
+}
+
+@keyframes flowTop {
+  0%   { transform: translateX(var(--top-enter)); animation-timing-function: cubic-bezier(.16,.86,.28,1); }
+  26%  { transform: translateX(0);                animation-timing-function: linear; }
+  52%  { transform: translateX(0);                animation-timing-function: cubic-bezier(.55,0,.82,.18); }
+  80%  { transform: translateX(var(--top-exit));  animation-timing-function: linear; }
+  100% { transform: translateX(var(--top-exit)); }
+}
+
+@keyframes flowBot {
+  0%   { transform: translateX(var(--bot-enter)); animation-timing-function: cubic-bezier(.16,.86,.28,1); }
+  26%  { transform: translateX(0);                animation-timing-function: linear; }
+  52%  { transform: translateX(0);                animation-timing-function: cubic-bezier(.55,0,.82,.18); }
+  80%  { transform: translateX(var(--bot-exit));  animation-timing-function: linear; }
+  100% { transform: translateX(var(--bot-exit)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrowTop,
+  .arrowBot {
+    animation: none;
+    transform: translateX(0) !important;
+  }
+}
