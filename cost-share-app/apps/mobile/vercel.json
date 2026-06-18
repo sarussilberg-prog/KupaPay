@@ -3,7 +3,6 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm install --include=optional",
   "buildCommand": "bash ../web/scripts/build-web-next.sh",
-  "outputDirectory": "../web/.next",
   "rewrites": [
     {
       "source": "/.well-known/apple-app-site-association",

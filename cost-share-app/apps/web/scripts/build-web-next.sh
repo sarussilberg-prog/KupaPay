@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Builds the Next.js web app for Vercel (kupa-pay.com / dev.kupa-pay.com).
 # Handles env var resolution: Vercel dashboard → supabase-public.*.defaults fallback.
+# Works whether invoked from apps/web/ (Vercel root = apps/web) or from
+# apps/mobile/ (legacy Vercel root = apps/mobile) — copies .next/ output
+# back to the invocation directory when needed.
 set -euo pipefail
 
+INVOCATION_DIR="$PWD"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 WEB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -38,3 +42,12 @@ fi
 cd "$ROOT"
 npm run build -w @cost-share/shared
 npm run build -w @cost-share/web
+
+# If the build was invoked from a different directory than apps/web (e.g., from
+# apps/mobile when the Vercel project root is apps/mobile), copy the .next/
+# output back so Vercel finds it at the project root.
+if [[ "$INVOCATION_DIR" != "$WEB_DIR" ]]; then
+  echo "Syncing .next/ from $WEB_DIR → $INVOCATION_DIR ..."
+  rm -rf "$INVOCATION_DIR/.next"
+  cp -r "$WEB_DIR/.next" "$INVOCATION_DIR/.next"
+fi
