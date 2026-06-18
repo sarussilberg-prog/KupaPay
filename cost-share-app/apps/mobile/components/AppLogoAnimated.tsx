@@ -1,7 +1,16 @@
-import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import Animated, {
-    Easing,
+import React, { useEffect, useRef } from 'react';
+import {
+    Animated as RNAnimated,
+    Easing as RNEasing,
+    Image,
+    Platform,
+    StyleProp,
+    StyleSheet,
+    View,
+    ViewStyle,
+} from 'react-native';
+import Reanimated, {
+    Easing as ReEasing,
     useAnimatedStyle,
     useReducedMotion,
     useSharedValue,
@@ -25,6 +34,10 @@ import Animated, {
  *   flowTop X: -900 → 0 → 0 → +1200; flowBot X: +900 → 0 → 0 → -1200 (px in stage units),
  *   ease-in glide-in (.16,.86,.28,1) and accelerate-out (.55,0,.82,.18).
  *
+ * Native uses react-native-reanimated. On web, reanimated's worklet runtime does not drive the
+ * loop reliably (it renders frozen), so the web build uses React Native's core `Animated` API,
+ * which react-native-web animates via requestAnimationFrame. Both paths produce identical motion.
+ *
  * Respects the OS "reduce motion" setting by rendering the assembled logo statically.
  */
 
@@ -44,24 +57,65 @@ const BOT_EXIT = -1200;
 
 const LOOP_MS = 3600;
 
+// Loop split as fractions of LOOP_MS: glide-in, hold assembled, accelerate-out, wait empty.
+const F_ENTER = 0.26;
+const F_HOLD = 0.26;
+const F_EXIT = 0.28;
+const F_WAIT = 0.2;
+
 interface AppLogoAnimatedProps {
     size?: number;
     testID?: string;
     style?: StyleProp<ViewStyle>;
 }
 
-export function AppLogoAnimated({
-    size = 108,
-    testID = 'app-logo',
-    style,
-}: AppLogoAnimatedProps) {
-    const reduced = useReducedMotion();
+interface StageLayout {
+    k: number;
+    stageH: number;
+    stageStyle: ViewStyle;
+    topSlot: ViewStyle;
+    botSlot: ViewStyle;
+}
 
-    // Scale the source stage (1100×967) to the square box, centered vertically (the logo is
-    // wider than tall), so the animated mark sits balanced in its container.
+// Scale the source stage (1100×967) to the square box, centered vertically (the logo is wider
+// than tall), so the animated mark sits balanced in its container.
+function getStageLayout(size: number): StageLayout {
     const k = size / STAGE_W;
     const stageH = STAGE_H * k;
     const stageTop = (size - stageH) / 2;
+    return {
+        k,
+        stageH,
+        stageStyle: { position: 'absolute', left: 0, top: stageTop, width: size, height: stageH },
+        topSlot: {
+            position: 'absolute',
+            left: TOP_SLOT.left * k,
+            top: TOP_SLOT.top * k,
+            width: TOP_SLOT.width * k,
+            height: TOP_SLOT.height * k,
+        },
+        botSlot: {
+            position: 'absolute',
+            left: BOT_SLOT.left * k,
+            top: BOT_SLOT.top * k,
+            width: BOT_SLOT.width * k,
+            height: BOT_SLOT.height * k,
+        },
+    };
+}
+
+export function AppLogoAnimated(props: AppLogoAnimatedProps) {
+    // Platform.OS is fixed for the app's lifetime, so this branch is stable and each platform's
+    // component keeps a consistent hook order across renders.
+    if (Platform.OS === 'web') {
+        return <AppLogoAnimatedWeb {...props} />;
+    }
+    return <AppLogoAnimatedNative {...props} />;
+}
+
+function AppLogoAnimatedNative({ size = 108, testID = 'app-logo', style }: AppLogoAnimatedProps) {
+    const reduced = useReducedMotion();
+    const { k, stageH, stageStyle, topSlot, botSlot } = getStageLayout(size);
 
     const topX = useSharedValue(reduced ? 0 : TOP_ENTER * k);
     const botX = useSharedValue(reduced ? 0 : BOT_ENTER * k);
@@ -74,19 +128,19 @@ export function AppLogoAnimated({
         }
         const d = LOOP_MS;
         // Approved easings: glide-in (fast then settle) and accelerate-out.
-        const enter = Easing.bezier(0.16, 0.86, 0.28, 1);
-        const exit = Easing.bezier(0.55, 0, 0.82, 0.18);
-        const linear = Easing.linear;
+        const enter = ReEasing.bezier(0.16, 0.86, 0.28, 1);
+        const exit = ReEasing.bezier(0.55, 0, 0.82, 0.18);
+        const linear = ReEasing.linear;
 
         // Top arrow (→): wait off-left, glide in to the logo, hold, accelerate out to the right,
         // wait off-right, then snap back off-left (invisible, behind the clip) and loop.
         topX.value = withRepeat(
             withSequence(
                 withTiming(TOP_ENTER * k, { duration: 0 }),
-                withTiming(0, { duration: 0.26 * d, easing: enter }),
-                withTiming(0, { duration: 0.26 * d, easing: linear }),
-                withTiming(TOP_EXIT * k, { duration: 0.28 * d, easing: exit }),
-                withTiming(TOP_EXIT * k, { duration: 0.2 * d, easing: linear }),
+                withTiming(0, { duration: F_ENTER * d, easing: enter }),
+                withTiming(0, { duration: F_HOLD * d, easing: linear }),
+                withTiming(TOP_EXIT * k, { duration: F_EXIT * d, easing: exit }),
+                withTiming(TOP_EXIT * k, { duration: F_WAIT * d, easing: linear }),
             ),
             -1,
         );
@@ -94,10 +148,10 @@ export function AppLogoAnimated({
         botX.value = withRepeat(
             withSequence(
                 withTiming(BOT_ENTER * k, { duration: 0 }),
-                withTiming(0, { duration: 0.26 * d, easing: enter }),
-                withTiming(0, { duration: 0.26 * d, easing: linear }),
-                withTiming(BOT_EXIT * k, { duration: 0.28 * d, easing: exit }),
-                withTiming(BOT_EXIT * k, { duration: 0.2 * d, easing: linear }),
+                withTiming(0, { duration: F_ENTER * d, easing: enter }),
+                withTiming(0, { duration: F_HOLD * d, easing: linear }),
+                withTiming(BOT_EXIT * k, { duration: F_EXIT * d, easing: exit }),
+                withTiming(BOT_EXIT * k, { duration: F_WAIT * d, easing: linear }),
             ),
             -1,
         );
@@ -105,28 +159,6 @@ export function AppLogoAnimated({
 
     const topStyle = useAnimatedStyle(() => ({ transform: [{ translateX: topX.value }] }));
     const botStyle = useAnimatedStyle(() => ({ transform: [{ translateX: botX.value }] }));
-
-    const stageStyle: ViewStyle = {
-        position: 'absolute',
-        left: 0,
-        top: stageTop,
-        width: size,
-        height: stageH,
-    };
-    const topSlot: ViewStyle = {
-        position: 'absolute',
-        left: TOP_SLOT.left * k,
-        top: TOP_SLOT.top * k,
-        width: TOP_SLOT.width * k,
-        height: TOP_SLOT.height * k,
-    };
-    const botSlot: ViewStyle = {
-        position: 'absolute',
-        left: BOT_SLOT.left * k,
-        top: BOT_SLOT.top * k,
-        width: BOT_SLOT.width * k,
-        height: BOT_SLOT.height * k,
-    };
 
     return (
         <View
@@ -142,16 +174,93 @@ export function AppLogoAnimated({
                     resizeMode="contain"
                 />
                 <View style={styles.fill} pointerEvents="none">
-                    <Animated.View style={[topSlot, topStyle]}>
+                    <Reanimated.View style={[topSlot, topStyle]}>
                         <Image source={ARROW_TOP} style={styles.full} resizeMode="contain" />
-                    </Animated.View>
-                    <Animated.View style={[botSlot, botStyle]}>
+                    </Reanimated.View>
+                    <Reanimated.View style={[botSlot, botStyle]}>
                         <Image source={ARROW_BOTTOM} style={styles.full} resizeMode="contain" />
-                    </Animated.View>
+                    </Reanimated.View>
                 </View>
             </View>
         </View>
     );
+}
+
+function AppLogoAnimatedWeb({ size = 108, testID = 'app-logo', style }: AppLogoAnimatedProps) {
+    const { k, stageH, stageStyle, topSlot, botSlot } = getStageLayout(size);
+    const reduced = prefersReducedMotionWeb();
+
+    const topX = useRef(new RNAnimated.Value(reduced ? 0 : TOP_ENTER * k)).current;
+    const botX = useRef(new RNAnimated.Value(reduced ? 0 : BOT_ENTER * k)).current;
+
+    useEffect(() => {
+        if (reduced) {
+            topX.setValue(0);
+            botX.setValue(0);
+            return;
+        }
+        const d = LOOP_MS;
+        const enter = RNEasing.bezier(0.16, 0.86, 0.28, 1);
+        const exit = RNEasing.bezier(0.55, 0, 0.82, 0.18);
+        const linear = RNEasing.linear;
+
+        // Each loop: snap to the off-screen start (duration 0), glide in, hold, accelerate out,
+        // wait off-screen. useNativeDriver is false because web has no native driver — RNW drives
+        // the translateX via requestAnimationFrame.
+        const makeLoop = (val: RNAnimated.Value, enterPos: number, exitPos: number) =>
+            RNAnimated.loop(
+                RNAnimated.sequence([
+                    RNAnimated.timing(val, { toValue: enterPos, duration: 0, useNativeDriver: false }),
+                    RNAnimated.timing(val, { toValue: 0, duration: F_ENTER * d, easing: enter, useNativeDriver: false }),
+                    RNAnimated.timing(val, { toValue: 0, duration: F_HOLD * d, easing: linear, useNativeDriver: false }),
+                    RNAnimated.timing(val, { toValue: exitPos, duration: F_EXIT * d, easing: exit, useNativeDriver: false }),
+                    RNAnimated.timing(val, { toValue: exitPos, duration: F_WAIT * d, easing: linear, useNativeDriver: false }),
+                ]),
+            );
+
+        const topLoop = makeLoop(topX, TOP_ENTER * k, TOP_EXIT * k);
+        const botLoop = makeLoop(botX, BOT_ENTER * k, BOT_EXIT * k);
+        topLoop.start();
+        botLoop.start();
+        return () => {
+            topLoop.stop();
+            botLoop.stop();
+        };
+    }, [reduced, k, topX, botX]);
+
+    return (
+        <View
+            style={[styles.wrap, { width: size, height: size }, style]}
+            testID={testID}
+            accessibilityLabel="KupaPay"
+            accessibilityRole="image"
+        >
+            <View style={stageStyle}>
+                <Image
+                    source={WALLET_BASE}
+                    style={{ width: size, height: stageH }}
+                    resizeMode="contain"
+                />
+                <View style={styles.fill} pointerEvents="none">
+                    <RNAnimated.View style={[topSlot, { transform: [{ translateX: topX }] }]}>
+                        <Image source={ARROW_TOP} style={styles.full} resizeMode="contain" />
+                    </RNAnimated.View>
+                    <RNAnimated.View style={[botSlot, { transform: [{ translateX: botX }] }]}>
+                        <Image source={ARROW_BOTTOM} style={styles.full} resizeMode="contain" />
+                    </RNAnimated.View>
+                </View>
+            </View>
+        </View>
+    );
+}
+
+function prefersReducedMotionWeb(): boolean {
+    const mm = (globalThis as { matchMedia?: (q: string) => { matches: boolean } }).matchMedia;
+    try {
+        return mm ? mm('(prefers-reduced-motion: reduce)').matches : false;
+    } catch {
+        return false;
+    }
 }
 
 const styles = StyleSheet.create({
