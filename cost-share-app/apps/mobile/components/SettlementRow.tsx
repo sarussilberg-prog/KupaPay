@@ -9,6 +9,7 @@ import { Settlement } from '@cost-share/shared';
 import { FeedRowCard } from './FeedRowCard';
 import { FeedRowThumbnail } from './FeedRowThumbnail';
 import { useAppLanguage } from '../hooks/useRtlLayout';
+import { formatAmountDecimal } from '../lib/currencyDisplay';
 import { formatFeedDateTime } from '../lib/formatFeedDateTime';
 import { buildSettlementFeedCopy } from '../lib/feedSettlementPerspective';
 import { colors } from '../theme';
@@ -42,7 +43,7 @@ function SettlementRowBase({
     const copy = buildSettlementFeedCopy(settlement, currentUserId);
     const title = t(copy.key);
     const meta = `${timestamp} · ${t('activity.settlement')}`;
-    const amount = `${settlement.currency} ${settlement.amount.toFixed(2)}`;
+    const amount = `${settlement.currency} ${formatAmountDecimal(settlement.amount)}`;
 
     const thumbnail = (
         <FeedRowThumbnail

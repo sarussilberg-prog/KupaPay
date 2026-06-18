@@ -6,7 +6,6 @@ import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppIcon } from './AppIcon';
-import { rtlRowStyle, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 
 /** Gap between FAB row and tab bar (px). */
@@ -28,16 +27,11 @@ export function GroupDetailFloatingActions({
     onExpense,
 }: GroupDetailFloatingActionsProps) {
     const { t } = useTranslation();
-    const isRtl = useRtlLayout();
 
     return (
         <View
             pointerEvents="box-none"
-            style={[
-                styles.container,
-                { bottom: FAB_BOTTOM_GAP },
-                rtlRowStyle(isRtl),
-            ]}
+            style={[styles.container, { bottom: FAB_BOTTOM_GAP }]}
         >
             <TouchableOpacity
                 onPress={onMessage}
@@ -75,6 +69,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
         gap: 12,
+        direction: 'ltr',
     },
     fab: {
         flexDirection: 'row',

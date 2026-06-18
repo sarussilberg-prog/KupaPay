@@ -15,6 +15,7 @@ import { GroupRollup } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { formatAmountDecimal } from '../../lib/currencyDisplay';
 import { colors } from '../../theme';
 
 interface SummaryBalanceStripProps {
@@ -27,7 +28,7 @@ interface SummaryBalanceStripProps {
 const INLINE_LIMIT = 2;
 
 function formatAmount(amount: number, currency: string): string {
-    return `${currency} ${Math.abs(amount).toFixed(2)}`;
+    return `${currency} ${formatAmountDecimal(Math.abs(amount))}`;
 }
 
 function CurrencyChip({

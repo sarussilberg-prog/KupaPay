@@ -201,6 +201,20 @@ export function GroupDetailScreen() {
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusConsumedRef = useRef(false);
     const pendingFocusKeyRef = useRef<string | null>(null);
+    const focusScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const focusClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [focusedRowKey, setFocusedRowKey] = useState<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (focusScrollTimerRef.current) {
+                clearTimeout(focusScrollTimerRef.current);
+            }
+            if (focusClearTimerRef.current) {
+                clearTimeout(focusClearTimerRef.current);
+            }
+        };
+    }, []);
 
     const [group, setGroup] = useState<Group | null>(null);
     const groupsQuery = useGroupsQuery();
@@ -421,31 +435,27 @@ export function GroupDetailScreen() {
         const index = findFeedItemIndex(filteredFeed, focus);
         if (index < 0) return;
 
-        const row = filteredFeed[index];
+        const rowKey =
+            focus.kind === 'expense' ? `e:${focus.id}` : `s:${focus.id}`;
         focusConsumedRef.current = true;
-        navigation.setParams({ groupId, focusFeedItem: undefined });
+        // Do NOT clear focusFeedItem from route params here — that would
+        // trigger a re-render and fire this effect's cleanup, which would
+        // cancel the scheduled scroll/highlight timers before they run.
+        // Route params naturally reset on the next navigation, so leaving
+        // it alone is safe.
 
-        const openDetail = () => {
-            if (row.kind === 'expense') {
-                setFeedDetailItem({ kind: 'expense', expense: row.expense });
-            } else if (row.kind === 'settlement') {
-                setFeedDetailItem({
-                    kind: 'settlement',
-                    settlement: row.settlement,
-                });
-            }
-        };
-
-        const scrollTimer = setTimeout(() => {
+        focusScrollTimerRef.current = setTimeout(() => {
             listRef.current?.scrollToIndex({
                 index,
                 animated: true,
                 viewPosition: 0.35,
             });
-            openDetail();
+            setFocusedRowKey(rowKey);
         }, 120);
 
-        return () => clearTimeout(scrollTimer);
+        focusClearTimerRef.current = setTimeout(() => {
+            setFocusedRowKey((current) => (current === rowKey ? null : current));
+        }, 2620);
     }, [
         focusFeedItemParam,
         filteredFeed,
@@ -748,7 +758,15 @@ export function GroupDetailScreen() {
                             ? `s:${item.settlement.id}`
                             : `m:${item.message.id}`
                 }
-                renderItem={({ item }) => (
+                renderItem={({ item }) => {
+                    const itemKey =
+                        item.kind === 'expense'
+                            ? `e:${item.expense.id}`
+                            : item.kind === 'settlement'
+                                ? `s:${item.settlement.id}`
+                                : `m:${item.message.id}`;
+                    const isFocused = focusedRowKey === itemKey;
+                    return (
                     <View className="px-2" style={{ position: 'relative' }}>
                         <FeedItemRow
                             item={item}
@@ -770,8 +788,24 @@ export function GroupDetailScreen() {
                                     }
                                 />
                             )}
+                        {isFocused && (
+                            <View
+                                pointerEvents="none"
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 8,
+                                    right: 8,
+                                    bottom: 8,
+                                    borderRadius: 16,
+                                    backgroundColor: colors.primary,
+                                    opacity: 0.18,
+                                }}
+                            />
+                        )}
                     </View>
-                )}
+                    );
+                }}
                 ListHeaderComponent={
                     <>
                         <GroupSummaryCard

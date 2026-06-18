@@ -40,6 +40,7 @@ import {
     isAnyFilterActive,
 } from '../../components/FiltersSheet';
 import {
+    isGroupArchived,
     passesGroupFilters,
     sortGroups,
 } from '../../lib/groupListQuery';
@@ -80,22 +81,39 @@ export function GroupsListScreen() {
         });
         return out;
     }, [simplified]);
+    // A group has any open debts iff `byGroupCurrency` has at least one
+    // non-empty transfer list for it. Lets BalanceChip distinguish
+    // "You are settled" (others still owe each other) from "Settled" (whole group clear).
+    const groupHasOpenDebts = useMemo(() => {
+        const out: Record<string, boolean> = {};
+        simplified?.byGroupCurrency.forEach((byCurrency, groupId) => {
+            for (const transfers of byCurrency.values()) {
+                if (transfers.length > 0) {
+                    out[groupId] = true;
+                    break;
+                }
+            }
+        });
+        return out;
+    }, [simplified]);
 
     const [refreshing, setRefreshing] = useState(false);
     const loadError = groupsQuery.isError;
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const [archivedExpanded, setArchivedExpanded] = useState(false);
 
     const incomingBalanceState = route.params?.balanceState as BalanceState | undefined;
     const incomingShowArchived = route.params?.showArchived as boolean | undefined;
     useEffect(() => {
         if (incomingBalanceState === undefined && incomingShowArchived === undefined) return;
-        setFilters(f => ({
-            ...f,
-            ...(incomingBalanceState !== undefined && { balanceState: incomingBalanceState }),
-            ...(incomingShowArchived !== undefined && { showArchived: incomingShowArchived }),
-        }));
+        if (incomingBalanceState !== undefined) {
+            setFilters(f => ({ ...f, balanceState: incomingBalanceState }));
+        }
+        if (incomingShowArchived) {
+            setArchivedExpanded(true);
+        }
         navigation.setParams({ balanceState: undefined, showArchived: undefined });
     }, [incomingBalanceState, incomingShowArchived, navigation]);
 
@@ -139,7 +157,7 @@ export function GroupsListScreen() {
     const trimmedQuery = searchQuery.trim();
     const sortLocale = i18n.language.startsWith('he') ? 'he' : undefined;
 
-    const filteredRows = useMemo(() => {
+    const { activeRows, archivedRows } = useMemo(() => {
         const lowerQ = trimmedQuery.toLowerCase();
         const matched = groups
             .map(g => {
@@ -162,20 +180,27 @@ export function GroupsListScreen() {
             sortLocale,
         );
         const order = new Map(sortedGroups.map((g, i) => [g.id, i]));
-        return [...matched].sort(
+        const ordered = [...matched].sort(
             (a, b) => (order.get(a.group.id) ?? 0) - (order.get(b.group.id) ?? 0),
         );
+        const active: typeof ordered = [];
+        const archived: typeof ordered = [];
+        for (const row of ordered) {
+            (isGroupArchived(row.group) ? archived : active).push(row);
+        }
+        return { activeRows: active, archivedRows: archived };
     }, [groups, trimmedQuery, filters, balanceNetsByGroup, sortLocale]);
 
     const filterActive = isAnyFilterActive(filters);
 
-    type FilteredRow = (typeof filteredRows)[number];
+    type FilteredRow = (typeof activeRows)[number];
 
-    const renderItem = useCallback<ListRenderItem<FilteredRow>>(
-        ({ item }) => (
+    const renderGroupRow = useCallback(
+        (item: FilteredRow) => (
             <GroupCard
                 group={item.group}
                 rollup={simplified?.groupRollups.get(item.group.id)}
+                groupHasOpenDebts={groupHasOpenDebts[item.group.id] === true}
                 searchQuery={trimmedQuery || undefined}
                 matchedMemberNames={
                     item.matched.length > 0 ? item.matched : undefined
@@ -183,8 +208,42 @@ export function GroupsListScreen() {
                 onPress={handleGroupPress}
             />
         ),
-        [simplified, trimmedQuery, handleGroupPress],
+        [simplified, groupHasOpenDebts, trimmedQuery, handleGroupPress],
     );
+
+    const renderItem = useCallback<ListRenderItem<FilteredRow>>(
+        ({ item }) => renderGroupRow(item),
+        [renderGroupRow],
+    );
+
+    const archivedFooter = useMemo(() => {
+        if (archivedRows.length === 0) return null;
+        return (
+            <View>
+                <TouchableOpacity
+                    onPress={() => setArchivedExpanded(v => !v)}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: archivedExpanded }}
+                    testID="groups-archived-toggle"
+                    className="mt-2 mb-3 py-3 flex-row items-center justify-center rounded-lg bg-slate-100"
+                >
+                    <Text className="text-sm font-medium text-gray-700 me-1">
+                        {t('groups.archive.sectionLabel', { count: archivedRows.length })}
+                    </Text>
+                    <AppIcon
+                        name={archivedExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={16}
+                        color={colors.gray500}
+                    />
+                </TouchableOpacity>
+                {archivedExpanded
+                    ? archivedRows.map(row => (
+                          <View key={row.group.id}>{renderGroupRow(row)}</View>
+                      ))
+                    : null}
+            </View>
+        );
+    }, [archivedRows, archivedExpanded, renderGroupRow, t]);
 
     if (isInitialLoading) {
         return <AppGateSkeleton />;
@@ -255,7 +314,7 @@ export function GroupsListScreen() {
 
             <View className="flex-1">
                 <FlatList
-                    data={filteredRows}
+                    data={activeRows}
                     keyExtractor={item => item.group.id}
                     renderItem={renderItem}
                     initialNumToRender={12}
@@ -274,6 +333,7 @@ export function GroupsListScreen() {
                             tintColor={colors.primary}
                         />
                     }
+                    ListFooterComponent={archivedFooter}
                     ListEmptyComponent={
                         loadError && groups.length === 0 ? (
                             <EmptyState
@@ -283,13 +343,7 @@ export function GroupsListScreen() {
                                 actionTitle={t('common.retry')}
                                 onAction={handleRefresh}
                             />
-                        ) : filters.showArchived ? (
-                            <View className="px-4 py-10 items-center">
-                                <Text className="text-sm text-gray-500">
-                                    {t('groups.archive.noArchived')}
-                                </Text>
-                            </View>
-                        ) : (
+                        ) : archivedRows.length > 0 ? null : (
                             <EmptyState
                                 iconName="people-outline"
                                 title={t('groups.noGroups')}

@@ -24,6 +24,31 @@ describe('BalanceChip', () => {
         expect(getByText('groups.card.settled')).toBeTruthy();
     });
 
+    it('shows "You are settled" when the group has open debts among others', () => {
+        const { getByText } = render(
+            <BalanceChip defaultCurrency="USD" groupHasOpenDebts />,
+        );
+        expect(getByText('groups.card.youSettled')).toBeTruthy();
+    });
+
+    it('still shows "Settled" when groupHasOpenDebts is false', () => {
+        const { getByText } = render(
+            <BalanceChip defaultCurrency="USD" groupHasOpenDebts={false} />,
+        );
+        expect(getByText('groups.card.settled')).toBeTruthy();
+    });
+
+    it('shows signed amount, not "You are settled", when the user has a non-zero net even if group has open debts', () => {
+        const { getByText } = render(
+            <BalanceChip
+                defaultCurrency="USD"
+                rollup={rollupOf({ currency: 'USD', net: 12 })}
+                groupHasOpenDebts
+            />,
+        );
+        expect(getByText('+USD 12.00')).toBeTruthy();
+    });
+
     it('formats a positive primary with + and its currency', () => {
         const { getByText } = render(
             <BalanceChip

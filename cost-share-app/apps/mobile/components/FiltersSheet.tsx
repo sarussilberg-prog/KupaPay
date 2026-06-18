@@ -9,7 +9,6 @@ import { FilterSection } from './filters/FilterSection';
 import { FilterSingleChipGrid } from './filters/FilterSingleChipGrid';
 import { FilterChipGrid } from './filters/FilterChipGrid';
 import { GroupTypeFilterGrid } from './filters/GroupTypeFilterGrid';
-import { FilterToggleRow } from './filters/FilterToggleRow';
 import {
     BalanceState,
     DEFAULT_GROUP_LIST_FILTERS,
@@ -116,16 +115,6 @@ export function FiltersSheet({
                             />
                         </FilterSection>
                     )}
-
-                    <FilterSection label={t('groups.filters.status.label')}>
-                        <FilterToggleRow
-                            label={t('groups.filters.status.showArchived')}
-                            value={f.showArchived}
-                            onValueChange={(showArchived) =>
-                                patch({ showArchived })
-                            }
-                        />
-                    </FilterSection>
                 </>
             )}
         </FilterBottomSheet>
