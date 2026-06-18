@@ -46,11 +46,15 @@ export function getCurrencySymbol(code: string): string {
     return CURRENCY_SYMBOL_OVERRIDES[code] ?? symbolFromIntl(code) ?? code;
 }
 
-export function formatCurrencyAmount(value: number, currency: string): string {
-    const formatted = value.toLocaleString(undefined, {
+export function formatAmountDecimal(value: number): string {
+    return value.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
+}
+
+export function formatCurrencyAmount(value: number, currency: string): string {
+    const formatted = formatAmountDecimal(value);
     const symbol = getCurrencySymbol(currency);
     if (symbol === '₪') return `${symbol}${formatted}`;
     if (symbol.length === 1 || symbol.endsWith('$')) return `${symbol}${formatted}`;
