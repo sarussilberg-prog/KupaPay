@@ -223,73 +223,73 @@ describe('ActivityItem', () => {
         expect(getByTestId('activity-card-amount')).toBeTruthy();
     });
 
-    it('appends " · Edited" to meta when metadata.is_edited is true (expense)', () => {
+    it('shows Edited badge when metadata.is_edited is true (expense)', () => {
         const event = buildEvent('expense_added', {
             metadata: { description: 'Lunch', amount: 12, currency: 'USD', is_edited: true },
         });
-        const { getByText } = render(
+        const { getByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(getByText(/activity\.edited/i)).toBeTruthy();
+        expect(getByTestId('activity-badge-edited')).toBeTruthy();
     });
 
-    it('appends " · Deleted" to meta when metadata.is_deleted is true (expense)', () => {
+    it('shows Deleted badge when metadata.is_deleted is true (expense)', () => {
         const event = buildEvent('expense_added', {
             metadata: { description: 'Lunch', amount: 12, currency: 'USD', is_deleted: true },
         });
-        const { getByText } = render(
+        const { getByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(getByText(/activity\.deleted/i)).toBeTruthy();
+        expect(getByTestId('activity-badge-deleted')).toBeTruthy();
     });
 
-    it('renders Deleted (not Edited) when both flags are true', () => {
+    it('shows Deleted badge (not Edited) when both flags are true', () => {
         const event = buildEvent('expense_added', {
             metadata: { description: 'Lunch', amount: 12, currency: 'USD', is_edited: true, is_deleted: true },
         });
-        const { queryByText, getByText } = render(
+        const { queryByTestId, getByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(getByText(/activity\.deleted/i)).toBeTruthy();
-        expect(queryByText(/activity\.edited/i)).toBeNull();
+        expect(getByTestId('activity-badge-deleted')).toBeTruthy();
+        expect(queryByTestId('activity-badge-edited')).toBeNull();
     });
 
-    it('does not append a suffix when flags are absent', () => {
+    it('shows no badge when flags are absent', () => {
         const event = buildEvent('expense_added', {
             metadata: { description: 'Lunch', amount: 12, currency: 'USD' },
         });
-        const { queryByText } = render(
+        const { queryByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(queryByText(/activity\.edited/i)).toBeNull();
-        expect(queryByText(/activity\.deleted/i)).toBeNull();
+        expect(queryByTestId('activity-badge-edited')).toBeNull();
+        expect(queryByTestId('activity-badge-deleted')).toBeNull();
     });
 
-    it('appends " · Deleted" for settlement_added rows too', () => {
+    it('shows Deleted badge for settlement_added rows', () => {
         const event = buildEvent('settlement_added', {
             metadata: { from_user_id: 'u1', to_user_id: 'u-me', amount: 10, currency: 'USD', is_deleted: true },
         });
-        const { getByText } = render(
+        const { getByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(getByText(/activity\.deleted/i)).toBeTruthy();
+        expect(getByTestId('activity-badge-deleted')).toBeTruthy();
     });
 
-    it('appends " · Edited" for message_posted rows', () => {
+    it('shows Edited badge for message_posted rows', () => {
         const event = buildEvent('message_posted', {
             metadata: { body: 'hi', is_edited: true },
         });
-        const { getByText } = render(
+        const { getByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(getByText(/activity\.edited/i)).toBeTruthy();
+        expect(getByTestId('activity-badge-edited')).toBeTruthy();
     });
 
     it('ignores is_edited on non-editable kinds (defensive)', () => {
         const event = buildEvent('group_added', { metadata: { is_edited: true } });
-        const { queryByText } = render(
+        const { queryByTestId } = render(
             <ActivityItem event={event} actor={actor} currentUserId="u-me" />,
         );
-        expect(queryByText(/activity\.edited/i)).toBeNull();
+        expect(queryByTestId('activity-badge-edited')).toBeNull();
     });
 });

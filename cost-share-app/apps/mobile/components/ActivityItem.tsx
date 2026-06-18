@@ -85,31 +85,30 @@ export const ActivityItem = React.memo(function ActivityItem({
         t,
     );
 
-    const meta = useMemo(() => {
+    const { meta, isDeleted, isEdited } = useMemo(() => {
         const md = (event.metadata ?? {}) as Record<string, unknown>;
         const isEditableKind =
             event.kind === 'expense_added'
             || event.kind === 'settlement_added'
             || event.kind === 'message_posted';
-        const suffix =
-            isEditableKind && md.is_deleted === true
-                ? ` · ${t('activity.deleted')}`
-                : isEditableKind && md.is_edited === true
-                ? ` · ${t('activity.edited')}`
-                : '';
+        const deleted = isEditableKind && md.is_deleted === true;
+        const edited = isEditableKind && !deleted && md.is_edited === true;
+        let metaText: string;
         switch (event.kind) {
             case 'settlement_added':
             case 'friend_request_received':
             case 'group_added':
             case 'group_member_joined':
             case 'group_removed':
-                return `${timestamp}${suffix}`;
+                metaText = timestamp;
+                break;
             case 'expense_added':
             case 'message_posted':
             default:
-                return `${actorName} · ${timestamp}${suffix}`;
+                metaText = `${actorName} · ${timestamp}`;
         }
-    }, [event.kind, event.metadata, actorName, timestamp, t]);
+        return { meta: metaText, isDeleted: deleted, isEdited: edited };
+    }, [event.kind, event.metadata, actorName, timestamp]);
 
     const avatar = (
         <MemberAvatar
@@ -127,6 +126,8 @@ export const ActivityItem = React.memo(function ActivityItem({
                 friendRequestStatus={friendRequestStatus}
                 title={title}
                 meta={meta}
+                isDeleted={isDeleted}
+                isEdited={isEdited}
                 groupName={groupName}
                 onPress={pressable ? () => onPress?.(event) : undefined}
                 testID={`activity-card-${event.id}`}
