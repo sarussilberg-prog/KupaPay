@@ -29,6 +29,28 @@ export function getAvatarUrl(user: UserLike): string | null {
     return user.avatarUrl ?? null;
 }
 
+/**
+ * Resolve a debt counterparty's display name in the settle-up / balances list.
+ * - current user            → t('settleUp.you')
+ * - known active member      → their roster name
+ * - id absent from the roster → t('common.deletedUser')
+ *
+ * The canonical simplifier emits a net for every user with financial footprint,
+ * including members who left or deleted their account. Those ids are NOT in the
+ * active-member roster, so the only correct label for them is "deleted user" —
+ * never the generic "unknown", which would hide that a real debt is owed
+ * to/from someone no longer in the group.
+ */
+export function resolveDebtPartyName(
+    userId: string,
+    currentUserId: string,
+    nameById: Record<string, string>,
+    t: TFunction,
+): string {
+    if (userId === currentUserId) return t('settleUp.you');
+    return nameById[userId] ?? t('common.deletedUser');
+}
+
 /** Returns contact email only for active users — never expose PII after deletion. */
 export function getDisplayEmail(user: UserLike): string | undefined {
     if (!user || user.isActive === false) return undefined;
