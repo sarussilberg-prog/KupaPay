@@ -102,52 +102,6 @@ function memberAvatarUrl(
     return getAvatarUrlForMember(map[userId]) ?? undefined;
 }
 
-function OpenInGroupButton({
-    label,
-    onPress,
-}: {
-    label: string;
-    onPress: () => void;
-}) {
-    const isRtl = useRtlLayout();
-    return (
-        <TouchableOpacity
-            onPress={onPress}
-            activeOpacity={0.75}
-            accessibilityRole="button"
-            testID="feed-detail-open-in-group"
-            style={openInGroupStyles.button}
-        >
-            <AppIcon name="people-outline" size={16} color={colors.primaryDark} />
-            <Text
-                className="text-[13px] font-semibold text-primary ml-2 flex-1"
-                numberOfLines={1}
-            >
-                {label}
-            </Text>
-            <AppIcon
-                name={isRtl ? 'chevron-back' : 'chevron-forward'}
-                size={16}
-                color={colors.primary}
-            />
-        </TouchableOpacity>
-    );
-}
-
-const openInGroupStyles = StyleSheet.create({
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: 16,
-        marginBottom: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#bfdbfe',
-        backgroundColor: colors.primaryExtraLight,
-    },
-});
 
 export function FeedItemDetailSheet({
     item,
@@ -207,6 +161,8 @@ export function FeedItemDetailSheet({
                             onEdit={deletedNotice ? undefined : onEdit}
                             onDelete={deletedNotice ? undefined : onDelete}
                             onRemoveFromActivity={deletedNotice ? onRemoveFromActivity : undefined}
+                            onOpenInGroup={onOpenInGroup}
+                            openInGroupLabel={openInGroupLabel}
                         />
                     )}
 
@@ -216,12 +172,6 @@ export function FeedItemDetailSheet({
                         }}
                         showsVerticalScrollIndicator
                     >
-                        {onOpenInGroup && openInGroupLabel ? (
-                            <OpenInGroupButton
-                                label={openInGroupLabel}
-                                onPress={onOpenInGroup}
-                            />
-                        ) : null}
                         {deletedNotice ? (
                             <DeletionNoticeBody
                                 deletedAt={deletedNotice.deletedAt}

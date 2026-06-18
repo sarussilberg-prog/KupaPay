@@ -24,6 +24,8 @@ export interface DetailSheetHeaderProps {
     onEdit?: () => void;
     onDelete?: () => void;
     onRemoveFromActivity?: () => void;
+    onOpenInGroup?: () => void;
+    openInGroupLabel?: string;
 }
 
 export function DetailSheetHeader({
@@ -32,18 +34,18 @@ export function DetailSheetHeader({
     onEdit,
     onDelete,
     onRemoveFromActivity,
+    onOpenInGroup,
+    openInGroupLabel,
 }: DetailSheetHeaderProps) {
     const { t } = useTranslation();
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleEdit = () => { setMenuOpen(false); onEdit?.(); };
     const handleDelete = () => { setMenuOpen(false); onDelete?.(); };
-    const handleRemoveFromActivity = () => {
-        setMenuOpen(false);
-        onRemoveFromActivity?.();
-    };
+    const handleRemoveFromActivity = () => { setMenuOpen(false); onRemoveFromActivity?.(); };
+    const handleOpenInGroup = () => { setMenuOpen(false); onOpenInGroup?.(); };
 
-    const hasMenu = Boolean(onEdit || onDelete || onRemoveFromActivity);
+    const hasMenu = Boolean(onEdit || onDelete || onRemoveFromActivity || onOpenInGroup);
 
     return (
         <View
@@ -91,6 +93,24 @@ export function DetailSheetHeader({
                                 style={styles.menuBackdrop}
                             />
                             <View style={styles.menuCard}>
+                                {onOpenInGroup && (
+                                    <TouchableOpacity
+                                        onPress={handleOpenInGroup}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
+                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
+                                        testID="detail-open-in-group-btn"
+                                    >
+                                        <AppIcon
+                                            name="arrow-forward-outline"
+                                            size={16}
+                                            color={colors.gray700}
+                                        />
+                                        <Text className="text-sm font-medium text-gray-900 ml-2.5" numberOfLines={1}>
+                                            {openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                                 {onEdit && (
                                     <TouchableOpacity
                                         onPress={handleEdit}
