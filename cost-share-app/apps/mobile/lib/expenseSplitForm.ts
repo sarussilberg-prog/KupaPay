@@ -51,6 +51,52 @@ export function computeUnequalTotal(
     return { total, target, difference, isValid };
 }
 
+/**
+ * Keep an exact-amount split always summing to `total` while the user edits it.
+ *
+ * "Locked" members are the ones the user has manually typed a value for; they
+ * keep their value. The remainder (`total - Σ locked`) is spread equally over
+ * the still-unlocked SELECTED members, with the rounding penny placed on the
+ * last one (matching `amountsFromAmountValues`). So typing one row auto-fills
+ * the rest — e.g. 100 split 3 ways, lock A=60 → B,C become 20 each; then lock
+ * B=30 → C becomes 10.
+ *
+ * Edge cases:
+ * - Nothing locked → seeds an equal split (every member is "unlocked").
+ * - Every member locked → returns the SAME `values` reference unchanged, so the
+ *   caller can skip a state update and the editor's own validation flags any
+ *   mismatch (we never silently overwrite a fully manual split).
+ * - Locked values already exceed the total → unlocked members clamp to 0.00.
+ *
+ * Works in integer cents to avoid floating-point drift.
+ */
+export function autoFillUnlockedAmounts(
+    total: number,
+    selectedIds: string[],
+    values: Record<string, string>,
+    lockedIds: ReadonlySet<string>,
+): Record<string, string> {
+    const unlocked = selectedIds.filter(id => !lockedIds.has(id));
+    if (unlocked.length === 0) return values;
+
+    const lockedCents = selectedIds
+        .filter(id => lockedIds.has(id))
+        .reduce((sum, id) => sum + Math.round(parseSplitInput(values[id] ?? '') * 100), 0);
+
+    const totalCents = Math.round(total * 100);
+    const remainderCents = Math.max(0, totalCents - lockedCents);
+
+    const base = Math.floor(remainderCents / unlocked.length);
+    const leftover = remainderCents - base * unlocked.length;
+
+    const next = { ...values };
+    unlocked.forEach((id, i) => {
+        const cents = base + (i === unlocked.length - 1 ? leftover : 0);
+        next[id] = (cents / 100).toFixed(2);
+    });
+    return next;
+}
+
 export function amountsFromPercentValues(
     values: Record<string, string>,
     memberIds: string[],

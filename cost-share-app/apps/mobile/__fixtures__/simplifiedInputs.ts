@@ -4,12 +4,14 @@ export const ARI = 'u_ari';
 export const BAR = 'u_bar';
 export const NAVEH = 'u_naveh';
 export const SARUS = 'u_sarus';
+export const GHOST = 'u_ghost'; // deleted account: RPC returns name = null
 
 export const BLALA = 'g_blala';
 export const PARIS = 'g_paris';
 export const DFG = 'g_dfg';
 
-export const member = (userId: string, name: string) => ({
+// `name` is null for deleted accounts (delete_my_account anonymises profiles.name).
+export const member = (userId: string, name: string | null) => ({
     userId,
     name,
     avatarUrl: null,
@@ -53,6 +55,54 @@ export const residual_paris: SimplifiedInputsPayload = {
                         { userId: ARI, net: -14.68 },
                         { userId: NAVEH, net: -14.66 },
                         { userId: SARUS, net: 29.34 },
+                    ],
+                },
+            ],
+        },
+    ],
+};
+
+/**
+ * Corrupt ledger: the per-currency nets do NOT sum to zero (e.g. an expense
+ * whose splits don't add up to its amount). simplifyDebts rejects this; the
+ * model must SURFACE it in `unbalanced`, never silently drop it as "settled".
+ * Sarus +20, Ari -10 → residual +10.
+ */
+export const unbalanced_dinner: SimplifiedInputsPayload = {
+    groups: [
+        {
+            groupId: DFG,
+            members: [member(ARI, 'Ari'), member(SARUS, 'Sarus')],
+            currencies: [
+                {
+                    currency: 'ILS',
+                    nets: [
+                        { userId: ARI, net: -10 },
+                        { userId: SARUS, net: 20 },
+                    ],
+                },
+            ],
+        },
+    ],
+};
+
+/**
+ * A deleted-account counterparty: their profile name is NULL (anonymised). They
+ * still owe the current user (Sarus +15, Ghost -15 → balanced), so they must
+ * appear in friendBalances flagged isActive:false → the UI renders "deleted user"
+ * rather than crashing on the null name or hiding the debt.
+ */
+export const deleted_friend: SimplifiedInputsPayload = {
+    groups: [
+        {
+            groupId: DFG,
+            members: [member(SARUS, 'Sarus'), member(GHOST, null)],
+            currencies: [
+                {
+                    currency: 'ILS',
+                    nets: [
+                        { userId: SARUS, net: 15 },
+                        { userId: GHOST, net: -15 },
                     ],
                 },
             ],
