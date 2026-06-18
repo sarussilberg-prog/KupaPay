@@ -86,19 +86,30 @@ export const ActivityItem = React.memo(function ActivityItem({
     );
 
     const meta = useMemo(() => {
+        const md = (event.metadata ?? {}) as Record<string, unknown>;
+        const isEditableKind =
+            event.kind === 'expense_added'
+            || event.kind === 'settlement_added'
+            || event.kind === 'message_posted';
+        const suffix =
+            isEditableKind && md.is_deleted === true
+                ? ` · ${t('activity.deleted')}`
+                : isEditableKind && md.is_edited === true
+                ? ` · ${t('activity.edited')}`
+                : '';
         switch (event.kind) {
             case 'settlement_added':
             case 'friend_request_received':
             case 'group_added':
             case 'group_member_joined':
             case 'group_removed':
-                return timestamp;
+                return `${timestamp}${suffix}`;
             case 'expense_added':
             case 'message_posted':
             default:
-                return `${actorName} · ${timestamp}`;
+                return `${actorName} · ${timestamp}${suffix}`;
         }
-    }, [event.kind, actorName, timestamp]);
+    }, [event.kind, event.metadata, actorName, timestamp, t]);
 
     const avatar = (
         <MemberAvatar
