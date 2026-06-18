@@ -15,7 +15,8 @@ const translations = {
     hero: {
       headline: 'לחלק הוצאות עם חברים, בלי חישובים',
       subheadline: 'KupaPay מפשטת חובות אוטומטית — פחות העברות, יותר שקט',
-      ctaDownload: 'הורד לאייפון',
+      ctaDownloadIos: 'הורד לאייפון',
+      ctaDownloadAndroid: 'הורד לאנדרואיד',
       ctaSignIn: 'כניסה לאתר',
     },
     features: {
@@ -102,7 +103,8 @@ const translations = {
     hero: {
       headline: 'Split expenses with friends, effortlessly',
       subheadline: 'KupaPay automatically simplifies debts — fewer transfers, less stress',
-      ctaDownload: 'Download for iPhone',
+      ctaDownloadIos: 'Download for iPhone',
+      ctaDownloadAndroid: 'Download for Android',
       ctaSignIn: 'Sign in',
     },
     features: {
@@ -183,7 +185,7 @@ const translations = {
 export type Translations = {
   header: { signIn: string; signOut: string; hello: string };
   locale: { toggle: string };
-  hero: { headline: string; subheadline: string; ctaDownload: string; ctaSignIn: string };
+  hero: { headline: string; subheadline: string; ctaDownloadIos: string; ctaDownloadAndroid: string; ctaSignIn: string };
   features: {
     title: string;
     items: ReadonlyArray<{ icon: string; title: string; description: string }>;
