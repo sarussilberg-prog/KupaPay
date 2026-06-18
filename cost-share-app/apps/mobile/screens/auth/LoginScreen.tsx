@@ -10,7 +10,7 @@ import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { platformAlert } from '../../lib/platformAlert';
 import { AppIcon } from '../../components/AppIcon';
-import { AppLogo } from '../../components/AppLogo';
+import { AppLogoAnimated } from '../../components/AppLogoAnimated';
 import { AppBrandTitle } from '../../components/AppBrandTitle';
 import { DeletedAccountNoticeDialog } from '../../components/DeletedAccountNoticeDialog';
 import { LoginFeatureChips } from '../../components/auth/LoginFeatureChips';
@@ -162,9 +162,7 @@ export function LoginScreen() {
 
                 <View className="flex-1 justify-center px-7">
                     <View style={styles.hero}>
-                        <View style={styles.logoRing}>
-                            <AppLogo size={108} />
-                        </View>
+                        <AppLogoAnimated size={148} />
                         <AppBrandTitle className="mt-5 mb-1" />
                         <Text
                             className="text-xl font-bold text-primary-dark text-center"
