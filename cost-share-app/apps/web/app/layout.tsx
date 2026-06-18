@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { APP_BRAND_COLOR, APP_BRAND_TITLE } from '@/lib/brand';
+import { getLocale } from '@/lib/locale';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: APP_BRAND_TITLE,
@@ -17,14 +19,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const dir = locale === 'he' ? 'rtl' : 'ltr';
+
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang={locale} dir={dir}>
+      <body className="antialiased bg-white text-gray-900">{children}</body>
     </html>
   );
 }
