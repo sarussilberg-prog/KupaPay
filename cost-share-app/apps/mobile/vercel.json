@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "cd ../.. && npm install",
-  "buildCommand": "cd ../.. && npm run build -w @cost-share/shared && cd apps/mobile && npm run build:web",
-  "outputDirectory": "dist",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && npm install --include=optional",
+  "buildCommand": "bash ../web/scripts/build-web-next.sh",
+  "outputDirectory": "../web/.next",
   "rewrites": [
     {
       "source": "/.well-known/apple-app-site-association",
@@ -28,10 +28,6 @@
     {
       "source": "/account-deletion",
       "destination": "https://jfqxjjjbpxbwwvoygahu.supabase.co/functions/v1/invite-landing/account-deletion"
-    },
-    {
-      "source": "/((?!_expo/|favicon\\.ico|manifest\\.json|.*\\.(?:css|js|png|jpg|jpeg|gif|webp|svg|ttf|woff2?|ico)$).*)",
-      "destination": "/index.html"
     }
   ],
   "redirects": [
