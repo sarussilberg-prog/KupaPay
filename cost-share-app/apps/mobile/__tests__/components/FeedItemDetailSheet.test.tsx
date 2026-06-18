@@ -221,3 +221,52 @@ describe('FeedItemDetailSheet', () => {
         expect(queryByText('settleUp.via')).toBeNull();
     });
 });
+
+describe('FeedItemDetailSheet — deletion notice', () => {
+    function renderDeleted(props: Partial<Parameters<typeof FeedItemDetailSheet>[0]> = {}) {
+        const baseExpense = {
+            id: 'e-del', groupId: 'g1', description: 'Dinner', amount: 120, currency: 'ILS',
+            expenseDate: new Date('2026-06-18T18:00:00Z'), paidBy: 'u1', createdBy: 'u1',
+            isDeleted: true, createdAt: new Date(), updatedAt: new Date(),
+            splits: [], myDelta: 0, myDeltaState: 'settled' as const,
+        };
+        const onRemove = jest.fn();
+        const onClose = jest.fn();
+        const utils = renderWithQuery(
+            <FeedItemDetailSheet
+                item={{ kind: 'expense', expense: baseExpense }}
+                memberMap={{ u1: { userId: 'u1', displayName: 'Avi', isActive: true } }}
+                currentUserId="u-me"
+                onClose={onClose}
+                onEdit={() => {}}
+                onDelete={() => {}}
+                deletedNotice={{
+                    deletedAt: new Date('2026-06-18T18:30:00Z'),
+                    deletedByName: 'Avi',
+                    kind: 'expense',
+                }}
+                onRemoveFromActivity={onRemove}
+                {...props}
+            />,
+        );
+        return { ...utils, onRemove, onClose };
+    }
+
+    it('shows the deletion notice body', () => {
+        const { getByText } = renderDeleted();
+        expect(getByText(/deleted by Avi/i)).toBeTruthy();
+    });
+
+    it('does not render Edit or Delete buttons', () => {
+        const { queryByTestId } = renderDeleted();
+        expect(queryByTestId('detail-edit-btn')).toBeNull();
+        expect(queryByTestId('detail-delete-btn')).toBeNull();
+    });
+
+    it('renders the kebab with a Remove-from-activity action that fires onRemoveFromActivity', () => {
+        const { getByTestId, onRemove } = renderDeleted();
+        fireEvent.press(getByTestId('detail-kebab-btn'));
+        fireEvent.press(getByTestId('detail-remove-from-activity-btn'));
+        expect(onRemove).toHaveBeenCalled();
+    });
+});

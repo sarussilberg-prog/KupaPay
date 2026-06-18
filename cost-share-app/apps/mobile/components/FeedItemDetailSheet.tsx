@@ -33,6 +33,7 @@ import {
     expenseFeedSummaryCount,
 } from '../lib/feedExpensePerspective';
 import { buildSettlementFeedCopy } from '../lib/feedSettlementPerspective';
+import { formatAmountDecimal } from '../lib/currencyDisplay';
 import { useAppLanguage, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { shadows } from '../theme/shadows';
@@ -73,6 +74,14 @@ export interface FeedItemDetailSheetProps {
     /** When set (e.g. from Activity feed), shows a link to open this item in the group. */
     onOpenInGroup?: () => void;
     openInGroupLabel?: string;
+    /** When set, swaps the body for a deletion notice and disables Edit/Delete. */
+    deletedNotice?: {
+        deletedAt: Date;
+        deletedByName: string;
+        kind: 'expense' | 'settlement';
+    };
+    /** Required when deletedNotice is set; powers the kebab "Remove from activity" action. */
+    onRemoveFromActivity?: () => void;
 }
 
 function memberName(
@@ -149,6 +158,8 @@ export function FeedItemDetailSheet({
     onDelete,
     onOpenInGroup,
     openInGroupLabel,
+    deletedNotice,
+    onRemoveFromActivity,
 }: FeedItemDetailSheetProps) {
     const { t } = useTranslation();
     const language = useAppLanguage();
@@ -193,8 +204,9 @@ export function FeedItemDetailSheet({
                                     : t('settleUp.detailHeaderLabel')
                             }
                             onClose={onClose}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
+                            onEdit={deletedNotice ? undefined : onEdit}
+                            onDelete={deletedNotice ? undefined : onDelete}
+                            onRemoveFromActivity={deletedNotice ? onRemoveFromActivity : undefined}
                         />
                     )}
 
@@ -210,21 +222,32 @@ export function FeedItemDetailSheet({
                                 onPress={onOpenInGroup}
                             />
                         ) : null}
-                        {item?.kind === 'expense' && (
-                            <ExpenseDetailBody
-                                expense={item.expense}
-                                memberMap={memberMap}
-                                currentUserId={currentUserId}
+                        {deletedNotice ? (
+                            <DeletionNoticeBody
+                                deletedAt={deletedNotice.deletedAt}
+                                deletedByName={deletedNotice.deletedByName}
+                                kind={deletedNotice.kind}
                                 language={language}
                             />
-                        )}
-                        {item?.kind === 'settlement' && (
-                            <SettlementDetailBody
-                                settlement={item.settlement}
-                                memberMap={memberMap}
-                                currentUserId={currentUserId}
-                                language={language}
-                            />
+                        ) : (
+                            <>
+                                {item?.kind === 'expense' && (
+                                    <ExpenseDetailBody
+                                        expense={item.expense}
+                                        memberMap={memberMap}
+                                        currentUserId={currentUserId}
+                                        language={language}
+                                    />
+                                )}
+                                {item?.kind === 'settlement' && (
+                                    <SettlementDetailBody
+                                        settlement={item.settlement}
+                                        memberMap={memberMap}
+                                        currentUserId={currentUserId}
+                                        language={language}
+                                    />
+                                )}
+                            </>
                         )}
                     </ScrollView>
                 </View>
@@ -268,21 +291,22 @@ function ExpenseDetailBody({
         t('common.unknown'),
     );
     const payerFirstName = payerName.split(' ')[0];
-    const amountFmt = (n: number) => `${expense.currency} ${n.toFixed(2)}`;
+    const amountFmt = (n: number) => `${expense.currency} ${formatAmountDecimal(n)}`;
     const involvement: 'borrowed' | 'lent' | 'settled' = expense.myDeltaState;
 
     const splitMembers: GroupMemberLite[] = expense.splits.map(s => {
+            const displayName = memberName(
+                memberMap,
+                s.userId,
+                currentUserId,
+                t('settleUp.you'),
+                t('common.unknown'),
+            );
             const existing = memberMap[s.userId];
-            if (existing) return existing;
+            if (existing) return { ...existing, displayName };
             return {
                 userId: s.userId,
-                displayName: memberName(
-                    memberMap,
-                    s.userId,
-                    currentUserId,
-                    t('settleUp.you'),
-                    t('common.unknown'),
-                ),
+                displayName,
                 isActive: true,
             };
         });
@@ -1170,7 +1194,7 @@ function SettlementDetailBody({
         t('settleUp.you'),
         t('common.unknown'),
     );
-    const amountText = `${settlement.currency} ${settlement.amount.toFixed(2)}`;
+    const amountText = `${settlement.currency} ${formatAmountDecimal(settlement.amount)}`;
     const heroDate = formatHeroDate(
         new Date(settlement.settlementDate ?? settlement.createdAt),
         language,
@@ -1202,6 +1226,35 @@ function SettlementDetailBody({
                 amountText={amountText}
                 methodLabel={methodLabel}
             />
+        </View>
+    );
+}
+
+function DeletionNoticeBody({
+    deletedAt,
+    deletedByName,
+    kind,
+    language,
+}: {
+    deletedAt: Date;
+    deletedByName: string;
+    kind: 'expense' | 'settlement';
+    language: 'en' | 'he';
+}) {
+    const { t } = useTranslation();
+    const formatter = new Intl.DateTimeFormat(language === 'he' ? 'he-IL' : 'en-US', {
+        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+    });
+    const when = formatter.format(deletedAt);
+    const key = kind === 'expense'
+        ? 'activity.deletionNotice.expense'
+        : 'activity.deletionNotice.settlement';
+    return (
+        <View className="px-6 py-8 items-center" testID="feed-detail-deletion-notice">
+            <AppIcon name="trash-outline" size={32} color={colors.gray500} />
+            <Text className="text-center text-gray-700 mt-3 text-base">
+                {t(key, { name: deletedByName, when })}
+            </Text>
         </View>
     );
 }
