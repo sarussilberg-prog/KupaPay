@@ -1,7 +1,12 @@
 /**
  * i18n Configuration
- * Internationalization setup for English and Hebrew
- * With AsyncStorage persistence
+ * Internationalization setup with AsyncStorage persistence.
+ *
+ * Adding a new language:
+ *   1. Update `Language` in @cost-share/shared.
+ *   2. Add a `./locales/<code>.json` file and an entry in `resources` below.
+ *   3. If the new language is RTL, add its code to `RTL_LANGUAGES`.
+ * Device-locale detection, fallback, and persistence then work without further changes.
  */
 
 import i18n from 'i18next';
@@ -10,31 +15,64 @@ import { DevSettings, I18nManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import * as Updates from 'expo-updates';
+import type { Language } from '@cost-share/shared';
 import en from './locales/en.json';
 import he from './locales/he.json';
 import { useAppStore } from '../store';
 
-type SupportedLanguage = 'en' | 'he';
+type SupportedLanguage = Language;
 
-/** Falls back to English when the dev client was not rebuilt after adding expo-localization. */
+const resources: Record<SupportedLanguage, { translation: object }> = {
+    en: { translation: en },
+    he: { translation: he },
+};
+
+const SUPPORTED_LANGUAGES = Object.keys(resources) as readonly SupportedLanguage[];
+
+const DEFAULT_LANGUAGE: SupportedLanguage = 'en';
+
+/** Languages whose script is right-to-left. Add new RTL languages (e.g. 'ar', 'fa', 'ur') here. */
+const RTL_LANGUAGES = new Set<SupportedLanguage>(['he']);
+
+// Java's `Locale.getLanguage()` returns deprecated ISO 639-1 codes for backwards
+// compatibility — Hebrew is "iw" (not "he"), Indonesian is "in" (not "id"), Yiddish
+// is "ji" (not "yi"). Android surfaces these via expo-localization's `languageCode`.
+// iOS returns modern codes. Map legacy → modern so detection works on both platforms.
+const LEGACY_LANGUAGE_CODE_MAP: Readonly<Record<string, string>> = {
+    iw: 'he',
+    in: 'id',
+    ji: 'yi',
+};
+
+const normalizeLanguageCode = (code: string | null | undefined): string | null => {
+    if (!code) return null;
+    const lower = code.toLowerCase();
+    return LEGACY_LANGUAGE_CODE_MAP[lower] ?? lower;
+};
+
+const isSupportedLanguage = (code: string | null | undefined): code is SupportedLanguage =>
+    !!code && (SUPPORTED_LANGUAGES as readonly string[]).includes(code);
+
+/** Picks the first device-preferred locale we have a translation for. Falls back to the default. */
 const resolveDeviceLanguage = (): SupportedLanguage => {
     try {
-        const code = Localization.getLocales()[0]?.languageCode;
-        return code === 'he' ? 'he' : 'en';
+        for (const locale of Localization.getLocales()) {
+            const fromCode = normalizeLanguageCode(locale?.languageCode);
+            if (isSupportedLanguage(fromCode)) return fromCode;
+            const tagPrefix = locale?.languageTag?.toLowerCase().split('-')[0];
+            const fromTag = normalizeLanguageCode(tagPrefix);
+            if (isSupportedLanguage(fromTag)) return fromTag;
+        }
+        return DEFAULT_LANGUAGE;
     } catch {
         console.warn(
-            'expo-localization unavailable — rebuild the dev client (npm run mobile:ios). Using en.',
+            'expo-localization unavailable — rebuild the dev client (npm run mobile:ios). Using default.',
         );
-        return 'en';
+        return DEFAULT_LANGUAGE;
     }
 };
 
 I18nManager.allowRTL(true);
-
-const resources = {
-    en: { translation: en },
-    he: { translation: he },
-};
 
 const LANGUAGE_KEY = '@app_language';
 /** Last language we already ran forceRTL + reload for (prevents Android dev reload loops). */
@@ -42,7 +80,7 @@ const RTL_NATIVE_APPLIED_KEY = '@rtl_native_applied';
 
 const i18nInitOptions = {
     resources,
-    fallbackLng: 'en' as const,
+    fallbackLng: DEFAULT_LANGUAGE,
     interpolation: {
         escapeValue: false,
     },
@@ -69,7 +107,7 @@ async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
 }
 
 async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
-    const desiredRTL = language === 'he';
+    const desiredRTL = RTL_LANGUAGES.has(language);
     if (I18nManager.isRTL === desiredRTL) {
         await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
         return;
@@ -101,7 +139,7 @@ async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
 async function resolveStartupLanguage(): Promise<SupportedLanguage> {
     const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
 
-    if (savedLanguage === 'en' || savedLanguage === 'he') {
+    if (isSupportedLanguage(savedLanguage)) {
         return savedLanguage;
     }
 
@@ -123,8 +161,8 @@ export const initializeLanguage = async (): Promise<void> => {
         if (__DEV__) console.log(`Language initialized: ${language}`);
     } catch (error) {
         console.error('Failed to initialize language:', error);
-        await ensureI18nReady('en');
-        useAppStore.getState().setLanguage('en');
+        await ensureI18nReady(DEFAULT_LANGUAGE);
+        useAppStore.getState().setLanguage(DEFAULT_LANGUAGE);
     }
 };
 
@@ -132,7 +170,7 @@ export const initializeLanguage = async (): Promise<void> => {
  * Change language and update RTL settings
  * Saves preference to AsyncStorage for persistence
  */
-export const changeLanguage = async (language: 'en' | 'he'): Promise<void> => {
+export const changeLanguage = async (language: SupportedLanguage): Promise<void> => {
     try {
         await ensureI18nReady(language);
         await i18n.changeLanguage(language);
@@ -149,10 +187,10 @@ export const changeLanguage = async (language: 'en' | 'he'): Promise<void> => {
 /**
  * Get current saved language from AsyncStorage
  */
-export const getSavedLanguage = async (): Promise<'en' | 'he' | null> => {
+export const getSavedLanguage = async (): Promise<SupportedLanguage | null> => {
     try {
         const language = await AsyncStorage.getItem(LANGUAGE_KEY);
-        return language === 'en' || language === 'he' ? language : null;
+        return isSupportedLanguage(language) ? language : null;
     } catch (error) {
         console.error('Failed to get saved language:', error);
         return null;

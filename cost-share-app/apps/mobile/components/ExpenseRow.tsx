@@ -15,6 +15,7 @@ import {
 import { FeedRowThumbnail } from './FeedRowThumbnail';
 import { AppIconName } from './AppIcon';
 import { useAppLanguage } from '../hooks/useRtlLayout';
+import { formatAmountDecimal } from '../lib/currencyDisplay';
 import { formatFeedDateTime } from '../lib/formatFeedDateTime';
 import {
     resolveExpenseFeedPerspective,
@@ -56,7 +57,7 @@ function ExpenseRowBase({
     const language = useAppLanguage();
     const timestamp = formatFeedDateTime(new Date(expense.createdAt), language);
 
-    const amount = `${expense.currency} ${expense.amount.toFixed(2)}`;
+    const amount = `${expense.currency} ${formatAmountDecimal(expense.amount)}`;
     const perspective = resolveExpenseFeedPerspective(expense, currentUserId);
     const summaryKey = expenseFeedSummaryKey(perspective.perspective);
     const summary = t(summaryKey, {
@@ -68,7 +69,7 @@ function ExpenseRowBase({
     let subLine: React.ReactNode | undefined;
     const userShare = Math.abs(expense.myDelta);
     if (userShare > 0) {
-        const formatted = `${expense.currency} ${userShare.toFixed(2)}`;
+        const formatted = `${expense.currency} ${formatAmountDecimal(userShare)}`;
         const key =
             expense.myDeltaState === 'lent'
                 ? 'groups.expense.youLent'

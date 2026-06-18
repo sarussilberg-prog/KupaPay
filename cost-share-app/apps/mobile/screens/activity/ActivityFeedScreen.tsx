@@ -32,7 +32,11 @@ import {
     deleteExpense,
     getExpenseWithSplitsById,
 } from '../../services/expenses.service';
-import { getSettlementById } from '../../services/settlements.service';
+import {
+    deleteSettlement,
+    getSettlementById,
+} from '../../services/settlements.service';
+import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { decorateExpense } from '../../services/expense-delta';
 import { fetchProfilesByUserIds } from '../../services/groups.service';
 import { supabase } from '../../lib/supabase';
@@ -43,8 +47,9 @@ import { EmptyState } from '../../components/EmptyState';
 import { ActivityItem } from '../../components/ActivityItem';
 import { ActivityItemSkeleton } from '../../components/ActivityItemSkeleton';
 import { AppIcon } from '../../components/AppIcon';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
+import { platformAlert } from '../../lib/platformAlert';
+import { removeActivityEvent } from '../../services/activityEvents.service';
 import {
     ActivityFiltersSheet,
     DEFAULT_ACTIVITY_FILTERS,
@@ -139,7 +144,10 @@ export function ActivityFeedScreen() {
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [detailItem, setDetailItem] = useState<FeedDetailItem | null>(null);
     const [detailMembers, setDetailMembers] = useState<Record<string, GroupMemberLite>>({});
-    const [pendingDelete, setPendingDelete] = useState(false);
+    const [detailEventId, setDetailEventId] = useState<string | null>(null);
+    const [detailDeletedNotice, setDetailDeletedNotice] = useState<
+        { deletedAt: Date; deletedByName: string; kind: 'expense' | 'settlement' } | null
+    >(null);
     const [userRefreshing, setUserRefreshing] = useState(false);
     const [profileMap, setProfileMap] = useState<Record<string, GroupMemberLite>>({});
     // Watermark captured at focus time. Anything strictly newer is "unseen",
@@ -164,6 +172,7 @@ export function ActivityFeedScreen() {
             if (typeof md.from_user_id === 'string') ids.add(md.from_user_id);
             if (typeof md.to_user_id === 'string') ids.add(md.to_user_id);
             if (typeof md.new_member_user_id === 'string') ids.add(md.new_member_user_id);
+            if (typeof md.deleted_by === 'string') ids.add(md.deleted_by);
         }
         const missing = [...ids].filter(id => !profileMap[id]);
         if (missing.length === 0) return;
@@ -184,8 +193,11 @@ export function ActivityFeedScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            // Capture the watermark BEFORE marking seen so the seen/unseen
-            // divider stays anchored at the moment of focus.
+            // Clear synchronously so the divider can't render with the previous
+            // visit's watermark while the fresh value is being fetched —
+            // otherwise it flickers in then out on revisits where nothing new
+            // arrived since last focus.
+            setFreezeWatermark(null);
             void (async () => {
                 const wm = await fetchActivityLastSeenAt();
                 setFreezeWatermark(wm);
@@ -321,9 +333,6 @@ export function ActivityFeedScreen() {
         async (event: ActivityEvent) => {
             const md = (event.metadata ?? {}) as Record<string, unknown>;
             const seed = seedMemberMapFromGroup(event.groupId);
-            // Open immediately with a stub built from event.metadata so the
-            // modal appears on the same tick as the press. Splits + extras
-            // fill in once the network fetch resolves.
             const stub: ExpenseWithDelta = {
                 id: event.refId,
                 groupId: event.groupId ?? '',
@@ -335,7 +344,7 @@ export function ActivityFeedScreen() {
                     : event.createdAt,
                 paidBy: event.actorUserId ?? '',
                 createdBy: event.actorUserId ?? '',
-                isDeleted: false,
+                isDeleted: md.is_deleted === true,
                 createdAt: event.createdAt,
                 updatedAt: event.createdAt,
                 splits: [],
@@ -343,11 +352,27 @@ export function ActivityFeedScreen() {
                 myDeltaState: 'settled',
             };
             setDetailMembers(seed);
+            setDetailEventId(event.id);
             setDetailItem({ kind: 'expense', expense: stub });
+
+            // Deleted row: skip the live fetch, surface the deletion notice.
+            if (md.is_deleted === true) {
+                const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
+                const deletedByName = deletedById === currentUser?.id
+                    ? t('common.you')
+                    : (profileMap[deletedById]?.displayName
+                        ?? seed[deletedById]?.displayName
+                        ?? t('common.unknown'));
+                const deletedAt = typeof md.deleted_at === 'string'
+                    ? new Date(md.deleted_at)
+                    : event.createdAt;
+                setDetailDeletedNotice({ deletedAt, deletedByName, kind: 'expense' });
+                return;
+            }
+            setDetailDeletedNotice(null);
 
             const expense = await getExpenseWithSplitsById(event.refId);
             if (!expense) {
-                // Source row no longer accessible; close to avoid stale stub.
                 setDetailItem(null);
                 return;
             }
@@ -366,7 +391,7 @@ export function ActivityFeedScreen() {
                 }
             }
         },
-        [currentUser?.id, seedMemberMapFromGroup],
+        [currentUser?.id, profileMap, seedMemberMapFromGroup, t],
     );
 
     const openSettlementDetail = useCallback(
@@ -386,10 +411,26 @@ export function ActivityFeedScreen() {
                 createdBy: event.actorUserId ?? '',
                 createdAt: event.createdAt,
                 updatedAt: event.createdAt,
-                deletedAt: null,
+                deletedAt: md.is_deleted === true ? new Date() : null,
             };
             setDetailMembers(seed);
+            setDetailEventId(event.id);
             setDetailItem({ kind: 'settlement', settlement: stub });
+
+            if (md.is_deleted === true) {
+                const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
+                const deletedByName = deletedById === currentUser?.id
+                    ? t('common.you')
+                    : (profileMap[deletedById]?.displayName
+                        ?? seed[deletedById]?.displayName
+                        ?? t('common.unknown'));
+                const deletedAt = typeof md.deleted_at === 'string'
+                    ? new Date(md.deleted_at)
+                    : event.createdAt;
+                setDetailDeletedNotice({ deletedAt, deletedByName, kind: 'settlement' });
+                return;
+            }
+            setDetailDeletedNotice(null);
 
             const settlement = await getSettlementById(event.refId);
             if (!settlement) {
@@ -410,8 +451,33 @@ export function ActivityFeedScreen() {
                 }
             }
         },
-        [seedMemberMapFromGroup],
+        [currentUser?.id, profileMap, seedMemberMapFromGroup, t],
     );
+
+    const handleRemoveFromActivity = useCallback(() => {
+        if (!detailEventId) return;
+        const eventId = detailEventId;
+        platformAlert(t('activity.removeFromActivityConfirm'), undefined, [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('activity.removeFromActivity'),
+                style: 'destructive',
+                onPress: () => {
+                    void (async () => {
+                        const ok = await removeActivityEvent(eventId);
+                        if (ok) {
+                            setDetailItem(null);
+                            setDetailDeletedNotice(null);
+                            setDetailEventId(null);
+                            void queryClient.invalidateQueries({
+                                queryKey: queryKeys.activityFeed(),
+                            });
+                        }
+                    })();
+                },
+            },
+        ]);
+    }, [detailEventId, queryClient, t]);
 
     const handleActivityPress = useCallback(
         (event: ActivityEvent) => {
@@ -443,10 +509,7 @@ export function ActivityFeedScreen() {
         if (detailItem.kind === 'expense') {
             const { id: expenseId, groupId } = detailItem.expense;
             setDetailItem(null);
-            navigation.navigate('Groups', {
-                screen: 'AddExpense',
-                params: { expenseId, groupId },
-            });
+            navigation.navigate('AddExpense', { expenseId, groupId });
             return;
         }
         const { groupId, id } = detailItem.settlement;
@@ -459,27 +522,38 @@ export function ActivityFeedScreen() {
     }, [detailItem, navigation]);
 
     const handleDetailDeleteRequest = useCallback(() => {
-        if (!detailItem) return;
-        if (detailItem.kind === 'settlement') {
-            const { groupId, id } = detailItem.settlement;
-            navigateToGroupWithFocus(groupId, { kind: 'settlement', id });
-            return;
-        }
-        setPendingDelete(true);
-    }, [detailItem, navigateToGroupWithFocus]);
-
-    const handleConfirmDelete = useCallback(async () => {
-        if (!detailItem || detailItem.kind !== 'expense') {
-            setPendingDelete(false);
-            return;
-        }
-        const ok = await deleteExpense(detailItem.expense.id);
-        setPendingDelete(false);
-        if (ok) {
-            setDetailItem(null);
-            void refetch();
-        }
-    }, [detailItem, refetch]);
+        const item = detailItem;
+        if (!item) return;
+        const confirmTitle =
+            item.kind === 'expense'
+                ? t('expenses.deleteExpenseConfirm')
+                : t('settleUp.confirmDelete');
+        platformAlert(confirmTitle, undefined, [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('common.delete'),
+                style: 'destructive',
+                onPress: () => {
+                    void (async () => {
+                        if (item.kind === 'expense') {
+                            const ok = await deleteExpense(item.expense.id);
+                            if (ok) {
+                                setDetailItem(null);
+                                void refetch();
+                            }
+                            return;
+                        }
+                        const ok = await deleteSettlement(item.settlement.id);
+                        if (ok) {
+                            invalidateBalanceCaches(item.settlement.groupId);
+                            void refetch();
+                            setDetailItem(null);
+                        }
+                    })();
+                },
+            },
+        ]);
+    }, [detailItem, refetch, t]);
 
     const renderActivity = useCallback(
         ({ item }: { item: FeedListItem }) => {
@@ -653,22 +727,17 @@ export function ActivityFeedScreen() {
                 item={detailItem}
                 memberMap={detailMembers}
                 currentUserId={currentUser?.id ?? ''}
-                onClose={() => setDetailItem(null)}
+                onClose={() => {
+                    setDetailItem(null);
+                    setDetailDeletedNotice(null);
+                    setDetailEventId(null);
+                }}
                 onEdit={handleDetailEdit}
                 onDelete={handleDetailDeleteRequest}
-                onOpenInGroup={detailOpenInGroup?.onPress}
-                openInGroupLabel={detailOpenInGroup?.label}
-            />
-
-            <ConfirmDialog
-                visible={pendingDelete}
-                title={t('expenses.deleteExpense')}
-                message={t('expenses.deleteExpenseConfirm')}
-                confirmText={t('common.delete')}
-                cancelText={t('common.cancel')}
-                onConfirm={() => { void handleConfirmDelete(); }}
-                onCancel={() => setPendingDelete(false)}
-                destructive
+                onOpenInGroup={detailDeletedNotice ? undefined : detailOpenInGroup?.onPress}
+                openInGroupLabel={detailDeletedNotice ? undefined : detailOpenInGroup?.label}
+                deletedNotice={detailDeletedNotice ?? undefined}
+                onRemoveFromActivity={handleRemoveFromActivity}
             />
         </SafeAreaView>
     );

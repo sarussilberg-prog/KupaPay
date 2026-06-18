@@ -134,7 +134,10 @@ function tabPopToTopOnPress(initialScreen: string) {
                 .routes.find((r) => r.key === route.key)?.state;
             if (shouldPopStackToInitial(nestedState, initialScreen)) {
                 e.preventDefault();
-                navigation.navigate(route.name, { screen: initialScreen });
+                // pop: true is required — without it, NAVIGATE on a v7 stack
+                // pushes a duplicate initial screen onto the existing stack
+                // instead of popping back to the existing one.
+                navigation.navigate(route.name, { screen: initialScreen, pop: true });
             }
         },
     });

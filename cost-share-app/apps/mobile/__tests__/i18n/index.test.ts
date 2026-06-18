@@ -174,6 +174,39 @@ describe('initializeLanguage', () => {
             expect(devReloadMock).not.toHaveBeenCalled();
         });
 
+        it('seeds he when Android reports the legacy "iw" language code', async () => {
+            // Java's Locale.getLanguage() returns the deprecated "iw" for Hebrew, not "he".
+            getLocalesMock.mockReturnValue([{ languageCode: 'iw' }]);
+
+            await initializeLanguage();
+
+            expect(await AsyncStorage.getItem('@app_language')).toBe('he');
+            expect(i18n.language).toBe('he');
+            expect(i18nMgr.forceRTL).toHaveBeenCalledWith(true);
+        });
+
+        it('seeds he when only languageTag is present and it begins with iw', async () => {
+            getLocalesMock.mockReturnValue([{ languageTag: 'iw-IL' }]);
+
+            await initializeLanguage();
+
+            expect(await AsyncStorage.getItem('@app_language')).toBe('he');
+            expect(i18n.language).toBe('he');
+        });
+
+        it('picks the first supported language across preferred locales', async () => {
+            // User has French primary, Hebrew secondary; app supports en + he.
+            getLocalesMock.mockReturnValue([
+                { languageCode: 'fr', languageTag: 'fr-FR' },
+                { languageCode: 'iw', languageTag: 'iw-IL' },
+            ]);
+
+            await initializeLanguage();
+
+            expect(await AsyncStorage.getItem('@app_language')).toBe('he');
+            expect(i18n.language).toBe('he');
+        });
+
         it('seeds he but skips reload when native is already RTL', async () => {
             getLocalesMock.mockReturnValue([{ languageCode: 'he' }]);
             i18nMgr.isRTL = true;

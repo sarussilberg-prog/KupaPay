@@ -66,6 +66,8 @@ interface ActivityItemCardProps {
     friendRequestStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled';
     title: string;
     meta: string;
+    isDeleted?: boolean;
+    isEdited?: boolean;
     groupName?: string;
     onPress?: () => void;
     testID?: string;
@@ -76,6 +78,8 @@ export function ActivityItemCard({
     friendRequestStatus,
     title,
     meta,
+    isDeleted,
+    isEdited,
     groupName,
     onPress,
     testID,
@@ -155,6 +159,42 @@ export function ActivityItemCard({
         </View>
     );
 
+    const badge = isDeleted ? (
+        <View
+            testID="activity-badge-deleted"
+            style={{
+                position: 'absolute',
+                top: 8,
+                right: 10,
+                backgroundColor: '#FEE2E2',
+                borderRadius: 4,
+                paddingHorizontal: 5,
+                paddingVertical: 2,
+            }}
+        >
+            <Text style={{ fontSize: 10, fontWeight: '600', color: '#DC2626', letterSpacing: 0.2 }}>
+                Deleted
+            </Text>
+        </View>
+    ) : isEdited ? (
+        <View
+            testID="activity-badge-edited"
+            style={{
+                position: 'absolute',
+                top: 8,
+                right: 10,
+                backgroundColor: '#F3F4F6',
+                borderRadius: 4,
+                paddingHorizontal: 5,
+                paddingVertical: 2,
+            }}
+        >
+            <Text style={{ fontSize: 10, fontWeight: '600', color: '#6B7280', letterSpacing: 0.2 }}>
+                Edited
+            </Text>
+        </View>
+    ) : null;
+
     if (onPress) {
         return (
             <TouchableOpacity
@@ -164,6 +204,7 @@ export function ActivityItemCard({
                 style={shellStyle}
             >
                 {body}
+                {badge}
             </TouchableOpacity>
         );
     }
@@ -171,6 +212,7 @@ export function ActivityItemCard({
     return (
         <View testID={testID} style={shellStyle}>
             {body}
+            {badge}
         </View>
     );
 }

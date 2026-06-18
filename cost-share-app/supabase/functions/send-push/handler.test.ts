@@ -98,3 +98,33 @@ Deno.test('returns failed and calls markFailed when sendExpo throws', async () =
     assertEquals(out, 'failed');
     assertEquals(failed, ['network']);
 });
+
+Deno.test('forwards is_edited metadata into renderNotification', async () => {
+    const sentBodies: string[] = [];
+    const deps = fakeDeps({
+        sendExpo: (msgs) => {
+            for (const m of msgs) sentBodies.push(m.body);
+            return Promise.resolve({ ticketIds: ['t-1'], invalidTokens: [] });
+        },
+    });
+    const record = baseRecord({
+        metadata: { description: 'Lunch', amount: 50, currency: 'ILS', is_edited: true },
+    });
+    await processActivityEvent(record, deps);
+    assertEquals(sentBodies[0], 'Dana updated an expense · Lunch · ₪50');
+});
+
+Deno.test('forwards is_deleted metadata into renderNotification', async () => {
+    const sentBodies: string[] = [];
+    const deps = fakeDeps({
+        sendExpo: (msgs) => {
+            for (const m of msgs) sentBodies.push(m.body);
+            return Promise.resolve({ ticketIds: ['t-1'], invalidTokens: [] });
+        },
+    });
+    const record = baseRecord({
+        metadata: { description: 'Lunch', amount: 50, currency: 'ILS', is_deleted: true },
+    });
+    await processActivityEvent(record, deps);
+    assertEquals(sentBodies[0], 'Dana deleted an expense · Lunch');
+});

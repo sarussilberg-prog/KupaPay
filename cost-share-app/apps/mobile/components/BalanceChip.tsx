@@ -17,13 +17,23 @@ interface BalanceChipProps {
     rollup?: GroupRollup;
     /** Currency to use in the "settled" / no-data state. Usually the group's default currency. */
     defaultCurrency: string;
+    /**
+     * True when the group has at least one open debt among other members (not
+     * involving the current user). Lets the settled chip distinguish
+     * "You are settled" (others still owe) from "Settled" (whole group clear).
+     */
+    groupHasOpenDebts?: boolean;
 }
 
 function formatAmount(amount: number, currency: string): string {
     return `${currency} ${Math.abs(amount).toFixed(2)}`;
 }
 
-export function BalanceChip({ rollup, defaultCurrency }: BalanceChipProps) {
+export function BalanceChip({
+    rollup,
+    defaultCurrency,
+    groupHasOpenDebts,
+}: BalanceChipProps) {
     const { t } = useTranslation();
     const primary = rollup?.primary;
     const extraCount = (rollup?.others ?? []).filter(
@@ -31,6 +41,9 @@ export function BalanceChip({ rollup, defaultCurrency }: BalanceChipProps) {
     ).length;
 
     if (!primary || Math.abs(primary.net) < 0.01) {
+        const label = groupHasOpenDebts
+            ? t('groups.card.youSettled')
+            : t('groups.card.settled');
         return (
             <View className="rounded-full bg-gray-100 px-2.5 py-1 max-w-[140px]">
                 <Text
@@ -38,7 +51,7 @@ export function BalanceChip({ rollup, defaultCurrency }: BalanceChipProps) {
                     numberOfLines={1}
                     ellipsizeMode="tail"
                 >
-                    {t('groups.card.settled')}
+                    {label}
                 </Text>
             </View>
         );
