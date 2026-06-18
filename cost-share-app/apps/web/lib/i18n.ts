@@ -180,7 +180,25 @@ const translations = {
   },
 } as const;
 
-export type Translations = typeof translations.he;
+export type Translations = {
+  header: { signIn: string; signOut: string; hello: string };
+  locale: { toggle: string };
+  hero: { headline: string; subheadline: string; ctaDownload: string; ctaSignIn: string };
+  features: {
+    title: string;
+    items: ReadonlyArray<{ icon: string; title: string; description: string }>;
+  };
+  howItWorks: {
+    title: string;
+    steps: ReadonlyArray<{ title: string; description: string }>;
+  };
+  faq: {
+    title: string;
+    items: ReadonlyArray<{ question: string; answer: string }>;
+  };
+  footer: { privacy: string; terms: string; contact: string; copyright: string };
+  legal: { notFound: string; backHome: string; effectiveDate: string };
+};
 
 export function getTranslations(locale: Language): Translations {
   return translations[locale];
