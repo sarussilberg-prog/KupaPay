@@ -734,8 +734,8 @@ export function ActivityFeedScreen() {
                 }}
                 onEdit={handleDetailEdit}
                 onDelete={handleDetailDeleteRequest}
-                onOpenInGroup={detailOpenInGroup?.onPress}
-                openInGroupLabel={detailOpenInGroup?.label}
+                onOpenInGroup={detailDeletedNotice ? undefined : detailOpenInGroup?.onPress}
+                openInGroupLabel={detailDeletedNotice ? undefined : detailOpenInGroup?.label}
                 deletedNotice={detailDeletedNotice ?? undefined}
                 onRemoveFromActivity={handleRemoveFromActivity}
             />
