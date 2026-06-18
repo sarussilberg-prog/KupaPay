@@ -28,3 +28,57 @@ Deno.test('group_member_joined uses new member name', () => {
     assertEquals(r.title, 'טיול');
     assertEquals(r.body, 'יוסי הצטרף לקבוצה');
 });
+
+Deno.test('expense_added edited renders he', () => {
+    const r = renderNotification('expense_added', 'he', {
+        actorName: 'דנה', groupName: 'טיול', description: 'ארוחה', amount: 240, currency: 'ILS',
+        isEdited: true,
+    });
+    assertEquals(r.title, 'טיול');
+    assertEquals(r.body, 'דנה עדכנה הוצאה · ארוחה · ₪240');
+});
+
+Deno.test('expense_added edited renders en', () => {
+    const r = renderNotification('expense_added', 'en', {
+        actorName: 'Dana', groupName: 'Trip', description: 'Dinner', amount: 240, currency: 'ILS',
+        isEdited: true,
+    });
+    assertEquals(r.body, 'Dana updated an expense · Dinner · ₪240');
+});
+
+Deno.test('expense_added deleted wins over edited', () => {
+    const r = renderNotification('expense_added', 'en', {
+        actorName: 'Dana', groupName: 'Trip', description: 'Dinner', amount: 240, currency: 'ILS',
+        isEdited: true, isDeleted: true,
+    });
+    assertEquals(r.body, 'Dana deleted an expense · Dinner');
+});
+
+Deno.test('settlement_added edited en', () => {
+    const r = renderNotification('settlement_added', 'en', {
+        actorName: 'Dana', groupName: 'Trip', amount: 50, currency: 'ILS', isEdited: true,
+    });
+    assertEquals(r.body, 'Dana updated a payment · ₪50');
+});
+
+Deno.test('settlement_added deleted he', () => {
+    const r = renderNotification('settlement_added', 'he', {
+        actorName: 'דנה', groupName: 'טיול', amount: 50, currency: 'ILS', isDeleted: true,
+    });
+    assertEquals(r.body, 'דנה מחקה תשלום');
+});
+
+Deno.test('message_posted edited en uses neutral body', () => {
+    const r = renderNotification('message_posted', 'en', {
+        actorName: 'Dana', groupName: 'Trip', body: 'hi', isEdited: true,
+    });
+    assertEquals(r.title, 'Dana · Trip');
+    assertEquals(r.body, 'Dana edited a message');
+});
+
+Deno.test('message_posted deleted he', () => {
+    const r = renderNotification('message_posted', 'he', {
+        actorName: 'דנה', groupName: 'טיול', body: 'שלום', isDeleted: true,
+    });
+    assertEquals(r.body, 'דנה מחקה הודעה');
+});

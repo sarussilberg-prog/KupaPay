@@ -12,6 +12,8 @@ export interface RenderParams {
     amount?: number | string | null;
     currency?: string | null;
     body?: string | null;
+    isEdited?: boolean;
+    isDeleted?: boolean;
 }
 
 export interface Rendered { title: string; body: string; }
@@ -34,22 +36,69 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
     const money = formatMoney(p.amount, p.currency);
     const he = lang === 'he';
     switch (kind) {
-        case 'expense_added':
+        case 'expense_added': {
+            if (p.isDeleted) {
+                return {
+                    title: p.groupName,
+                    body: he
+                        ? joinDot([`${p.actorName} מחקה הוצאה`, p.description])
+                        : joinDot([`${p.actorName} deleted an expense`, p.description]),
+                };
+            }
+            if (p.isEdited) {
+                return {
+                    title: p.groupName,
+                    body: he
+                        ? joinDot([`${p.actorName} עדכנה הוצאה`, p.description, money])
+                        : joinDot([`${p.actorName} updated an expense`, p.description, money]),
+                };
+            }
             return {
                 title: p.groupName,
                 body: he
                     ? joinDot([`הוצאה חדשה מאת ${p.actorName}`, p.description, money])
                     : joinDot([`New expense from ${p.actorName}`, p.description, money]),
             };
-        case 'settlement_added':
+        }
+        case 'settlement_added': {
+            if (p.isDeleted) {
+                return {
+                    title: p.groupName,
+                    body: he
+                        ? `${p.actorName} מחקה תשלום`
+                        : `${p.actorName} deleted a payment`,
+                };
+            }
+            if (p.isEdited) {
+                return {
+                    title: p.groupName,
+                    body: he
+                        ? joinDot([`${p.actorName} עדכנה תשלום`, money])
+                        : joinDot([`${p.actorName} updated a payment`, money]),
+                };
+            }
             return {
                 title: p.groupName,
                 body: he
                     ? joinDot([`תשלום חדש מאת ${p.actorName}`, money])
                     : joinDot([`New payment from ${p.actorName}`, money]),
             };
-        case 'message_posted':
+        }
+        case 'message_posted': {
+            if (p.isDeleted) {
+                return {
+                    title: joinDot([p.actorName, p.groupName]),
+                    body: he ? `${p.actorName} מחקה הודעה` : `${p.actorName} deleted a message`,
+                };
+            }
+            if (p.isEdited) {
+                return {
+                    title: joinDot([p.actorName, p.groupName]),
+                    body: he ? `${p.actorName} ערכה הודעה` : `${p.actorName} edited a message`,
+                };
+            }
             return { title: joinDot([p.actorName, p.groupName]), body: (p.body ?? '').trim() };
+        }
         case 'friend_request_received':
             return he
                 ? { title: 'בקשת חברות חדשה', body: `${p.actorName} רוצה להתחבר איתך` }
