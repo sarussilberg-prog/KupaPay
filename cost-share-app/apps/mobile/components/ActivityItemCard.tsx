@@ -133,45 +133,12 @@ export function ActivityItemCard({
                         {groupName}
                     </Text>
                 ) : null}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'nowrap' }}>
-                    <Text
-                        className="text-[11px] text-gray-400 leading-4"
-                        numberOfLines={1}
-                        style={{ flexShrink: 1 }}
-                    >
-                        {meta}
-                    </Text>
-                    {isDeleted && (
-                        <View
-                            testID="activity-badge-deleted"
-                            style={{
-                                backgroundColor: '#FEE2E2',
-                                borderRadius: 4,
-                                paddingHorizontal: 5,
-                                paddingVertical: 1,
-                            }}
-                        >
-                            <Text style={{ fontSize: 10, fontWeight: '600', color: '#DC2626', letterSpacing: 0.2 }}>
-                                Deleted
-                            </Text>
-                        </View>
-                    )}
-                    {isEdited && (
-                        <View
-                            testID="activity-badge-edited"
-                            style={{
-                                backgroundColor: '#F3F4F6',
-                                borderRadius: 4,
-                                paddingHorizontal: 5,
-                                paddingVertical: 1,
-                            }}
-                        >
-                            <Text style={{ fontSize: 10, fontWeight: '600', color: '#6B7280', letterSpacing: 0.2 }}>
-                                Edited
-                            </Text>
-                        </View>
-                    )}
-                </View>
+                <Text
+                    className="text-[11px] text-gray-400 leading-4"
+                    numberOfLines={1}
+                >
+                    {meta}
+                </Text>
             </View>
             {amountText ? (
                 <View
@@ -192,6 +159,42 @@ export function ActivityItemCard({
         </View>
     );
 
+    const badge = isDeleted ? (
+        <View
+            testID="activity-badge-deleted"
+            style={{
+                position: 'absolute',
+                top: 8,
+                right: 10,
+                backgroundColor: '#FEE2E2',
+                borderRadius: 4,
+                paddingHorizontal: 5,
+                paddingVertical: 2,
+            }}
+        >
+            <Text style={{ fontSize: 10, fontWeight: '600', color: '#DC2626', letterSpacing: 0.2 }}>
+                Deleted
+            </Text>
+        </View>
+    ) : isEdited ? (
+        <View
+            testID="activity-badge-edited"
+            style={{
+                position: 'absolute',
+                top: 8,
+                right: 10,
+                backgroundColor: '#F3F4F6',
+                borderRadius: 4,
+                paddingHorizontal: 5,
+                paddingVertical: 2,
+            }}
+        >
+            <Text style={{ fontSize: 10, fontWeight: '600', color: '#6B7280', letterSpacing: 0.2 }}>
+                Edited
+            </Text>
+        </View>
+    ) : null;
+
     if (onPress) {
         return (
             <TouchableOpacity
@@ -201,6 +204,7 @@ export function ActivityItemCard({
                 style={shellStyle}
             >
                 {body}
+                {badge}
             </TouchableOpacity>
         );
     }
@@ -208,6 +212,7 @@ export function ActivityItemCard({
     return (
         <View testID={testID} style={shellStyle}>
             {body}
+            {badge}
         </View>
     );
 }
