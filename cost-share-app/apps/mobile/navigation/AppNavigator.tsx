@@ -290,14 +290,14 @@ function MainTabs() {
                                         height: 16,
                                         paddingHorizontal: 4,
                                         borderRadius: 8,
-                                        backgroundColor: colors.error,
+                                        backgroundColor: colors.primaryExtraLight,
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}
                                 >
                                     <Text
                                         style={{
-                                            color: '#FFFFFF',
+                                            color: colors.primaryDark,
                                             fontSize: 10,
                                             fontWeight: '600',
                                             lineHeight: 12,
