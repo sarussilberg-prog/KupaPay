@@ -3,14 +3,18 @@ import {
     all_settled,
     cycle_blala,
     residual_paris,
+    unbalanced_dinner,
+    deleted_friend,
     multi_currency_blala,
     multi_group,
     ARI,
     BAR,
     NAVEH,
     SARUS,
+    GHOST,
     BLALA,
     PARIS,
+    DFG,
 } from '../../__fixtures__/simplifiedInputs';
 
 describe('deriveSimplifiedDebts', () => {
@@ -105,6 +109,50 @@ describe('deriveSimplifiedDebts', () => {
             expect(d.friendBalances.get(ARI)?.byCurrency).toEqual([
                 { currency: 'USD', net: -3.33 },
             ]);
+        });
+    });
+
+    describe('unbalanced_dinner (data corruption — protection)', () => {
+        it('surfaces the (group, currency) in `unbalanced` with the residual', () => {
+            const d = deriveSimplifiedDebts(unbalanced_dinner, SARUS);
+            expect(d.unbalanced).toEqual([
+                { groupId: DFG, currency: 'ILS', residual: 10 },
+            ]);
+        });
+
+        it('never fabricates transfers or a "settled" rollup for a corrupt currency', () => {
+            const d = deriveSimplifiedDebts(unbalanced_dinner, SARUS);
+            expect(d.transfers).toEqual([]);
+            expect(d.byGroupCurrency.get(DFG)).toBeUndefined();
+            expect(d.groupRollups.get(DFG)).toBeUndefined();
+        });
+
+        it('balanced ledgers report no unbalanced entries', () => {
+            expect(deriveSimplifiedDebts(residual_paris, SARUS).unbalanced).toEqual([]);
+            expect(deriveSimplifiedDebts(cycle_blala, ARI).unbalanced).toEqual([]);
+            expect(deriveSimplifiedDebts(all_settled, ARI).unbalanced).toEqual([]);
+        });
+    });
+
+    describe('deleted_friend (anonymised counterparty)', () => {
+        it('flags the deleted friend isActive:false so the UI renders "deleted user"', () => {
+            const d = deriveSimplifiedDebts(deleted_friend, SARUS);
+            const ghost = d.friendBalances.get(GHOST);
+            expect(ghost).toBeDefined();
+            expect(ghost?.isActive).toBe(false);
+        });
+
+        it('still surfaces the real debt owed by the deleted friend', () => {
+            const d = deriveSimplifiedDebts(deleted_friend, SARUS);
+            // Sarus is owed 15 by the (now deleted) Ghost.
+            expect(d.friendBalances.get(GHOST)?.byCurrency).toEqual([
+                { currency: 'ILS', net: 15 },
+            ]);
+        });
+
+        it('does not crash on the null name and keeps it a string for the UI', () => {
+            const d = deriveSimplifiedDebts(deleted_friend, SARUS);
+            expect(typeof d.friendBalances.get(GHOST)?.name).toBe('string');
         });
     });
 

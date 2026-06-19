@@ -16,6 +16,7 @@ import { AppIcon } from '../AppIcon';
 import { Text } from '../AppText';
 import { DebtRow } from './DebtRow';
 import type { SimplifiedDebtsByCurrencyEntry } from '../../services/groups.service';
+import { resolveDebtPartyName } from '../../lib/userDisplay';
 import { colors } from '../../theme';
 
 interface SimplifiedDebtsSectionProps {
@@ -71,10 +72,8 @@ export function SimplifiedDebtsSection({
         );
     }
 
-    const resolveName = (userId: string): string => {
-        if (userId === currentUserId) return t('settleUp.you');
-        return nameById[userId] ?? t('common.unknown');
-    };
+    const resolveName = (userId: string): string =>
+        resolveDebtPartyName(userId, currentUserId, nameById, t);
 
     const renderRow = ({ currency, debt }: FlatDebt, involvedRow: boolean) => (
         <DebtRow

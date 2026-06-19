@@ -148,7 +148,7 @@
         "@sentry/react-native/expo",
         {
           "organization": "kupay-hb",
-          "project": "kupapay-mobile-prod"
+          "project": "copay-mobile-prod"
         }
       ],
       "./plugins/withFastStackTransitions",

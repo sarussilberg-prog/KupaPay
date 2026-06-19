@@ -19,7 +19,6 @@ export interface GroupListFilters {
     sortBy: GroupSortOption;
     balanceState: BalanceState;
     types: GroupType[];
-    showArchived: boolean;
     currencies: string[];
 }
 
@@ -27,7 +26,6 @@ export const DEFAULT_GROUP_LIST_FILTERS: GroupListFilters = {
     sortBy: 'recentDesc',
     balanceState: 'all',
     types: [],
-    showArchived: false,
     currencies: [],
 };
 
@@ -36,7 +34,6 @@ export function isAnyGroupListFilterActive(f: GroupListFilters): boolean {
         f.sortBy !== 'recentDesc' ||
         f.balanceState !== 'all' ||
         f.types.length > 0 ||
-        f.showArchived ||
         f.currencies.length > 0
     );
 }
@@ -57,9 +54,6 @@ export function passesGroupFilters(
         filters.currencies.length > 0 &&
         !filters.currencies.includes(group.defaultCurrency)
     ) {
-        return false;
-    }
-    if (!filters.showArchived && isGroupArchived(group)) {
         return false;
     }
     if (filters.balanceState !== 'all') {

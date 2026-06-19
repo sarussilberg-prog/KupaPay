@@ -27,6 +27,7 @@ import { colors } from '../../theme';
 import { SegmentedControl } from './SegmentedControl';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import {
+    autoFillUnlockedAmounts,
     computeUnequalTotal,
     parseSplitInput,
 } from '../../lib/expenseSplitForm';
@@ -41,6 +42,15 @@ function sanitizeNumeric(text: string): string {
     const whole = normalized.slice(0, firstDot);
     const frac = normalized.slice(firstDot + 1).replace(/\./g, '').slice(0, 2);
     return `${whole}.${frac}`;
+}
+
+/** Prefilled (non-empty) members count as manually set, so edit-mode keeps them. */
+function lockedFromValues(values: Record<string, string>): Set<string> {
+    return new Set(
+        Object.entries(values)
+            .filter(([, v]) => v != null && v.trim() !== '')
+            .map(([id]) => id),
+    );
 }
 
 export interface EditPayerSplitDraft {
@@ -76,6 +86,9 @@ export function EditPayerSplitSheet({
     const [splitMode, setSplitMode] = useState<UiSplitMode>(initial.splitMode);
     const [selectedIds, setSelectedIds] = useState<string[]>(initial.selectedMemberIds);
     const [values, setValues] = useState<Record<string, string>>(initial.unequalValues);
+    // Members whose exact amount the user has manually typed. Auto-fill spreads
+    // the remainder over the rest so the split always sums to the total.
+    const [lockedIds, setLockedIds] = useState<Set<string>>(() => lockedFromValues(initial.unequalValues));
 
     useEffect(() => {
         if (visible) {
@@ -83,8 +96,17 @@ export function EditPayerSplitSheet({
             setSplitMode(initial.splitMode);
             setSelectedIds(initial.selectedMemberIds);
             setValues(initial.unequalValues);
+            setLockedIds(lockedFromValues(initial.unequalValues));
         }
     }, [visible, initial.payerId, initial.splitMode, initial.selectedMemberIds, initial.unequalValues]);
+
+    // Lock (and auto-fill the rest) when the user edits one member's exact amount.
+    const handleExactAmountInput = (id: string, sanitized: string) => {
+        const nextLocked = new Set(lockedIds).add(id);
+        const withTyped = { ...values, [id]: sanitized };
+        setLockedIds(nextLocked);
+        setValues(autoFillUnlockedAmounts(totalAmount, selectedIds, withTyped, nextLocked));
+    };
 
     const splitModeOptions = useMemo(
         () => [
@@ -107,16 +129,22 @@ export function EditPayerSplitSheet({
     }, [selectedIds.length, totalAmount]);
 
     const toggleMember = (id: string) => {
-        setSelectedIds(prev => {
-            const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-            setValues(v => {
-                const updated = { ...v };
-                if (!next.includes(id)) delete updated[id];
-                else if (updated[id] === undefined) updated[id] = '';
-                return updated;
-            });
-            return next;
-        });
+        const nextSelected = selectedIds.includes(id)
+            ? selectedIds.filter(x => x !== id)
+            : [...selectedIds, id];
+        // A (de)selected member is no longer manually locked.
+        const nextLocked = new Set(lockedIds);
+        nextLocked.delete(id);
+        let nextValues = { ...values };
+        if (!nextSelected.includes(id)) delete nextValues[id];
+        else if (nextValues[id] === undefined) nextValues[id] = '';
+        // In exact mode, rebalance the remainder across the new selection.
+        if (splitMode === 'exact') {
+            nextValues = autoFillUnlockedAmounts(totalAmount, nextSelected, nextValues, nextLocked);
+        }
+        setSelectedIds(nextSelected);
+        setLockedIds(nextLocked);
+        setValues(nextValues);
     };
 
     const handleDone = () => {
@@ -244,7 +272,17 @@ export function EditPayerSplitSheet({
                             <SegmentedControl
                                 value={splitMode}
                                 options={splitModeOptions}
-                                onChange={mode => setSplitMode(mode)}
+                                onChange={mode => {
+                                    setSplitMode(mode);
+                                    if (mode === 'exact') {
+                                        // Seed a clean equal split on entering exact mode.
+                                        const fresh = new Set<string>();
+                                        setLockedIds(fresh);
+                                        setValues(
+                                            autoFillUnlockedAmounts(totalAmount, selectedIds, values, fresh),
+                                        );
+                                    }
+                                }}
                                 testIDPrefix="split-mode"
                             />
                         </View>
@@ -290,9 +328,14 @@ export function EditPayerSplitSheet({
                                                 <TextInput
                                                     style={styles.input}
                                                     value={value}
-                                                    onChangeText={text =>
-                                                        setValues(v => ({ ...v, [member.id]: sanitizeNumeric(text) }))
-                                                    }
+                                                    onChangeText={text => {
+                                                        const sanitized = sanitizeNumeric(text);
+                                                        if (splitMode === 'exact') {
+                                                            handleExactAmountInput(member.id, sanitized);
+                                                        } else {
+                                                            setValues(v => ({ ...v, [member.id]: sanitized }));
+                                                        }
+                                                    }}
                                                     keyboardType="decimal-pad"
                                                     inputMode="decimal"
                                                     placeholder={splitMode === 'percent' ? '0' : '0.00'}

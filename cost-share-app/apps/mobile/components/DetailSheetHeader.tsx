@@ -1,6 +1,8 @@
 /**
  * DetailSheetHeader — shared top bar for FeedItemDetailSheet (expense + settlement).
- * Layout: close ✕ · centered uppercase label · ⋮ kebab popover (Edit / Delete).
+ * Layout: close ✕ · centered uppercase label · ⋮ kebab popover.
+ * Menu items are rendered for each provided callback. The kebab is hidden when
+ * no callbacks are passed (e.g., a read-only deletion-notice with nothing to do).
  */
 
 import React, { useState } from 'react';
@@ -19,8 +21,11 @@ export interface DetailSheetHeaderProps {
     /** Label shown centered; rendered uppercase by the component. */
     label: string;
     onClose: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    onRemoveFromActivity?: () => void;
+    onOpenInGroup?: () => void;
+    openInGroupLabel?: string;
 }
 
 export function DetailSheetHeader({
@@ -28,18 +33,19 @@ export function DetailSheetHeader({
     onClose,
     onEdit,
     onDelete,
+    onRemoveFromActivity,
+    onOpenInGroup,
+    openInGroupLabel,
 }: DetailSheetHeaderProps) {
     const { t } = useTranslation();
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const handleEdit = () => {
-        setMenuOpen(false);
-        onEdit();
-    };
-    const handleDelete = () => {
-        setMenuOpen(false);
-        onDelete();
-    };
+    const handleEdit = () => { setMenuOpen(false); onEdit?.(); };
+    const handleDelete = () => { setMenuOpen(false); onDelete?.(); };
+    const handleRemoveFromActivity = () => { setMenuOpen(false); onRemoveFromActivity?.(); };
+    const handleOpenInGroup = () => { setMenuOpen(false); onOpenInGroup?.(); };
+
+    const hasMenu = Boolean(onEdit || onDelete || onRemoveFromActivity || onOpenInGroup);
 
     return (
         <View
@@ -63,68 +69,116 @@ export function DetailSheetHeader({
                 {label}
             </Text>
 
-            <View>
-                <TouchableOpacity
-                    onPress={() => setMenuOpen((o) => !o)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('common.edit')}
-                    className="w-11 h-11 items-center justify-center"
-                    testID="detail-kebab-btn"
-                >
-                    <AppIcon
-                        name="ellipsis-vertical"
-                        size={20}
-                        color={colors.gray600}
-                    />
-                </TouchableOpacity>
-
-                {menuOpen && (
-                    <>
-                        <Pressable
-                            onPress={() => setMenuOpen(false)}
-                            style={styles.menuBackdrop}
+            {hasMenu ? (
+                <View>
+                    <TouchableOpacity
+                        onPress={() => setMenuOpen((o) => !o)}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('common.edit')}
+                        className="w-11 h-11 items-center justify-center"
+                        testID="detail-kebab-btn"
+                    >
+                        <AppIcon
+                            name="ellipsis-vertical"
+                            size={20}
+                            color={colors.gray600}
                         />
-                        <View style={styles.menuCard}>
-                            <TouchableOpacity
-                                onPress={handleEdit}
-                                accessibilityRole="button"
-                                accessibilityLabel={t('common.edit')}
-                                className="flex-row items-center px-3 py-2.5 rounded-lg"
-                                testID="detail-edit-btn"
-                            >
-                                <AppIcon
-                                    name="create-outline"
-                                    size={16}
-                                    color={colors.gray700}
-                                />
-                                <Text className="text-sm font-medium text-gray-900 ml-2.5">
-                                    {t('common.edit')}
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={handleDelete}
-                                accessibilityRole="button"
-                                accessibilityLabel={t('common.delete')}
-                                className="flex-row items-center px-3 py-2.5 rounded-lg"
-                                testID="detail-delete-btn"
-                            >
-                                <AppIcon
-                                    name="trash-outline"
-                                    size={16}
-                                    color={colors.error}
-                                />
-                                <Text
-                                    className="text-sm font-medium ml-2.5"
-                                    style={{ color: colors.error }}
-                                >
-                                    {t('common.delete')}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </>
-                )}
-            </View>
+                    </TouchableOpacity>
+
+                    {menuOpen && (
+                        <>
+                            <Pressable
+                                onPress={() => setMenuOpen(false)}
+                                style={styles.menuBackdrop}
+                            />
+                            <View style={styles.menuCard}>
+                                {onOpenInGroup && (
+                                    <TouchableOpacity
+                                        onPress={handleOpenInGroup}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
+                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
+                                        testID="detail-open-in-group-btn"
+                                    >
+                                        <AppIcon
+                                            name="arrow-forward-outline"
+                                            size={16}
+                                            color={colors.gray700}
+                                        />
+                                        <Text className="text-sm font-medium text-gray-900 ml-2.5" numberOfLines={1}>
+                                            {openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                {onEdit && (
+                                    <TouchableOpacity
+                                        onPress={handleEdit}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={t('common.edit')}
+                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
+                                        testID="detail-edit-btn"
+                                    >
+                                        <AppIcon
+                                            name="create-outline"
+                                            size={16}
+                                            color={colors.gray700}
+                                        />
+                                        <Text className="text-sm font-medium text-gray-900 ml-2.5">
+                                            {t('common.edit')}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                {onDelete && (
+                                    <TouchableOpacity
+                                        onPress={handleDelete}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={t('common.delete')}
+                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
+                                        testID="detail-delete-btn"
+                                    >
+                                        <AppIcon
+                                            name="trash-outline"
+                                            size={16}
+                                            color={colors.error}
+                                        />
+                                        <Text
+                                            className="text-sm font-medium ml-2.5"
+                                            style={{ color: colors.error }}
+                                        >
+                                            {t('common.delete')}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                {onRemoveFromActivity && (
+                                    <TouchableOpacity
+                                        onPress={handleRemoveFromActivity}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={t('activity.removeFromActivity')}
+                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
+                                        testID="detail-remove-from-activity-btn"
+                                    >
+                                        <AppIcon
+                                            name="trash-outline"
+                                            size={16}
+                                            color={colors.error}
+                                        />
+                                        <Text
+                                            className="text-sm font-medium ml-2.5"
+                                            style={{ color: colors.error }}
+                                        >
+                                            {t('activity.removeFromActivity')}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </>
+                    )}
+                </View>
+            ) : (
+                // Spacer so the centered label stays centered.
+                <View className="w-11 h-11" />
+            )}
         </View>
     );
 }

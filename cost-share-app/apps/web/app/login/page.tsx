@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { APP_BRAND_TITLE, appBrandTitleStyle } from '@/lib/brand';
+import { WalletAnimation } from './WalletAnimation';
 
 function GoogleIcon() {
   return (
@@ -53,14 +53,9 @@ export default function LoginPage() {
 
   return (
     <main style={styles.container}>
-      <Image
-        src="/icon.png"
-        alt={APP_BRAND_TITLE}
-        width={128}
-        height={128}
-        priority
-        style={styles.logo}
-      />
+      <div style={{ marginBottom: '16px' }}>
+        <WalletAnimation size={148} />
+      </div>
       <h1 style={appBrandTitleStyle}>{APP_BRAND_TITLE}</h1>
       <p style={styles.subtitle}>Split expenses with friends</p>
 

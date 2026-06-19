@@ -110,7 +110,7 @@
             "hero": {
                 "eyebrow": "צעד אחרון",
                 "titleTodo": "נותנים שם ויוצאים לדרך",
-                "subtitleTodo": "סוג ומטבע כבר מוכנים — אפשר לשנות הכל אחר כך.",
+                "subtitleTodo": "סוג הקבוצה והמטבע הראשי כבר מוגדרים — אפשר לשנות הכל אחר כך.",
                 "titleReady": "מעולה, הקופה מוכנה!",
                 "subtitleReady": "אפשר לפתוח עכשיו, או להוסיף תמונה וחברים."
             },
@@ -195,7 +195,8 @@
             "errorHasBalance": "סגור את היתרה בקופה לפני העברה לארכיון",
             "errorGeneric": "עדכון מצב הארכיון נכשל",
             "badge": "ארכיון",
-            "noArchived": "אין קופות בארכיון"
+            "noArchived": "אין קופות בארכיון",
+            "sectionLabel": "קופות בארכיון ({{count}})"
         },
         "groupCreated": "הקופה נפתחה בהצלחה",
         "groupUpdated": "הקופה עודכנה בהצלחה",
@@ -256,10 +257,6 @@
                 "label": "סוג קופה",
                 "hint": "אפשר לבחור אחד או יותר — ריק = כל הסוגים"
             },
-            "status": {
-                "label": "סטטוס",
-                "showArchived": "הצג קופות בארכיון"
-            },
             "currency": {
                 "label": "מטבע"
             },
@@ -288,7 +285,8 @@
         },
         "card": {
             "matchedMembers": "כולל {{names}}",
-            "settled": "מסודר"
+            "settled": "מסודר",
+            "youSettled": "את/ה מסודר/ת"
         },
         "bigCreateCta": "פתח קופה",
         "settings": "הגדרות קופה",
@@ -764,6 +762,14 @@
         "expense": "הוצאה",
         "settlement": "תשלום",
         "message": "הודעה",
+        "edited": "נערך",
+        "deleted": "נמחק",
+        "deletionNotice": {
+            "expense": "ההוצאה הזו נמחקה על ידי {{name}} ב־{{when}}.",
+            "settlement": "התשלום הזה נמחק על ידי {{name}} ב־{{when}}."
+        },
+        "removeFromActivity": "הסר מהפעילות",
+        "removeFromActivityConfirm": "להסיר את זה מהפעילות שלך?",
         "cardTypes": {
             "expense": "הוצאה",
             "settlement": "תשלום",

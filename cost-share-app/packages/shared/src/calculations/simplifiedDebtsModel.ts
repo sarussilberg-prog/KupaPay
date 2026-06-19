@@ -5,8 +5,9 @@ import {
     SimplifiedDebts,
     SimplifiedInputsPayload,
     Transfer,
+    UnbalancedLedgerEntry,
 } from '../types';
-import { simplifyDebts } from './simplifyDebts';
+import { simplifyDebts, UnbalancedLedgerError } from './simplifyDebts';
 
 /**
  * Derive the canonical SimplifiedDebts struct from the RPC payload.
@@ -22,10 +23,11 @@ export function deriveSimplifiedDebts(
     currentUserId: string,
 ): SimplifiedDebts {
     const transfers: Transfer[] = [];
+    const unbalanced: UnbalancedLedgerEntry[] = [];
 
     for (const group of payload.groups) {
         const nameById = new Map<string, string>(
-            group.members.map(m => [m.userId, m.name]),
+            group.members.map(m => [m.userId, m.name ?? '']),
         );
         for (const cur of group.currencies) {
             const balances = cur.nets.map(n => ({
@@ -49,10 +51,25 @@ export function deriveSimplifiedDebts(
                         amount: d.amount,
                     });
                 }
-            } catch {
-                // UnbalancedLedgerError: an inactive-member residual upstream;
-                // skip this currency. Settle-up screen has the same behaviour.
-                continue;
+            } catch (err) {
+                // The ledger for this currency does not sum to zero. With the
+                // canonical RPC now emitting a net for EVERY footprint user
+                // (incl. inactive/deleted members), the only remaining cause is
+                // genuine upstream corruption — e.g. an expense whose splits
+                // don't add up to its amount. Surface it instead of silently
+                // dropping the currency, which would re-introduce the
+                // "you are owed X / everyone settled" contradiction.
+                if (err instanceof UnbalancedLedgerError) {
+                    unbalanced.push({
+                        groupId: group.groupId,
+                        currency: cur.currency,
+                        residual: round2(
+                            cur.nets.reduce((sum, n) => sum + n.net, 0),
+                        ),
+                    });
+                    continue;
+                }
+                throw err;
             }
         }
     }
@@ -65,6 +82,7 @@ export function deriveSimplifiedDebts(
         ),
         groupRollups: buildGroupRollups(transfers, currentUserId),
         friendBalances: buildFriendBalances(transfers, payload, currentUserId),
+        unbalanced,
     };
 }
 
@@ -153,7 +171,7 @@ function buildFriendBalances(
 
     const profileById = new Map<
         string,
-        { name: string; avatarUrl: string | null }
+        { name: string | null; avatarUrl: string | null }
     >();
     for (const g of payload.groups) {
         for (const m of g.members) {
@@ -177,11 +195,15 @@ function buildFriendBalances(
             name: friendId,
             avatarUrl: null,
         };
+        // A null name means the RPC returned an anonymised (deleted) account.
+        // Flag it isActive:false so getDisplayNameForFriend renders "deleted
+        // user"; keep `name` a non-null string so sorts/labels never crash.
+        const isActive = profile.name != null;
         out.set(friendId, {
             userId: friendId,
-            name: profile.name,
+            name: profile.name ?? '',
             avatarUrl: profile.avatarUrl,
-            isActive: true,
+            isActive,
             sharedGroupIds: [...(sharedGroupsByFriend.get(friendId) ?? [])].sort(
                 (a, b) => a.localeCompare(b),
             ),

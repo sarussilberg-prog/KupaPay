@@ -530,7 +530,8 @@ export interface SimplifiedInputsGroup {
 
 export interface SimplifiedInputsMember {
     userId: string;
-    name: string;
+    /** null for a deleted account (delete_my_account anonymises profiles.name). */
+    name: string | null;
     avatarUrl: string | null;
 }
 
@@ -573,6 +574,20 @@ export interface FriendBalanceSummary {
 }
 
 /**
+ * A (group, currency) whose nets did not sum to zero, so simplifyDebts could
+ * not run. This is upstream data corruption (e.g. an expense whose splits don't
+ * add up to its amount). It MUST be surfaced — never silently presented as
+ * "settled" — so the contradiction "you are owed X / everyone settled" can never
+ * recur unnoticed.
+ */
+export interface UnbalancedLedgerEntry {
+    groupId: string;
+    currency: string;
+    /** Sum of the emitted nets; should be 0. Non-zero ⇒ the residual that was hidden. */
+    residual: number;
+}
+
+/**
  * Full canonical struct — output of deriveSimplifiedDebts. Every UI surface
  * that shows a debt number reads from here. If two surfaces disagree it is a
  * bug in deriveSimplifiedDebts, not a "different RPC" mismatch.
@@ -588,6 +603,12 @@ export interface SimplifiedDebts {
     groupRollups: Map<string, GroupRollup>;
     /** Per-friend rollup (profile screen tile). Absent ⇒ no non-zero balance with that friend. */
     friendBalances: Map<string, FriendBalanceSummary>;
+    /**
+     * (group, currency) pairs whose ledger did not balance and were skipped.
+     * Empty in the healthy case. Non-empty ⇒ data corruption that callers must
+     * report (Sentry) and surface to the user as "couldn't compute", not "settled".
+     */
+    unbalanced: UnbalancedLedgerEntry[];
 }
 
 /** One row of the per-currency balance summary for the current user. */

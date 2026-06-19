@@ -18,6 +18,8 @@ import { colors } from '../theme';
 interface GroupCardProps {
     group: GroupWithMembers;
     rollup?: GroupRollup;
+    /** Forwarded to BalanceChip — distinguishes "You are settled" from "Settled". */
+    groupHasOpenDebts?: boolean;
     searchQuery?: string;
     matchedMemberNames?: string[];
     onPress: (groupId: string) => void;
@@ -26,6 +28,7 @@ interface GroupCardProps {
 function GroupCardBase({
     group,
     rollup,
+    groupHasOpenDebts,
     searchQuery,
     matchedMemberNames,
     onPress,
@@ -42,16 +45,16 @@ function GroupCardBase({
             activeOpacity={0.7}
             className={
                 isArchived
-                    ? 'bg-slate-50 rounded-2xl p-4 mb-3 border border-dashed border-gray-300'
-                    : 'bg-white rounded-2xl p-4 mb-3 border border-gray-100'
+                    ? 'bg-slate-50 rounded-2xl p-5 mb-3 border border-dashed border-gray-300'
+                    : 'bg-white rounded-2xl p-5 mb-3 border border-gray-100'
             }
         >
             <View style={[rtlRowStyle(isRtl), { alignItems: 'center' }]}>
-                <View className="mr-3">
+                <View className="mr-4">
                     <GroupAvatar
                         imageUrl={group.imageUrl}
                         groupType={group.groupType}
-                        size="sm"
+                        size="md"
                     />
                 </View>
 
@@ -61,8 +64,8 @@ function GroupCardBase({
                             <HighlightedText
                                 className={
                                     isArchived
-                                        ? 'text-base font-semibold text-gray-600'
-                                        : 'text-base font-semibold text-gray-900'
+                                        ? 'text-lg font-semibold text-gray-600'
+                                        : 'text-lg font-semibold text-gray-900'
                                 }
                                 text={group.name}
                                 query={searchQuery}
@@ -85,7 +88,7 @@ function GroupCardBase({
                         )}
                     </View>
                     <Text
-                        className={`text-xs mt-1 ${isArchived ? 'text-gray-500' : 'text-gray-400'}`}
+                        className={`text-sm mt-1 ${isArchived ? 'text-gray-500' : 'text-gray-400'}`}
                         numberOfLines={1}
                     >
                         {t(`groups.types.${group.groupType}`)}
@@ -95,7 +98,7 @@ function GroupCardBase({
                     </Text>
                     {hasMatches && (
                         <Text
-                            className="text-xs text-gray-500 mt-0.5"
+                            className="text-sm text-gray-500 mt-0.5"
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
@@ -109,12 +112,13 @@ function GroupCardBase({
                 <BalanceChip
                     rollup={rollup}
                     defaultCurrency={group.defaultCurrency}
+                    groupHasOpenDebts={groupHasOpenDebts}
                 />
 
                 <View className="ml-2">
                     <AppIcon
                         name={isRtl ? 'chevron-back' : 'chevron-forward'}
-                        size={20}
+                        size={22}
                         color={colors.gray300}
                     />
                 </View>

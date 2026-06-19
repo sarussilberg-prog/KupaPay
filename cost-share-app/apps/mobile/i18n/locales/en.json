@@ -195,7 +195,8 @@
             "errorHasBalance": "Settle your balance in this group before archiving",
             "errorGeneric": "Couldn't update archive state",
             "badge": "ARCHIVED",
-            "noArchived": "No archived groups"
+            "noArchived": "No archived groups",
+            "sectionLabel": "Archived groups ({{count}})"
         },
         "groupCreated": "Group created successfully",
         "groupUpdated": "Group updated successfully",
@@ -256,10 +257,6 @@
                 "label": "Group type",
                 "hint": "Pick one or more — empty means all types"
             },
-            "status": {
-                "label": "Status",
-                "showArchived": "Show archived groups"
-            },
             "currency": {
                 "label": "Currency"
             },
@@ -288,7 +285,8 @@
         },
         "card": {
             "matchedMembers": "incl. {{names}}",
-            "settled": "Settled"
+            "settled": "Settled",
+            "youSettled": "You are settled"
         },
         "bigCreateCta": "Create a group",
         "settings": "Group settings",
@@ -748,6 +746,14 @@
         "expense": "Expense",
         "settlement": "Settlement",
         "message": "Message",
+        "edited": "Edited",
+        "deleted": "Deleted",
+        "deletionNotice": {
+            "expense": "This expense was deleted by {{name}} on {{when}}.",
+            "settlement": "This payment was deleted by {{name}} on {{when}}."
+        },
+        "removeFromActivity": "Remove from activity",
+        "removeFromActivityConfirm": "Remove this from your activity?",
         "cardTypes": {
             "expense": "Expense",
             "settlement": "Payment",
@@ -778,7 +784,7 @@
         "title": "Settle up",
         "openDebts": "Open debts left to settle",
         "empty": "Everyone is settled up",
-        "you": "you",
+        "you": "You",
         "row": "{{from}} owes {{to}} {{amount}}",
         "payer": "Payer",
         "receiver": "Receiver",

@@ -97,6 +97,8 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
         amount: (md.amount as number | string | undefined) ?? null,
         currency: (md.currency as string | undefined) ?? null,
         body: (md.body as string | undefined) ?? null,
+        isEdited: md.is_edited === true,
+        isDeleted: md.is_deleted === true,
     });
 
     const messages: ExpoMessage[] = tokens.map((t) => ({

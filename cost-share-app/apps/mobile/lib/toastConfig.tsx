@@ -1,94 +1,56 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import {
-    BaseToast,
-    ErrorToast,
-    InfoToast,
-    type BaseToastProps,
-} from 'react-native-toast-message';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { type BaseToastProps } from 'react-native-toast-message';
+import { Text } from '../components/AppText';
 import { colors } from '../theme';
-import { rtlTextAlign, rtlWritingDirection } from '../hooks/useRtlLayout';
-import { useAppStore } from '../store';
+import { useRtlLayout } from '../hooks/useRtlLayout';
 
-function useToastRtl(): boolean {
-    const language = useAppStore((s) => s.language);
-    return language === 'he';
-}
+type ToastVariant = {
+    borderStartColor: string;
+    backgroundColor: string;
+};
 
-export function toastTextStyles(isRtl: boolean) {
-    const align = rtlTextAlign(isRtl);
-    const writingDirection = rtlWritingDirection(isRtl);
-    // On native, textAlign alone doesn't move the text: the <Text> box hugs its
-    // content at the container's start (left in logical-RTL mode) so right-aligned
-    // Hebrew looks stuck left. Stretching the box to full width makes textAlign
-    // take effect — same pattern as centeredTextStyle/feedActorNameStyle.
-    return {
-        text1: {
-            fontSize: 15,
-            fontWeight: '600' as const,
-            color: colors.gray900,
-            textAlign: align,
-            writingDirection,
-            alignSelf: 'stretch' as const,
-            width: '100%' as const,
-        },
-        text2: {
-            fontSize: 13,
-            fontWeight: '400' as const,
-            color: colors.gray600,
-            textAlign: align,
-            writingDirection,
-            alignSelf: 'stretch' as const,
-            width: '100%' as const,
-        },
-    };
-}
-
-function KupaPayBaseToast(props: BaseToastProps) {
-    const isRtl = useToastRtl();
-    const textStyles = toastTextStyles(isRtl);
+/**
+ * Toast layout for the app.
+ *
+ * Why a custom component instead of the library's BaseToast/ErrorToast/InfoToast:
+ * those render a raw React Native `<Text>` whose alignment is set via inline
+ * `textAlign`. On iOS that does NOT right-align Hebrew — the box hugs its content
+ * at the start and the text stays stuck to the left (the long-standing bug).
+ * Every other Hebrew string in the app aligns correctly because it renders through
+ * `<AppText>`, which drives alignment from the store via NativeWind `text-right`
+ * + `self-stretch` (className wins over the style prop on native — see useRtlLayout).
+ * Routing toast text through `<AppText>` fixes all toast types at once.
+ */
+function KupaPayToast({
+    text1,
+    text2,
+    onPress,
+    variant,
+}: BaseToastProps & { variant: ToastVariant }) {
+    const isRtl = useRtlLayout();
     return (
-        <BaseToast
-            {...props}
-            style={[styles.base, { direction: isRtl ? 'rtl' : 'ltr' }, props.style]}
-            contentContainerStyle={[styles.content, props.contentContainerStyle]}
-            text1Style={[textStyles.text1, props.text1Style]}
-            text2Style={[textStyles.text2, props.text2Style]}
-            text1NumberOfLines={3}
-            text2NumberOfLines={4}
-        />
-    );
-}
-
-function KupaPayErrorToast(props: BaseToastProps) {
-    const isRtl = useToastRtl();
-    const textStyles = toastTextStyles(isRtl);
-    return (
-        <ErrorToast
-            {...props}
-            style={[styles.base, styles.error, { direction: isRtl ? 'rtl' : 'ltr' }, props.style]}
-            contentContainerStyle={[styles.content, props.contentContainerStyle]}
-            text1Style={[textStyles.text1, props.text1Style]}
-            text2Style={[textStyles.text2, props.text2Style]}
-            text1NumberOfLines={3}
-            text2NumberOfLines={4}
-        />
-    );
-}
-
-function KupaPayInfoToast(props: BaseToastProps) {
-    const isRtl = useToastRtl();
-    const textStyles = toastTextStyles(isRtl);
-    return (
-        <InfoToast
-            {...props}
-            style={[styles.base, styles.info, { direction: isRtl ? 'rtl' : 'ltr' }, props.style]}
-            contentContainerStyle={[styles.content, props.contentContainerStyle]}
-            text1Style={[textStyles.text1, props.text1Style]}
-            text2Style={[textStyles.text2, props.text2Style]}
-            text1NumberOfLines={3}
-            text2NumberOfLines={4}
-        />
+        <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={onPress}
+            accessibilityRole="alert"
+            // `direction` only flips the accent border to the language's leading edge
+            // (borderStart). Text alignment itself is owned by <AppText>.
+            style={[styles.base, variant, { direction: isRtl ? 'rtl' : 'ltr' }]}
+        >
+            <View style={styles.content}>
+                {text1 ? (
+                    <Text style={styles.text1} numberOfLines={3}>
+                        {text1}
+                    </Text>
+                ) : null}
+                {text2 ? (
+                    <Text style={styles.text2} numberOfLines={4}>
+                        {text2}
+                    </Text>
+                ) : null}
+            </View>
+        </TouchableOpacity>
     );
 }
 
@@ -99,6 +61,9 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         minHeight: 56,
         width: '92%',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        justifyContent: 'center',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.12,
@@ -106,8 +71,22 @@ const styles = StyleSheet.create({
         elevation: 6,
     },
     content: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        width: '100%',
+    },
+    text1: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.gray900,
+    },
+    text2: {
+        fontSize: 13,
+        fontWeight: '400',
+        color: colors.gray600,
+        marginTop: 2,
+    },
+    success: {
+        borderStartColor: colors.success.DEFAULT,
+        backgroundColor: '#ECFDF5',
     },
     error: {
         borderStartColor: colors.error,
@@ -117,35 +96,15 @@ const styles = StyleSheet.create({
         borderStartColor: colors.info,
         backgroundColor: colors.primaryExtraLight,
     },
+    warning: {
+        borderStartColor: colors.warning,
+        backgroundColor: '#FFFBEB',
+    },
 });
 
 export const toastConfig = {
-    success: (props: BaseToastProps) => (
-        <KupaPayBaseToast
-            {...props}
-            style={[
-                styles.base,
-                {
-                    borderStartColor: colors.success.DEFAULT,
-                    backgroundColor: '#ECFDF5',
-                },
-                props.style,
-            ]}
-        />
-    ),
-    error: (props: BaseToastProps) => <KupaPayErrorToast {...props} />,
-    info: (props: BaseToastProps) => <KupaPayInfoToast {...props} />,
-    warning: (props: BaseToastProps) => (
-        <KupaPayBaseToast
-            {...props}
-            style={[
-                styles.base,
-                {
-                    borderStartColor: colors.warning,
-                    backgroundColor: '#FFFBEB',
-                },
-                props.style,
-            ]}
-        />
-    ),
+    success: (props: BaseToastProps) => <KupaPayToast {...props} variant={styles.success} />,
+    error: (props: BaseToastProps) => <KupaPayToast {...props} variant={styles.error} />,
+    info: (props: BaseToastProps) => <KupaPayToast {...props} variant={styles.info} />,
+    warning: (props: BaseToastProps) => <KupaPayToast {...props} variant={styles.warning} />,
 };

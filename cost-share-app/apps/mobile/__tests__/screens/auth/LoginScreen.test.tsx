@@ -25,6 +25,17 @@ jest.mock('../../../lib/appToast', () => ({
     showErrorToast: jest.fn(),
 }));
 
+// AppLogoAnimated pulls in react-native-reanimated (native worklets), which isn't
+// initialized under jest — mock it like the other animated components in the suite.
+jest.mock('../../../components/AppLogoAnimated', () => {
+    const React = require('react');
+    const { View } = require('react-native');
+    function AppLogoAnimated({ testID = 'app-logo' }: { testID?: string }) {
+        return <View testID={testID} />;
+    }
+    return { AppLogoAnimated };
+});
+
 import { LoginScreen } from '../../../screens/auth/LoginScreen';
 import { signInWithGoogle } from '../../../services/auth.service';
 import { useChangeAppLanguage } from '../../../hooks/useChangeAppLanguage';

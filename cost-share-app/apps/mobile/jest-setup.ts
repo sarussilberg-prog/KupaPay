@@ -104,9 +104,22 @@ jest.mock('./lib/supabase', () => ({
 }));
 
 // Mock react-i18next: provide a t() that returns the key so assertions can use keys.
+// When interpolation options are provided, substitute {{variable}} placeholders so
+// tests that match against real translated text (e.g. /deleted by Avi/i) still work.
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({
-        t: (key: string) => key,
+        t: (key: string, opts?: Record<string, unknown>) => {
+            if (!opts) return key;
+            // Substitute {{variable}} placeholders with opts values.
+            const translations: Record<string, string> = {
+                'activity.deletionNotice.expense': 'This expense was deleted by {{name}} on {{when}}.',
+                'activity.deletionNotice.settlement': 'This payment was deleted by {{name}} on {{when}}.',
+            };
+            const template = translations[key] ?? key;
+            return template.replace(/\{\{(\w+)\}\}/g, (_: string, k: string) =>
+                opts[k] !== undefined ? String(opts[k]) : `{{${k}}}`,
+            );
+        },
         i18n: {
             language: 'en',
             changeLanguage: jest.fn(),

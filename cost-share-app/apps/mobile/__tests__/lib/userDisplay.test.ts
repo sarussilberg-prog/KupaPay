@@ -8,6 +8,7 @@ import {
     getDisplayNameForFriend,
     getDisplayNameForMember,
     isDeleted,
+    resolveDebtPartyName,
 } from '../../lib/userDisplay';
 
 const t = (key: string) => key;
@@ -108,6 +109,16 @@ describe('userDisplay', () => {
             expect(getAvatarUrlForMember(deletedMember)).toBeUndefined());
         it('getAvatarUrlForMember returns undefined for null', () =>
             expect(getAvatarUrlForMember(null)).toBeUndefined());
+    });
+
+    describe('resolveDebtPartyName', () => {
+        const names = { me: 'Me', alice: 'Alice' };
+        it('returns "you" for the current user', () =>
+            expect(resolveDebtPartyName('me', 'me', names, t as any)).toBe('settleUp.you'));
+        it('returns the roster name for a known member', () =>
+            expect(resolveDebtPartyName('alice', 'me', names, t as any)).toBe('Alice'));
+        it('returns deletedUser for an id absent from the roster (left / deleted member)', () =>
+            expect(resolveDebtPartyName('ghost', 'me', names, t as any)).toBe('common.deletedUser'));
     });
 
     describe('Friend helpers', () => {
