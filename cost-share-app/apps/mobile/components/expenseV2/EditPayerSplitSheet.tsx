@@ -6,7 +6,7 @@
  * and Cancel discard the draft.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Modal,
@@ -90,6 +90,7 @@ export function EditPayerSplitSheet({
     // Members whose exact amount the user has manually typed. Auto-fill spreads
     // the remainder over the rest so the split always sums to the total.
     const [lockedIds, setLockedIds] = useState<Set<string>>(() => lockedFromValues(initial.unequalValues));
+    const splitInputRefs = useRef<Record<string, TextInput | null>>({});
 
     useEffect(() => {
         if (visible) {
@@ -386,6 +387,7 @@ export function EditPayerSplitSheet({
                                         ) : (
                                             <View style={styles.inputWrap}>
                                                 <TextInput
+                                                    ref={(r) => { splitInputRefs.current[member.id] = r; }}
                                                     style={styles.input}
                                                     value={value}
                                                     onChangeText={text => {
@@ -402,6 +404,12 @@ export function EditPayerSplitSheet({
                                                     placeholderTextColor={colors.gray400}
                                                     editable={checked}
                                                     testID={`split-input-${member.id}`}
+                                                    onFocus={() => {
+                                                        const len = (values[member.id] ?? '').length;
+                                                        setTimeout(() => {
+                                                            splitInputRefs.current[member.id]?.setNativeProps({ selection: { start: len, end: len } });
+                                                        }, 0);
+                                                    }}
                                                 />
                                                 <Text style={styles.inputSuffix}>
                                                     {splitMode === 'percent' ? '%' : currency}

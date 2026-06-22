@@ -193,6 +193,7 @@ export function AddExpenseScreen() {
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
+    const amountInputRef = useRef<TextInput>(null);
 
     const { data: membersData = [], isLoading: membersLoading } = useGroupMembersQuery(groupId);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
@@ -741,6 +742,7 @@ export function AddExpenseScreen() {
                     <View style={{ height: 24 }} />
                     <Animated.View style={{ transform: [{ translateX: amountShake }] }}>
                         <TextInput
+                            ref={amountInputRef}
                             value={amount}
                             onChangeText={text => setAmount(sanitizeAmountInput(text))}
                             keyboardType="decimal-pad"
@@ -749,6 +751,13 @@ export function AddExpenseScreen() {
                             placeholderTextColor={colors.gray300}
                             style={styles.amountInput}
                             testID="amount-display"
+                            autoFocus
+                            onFocus={() => {
+                                const len = amount.length;
+                                setTimeout(() => {
+                                    amountInputRef.current?.setNativeProps({ selection: { start: len, end: len } });
+                                }, 0);
+                            }}
                         />
                     </Animated.View>
                     <Animated.View
