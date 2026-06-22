@@ -17,7 +17,9 @@ import {
     ActivityIndicator,
     Animated,
     Image,
+    InputAccessoryView,
     InteractionManager,
+    Platform,
     ScrollView,
     StyleSheet,
     TextInput,
@@ -46,6 +48,11 @@ import {
 } from '../../components/expenseV2/EditPayerSplitSheet';
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
+
+// iOS localizes the numeric keyboard's "Next" return button from the native
+// bundle, which ignores the in-app language. We provide our own accessory bar
+// with an i18n-driven label instead so it follows the app's language.
+const AMOUNT_ACCESSORY_ID = 'amountKeyboardAccessory';
 
 /**
  * Keep only digits and a single decimal separator (`.` or `,` → `.`),
@@ -779,11 +786,28 @@ export function AddExpenseScreen() {
                             style={styles.amountInput}
                             testID="amount-display"
                             autoFocus
-                            returnKeyType="next"
                             blurOnSubmit={false}
                             onSubmitEditing={() => descriptionInputRef.current?.focus()}
+                            inputAccessoryViewID={
+                                Platform.OS === 'ios' ? AMOUNT_ACCESSORY_ID : undefined
+                            }
                         />
                     </Animated.View>
+                    {Platform.OS === 'ios' ? (
+                        <InputAccessoryView nativeID={AMOUNT_ACCESSORY_ID}>
+                            <View style={styles.keyboardAccessory}>
+                                <TouchableOpacity
+                                    onPress={() => descriptionInputRef.current?.focus()}
+                                    style={styles.keyboardAccessoryButton}
+                                    testID="amount-accessory-next"
+                                >
+                                    <Text style={styles.keyboardAccessoryText}>
+                                        {t('common.next')}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </InputAccessoryView>
+                    ) : null}
                     <Animated.View
                         style={{
                             alignItems: 'center',
@@ -1064,6 +1088,32 @@ const styles = StyleSheet.create({
         height: 2,
         borderRadius: 9999,
         backgroundColor: colors.primaryLight,
+    },
+    // Transparent bar so only the rounded white "bubble" floats above the
+    // keyboard, matching iOS's native number-pad return button look.
+    keyboardAccessory: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        backgroundColor: 'transparent',
+        paddingHorizontal: 12,
+        paddingBottom: 6,
+    },
+    keyboardAccessoryButton: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 18,
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    keyboardAccessoryText: {
+        fontSize: 17,
+        fontWeight: '500',
+        color: colors.text.primary,
+        textAlign: 'center',
     },
     bottomSaveRow: {
         alignItems: 'center',
