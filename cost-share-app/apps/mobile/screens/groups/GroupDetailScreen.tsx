@@ -90,7 +90,9 @@ import {
 } from '../../components/GroupFeedFiltersSheet';
 import { filterAndSortGroupFeed } from '../../lib/groupFeedFilters';
 import {
-    findFeedItemIndex,
+    IDLE_FOCUS_SESSION,
+    reduceFocusSession,
+    type FocusSessionState,
     type GroupDetailFocusFeedItem,
 } from '../../lib/groupDetailFocus';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
@@ -200,8 +202,7 @@ export function GroupDetailScreen() {
         editSettlementId?: string;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
-    const focusConsumedRef = useRef(false);
-    const pendingFocusKeyRef = useRef<string | null>(null);
+    const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
     const focusScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const focusClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [focusedRowKey, setFocusedRowKey] = useState<string | null>(null);
@@ -424,35 +425,28 @@ export function GroupDetailScreen() {
     );
 
     useEffect(() => {
-        const focus = focusFeedItemParam;
-        if (!focus) return;
-        const key = `${focus.kind}:${focus.id}`;
-        if (pendingFocusKeyRef.current === key) return;
-        pendingFocusKeyRef.current = key;
-        focusConsumedRef.current = false;
-        setSearchQuery('');
-        setFilters(DEFAULT_GROUP_FEED_FILTERS);
-    }, [focusFeedItemParam]);
+        const decision = reduceFocusSession(
+            focusSessionRef.current,
+            focusFeedItemParam,
+            filteredFeed,
+            isFeedLoading,
+        );
+        focusSessionRef.current = decision.state;
 
-    useEffect(() => {
-        const focus = focusFeedItemParam;
-        if (!focus || focusConsumedRef.current || isFeedLoading) return;
+        if (decision.resetFilters) {
+            setSearchQuery('');
+            setFilters(DEFAULT_GROUP_FEED_FILTERS);
+        }
 
-        const index = findFeedItemIndex(filteredFeed, focus);
-        if (index < 0) return;
+        if (decision.highlightKey === null) return;
 
-        const rowKey =
-            focus.kind === 'expense'
-                ? `e:${focus.id}`
-                : focus.kind === 'message'
-                    ? `m:${focus.id}`
-                    : `s:${focus.id}`;
-        focusConsumedRef.current = true;
-        // Do NOT clear focusFeedItem from route params here — that would
-        // trigger a re-render and fire this effect's cleanup, which would
-        // cancel the scheduled scroll/highlight timers before they run.
-        // Route params naturally reset on the next navigation, so leaving
-        // it alone is safe.
+        const { highlightKey: rowKey, highlightIndex: index } = decision;
+        // Clear the route param now that we've consumed it. This re-runs the
+        // effect with no focus (a no-op that returns the session to idle), which
+        // is what lets the SAME item be focused again on a later navigation.
+        // Clearing does not cancel the timers below — they live in refs and are
+        // only cleared on unmount.
+        navigation.setParams({ groupId, focusFeedItem: undefined });
 
         focusScrollTimerRef.current = setTimeout(() => {
             listRef.current?.scrollToIndex({

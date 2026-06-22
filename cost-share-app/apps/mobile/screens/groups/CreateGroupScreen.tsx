@@ -13,6 +13,7 @@ import { GroupType, User } from '@cost-share/shared';
 import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
 import {
+    addGroupMember,
     createGroup,
     getGroupById,
     removeGroupMember,
@@ -57,6 +58,12 @@ export function CreateGroupScreen() {
     const [members, setMembers] = useState<User[]>(
         !isEdit && initialMembers ? initialMembers.filter((m) => m.isActive !== false) : [],
     );
+    // Edit mode only: members picked but not yet committed. They're added to the
+    // backend on Save, so Cancel discards them instead of leaving them in the group.
+    const [pendingMembers, setPendingMembers] = useState<User[]>([]);
+    // Edit mode only: existing members staged for removal (after the confirm /
+    // open-balance guards). They're removed from the backend only on Save.
+    const [pendingRemovalIds, setPendingRemovalIds] = useState<Set<string>>(new Set());
     const [addMembersOpen, setAddMembersOpen] = useState(false);
     const [removeTarget, setRemoveTarget] = useState<User | null>(null);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -109,6 +116,11 @@ export function CreateGroupScreen() {
 
     const openRemoveDialog = useCallback(
         (m: User) => {
+            // Staged addition not yet committed — just drop it locally, no backend call.
+            if (pendingMembers.some((p) => p.id === m.id)) {
+                setPendingMembers((prev) => prev.filter((x) => x.id !== m.id));
+                return;
+            }
             if (!groupId) {
                 setMembers((prev) => prev.filter((x) => x.id !== m.id));
                 return;
@@ -122,30 +134,50 @@ export function CreateGroupScreen() {
                 {
                     text: t('groups.removeMember'),
                     style: 'destructive',
+                    // Stage the removal; it's committed on Save so Cancel keeps the member.
                     onPress: () => {
-                        void (async () => {
-                            const ok = await removeGroupMember(groupId, m.id);
-                            if (ok) await loadMembers();
-                        })();
+                        setPendingRemovalIds((prev) => {
+                            const next = new Set(prev);
+                            next.add(m.id);
+                            return next;
+                        });
                     },
                 },
             ]);
         },
-        [groupId, unsettledMemberIds, t, loadMembers],
+        [groupId, unsettledMemberIds, t, pendingMembers],
     );
 
-    const handleMembersSelected = useCallback((users: User[]) => {
-        setMembers((prev) => {
-            const existing = new Set(prev.map((m) => m.id));
-            const next = [...prev];
-            users
-                .filter((u) => u.isActive !== false)
-                .forEach((u) => {
+    // Stage picked members locally. Create commits them in createGroup; edit
+    // commits them on Save (handleUpdate) so Cancel leaves the group untouched.
+    const stageMembers = useCallback(
+        (users: User[]) => {
+            const active = users.filter((u) => u.isActive !== false);
+            if (isEdit) {
+                setPendingMembers((prev) => {
+                    const existing = new Set([
+                        ...members.map((m) => m.id),
+                        ...prev.map((m) => m.id),
+                    ]);
+                    const next = [...prev];
+                    active.forEach((u) => {
+                        if (!existing.has(u.id)) next.push(u);
+                    });
+                    return next;
+                });
+                return;
+            }
+            setMembers((prev) => {
+                const existing = new Set(prev.map((m) => m.id));
+                const next = [...prev];
+                active.forEach((u) => {
                     if (!existing.has(u.id)) next.push(u);
                 });
-            return next;
-        });
-    }, []);
+                return next;
+            });
+        },
+        [isEdit, members],
+    );
 
     const validateForm = (): boolean => {
         if (!name.trim()) {
@@ -219,7 +251,17 @@ export function CreateGroupScreen() {
                 groupType,
                 defaultCurrency: currency,
             });
-            if (result) navigation.goBack();
+            if (!result) return;
+
+            // Commit staged membership changes only now, on Save.
+            for (const id of pendingRemovalIds) {
+                await removeGroupMember(groupId, id);
+            }
+            for (const m of pendingMembers) {
+                await addGroupMember(groupId, m.id);
+            }
+
+            navigation.goBack();
         } finally {
             stopLoading();
         }
@@ -241,13 +283,13 @@ export function CreateGroupScreen() {
     }
 
     const displayMembers: User[] = isEdit
-        ? members
+        ? [...members.filter((m) => !pendingRemovalIds.has(m.id)), ...pendingMembers]
         : currentUser
           ? [currentUser, ...members]
           : members;
 
     const memberIdsForSheet = isEdit
-        ? members.map((m) => m.id)
+        ? [...members.map((m) => m.id), ...pendingMembers.map((m) => m.id)]
         : [...(currentUser ? [currentUser.id] : []), ...members.map((m) => m.id)];
 
     const screenTitle = isEdit ? t('groups.editGroup') : t('groups.createGroup');
@@ -326,8 +368,7 @@ export function CreateGroupScreen() {
                 groupId={groupId}
                 currentMemberIds={memberIdsForSheet}
                 onClose={() => setAddMembersOpen(false)}
-                onAdded={isEdit ? loadMembers : undefined}
-                onConfirmSelection={isEdit ? undefined : handleMembersSelected}
+                onConfirmSelection={stageMembers}
             />
 
             <Modal

@@ -156,6 +156,15 @@ describe('AddExpenseScreen — v2', () => {
         expect(amount.props.editable).not.toBe(false);
     });
 
+    it('shows an app-localized "Next" keyboard accessory on the amount field', async () => {
+        const { findByTestId, getByText } = renderWithQuery(<AddExpenseScreen />);
+        const amount = await findByTestId('amount-display');
+        // The native return-key label is bypassed in favor of our own accessory,
+        // so the button text comes from i18n (here the key, via the test stub).
+        expect(amount.props.inputAccessoryViewID).toBeTruthy();
+        expect(getByText('common.next')).toBeTruthy();
+    });
+
     it('sanitizes the amount input — letters dropped, one dot max, 2 decimal cap', async () => {
         const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
         const amount = await findByTestId('amount-display');
