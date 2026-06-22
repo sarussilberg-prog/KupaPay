@@ -2,12 +2,15 @@
  * EditPayerSplitSheet
  * Bottom-sheet modal for choosing the payer and the split distribution.
  *
- * Internal draft state is committed back to the parent on Done; scrim taps
- * and Cancel discard the draft.
+ * Internal draft state is committed back to the parent on Done or on a scrim
+ * tap (both treated as "save"); only the explicit Cancel button discards it.
+ * When an unequal split doesn't sum correctly, saving is blocked and the error
+ * caption shakes to draw attention instead of closing the sheet.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+    Animated,
     KeyboardAvoidingView,
     Modal,
     Platform,
@@ -147,8 +150,28 @@ export function EditPayerSplitSheet({
         setValues(nextValues);
     };
 
-    const handleDone = () => {
-        if (splitMode !== 'equal' && !validation.isValid) return;
+    // Shake the error caption when the user tries to save an invalid split.
+    const errorShake = useRef(new Animated.Value(0)).current;
+    const runErrorShake = useCallback(() => {
+        errorShake.setValue(0);
+        // JS driver (not native): the caption is a tiny text node and the native
+        // driver's node lookup is fragile under test; a 250ms shake is fine on JS.
+        Animated.sequence([
+            Animated.timing(errorShake, { toValue: -6, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: 6, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: -4, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: 4, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: 0, duration: 50, useNativeDriver: false }),
+        ]).start();
+    }, [errorShake]);
+
+    // Both Done and a scrim tap route here: save when valid, otherwise keep the
+    // sheet open and shake the error so the user notices what's wrong.
+    const handleSave = () => {
+        if (splitMode !== 'equal' && !validation.isValid) {
+            runErrorShake();
+            return;
+        }
         onDone({ payerId, splitMode, selectedMemberIds: selectedIds, unequalValues: values });
     };
 
@@ -187,26 +210,24 @@ export function EditPayerSplitSheet({
                 <View style={styles.backdrop}>
                     <Pressable
                         style={styles.scrim}
-                        onPress={onCancel}
+                        onPress={handleSave}
                         testID="edit-payer-split-scrim"
                     />
                     <View style={styles.sheet}>
                     <View style={styles.grabber} />
                     <View style={styles.titleRow}>
+                        <TouchableOpacity
+                            onPress={onCancel}
+                            testID="edit-payer-split-cancel"
+                        >
+                            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+                        </TouchableOpacity>
                         <Text style={styles.title}>{t('expenses.v2.whoAndHow')}</Text>
                         <TouchableOpacity
-                            onPress={handleDone}
-                            disabled={splitMode !== 'equal' && !validation.isValid}
+                            onPress={handleSave}
                             testID="edit-payer-split-done"
                         >
-                            <Text
-                                style={[
-                                    styles.doneText,
-                                    splitMode !== 'equal' && !validation.isValid ? styles.doneTextDisabled : null,
-                                ]}
-                            >
-                                {t('common.done')}
-                            </Text>
+                            <Text style={styles.doneText}>{t('common.done')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -256,13 +277,16 @@ export function EditPayerSplitSheet({
                         <View style={styles.splitHeaderRow}>
                             <Text style={styles.eyebrow}>{t('expenses.v2.sectionSplitBetween')}</Text>
                             {titleError ? (
-                                <Text
-                                    style={styles.splitErrorCaption}
+                                <Animated.Text
+                                    style={[
+                                        styles.splitErrorCaption,
+                                        { transform: [{ translateX: errorShake }] },
+                                    ]}
                                     numberOfLines={1}
                                     testID="edit-payer-split-error"
                                 >
                                     {titleError}
-                                </Text>
+                                </Animated.Text>
                             ) : (
                                 <Text style={styles.metaCaption}>{metaCaption}</Text>
                             )}
@@ -401,6 +425,8 @@ const styles = StyleSheet.create({
         marginBottom: 14,
     },
     title: {
+        flex: 1,
+        textAlign: 'center',
         fontSize: 15,
         fontWeight: '700',
         color: colors.text.primary,
@@ -419,8 +445,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 4,
     },
-    doneTextDisabled: {
-        color: colors.gray400,
+    cancelText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text.secondary,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
     },
     eyebrow: {
         fontSize: 12,

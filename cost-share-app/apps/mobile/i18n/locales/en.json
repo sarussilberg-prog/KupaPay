@@ -16,6 +16,7 @@
         "unknown": "Unknown",
         "loadError": "Failed to load data",
         "networkError": "Network error. Please check your connection.",
+        "offlineTitle": "You're offline",
         "retry": "Retry",
         "search": "Search",
         "submit": "Submit",
@@ -24,6 +25,8 @@
         "you": "You",
         "deletedUser": "Deleted user",
         "unknownUser": "Unknown user",
+        "groupMember": "Group member",
+        "formerMember": "Former member",
         "openMail": "Open mail",
         "linkCopied": "Link copied to clipboard"
     },
@@ -144,6 +147,7 @@
         "editGroup": "Edit Group",
         "noGroups": "No groups yet",
         "noGroupsMessage": "Create your first group to start sharing expenses",
+        "offlineMessage": "We can't load your groups right now. They'll appear here automatically once you're back online.",
         "groupName": "Group Name",
         "enterGroupName": "Enter group name",
         "createForm": {
@@ -286,7 +290,8 @@
         "card": {
             "matchedMembers": "incl. {{names}}",
             "settled": "Settled",
-            "youSettled": "You are settled"
+            "youSettled": "You are settled",
+            "balanceUnavailable": "Balance unavailable offline"
         },
         "bigCreateCta": "Create a group",
         "settings": "Group settings",
@@ -392,7 +397,8 @@
             "action": "Add the first expense",
             "addMembers": "Add members",
             "noResultsTitle": "No results",
-            "noResultsMessage": "Try changing your search or filters."
+            "noResultsMessage": "Try changing your search or filters.",
+            "offlineMessage": "We can't load this group's activity right now. You can still add an expense — it'll upload to the group automatically once you're back online."
         },
         "members": {
             "title": "Members",
@@ -438,6 +444,7 @@
         "eachPays": "Each pays",
         "noExpenses": "No expenses yet",
         "noExpensesMessage": "Add your first expense to start tracking",
+        "offlineMessage": "We can't load expenses right now. You can still add an expense — it'll sync to the group automatically once you're back online.",
         "recentExpenses": "Recent Expenses",
         "deleteExpense": "Delete Expense",
         "deleteExpenseConfirm": "Are you sure you want to delete this expense?",
@@ -538,6 +545,7 @@
         "minimumBadge": "Minimum",
         "allSettled": "All settled up!",
         "noDebts": "No outstanding debts in this group",
+        "unavailableOffline": "Balances unavailable offline",
         "noBalances": "No balances to display",
         "settleUp": "Settle Up",
         "recordPayment": "Record Payment",
@@ -765,8 +773,10 @@
         },
         "notifications": {
             "groupInvite": "{{name}} added you to {{group}}",
+            "joinedViaInvite": "You joined {{group}} using an invitation link",
             "memberJoined": "{{name}} joined {{group}}",
             "memberLeft": "{{name}} left {{group}}",
+            "memberRemovedYou": "{{name}} removed you from {{group}}",
             "friendRequest": "Friend request from {{name}}",
             "friendRequestAccepted": "You and {{name}} are now friends",
             "friendRequestRejected": "You declined {{name}}'s friend request"
@@ -778,7 +788,9 @@
         "paidYou": "{{name}} paid you {{amount}}",
         "inGroup": "in {{group}}",
         "openInGroup": "Open in {{group}}",
-        "earlier": "Earlier"
+        "earlier": "Earlier",
+        "unavailableTitle": "No longer available",
+        "unavailableMessage": "This may have been deleted, or you no longer have access."
     },
     "settleUp": {
         "title": "Settle up",
@@ -922,7 +934,8 @@
         "friendConversionFailed": "rates unavailable",
         "noFriendsYet": "No shared groups yet",
         "friendBreakdownTitle": "Per-group breakdown",
-        "friendBreakdownEmpty": "No shared groups with this friend."
+        "friendBreakdownEmpty": "No shared groups with this friend.",
+        "friendMoreCurrencies": "+{{count}} more"
     },
     "legal": {
         "termsTitle": "Terms of Service",

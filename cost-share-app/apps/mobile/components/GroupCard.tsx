@@ -20,6 +20,8 @@ interface GroupCardProps {
     rollup?: GroupRollup;
     /** Forwarded to BalanceChip — distinguishes "You are settled" from "Settled". */
     groupHasOpenDebts?: boolean;
+    /** Forwarded to BalanceChip — true when balance data is unavailable (offline, no cache). */
+    balanceUnknown?: boolean;
     searchQuery?: string;
     matchedMemberNames?: string[];
     onPress: (groupId: string) => void;
@@ -29,6 +31,7 @@ function GroupCardBase({
     group,
     rollup,
     groupHasOpenDebts,
+    balanceUnknown,
     searchQuery,
     matchedMemberNames,
     onPress,
@@ -113,6 +116,7 @@ function GroupCardBase({
                     rollup={rollup}
                     defaultCurrency={group.defaultCurrency}
                     groupHasOpenDebts={groupHasOpenDebts}
+                    balanceUnknown={balanceUnknown}
                 />
 
                 <View className="ml-2">

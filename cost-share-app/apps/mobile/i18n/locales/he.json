@@ -16,6 +16,7 @@
         "unknown": "לא ידוע",
         "loadError": "טעינת הנתונים נכשלה",
         "networkError": "שגיאת רשת. אנא בדוק את החיבור שלך.",
+        "offlineTitle": "אין חיבור לאינטרנט",
         "retry": "נסה שוב",
         "search": "חיפוש",
         "submit": "שלח",
@@ -24,6 +25,8 @@
         "you": "את/ה",
         "deletedUser": "משתמש שנמחק",
         "unknownUser": "משתמש לא ידוע",
+        "groupMember": "חבר בקבוצה",
+        "formerMember": "חבר לשעבר",
         "openMail": "פתח מייל",
         "linkCopied": "הקישור הועתק ללוח"
     },
@@ -144,6 +147,7 @@
         "editGroup": "ערוך קופה",
         "noGroups": "אין קופות עדיין",
         "noGroupsMessage": "פתח את הקופה הראשונה שלך כדי להתחיל לשתף הוצאות",
+        "offlineMessage": "לא ניתן לטעון את הקופות שלך כרגע. הן יופיעו כאן אוטומטית כשהחיבור יחזור.",
         "groupName": "שם הקופה",
         "enterGroupName": "הזן שם קופה",
         "createForm": {
@@ -286,7 +290,8 @@
         "card": {
             "matchedMembers": "כולל {{names}}",
             "settled": "מסודר",
-            "youSettled": "את/ה מסודר/ת"
+            "youSettled": "את/ה מסודר/ת",
+            "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
         "bigCreateCta": "פתח קופה",
         "settings": "הגדרות קופה",
@@ -404,7 +409,8 @@
             "action": "הוסף הוצאה ראשונה",
             "addMembers": "הוסף חברים",
             "noResultsTitle": "לא נמצאו תוצאות",
-            "noResultsMessage": "נסה לשנות את החיפוש או הסינון."
+            "noResultsMessage": "נסה לשנות את החיפוש או הסינון.",
+            "offlineMessage": "לא ניתן לטעון את פעילות הקופה כרגע. אפשר עדיין להוסיף הוצאה — היא תיטען לקופה אוטומטית כשהחיבור יחזור."
         },
         "members": {
             "title": "חברים בקופה",
@@ -452,6 +458,7 @@
         "eachPays": "כל אחד משלם",
         "noExpenses": "אין הוצאות עדיין",
         "noExpensesMessage": "הוסף את ההוצאה הראשונה שלך כדי להתחיל לעקוב",
+        "offlineMessage": "לא ניתן לטעון הוצאות כרגע. אפשר עדיין להוסיף הוצאה — היא תסונכרן לקופה אוטומטית כשהחיבור יחזור.",
         "recentExpenses": "הוצאות אחרונות",
         "deleteExpense": "מחק הוצאה",
         "deleteExpenseConfirm": "האם אתה בטוח שברצונך למחוק את ההוצאה הזו?",
@@ -554,6 +561,7 @@
         "minimumBadge": "מינימום",
         "allSettled": "הכל מסודר!",
         "noDebts": "אין חובות בקופה זו",
+        "unavailableOffline": "היתרות אינן זמינות במצב לא מקוון",
         "noBalances": "אין יתרות להצגה",
         "settleUp": "סגור חשבון",
         "recordPayment": "רשום תשלום",
@@ -781,8 +789,10 @@
         },
         "notifications": {
             "groupInvite": "{{name}} צירף/ה אותך ל{{group}}",
+            "joinedViaInvite": "הצטרפת ל{{group}} באמצעות קישור הזמנה",
             "memberJoined": "{{name}} הצטרף/ה ל{{group}}",
             "memberLeft": "{{name}} עזב/ה את {{group}}",
+            "memberRemovedYou": "{{name}} הסיר/ה אותך מ{{group}}",
             "friendRequest": "בקשת חברות מ{{name}}",
             "friendRequestAccepted": "את/ה ו-{{name}} חברים עכשיו",
             "friendRequestRejected": "דחית את בקשת החברות מ{{name}}"
@@ -794,7 +804,9 @@
         "paidYou": "{{name}} שילם/ה לך {{amount}}",
         "inGroup": "בקופה {{group}}",
         "openInGroup": "פתח ב{{group}}",
-        "earlier": "קודם"
+        "earlier": "קודם",
+        "unavailableTitle": "לא זמין יותר",
+        "unavailableMessage": "ייתכן שזה נמחק, או שאין לך יותר גישה."
     },
     "settleUp": {
         "title": "סגירת חשבון",
@@ -837,6 +849,7 @@
         "newPayment": "תשלום חדש",
         "from": "מאת",
         "to": "אל",
+        "swap": "החלף",
         "method": "אמצעי תשלום",
         "methodType": "סוג אמצעי תשלום",
         "paymentApps": "אפליקציות תשלום",
@@ -937,7 +950,8 @@
         "friendConversionFailed": "שערים לא זמינים",
         "noFriendsYet": "אין קופות משותפות",
         "friendBreakdownTitle": "פירוט לפי קופה",
-        "friendBreakdownEmpty": "אין קופות משותפות עם החבר הזה."
+        "friendBreakdownEmpty": "אין קופות משותפות עם החבר הזה.",
+        "friendMoreCurrencies": "עוד {{count}}"
     },
     "legal": {
         "termsTitle": "תנאי שירות",

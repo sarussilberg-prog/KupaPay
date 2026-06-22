@@ -123,18 +123,17 @@ describe('Service-layer createExpense', () => {
     it('throws on Supabase failure so the mutation hook can surface the error', async () => {
         jest.resetModules();
 
-        const singleMock = jest.fn().mockResolvedValue({
+        // createExpense now inserts the expense + splits atomically via the
+        // create_expense_with_splits RPC, so the failure surfaces from rpc().
+        const rpcMock = jest.fn().mockResolvedValue({
             data: null,
             error: { message: 'db-down' },
         });
-        const selectMock = jest.fn(() => ({ single: singleMock }));
-        const insertMock = jest.fn(() => ({ select: selectMock }));
-        const fromMock = jest.fn(() => ({ insert: insertMock }));
 
         jest.doMock('../../lib/supabase', () => ({
             supabase: {
-                from: fromMock,
-                rpc: jest.fn(),
+                from: jest.fn(),
+                rpc: rpcMock,
                 auth: { getUser: jest.fn() },
             },
         }));

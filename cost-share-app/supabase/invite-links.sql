@@ -242,14 +242,14 @@ BEGIN
         );
     END IF;
 
-    -- Reactivate a previous row if it exists, else insert
-    UPDATE group_members SET is_active = true, left_at = NULL, joined_at = now()
-    WHERE group_id = v_group_id AND user_id = v_me;
-
-    IF NOT FOUND THEN
-        INSERT INTO group_members (group_id, user_id, is_active)
-        VALUES (v_group_id, v_me, true);
-    END IF;
+    -- Atomic upsert: inserts a new membership, or reactivates a prior one.
+    -- ON CONFLICT keeps concurrent redemptions of the same invite safe — the
+    -- losing call updates the row instead of throwing a duplicate-key error
+    -- (group_members_group_id_user_id_key).
+    INSERT INTO group_members (group_id, user_id, is_active, left_at, joined_at)
+    VALUES (v_group_id, v_me, true, NULL, now())
+    ON CONFLICT (group_id, user_id)
+    DO UPDATE SET is_active = true, left_at = NULL, joined_at = now();
 
     -- The existing on_group_member_insert_auto_friend trigger handles friendships.
 

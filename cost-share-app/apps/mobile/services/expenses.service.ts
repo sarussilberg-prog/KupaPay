@@ -124,32 +124,27 @@ export async function createExpense(dto: CreateExpenseDto): Promise<ExpenseWithS
 
     const expenseDate = (dto.expenseDate ?? new Date()).toISOString().slice(0, 10);
 
-    const { data: expenseRow, error: expenseErr } = await supabase
-        .from('expenses')
-        .insert({
-            group_id: dto.groupId,
-            description: dto.description,
-            amount: dto.amount,
-            currency: dto.currency,
-            category: dto.category,
-            expense_date: expenseDate,
-            receipt_url: dto.receiptUrl,
-            paid_by: dto.paidBy,
-            created_by: createdBy,
-            split_mode: dto.splitMode ?? 'equal',
-        })
-        .select()
-        .single();
+    // Atomic: the RPC inserts the expense AND its splits in one transaction, so
+    // the `expenses` realtime INSERT event only fires once both are committed.
+    // Inserting them separately (as before) raced the balance recompute, which
+    // reads expense_splits — other devices saw the expense but a stale balance.
+    const { data: expenseRow, error: expenseErr } = await supabase.rpc(
+        'create_expense_with_splits',
+        {
+            p_group_id: dto.groupId,
+            p_description: dto.description,
+            p_amount: dto.amount,
+            p_currency: dto.currency,
+            p_category: dto.category ?? null,
+            p_expense_date: expenseDate,
+            p_receipt_url: dto.receiptUrl ?? null,
+            p_paid_by: dto.paidBy,
+            p_split_mode: dto.splitMode ?? 'equal',
+            p_splits: splits.map(s => ({ user_id: s.userId, amount: s.amount })),
+        },
+    );
     if (expenseErr) throw expenseErr;
-    if (!expenseRow) throw new Error('createExpense: insert returned no row');
-
-    const splitRows = splits.map(s => ({
-        expense_id: expenseRow.id,
-        user_id: s.userId,
-        amount: s.amount,
-    }));
-    const { error: splitsErr } = await supabase.from('expense_splits').insert(splitRows);
-    if (splitsErr) throw splitsErr;
+    if (!expenseRow) throw new Error('createExpense: rpc returned no row');
 
     const expense = expenseFromRow(expenseRow);
     const splitsForCache: ExpenseSplit[] = splits.map(s => ({

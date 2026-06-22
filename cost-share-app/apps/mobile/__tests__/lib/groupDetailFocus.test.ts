@@ -44,7 +44,15 @@ describe('findFeedItemIndex', () => {
         expect(findFeedItemIndex(feed, { kind: 'expense', id: 'e1' })).toBe(1);
     });
 
+    it('finds message index in feed', () => {
+        expect(findFeedItemIndex(feed, { kind: 'message', id: 'm1' })).toBe(0);
+    });
+
     it('returns -1 when item is missing', () => {
         expect(findFeedItemIndex(feed, { kind: 'settlement', id: 's9' })).toBe(-1);
+    });
+
+    it('returns -1 for a missing message', () => {
+        expect(findFeedItemIndex(feed, { kind: 'message', id: 'm9' })).toBe(-1);
     });
 });

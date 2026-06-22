@@ -13,7 +13,7 @@
  * collapsed across currencies.
  */
 
-import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -42,8 +42,14 @@ import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { useAppStore } from '../../store';
 import type { SimplifiedDebtsByCurrencyEntry } from '../../services/groups.service';
+import { fetchProfilesByUserIds } from '../../services/groups.service';
 import { colors } from '../../theme';
-import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import {
+    getAvatarUrl,
+    getAvatarUrlForMember,
+    getDisplayName,
+    getDisplayNameForMember,
+} from '../../lib/userDisplay';
 
 interface SettleTarget {
     fromUserId: string;
@@ -88,6 +94,13 @@ export function BalancesScreen() {
 
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [settleTarget, setSettleTarget] = useState<SettleTarget | null>(null);
+    // Profiles of debt parties NOT in the active roster (members who left or
+    // deleted their account). The active-member query filters them out, so we
+    // fetch them on demand to label each debt row with real data — a deleted
+    // account renders "Deleted user", an account that merely left renders its
+    // real name. Ids we can't resolve (offline) stay out and fall back to the
+    // neutral "former member" rather than a fabricated "deleted user".
+    const [formerParties, setFormerParties] = useState<Record<string, GroupMemberLite>>({});
 
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
     const {
@@ -155,17 +168,43 @@ export function BalancesScreen() {
         [allUsers, t],
     );
 
+    // Debt parties that aren't active members — fetch their profiles so the
+    // row shows real data (deleted → "Deleted user", left → real name) instead
+    // of guessing. Offline, the fetch no-ops and they fall back to neutral.
+    useEffect(() => {
+        const activeIds = new Set(members.map(m => m.userId));
+        const missing = new Set<string>();
+        for (const e of simplifiedByCurrency) {
+            for (const d of e.result.debts) {
+                for (const id of [d.fromUserId, d.toUserId]) {
+                    if (id && id !== currentUserId && !activeIds.has(id) && !formerParties[id]) {
+                        missing.add(id);
+                    }
+                }
+            }
+        }
+        if (missing.size === 0) return;
+        void fetchProfilesByUserIds([...missing]).then(extra => {
+            if (Object.keys(extra).length > 0) {
+                setFormerParties(prev => ({ ...prev, ...extra }));
+            }
+        });
+    }, [simplifiedByCurrency, members, currentUserId, formerParties]);
+
     const avatarById: Record<string, string | undefined> = useMemo(() => {
         const map: Record<string, string | undefined> = {};
+        for (const id in formerParties) map[id] = getAvatarUrlForMember(formerParties[id]);
         for (const m of members) map[m.userId] = m.avatarUrl;
         return map;
-    }, [members]);
+    }, [members, formerParties]);
 
     const nameById: Record<string, string> = useMemo(() => {
         const map: Record<string, string> = {};
+        // Off-roster parties first; active members override on id collision.
+        for (const id in formerParties) map[id] = getDisplayNameForMember(formerParties[id], t);
         for (const m of members) map[m.userId] = m.displayName;
         return map;
-    }, [members]);
+    }, [members, formerParties, t]);
 
     const sortedMembers = useMemo(() => {
         const sorted = [...members];
@@ -328,6 +367,7 @@ export function BalancesScreen() {
                         {t('balances.simplifiedDebts')}
                     </Text>
                     <SimplifiedDebtsSection
+                        balanceUnknown={simplified === undefined}
                         entries={simplifiedByCurrency ?? []}
                         avatarById={avatarById}
                         nameById={nameById}

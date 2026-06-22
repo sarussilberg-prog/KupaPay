@@ -46,6 +46,12 @@ const t = (key: string, opts?: Record<string, string>) => {
     if (key === 'activity.notifications.memberLeft') {
         return `${opts?.name} left ${opts?.group}`;
     }
+    if (key === 'activity.notifications.memberRemovedYou') {
+        return `${opts?.name} removed you from ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.joinedViaInvite') {
+        return `You joined ${opts?.group} using an invitation link`;
+    }
     if (key === 'common.you') return 'You';
     return key;
 };
@@ -105,6 +111,15 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Alice added you to Trip');
     });
 
+    it('builds invite-link self-join copy when there is no actor', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_added', { actorUserId: null }),
+            { actorName: '', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('You joined Trip using an invitation link');
+    });
+
     it('uses the new member name when supplied for joins', () => {
         const title = resolveActivityTitle(
             buildEvent('group_member_joined'),
@@ -114,13 +129,22 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Bob joined Trip');
     });
 
-    it('builds group_removed copy', () => {
+    it('names the remover when a member was removed by someone else', () => {
         const title = resolveActivityTitle(
             buildEvent('group_removed'),
             { actorName: 'Alice', groupName: 'Trip' },
             t as never,
         );
-        expect(title).toBe('Alice left Trip');
+        expect(title).toBe('Alice removed you from Trip');
+    });
+
+    it('falls back to "You left" when there is no actor (self-leave)', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_removed', { actorUserId: null }),
+            { actorName: '', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('You left Trip');
     });
 });
 

@@ -7,10 +7,10 @@ import {
 import * as Application from 'expo-application';
 import * as Sentry from '@sentry/react-native';
 import SuperJSON from 'superjson';
+import { Image as ExpoImage } from 'expo-image';
 import { queryClient } from './queryClient';
 import { registerAddExpenseMutationDefaults } from '../hooks/mutations/useAddExpenseMutation';
-import { resetAvatarPrefetchCache } from './avatarPrefetch';
-import { clearAvatarCache } from './avatarCache';
+import { resetAvatarPrefetchCache } from '../hooks/useAvatarPrefetcher';
 import { SENTRY_TAGS } from './sentryTags';
 
 // Bumped to v2 when we switched the persister serializer to SuperJSON so
@@ -33,6 +33,10 @@ export const PERSIST_ALLOWLIST_PREFIXES = [
     'group-simplified-debts-by-currency',
     'group-contributions',
     'balanceSummary',
+    // The canonical balance hook (useSimplifiedDebts). Persisting it is what
+    // lets the group list, profile, and balances screens show real balances
+    // offline instead of defaulting every group to a false "settled".
+    'simplifiedDebts',
     'dashboard',
     'activity',
     'friends',
@@ -42,10 +46,21 @@ export const PERSIST_ALLOWLIST_PREFIXES = [
 const ALLOWLIST = new Set<string>(PERSIST_ALLOWLIST_PREFIXES as readonly string[]);
 
 export function shouldDehydrateQueryFactory() {
-    return (query: { queryKey: readonly unknown[]; state: { status: string } }) => {
-        if (query.state.status !== 'success') return false;
+    return (query: {
+        queryKey: readonly unknown[];
+        state: { status: string; data?: unknown };
+    }) => {
         const head = query.queryKey[0];
-        return typeof head === 'string' && ALLOWLIST.has(head);
+        if (!(typeof head === 'string' && ALLOWLIST.has(head))) return false;
+        // Persist successful queries. ALSO persist errored queries that still
+        // hold last-known-good data: when a refetch fails offline the query goes
+        // to status=error but retains its prior data in memory. Dropping it from
+        // the snapshot would overwrite the good on-disk cache, so the next cold
+        // start offline restores nothing and the user sees "no groups" / false
+        // balances until they reconnect. Never persist a data-less query.
+        if (query.state.status === 'success') return true;
+        if (query.state.status === 'error' && query.state.data !== undefined) return true;
+        return false;
     };
 }
 
@@ -167,9 +182,12 @@ export async function wipePersistedCache(): Promise<void> {
         // Drop the per-session prefetched-avatars Set so the next signed-in
         // user starts fresh and their avatars get prefetched on first sight.
         resetAvatarPrefetchCache();
-        // Wipe the disk-backed avatar files + manifest so user A's friends'
-        // faces don't appear when user B signs in on the same device.
-        await clearAvatarCache();
+        // Wipe expo-image's memory + disk cache so user A's friends' faces
+        // don't appear when user B signs in on the same device.
+        await Promise.all([
+            ExpoImage.clearMemoryCache(),
+            ExpoImage.clearDiskCache(),
+        ]);
     } catch (err) {
         Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.CACHE_PERSIST } });
     }

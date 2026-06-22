@@ -27,6 +27,21 @@ describe('SimplifiedDebtsSection', () => {
         expect(queryByTestId('debts-summary')).toBeNull();
     });
 
+    it('shows an offline-unavailable state (NOT "all settled") when balance data is missing', () => {
+        const { getByTestId, queryByText } = render(
+            <SimplifiedDebtsSection
+                entries={[]}
+                avatarById={avatarById}
+                nameById={nameById}
+                currentUserId="me"
+                balanceUnknown
+                onSettle={() => {}}
+            />,
+        );
+        expect(getByTestId('debts-unavailable')).toBeTruthy();
+        expect(queryByText('balances.allSettled')).toBeNull();
+    });
+
     it('renders involved debts directly and hides others behind a toggle', () => {
         const involvedDebt = {
             fromUserId: 'me',

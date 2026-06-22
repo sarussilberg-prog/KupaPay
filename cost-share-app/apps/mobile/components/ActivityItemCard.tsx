@@ -47,6 +47,14 @@ export function resolveActivityTitle(
             return t('activity.notifications.friendRequest', { name: actorName });
         }
         case 'group_added':
+            // No actor → the user joined themselves via an invitation link
+            // (redeem_group_invite inserts membership with a NULL added_by).
+            // Without an adder there is nobody to name, so never fall through
+            // to "{{name}} added you" — that renders the absent actor as a
+            // bogus "deleted user".
+            if (!actorName) {
+                return t('activity.notifications.joinedViaInvite', { group: groupName });
+            }
             return t('activity.notifications.groupInvite', { name: actorName, group: groupName });
         case 'group_member_joined':
             return t('activity.notifications.memberJoined', {
@@ -54,8 +62,16 @@ export function resolveActivityTitle(
                 group: groupName,
             });
         case 'group_removed':
+            // An actor means someone else removed this member; name them.
+            // No actor → a self-initiated leave, rendered as "You left".
+            if (actorName) {
+                return t('activity.notifications.memberRemovedYou', {
+                    name: actorName,
+                    group: groupName,
+                });
+            }
             return t('activity.notifications.memberLeft', {
-                name: actorName || t('common.you'),
+                name: t('common.you'),
                 group: groupName,
             });
     }

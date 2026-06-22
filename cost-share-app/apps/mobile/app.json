@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kupapay.mobile",
-      "buildNumber": "4",
+      "buildNumber": "8",
       "usesAppleSignIn": true,
       "associatedDomains": [
         "applinks:kupa-pay.com"

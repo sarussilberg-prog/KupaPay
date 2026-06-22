@@ -17,6 +17,7 @@ jest.mock('../../lib/supabase', () => ({
 }));
 
 import { AppState } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     clearStaleAuthSession,
     hydrateAuthSession,
@@ -74,6 +75,37 @@ describe('authSessionLifecycle', () => {
         jest.advanceTimersByTime(2500);
 
         await expect(pending).resolves.toBe(session);
+        expect(unsubscribe).toHaveBeenCalled();
+        jest.useRealTimers();
+    });
+
+    it('falls back to the persisted session when getSession hangs offline', async () => {
+        jest.useFakeTimers();
+        const unsubscribe = jest.fn();
+
+        // Offline cold-start with an expired access token: Supabase blocks both
+        // INITIAL_SESSION and getSession() on a network token-refresh that never
+        // settles (airplane mode). The boot must not hang on the splash.
+        mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe } } });
+        mockGetSession.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const persisted = {
+            access_token: 'stored-access',
+            refresh_token: 'stored-refresh',
+            expires_at: 1700000000,
+            token_type: 'bearer',
+            user: { id: 'user-offline' },
+        };
+        process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://jfqxjjjbpxbwwvoygahu.supabase.co';
+        await AsyncStorage.setItem(
+            'sb-jfqxjjjbpxbwwvoygahu-auth-token',
+            JSON.stringify(persisted),
+        );
+
+        const pending = hydrateAuthSession();
+        await jest.advanceTimersByTimeAsync(6000);
+
+        await expect(pending).resolves.toMatchObject({ user: { id: 'user-offline' } });
         expect(unsubscribe).toHaveBeenCalled();
         jest.useRealTimers();
     });

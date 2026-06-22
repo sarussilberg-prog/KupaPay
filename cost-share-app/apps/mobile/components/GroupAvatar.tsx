@@ -1,15 +1,21 @@
 /**
  * GroupAvatar
- * Shows a group image or a type-based icon fallback
+ * Shows a group image or a type-based icon fallback.
+ *
+ * Image loading + local caching is delegated to `expo-image` (persistent
+ * memory+disk cache keyed by URL: instant on repeat views, available offline
+ * once fetched). On load failure we retry a bounded number of times, then fall
+ * back to the type gradient/icon so a broken or unreachable URL is never a
+ * permanent blank tile.
  */
 
-import React from 'react';
-import { View, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GroupType } from '@cost-share/shared';
 import { getGroupTypeVisual } from '../lib/groupTypeVisuals';
 import { AppIcon } from './AppIcon';
-import { useLocalAvatar } from '../hooks/useLocalAvatar';
 
 interface GroupAvatarProps {
     imageUrl?: string | null;
@@ -24,6 +30,9 @@ const sizeStyles = {
     lg: { className: 'w-24 h-24 rounded-2xl', iconSize: 40 },
 } as const;
 
+/** How many times to re-attempt a failed cover load before showing the icon. */
+const MAX_AVATAR_RETRIES = 2;
+
 export function GroupAvatar({
     imageUrl,
     groupType = 'general',
@@ -32,17 +41,23 @@ export function GroupAvatar({
 }: GroupAvatarProps) {
     const { className, iconSize } = sizeStyles[size];
     const visual = getGroupTypeVisual(groupType);
-    // Use the disk-cached local URI when one is available so group images
-    // render instantly + work offline.
-    const resolvedImageUrl = useLocalAvatar(imageUrl);
 
-    if (resolvedImageUrl) {
+    const [attempt, setAttempt] = useState(0);
+    useEffect(() => setAttempt(0), [imageUrl]);
+
+    const showImage = Boolean(imageUrl) && attempt <= MAX_AVATAR_RETRIES;
+
+    if (showImage && imageUrl) {
         return (
             <View className={`${className} overflow-hidden`} testID={testID}>
                 <Image
-                    source={{ uri: resolvedImageUrl }}
-                    className="w-full h-full"
-                    resizeMode="cover"
+                    recyclingKey={`${imageUrl}#${attempt}`}
+                    source={imageUrl}
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={0}
+                    onError={() => setAttempt((a) => a + 1)}
                     testID={`${testID}-image`}
                 />
             </View>

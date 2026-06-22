@@ -279,12 +279,16 @@ export function GroupDetailScreen() {
     );
     const isLoading = expensesQuery.isLoading || messagesQuery.isLoading;
     const isFeedLoading = isLoading && groupExpenses.length === 0 && messages.length === 0;
+    const { online } = useNetworkStatus();
 
     useGroupMessagesRealtime(groupId);
     useGroupExpensesRealtime(groupId);
     useGroupSettlementsRealtime(groupId);
 
     const rollup = simplified?.groupRollups.get(groupId);
+    // No balance dataset at all (offline before it was ever cached) → the strip
+    // should say "unavailable", never a false "settled".
+    const balanceUnknown = simplified === undefined;
     const pairwiseDebts = useMemo(() => {
         const perCurrency = simplified?.byGroupCurrency.get(groupId);
         if (!perCurrency) return [];
@@ -436,7 +440,11 @@ export function GroupDetailScreen() {
         if (index < 0) return;
 
         const rowKey =
-            focus.kind === 'expense' ? `e:${focus.id}` : `s:${focus.id}`;
+            focus.kind === 'expense'
+                ? `e:${focus.id}`
+                : focus.kind === 'message'
+                    ? `m:${focus.id}`
+                    : `s:${focus.id}`;
         focusConsumedRef.current = true;
         // Do NOT clear focusFeedItem from route params here — that would
         // trigger a re-render and fire this effect's cleanup, which would
@@ -812,6 +820,7 @@ export function GroupDetailScreen() {
                             group={displayGroup}
                             members={memberLites}
                             rollup={rollup}
+                            balanceUnknown={balanceUnknown}
                             settlementCount={settlementCount}
                             onBack={handleBack}
                             onShare={handleShare}
@@ -880,6 +889,21 @@ export function GroupDetailScreen() {
                             testID="feed-loading"
                         >
                             <ActivityIndicator size="large" color={colors.primary} />
+                        </View>
+                    ) : feed.length === 0 && !online ? (
+                        // Offline with nothing cached for this group: be honest,
+                        // and reassure that adding an expense still works (it
+                        // queues via the add-expense FAB and syncs on reconnect).
+                        // The add-members / share-link actions need the network,
+                        // so we omit them here.
+                        <View className="mx-4 my-6 bg-white rounded-2xl p-6 items-center border border-gray-100">
+                            <AppIcon name="cloud-offline-outline" size={40} color={colors.gray300} />
+                            <Text className="text-base font-semibold text-gray-900 mt-3 mb-1">
+                                {t('common.offlineTitle')}
+                            </Text>
+                            <Text className="text-sm text-gray-500 text-center">
+                                {t('groups.emptyFeed.offlineMessage')}
+                            </Text>
                         </View>
                     ) : feed.length === 0 ? (
                         <View className="mx-4 my-6 bg-white rounded-2xl p-6 items-center border border-gray-100">

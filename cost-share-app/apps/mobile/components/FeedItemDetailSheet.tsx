@@ -853,52 +853,29 @@ function InvolvementStrip({
     const { t } = useTranslation();
     const isBorrowed = state === 'borrowed';
 
-    const bg = isBorrowed ? '#FEF2F2' : '#ECFDF5';
-    const border = isBorrowed ? '#FECACA' : '#A7F3D0';
     const textColor = isBorrowed ? '#B91C1C' : '#047857';
-    const iconColor = isBorrowed ? colors.error : colors.success.DEFAULT;
-    const iconName: AppIconName = isBorrowed
-        ? 'arrow-up-circle-outline'
-        : 'arrow-down-circle-outline';
     const headingKey = isBorrowed
         ? 'groups.expense.youBorrowed'
         : 'groups.expense.youLent';
 
     return (
-        <View
-            className="flex-row items-center mx-4 mt-1.5 rounded-xl"
-            style={{
-                backgroundColor: bg,
-                borderColor: border,
-                borderWidth: 1,
-                paddingVertical: 12,
-                paddingHorizontal: 14,
-            }}
-        >
-            <View
-                className="items-center justify-center bg-white"
-                style={{ width: 32, height: 32, borderRadius: 9999 }}
+        <View className="mx-4 mt-2">
+            <Text
+                className="font-semibold"
+                style={{ fontSize: 13, color: textColor }}
             >
-                <AppIcon name={iconName} size={18} color={iconColor} />
-            </View>
-            <View className="flex-1 mx-3 min-w-0">
-                <Text
-                    className="font-bold"
-                    style={{ fontSize: 14, color: textColor }}
-                >
-                    {t(headingKey, { amount: amountText })}
-                </Text>
-                <Text
-                    style={{
-                        fontSize: 11,
-                        color: textColor,
-                        opacity: 0.8,
-                        marginTop: 1,
-                    }}
-                >
-                    {subText}
-                </Text>
-            </View>
+                {t(headingKey, { amount: amountText })}
+            </Text>
+            <Text
+                style={{
+                    fontSize: 11,
+                    color: textColor,
+                    opacity: 0.7,
+                    marginTop: 1,
+                }}
+            >
+                {subText}
+            </Text>
         </View>
     );
 }

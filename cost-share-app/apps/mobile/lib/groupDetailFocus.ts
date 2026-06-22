@@ -6,7 +6,8 @@ import type { FeedItem } from '@cost-share/shared';
 
 export type GroupDetailFocusFeedItem =
     | { kind: 'expense'; id: string }
-    | { kind: 'settlement'; id: string };
+    | { kind: 'settlement'; id: string }
+    | { kind: 'message'; id: string };
 
 export function feedItemMatchesFocus(
     item: FeedItem,
@@ -14,6 +15,9 @@ export function feedItemMatchesFocus(
 ): boolean {
     if (focus.kind === 'expense') {
         return item.kind === 'expense' && item.expense.id === focus.id;
+    }
+    if (focus.kind === 'message') {
+        return item.kind === 'message' && item.message.id === focus.id;
     }
     return item.kind === 'settlement' && item.settlement.id === focus.id;
 }
