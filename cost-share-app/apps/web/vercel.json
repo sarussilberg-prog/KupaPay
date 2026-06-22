@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm install --include=optional",
-  "buildCommand": "bash scripts/build-web-next.sh",
+  "buildCommand": "next build",
   "rewrites": [
     {
       "source": "/.well-known/apple-app-site-association",
