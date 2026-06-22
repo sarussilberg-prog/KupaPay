@@ -108,9 +108,14 @@ export function resolveAutoTextInputStyle(
     const flat = StyleSheet.flatten(style);
     if (flat?.textAlign) return undefined;
 
+    // textAlign ONLY — deliberately no `writingDirection`. On iOS a TextInput
+    // with `writingDirection` set renders its placeholder twice (overlapping,
+    // garbled — a long-standing RN bug). Base bidi direction is already
+    // established by the RtlLayoutProvider root (`direction: rtl/ltr`), so the
+    // input still lays mixed Hebrew/Latin/number content out correctly while
+    // `textAlign` pins the caret and text to the right edge.
     return {
         textAlign: rtlTextAlign(isRtl),
-        writingDirection: rtlWritingDirection(isRtl),
     };
 }
 

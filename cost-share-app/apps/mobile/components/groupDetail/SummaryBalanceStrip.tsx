@@ -19,8 +19,10 @@ import { formatAmountDecimal } from '../../lib/currencyDisplay';
 import { colors } from '../../theme';
 
 interface SummaryBalanceStripProps {
-    /** Undefined ⇒ "all settled". */
+    /** Undefined + balanceUnknown=false ⇒ "all settled". */
     rollup?: GroupRollup;
+    /** True when the balance dataset is unavailable (offline, no cache). */
+    balanceUnknown?: boolean;
     onPress: () => void;
     testID?: string;
 }
@@ -57,12 +59,17 @@ function CurrencyChip({
 
 export function SummaryBalanceStrip({
     rollup,
+    balanceUnknown,
     onPress,
     testID,
 }: SummaryBalanceStripProps) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
-    const isSettled = !rollup || Math.abs(rollup.primary.net) < 0.01;
+    const hasRealBalance = rollup && Math.abs(rollup.primary.net) >= 0.01;
+    // Only "settled" when we actually have the data and it's zero. If the
+    // dataset is unavailable, say so rather than claiming the group is settled.
+    const isUnknown = !hasRealBalance && Boolean(balanceUnknown);
+    const isSettled = !hasRealBalance && !isUnknown;
     const net = rollup?.primary.net ?? 0;
     const currency = rollup?.primary.currency ?? '';
     const others = rollup?.others ?? [];
@@ -101,7 +108,11 @@ export function SummaryBalanceStrip({
                     className="text-[15px] text-gray-900 flex-1"
                     numberOfLines={2}
                 >
-                    {isSettled ? (
+                    {isUnknown ? (
+                        <Text className="text-[15px] text-gray-400" testID="summary-balance-unknown">
+                            {t('groups.card.balanceUnavailable')}
+                        </Text>
+                    ) : isSettled ? (
                         t('groups.card.settled')
                     ) : (
                         <Trans

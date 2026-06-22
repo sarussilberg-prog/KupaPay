@@ -1,3 +1,4 @@
+import { QueryClient, dehydrate, hydrate } from '@tanstack/react-query';
 import {
     PERSIST_ALLOWLIST_PREFIXES,
     PERSIST_SCHEMA_VERSION,
@@ -25,12 +26,20 @@ describe('persistQueryClient helpers', () => {
                 'group-simplified-debts-by-currency',
                 'group-contributions',
                 'balanceSummary',
+                'simplifiedDebts',
                 'dashboard',
                 'activity',
                 'friends',
                 'friend-requests',
             ]),
         );
+    });
+
+    it('persists the canonical simplifiedDebts balance query (needed for offline balances)', () => {
+        const fn = shouldDehydrateQueryFactory();
+        expect(
+            fn({ queryKey: ['simplifiedDebts'], state: { status: 'success' } } as any),
+        ).toBe(true);
     });
 
     it('shouldDehydrateQuery accepts allowlisted keys with status=success', () => {
@@ -54,10 +63,30 @@ describe('persistQueryClient helpers', () => {
         );
     });
 
-    it('shouldDehydrateQuery rejects pending/error states', () => {
+    it('persists errored queries that still hold last-known-good data (offline must not evict the cache)', () => {
+        // When a refetch fails offline the query goes to status=error but keeps
+        // its previous data in memory. If we drop it from the persisted snapshot
+        // the next cold start offline restores nothing → "no groups". Keep it.
         const fn = shouldDehydrateQueryFactory();
-        expect(fn({ queryKey: ['groups'], state: { status: 'pending' } } as any)).toBe(false);
-        expect(fn({ queryKey: ['groups'], state: { status: 'error' } } as any)).toBe(false);
+        expect(
+            fn({ queryKey: ['groups'], state: { status: 'error', data: [{ id: 'g1' }] } } as any),
+        ).toBe(true);
+        expect(
+            fn({
+                queryKey: ['simplifiedDebts'],
+                state: { status: 'error', data: { groups: [] } },
+            } as any),
+        ).toBe(true);
+    });
+
+    it('shouldDehydrateQuery rejects pending queries and errored queries with no data', () => {
+        const fn = shouldDehydrateQueryFactory();
+        expect(
+            fn({ queryKey: ['groups'], state: { status: 'pending', data: undefined } } as any),
+        ).toBe(false);
+        expect(
+            fn({ queryKey: ['groups'], state: { status: 'error', data: undefined } } as any),
+        ).toBe(false);
     });
 
     it('shouldDehydrateMutation accepts paused addExpense mutations', () => {
@@ -81,6 +110,34 @@ describe('persistQueryClient helpers', () => {
         expect(
             fn({ options: { mutationKey: undefined }, state: { isPaused: true } } as any),
         ).toBe(false);
+    });
+
+    it('an errored query that still holds data survives a dehydrate→hydrate round-trip', async () => {
+        // End-to-end guard for the offline-eviction bug: a query that was
+        // fetched online (good data) then errored on an offline refetch must
+        // still restore its last-known-good data on the next cold start.
+        const source = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+        source.setQueryData(['groups'], [{ id: 'g1' }]);
+        await source
+            .fetchQuery({
+                queryKey: ['groups'],
+                queryFn: async () => {
+                    throw new Error('offline');
+                },
+            })
+            .catch(() => undefined);
+
+        const errored = source.getQueryCache().find({ queryKey: ['groups'] });
+        expect(errored?.state.status).toBe('error');
+        expect(errored?.state.data).toEqual([{ id: 'g1' }]);
+
+        const dehydrated = dehydrate(source, {
+            shouldDehydrateQuery: shouldDehydrateQueryFactory(),
+        });
+
+        const target = new QueryClient();
+        hydrate(target, dehydrated);
+        expect(target.getQueryData(['groups'])).toEqual([{ id: 'g1' }]);
     });
 
     it('computePersistBuster combines app version and schema version (NOT userId)', () => {

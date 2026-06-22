@@ -20,8 +20,10 @@ const BORDER_CARD = '#E2E8F0';
 interface GroupSummaryCardProps {
     group: Group;
     members: GroupMemberLite[];
-    /** Undefined ⇒ "all settled" in the strip. */
+    /** Undefined ⇒ "all settled" in the strip (unless balanceUnknown). */
     rollup?: GroupRollup;
+    /** True when the balance dataset is unavailable (offline, no cache). */
+    balanceUnknown?: boolean;
     settlementCount: number;
     onBack: () => void;
     onShare: () => void;
@@ -35,6 +37,7 @@ export function GroupSummaryCard({
     group,
     members,
     rollup,
+    balanceUnknown,
     settlementCount,
     onBack,
     onShare,
@@ -68,6 +71,7 @@ export function GroupSummaryCard({
             />
             <SummaryBalanceStrip
                 rollup={rollup}
+                balanceUnknown={balanceUnknown}
                 onPress={onOpenBalances}
                 testID="summary-balance-strip"
             />

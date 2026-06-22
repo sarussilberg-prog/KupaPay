@@ -1,13 +1,19 @@
 /**
  * MemberAvatar Component
- * User avatar with fallback initials
- * Uses NativeWind styling only
+ * User avatar with fallback initials.
+ *
+ * Image loading + local caching is delegated to `expo-image`, which keeps a
+ * persistent memory+disk cache keyed by URL: images render instantly on repeat
+ * views and stay available offline once they've been fetched (or warmed by
+ * `useAvatarPrefetcher`). On load failure we retry a bounded number of times
+ * (self-heal a transient blank), then fall back to initials so a broken or
+ * unreachable URL is never a permanent blank box.
  */
 
 import { Text } from './AppText';
-import React from 'react';
-import { View, Image } from 'react-native';
-import { useLocalAvatar } from '../hooks/useLocalAvatar';
+import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Image } from 'expo-image';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
@@ -26,6 +32,9 @@ const sizeStyles: Record<AvatarSize, { imageSize: number; text: string }> = {
     md: { imageSize: 44, text: 'text-sm' },
     lg: { imageSize: 56, text: 'text-lg' },
 };
+
+/** How many times to re-attempt a failed avatar load before showing initials. */
+const MAX_AVATAR_RETRIES = 2;
 
 function getInitials(name: string): string {
     return name
@@ -53,17 +62,27 @@ export function MemberAvatar({
         height: imageSize,
         borderRadius: imageSize / 2,
     };
-    // Prefer the disk-cached local file URI when one is available so the
-    // avatar renders instantly + works offline. Falls back to the remote URL.
-    const resolvedAvatarUrl = useLocalAvatar(avatarUrl);
 
-    if (resolvedAvatarUrl) {
+    // Retry counter, reset whenever the URL changes so a new picture gets a
+    // fresh set of attempts.
+    const [attempt, setAttempt] = useState(0);
+    useEffect(() => setAttempt(0), [avatarUrl]);
+
+    const showImage = Boolean(avatarUrl) && attempt <= MAX_AVATAR_RETRIES;
+
+    if (showImage && avatarUrl) {
         return (
             <View style={frameStyle} className="overflow-hidden shrink-0 bg-slate-100" testID={testID}>
                 <Image
-                    source={{ uri: resolvedAvatarUrl }}
+                    // `recyclingKey` keys the attempt so each onError forces a
+                    // fresh fetch (and a successful one repopulates the disk cache).
+                    recyclingKey={`${avatarUrl}#${attempt}`}
+                    source={avatarUrl}
                     style={{ width: imageSize, height: imageSize }}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={0}
+                    onError={() => setAttempt((a) => a + 1)}
                     accessibilityLabel={name}
                     testID={`${testID}-image`}
                 />

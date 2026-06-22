@@ -88,7 +88,7 @@ function FriendBalanceRowInner({ friend, onPress, testID, isLast = false }: Prop
                         className="text-[10px] text-slate-400 mt-0.5"
                         testID={`${testID}-extra-count`}
                     >
-                        {`+${extraCount} ${t('dashboard.friendMoreCurrencies', { count: extraCount, defaultValue: 'more' })}`}
+                        {t('dashboard.friendMoreCurrencies', { count: extraCount })}
                     </Text>
                 ) : null}
                 <Text className={`text-sm font-semibold ${amountClass}`}>

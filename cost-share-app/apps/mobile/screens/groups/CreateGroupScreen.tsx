@@ -70,9 +70,12 @@ export function CreateGroupScreen() {
     const currentUserIdFromStore = useAppStore(s => s.currentUser?.id ?? '');
     const loadMembers = useCallback(async () => {
         if (!groupId) return;
+        // fetchSimplifiedInputs now throws on RPC error; the unsettled-member
+        // pre-selection is a non-essential hint, so fall back to an empty
+        // payload instead of letting it break member loading.
         const [users, payload] = await Promise.all([
             fetchGroupUsers(groupId),
-            fetchSimplifiedInputs(),
+            fetchSimplifiedInputs().catch(() => ({ groups: [] })),
         ]);
         setMembers(users);
         const simplified = currentUserIdFromStore

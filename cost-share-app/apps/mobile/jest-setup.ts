@@ -80,6 +80,8 @@ jest.mock('expo-file-system', () => {
     };
 });
 
+jest.mock('expo-image');
+
 jest.mock('./lib/supabase', () => ({
     supabase: {
         from: jest.fn(() => ({
@@ -92,6 +94,9 @@ jest.mock('./lib/supabase', () => ({
             single: jest.fn().mockResolvedValue({ data: null, error: null }),
         })),
         rpc: jest.fn().mockResolvedValue({ data: null, error: null }),
+        realtime: {
+            setAuth: jest.fn().mockResolvedValue(undefined),
+        },
         auth: {
             getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
             getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),

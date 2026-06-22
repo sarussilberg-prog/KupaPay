@@ -260,11 +260,33 @@ describe('AddExpenseScreen — v2', () => {
         );
     });
 
-    it('discards editor changes when the scrim is tapped', async () => {
+    it('saves editor changes when the scrim is tapped', async () => {
         const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
         fireEvent.press(await findByTestId('combined-payer-split'));
         fireEvent.press(await findByTestId('payer-cell-u2'));
+        // Tapping outside now commits the draft (equivalent to Done).
         fireEvent.press(await findByTestId('edit-payer-split-scrim'));
+
+        await waitFor(() => {
+            expect(queryByTestId('edit-payer-split-done')).toBeNull();
+        });
+
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        fireEvent.changeText(await findByTestId('description-input'), 'X');
+        fireEvent.changeText(await findByTestId('amount-display'), '5');
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
+        expect(mockCreateExpense).toHaveBeenCalledWith(
+            expect.objectContaining({ paidBy: 'u2' }),
+        );
+    });
+
+    it('discards editor changes when Cancel is pressed', async () => {
+        const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.press(await findByTestId('combined-payer-split'));
+        fireEvent.press(await findByTestId('payer-cell-u2'));
+        fireEvent.press(await findByTestId('edit-payer-split-cancel'));
 
         await waitFor(() => {
             expect(queryByTestId('edit-payer-split-done')).toBeNull();

@@ -17,6 +17,7 @@ import {
     ActivityIndicator,
     Animated,
     Image,
+    InteractionManager,
     ScrollView,
     StyleSheet,
     TextInput,
@@ -172,6 +173,12 @@ export function AddExpenseScreen() {
 
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
+    // Controlled selection used only to drop the caret at the end when focusing a
+    // pre-filled amount; released on the first selection change so the user can
+    // still reposition the caret freely afterwards.
+    const [amountSelection, setAmountSelection] = useState<
+        { start: number; end: number } | undefined
+    >(undefined);
     const [currency, setCurrency] = useState<string>(
         storeGroup?.defaultCurrency ?? DEFAULT_CURRENCY,
     );
@@ -194,6 +201,7 @@ export function AddExpenseScreen() {
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
     const amountInputRef = useRef<TextInput>(null);
+    const descriptionInputRef = useRef<TextInput>(null);
 
     const { data: membersData = [], isLoading: membersLoading } = useGroupMembersQuery(groupId);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
@@ -241,6 +249,18 @@ export function AddExpenseScreen() {
         if (isEditMode) return;
         if (!paidBy && currentUser?.id) setPaidBy(currentUser.id);
     }, [isEditMode, paidBy, currentUser?.id]);
+
+    // Create mode: open with the amount field focused and the keyboard up.
+    // Wait for the modal's present animation to finish (InteractionManager) so
+    // the keyboard reliably surfaces. Edit mode skips this — it opens read-first
+    // on a loading screen and shouldn't pop the keyboard on entry.
+    useEffect(() => {
+        if (isEditMode) return;
+        const task = InteractionManager.runAfterInteractions(() => {
+            amountInputRef.current?.focus();
+        });
+        return () => task.cancel();
+    }, [isEditMode]);
 
     // Edit mode: load the existing expense and prefill the form.
     useEffect(() => {
@@ -745,6 +765,13 @@ export function AddExpenseScreen() {
                             ref={amountInputRef}
                             value={amount}
                             onChangeText={text => setAmount(sanitizeAmountInput(text))}
+                            selection={amountSelection}
+                            onFocus={() =>
+                                setAmountSelection({ start: amount.length, end: amount.length })
+                            }
+                            onSelectionChange={() => {
+                                if (amountSelection !== undefined) setAmountSelection(undefined);
+                            }}
                             keyboardType="decimal-pad"
                             inputMode="decimal"
                             placeholder="0.00"
@@ -752,12 +779,9 @@ export function AddExpenseScreen() {
                             style={styles.amountInput}
                             testID="amount-display"
                             autoFocus
-                            onFocus={() => {
-                                const len = amount.length;
-                                setTimeout(() => {
-                                    amountInputRef.current?.setNativeProps({ selection: { start: len, end: len } });
-                                }, 0);
-                            }}
+                            returnKeyType="next"
+                            blurOnSubmit={false}
+                            onSubmitEditing={() => descriptionInputRef.current?.focus()}
                         />
                     </Animated.View>
                     <Animated.View
@@ -767,6 +791,7 @@ export function AddExpenseScreen() {
                         }}
                     >
                         <TextInput
+                            ref={descriptionInputRef}
                             value={description}
                             onChangeText={setDescription}
                             placeholder={t('expenses.v2.descriptionPlaceholder')}

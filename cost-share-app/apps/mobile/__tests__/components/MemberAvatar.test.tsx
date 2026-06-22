@@ -1,6 +1,6 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import { Image, StyleSheet } from 'react-native';
+import { render, fireEvent } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { MemberAvatar } from '../../components/MemberAvatar';
 
 describe('MemberAvatar', () => {
@@ -23,11 +23,26 @@ describe('MemberAvatar', () => {
         expect(getByText('B')).toBeTruthy();
     });
 
-    it('renders an Image when avatarUrl is provided', () => {
-        const { UNSAFE_getByType } = render(
-            <MemberAvatar name="Alice" avatarUrl="https://example.com/a.png" />
+    it('renders an image when avatarUrl is provided', () => {
+        const { getByTestId } = render(
+            <MemberAvatar name="Alice" avatarUrl="https://example.com/a.png" />,
         );
-        expect(UNSAFE_getByType(Image)).toBeTruthy();
+        expect(getByTestId('member-avatar-image')).toBeTruthy();
+    });
+
+    it('falls back to initials after the image fails to load past the retry budget', () => {
+        const { queryByTestId, getByText } = render(
+            <MemberAvatar name="Alice Smith" avatarUrl="https://example.com/broken.png" />,
+        );
+        // Each onError re-attempts (self-heal); after the budget is exhausted it
+        // shows initials instead of a permanent blank box.
+        for (let i = 0; i < 6; i++) {
+            const img = queryByTestId('member-avatar-image');
+            if (!img) break;
+            fireEvent(img, 'error', { error: 'boom' });
+        }
+        expect(queryByTestId('member-avatar-image')).toBeNull();
+        expect(getByText('AS')).toBeTruthy();
     });
 
     it.each(['sm', 'md', 'lg'] as const)('renders at size %s', (size) => {

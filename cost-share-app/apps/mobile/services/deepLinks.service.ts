@@ -81,13 +81,38 @@ function navigateAfterGroupInvite(
     useAppStore.getState().setPendingNavigation({ target: 'groupDetail', groupId });
 }
 
-export async function handleInviteLink(
+// Collapse concurrent redemptions of the same invite into one in-flight RPC.
+// Multiple subscribers react to the same `Linking.useURL()` value — and once
+// `session` flips on after sign-in, both the live-URL effect and the parked
+// `pendingInvite` effect in useInviteRedemption fire together. Without this
+// guard each fires its own `redeem_group_invite`, and because that RPC's
+// add-member step is not atomic, the parallel calls race into a
+// `group_members_group_id_user_id_key` duplicate-key violation.
+const inFlightRedemptions = new Map<string, Promise<InviteRedemptionResult | null>>();
+
+export function handleInviteLink(
     link: InviteLink,
     navigation: NavigationProp<any> | null,
     queryClient: QueryClient,
 ): Promise<InviteRedemptionResult | null> {
-    if (link.kind === 'unknown') return null;
+    if (link.kind === 'unknown') return Promise.resolve(null);
 
+    const dedupeKey = `${link.kind}:${link.token}`;
+    const existing = inFlightRedemptions.get(dedupeKey);
+    if (existing) return existing;
+
+    const promise = redeemInviteLink(link, navigation, queryClient).finally(() => {
+        inFlightRedemptions.delete(dedupeKey);
+    });
+    inFlightRedemptions.set(dedupeKey, promise);
+    return promise;
+}
+
+async function redeemInviteLink(
+    link: Exclude<InviteLink, { kind: 'unknown' }>,
+    navigation: NavigationProp<any> | null,
+    queryClient: QueryClient,
+): Promise<InviteRedemptionResult | null> {
     if (link.kind === 'friend') {
         const { data, error } = await supabase.rpc('redeem_friend_invite', { p_token: link.token });
         if (error) {

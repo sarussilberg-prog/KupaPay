@@ -14,6 +14,29 @@ describe('BalanceChip', () => {
         expect(getByText('groups.card.settled')).toBeTruthy();
     });
 
+    it('shows an unknown placeholder (NOT Settled) when balance data is unavailable', () => {
+        const { getByTestId, queryByText } = render(
+            <BalanceChip defaultCurrency="USD" balanceUnknown />,
+        );
+        // Never claim "settled" when we simply don't have the data (offline,
+        // no cache) — show a neutral placeholder instead.
+        expect(getByTestId('balance-chip-unknown')).toBeTruthy();
+        expect(queryByText('groups.card.settled')).toBeNull();
+        expect(queryByText('groups.card.youSettled')).toBeNull();
+    });
+
+    it('ignores balanceUnknown once a real rollup is present', () => {
+        const { getByText, queryByTestId } = render(
+            <BalanceChip
+                defaultCurrency="USD"
+                balanceUnknown
+                rollup={rollupOf({ currency: 'USD', net: 12 })}
+            />,
+        );
+        expect(getByText('+USD 12.00')).toBeTruthy();
+        expect(queryByTestId('balance-chip-unknown')).toBeNull();
+    });
+
     it('shows Settled label when primary net rounds to zero', () => {
         const { getByText } = render(
             <BalanceChip

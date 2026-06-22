@@ -270,6 +270,7 @@ export function SettleUpSheet({
                     style={{ flex: 1 }}
                     contentContainerStyle={{ paddingBottom: BOTTOM_DOCK_PADDING }}
                     keyboardShouldPersistTaps="handled"
+                    automaticallyAdjustKeyboardInsets
                     nestedScrollEnabled
                     showsVerticalScrollIndicator={false}
                 >
@@ -284,6 +285,10 @@ export function SettleUpSheet({
                         canPickParticipants={allowParticipantEdit}
                         onOpenFromPicker={() => setFromPickerOpen(true)}
                         onOpenToPicker={() => setToPickerOpen(true)}
+                        onSwap={() => {
+                            setFromUserId(toUserId);
+                            setToUserId(fromUserId);
+                        }}
                         groupName={groupName}
                         isRtl={isRtl}
                     />
@@ -390,6 +395,7 @@ interface SettleUpHeroProps {
     canPickParticipants: boolean;
     onOpenFromPicker: () => void;
     onOpenToPicker: () => void;
+    onSwap: () => void;
     groupName?: string;
     isRtl: boolean;
 }
@@ -405,6 +411,7 @@ function SettleUpHero({
     canPickParticipants,
     onOpenFromPicker,
     onOpenToPicker,
+    onSwap,
     groupName,
     isRtl,
 }: SettleUpHeroProps) {
@@ -495,6 +502,26 @@ function SettleUpHero({
                             />
                             <View className="flex-1 h-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.85)' }} />
                         </View>
+
+                        {canPickParticipants ? (
+                            <Pressable
+                                onPress={onSwap}
+                                testID="settle-swap-button"
+                                className="flex-row items-center mt-2 rounded-full px-2.5 py-0.5"
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.18)',
+                                    borderWidth: 1,
+                                    borderColor: 'rgba(255,255,255,0.35)',
+                                }}
+                                accessibilityRole="button"
+                                accessibilityLabel={t('settleUp.swap')}
+                            >
+                                <AppIcon name="swap-horizontal" size={12} color="#FFFFFF" />
+                                <Text className="text-white text-[10px] font-bold ms-1">
+                                    {t('settleUp.swap')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
                     </View>
 
                     <FlowAvatar
