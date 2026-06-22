@@ -28,7 +28,7 @@ export interface ResolvedNames {
 }
 
 export interface SendPushDeps {
-    recordPending(eventId: string, recipientId: string): Promise<'new' | 'duplicate'>;
+    recordPending(eventId: string, recipientId: string, eventCreatedAt: string): Promise<'new' | 'duplicate'>;
     markSkipped(eventId: string, reason: string): Promise<void>;
     markSent(eventId: string, ticketIds: string[]): Promise<void>;
     markFailed(eventId: string, error: string): Promise<void>;
@@ -66,7 +66,7 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
         return 'skipped_self';
     }
 
-    if ((await deps.recordPending(record.id, record.user_id)) === 'duplicate') {
+    if ((await deps.recordPending(record.id, record.user_id, record.created_at)) === 'duplicate') {
         return 'duplicate';
     }
 
