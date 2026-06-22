@@ -516,7 +516,9 @@
                 "amountUnder": "חסר {{currency}} {{value}} מתוך {{currency}} {{total}}",
                 "amountOver": "{{currency}} {{value}} מעל {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד"
+            "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד",
+            "splitMetaPercent": "{{selected}} מתוך {{total}} · {{allocated}}% מוקצים",
+            "splitMetaExact": "{{selected}} מתוך {{total}} · {{currency}} {{allocated}} מוקצים"
         }
     },
     "balances": {
