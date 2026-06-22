@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
-    Animated as RNAnimated,
-    Easing as RNEasing,
+    Animated,
+    Easing,
     Image,
     Platform,
     StyleProp,
@@ -9,34 +9,39 @@ import {
     View,
     ViewStyle,
 } from 'react-native';
-import Reanimated, {
-    Easing as ReEasing,
-    useAnimatedStyle,
-    useReducedMotion,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withTiming,
-} from 'react-native-reanimated';
+import { useReducedMotion } from 'react-native-reanimated';
 
 /**
  * Animated KupaPay brand mark for the login screen.
  *
- * This is a 1:1 port of the approved "Transfer Loop" animation (designed in Claude Design):
- * three raster layers — the empty teal wallet (base) plus the two white transfer arrows. The top
- * arrow (→) slides in from the left and the bottom arrow (←) from the right; they meet to assemble
- * the complete logo, hold, then keep going and exit out the far side, leaving the empty wallet for
- * a beat before looping. The arrows are clipped to the stage, so they appear to emerge from /
+ * 1:1 port of the approved "Transfer Loop" animation (designed in Claude Design): three raster
+ * layers — the empty teal wallet (base) plus the two white transfer arrows. The top arrow (→)
+ * slides in from the left and the bottom arrow (←) from the right; they meet to assemble the
+ * complete logo, hold, then keep going and exit out the far side, leaving the empty wallet for a
+ * beat before looping. The arrows are clipped to the stage, so they appear to emerge from /
  * disappear into the wallet's edges (no fade).
  *
  * Geometry, timing and easing are taken verbatim from the source HTML:
  *   stage 1100×967; arrow slots 792×323 at (0,247) and (308,518); loop 3.6s;
  *   flowTop X: -900 → 0 → 0 → +1200; flowBot X: +900 → 0 → 0 → -1200 (px in stage units),
- *   ease-in glide-in (.16,.86,.28,1) and accelerate-out (.55,0,.82,.18).
+ *   glide-in (.16,.86,.28,1) and accelerate-out (.55,0,.82,.18).
  *
- * Native uses react-native-reanimated. On web, reanimated's worklet runtime does not drive the
- * loop reliably (it renders frozen), so the web build uses React Native's core `Animated` API,
- * which react-native-web animates via requestAnimationFrame. Both paths produce identical motion.
+ * Both platforms run on React Native's core `Animated` API so the motion is identical everywhere:
+ * native uses the native driver (UI thread, 60fps); web has no native driver, so react-native-web
+ * drives translateX via requestAnimationFrame. A single engine matters here — an earlier
+ * reanimated implementation paused the loop on a different keyframe on iOS (arrow heads, not tails,
+ * at the wallet edge) and rendered frozen on web.
+ *
+ * RTL: the app renders right-to-left for Hebrew (RtlLayoutProvider sets the root to `direction:
+ * 'rtl'`; i18n also calls I18nManager.forceRTL, so I18nManager.isRTL is true). On the New
+ * Architecture layout direction is per-node, so that inherited `direction: 'rtl'` mirrored the
+ * absolutely-positioned arrow slots on iOS — arrow heads landed at the wallet edges instead of
+ * meeting in the middle. The fix is a single mechanism: `direction: 'ltr'` on the wrapper opts the
+ * whole subtree back out of RTL, so each slot's physical `left` offset resolves to the physical
+ * left in every language (verified at runtime: with isRTL true, a literal `left: 0` box still
+ * renders on the left inside this subtree, so no manual left/right swap is needed). react-native-web
+ * honors the same direction, which is why web was already correct. A brand mark must never mirror
+ * with language direction.
  *
  * Respects the OS "reduce motion" setting by rendering the assembled logo statically.
  */
@@ -62,6 +67,10 @@ const F_ENTER = 0.26;
 const F_HOLD = 0.26;
 const F_EXIT = 0.28;
 const F_WAIT = 0.2;
+
+// translateX runs on the native driver on iOS/Android (UI thread). Web has no native driver, so
+// react-native-web animates it via requestAnimationFrame.
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 interface AppLogoAnimatedProps {
     size?: number;
@@ -104,94 +113,12 @@ function getStageLayout(size: number): StageLayout {
     };
 }
 
-export function AppLogoAnimated(props: AppLogoAnimatedProps) {
-    // Platform.OS is fixed for the app's lifetime, so this branch is stable and each platform's
-    // component keeps a consistent hook order across renders.
-    if (Platform.OS === 'web') {
-        return <AppLogoAnimatedWeb {...props} />;
-    }
-    return <AppLogoAnimatedNative {...props} />;
-}
-
-function AppLogoAnimatedNative({ size = 108, testID = 'app-logo', style }: AppLogoAnimatedProps) {
+export function AppLogoAnimated({ size = 108, testID = 'app-logo', style }: AppLogoAnimatedProps) {
     const reduced = useReducedMotion();
     const { k, stageH, stageStyle, topSlot, botSlot } = getStageLayout(size);
 
-    const topX = useSharedValue(reduced ? 0 : TOP_ENTER * k);
-    const botX = useSharedValue(reduced ? 0 : BOT_ENTER * k);
-
-    useEffect(() => {
-        if (reduced) {
-            topX.value = 0;
-            botX.value = 0;
-            return;
-        }
-        const d = LOOP_MS;
-        // Approved easings: glide-in (fast then settle) and accelerate-out.
-        const enter = ReEasing.bezier(0.16, 0.86, 0.28, 1);
-        const exit = ReEasing.bezier(0.55, 0, 0.82, 0.18);
-        const linear = ReEasing.linear;
-
-        // Top arrow (→): wait off-left, glide in to the logo, hold, accelerate out to the right,
-        // wait off-right, then snap back off-left (invisible, behind the clip) and loop.
-        topX.value = withRepeat(
-            withSequence(
-                withTiming(TOP_ENTER * k, { duration: 0 }),
-                withTiming(0, { duration: F_ENTER * d, easing: enter }),
-                withTiming(0, { duration: F_HOLD * d, easing: linear }),
-                withTiming(TOP_EXIT * k, { duration: F_EXIT * d, easing: exit }),
-                withTiming(TOP_EXIT * k, { duration: F_WAIT * d, easing: linear }),
-            ),
-            -1,
-        );
-        // Bottom arrow (←): mirror — in from the right, hold, out to the left, loop.
-        botX.value = withRepeat(
-            withSequence(
-                withTiming(BOT_ENTER * k, { duration: 0 }),
-                withTiming(0, { duration: F_ENTER * d, easing: enter }),
-                withTiming(0, { duration: F_HOLD * d, easing: linear }),
-                withTiming(BOT_EXIT * k, { duration: F_EXIT * d, easing: exit }),
-                withTiming(BOT_EXIT * k, { duration: F_WAIT * d, easing: linear }),
-            ),
-            -1,
-        );
-    }, [reduced, k, topX, botX]);
-
-    const topStyle = useAnimatedStyle(() => ({ transform: [{ translateX: topX.value }] }));
-    const botStyle = useAnimatedStyle(() => ({ transform: [{ translateX: botX.value }] }));
-
-    return (
-        <View
-            style={[styles.wrap, { width: size, height: size }, style]}
-            testID={testID}
-            accessibilityLabel="KupaPay"
-            accessibilityRole="image"
-        >
-            <View style={stageStyle}>
-                <Image
-                    source={WALLET_BASE}
-                    style={{ width: size, height: stageH }}
-                    resizeMode="contain"
-                />
-                <View style={styles.fill} pointerEvents="none">
-                    <Reanimated.View style={[topSlot, topStyle]}>
-                        <Image source={ARROW_TOP} style={styles.full} resizeMode="contain" />
-                    </Reanimated.View>
-                    <Reanimated.View style={[botSlot, botStyle]}>
-                        <Image source={ARROW_BOTTOM} style={styles.full} resizeMode="contain" />
-                    </Reanimated.View>
-                </View>
-            </View>
-        </View>
-    );
-}
-
-function AppLogoAnimatedWeb({ size = 108, testID = 'app-logo', style }: AppLogoAnimatedProps) {
-    const { k, stageH, stageStyle, topSlot, botSlot } = getStageLayout(size);
-    const reduced = prefersReducedMotionWeb();
-
-    const topX = useRef(new RNAnimated.Value(reduced ? 0 : TOP_ENTER * k)).current;
-    const botX = useRef(new RNAnimated.Value(reduced ? 0 : BOT_ENTER * k)).current;
+    const topX = useRef(new Animated.Value(reduced ? 0 : TOP_ENTER * k)).current;
+    const botX = useRef(new Animated.Value(reduced ? 0 : BOT_ENTER * k)).current;
 
     useEffect(() => {
         if (reduced) {
@@ -200,24 +127,25 @@ function AppLogoAnimatedWeb({ size = 108, testID = 'app-logo', style }: AppLogoA
             return;
         }
         const d = LOOP_MS;
-        const enter = RNEasing.bezier(0.16, 0.86, 0.28, 1);
-        const exit = RNEasing.bezier(0.55, 0, 0.82, 0.18);
-        const linear = RNEasing.linear;
+        // Approved easings: glide-in (fast then settle) and accelerate-out.
+        const enter = Easing.bezier(0.16, 0.86, 0.28, 1);
+        const exit = Easing.bezier(0.55, 0, 0.82, 0.18);
+        const linear = Easing.linear;
 
-        // Each loop: snap to the off-screen start (duration 0), glide in, hold, accelerate out,
-        // wait off-screen. useNativeDriver is false because web has no native driver — RNW drives
-        // the translateX via requestAnimationFrame.
-        const makeLoop = (val: RNAnimated.Value, enterPos: number, exitPos: number) =>
-            RNAnimated.loop(
-                RNAnimated.sequence([
-                    RNAnimated.timing(val, { toValue: enterPos, duration: 0, useNativeDriver: false }),
-                    RNAnimated.timing(val, { toValue: 0, duration: F_ENTER * d, easing: enter, useNativeDriver: false }),
-                    RNAnimated.timing(val, { toValue: 0, duration: F_HOLD * d, easing: linear, useNativeDriver: false }),
-                    RNAnimated.timing(val, { toValue: exitPos, duration: F_EXIT * d, easing: exit, useNativeDriver: false }),
-                    RNAnimated.timing(val, { toValue: exitPos, duration: F_WAIT * d, easing: linear, useNativeDriver: false }),
+        // Each loop: snap to the off-screen start (duration 0), glide in, hold assembled, accelerate
+        // out, wait off-screen, then repeat.
+        const makeLoop = (val: Animated.Value, enterPos: number, exitPos: number) =>
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(val, { toValue: enterPos, duration: 0, useNativeDriver: USE_NATIVE_DRIVER }),
+                    Animated.timing(val, { toValue: 0, duration: F_ENTER * d, easing: enter, useNativeDriver: USE_NATIVE_DRIVER }),
+                    Animated.timing(val, { toValue: 0, duration: F_HOLD * d, easing: linear, useNativeDriver: USE_NATIVE_DRIVER }),
+                    Animated.timing(val, { toValue: exitPos, duration: F_EXIT * d, easing: exit, useNativeDriver: USE_NATIVE_DRIVER }),
+                    Animated.timing(val, { toValue: exitPos, duration: F_WAIT * d, easing: linear, useNativeDriver: USE_NATIVE_DRIVER }),
                 ]),
             );
 
+        // Top arrow (→): in from the left, hold, out to the right. Bottom arrow (←): mirror.
         const topLoop = makeLoop(topX, TOP_ENTER * k, TOP_EXIT * k);
         const botLoop = makeLoop(botX, BOT_ENTER * k, BOT_EXIT * k);
         topLoop.start();
@@ -242,31 +170,27 @@ function AppLogoAnimatedWeb({ size = 108, testID = 'app-logo', style }: AppLogoA
                     resizeMode="contain"
                 />
                 <View style={styles.fill} pointerEvents="none">
-                    <RNAnimated.View style={[topSlot, { transform: [{ translateX: topX }] }]}>
+                    <Animated.View style={[topSlot, { transform: [{ translateX: topX }] }]}>
                         <Image source={ARROW_TOP} style={styles.full} resizeMode="contain" />
-                    </RNAnimated.View>
-                    <RNAnimated.View style={[botSlot, { transform: [{ translateX: botX }] }]}>
+                    </Animated.View>
+                    <Animated.View style={[botSlot, { transform: [{ translateX: botX }] }]}>
                         <Image source={ARROW_BOTTOM} style={styles.full} resizeMode="contain" />
-                    </RNAnimated.View>
+                    </Animated.View>
                 </View>
             </View>
         </View>
     );
 }
 
-function prefersReducedMotionWeb(): boolean {
-    const mm = (globalThis as { matchMedia?: (q: string) => { matches: boolean } }).matchMedia;
-    try {
-        return mm ? mm('(prefers-reduced-motion: reduce)').matches : false;
-    } catch {
-        return false;
-    }
-}
-
 const styles = StyleSheet.create({
     wrap: {
         position: 'relative',
         overflow: 'hidden',
+        // Opt the logo out of the app's RTL. The root is `direction: 'rtl'` for Hebrew
+        // (RtlLayoutProvider); on the New Architecture that inherited direction mirrors the arrows'
+        // absolute `left` offsets on iOS. Forcing this subtree to LTR makes `left` resolve
+        // physically again, so the mark never mirrors with language. A brand mark must never mirror.
+        direction: 'ltr',
     },
     // The arrows live in a layer clipped to the stage, so they vanish at the wallet's edges.
     fill: {
