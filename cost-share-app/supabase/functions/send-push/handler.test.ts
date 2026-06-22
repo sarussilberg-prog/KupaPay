@@ -1,5 +1,6 @@
 import { assertEquals } from '@std/assert';
 import { processActivityEvent, type ActivityRecord, type SendPushDeps } from './handler.ts';
+import { classifyDelivery, type DeliveryStatus } from './dedup.ts';
 
 function baseRecord(over: Partial<ActivityRecord> = {}): ActivityRecord {
     return {
@@ -127,4 +128,62 @@ Deno.test('forwards is_deleted metadata into renderNotification', async () => {
     });
     await processActivityEvent(record, deps);
     assertEquals(sentBodies[0], 'Dana deleted an expense · Lunch');
+});
+
+// Regression for the edit/delete-no-push bug: edits/deletes reuse the same activity_events
+// row (same id), only bumping created_at. The delivery store must treat each bumped revision
+// as a fresh send while still dropping a duplicate trigger fire for the SAME revision.
+Deno.test('re-sends on edit and delete; drops duplicate same-revision fire', async () => {
+    const rows = new Map<string, { status: DeliveryStatus; event_created_at: string }>();
+    const sentBodies: string[] = [];
+    const deps = fakeDeps({
+        recordPending: (eventId, _recipientId, eventCreatedAt) => {
+            const decision = classifyDelivery(rows.get(eventId) ?? null, eventCreatedAt);
+            if (decision === 'duplicate') return Promise.resolve('duplicate');
+            rows.set(eventId, { status: 'pending', event_created_at: eventCreatedAt });
+            return Promise.resolve('new');
+        },
+        markSent: (eventId) => {
+            const r = rows.get(eventId);
+            if (r) r.status = 'sent';
+            return Promise.resolve();
+        },
+        sendExpo: (msgs) => {
+            for (const m of msgs) sentBodies.push(m.body);
+            return Promise.resolve({ ticketIds: ['t-1'], invalidTokens: [] });
+        },
+    });
+
+    // 1. added
+    assertEquals(
+        await processActivityEvent(baseRecord({ created_at: '2026-06-22T10:00:00Z' }), deps),
+        'sent',
+    );
+    // duplicate webhook delivery for the same revision → dropped
+    assertEquals(
+        await processActivityEvent(baseRecord({ created_at: '2026-06-22T10:00:00Z' }), deps),
+        'duplicate',
+    );
+    // 2. edited (created_at bumped)
+    assertEquals(
+        await processActivityEvent(baseRecord({
+            created_at: '2026-06-22T10:05:00Z',
+            metadata: { description: 'Lunch', amount: 60, currency: 'ILS', is_edited: true },
+        }), deps),
+        'sent',
+    );
+    // 3. deleted (created_at bumped again)
+    assertEquals(
+        await processActivityEvent(baseRecord({
+            created_at: '2026-06-22T10:09:00Z',
+            metadata: { description: 'Lunch', amount: 60, currency: 'ILS', is_deleted: true },
+        }), deps),
+        'sent',
+    );
+
+    assertEquals(sentBodies, [
+        'New expense from Dana · Lunch · ₪50',
+        'Dana updated an expense · Lunch · ₪60',
+        'Dana deleted an expense · Lunch',
+    ]);
 });
