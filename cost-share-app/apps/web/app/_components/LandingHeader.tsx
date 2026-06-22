@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 import { getLocale } from '@/lib/locale';
 import { getTranslations } from '@/lib/i18n';
 import { APP_BRAND_TITLE } from '@/lib/brand';
+import { LOGIN_HREF } from '@/lib/appLinks';
 
 async function signOut() {
   'use server';
@@ -61,12 +62,12 @@ export default async function LandingHeader() {
               </form>
             </div>
           ) : (
-            <Link
-              href="/login"
+            <a
+              href={LOGIN_HREF}
               className="text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition-colors"
             >
               {t.header.signIn}
-            </Link>
+            </a>
           )}
         </div>
       </div>
