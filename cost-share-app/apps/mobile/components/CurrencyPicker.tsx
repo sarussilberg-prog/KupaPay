@@ -4,8 +4,8 @@
  */
 
 import { Text } from './AppText';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { View, TouchableOpacity, Modal, FlatList, TextInput } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, TouchableOpacity, Modal, FlatList, TextInput, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import currencyCodes from 'currency-codes';
 import { resolveAutoTextInputStyle, useAppLanguage, useRtlLayout } from '../hooks/useRtlLayout';
@@ -42,12 +42,6 @@ export function CurrencyPicker({
     const isControlled = visible !== undefined;
     const modalVisible = isControlled ? visible : internalVisible;
     const [searchQuery, setSearchQuery] = useState('');
-    const searchInputRef = useRef<TextInput | null>(null);
-    useEffect(() => {
-        if (!modalVisible) return;
-        const id = setTimeout(() => searchInputRef.current?.focus(), 80);
-        return () => clearTimeout(id);
-    }, [modalVisible]);
 
     const closeModal = () => {
         if (isControlled) {
@@ -147,6 +141,12 @@ export function CurrencyPicker({
                 onRequestClose={closeModal}
             >
                 <View className="flex-1 bg-black/50 justify-end">
+                    <Pressable
+                        style={StyleSheet.absoluteFill}
+                        onPress={closeModal}
+                        accessibilityLabel={t('common.close')}
+                        testID="currency-picker-backdrop"
+                    />
                     <View className="bg-white rounded-t-3xl h-3/4">
                         {/* Header */}
                         <View className="p-4 border-b border-gray-200">
@@ -159,7 +159,6 @@ export function CurrencyPicker({
 
                             {/* Search */}
                             <TextInput
-                                ref={searchInputRef}
                                 className="bg-gray-100 rounded-lg p-3"
                                 style={resolveAutoTextInputStyle(isRtl)}
                                 placeholder={t('currencyPicker.searchPlaceholder')}

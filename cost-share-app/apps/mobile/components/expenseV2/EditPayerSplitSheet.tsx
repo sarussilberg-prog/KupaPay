@@ -2,12 +2,15 @@
  * EditPayerSplitSheet
  * Bottom-sheet modal for choosing the payer and the split distribution.
  *
- * Internal draft state is committed back to the parent on Done; scrim taps
- * and Cancel discard the draft.
+ * Internal draft state is committed back to the parent on Done or on a scrim
+ * tap (both treated as "save"); only the explicit Cancel button discards it.
+ * When an unequal split doesn't sum correctly, saving is blocked and the error
+ * caption shakes to draw attention instead of closing the sheet.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+    Animated,
     KeyboardAvoidingView,
     Modal,
     Platform,
@@ -27,6 +30,7 @@ import { colors } from '../../theme';
 import { SegmentedControl } from './SegmentedControl';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import {
+    amountsFromPercentValues,
     autoFillUnlockedAmounts,
     computeUnequalTotal,
     parseSplitInput,
@@ -89,6 +93,7 @@ export function EditPayerSplitSheet({
     // Members whose exact amount the user has manually typed. Auto-fill spreads
     // the remainder over the rest so the split always sums to the total.
     const [lockedIds, setLockedIds] = useState<Set<string>>(() => lockedFromValues(initial.unequalValues));
+    const splitInputRefs = useRef<Record<string, TextInput | null>>({});
 
     useEffect(() => {
         if (visible) {
@@ -147,17 +152,106 @@ export function EditPayerSplitSheet({
         setValues(nextValues);
     };
 
-    const handleDone = () => {
-        if (splitMode !== 'equal' && !validation.isValid) return;
+    // Shake the error caption when the user tries to save an invalid split.
+    const errorShake = useRef(new Animated.Value(0)).current;
+    const runErrorShake = useCallback(() => {
+        errorShake.setValue(0);
+        // JS driver (not native): the caption is a tiny text node and the native
+        // driver's node lookup is fragile under test; a 250ms shake is fine on JS.
+        Animated.sequence([
+            Animated.timing(errorShake, { toValue: -6, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: 6, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: -4, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: 4, duration: 50, useNativeDriver: false }),
+            Animated.timing(errorShake, { toValue: 0, duration: 50, useNativeDriver: false }),
+        ]).start();
+    }, [errorShake]);
+
+    const handleModeChange = (newMode: UiSplitMode) => {
+        if (newMode === splitMode) return;
+        let nextValues: Record<string, string> = {};
+        const nextLocked = new Set<string>();
+
+        if (newMode === 'equal') {
+            // equal doesn't use values — wipe slate clean
+        } else if (splitMode === 'equal') {
+            if (newMode === 'percent') {
+                // seed equal percentages, last member absorbs rounding remainder
+                if (selectedIds.length > 0) {
+                    const base = parseFloat((100 / selectedIds.length).toFixed(2));
+                    selectedIds.forEach((id, i) => {
+                        const isLast = i === selectedIds.length - 1;
+                        const pct = isLast
+                            ? parseFloat((100 - base * i).toFixed(2))
+                            : base;
+                        nextValues[id] = pct.toFixed(2);
+                    });
+                }
+            } else {
+                // equal → exact: auto-fill equal amounts from scratch
+                nextValues = autoFillUnlockedAmounts(totalAmount, selectedIds, {}, nextLocked);
+            }
+        } else if (splitMode === 'percent' && newMode === 'exact') {
+            // convert percentages → amounts (last member absorbs rounding remainder)
+            const amounts = amountsFromPercentValues(values, selectedIds, totalAmount);
+            selectedIds.forEach((id, i) => {
+                nextValues[id] = (amounts[i] ?? 0).toFixed(2);
+            });
+        } else if (splitMode === 'exact' && newMode === 'percent') {
+            // convert amounts → percentages (last member absorbs rounding remainder)
+            if (totalAmount > 0) {
+                let headSum = 0;
+                selectedIds.forEach((id, i) => {
+                    const isLast = i === selectedIds.length - 1;
+                    if (isLast) {
+                        nextValues[id] = parseFloat((100 - headSum).toFixed(2)).toFixed(2);
+                    } else {
+                        const amount = parseSplitInput(values[id] ?? '');
+                        const pct = parseFloat(((amount / totalAmount) * 100).toFixed(2));
+                        headSum += pct;
+                        nextValues[id] = pct.toFixed(2);
+                    }
+                });
+            } else {
+                selectedIds.forEach(id => { nextValues[id] = '0.00'; });
+            }
+        }
+
+        setValues(nextValues);
+        setLockedIds(nextLocked);
+        setSplitMode(newMode);
+    };
+
+    // Both Done and a scrim tap route here: save when valid, otherwise keep the
+    // sheet open and shake the error so the user notices what's wrong.
+    const handleSave = () => {
+        if (splitMode !== 'equal' && !validation.isValid) {
+            runErrorShake();
+            return;
+        }
         onDone({ payerId, splitMode, selectedMemberIds: selectedIds, unequalValues: values });
     };
 
-    const metaCaption = t('expenses.v2.splitMeta', {
-        selected: selectedIds.length,
-        total: members.length,
-        currency,
-        each: perHead.toFixed(2),
-    });
+    const allocatedSum = 'total' in validation ? validation.total : 0;
+    const metaCaption = splitMode === 'equal'
+        ? t('expenses.v2.splitMeta', {
+            selected: selectedIds.length,
+            total: members.length,
+            currency,
+            each: perHead.toFixed(2),
+        })
+        : splitMode === 'percent'
+            ? t('expenses.v2.splitMetaPercent', {
+                selected: selectedIds.length,
+                total: members.length,
+                allocated: allocatedSum.toFixed(0),
+            })
+            : t('expenses.v2.splitMetaExact', {
+                selected: selectedIds.length,
+                total: members.length,
+                currency,
+                allocated: allocatedSum.toFixed(2),
+            });
 
     const titleError = useMemo(() => {
         if (splitMode === 'equal' || selectedIds.length === 0) return null;
@@ -187,26 +281,24 @@ export function EditPayerSplitSheet({
                 <View style={styles.backdrop}>
                     <Pressable
                         style={styles.scrim}
-                        onPress={onCancel}
+                        onPress={handleSave}
                         testID="edit-payer-split-scrim"
                     />
                     <View style={styles.sheet}>
                     <View style={styles.grabber} />
                     <View style={styles.titleRow}>
+                        <TouchableOpacity
+                            onPress={onCancel}
+                            testID="edit-payer-split-cancel"
+                        >
+                            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+                        </TouchableOpacity>
                         <Text style={styles.title}>{t('expenses.v2.whoAndHow')}</Text>
                         <TouchableOpacity
-                            onPress={handleDone}
-                            disabled={splitMode !== 'equal' && !validation.isValid}
+                            onPress={handleSave}
                             testID="edit-payer-split-done"
                         >
-                            <Text
-                                style={[
-                                    styles.doneText,
-                                    splitMode !== 'equal' && !validation.isValid ? styles.doneTextDisabled : null,
-                                ]}
-                            >
-                                {t('common.done')}
-                            </Text>
+                            <Text style={styles.doneText}>{t('common.done')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -256,13 +348,16 @@ export function EditPayerSplitSheet({
                         <View style={styles.splitHeaderRow}>
                             <Text style={styles.eyebrow}>{t('expenses.v2.sectionSplitBetween')}</Text>
                             {titleError ? (
-                                <Text
-                                    style={styles.splitErrorCaption}
+                                <Animated.Text
+                                    style={[
+                                        styles.splitErrorCaption,
+                                        { transform: [{ translateX: errorShake }] },
+                                    ]}
                                     numberOfLines={1}
                                     testID="edit-payer-split-error"
                                 >
                                     {titleError}
-                                </Text>
+                                </Animated.Text>
                             ) : (
                                 <Text style={styles.metaCaption}>{metaCaption}</Text>
                             )}
@@ -272,17 +367,7 @@ export function EditPayerSplitSheet({
                             <SegmentedControl
                                 value={splitMode}
                                 options={splitModeOptions}
-                                onChange={mode => {
-                                    setSplitMode(mode);
-                                    if (mode === 'exact') {
-                                        // Seed a clean equal split on entering exact mode.
-                                        const fresh = new Set<string>();
-                                        setLockedIds(fresh);
-                                        setValues(
-                                            autoFillUnlockedAmounts(totalAmount, selectedIds, values, fresh),
-                                        );
-                                    }
-                                }}
+                                onChange={handleModeChange}
                                 testIDPrefix="split-mode"
                             />
                         </View>
@@ -326,6 +411,7 @@ export function EditPayerSplitSheet({
                                         ) : (
                                             <View style={styles.inputWrap}>
                                                 <TextInput
+                                                    ref={(r) => { splitInputRefs.current[member.id] = r; }}
                                                     style={styles.input}
                                                     value={value}
                                                     onChangeText={text => {
@@ -342,6 +428,12 @@ export function EditPayerSplitSheet({
                                                     placeholderTextColor={colors.gray400}
                                                     editable={checked}
                                                     testID={`split-input-${member.id}`}
+                                                    onFocus={() => {
+                                                        const len = (values[member.id] ?? '').length;
+                                                        setTimeout(() => {
+                                                            splitInputRefs.current[member.id]?.setNativeProps({ selection: { start: len, end: len } });
+                                                        }, 0);
+                                                    }}
                                                 />
                                                 <Text style={styles.inputSuffix}>
                                                     {splitMode === 'percent' ? '%' : currency}
@@ -401,6 +493,8 @@ const styles = StyleSheet.create({
         marginBottom: 14,
     },
     title: {
+        flex: 1,
+        textAlign: 'center',
         fontSize: 15,
         fontWeight: '700',
         color: colors.text.primary,
@@ -419,8 +513,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 4,
     },
-    doneTextDisabled: {
-        color: colors.gray400,
+    cancelText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text.secondary,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
     },
     eyebrow: {
         fontSize: 12,

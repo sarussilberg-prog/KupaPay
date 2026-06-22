@@ -25,6 +25,8 @@ import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
 import { prefetchAddExpensePrerequisitesForGroup } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
+import { useNetworkStatus } from '../../lib/networkStatus';
+import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
 import { AppGateSkeleton } from '../../components/skeletons/AppGateSkeleton';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
@@ -99,6 +101,11 @@ export function GroupsListScreen() {
 
     const [refreshing, setRefreshing] = useState(false);
     const loadError = groupsQuery.isError;
+    const { online } = useNetworkStatus();
+    // Which empty-state to show when the list has no groups. Offline wins over a
+    // generic load error so the user gets the honest "you're offline" message
+    // instead of a bare "failed to load".
+    const emptyVariant = resolveEmptyStateVariant({ online, hasError: loadError });
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -195,12 +202,18 @@ export function GroupsListScreen() {
 
     type FilteredRow = (typeof activeRows)[number];
 
+    // No balance dataset at all (e.g. offline before it was ever cached) →
+    // tell each card its balance is unknown so it shows a neutral placeholder
+    // instead of a false "Settled".
+    const balanceUnknown = simplified === undefined;
+
     const renderGroupRow = useCallback(
         (item: FilteredRow) => (
             <GroupCard
                 group={item.group}
                 rollup={simplified?.groupRollups.get(item.group.id)}
                 groupHasOpenDebts={groupHasOpenDebts[item.group.id] === true}
+                balanceUnknown={balanceUnknown}
                 searchQuery={trimmedQuery || undefined}
                 matchedMemberNames={
                     item.matched.length > 0 ? item.matched : undefined
@@ -208,7 +221,7 @@ export function GroupsListScreen() {
                 onPress={handleGroupPress}
             />
         ),
-        [simplified, groupHasOpenDebts, trimmedQuery, handleGroupPress],
+        [simplified, balanceUnknown, groupHasOpenDebts, trimmedQuery, handleGroupPress],
     );
 
     const renderItem = useCallback<ListRenderItem<FilteredRow>>(
@@ -335,7 +348,15 @@ export function GroupsListScreen() {
                     }
                     ListFooterComponent={archivedFooter}
                     ListEmptyComponent={
-                        loadError && groups.length === 0 ? (
+                        // Archived groups exist (just no active ones) → the
+                        // archived footer renders them; no empty state needed.
+                        archivedRows.length > 0 ? null : emptyVariant === 'offline' ? (
+                            <EmptyState
+                                iconName="cloud-offline-outline"
+                                title={t('common.offlineTitle')}
+                                message={t('groups.offlineMessage')}
+                            />
+                        ) : emptyVariant === 'error' ? (
                             <EmptyState
                                 iconName="alert-circle-outline"
                                 title={t('groups.loadError')}
@@ -343,7 +364,7 @@ export function GroupsListScreen() {
                                 actionTitle={t('common.retry')}
                                 onAction={handleRefresh}
                             />
-                        ) : archivedRows.length > 0 ? null : (
+                        ) : (
                             <EmptyState
                                 iconName="people-outline"
                                 title={t('groups.noGroups')}

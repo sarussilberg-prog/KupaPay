@@ -39,6 +39,26 @@ describe('SummaryBalanceStrip', () => {
         expect(queryByText(/USD 0/)).toBeNull();
     });
 
+    it('shows an unavailable copy (NOT settled) when balance data is missing', () => {
+        const { getByTestId, queryByText } = render(
+            <SummaryBalanceStrip balanceUnknown onPress={() => {}} />,
+        );
+        expect(getByTestId('summary-balance-unknown')).toBeTruthy();
+        expect(queryByText('groups.card.settled')).toBeNull();
+    });
+
+    it('shows the real balance even if balanceUnknown is set', () => {
+        const { getByText, queryByTestId } = render(
+            <SummaryBalanceStrip
+                balanceUnknown
+                rollup={rollupOf({ currency: 'USD', net: 42 })}
+                onPress={() => {}}
+            />,
+        );
+        expect(getByText(/USD 42\.00/)).toBeTruthy();
+        expect(queryByTestId('summary-balance-unknown')).toBeNull();
+    });
+
     it('calls onPress when tapped', () => {
         const onPress = jest.fn();
         const { getByTestId } = render(

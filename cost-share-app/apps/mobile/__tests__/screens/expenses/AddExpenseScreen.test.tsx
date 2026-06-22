@@ -156,6 +156,15 @@ describe('AddExpenseScreen — v2', () => {
         expect(amount.props.editable).not.toBe(false);
     });
 
+    it('shows an app-localized "Next" keyboard accessory on the amount field', async () => {
+        const { findByTestId, getByText } = renderWithQuery(<AddExpenseScreen />);
+        const amount = await findByTestId('amount-display');
+        // The native return-key label is bypassed in favor of our own accessory,
+        // so the button text comes from i18n (here the key, via the test stub).
+        expect(amount.props.inputAccessoryViewID).toBeTruthy();
+        expect(getByText('common.next')).toBeTruthy();
+    });
+
     it('sanitizes the amount input — letters dropped, one dot max, 2 decimal cap', async () => {
         const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
         const amount = await findByTestId('amount-display');
@@ -260,11 +269,33 @@ describe('AddExpenseScreen — v2', () => {
         );
     });
 
-    it('discards editor changes when the scrim is tapped', async () => {
+    it('saves editor changes when the scrim is tapped', async () => {
         const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
         fireEvent.press(await findByTestId('combined-payer-split'));
         fireEvent.press(await findByTestId('payer-cell-u2'));
+        // Tapping outside now commits the draft (equivalent to Done).
         fireEvent.press(await findByTestId('edit-payer-split-scrim'));
+
+        await waitFor(() => {
+            expect(queryByTestId('edit-payer-split-done')).toBeNull();
+        });
+
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        fireEvent.changeText(await findByTestId('description-input'), 'X');
+        fireEvent.changeText(await findByTestId('amount-display'), '5');
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockCreateExpense).toHaveBeenCalled());
+        expect(mockCreateExpense).toHaveBeenCalledWith(
+            expect.objectContaining({ paidBy: 'u2' }),
+        );
+    });
+
+    it('discards editor changes when Cancel is pressed', async () => {
+        const { findByTestId, queryByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.press(await findByTestId('combined-payer-split'));
+        fireEvent.press(await findByTestId('payer-cell-u2'));
+        fireEvent.press(await findByTestId('edit-payer-split-cancel'));
 
         await waitFor(() => {
             expect(queryByTestId('edit-payer-split-done')).toBeNull();

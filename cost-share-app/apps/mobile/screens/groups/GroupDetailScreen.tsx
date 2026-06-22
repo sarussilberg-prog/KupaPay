@@ -14,6 +14,7 @@ import {
     Pressable,
     TextInput,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -89,7 +90,9 @@ import {
 } from '../../components/GroupFeedFiltersSheet';
 import { filterAndSortGroupFeed } from '../../lib/groupFeedFilters';
 import {
-    findFeedItemIndex,
+    IDLE_FOCUS_SESSION,
+    reduceFocusSession,
+    type FocusSessionState,
     type GroupDetailFocusFeedItem,
 } from '../../lib/groupDetailFocus';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
@@ -199,8 +202,7 @@ export function GroupDetailScreen() {
         editSettlementId?: string;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
-    const focusConsumedRef = useRef(false);
-    const pendingFocusKeyRef = useRef<string | null>(null);
+    const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
     const focusScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const focusClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [focusedRowKey, setFocusedRowKey] = useState<string | null>(null);
@@ -262,6 +264,7 @@ export function GroupDetailScreen() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
+    const [pendingExport, setPendingExport] = useState(false);
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -279,12 +282,16 @@ export function GroupDetailScreen() {
     );
     const isLoading = expensesQuery.isLoading || messagesQuery.isLoading;
     const isFeedLoading = isLoading && groupExpenses.length === 0 && messages.length === 0;
+    const { online } = useNetworkStatus();
 
     useGroupMessagesRealtime(groupId);
     useGroupExpensesRealtime(groupId);
     useGroupSettlementsRealtime(groupId);
 
     const rollup = simplified?.groupRollups.get(groupId);
+    // No balance dataset at all (offline before it was ever cached) → the strip
+    // should say "unavailable", never a false "settled".
+    const balanceUnknown = simplified === undefined;
     const pairwiseDebts = useMemo(() => {
         const perCurrency = simplified?.byGroupCurrency.get(groupId);
         if (!perCurrency) return [];
@@ -418,31 +425,28 @@ export function GroupDetailScreen() {
     );
 
     useEffect(() => {
-        const focus = focusFeedItemParam;
-        if (!focus) return;
-        const key = `${focus.kind}:${focus.id}`;
-        if (pendingFocusKeyRef.current === key) return;
-        pendingFocusKeyRef.current = key;
-        focusConsumedRef.current = false;
-        setSearchQuery('');
-        setFilters(DEFAULT_GROUP_FEED_FILTERS);
-    }, [focusFeedItemParam]);
+        const decision = reduceFocusSession(
+            focusSessionRef.current,
+            focusFeedItemParam,
+            filteredFeed,
+            isFeedLoading,
+        );
+        focusSessionRef.current = decision.state;
 
-    useEffect(() => {
-        const focus = focusFeedItemParam;
-        if (!focus || focusConsumedRef.current || isFeedLoading) return;
+        if (decision.resetFilters) {
+            setSearchQuery('');
+            setFilters(DEFAULT_GROUP_FEED_FILTERS);
+        }
 
-        const index = findFeedItemIndex(filteredFeed, focus);
-        if (index < 0) return;
+        if (decision.highlightKey === null) return;
 
-        const rowKey =
-            focus.kind === 'expense' ? `e:${focus.id}` : `s:${focus.id}`;
-        focusConsumedRef.current = true;
-        // Do NOT clear focusFeedItem from route params here — that would
-        // trigger a re-render and fire this effect's cleanup, which would
-        // cancel the scheduled scroll/highlight timers before they run.
-        // Route params naturally reset on the next navigation, so leaving
-        // it alone is safe.
+        const { highlightKey: rowKey, highlightIndex: index } = decision;
+        // Clear the route param now that we've consumed it. This re-runs the
+        // effect with no focus (a no-op that returns the session to idle), which
+        // is what lets the SAME item be focused again on a later navigation.
+        // Clearing does not cancel the timers below — they live in refs and are
+        // only cleared on unmount.
+        navigation.setParams({ groupId, focusFeedItem: undefined });
 
         focusScrollTimerRef.current = setTimeout(() => {
             listRef.current?.scrollToIndex({
@@ -541,9 +545,8 @@ export function GroupDetailScreen() {
             },
         ]);
     }, [groupId, navigation, t]);
-    const handleExport = useCallback(async () => {
-        setMenuOpen(false);
-        if (!displayGroup || exporting) return;
+    const runExport = useCallback(async () => {
+        if (!displayGroup) return;
         setExporting(true);
         showInfoToast('groups.share.exporting');
         try {
@@ -555,7 +558,19 @@ export function GroupDetailScreen() {
         } finally {
             setExporting(false);
         }
-    }, [displayGroup, exporting, feed, memberLites, pairwiseDebts, t]);
+    }, [displayGroup, feed, memberLites, pairwiseDebts]);
+    const handleExport = useCallback(() => {
+        if (!displayGroup || exporting) return;
+        setMenuOpen(false);
+        // iOS can't present the native share sheet while the menu Modal is
+        // still dismissing — the sheet silently never appears. Defer until the
+        // Modal's onDismiss fires. Android shares via Intent, so no race.
+        if (Platform.OS === 'ios') {
+            setPendingExport(true);
+        } else {
+            void runExport();
+        }
+    }, [displayGroup, exporting, runExport]);
     const handleSettleUp = useCallback(
         () => navigation.navigate('SettleUpList', { groupId }),
         [navigation, groupId],
@@ -812,6 +827,7 @@ export function GroupDetailScreen() {
                             group={displayGroup}
                             members={memberLites}
                             rollup={rollup}
+                            balanceUnknown={balanceUnknown}
                             settlementCount={settlementCount}
                             onBack={handleBack}
                             onShare={handleShare}
@@ -880,6 +896,21 @@ export function GroupDetailScreen() {
                             testID="feed-loading"
                         >
                             <ActivityIndicator size="large" color={colors.primary} />
+                        </View>
+                    ) : feed.length === 0 && !online ? (
+                        // Offline with nothing cached for this group: be honest,
+                        // and reassure that adding an expense still works (it
+                        // queues via the add-expense FAB and syncs on reconnect).
+                        // The add-members / share-link actions need the network,
+                        // so we omit them here.
+                        <View className="mx-4 my-6 bg-white rounded-2xl p-6 items-center border border-gray-100">
+                            <AppIcon name="cloud-offline-outline" size={40} color={colors.gray300} />
+                            <Text className="text-base font-semibold text-gray-900 mt-3 mb-1">
+                                {t('common.offlineTitle')}
+                            </Text>
+                            <Text className="text-sm text-gray-500 text-center">
+                                {t('groups.emptyFeed.offlineMessage')}
+                            </Text>
                         </View>
                     ) : feed.length === 0 ? (
                         <View className="mx-4 my-6 bg-white rounded-2xl p-6 items-center border border-gray-100">
@@ -1014,6 +1045,12 @@ export function GroupDetailScreen() {
                 transparent
                 animationType="fade"
                 onRequestClose={() => setMenuOpen(false)}
+                onDismiss={() => {
+                    if (pendingExport) {
+                        setPendingExport(false);
+                        void runExport();
+                    }
+                }}
             >
                 <Pressable className="flex-1" onPress={() => setMenuOpen(false)}>
                     <View

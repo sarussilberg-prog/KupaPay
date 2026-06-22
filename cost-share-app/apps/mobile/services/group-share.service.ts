@@ -6,10 +6,10 @@ import { Platform } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import { captureError } from '../lib/captureError';
 import { Group, FeedItem, GroupMemberLite, PairwiseDebt } from '@cost-share/shared';
-import Toast from 'react-native-toast-message';
 import i18n from '../i18n';
 import { buildGroupExportCsv } from '../lib/groupExportCsv';
 import { downloadTextAsFile } from '../lib/webFileDownload';
+import { showErrorToast, showSuccessMessage } from '../lib/appToast';
 
 export interface GroupExportPayload {
     feed: FeedItem[];
@@ -60,10 +60,7 @@ export async function exportGroupCsv(
 
         if (Platform.OS === 'web') {
             downloadTextAsFile(buildGroupExportFilename(group), csv, 'text/csv;charset=utf-8');
-            Toast.show({
-                type: 'success',
-                text1: i18n.t('groups.share.exportTitle'),
-            });
+            showSuccessMessage('groups.share.exportDownloaded');
             return true;
         }
 
@@ -72,10 +69,7 @@ export async function exportGroupCsv(
         const Sharing = await import('expo-sharing');
         const available = await Sharing.isAvailableAsync();
         if (!available) {
-            Toast.show({
-                type: 'error',
-                text1: i18n.t('groups.share.exportError'),
-            });
+            showErrorToast('groups.share.exportError');
             return false;
         }
         await Sharing.shareAsync(uri, {
@@ -89,11 +83,7 @@ export async function exportGroupCsv(
             tags: { service: 'group-share', op: 'export' },
         });
         console.error('Failed to export group report:', error);
-        Toast.show({
-            type: 'error',
-            text1: i18n.t('groups.share.exportError'),
-            text2: i18n.t('common.networkError'),
-        });
+        showErrorToast('groups.share.exportError', 'common.retry');
         return false;
     }
 }

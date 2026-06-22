@@ -17,6 +17,9 @@ import {
     ActivityIndicator,
     Animated,
     Image,
+    InputAccessoryView,
+    InteractionManager,
+    Platform,
     ScrollView,
     StyleSheet,
     TextInput,
@@ -45,6 +48,11 @@ import {
 } from '../../components/expenseV2/EditPayerSplitSheet';
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
+
+// iOS localizes the numeric keyboard's "Next" return button from the native
+// bundle, which ignores the in-app language. We provide our own accessory bar
+// with an i18n-driven label instead so it follows the app's language.
+const AMOUNT_ACCESSORY_ID = 'amountKeyboardAccessory';
 
 /**
  * Keep only digits and a single decimal separator (`.` or `,` → `.`),
@@ -172,6 +180,12 @@ export function AddExpenseScreen() {
 
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
+    // Controlled selection used only to drop the caret at the end when focusing a
+    // pre-filled amount; released on the first selection change so the user can
+    // still reposition the caret freely afterwards.
+    const [amountSelection, setAmountSelection] = useState<
+        { start: number; end: number } | undefined
+    >(undefined);
     const [currency, setCurrency] = useState<string>(
         storeGroup?.defaultCurrency ?? DEFAULT_CURRENCY,
     );
@@ -193,6 +207,8 @@ export function AddExpenseScreen() {
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
+    const amountInputRef = useRef<TextInput>(null);
+    const descriptionInputRef = useRef<TextInput>(null);
 
     const { data: membersData = [], isLoading: membersLoading } = useGroupMembersQuery(groupId);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
@@ -240,6 +256,18 @@ export function AddExpenseScreen() {
         if (isEditMode) return;
         if (!paidBy && currentUser?.id) setPaidBy(currentUser.id);
     }, [isEditMode, paidBy, currentUser?.id]);
+
+    // Create mode: open with the amount field focused and the keyboard up.
+    // Wait for the modal's present animation to finish (InteractionManager) so
+    // the keyboard reliably surfaces. Edit mode skips this — it opens read-first
+    // on a loading screen and shouldn't pop the keyboard on entry.
+    useEffect(() => {
+        if (isEditMode) return;
+        const task = InteractionManager.runAfterInteractions(() => {
+            amountInputRef.current?.focus();
+        });
+        return () => task.cancel();
+    }, [isEditMode]);
 
     // Edit mode: load the existing expense and prefill the form.
     useEffect(() => {
@@ -741,16 +769,45 @@ export function AddExpenseScreen() {
                     <View style={{ height: 24 }} />
                     <Animated.View style={{ transform: [{ translateX: amountShake }] }}>
                         <TextInput
+                            ref={amountInputRef}
                             value={amount}
                             onChangeText={text => setAmount(sanitizeAmountInput(text))}
+                            selection={amountSelection}
+                            onFocus={() =>
+                                setAmountSelection({ start: amount.length, end: amount.length })
+                            }
+                            onSelectionChange={() => {
+                                if (amountSelection !== undefined) setAmountSelection(undefined);
+                            }}
                             keyboardType="decimal-pad"
                             inputMode="decimal"
                             placeholder="0.00"
                             placeholderTextColor={colors.gray300}
                             style={styles.amountInput}
                             testID="amount-display"
+                            autoFocus
+                            blurOnSubmit={false}
+                            onSubmitEditing={() => descriptionInputRef.current?.focus()}
+                            inputAccessoryViewID={
+                                Platform.OS === 'ios' ? AMOUNT_ACCESSORY_ID : undefined
+                            }
                         />
                     </Animated.View>
+                    {Platform.OS === 'ios' ? (
+                        <InputAccessoryView nativeID={AMOUNT_ACCESSORY_ID}>
+                            <View style={styles.keyboardAccessory}>
+                                <TouchableOpacity
+                                    onPress={() => descriptionInputRef.current?.focus()}
+                                    style={styles.keyboardAccessoryButton}
+                                    testID="amount-accessory-next"
+                                >
+                                    <Text style={styles.keyboardAccessoryText}>
+                                        {t('common.next')}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </InputAccessoryView>
+                    ) : null}
                     <Animated.View
                         style={{
                             alignItems: 'center',
@@ -758,6 +815,7 @@ export function AddExpenseScreen() {
                         }}
                     >
                         <TextInput
+                            ref={descriptionInputRef}
                             value={description}
                             onChangeText={setDescription}
                             placeholder={t('expenses.v2.descriptionPlaceholder')}
@@ -1030,6 +1088,32 @@ const styles = StyleSheet.create({
         height: 2,
         borderRadius: 9999,
         backgroundColor: colors.primaryLight,
+    },
+    // Transparent bar so only the rounded white "bubble" floats above the
+    // keyboard, matching iOS's native number-pad return button look.
+    keyboardAccessory: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        backgroundColor: 'transparent',
+        paddingHorizontal: 12,
+        paddingBottom: 6,
+    },
+    keyboardAccessoryButton: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 18,
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    keyboardAccessoryText: {
+        fontSize: 17,
+        fontWeight: '500',
+        color: colors.text.primary,
+        textAlign: 'center',
     },
     bottomSaveRow: {
         alignItems: 'center',

@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useQueryClient } from '@tanstack/react-query';
+import { onlineManager, useQueryClient } from '@tanstack/react-query';
 import {
     ActivityEvent,
     ExpenseWithDelta,
@@ -49,6 +49,7 @@ import { ActivityItemSkeleton } from '../../components/ActivityItemSkeleton';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { platformAlert } from '../../lib/platformAlert';
+import { showAppToast } from '../../lib/appToast';
 import { removeActivityEvent } from '../../services/activityEvents.service';
 import {
     ActivityFiltersSheet,
@@ -128,6 +129,59 @@ export function ActivityFeedScreen() {
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
 
+    // Offline-safe actor directory. The groups query is persisted, so its
+    // members (id + name + avatar + isActive) are available with no network.
+    // This lets the feed resolve who performed each action even offline —
+    // without it, every actor falls back to an unresolved profile and the row
+    // mislabels real people. Network-fetched profiles (profileMap) layer on
+    // top for ids not in any cached roster (e.g. former members).
+    const memberDirectory = useMemo<Record<string, GroupMemberLite>>(() => {
+        const map: Record<string, GroupMemberLite> = {};
+        for (const g of groups) {
+            for (const m of g.members) map[m.userId] = m;
+        }
+        if (currentUser) {
+            map[currentUser.id] = {
+                userId: currentUser.id,
+                displayName: currentUser.name,
+                avatarUrl: currentUser.avatarUrl,
+                isActive: true,
+            };
+        }
+        return map;
+    }, [groups, currentUser?.id, currentUser?.name, currentUser?.avatarUrl]);
+
+    // Groups the user can currently open. fetchGroups only returns groups with
+    // an active membership in an active group, so a groupId missing here means
+    // the group was deleted or the user was removed. Archived groups stay in
+    // the list, so they aren't falsely treated as gone.
+    const knownGroupIds = useMemo(() => new Set(groups.map(g => g.id)), [groups]);
+    // Only trust the set once the query has resolved (data may come from the
+    // persisted cache, even offline). Until then, fall back to navigating.
+    const groupsLoaded = groupsQuery.data !== undefined;
+
+    // The activity referenced something that's gone or that the user can no
+    // longer access. Offline takes precedence: when we couldn't reach the
+    // server we say so rather than wrongly claiming the data is gone.
+    const showUnavailableToast = useCallback(() => {
+        showAppToast({
+            type: 'info',
+            titleKey: 'activity.unavailableTitle',
+            messageKey: 'activity.unavailableMessage',
+        });
+    }, []);
+    const showOpenFailedToast = useCallback(() => {
+        if (onlineManager.isOnline()) {
+            showUnavailableToast();
+        } else {
+            showAppToast({
+                type: 'error',
+                titleKey: 'common.error',
+                messageKey: 'common.networkError',
+            });
+        }
+    }, [showUnavailableToast]);
+
     const {
         data,
         isLoading,
@@ -174,12 +228,18 @@ export function ActivityFeedScreen() {
             if (typeof md.new_member_user_id === 'string') ids.add(md.new_member_user_id);
             if (typeof md.deleted_by === 'string') ids.add(md.deleted_by);
         }
-        const missing = [...ids].filter(id => !profileMap[id]);
+        const missing = [...ids].filter(id => !profileMap[id] && !memberDirectory[id]);
         if (missing.length === 0) return;
         void fetchProfilesByUserIds(missing).then(extra => {
             setProfileMap(prev => ({ ...prev, ...extra }));
         });
-    }, [activities, profileMap]);
+    }, [activities, profileMap, memberDirectory]);
+
+    // Cached roster first, authoritative network profiles override.
+    const resolvedProfiles = useMemo<Record<string, GroupMemberLite>>(
+        () => ({ ...memberDirectory, ...profileMap }),
+        [memberDirectory, profileMap],
+    );
 
     const handleRefresh = useCallback(async () => {
         canLoadMoreRef.current = false;
@@ -374,6 +434,7 @@ export function ActivityFeedScreen() {
             const expense = await getExpenseWithSplitsById(event.refId);
             if (!expense) {
                 setDetailItem(null);
+                showOpenFailedToast();
                 return;
             }
             const decorated = decorateExpense(expense, currentUser?.id ?? '');
@@ -391,7 +452,7 @@ export function ActivityFeedScreen() {
                 }
             }
         },
-        [currentUser?.id, profileMap, seedMemberMapFromGroup, t],
+        [currentUser?.id, profileMap, seedMemberMapFromGroup, showOpenFailedToast, t],
     );
 
     const openSettlementDetail = useCallback(
@@ -435,6 +496,7 @@ export function ActivityFeedScreen() {
             const settlement = await getSettlementById(event.refId);
             if (!settlement) {
                 setDetailItem(null);
+                showOpenFailedToast();
                 return;
             }
             setDetailItem({ kind: 'settlement', settlement });
@@ -451,7 +513,7 @@ export function ActivityFeedScreen() {
                 }
             }
         },
-        [currentUser?.id, profileMap, seedMemberMapFromGroup, t],
+        [currentUser?.id, profileMap, seedMemberMapFromGroup, showOpenFailedToast, t],
     );
 
     const handleRemoveFromActivity = useCallback(() => {
@@ -485,6 +547,13 @@ export function ActivityFeedScreen() {
                 navigation.navigate('Profile', { screen: 'Friends' });
                 return;
             }
+            // The group this activity lives in was deleted or the user was
+            // removed from it — there's nothing to open. Covers expense,
+            // settlement, message and group-navigation events alike.
+            if (event.groupId && groupsLoaded && !knownGroupIds.has(event.groupId)) {
+                showUnavailableToast();
+                return;
+            }
             if (event.kind === 'expense_added') {
                 void openExpenseDetail(event);
                 return;
@@ -493,7 +562,21 @@ export function ActivityFeedScreen() {
                 void openSettlementDetail(event);
                 return;
             }
-            // group_added / group_member_joined / message_posted → navigate to group
+            // message_posted → navigate to group and highlight the message row,
+            // matching the expense/settlement focus behavior. refId is the
+            // message id (activity_events.ref_id = messages.id).
+            if (event.kind === 'message_posted' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: {
+                        groupId: event.groupId,
+                        focusFeedItem: { kind: 'message', id: event.refId },
+                    },
+                    merge: true,
+                });
+                return;
+            }
+            // group_added / group_member_joined → navigate to group
             if (event.groupId) {
                 navigation.navigate('Groups', {
                     screen: 'GroupDetail',
@@ -501,7 +584,14 @@ export function ActivityFeedScreen() {
                 });
             }
         },
-        [navigation, openExpenseDetail, openSettlementDetail],
+        [
+            navigation,
+            openExpenseDetail,
+            openSettlementDetail,
+            groupsLoaded,
+            knownGroupIds,
+            showUnavailableToast,
+        ],
     );
 
     const handleDetailEdit = useCallback(() => {
@@ -555,12 +645,26 @@ export function ActivityFeedScreen() {
         ]);
     }, [detailItem, refetch, t]);
 
+    // Current user as a member profile — the avatar for self-actions
+    // (invite-link self-join / self-initiated leave) that store no actor.
+    const selfProfile = useMemo<GroupMemberLite | undefined>(
+        () => (currentUser
+            ? {
+                userId: currentUser.id,
+                displayName: currentUser.name,
+                avatarUrl: currentUser.avatarUrl,
+                isActive: true,
+            }
+            : undefined),
+        [currentUser?.id, currentUser?.name, currentUser?.avatarUrl],
+    );
+
     const renderActivity = useCallback(
         ({ item }: { item: FeedListItem }) => {
             if (isDivider(item)) {
                 return <ActivityFeedDivider />;
             }
-            const actor = item.actorUserId ? profileMap[item.actorUserId] : undefined;
+            const actor = item.actorUserId ? resolvedProfiles[item.actorUserId] : undefined;
             const md = (item.metadata ?? {}) as Record<string, unknown>;
             let counterpart: GroupMemberLite | undefined;
             if (item.kind === 'settlement_added') {
@@ -569,26 +673,32 @@ export function ActivityFeedScreen() {
                     : typeof md.to_user_id === 'string'
                     ? md.to_user_id
                     : undefined;
-                if (otherId) counterpart = profileMap[otherId];
+                if (otherId) counterpart = resolvedProfiles[otherId];
             }
             const newMemberId = typeof md.new_member_user_id === 'string'
                 ? md.new_member_user_id
                 : undefined;
-            const newMember = newMemberId ? profileMap[newMemberId] : undefined;
-            const groupName = item.groupId ? groupNameById[item.groupId] : undefined;
+            const newMember = newMemberId ? resolvedProfiles[newMemberId] : undefined;
+            // A removed member no longer has the group in their cache (and RLS
+            // blocks re-reading it), so fall back to the name snapshotted on the
+            // event metadata by the membership trigger.
+            const groupName =
+                (item.groupId ? groupNameById[item.groupId] : undefined) ??
+                (typeof md.group_name === 'string' ? md.group_name : undefined);
             return (
                 <ActivityItem
                     event={item}
                     actor={actor}
                     counterpart={counterpart}
                     newMember={newMember}
+                    selfProfile={selfProfile}
                     groupName={groupName}
                     currentUserId={currentUser?.id ?? ''}
                     onPress={handleActivityPress}
                 />
             );
         },
-        [handleActivityPress, groupNameById, profileMap, currentUser?.id],
+        [handleActivityPress, groupNameById, resolvedProfiles, currentUser?.id, selfProfile],
     );
 
     const keyExtractor = useCallback(

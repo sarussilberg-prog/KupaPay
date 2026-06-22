@@ -1,8 +1,9 @@
-import { assertProfileActiveWithTimeout, isAuthSessionAllowed } from '../../lib/auth';
+import { assertProfileActiveWithTimeout, getCurrentUserId, isAuthSessionAllowed } from '../../lib/auth';
 
 const mockMaybeSingle = jest.fn();
 const mockRpc = jest.fn();
 const mockGetUser = jest.fn();
+const mockGetSession = jest.fn();
 const mockClearStaleAuthSession = jest.fn().mockResolvedValue(undefined);
 const mockSetSession = jest.fn();
 
@@ -20,6 +21,7 @@ jest.mock('../../lib/supabase', () => ({
     supabase: {
         auth: {
             getUser: (...args: unknown[]) => mockGetUser(...args),
+            getSession: (...args: unknown[]) => mockGetSession(...args),
         },
         rpc: (...args: unknown[]) => mockRpc(...args),
         from: jest.fn(() => ({
@@ -29,6 +31,33 @@ jest.mock('../../lib/supabase', () => ({
         })),
     },
 }));
+
+describe('getCurrentUserId', () => {
+    beforeEach(() => {
+        mockGetSession.mockReset();
+        mockGetUser.mockReset();
+    });
+
+    it('returns the user id from the local session without a network getUser call', async () => {
+        mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
+        await expect(getCurrentUserId()).resolves.toBe('u1');
+        expect(mockGetUser).not.toHaveBeenCalled();
+    });
+
+    it('returns the cached session id even when offline (a network getUser would resolve null)', async () => {
+        // Regression: getUser() is a network round-trip that returns null in
+        // airplane mode. That null made fetchSimplifiedInputs return EMPTY and
+        // every group fabricate a false "Settled". The id must come from the
+        // locally-stored session so it survives going offline.
+        mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
+        await expect(getCurrentUserId()).resolves.toBe('u1');
+    });
+
+    it('returns null when there is no stored session', async () => {
+        mockGetSession.mockResolvedValue({ data: { session: null }, error: null });
+        await expect(getCurrentUserId()).resolves.toBeNull();
+    });
+});
 
 describe('assertProfileActiveWithTimeout', () => {
     beforeEach(() => {

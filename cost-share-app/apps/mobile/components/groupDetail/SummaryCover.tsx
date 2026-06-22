@@ -5,8 +5,9 @@
  * overlaid on the cover.
  */
 
-import React from 'react';
-import { View, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { ImageBackground } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { Group, GroupMemberLite } from '@cost-share/shared';
@@ -43,6 +44,12 @@ export function SummaryCover({
         defaultValue: group.groupType,
     });
     const totalHeight = COVER_BODY_HEIGHT + topInset;
+
+    // Retry a failed cover load a couple of times, then fall back to the type
+    // gradient so a broken/unreachable image never leaves a blank cover.
+    const [attempt, setAttempt] = useState(0);
+    useEffect(() => setAttempt(0), [group.imageUrl]);
+    const showCoverImage = Boolean(group.imageUrl) && attempt <= 2;
 
     const buttons = (
         <View
@@ -149,11 +156,15 @@ export function SummaryCover({
         </>
     );
 
-    if (group.imageUrl) {
+    if (showCoverImage && group.imageUrl) {
         return (
             <ImageBackground
-                source={{ uri: group.imageUrl }}
-                resizeMode="cover"
+                recyclingKey={`${group.imageUrl}#${attempt}`}
+                source={group.imageUrl}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={0}
+                onError={() => setAttempt((a) => a + 1)}
                 style={[styles.cover, { height: totalHeight }]}
                 testID="summary-cover-image"
             >

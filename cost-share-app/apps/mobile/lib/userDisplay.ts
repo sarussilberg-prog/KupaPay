@@ -20,7 +20,12 @@ export function isDeleted(user: UserLike): boolean {
 }
 
 export function getDisplayName(user: UserLike, t: TFunction): string {
-    if (!user || user.isActive === false) return t('common.deletedUser');
+    // "Deleted user" is reserved for a POSITIVE deletion signal (isActive===false).
+    // A missing profile only means we could not resolve who this is (offline, or a
+    // former member outside the loaded roster) — label that neutrally, never as
+    // "deleted", so we don't fabricate a deletion that didn't happen.
+    if (user && user.isActive === false) return t('common.deletedUser');
+    if (!user) return t('common.groupMember');
     return user.name?.trim() || t('common.unknownUser');
 }
 
@@ -31,15 +36,19 @@ export function getAvatarUrl(user: UserLike): string | null {
 
 /**
  * Resolve a debt counterparty's display name in the settle-up / balances list.
- * - current user            → t('settleUp.you')
- * - known active member      → their roster name
- * - id absent from the roster → t('common.deletedUser')
+ * - current user                  → t('settleUp.you')
+ * - resolved party (active/deleted) → their name from `nameById`
+ * - id we could not resolve at all  → t('common.formerMember')
  *
  * The canonical simplifier emits a net for every user with financial footprint,
- * including members who left or deleted their account. Those ids are NOT in the
- * active-member roster, so the only correct label for them is "deleted user" —
- * never the generic "unknown", which would hide that a real debt is owed
- * to/from someone no longer in the group.
+ * including members who left or deleted their account. The caller is responsible
+ * for resolving those ids — including off-roster ones — into `nameById` via
+ * `getDisplayNameForMember`, so a genuinely deleted account already arrives as
+ * "Deleted user" here. An id STILL absent from `nameById` means we simply could
+ * not resolve who it is (e.g. offline, or a profile we never fetched). Labelling
+ * that "deleted user" would fabricate a deletion we cannot prove, so we use the
+ * neutral "former member" — which still conveys "someone no longer in the group"
+ * without hiding the debt or lying about why they're gone.
  */
 export function resolveDebtPartyName(
     userId: string,
@@ -48,7 +57,7 @@ export function resolveDebtPartyName(
     t: TFunction,
 ): string {
     if (userId === currentUserId) return t('settleUp.you');
-    return nameById[userId] ?? t('common.deletedUser');
+    return nameById[userId] ?? t('common.formerMember');
 }
 
 /** Returns contact email only for active users — never expose PII after deletion. */
@@ -72,7 +81,7 @@ export interface MemberLike {
 }
 
 export function getDisplayNameForMember(m: MemberLike | undefined | null, t: TFunction): string {
-    if (!m) return t('common.deletedUser');
+    if (!m) return t('common.groupMember');
     return getDisplayName({ id: m.userId, name: m.displayName, avatarUrl: m.avatarUrl, isActive: m.isActive }, t);
 }
 
@@ -93,7 +102,7 @@ export interface FriendLike {
 }
 
 export function getDisplayNameForFriend(f: FriendLike | undefined | null, t: TFunction): string {
-    if (!f) return t('common.deletedUser');
+    if (!f) return t('common.groupMember');
     return getDisplayName({ id: f.userId, name: f.name ?? null, avatarUrl: f.avatarUrl ?? null, isActive: f.isActive }, t);
 }
 

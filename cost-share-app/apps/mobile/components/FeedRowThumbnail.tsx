@@ -1,10 +1,13 @@
 /**
  * FeedRowThumbnail — 44×44 thumbnail for activity feed rows.
- * Displays an image or icon with optional background tint.
+ * Displays an image (cached + offline via expo-image) or an icon fallback.
+ * On image load failure we retry a couple of times, then show the icon so a
+ * broken/unreachable receipt URL never leaves a blank tile.
  */
 
-import React from 'react';
-import { View, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Image } from 'expo-image';
 import { AppIcon, AppIconName } from './AppIcon';
 import { colors } from '../theme';
 
@@ -16,6 +19,8 @@ interface FeedRowThumbnailProps {
     testID?: string;
 }
 
+const MAX_RETRIES = 2;
+
 export function FeedRowThumbnail({
     imageUrl,
     iconName,
@@ -23,10 +28,17 @@ export function FeedRowThumbnail({
     iconBgColor = colors.primaryExtraLight,
     testID,
 }: FeedRowThumbnailProps) {
-    if (imageUrl) {
+    const [attempt, setAttempt] = useState(0);
+    useEffect(() => setAttempt(0), [imageUrl]);
+
+    if (imageUrl && attempt <= MAX_RETRIES) {
         return (
             <Image
-                source={{ uri: imageUrl }}
+                recyclingKey={`${imageUrl}#${attempt}`}
+                source={imageUrl}
+                cachePolicy="memory-disk"
+                transition={0}
+                onError={() => setAttempt((a) => a + 1)}
                 style={{
                     width: 44,
                     height: 44,
@@ -35,7 +47,7 @@ export function FeedRowThumbnail({
                     // slate-100 / design "border.soft"; no matching theme token exists
                     borderColor: '#F1F5F9',
                 }}
-                resizeMode="cover"
+                contentFit="cover"
                 testID={testID ? `${testID}-image` : undefined}
             />
         );
