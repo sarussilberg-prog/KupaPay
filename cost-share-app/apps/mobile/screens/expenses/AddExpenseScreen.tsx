@@ -778,6 +778,7 @@ export function AddExpenseScreen() {
                             placeholderTextColor={colors.gray300}
                             style={styles.amountInput}
                             testID="amount-display"
+                            autoFocus
                             returnKeyType="next"
                             blurOnSubmit={false}
                             onSubmitEditing={() => descriptionInputRef.current?.focus()}

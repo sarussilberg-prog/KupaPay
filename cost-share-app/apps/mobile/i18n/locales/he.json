@@ -325,6 +325,7 @@
             "exportOption": "ייצוא לקובץ אקסל",
             "exportDescription": "שמור את פעילות הקופה והיתרות כקובץ CSV (פתיחה באקסל / Google Sheets)",
             "exportTitle": "שיתוף דוח קופה",
+            "exportDownloaded": "הדוח הורד",
             "exportError": "לא ניתן ליצור את הקובץ",
             "exporting": "מכין ייצוא…",
             "exportedAt": "יוצא בתאריך",
@@ -523,7 +524,9 @@
                 "amountUnder": "חסר {{currency}} {{value}} מתוך {{currency}} {{total}}",
                 "amountOver": "{{currency}} {{value}} מעל {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד"
+            "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד",
+            "splitMetaPercent": "{{selected}} מתוך {{total}} · {{allocated}}% מוקצים",
+            "splitMetaExact": "{{selected}} מתוך {{total}} · {{currency}} {{allocated}} מוקצים"
         }
     },
     "balances": {

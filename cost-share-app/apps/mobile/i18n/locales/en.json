@@ -325,6 +325,7 @@
             "exportOption": "Export to Excel / CSV",
             "exportDescription": "Save group activity and balances as a CSV file (opens in Excel / Google Sheets)",
             "exportTitle": "Share group report",
+            "exportDownloaded": "Report downloaded",
             "exportError": "Couldn't generate the file",
             "exporting": "Preparing export…",
             "exportedAt": "Exported",

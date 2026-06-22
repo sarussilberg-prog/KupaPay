@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import type { Translations } from '@/lib/i18n';
+import { LOGIN_HREF } from '@/lib/appLinks';
 
 // TODO: Replace with real App Store URL when app is live on the App Store
 const APP_STORE_URL = 'https://apps.apple.com/app/kupapay';
@@ -57,12 +57,12 @@ export default function HeroSection({ t }: Props) {
           </a>
 
           {/* Web sign-in */}
-          <Link
-            href="/login"
+          <a
+            href={LOGIN_HREF}
             className="px-7 py-3.5 border-2 border-blue-500 text-blue-500 rounded-full font-semibold text-base hover:bg-blue-50 transition-colors"
           >
             {t.hero.ctaSignIn}
-          </Link>
+          </a>
         </div>
       </div>
     </section>
