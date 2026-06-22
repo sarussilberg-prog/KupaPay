@@ -320,6 +320,7 @@
             "exportOption": "ייצוא לקובץ אקסל",
             "exportDescription": "שמור את פעילות הקופה והיתרות כקובץ CSV (פתיחה באקסל / Google Sheets)",
             "exportTitle": "שיתוף דוח קופה",
+            "exportDownloaded": "הדוח הורד",
             "exportError": "לא ניתן ליצור את הקובץ",
             "exporting": "מכין ייצוא…",
             "exportedAt": "יוצא בתאריך",

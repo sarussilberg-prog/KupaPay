@@ -14,6 +14,7 @@ import {
     Pressable,
     TextInput,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -262,6 +263,7 @@ export function GroupDetailScreen() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
+    const [pendingExport, setPendingExport] = useState(false);
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -541,9 +543,8 @@ export function GroupDetailScreen() {
             },
         ]);
     }, [groupId, navigation, t]);
-    const handleExport = useCallback(async () => {
-        setMenuOpen(false);
-        if (!displayGroup || exporting) return;
+    const runExport = useCallback(async () => {
+        if (!displayGroup) return;
         setExporting(true);
         showInfoToast('groups.share.exporting');
         try {
@@ -555,7 +556,19 @@ export function GroupDetailScreen() {
         } finally {
             setExporting(false);
         }
-    }, [displayGroup, exporting, feed, memberLites, pairwiseDebts, t]);
+    }, [displayGroup, feed, memberLites, pairwiseDebts]);
+    const handleExport = useCallback(() => {
+        if (!displayGroup || exporting) return;
+        setMenuOpen(false);
+        // iOS can't present the native share sheet while the menu Modal is
+        // still dismissing — the sheet silently never appears. Defer until the
+        // Modal's onDismiss fires. Android shares via Intent, so no race.
+        if (Platform.OS === 'ios') {
+            setPendingExport(true);
+        } else {
+            void runExport();
+        }
+    }, [displayGroup, exporting, runExport]);
     const handleSettleUp = useCallback(
         () => navigation.navigate('SettleUpList', { groupId }),
         [navigation, groupId],
@@ -1014,6 +1027,12 @@ export function GroupDetailScreen() {
                 transparent
                 animationType="fade"
                 onRequestClose={() => setMenuOpen(false)}
+                onDismiss={() => {
+                    if (pendingExport) {
+                        setPendingExport(false);
+                        void runExport();
+                    }
+                }}
             >
                 <Pressable className="flex-1" onPress={() => setMenuOpen(false)}>
                     <View
