@@ -38,6 +38,11 @@ const translations = {
           description: 'צור קבוצות לטיולים, שכירות, ארוחות — כמה שתרצה',
         },
         {
+          icon: '✈️',
+          title: 'עובד גם אופליין',
+          description: 'אפשר להוסיף ולצפות בהוצאות גם בלי אינטרנט — הכול מסתנכרן אוטומטית כשחוזרים לרשת',
+        },
+        {
           icon: '🔒',
           title: 'פרטיות ואבטחה',
           description: 'הנתונים שלך מוגנים ומאובטחים',
@@ -125,6 +130,11 @@ const translations = {
           icon: '👥',
           title: 'Flexible groups',
           description: 'Create groups for trips, rent, dinners — as many as you like',
+        },
+        {
+          icon: '✈️',
+          title: 'Works offline',
+          description: 'Add and view expenses even without internet — everything syncs automatically when you reconnect',
         },
         {
           icon: '🔒',
