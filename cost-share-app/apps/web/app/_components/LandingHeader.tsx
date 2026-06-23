@@ -33,14 +33,6 @@ export default async function LandingHeader() {
               {t.locale.toggle}
             </button>
           </form>
-
-          {/* Enter the app (same domain — proxied to the web app) */}
-          <a
-            href="/login"
-            className="text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition-colors"
-          >
-            {t.header.signIn}
-          </a>
         </div>
       </div>
     </header>
