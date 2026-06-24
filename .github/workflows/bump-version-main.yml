@@ -65,28 +65,28 @@ jobs:
           BUMP_BRANCH: ${{ steps.version.outputs.branch }}
         run: |
           cat > /tmp/pr-body.md << EOF
-## 🔖 Version Bump
+          ## 🔖 Version Bump
 
-| | |
-|---|---|
-| **Previous** | \`${PREV}\` |
-| **New** | \`${NEXT}\` |
-| **Bump type** | **Minor** — merge to \`main\` |
-| **File** | \`cost-share-app/packages/shared/version.json\` |
+          | | |
+          |---|---|
+          | **Previous** | \`${PREV}\` |
+          | **New** | \`${NEXT}\` |
+          | **Bump type** | **Minor** — merge to \`main\` |
+          | **File** | \`cost-share-app/packages/shared/version.json\` |
 
-### What happened
-A merge reached \`main\`, triggering an automated **minor** version increment.
-The middle number increases with every production release; the patch resets to \`0\`.
+          ### What happened
+          A merge reached \`main\`, triggering an automated **minor** version increment.
+          The middle number increases with every production release; the patch resets to \`0\`.
 
-\`\`\`
-${PREV}  →  ${NEXT}
-   ^           ^
-minor++     patch reset
-\`\`\`
+          \`\`\`
+          ${PREV}  →  ${NEXT}
+             ^           ^
+          minor++     patch reset
+          \`\`\`
 
----
-_🤖 Automated by [bump-version-main](../../actions/workflows/bump-version-main.yml)_
-EOF
+          ---
+          _🤖 Automated by [bump-version-main](../../actions/workflows/bump-version-main.yml)_
+          EOF
 
           PR_URL=$(gh pr create \
             --base main \
