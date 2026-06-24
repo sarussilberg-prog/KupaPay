@@ -4,7 +4,7 @@ on:
   push:
     branches: [dev]
     paths-ignore:
-      - 'cost-share-app/apps/mobile/version.json'
+      - 'cost-share-app/packages/shared/version.json'
 
 concurrency:
   group: version-bump-dev
@@ -29,7 +29,7 @@ jobs:
       - name: Compute new version
         id: version
         run: |
-          VERSION_FILE="cost-share-app/apps/mobile/version.json"
+          VERSION_FILE="cost-share-app/packages/shared/version.json"
           current=$(jq -r '.version' "$VERSION_FILE")
           IFS='.' read -r major minor patch <<< "$current"
           new_version="${major}.${minor}.$((patch + 1))"
@@ -39,7 +39,7 @@ jobs:
 
       - name: Commit version bump on new branch
         run: |
-          VERSION_FILE="cost-share-app/apps/mobile/version.json"
+          VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "${{ steps.version.outputs.branch }}"
@@ -64,7 +64,7 @@ jobs:
 | **Previous** | \`${PREV}\` |
 | **New** | \`${NEXT}\` |
 | **Bump type** | **Patch** — push to \`dev\` |
-| **File** | \`cost-share-app/apps/mobile/version.json\` |
+| **File** | \`cost-share-app/packages/shared/version.json\` |
 
 ### What happened
 A push reached \`dev\`, triggering an automated **patch** version increment.
