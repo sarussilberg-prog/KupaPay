@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - 'cost-share-app/apps/mobile/version.json'
+      - 'cost-share-app/packages/shared/version.json'
 
 concurrency:
   group: version-bump-main
@@ -29,7 +29,7 @@ jobs:
       - name: Compute new version
         id: version
         run: |
-          VERSION_FILE="cost-share-app/apps/mobile/version.json"
+          VERSION_FILE="cost-share-app/packages/shared/version.json"
 
           # Read the PREVIOUS main version (before the squash from dev overwrote it).
           # HEAD~1 is main's last commit before this push, which holds the real minor baseline.
@@ -47,7 +47,7 @@ jobs:
 
       - name: Commit version bump on new branch
         run: |
-          VERSION_FILE="cost-share-app/apps/mobile/version.json"
+          VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "${{ steps.version.outputs.branch }}"
@@ -72,7 +72,7 @@ jobs:
 | **Previous** | \`${PREV}\` |
 | **New** | \`${NEXT}\` |
 | **Bump type** | **Minor** — merge to \`main\` |
-| **File** | \`cost-share-app/apps/mobile/version.json\` |
+| **File** | \`cost-share-app/packages/shared/version.json\` |
 
 ### What happened
 A merge reached \`main\`, triggering an automated **minor** version increment.

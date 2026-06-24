@@ -5,7 +5,7 @@ import Markdown from 'react-native-markdown-display';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { useLegalDocument } from '../../hooks/queries/useLegalDocument';
-import type { LegalSlug } from '@cost-share/shared';
+import { APP_VERSION, type LegalSlug } from '@cost-share/shared';
 
 interface Props {
     visible: boolean;
@@ -69,7 +69,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
                                     className="text-xs text-gray-500 mt-1"
                                     style={{ textAlign: titleAlign, writingDirection: isRtl ? 'rtl' : 'ltr' }}
                                 >
-                                    {t('legal.lastUpdated', { date: formattedDate })} · {t('legal.versionLabel', { version: query.data.version })}
+                                    {t('legal.lastUpdated', { date: formattedDate })} · {t('legal.appVersion', { version: APP_VERSION })}
                                 </Text>
                             )}
                         </View>

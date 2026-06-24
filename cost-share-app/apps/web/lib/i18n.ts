@@ -94,6 +94,7 @@ const translations = {
       notFound: 'המסמך לא נמצא.',
       backHome: 'חזרה לעמוד הבית',
       effectiveDate: 'תוקף מ-',
+      appVersion: 'גרסת אפליקציה ',
     },
   },
   en: {
@@ -188,6 +189,7 @@ const translations = {
       notFound: 'Document not found.',
       backHome: 'Back to home',
       effectiveDate: 'Effective from ',
+      appVersion: 'App version ',
     },
   },
 } as const;
@@ -209,7 +211,7 @@ export type Translations = {
     items: ReadonlyArray<{ question: string; answer: string }>;
   };
   footer: { privacy: string; terms: string; contact: string; copyright: string };
-  legal: { notFound: string; backHome: string; effectiveDate: string };
+  legal: { notFound: string; backHome: string; effectiveDate: string; appVersion: string };
 };
 
 export function getTranslations(locale: Language): Translations {

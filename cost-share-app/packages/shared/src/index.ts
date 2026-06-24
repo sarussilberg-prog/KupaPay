@@ -11,3 +11,4 @@ export * from './utils';
 export * from './mappers';
 export * from './calculations';
 export * from './notifications';
+export * from './version';
