@@ -27,7 +27,6 @@ import { prefetchAddExpensePrerequisitesForGroup } from '../../hooks/queries/pre
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { useNetworkStatus } from '../../lib/networkStatus';
 import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
-import { AppGateSkeleton } from '../../components/skeletons/AppGateSkeleton';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
 import { CreateGroupFabAnchor, createGroupFabScrollPadding } from '../../components/groups/CreateGroupFabAnchor';
@@ -69,11 +68,16 @@ export function GroupsListScreen() {
     const listBottomPadding = createGroupFabScrollPadding() + FAB_LIST_GAP;
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
-    // Suppress the empty state while any fetch is in flight and we have no
-    // data yet — covers the cold-start case where a persisted-empty cache
-    // briefly resolves with `isLoading=false` while the background refetch
-    // is still loading the user's groups.
-    const isInitialLoading = groupsQuery.isFetching && groups.length === 0;
+    // "Initial loading" = we have NO cached data yet AND a fetch is actively in
+    // flight (not offline-paused). The gate (AuthenticatedAppGate) seeds the
+    // groups cache before the navigator mounts, so in practice data is already
+    // present and this is false. Keying on `data === undefined` (not
+    // `groups.length === 0`) means a seeded EMPTY list shows the empty state
+    // rather than a loading screen — and this screen never renders the
+    // full-screen boot splash, which would leak the tab bar (it lives inside the
+    // bottom-tab navigator).
+    const isInitialLoading =
+        groupsQuery.data === undefined && groupsQuery.fetchStatus === 'fetching';
 
     const { data: simplified } = useSimplifiedDebts();
     const balanceNetsByGroup = useMemo(() => {
@@ -259,7 +263,12 @@ export function GroupsListScreen() {
     }, [archivedRows, archivedExpanded, renderGroupRow, t]);
 
     if (isInitialLoading) {
-        return <AppGateSkeleton />;
+        // Render nothing — never the full-screen boot splash. The gate owns that
+        // splash (full-screen, above the tabs); showing it here would put the icon
+        // behind the bottom bar. With the gate seeding the cache this is reached
+        // only in rare degraded-network edges, where blank-until-data beats both a
+        // tab-bar-leaking splash and a premature empty-state flash.
+        return null;
     }
 
     return (

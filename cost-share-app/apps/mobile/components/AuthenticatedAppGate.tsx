@@ -9,10 +9,7 @@ import {
     hasCompletedPostLoginOnboarding,
     markPostLoginOnboardingComplete,
 } from '../lib/onboardingStorage';
-import {
-    resolveAuthenticatedGateTarget,
-    shouldMarkPostOnboardingAfterGroups,
-} from '../lib/authenticatedGateResolve';
+import { runAuthenticatedGate } from '../lib/authenticatedGateResolve';
 import { useAuthenticatedInviteRedemption } from '../hooks/useAuthenticatedInviteRedemption';
 import { fetchGroups } from '../services/groups.service';
 import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
@@ -63,48 +60,21 @@ export function AuthenticatedAppGate() {
     useAvatarPrefetcher();
 
     const resolveGate = useCallback(async () => {
-        const postOnboardingComplete = await hasCompletedPostLoginOnboarding();
-        if (postOnboardingComplete) {
-            setGate('main');
-            return;
-        }
-
-        // If we have ANY cached groups, the user is clearly past onboarding —
-        // no need to hit the network. This is the fast offline path.
-        const cachedGroups =
-            queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? [];
-        if (cachedGroups.length > 0) {
-            await markPostLoginOnboardingComplete();
-            setGate('main');
-            return;
-        }
-
-        // No cached groups + offline → fall through to the main app. The
-        // GroupsListScreen will show its empty state with a create CTA.
-        // Better UX than getting stuck on the skeleton, and the user can
-        // still browse the rest of the app from cache.
-        if (!onlineManager.isOnline()) {
-            setGate('main');
-            return;
-        }
-
-        // Online — try fetchGroups but never block on it. If Supabase hangs
-        // (poor connectivity, etc.) we still resolve the gate within the
-        // timeout instead of stranding the user.
-        let groupsCount = 0;
-        let fetchFailed = false;
-        try {
-            const groups = await withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS);
-            groupsCount = groups.length;
-        } catch {
-            fetchFailed = true;
-        }
-
-        const input = { postOnboardingComplete, groupsCount, fetchFailed };
-        if (shouldMarkPostOnboardingAfterGroups(input)) {
-            await markPostLoginOnboardingComplete();
-        }
-        setGate(resolveAuthenticatedGateTarget(input));
+        // Seeds the groups cache before mounting the navigator so GroupsListScreen
+        // never renders the full-screen boot splash inside the tabs (which would
+        // leave the bottom bar visible behind the loading icon). The online fetch
+        // is bounded by GATE_FETCH_TIMEOUT_MS so a hung Supabase call can't strand
+        // the user on the skeleton; on timeout we still resolve the gate.
+        const target = await runAuthenticatedGate<GroupWithMembers>({
+            hasCompletedPostLoginOnboarding,
+            markPostLoginOnboardingComplete,
+            getCachedGroupsCount: () =>
+                (queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? []).length,
+            isOnline: () => onlineManager.isOnline(),
+            fetchGroups: () => withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS),
+            seedGroups: (groups) => queryClient.setQueryData(queryKeys.groups, groups),
+        });
+        setGate(target);
     }, []);
 
     useEffect(() => {
