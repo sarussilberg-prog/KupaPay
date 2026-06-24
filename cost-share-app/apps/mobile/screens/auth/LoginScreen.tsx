@@ -31,7 +31,7 @@ import {
     consumeDeactivationNoticePending,
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
-import appVersion from '../../../../packages/shared/version.json';
+import { APP_VERSION } from '@cost-share/shared';
 
 export function LoginScreen() {
     const { t } = useTranslation();
@@ -209,7 +209,7 @@ export function LoginScreen() {
                         </>
                     )}
                     <Text className="text-[11px] text-gray-300 text-center mt-4">
-                        v{appVersion.version}
+                        v{APP_VERSION}
                     </Text>
                 </View>
             </SafeAreaView>
