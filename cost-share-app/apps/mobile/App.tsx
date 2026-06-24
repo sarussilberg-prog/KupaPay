@@ -270,7 +270,7 @@ function App() {
     const aasa = {
       applinks: {
         apps: [],
-        details: [{ appID: 'K3M6R85KA6.com.kupapay.mobile', paths: ['/i/*', '/g/*'] }],
+        details: [{ appID: 'HVW3H3DLRB.com.kupapay.mobile', paths: ['/i/*', '/g/*'] }],
       },
     };
     // Write raw JSON directly — this path must return JSON, not a React screen.
