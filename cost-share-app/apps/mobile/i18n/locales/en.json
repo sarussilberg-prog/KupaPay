@@ -949,7 +949,7 @@
         "retry": "Try again",
         "cachedNotice": "Showing saved version",
         "lastUpdated": "Updated: {{date}}",
-        "versionLabel": "v{{version}}",
+        "appVersion": "App version {{version}}",
         "understood": "I understand"
     },
     "friends": {
