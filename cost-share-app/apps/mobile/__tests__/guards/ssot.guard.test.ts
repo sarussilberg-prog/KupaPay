@@ -129,11 +129,16 @@ describe('App version — single source of truth', () => {
     }
   });
 
-  it('both bump workflows target the shared version.json', () => {
-    for (const wf of ['bump-version-dev.yml', 'bump-version-main.yml']) {
-      const text = read(resolve(REPO_ROOT, '.github/workflows', wf));
+  it('the version-bump automation targets the shared version.json (dev folded into ci.yml, main in its own workflow)', () => {
+    const ci = read(resolve(REPO_ROOT, '.github/workflows/ci.yml'));
+    const main = read(resolve(REPO_ROOT, '.github/workflows/bump-version-main.yml'));
+    for (const text of [ci, main]) {
       expect(text).toContain('cost-share-app/packages/shared/version.json');
       expect(text).not.toContain('cost-share-app/apps/mobile/version.json');
     }
+  });
+
+  it('the old push-triggered dev bump workflow is gone (folded into the ci.yml auto-merge job)', () => {
+    expect(existsSync(resolve(REPO_ROOT, '.github/workflows/bump-version-dev.yml'))).toBe(false);
   });
 });
