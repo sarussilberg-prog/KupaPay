@@ -3,9 +3,8 @@ import React, { useCallback, useState } from 'react';
 import { View, ScrollView, Linking, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import Constants from 'expo-constants';
 import * as StoreReview from 'expo-store-review';
-import { Language } from '@cost-share/shared';
+import { APP_VERSION, Language } from '@cost-share/shared';
 import { useAppStore } from '../../store';
 import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
@@ -29,7 +28,6 @@ import currencyCodes from 'currency-codes';
 import { getCurrencyDisplayName } from '../../lib/currencyDisplay';
 import { InviteLinkBlock } from '../../components/InviteLinkBlock';
 
-const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
 const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 

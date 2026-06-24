@@ -114,6 +114,15 @@ describe('App version — single source of truth', () => {
     expect(login).not.toContain('version.json');
   });
 
+  // Every in-app version display must read the SAME constant (APP_VERSION, from the
+  // JS bundle) so they can never disagree. Reading Constants.expoConfig.version (the
+  // native binary's frozen value) drifts from APP_VERSION under OTA/dev reloads.
+  it('the settings screen reads APP_VERSION, not the native Constants.expoConfig.version', () => {
+    const settings = read(resolve(MOBILE_DIR, 'screens/profile/SettingsScreen.tsx'));
+    expect(settings).toContain('APP_VERSION');
+    expect(settings).not.toMatch(/expoConfig\??\.version/);
+  });
+
   it('the legal sheet shows the app version, not the document version', () => {
     const sheet = read(resolve(MOBILE_DIR, 'components/settings/LegalDocumentSheet.tsx'));
     expect(sheet).toContain('legal.appVersion');
