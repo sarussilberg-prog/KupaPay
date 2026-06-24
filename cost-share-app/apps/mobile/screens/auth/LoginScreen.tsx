@@ -31,7 +31,7 @@ import {
     consumeDeactivationNoticePending,
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
-import appVersion from '../../version.json';
+import appVersion from '../../../../packages/shared/version.json';
 
 export function LoginScreen() {
     const { t } = useTranslation();
