@@ -74,7 +74,7 @@ const METHOD_TILES: ReadonlyArray<{ key: MethodKey; icon: AppIconName }> = [
     { key: 'paypal', icon: 'logo-paypal' },
 ];
 
-const DEFAULT_METHOD: MethodKey = 'credit_card';
+const DEFAULT_METHOD: MethodKey = 'cash';
 
 function normalizeMethodKey(method: PaymentMethod | undefined): MethodKey {
     if (method === 'cash' || method === 'credit_card' || method === 'paypal') {
@@ -86,9 +86,6 @@ function normalizeMethodKey(method: PaymentMethod | undefined): MethodKey {
 const formatAmountText = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : '');
 const formatShortDate = (d: Date, locale: string) =>
     d.toLocaleDateString(locale === 'he' ? 'he-IL' : locale, { month: 'short', day: 'numeric' });
-
-/** Space for the fixed bottom dock (date chip + record button). */
-const BOTTOM_DOCK_PADDING = 132;
 
 export function SettleUpSheet({
     visible,
@@ -265,10 +262,10 @@ export function SettleUpSheet({
             onSave={handleSubmit}
             saveDisabled={recordDisabled}
         >
-            <View className="flex-1">
+            <View style={{ flexShrink: 1 }}>
                 <ScrollView
-                    style={{ flex: 1 }}
-                    contentContainerStyle={{ paddingBottom: BOTTOM_DOCK_PADDING }}
+                    style={{ flexShrink: 1, flexGrow: 0 }}
+                    contentContainerStyle={{ paddingBottom: 8 }}
                     keyboardShouldPersistTaps="handled"
                     automaticallyAdjustKeyboardInsets
                     nestedScrollEnabled
@@ -648,7 +645,7 @@ function PaymentMethodSection({ selected, onSelect, isRtl }: PaymentMethodSectio
     const { t } = useTranslation();
 
     return (
-        <View className="px-4 pt-5 self-stretch">
+        <View className="px-4 pt-4 self-stretch">
             <SectionLabel isRtl={isRtl} title={t('settleUp.methodType')} />
             <MethodTiles selected={selected} onSelect={onSelect} t={t} isRtl={isRtl} />
         </View>
@@ -753,10 +750,8 @@ function SettleUpBottomDock({
 }: SettleUpBottomDockProps) {
     return (
         <View
-            className="absolute bottom-0 bg-white/95 border-t border-border-soft"
+            className="bg-white/95 border-t border-border-soft"
             style={{
-                left: 0,
-                right: 0,
                 paddingHorizontal: 16,
                 paddingTop: 10,
                 paddingBottom: 22,

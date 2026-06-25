@@ -352,9 +352,11 @@ function ExpenseDetailBody({
                                                   expense.amount - split.amount,
                                               ),
                                           })
-                                        : t('groups.expense.splitOwes', {
-                                              name: payerFirstName,
-                                          });
+                                        : expense.paidBy === currentUserId
+                                          ? t('groups.expense.splitOwesYou')
+                                          : t('groups.expense.splitOwes', {
+                                                name: payerFirstName,
+                                            });
                                     return (
                                         <View
                                             key={split.id}

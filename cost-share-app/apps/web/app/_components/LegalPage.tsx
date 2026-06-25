@@ -19,10 +19,12 @@ function createAnonClient() {
 
 interface Props {
   slug: LegalSlug;
+  // Explicit locale (e.g. from a `?lang=` deep link), takes precedence over cookie/header.
+  langOverride?: string;
 }
 
-export default async function LegalPage({ slug }: Props) {
-  const locale = await getLocale();
+export default async function LegalPage({ slug, langOverride }: Props) {
+  const locale = await getLocale(langOverride);
   const t = getTranslations(locale);
   const supabase = createAnonClient();
 

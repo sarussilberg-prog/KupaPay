@@ -99,6 +99,7 @@ export function SimplifiedDebtsSection({
             involved={involvedRow}
             fromName={resolveName(debt.fromUserId)}
             toName={resolveName(debt.toUserId)}
+            currentUserId={currentUserId}
             fromAvatar={avatarById[debt.fromUserId]}
             toAvatar={avatarById[debt.toUserId]}
             onPress={() => onSettle(debt)}

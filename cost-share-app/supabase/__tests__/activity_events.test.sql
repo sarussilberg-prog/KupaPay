@@ -83,6 +83,15 @@ BEGIN
         RAISE EXCEPTION 'Case 2 failed: expected 1 group_member_joined for Alice, got %', v_count;
     END IF;
 
+    -- Alice added Bob, so her join event must record her as the adder (drives the
+    -- client's "You added Bob" copy).
+    SELECT COUNT(*) INTO v_count FROM activity_events
+    WHERE group_id = v_group AND kind = 'group_member_joined' AND user_id = v_alice
+      AND metadata ->> 'added_by_user_id' = v_alice::text;
+    IF v_count <> 1 THEN
+        RAISE EXCEPTION 'Case 2 failed: group_member_joined missing added_by_user_id=Alice, got %', v_count;
+    END IF;
+
     -- ---- CASE 3: expense fan-out → 2 rows (Alice + Bob)
     INSERT INTO public.expenses (group_id, paid_by, amount, currency, description, expense_date, created_by, is_deleted)
     VALUES (v_group, v_alice, 30, 'USD', 'Lunch', CURRENT_DATE, v_alice, FALSE)

@@ -26,6 +26,7 @@ interface DebtRowProps {
     involved: boolean;
     fromName: string;
     toName: string;
+    currentUserId: string;
     fromAvatar?: string;
     toAvatar?: string;
     onPress: () => void;
@@ -36,12 +37,23 @@ export function DebtRow({
     involved,
     fromName,
     toName,
+    currentUserId,
     fromAvatar,
     toAvatar,
     onPress,
 }: DebtRowProps) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
+    const amountText = `${debt.currency} ${debt.amount.toFixed(2)}`;
+    // Use second-person, perspective-specific copy when the current user is a
+    // party — otherwise injecting the "you" label into the generic template
+    // yields ungrammatical Hebrew (e.g. "חייב לאת/ה" instead of "חייב לך").
+    const rowLabel =
+        debt.fromUserId === currentUserId
+            ? t('settleUp.rowYouOwe', { to: toName, amount: amountText })
+            : debt.toUserId === currentUserId
+              ? t('settleUp.rowOwesYou', { from: fromName, amount: amountText })
+              : t('settleUp.row', { from: fromName, to: toName, amount: amountText });
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -63,11 +75,7 @@ export function DebtRow({
                     className={`text-sm font-semibold ${involved ? 'text-gray-900' : 'text-gray-600'}`}
                     numberOfLines={1}
                 >
-                    {t('settleUp.row', {
-                        from: fromName,
-                        to: toName,
-                        amount: `${debt.currency} ${debt.amount.toFixed(2)}`,
-                    })}
+                    {rowLabel}
                 </Text>
                 {!involved && (
                     <Text className="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide">
