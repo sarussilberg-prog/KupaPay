@@ -134,11 +134,26 @@
             "findFriendsAfterCreate": "אחרי פתיחת הקופה — לינק, וואטסאפ או אנשי קשר.",
             "steps": {
                 "optional": "אופציונלי",
-                "name": { "title": "שם הקופה", "helper": "תנו שם שכולם מזהים (למשל טיול לים או דירה 2025)." },
-                "category": { "title": "קטגוריה", "helper": "סוג הקופה קובע את הצבעים — אפשר לשנות אחר כך." },
-                "currency": { "title": "מטבע" },
-                "image": { "title": "תמונת כריכה", "summaryDefault": "ברירת מחדל", "summarySet": "תמונה נבחרה" },
-                "members": { "title": "הזמנת חברים", "summarySuffix": "חברים" }
+                "name": {
+                    "title": "שם הקופה",
+                    "helper": "תנו שם שכולם מזהים (למשל טיול לים או דירה 2025)."
+                },
+                "category": {
+                    "title": "קטגוריה",
+                    "helper": "סוג הקופה קובע את הצבעים — אפשר לשנות אחר כך."
+                },
+                "currency": {
+                    "title": "מטבע"
+                },
+                "image": {
+                    "title": "תמונת כריכה",
+                    "summaryDefault": "ברירת מחדל",
+                    "summarySet": "תמונה נבחרה"
+                },
+                "members": {
+                    "title": "הזמנת חברים",
+                    "summarySuffix": "חברים"
+                }
             }
         }
     },
@@ -932,7 +947,7 @@
         "netBalance": "יתרה נטו",
         "netOwedToYou": "יתרה לזכותך",
         "netYouOwe": "יתרת חוב נטו",
-        "netSettled": "הכל מסולק",
+        "netSettled": "הכל מסודר",
         "nothingOwed": "אין לך חובות",
         "notOwedToYou": "לא חייבים לך",
         "nothingOwedShort": "אין חוב",
