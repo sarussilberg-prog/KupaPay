@@ -76,3 +76,17 @@ export default async function LegalPage({ slug, langOverride }: Props) {
     </>
   );
 }
+
+// Shared route component for /privacy and /terms — both pass through an optional
+// `?lang=` deep-link override to LegalPage. Defined once to avoid duplicating the
+// searchParams-unwrapping boilerplate in every route file.
+export function createLegalPageRoute(slug: LegalSlug) {
+  return async function LegalPageRoute({
+    searchParams,
+  }: {
+    searchParams: Promise<{ lang?: string }>;
+  }) {
+    const { lang } = await searchParams;
+    return <LegalPage slug={slug} langOverride={lang} />;
+  };
+}
