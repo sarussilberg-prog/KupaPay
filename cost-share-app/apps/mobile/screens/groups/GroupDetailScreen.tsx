@@ -835,6 +835,7 @@ export function GroupDetailScreen() {
                             onOpenBalances={handleBalances}
                             onOpenNote={handleNote}
                             onOpenSettleUp={handleSettleUp}
+                            noteHasUnread={storeGroup?.hasUnreadNote ?? false}
                         />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">

@@ -17,7 +17,7 @@ import { useRoute } from '@react-navigation/native';
 import { Text } from '../../components/AppText';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { supabase } from '../../lib/supabase';
-import { getGroupById } from '../../services/groups.service';
+import { getGroupById, markGroupNoteSeen } from '../../services/groups.service';
 import {
     resolveAutoTextInputStyle,
     rtlTextClassName,
@@ -57,6 +57,10 @@ export function GroupNoteScreen() {
         return () => {
             cancelled = true;
         };
+    }, [groupId]);
+
+    useEffect(() => {
+        void markGroupNoteSeen(groupId);
     }, [groupId]);
 
     const persist = useCallback(

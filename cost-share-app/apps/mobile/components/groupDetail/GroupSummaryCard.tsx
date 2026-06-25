@@ -31,6 +31,7 @@ interface GroupSummaryCardProps {
     onOpenBalances: () => void;
     onOpenNote: () => void;
     onOpenSettleUp: () => void;
+    noteHasUnread?: boolean;
 }
 
 export function GroupSummaryCard({
@@ -45,6 +46,7 @@ export function GroupSummaryCard({
     onOpenBalances,
     onOpenNote,
     onOpenSettleUp,
+    noteHasUnread,
 }: GroupSummaryCardProps) {
     const insets = useSafeAreaInsets();
     return (
@@ -79,6 +81,7 @@ export function GroupSummaryCard({
                 settlementCount={settlementCount}
                 onOpenNote={onOpenNote}
                 onOpenSettleUp={onOpenSettleUp}
+                noteHasUnread={noteHasUnread}
             />
         </View>
     );
