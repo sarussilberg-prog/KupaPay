@@ -92,11 +92,16 @@ function → `render.ts` builds the push copy.
   **sender** (`user_id = from_user_id`, `actor_user_id = to_user_id` = the rejecter).
 - **Audience:** both sides. Rejecter: "You declined {actor}'s friend request".
   Sender: "{actor} declined your friend request".
-- **Push:** **none.** Because this kind otherwise pushes, add a guard in the push
-  webhook trigger `WHEN` clause:
-  `AND NOT (NEW.kind = 'friend_request_received' AND NEW.metadata->>'status' = 'rejected')`.
+- **Push:** to the **sender only**. The sender's new event has `actor = rejecter`
+  (not self), so the existing self-suppression lets it push. The rejecter's own event
+  updates in place (no `created_at` change → the update webhook does not fire), so the
+  rejecter is not pushed. No special skip guard needed.
 - **Feed copy:** distinct EN/HE strings for the rejecter-perspective and sender-perspective
   (resolved by comparing `actorUserId`/`userId` to `currentUserId` in title resolution).
+- **Push copy:** `render.ts` `friend_request_received` must branch on `metadata.status`
+  to render the rejected-status push body ("{actor} declined your friend request") in
+  addition to the existing pending/accepted copy. Add the strings to
+  `send-push/locales/{en,he}.json`.
 - **Tap:** opens Friends screen (already wired in `handleActivityPress`).
 
 ### 5. Unread-note dot
@@ -135,7 +140,8 @@ Add `note_seen_at` to the `group_members!inner(...)` projection; compute
   note-changed + note_updated_at stamp); extend the friend-request trigger for rejection;
   add the reject push-skip guard to the webhook trigger; add `mark_group_note_seen` RPC.
 - **Edge function:** `render.ts` + `send-push/locales/{en,he}.json` — add `group_deleted`
-  and `group_note_changed`; extend the `ActivityKind` type union with all new kinds.
+  and `group_note_changed`; branch `friend_request_received` on `metadata.status` for the
+  rejected push body; extend the `ActivityKind` type union with all new kinds.
 - **Shared types:** extend `ActivityEventKind` in `@cost-share/shared`.
 - **Mobile:** `ActivityItemCard.tsx` title resolution for the four new/extended cases;
   `handleActivityPress` GroupNote case; `groups.service.ts` (`note_seen_at` in select +
@@ -148,15 +154,23 @@ Add `note_seen_at` to the `group_members!inner(...)` projection; compute
 - DB trigger behavior: group create/delete/note-change emit the expected rows with
   correct actor/recipient; friend rejection inserts the sender event + updates recipient;
   note edit stamps `note_updated_at` and marks editor seen.
-- `render.ts` unit tests for `group_deleted` / `group_note_changed` (EN + HE).
-- Push webhook skip: `friend_request_received` + `status='rejected'` does not push.
+- `render.ts` unit tests for `group_deleted` / `group_note_changed` / rejected
+  `friend_request_received` push body (EN + HE).
+- Push targeting: friend rejection pushes the sender (actor != recipient) but not the
+  rejecter (in-place update, no `created_at` change → no webhook fire).
 - `ActivityItemCard` title tests for the four cases (self vs other perspective).
 - Unread-note: `hasUnreadNote` true after a non-actor's change, false for the actor,
   false after `mark_group_note_seen`.
 
 ## Open assumptions (call out if wrong)
 
-- Friend rejection produces **no** push (per "just add an activity").
+- Friend rejection pushes the **sender** ("{actor} declined your friend request"); the
+  rejecter is not pushed. (Every new event pushes unless it is the actor's own action.)
+- The friend-rejection push depends on the rejecter's in-place event NOT bumping
+  `created_at`. **Verified:** the UPDATE webhook (`20260618110000_activity_events_fire_on_edit.sql`)
+  fires only when `created_at` changes, explicitly to "avoid duplicate push for
+  friend-request status updates, which UPDATE metadata but leave created_at alone." So
+  the rejecter is provably not pushed; no extra guard needed.
 - Group note `BEFORE UPDATE` stamping coexists cleanly with the existing autosave/realtime
   on the groups row (note edits already write `groups.note`).
 - `groups.note` column exists in production (the app reads/writes it via `updateGroup` /
