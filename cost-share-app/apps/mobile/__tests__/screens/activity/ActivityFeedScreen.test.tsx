@@ -285,7 +285,7 @@ describe('ActivityFeedScreen', () => {
         expect(await findByTestId('expense-detail-sheet')).toBeTruthy();
     });
 
-    it('seats GroupDetail beneath GroupNote when a note-changed row is pressed (Back → the group)', async () => {
+    it('opens a note-changed row via GroupDetail+openNote so Back returns to the group', async () => {
         mockFetchRecentActivity.mockResolvedValue({
             items: [
                 {
@@ -306,23 +306,19 @@ describe('ActivityFeedScreen', () => {
         const card = await findByTestId('activity-card-n1');
         fireEvent.press(card);
 
+        // A single navigate to GroupDetail with openNote — GroupDetail itself
+        // pushes the note on top, so the note's Back button returns to the group.
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith('Groups', {
                 screen: 'GroupDetail',
-                params: { groupId: 'g1' },
+                params: { groupId: 'g1', openNote: true },
             });
         });
-        expect(mockNavigate).toHaveBeenCalledWith('Groups', {
-            screen: 'GroupNote',
-            params: { groupId: 'g1' },
-        });
-        // GroupDetail must be seated before GroupNote is pushed on top, so Back
-        // from the note returns to the relevant group.
-        const groupCalls = mockNavigate.mock.calls.filter((c) => c[0] === 'Groups');
-        const detailIdx = groupCalls.findIndex((c) => c[1]?.screen === 'GroupDetail');
-        const noteIdx = groupCalls.findIndex((c) => c[1]?.screen === 'GroupNote');
-        expect(detailIdx).toBeGreaterThanOrEqual(0);
-        expect(noteIdx).toBeGreaterThan(detailIdx);
+        // It must NOT navigate straight to GroupNote (that loses the group beneath).
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Groups',
+            expect.objectContaining({ screen: 'GroupNote' }),
+        );
     });
 
     it('shows an "unavailable" message instead of navigating when the group is gone', async () => {
