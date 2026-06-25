@@ -317,7 +317,8 @@
             "placeholder": "Write a shared note for everyone in this group…",
             "saving": "Saving…",
             "saved": "Saved",
-            "saveError": "Couldn't save"
+            "saveError": "Couldn't save",
+            "titleFor": "Group note for"
         },
         "share": {
             "menuTitle": "Share group",

@@ -4,7 +4,7 @@
  * via supabase realtime on the groups row.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
     View,
     TextInput,
@@ -13,7 +13,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Text } from '../../components/AppText';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { supabase } from '../../lib/supabase';
@@ -33,9 +33,11 @@ export function GroupNoteScreen() {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const route = useRoute<any>();
+    const navigation = useNavigation<any>();
     const { groupId } = route.params as { groupId: string };
 
     const [text, setText] = useState('');
+    const [groupName, setGroupName] = useState('');
     const [loading, setLoading] = useState(true);
     const [saveState, setSaveState] = useState<SaveState>('idle');
 
@@ -52,6 +54,7 @@ export function GroupNoteScreen() {
             const initial = group?.note ?? '';
             serverNoteRef.current = initial;
             setText(initial);
+            setGroupName(group?.name ?? '');
             setLoading(false);
         })();
         return () => {
@@ -62,6 +65,28 @@ export function GroupNoteScreen() {
     useEffect(() => {
         void markGroupNoteSeen(groupId);
     }, [groupId]);
+
+    // Header title: "Group note for {group}" with the group name visually
+    // distinct (bold + primary color) so it reads as the group's name, not part
+    // of a sentence. Falls back to the plain title until the group name loads.
+    useLayoutEffect(() => {
+        navigation.setOptions(
+            groupName
+                ? {
+                    headerTitle: () => (
+                        <Text
+                            className="text-[17px] text-gray-700"
+                            numberOfLines={1}
+                            style={{ maxWidth: 240 }}
+                        >
+                            {t('groups.note.titleFor')}{' '}
+                            <Text className="font-extrabold text-blue-600">{groupName}</Text>
+                        </Text>
+                    ),
+                }
+                : { title: t('groups.note.title') },
+        );
+    }, [navigation, groupName, t]);
 
     const persist = useCallback(
         async (next: string) => {

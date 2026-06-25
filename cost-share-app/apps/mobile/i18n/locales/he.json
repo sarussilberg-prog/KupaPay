@@ -332,7 +332,8 @@
             "placeholder": "כתוב פתק משותף לכל חברי הקופה…",
             "saving": "שומר…",
             "saved": "נשמר",
-            "saveError": "השמירה נכשלה"
+            "saveError": "השמירה נכשלה",
+            "titleFor": "פתק הקבוצה של"
         },
         "share": {
             "menuTitle": "שיתוף קופה",
