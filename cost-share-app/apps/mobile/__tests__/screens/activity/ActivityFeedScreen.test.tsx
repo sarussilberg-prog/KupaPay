@@ -285,6 +285,46 @@ describe('ActivityFeedScreen', () => {
         expect(await findByTestId('expense-detail-sheet')).toBeTruthy();
     });
 
+    it('seats GroupDetail beneath GroupNote when a note-changed row is pressed (Back → the group)', async () => {
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'n1',
+                    userId: 'u1',
+                    kind: 'group_note_changed',
+                    groupId: 'g1',
+                    refId: 'g1',
+                    actorUserId: 'u2',
+                    metadata: { group_name: 'Trip' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
+        const card = await findByTestId('activity-card-n1');
+        fireEvent.press(card);
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: 'g1' },
+            });
+        });
+        expect(mockNavigate).toHaveBeenCalledWith('Groups', {
+            screen: 'GroupNote',
+            params: { groupId: 'g1' },
+        });
+        // GroupDetail must be seated before GroupNote is pushed on top, so Back
+        // from the note returns to the relevant group.
+        const groupCalls = mockNavigate.mock.calls.filter((c) => c[0] === 'Groups');
+        const detailIdx = groupCalls.findIndex((c) => c[1]?.screen === 'GroupDetail');
+        const noteIdx = groupCalls.findIndex((c) => c[1]?.screen === 'GroupNote');
+        expect(detailIdx).toBeGreaterThanOrEqual(0);
+        expect(noteIdx).toBeGreaterThan(detailIdx);
+    });
+
     it('shows an "unavailable" message instead of navigating when the group is gone', async () => {
         // The user's groups no longer include g1 (removed / group deleted).
         mockFetchGroups.mockResolvedValue([] as never);

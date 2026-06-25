@@ -576,12 +576,20 @@ export function ActivityFeedScreen() {
                 });
                 return;
             }
-            // group_note_changed → open the shared note screen.
+            // group_note_changed → open the shared note screen, but seat the
+            // relevant GroupDetail beneath it first so Back returns to that group
+            // (not wherever the Groups tab was last). Navigating to GroupDetail
+            // collapses any other group screens to the relevant group; GroupNote
+            // is then pushed on top — the same stack as opening the note in-app.
             if (event.kind === 'group_note_changed' && event.groupId) {
+                const groupId = event.groupId;
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: { groupId },
+                });
                 navigation.navigate('Groups', {
                     screen: 'GroupNote',
-                    params: { groupId: event.groupId },
-                    merge: true,
+                    params: { groupId },
                 });
                 return;
             }
