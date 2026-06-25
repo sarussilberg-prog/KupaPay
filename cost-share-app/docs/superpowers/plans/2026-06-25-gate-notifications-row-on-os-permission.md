@@ -13,6 +13,7 @@
 - Gate **only** on OS status `'denied'`. `'granted'` and `'undetermined'` must keep the row tappable — the existing on-app-entry permission request flow is unchanged. (`getPermissionStatus()` returns `Notifications.PermissionStatus` = `'granted' | 'denied' | 'undetermined'`, verified in `lib/pushNotifications.ts:25`.)
 - Do **not** modify the soft-ask flow (`usePushPermissionPrompt`, `EnableNotificationsBanner`) or the in-app `pushEnabled`/category toggles.
 - Link color for in-text links uses `style={{ color: colors.primary }}` (established pattern, e.g. `EnableNotificationsBanner.tsx:30`).
+- "Go to settings" must open the app's **notification** settings page where the OS allows: Android → `expo-intent-launcher` `ActivityAction.APP_NOTIFICATION_SETTINGS` with the package as `android.provider.extra.APP_PACKAGE`; iOS → `Linking.openSettings()` (iOS has no public deep-link to the notification sub-page — the app settings page is the ceiling). `expo-intent-launcher@~13.0.8` is already installed; `expo-application` provides `applicationId`.
 - i18n: every new user-facing string gets both `en.json` and `he.json` keys under the existing `notifications` block.
 - Tests run with `npm test -- <path>` (jest, preset `jest-expo`). In tests `t(key)` returns the key verbatim, so assert on raw keys (e.g. `'notifications.title'`).
 - Commit after each task.
@@ -22,6 +23,7 @@
 ## File Structure
 
 - `hooks/useSystemNotificationsDenied.ts` (new) — reads OS permission, returns `boolean`, refreshes on foreground.
+- `lib/notificationSettings.ts` (new) — `openAppNotificationSettings()`: Android deep-links to the app notification page, iOS opens app settings.
 - `components/settings/NotificationsDisabledHint.tsx` (new) — footer caption + inline "Go to settings" link.
 - `components/settings/SettingsRow.tsx` (modify) — add `disabled?: boolean`.
 - `components/settings/SettingsSection.tsx` (modify) — add `footer?: ReactNode`.
@@ -315,7 +317,121 @@ git commit -m "feat(settings): support optional SettingsSection footer"
 
 ---
 
-### Task 4: i18n keys + `NotificationsDisabledHint` component
+### Task 4: `openAppNotificationSettings` deep-link helper
+
+**Files:**
+- Create: `lib/notificationSettings.ts`
+- Test: `__tests__/lib/notificationSettings.test.ts`
+
+**Interfaces:**
+- Consumes: `expo-intent-launcher` (`ActivityAction.APP_NOTIFICATION_SETTINGS`, `startActivityAsync`), `expo-application` (`applicationId`), `react-native` (`Platform`, `Linking`).
+- Produces: `openAppNotificationSettings(): Promise<void>` — Android deep-links to the app's notification settings page; iOS (and Android fallback) opens app settings via `Linking.openSettings()`.
+
+**Note:** `expo-intent-launcher@~13.0.8` is already installed (controller did `npx expo install`); do not re-install.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `__tests__/lib/notificationSettings.test.ts`:
+
+```ts
+import { Linking, Platform } from 'react-native';
+import * as IntentLauncher from 'expo-intent-launcher';
+import { openAppNotificationSettings } from '../../lib/notificationSettings';
+
+jest.mock('expo-intent-launcher', () => ({
+    ActivityAction: { APP_NOTIFICATION_SETTINGS: 'android.settings.APP_NOTIFICATION_SETTINGS' },
+    startActivityAsync: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('expo-application', () => ({ applicationId: 'com.kupapay.app' }));
+
+const mockStart = IntentLauncher.startActivityAsync as jest.MockedFunction<typeof IntentLauncher.startActivityAsync>;
+
+describe('openAppNotificationSettings', () => {
+    let openSettings: jest.SpyInstance;
+    beforeEach(() => {
+        mockStart.mockClear();
+        mockStart.mockResolvedValue(undefined as any);
+        openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined as any);
+    });
+    afterEach(() => {
+        openSettings.mockRestore();
+        Platform.OS = 'ios';
+    });
+
+    it('on Android deep-links to the app notification settings with the package extra', async () => {
+        Platform.OS = 'android';
+        await openAppNotificationSettings();
+        expect(mockStart).toHaveBeenCalledWith(
+            'android.settings.APP_NOTIFICATION_SETTINGS',
+            { extra: { 'android.provider.extra.APP_PACKAGE': 'com.kupapay.app' } },
+        );
+        expect(openSettings).not.toHaveBeenCalled();
+    });
+
+    it('on iOS opens the app settings page', async () => {
+        Platform.OS = 'ios';
+        await openAppNotificationSettings();
+        expect(openSettings).toHaveBeenCalledTimes(1);
+        expect(mockStart).not.toHaveBeenCalled();
+    });
+
+    it('falls back to app settings when the Android intent throws', async () => {
+        Platform.OS = 'android';
+        mockStart.mockRejectedValueOnce(new Error('no activity'));
+        await openAppNotificationSettings();
+        expect(openSettings).toHaveBeenCalledTimes(1);
+    });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npm test -- __tests__/lib/notificationSettings.test.ts`
+Expected: FAIL — "Cannot find module '../../lib/notificationSettings'".
+
+- [ ] **Step 3: Write minimal implementation**
+
+Create `lib/notificationSettings.ts`:
+
+```ts
+import { Linking, Platform } from 'react-native';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as Application from 'expo-application';
+
+// Opens the OS settings page for this app's notifications. Android can deep-link
+// straight to the notification page; iOS has no public deep-link to that
+// sub-page, so it (and any Android failure) falls back to the app settings page.
+export async function openAppNotificationSettings(): Promise<void> {
+    if (Platform.OS === 'android') {
+        try {
+            await IntentLauncher.startActivityAsync(
+                IntentLauncher.ActivityAction.APP_NOTIFICATION_SETTINGS,
+                { extra: { 'android.provider.extra.APP_PACKAGE': Application.applicationId ?? '' } },
+            );
+            return;
+        } catch {
+            /* fall through to the generic app settings page */
+        }
+    }
+    await Linking.openSettings();
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npm test -- __tests__/lib/notificationSettings.test.ts`
+Expected: PASS (3 tests).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add apps/mobile/lib/notificationSettings.ts apps/mobile/__tests__/lib/notificationSettings.test.ts apps/mobile/package.json
+git commit -m "feat(notifications): add openAppNotificationSettings deep-link helper"
+```
+
+---
+
+### Task 5: i18n keys + `NotificationsDisabledHint` component
 
 **Files:**
 - Modify: `i18n/locales/en.json`, `i18n/locales/he.json`
@@ -323,8 +439,8 @@ git commit -m "feat(settings): support optional SettingsSection footer"
 - Test: `__tests__/components/settings/NotificationsDisabledHint.test.tsx`
 
 **Interfaces:**
-- Consumes: i18n keys `notifications.systemDisabledHint`, `notifications.goToSettings`; `Linking.openSettings()`.
-- Produces: `<NotificationsDisabledHint />` — caption text + inline pressable link (testID `notifications-go-to-settings`) that calls `Linking.openSettings()`.
+- Consumes: i18n keys `notifications.systemDisabledHint`, `notifications.goToSettings`; `openAppNotificationSettings()` from `lib/notificationSettings` (Task 4).
+- Produces: `<NotificationsDisabledHint />` — caption text + inline pressable link (testID `notifications-go-to-settings`) that calls `openAppNotificationSettings()`.
 
 - [ ] **Step 1: Add the i18n keys**
 
@@ -351,22 +467,28 @@ Create `__tests__/components/settings/NotificationsDisabledHint.test.tsx`:
 ```tsx
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { Linking } from 'react-native';
 import { NotificationsDisabledHint } from '../../../components/settings/NotificationsDisabledHint';
+import { openAppNotificationSettings } from '../../../lib/notificationSettings';
+
+jest.mock('../../../lib/notificationSettings', () => ({
+    openAppNotificationSettings: jest.fn().mockResolvedValue(undefined),
+}));
+
+const mockOpen = openAppNotificationSettings as jest.MockedFunction<typeof openAppNotificationSettings>;
 
 describe('NotificationsDisabledHint', () => {
+    beforeEach(() => mockOpen.mockClear());
+
     it('renders the hint and the go-to-settings link', () => {
         const { getByText, getByTestId } = render(<NotificationsDisabledHint />);
         expect(getByText('notifications.systemDisabledHint')).toBeTruthy();
         expect(getByTestId('notifications-go-to-settings')).toBeTruthy();
     });
 
-    it('opens OS settings when the link is pressed', () => {
-        const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined as any);
+    it('opens the app notification settings when the link is pressed', () => {
         const { getByTestId } = render(<NotificationsDisabledHint />);
         fireEvent.press(getByTestId('notifications-go-to-settings'));
-        expect(openSettings).toHaveBeenCalledTimes(1);
-        openSettings.mockRestore();
+        expect(mockOpen).toHaveBeenCalledTimes(1);
     });
 });
 ```
@@ -383,12 +505,12 @@ Create `components/settings/NotificationsDisabledHint.tsx`:
 ```tsx
 import { Text } from '../AppText';
 import React from 'react';
-import { Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../theme';
+import { openAppNotificationSettings } from '../../lib/notificationSettings';
 
 // Footer shown under the Notifications row when OS notifications are off.
-// The inline link jumps to device settings so the user can re-enable them.
+// The inline link jumps to the device notification settings so the user can re-enable them.
 export function NotificationsDisabledHint() {
     const { t } = useTranslation();
     return (
@@ -398,7 +520,7 @@ export function NotificationsDisabledHint() {
                 className="text-xs font-semibold"
                 style={{ color: colors.primary }}
                 testID="notifications-go-to-settings"
-                onPress={() => { void Linking.openSettings(); }}
+                onPress={() => { void openAppNotificationSettings(); }}
             >
                 {t('notifications.goToSettings')}
             </Text>
@@ -421,14 +543,14 @@ git commit -m "feat(notifications): add NotificationsDisabledHint footer + i18n"
 
 ---
 
-### Task 5: Wire the gate into `SettingsScreen`
+### Task 6: Wire the gate into `SettingsScreen`
 
 **Files:**
 - Modify: `screens/profile/SettingsScreen.tsx`
 - Test: `__tests__/screens/profile/SettingsScreen.test.tsx`
 
 **Interfaces:**
-- Consumes: `useSystemNotificationsDenied()` (Task 1), `NotificationsDisabledHint` (Task 4), `SettingsSection` `footer` (Task 3), `SettingsRow` `disabled` + `testID` (Task 2).
+- Consumes: `useSystemNotificationsDenied()` (Task 1), `NotificationsDisabledHint` (Task 5), `SettingsSection` `footer` (Task 3), `SettingsRow` `disabled` + `testID` (Task 2).
 - Produces: Notifications row carries `testID="settings-notifications-row"`; lives in its own section; disabled + footer when denied.
 
 - [ ] **Step 1: Write the failing test**
@@ -520,7 +642,7 @@ git commit -m "feat(notifications): gate Settings notifications row on OS permis
 
 ---
 
-### Task 6: Remove the now-unreachable "Open settings" row from `NotificationSettingsScreen`
+### Task 7: Remove the now-unreachable "Open settings" row from `NotificationSettingsScreen`
 
 **Files:**
 - Modify: `screens/profile/NotificationSettingsScreen.tsx`
@@ -578,6 +700,6 @@ git commit -m "refactor(notifications): drop unreachable Open settings row from 
 
 ## Self-Review
 
-- **Spec coverage:** hook (Task 1), `SettingsRow` disabled (Task 2), `SettingsSection` footer (Task 3), hint component + i18n (Task 4), SettingsScreen wiring + own section + gate-on-denied (Task 5), remove inner Open settings row (Task 6). All spec sections mapped.
+- **Spec coverage:** hook (Task 1), `SettingsRow` disabled (Task 2), `SettingsSection` footer (Task 3), `openAppNotificationSettings` deep-link helper (Task 4), hint component + i18n (Task 5), SettingsScreen wiring + own section + gate-on-denied (Task 6), remove inner Open settings row (Task 7). All spec sections mapped.
 - **Placeholder scan:** none — every step has concrete code/commands.
 - **Type consistency:** `useSystemNotificationsDenied(): boolean`, `disabled?: boolean`, `footer?: React.ReactNode`, testIDs `settings-notifications-row` / `notifications-go-to-settings`, i18n keys `notifications.systemDisabledHint` / `notifications.goToSettings` — used identically across tasks.
