@@ -52,7 +52,7 @@ function → `render.ts` builds the push copy.
   `metadata = { group_name }`.
 - **Audience:** creator only (sole member at creation).
 - **Push:** none — self-action, blocked by existing self-suppression.
-- **Feed copy:** EN "You created the group {group}". HE equivalent.
+- **Feed copy:** EN "Group {group} created by you" (always the creator). HE equivalent.
 - **Tap:** opens the group; missing → unavailable toast (existing `knownGroupIds` guard,
   then falls through to the existing `if (event.groupId)` → GroupDetail navigation).
 
@@ -61,11 +61,11 @@ function → `render.ts` builds the push copy.
   Fan out one event per still-active member (`group_members` where `is_active = true`):
   `user_id = gm.user_id`, `actor_user_id = auth.uid()` (the deleter), `group_id = NEW.id`,
   `ref_id = NEW.id`, `metadata = { group_name }`.
-- **Audience:** everyone. Deleter: actor == user → "You deleted the group {group}".
-  Others: actor != user → "{actor} deleted the group {group}".
+- **Audience:** everyone. Deleter: actor == user → "Group {group} deleted by you".
+  Others: actor != user → "Group {group} deleted by {actor}".
 - **Push:** to every member except the deleter (self-suppression handles the deleter).
-- **Feed copy:** EN self "You deleted the group {group}" / other "{actor} deleted the group {group}".
-- **Push copy:** `render.ts` case `group_deleted` → title = group name, body = "{actor} deleted the group".
+- **Feed copy:** EN self "Group {group} deleted by you" / other "Group {group} deleted by {actor}".
+- **Push copy:** `render.ts` case `group_deleted` → title = group name, body = "Deleted by {actor}".
 - **Tap:** group no longer exists → existing `knownGroupIds` guard shows unavailable toast.
 - **Pressable:** ensure `group_deleted` is pressable (current code excludes only `group_removed`
   in `ActivityItem.tsx:48`; `group_deleted` is therefore already pressable — verify).
@@ -75,10 +75,16 @@ function → `render.ts` builds the push copy.
   Fan out one event per active member: `user_id = gm.user_id`, `actor_user_id = auth.uid()`,
   `group_id = NEW.id`, `ref_id = NEW.id`, `metadata = { group_name }`.
   Only the `note` column triggers this — other column edits stay silent.
-- **Audience:** everyone. Actor: "You changed the note in {group}". Others:
-  "{actor} changed the note in {group}".
+- **Audience:** everyone. Actor: "Note changed by you · {group}". Others:
+  "Note changed by {actor} · {group}".
 - **Push:** to everyone except the actor.
-- **Feed copy / push copy:** added to both locale sets + `render.ts` case `group_note_changed`.
+- **Feed copy:** EN self "Note changed by you · {group}" / other "Note changed by {actor} · {group}";
+  HE equivalents. The changer's name comes from the event's `actor_user_id`.
+- **Push copy:** `render.ts` case `group_note_changed` → title = group name,
+  body = "Note changed by {actor}". Added to `send-push/locales/{en,he}.json`.
+- **No group-detail / note-screen row:** the changer's name appears ONLY in the activity
+  feed and push copy. Nothing is added to the GroupNote or group detail screen (no
+  "last changed by" line, no `note_updated_by` column).
 - **Tap:** opens the GroupNote screen —
   `navigation.navigate('Groups', { screen: 'GroupNote', params: { groupId } })`;
   missing group → unavailable toast.
