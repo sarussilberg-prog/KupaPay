@@ -10,7 +10,8 @@ export function NotificationsDisabledHint() {
     const { t } = useTranslation();
     return (
         <Text className="text-xs text-gray-500">
-            {t('notifications.systemDisabledHint')}{' '}
+            <Text>{t('notifications.systemDisabledHint')}</Text>
+            {' '}
             <Text
                 className="text-xs font-semibold"
                 style={{ color: colors.primary }}
