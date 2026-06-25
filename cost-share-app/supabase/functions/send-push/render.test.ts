@@ -26,7 +26,7 @@ Deno.test('group_member_joined uses new member name', () => {
         actorName: 'דנה', groupName: 'טיול', newMemberName: 'יוסי',
     });
     assertEquals(r.title, 'טיול');
-    assertEquals(r.body, 'יוסי הצטרף לקבוצה');
+    assertEquals(r.body, 'יוסי הצטרף/ה לקבוצה');
 });
 
 Deno.test('expense_added edited renders he', () => {
@@ -35,7 +35,7 @@ Deno.test('expense_added edited renders he', () => {
         isEdited: true,
     });
     assertEquals(r.title, 'טיול');
-    assertEquals(r.body, 'דנה עדכנה הוצאה · ארוחה · ₪240');
+    assertEquals(r.body, 'הוצאה עודכנה על ידי דנה · ארוחה · ₪240');
 });
 
 Deno.test('expense_added edited renders en', () => {
@@ -65,7 +65,7 @@ Deno.test('settlement_added deleted he', () => {
     const r = renderNotification('settlement_added', 'he', {
         actorName: 'דנה', groupName: 'טיול', amount: 50, currency: 'ILS', isDeleted: true,
     });
-    assertEquals(r.body, 'דנה מחקה תשלום');
+    assertEquals(r.body, 'תשלום נמחק על ידי דנה');
 });
 
 Deno.test('message_posted edited en uses neutral body', () => {
@@ -80,5 +80,5 @@ Deno.test('message_posted deleted he', () => {
     const r = renderNotification('message_posted', 'he', {
         actorName: 'דנה', groupName: 'טיול', body: 'שלום', isDeleted: true,
     });
-    assertEquals(r.body, 'דנה מחקה הודעה');
+    assertEquals(r.body, 'ההודעה נמחקה על ידי דנה');
 });

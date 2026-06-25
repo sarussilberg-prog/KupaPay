@@ -1,0 +1,26 @@
+{
+    "expense_added": {
+        "new": "הוצאה חדשה מאת {actor}",
+        "edited": "הוצאה עודכנה על ידי {actor}",
+        "deleted": "הוצאה נמחקה על ידי {actor}"
+    },
+    "settlement_added": {
+        "new": "תשלום חדש מאת {actor}",
+        "edited": "תשלום עודכן על ידי {actor}",
+        "deleted": "תשלום נמחק על ידי {actor}"
+    },
+    "message_posted": {
+        "edited": "ההודעה נערכה על ידי {actor}",
+        "deleted": "ההודעה נמחקה על ידי {actor}"
+    },
+    "friend_request_received": {
+        "title": "בקשת חברות חדשה",
+        "body": "{actor} רוצה להתחבר איתך"
+    },
+    "group_added": {
+        "title": "צורפת לקבוצה",
+        "body": "על ידי {actor}"
+    },
+    "group_member_joined": "{member} הצטרף/ה לקבוצה",
+    "group_removed": "הוסרת מהקבוצה"
+}

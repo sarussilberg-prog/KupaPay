@@ -1,0 +1,26 @@
+{
+    "expense_added": {
+        "new": "New expense from {actor}",
+        "edited": "{actor} updated an expense",
+        "deleted": "{actor} deleted an expense"
+    },
+    "settlement_added": {
+        "new": "New payment from {actor}",
+        "edited": "{actor} updated a payment",
+        "deleted": "{actor} deleted a payment"
+    },
+    "message_posted": {
+        "edited": "{actor} edited a message",
+        "deleted": "{actor} deleted a message"
+    },
+    "friend_request_received": {
+        "title": "New friend request",
+        "body": "{actor} wants to connect"
+    },
+    "group_added": {
+        "title": "You were added to a group",
+        "body": "{actor} added you"
+    },
+    "group_member_joined": "{member} joined the group",
+    "group_removed": "You were removed from the group"
+}
