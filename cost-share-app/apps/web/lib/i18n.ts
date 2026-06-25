@@ -38,6 +38,11 @@ const translations = {
           description: 'צור קבוצות לטיולים, שכירות, ארוחות — כמה שתרצה',
         },
         {
+          icon: '✈️',
+          title: 'עובד גם אופליין',
+          description: 'אפשר להוסיף ולצפות בהוצאות גם בלי אינטרנט — הכול מסתנכרן אוטומטית כשחוזרים לרשת',
+        },
+        {
           icon: '🔒',
           title: 'פרטיות ואבטחה',
           description: 'הנתונים שלך מוגנים ומאובטחים',
@@ -89,6 +94,7 @@ const translations = {
       notFound: 'המסמך לא נמצא.',
       backHome: 'חזרה לעמוד הבית',
       effectiveDate: 'תוקף מ-',
+      appVersion: 'גרסת אפליקציה ',
     },
   },
   en: {
@@ -125,6 +131,11 @@ const translations = {
           icon: '👥',
           title: 'Flexible groups',
           description: 'Create groups for trips, rent, dinners — as many as you like',
+        },
+        {
+          icon: '✈️',
+          title: 'Works offline',
+          description: 'Add and view expenses even without internet — everything syncs automatically when you reconnect',
         },
         {
           icon: '🔒',
@@ -178,6 +189,7 @@ const translations = {
       notFound: 'Document not found.',
       backHome: 'Back to home',
       effectiveDate: 'Effective from ',
+      appVersion: 'App version ',
     },
   },
 } as const;
@@ -199,7 +211,7 @@ export type Translations = {
     items: ReadonlyArray<{ question: string; answer: string }>;
   };
   footer: { privacy: string; terms: string; contact: string; copyright: string };
-  legal: { notFound: string; backHome: string; effectiveDate: string };
+  legal: { notFound: string; backHome: string; effectiveDate: string; appVersion: string };
 };
 
 export function getTranslations(locale: Language): Translations {

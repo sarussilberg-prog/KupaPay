@@ -1,9 +1,9 @@
 // Edge Function: invite-landing
-// Serves https://kupa-pay.com/i/<token>, /g/<token>, /.well-known/*, and a minimal root page.
+// Serves /.well-known/* (AASA / assetlinks), legal pages, account-deletion, and
+// bounces invite links (/i/<token>, /g/<token>) to the marketing site.
 // See docs/superpowers/specs/2026-05-20-invites-and-sharing-design.md
 
 import { createClient } from 'supabase';
-import { renderFriendInvite, renderGroupInvite, renderInvalid, renderRoot } from './render.ts';
 import { handleWellKnown } from './well-known.ts';
 import { handleAccountDeletion, handleLegal } from './legal.ts';
 
@@ -12,30 +12,7 @@ const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const TOKEN_RE = /^[A-Za-z0-9_-]{10}$/;
-
-interface PreviewFriend {
-    kind: 'friend';
-    inviter: { id: string; name: string; avatar_url: string | null };
-}
-interface PreviewGroup {
-    kind: 'group';
-    group: {
-        id: string;
-        name: string;
-        currency: string;
-        member_count: number;
-        members: Array<{ id: string; name: string; avatar_url: string | null }>;
-    };
-}
-interface PreviewInvalid { kind: 'invalid'; }
-type Preview = PreviewFriend | PreviewGroup | PreviewInvalid;
-
-async function fetchPreview(token: string): Promise<Preview> {
-    const { data, error } = await client.rpc('get_invite_preview', { p_token: token });
-    if (error || !data) return { kind: 'invalid' };
-    return data as Preview;
-}
+const MARKETING_SITE = 'https://kupa-pay.com/';
 
 Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
@@ -43,7 +20,8 @@ Deno.serve(async (req: Request) => {
     // when present so the same routes work both behind kupa-pay.com and the direct project URL.
     const path = url.pathname.replace(/^\/functions\/v1\/invite-landing/, '').replace(/^\/invite-landing/, '') || '/';
 
-    // well-known files
+    // well-known files (AASA / assetlinks) — served as application/json, which the
+    // Supabase gateway preserves. These power OS-level Universal Links / App Links.
     const wk = handleWellKnown(path);
     if (wk) return wk;
 
@@ -55,37 +33,35 @@ Deno.serve(async (req: Request) => {
     const deletion = handleAccountDeletion(req, path);
     if (deletion) return deletion;
 
-    // friend invite
-    const friend = path.match(/^\/i\/([^/?#]+)\/?$/);
-    if (friend && TOKEN_RE.test(friend[1])) {
-        const preview = await fetchPreview(friend[1]);
-        if (preview.kind !== 'friend') {
-            return new Response(renderInvalid(), { status: 404, headers: htmlHeaders() });
-        }
-        return new Response(renderFriendInvite(preview, friend[1]), { status: 200, headers: htmlHeaders() });
-    }
-
-    // group invite
-    const group = path.match(/^\/g\/([^/?#]+)\/?$/);
-    if (group && TOKEN_RE.test(group[1])) {
-        const preview = await fetchPreview(group[1]);
-        if (preview.kind !== 'group') {
-            return new Response(renderInvalid(), { status: 404, headers: htmlHeaders() });
-        }
-        return new Response(renderGroupInvite(preview, group[1]), { status: 200, headers: htmlHeaders() });
+    // Invite links (/i/<token> friend, /g/<token> group).
+    // When a user TAPS one of these from another app with KupaPay installed, iOS
+    // Universal Links / Android App Links open the app at the OS level and this
+    // function is never reached. We only land here in a browser (app not installed,
+    // or the URL was pasted into the address bar). The Supabase gateway refuses to
+    // serve HTML from *.supabase.co (it downgrades text/html to text/plain), so we
+    // cannot render a landing page or run JS here. A 302 is content-type independent
+    // and survives both the gateway and the Vercel proxy, so we bounce the browser
+    // to the marketing site, which owns the "no app installed" story.
+    if (/^\/(i|g)\//.test(path)) {
+        return redirectToSite();
     }
 
     // root
     if (path === '/' || path === '') {
-        return new Response(renderRoot(), { status: 200, headers: htmlHeaders() });
+        return redirectToSite();
     }
 
     return new Response('Not found', { status: 404 });
 });
 
-function htmlHeaders(): HeadersInit {
-    return {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=60',
-    };
+// 302 (temporary) on purpose: never 301/308, which browsers cache hard and would
+// pin this behavior. Location points at a hardcoded constant (no open-redirect).
+function redirectToSite(): Response {
+    return new Response(null, {
+        status: 302,
+        headers: {
+            Location: MARKETING_SITE,
+            'Cache-Control': 'no-store',
+        },
+    });
 }

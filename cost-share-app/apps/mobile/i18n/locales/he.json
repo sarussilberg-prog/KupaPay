@@ -982,7 +982,7 @@
         "retry": "נסה שוב",
         "cachedNotice": "מציג גרסה שמורה",
         "lastUpdated": "עודכן: {{date}}",
-        "versionLabel": "גרסה {{version}}",
+        "appVersion": "גרסת אפליקציה {{version}}",
         "understood": "הבנתי"
     },
     "friends": {

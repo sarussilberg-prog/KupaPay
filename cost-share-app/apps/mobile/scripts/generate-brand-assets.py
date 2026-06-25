@@ -10,7 +10,9 @@ The master is transparent. Background treatment per surface:
   adaptive foreground + monochrome, and the web login icon.png + favicon.
 
 Each output uses a scale tuned to the target surface safe zone:
-- Android adaptive foreground: 66/108 dp circle (~61% diameter); we use 68% art scale.
+- Android adaptive foreground: launcher shows only the center 72/108 dp of the layer, so 50% art
+  makes the mark fill a similar share of the *visible* tile as the iOS icon (was 68% → looked ~1.4x
+  too big on Android because the outer 18 dp of the layer is cropped).
 - Splash (Android 12+ circle mask + iOS): 88% art on 512 canvas + imageWidth in app.json.
 - In-app logo.png: no OS mask — 96% art on 256 canvas.
 - iOS icon.png: squircle mask — 72% art on 1024 canvas.
@@ -43,9 +45,11 @@ def _rel(p: Path) -> str:
         return str(p)
 
 # --- Tuning constants (documented) ---
-# Android adaptive: 66dp safe diameter / 108dp layer → ~61% max; 68% keeps arrows inside on most launchers.
-ANDROID_FOREGROUND_SCALE = 0.68
-ANDROID_MONOCHROME_SCALE = 0.68
+# Android adaptive icons display only the center 72dp of the 108dp layer (the outer 18dp is parallax
+# bleed), so foreground art that fills the layer looks ~1.4x larger than the iOS icon. Scale the art
+# so it occupies a similar fraction of the *visible* tile as iOS (icon.png at 0.72): 0.50 → ~66%.
+ANDROID_FOREGROUND_SCALE = 0.50
+ANDROID_MONOCHROME_SCALE = 0.50
 # Splash: circle mask clips square corners; 88% art + platform imageWidth balances size vs clip.
 SPLASH_SIZE = 512
 SPLASH_SCALE = 0.88

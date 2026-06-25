@@ -3,7 +3,6 @@
     "name": "KupaPay",
     "slug": "kupapay",
     "scheme": "com.kupapay.mobile",
-    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -37,7 +36,7 @@
           "remote-notification"
         ]
       },
-      "appleTeamId": "K3M6R85KA6"
+      "appleTeamId": "HVW3H3DLRB"
     },
     "android": {
       "package": "com.kupapay.mobile",
@@ -151,6 +150,7 @@
           "project": "copay-mobile-prod"
         }
       ],
+      "./plugins/withAndroidSplashFullBleed",
       "./plugins/withFastStackTransitions",
       "./plugins/withReleaseNodeEnv",
       "./plugins/withModularHeaders"

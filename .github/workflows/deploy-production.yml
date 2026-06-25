@@ -1,5 +1,10 @@
 # Apply pending Supabase migrations to production when main is updated (e.g. dev → main merge).
 # Requires GitHub Environment "production" and secrets (see docs/SSOT/SUPABASE_ENVIRONMENTS.md).
+#
+# Pipeline:
+#   1. validate-migrations — checks new migrations for backward-breaking changes
+#      (no production secrets needed — pure git + regex analysis).
+#   2. supabase-migrations — applies to production only if step 1 passes.
 name: Deploy production — Supabase migrations
 
 on:
@@ -15,8 +20,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-migrations:
+    name: Validate backward compatibility
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need full history to diff against github.event.before
+
+      - name: Check new migrations for breaking changes
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: bash scripts/supabase-safe-migration-check.sh
+
   supabase-migrations:
     name: Push migrations to production
+    needs: [validate-migrations]
     runs-on: ubuntu-latest
     environment: Production
     defaults:
