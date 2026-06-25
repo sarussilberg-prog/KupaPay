@@ -90,7 +90,7 @@ export const ActivityItem = React.memo(function ActivityItem({
 
     const title = titleOverride ?? resolveActivityTitle(
         event,
-        { actorName, groupName: groupName ?? '', newMemberName },
+        { actorName, groupName: groupName ?? '', newMemberName, currentUserId },
         t,
     );
 
@@ -109,6 +109,9 @@ export const ActivityItem = React.memo(function ActivityItem({
             case 'group_added':
             case 'group_member_joined':
             case 'group_removed':
+            case 'group_created':
+            case 'group_deleted':
+            case 'group_note_changed':
                 metaText = timestamp;
                 break;
             case 'expense_added':

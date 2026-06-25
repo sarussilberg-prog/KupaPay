@@ -783,7 +783,13 @@
             "memberRemovedYou": "{{name}} removed you from {{group}}",
             "friendRequest": "Friend request from {{name}}",
             "friendRequestAccepted": "You and {{name}} are now friends",
-            "friendRequestRejected": "You declined {{name}}'s friend request"
+            "friendRequestRejected": "You declined {{name}}'s friend request",
+            "groupCreatedByYou": "Group {{group}} created by you",
+            "groupDeletedByYou": "Group {{group}} deleted by you",
+            "groupDeletedBy": "Group {{group}} deleted by {{name}}",
+            "noteChangedByYou": "Note changed by you · {{group}}",
+            "noteChangedBy": "Note changed by {{name}} · {{group}}",
+            "friendRequestRejectedByThem": "{{name}} declined your friend request"
         },
         "addedExpense": "added an expense",
         "settledPayment": "settled a payment",

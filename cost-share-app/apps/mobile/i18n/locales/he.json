@@ -816,7 +816,13 @@
             "memberRemovedYou": "{{name}} הסיר/ה אותך מ{{group}}",
             "friendRequest": "בקשת חברות מ{{name}}",
             "friendRequestAccepted": "את/ה ו-{{name}} חברים עכשיו",
-            "friendRequestRejected": "דחית את בקשת החברות מ{{name}}"
+            "friendRequestRejected": "דחית את בקשת החברות מ{{name}}",
+            "groupCreatedByYou": "קבוצה {{group}} נוצרה על ידך",
+            "groupDeletedByYou": "קבוצה {{group}} נמחקה על ידך",
+            "groupDeletedBy": "קבוצה {{group}} נמחקה על ידי {{name}}",
+            "noteChangedByYou": "הפתק שונה על ידך · {{group}}",
+            "noteChangedBy": "הפתק שונה על ידי {{name}} · {{group}}",
+            "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך"
         },
         "addedExpense": "הוסיף הוצאה",
         "settledPayment": "ביצע תשלום",

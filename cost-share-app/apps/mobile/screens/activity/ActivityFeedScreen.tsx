@@ -576,6 +576,15 @@ export function ActivityFeedScreen() {
                 });
                 return;
             }
+            // group_note_changed → open the shared note screen.
+            if (event.kind === 'group_note_changed' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupNote',
+                    params: { groupId: event.groupId },
+                    merge: true,
+                });
+                return;
+            }
             // group_added / group_member_joined → navigate to group
             if (event.groupId) {
                 navigation.navigate('Groups', {
