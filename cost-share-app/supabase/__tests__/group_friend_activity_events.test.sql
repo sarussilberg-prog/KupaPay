@@ -48,6 +48,14 @@ BEGIN
     SELECT note_seen_at INTO v_seen FROM group_members WHERE group_id = v_group AND user_id = v_bob;
     IF v_seen IS NOT NULL THEN RAISE EXCEPTION 'Case 2: non-editor should be unseen'; END IF;
 
+    -- CASE 2b: an autosave burst (rapid successive note writes) must COALESCE into
+    -- the single existing row per member, not add new ones (ref_id = group id).
+    UPDATE public.groups SET note = 'hello tea'   WHERE id = v_group;
+    UPDATE public.groups SET note = 'hello te'    WHERE id = v_group;
+    UPDATE public.groups SET note = 'hello again' WHERE id = v_group;
+    SELECT COUNT(*) INTO v_count FROM activity_events WHERE kind = 'group_note_changed' AND group_id = v_group;
+    IF v_count <> 2 THEN RAISE EXCEPTION 'Case 2b: burst should stay 2 rows (1 per member), got %', v_count; END IF;
+
     -- CASE 3: friend rejection → recipient row updated + sender row inserted, both carry responder
     INSERT INTO public.friend_requests (id, from_user_id, to_user_id, status, created_at)
     VALUES (gen_random_uuid(), v_bob, v_alice, 'pending', now())
