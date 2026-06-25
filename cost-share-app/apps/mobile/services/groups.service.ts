@@ -326,6 +326,7 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
             members: [],
             isArchivedByMe: false,
             isAutoArchived: false,
+            hasUnreadNote: false,
         };
         queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
             [group, ...(prev ?? []).filter((g) => g.id !== group.id)],
@@ -381,6 +382,7 @@ export async function updateGroup(id: string, dto: UpdateGroupDto): Promise<Grou
         members: existing?.members ?? [],
         isArchivedByMe: existing?.isArchivedByMe ?? false,
         isAutoArchived: existing?.isAutoArchived ?? false,
+        hasUnreadNote: false,
     };
     queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
         (prev ?? []).map((g) => (g.id === id ? group : g)),

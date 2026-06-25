@@ -91,6 +91,7 @@ export function applyGroupsRealtimeEventToCache(
                 members: existing.members,
                 isArchivedByMe: existing.isArchivedByMe,
                 isAutoArchived: existing.isAutoArchived,
+                hasUnreadNote: false,
             };
             return list.map((g) => (g.id === id ? merged : g));
         });
