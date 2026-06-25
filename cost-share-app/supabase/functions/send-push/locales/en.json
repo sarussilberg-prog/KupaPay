@@ -15,12 +15,17 @@
     },
     "friend_request_received": {
         "title": "New friend request",
-        "body": "{actor} wants to connect"
+        "body": "{actor} wants to connect",
+        "rejectedTitle": "Friend request declined",
+        "rejectedBody": "{actor} declined your friend request"
     },
     "group_added": {
         "title": "You were added to a group",
         "body": "{actor} added you"
     },
     "group_member_joined": "{member} joined the group",
-    "group_removed": "You were removed from the group"
+    "group_removed": "You were removed from the group",
+    "group_created": "Group created",
+    "group_deleted": "Deleted by {actor}",
+    "group_note_changed": "Note changed by {actor}"
 }

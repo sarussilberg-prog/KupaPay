@@ -5,7 +5,8 @@ export type Lang = 'he' | 'en';
 
 export type ActivityKind =
     | 'expense_added' | 'settlement_added' | 'message_posted'
-    | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed';
+    | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed'
+    | 'group_created' | 'group_deleted' | 'group_note_changed';
 
 export interface RenderParams {
     actorName: string;
@@ -17,6 +18,7 @@ export interface RenderParams {
     body?: string | null;
     isEdited?: boolean;
     isDeleted?: boolean;
+    status?: string | null;
 }
 
 export interface Rendered { title: string; body: string; }
@@ -27,10 +29,13 @@ interface Messages {
     expense_added: Record<Variant, string>;
     settlement_added: Record<Variant, string>;
     message_posted: { edited: string; deleted: string };
-    friend_request_received: { title: string; body: string };
+    friend_request_received: { title: string; body: string; rejectedTitle: string; rejectedBody: string };
     group_added: { title: string; body: string };
     group_member_joined: string;
     group_removed: string;
+    group_created: string;
+    group_deleted: string;
+    group_note_changed: string;
 }
 
 const LOCALES: Record<Lang, Messages> = { en: en as Messages, he: he as Messages };
@@ -78,6 +83,9 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
             return { title, body: (p.body ?? '').trim() };
         }
         case 'friend_request_received':
+            if (p.status === 'rejected') {
+                return { title: t.friend_request_received.rejectedTitle, body: interpolate(t.friend_request_received.rejectedBody, vars) };
+            }
             return { title: t.friend_request_received.title, body: interpolate(t.friend_request_received.body, vars) };
         case 'group_added':
             return { title: t.group_added.title, body: joinDot([interpolate(t.group_added.body, vars), p.groupName]) };
@@ -85,5 +93,11 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
             return { title: p.groupName, body: interpolate(t.group_member_joined, vars) };
         case 'group_removed':
             return { title: p.groupName, body: interpolate(t.group_removed, vars) };
+        case 'group_created':
+            return { title: p.groupName, body: interpolate(t.group_created, vars) };
+        case 'group_deleted':
+            return { title: p.groupName, body: interpolate(t.group_deleted, vars) };
+        case 'group_note_changed':
+            return { title: p.groupName, body: interpolate(t.group_note_changed, vars) };
     }
 }

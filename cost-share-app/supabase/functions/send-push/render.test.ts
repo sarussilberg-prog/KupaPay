@@ -82,3 +82,39 @@ Deno.test('message_posted deleted he', () => {
     });
     assertEquals(r.body, 'ההודעה נמחקה על ידי דנה');
 });
+
+Deno.test('group_deleted renders en/he with group title', () => {
+    assertEquals(
+        renderNotification('group_deleted', 'en', { actorName: 'Alice', groupName: 'Trip' }),
+        { title: 'Trip', body: 'Deleted by Alice' },
+    );
+    assertEquals(
+        renderNotification('group_deleted', 'he', { actorName: 'דנה', groupName: 'טיול' }),
+        { title: 'טיול', body: 'נמחקה על ידי דנה' },
+    );
+});
+
+Deno.test('group_note_changed renders en/he', () => {
+    assertEquals(
+        renderNotification('group_note_changed', 'en', { actorName: 'Alice', groupName: 'Trip' }),
+        { title: 'Trip', body: 'Note changed by Alice' },
+    );
+    assertEquals(
+        renderNotification('group_note_changed', 'he', { actorName: 'דנה', groupName: 'טיול' }),
+        { title: 'טיול', body: 'הפתק שונה על ידי דנה' },
+    );
+});
+
+Deno.test('friend_request_received rejected uses rejected push copy', () => {
+    assertEquals(
+        renderNotification('friend_request_received', 'en', { actorName: 'Bob', groupName: '', status: 'rejected' }),
+        { title: 'Friend request declined', body: 'Bob declined your friend request' },
+    );
+});
+
+Deno.test('friend_request_received pending unchanged', () => {
+    assertEquals(
+        renderNotification('friend_request_received', 'en', { actorName: 'Dana', groupName: '' }),
+        { title: 'New friend request', body: 'Dana wants to connect' },
+    );
+});

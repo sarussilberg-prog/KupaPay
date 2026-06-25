@@ -15,12 +15,17 @@
     },
     "friend_request_received": {
         "title": "בקשת חברות חדשה",
-        "body": "{actor} רוצה להתחבר איתך"
+        "body": "{actor} רוצה להתחבר איתך",
+        "rejectedTitle": "בקשת חברות נדחתה",
+        "rejectedBody": "{actor} דחה/תה את בקשת החברות שלך"
     },
     "group_added": {
         "title": "צורפת לקבוצה",
         "body": "על ידי {actor}"
     },
     "group_member_joined": "{member} הצטרף/ה לקבוצה",
-    "group_removed": "הוסרת מהקבוצה"
+    "group_removed": "הוסרת מהקבוצה",
+    "group_created": "קבוצה נוצרה",
+    "group_deleted": "נמחקה על ידי {actor}",
+    "group_note_changed": "הפתק שונה על ידי {actor}"
 }
