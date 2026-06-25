@@ -20,7 +20,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import { DebtRow } from '../../components/balances/DebtRow';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { platformAlert } from '../../lib/platformAlert';
 import {
     useCreateSettlementMutation,
     useDeleteSettlementMutation,
@@ -120,8 +120,6 @@ export function SettleUpListScreen() {
     const [activeDebt, setActiveDebt] = useState<PairwiseDebt | null>(null);
     const [detailSettlement, setDetailSettlement] = useState<Settlement | null>(null);
     const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
-    const [pendingDeleteSettlement, setPendingDeleteSettlement] =
-        useState<Settlement | null>(null);
     const [othersExpanded, setOthersExpanded] = useState(false);
     const [recordingPayment, setRecordingPayment] = useState(false);
 
@@ -205,19 +203,26 @@ export function SettleUpListScreen() {
 
     const handleDetailDeleteRequest = useCallback(() => {
         if (!detailSettlement) return;
-        setPendingDeleteSettlement(detailSettlement);
-    }, [detailSettlement]);
-
-    const handleConfirmDelete = useCallback(async () => {
-        if (!pendingDeleteSettlement) return;
-        const deleted = await deleteSettlementMutation.mutateAsync(
-            pendingDeleteSettlement.id,
-        );
-        if (deleted) {
-            setDetailSettlement(null);
-        }
-        setPendingDeleteSettlement(null);
-    }, [pendingDeleteSettlement, deleteSettlementMutation]);
+        // Confirm via the native platformAlert (not a React Native <Modal>) so
+        // it presents over the still-open detail-sheet Modal — RN won't stack
+        // two modals, which is why an in-app <Modal> confirm silently failed
+        // here. Matches the Activity and Group Details delete flows.
+        const target = detailSettlement;
+        platformAlert(t('settleUp.confirmDelete'), undefined, [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('common.delete'),
+                style: 'destructive',
+                onPress: () => {
+                    void (async () => {
+                        const deleted =
+                            await deleteSettlementMutation.mutateAsync(target.id);
+                        if (deleted) setDetailSettlement(null);
+                    })();
+                },
+            },
+        ]);
+    }, [detailSettlement, deleteSettlementMutation, t]);
 
     const handleSettlementEditSubmit = useCallback(
         async (values: SettleUpFormValues) => {
@@ -262,6 +267,7 @@ export function SettleUpListScreen() {
                         involved={item.involved}
                         fromName={displayName(item.debt.fromUserId)}
                         toName={displayName(item.debt.toUserId)}
+                        currentUserId={currentUserId}
                         fromAvatar={memberAvatarFor(item.debt.fromUserId)}
                         toAvatar={memberAvatarFor(item.debt.toUserId)}
                         onPress={() => handleRowPress(item.debt)}
@@ -305,6 +311,7 @@ export function SettleUpListScreen() {
                                                 involved={false}
                                                 fromName={displayName(d.fromUserId)}
                                                 toName={displayName(d.toUserId)}
+                                                currentUserId={currentUserId}
                                                 fromAvatar={memberAvatarFor(d.fromUserId)}
                                                 toAvatar={memberAvatarFor(d.toUserId)}
                                                 onPress={() => handleRowPress(d)}
@@ -351,6 +358,7 @@ export function SettleUpListScreen() {
                                             settlement={s}
                                             fromName={displayName(s.fromUserId)}
                                             toName={displayName(s.toUserId)}
+                                            currentUserId={currentUserId}
                                             fromAvatar={memberAvatarFor(s.fromUserId)}
                                             toAvatar={memberAvatarFor(s.toUserId)}
                                             isLast={idx === sortedSettlements.length - 1}
@@ -401,19 +409,6 @@ export function SettleUpListScreen() {
                 onClose={() => setDetailSettlement(null)}
                 onEdit={handleDetailEdit}
                 onDelete={handleDetailDeleteRequest}
-            />
-
-            <ConfirmDialog
-                visible={pendingDeleteSettlement !== null}
-                title={t('settleUp.delete')}
-                message={t('settleUp.confirmDelete')}
-                confirmText={t('common.delete')}
-                cancelText={t('common.cancel')}
-                onConfirm={() => {
-                    void handleConfirmDelete();
-                }}
-                onCancel={() => setPendingDeleteSettlement(null)}
-                destructive
             />
 
             {editingSettlement && currentUserId && (
@@ -500,6 +495,7 @@ interface SettlementHistoryRowProps {
     settlement: Settlement;
     fromName: string;
     toName: string;
+    currentUserId: string;
     fromAvatar?: string;
     toAvatar?: string;
     isLast: boolean;
@@ -510,6 +506,7 @@ function SettlementHistoryRow({
     settlement,
     fromName,
     toName,
+    currentUserId,
     fromAvatar,
     toAvatar,
     isLast,
@@ -524,6 +521,15 @@ function SettlementHistoryRow({
         day: 'numeric',
     });
     const amountText = `${settlement.currency} ${settlement.amount.toFixed(2)}`;
+    // Perspective-specific copy when the current user is a party — avoids
+    // ungrammatical Hebrew from injecting the "you" label into the generic
+    // template (e.g. "את/ה שילם/ה" instead of "שילמת", or "ל-את/ה" vs "לך").
+    const settlementLabel =
+        settlement.fromUserId === currentUserId
+            ? t('activity.youPaid', { name: toName, amount: amountText })
+            : settlement.toUserId === currentUserId
+              ? t('activity.paidYou', { name: fromName, amount: amountText })
+              : t('feed.settlement', { from: fromName, to: toName, amount: amountText });
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -548,11 +554,7 @@ function SettlementHistoryRow({
                     className="text-[13px] text-gray-600"
                     numberOfLines={1}
                 >
-                    {t('feed.settlement', {
-                        from: fromName,
-                        to: toName,
-                        amount: amountText,
-                    })}
+                    {settlementLabel}
                 </Text>
                 <Text className="text-[10px] text-gray-400 mt-0.5">
                     {dateText}

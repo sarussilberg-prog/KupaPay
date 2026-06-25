@@ -25,6 +25,7 @@ const baseGroup: GroupWithMembers = {
     ],
     isArchivedByMe: false,
     isAutoArchived: false,
+    hasUnreadNote: false,
 };
 
 describe('GroupCard', () => {

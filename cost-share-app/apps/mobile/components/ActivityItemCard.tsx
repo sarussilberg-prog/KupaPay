@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { ActivityEvent } from '@cost-share/shared';
 import { Text } from './AppText';
@@ -19,6 +20,7 @@ interface ResolveTitleArgs {
     actorName: string;
     groupName: string;
     newMemberName?: string;
+    currentUserId?: string;
 }
 
 export function resolveActivityTitle(
@@ -26,7 +28,7 @@ export function resolveActivityTitle(
     args: ResolveTitleArgs,
     t: TFunction,
 ): string {
-    const { actorName, groupName, newMemberName } = args;
+    const { actorName, groupName, newMemberName, currentUserId } = args;
     const meta = event.metadata ?? {};
     switch (event.kind) {
         case 'expense_added':
@@ -42,10 +44,28 @@ export function resolveActivityTitle(
                 return t('activity.notifications.friendRequestAccepted', { name: actorName });
             }
             if (status === 'rejected') {
-                return t('activity.notifications.friendRequestRejected', { name: actorName });
+                const responder = meta.responder_user_id as string | undefined;
+                // Rejecter's own row → "You declined {name}'s request".
+                // Sender's row (responder is the other person) → "{name} declined your request".
+                if (responder && currentUserId && responder === currentUserId) {
+                    return t('activity.notifications.friendRequestRejected', { name: actorName });
+                }
+                return t('activity.notifications.friendRequestRejectedByThem', { name: actorName });
             }
             return t('activity.notifications.friendRequest', { name: actorName });
         }
+        case 'group_created':
+            return t('activity.notifications.groupCreatedByYou', { group: groupName });
+        case 'group_deleted':
+            if (event.actorUserId && currentUserId && event.actorUserId === currentUserId) {
+                return t('activity.notifications.groupDeletedByYou', { group: groupName });
+            }
+            return t('activity.notifications.groupDeletedBy', { name: actorName, group: groupName });
+        case 'group_note_changed':
+            if (event.actorUserId && currentUserId && event.actorUserId === currentUserId) {
+                return t('activity.notifications.noteChangedByYou', { group: groupName });
+            }
+            return t('activity.notifications.noteChangedBy', { name: actorName, group: groupName });
         case 'group_added':
             // No actor → the user joined themselves via an invitation link
             // (redeem_group_invite inserts membership with a NULL added_by).
@@ -56,11 +76,21 @@ export function resolveActivityTitle(
                 return t('activity.notifications.joinedViaInvite', { group: groupName });
             }
             return t('activity.notifications.groupInvite', { name: actorName, group: groupName });
-        case 'group_member_joined':
+        case 'group_member_joined': {
+            // The viewer is an existing member; when they were the one who added
+            // the new member (added_by === them), render the first-person
+            // "You added X" instead of the neutral "X joined".
+            const addedByUserId = meta.added_by_user_id as string | undefined;
+            if (addedByUserId && currentUserId && addedByUserId === currentUserId) {
+                return t('activity.notifications.memberAddedByYou', {
+                    name: newMemberName ?? actorName,
+                });
+            }
             return t('activity.notifications.memberJoined', {
                 name: newMemberName ?? actorName,
                 group: groupName,
             });
+        }
         case 'group_removed':
             // An actor means someone else removed this member; name them.
             // No actor → a self-initiated leave, rendered as "You left".
@@ -100,6 +130,7 @@ export function ActivityItemCard({
     onPress,
     testID,
 }: ActivityItemCardProps) {
+    const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const variant = getActivityCardVariant(event.kind, friendRequestStatus);
     const md = event.metadata ?? {};
@@ -189,7 +220,7 @@ export function ActivityItemCard({
             }}
         >
             <Text style={{ fontSize: 10, fontWeight: '600', color: '#DC2626', letterSpacing: 0.2 }}>
-                Deleted
+                {t('activity.deleted')}
             </Text>
         </View>
     ) : isEdited ? (
@@ -206,7 +237,7 @@ export function ActivityItemCard({
             }}
         >
             <Text style={{ fontSize: 10, fontWeight: '600', color: '#6B7280', letterSpacing: 0.2 }}>
-                Edited
+                {t('activity.edited')}
             </Text>
         </View>
     ) : null;

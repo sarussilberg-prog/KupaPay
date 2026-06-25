@@ -30,6 +30,9 @@ export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
     group_added: 'groups',
     group_member_joined: 'groups',
     group_removed: 'groups',
+    group_created: 'groups',
+    group_deleted: 'groups',
+    group_note_changed: 'groups',
 };
 
 export const CATEGORY_TO_PREF_KEY: Record<ActivityCategory, keyof NotificationPreferences> = {

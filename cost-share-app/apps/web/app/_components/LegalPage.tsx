@@ -19,10 +19,12 @@ function createAnonClient() {
 
 interface Props {
   slug: LegalSlug;
+  // Explicit locale (e.g. from a `?lang=` deep link), takes precedence over cookie/header.
+  langOverride?: string;
 }
 
-export default async function LegalPage({ slug }: Props) {
-  const locale = await getLocale();
+export default async function LegalPage({ slug, langOverride }: Props) {
+  const locale = await getLocale(langOverride);
   const t = getTranslations(locale);
   const supabase = createAnonClient();
 
@@ -73,4 +75,18 @@ export default async function LegalPage({ slug }: Props) {
       <LandingFooter t={t} locale={locale} />
     </>
   );
+}
+
+// Shared route component for /privacy and /terms — both pass through an optional
+// `?lang=` deep-link override to LegalPage. Defined once to avoid duplicating the
+// searchParams-unwrapping boilerplate in every route file.
+export function createLegalPageRoute(slug: LegalSlug) {
+  return async function LegalPageRoute({
+    searchParams,
+  }: {
+    searchParams: Promise<{ lang?: string }>;
+  }) {
+    const { lang } = await searchParams;
+    return <LegalPage slug={slug} langOverride={lang} />;
+  };
 }

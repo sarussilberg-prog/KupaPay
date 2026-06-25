@@ -148,6 +148,12 @@ export function getActivityCardVariant(
             return MEMBER_JOINED;
         case 'group_removed':
             return MEMBER_LEFT;
+        case 'group_created':
+            return GROUP_INVITE;
+        case 'group_deleted':
+            return MEMBER_LEFT;
+        case 'group_note_changed':
+            return MESSAGE;
     }
 }
 

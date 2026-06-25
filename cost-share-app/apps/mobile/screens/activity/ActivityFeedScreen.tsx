@@ -576,6 +576,19 @@ export function ActivityFeedScreen() {
                 });
                 return;
             }
+            // group_note_changed → open the group's shared note. We navigate to
+            // GroupDetail with openNote; GroupDetail then pushes GroupNote on top
+            // of itself (the same path as the in-group note button), guaranteeing
+            // Back from the note returns to the relevant group — not wherever the
+            // Groups tab was last. A single navigate avoids the nested-navigator
+            // coalescing that made two separate navigates unreliable.
+            if (event.kind === 'group_note_changed' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: { groupId: event.groupId, openNote: true },
+                });
+                return;
+            }
             // group_added / group_member_joined → navigate to group
             if (event.groupId) {
                 navigation.navigate('Groups', {

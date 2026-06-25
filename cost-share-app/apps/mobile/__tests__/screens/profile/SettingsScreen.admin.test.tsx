@@ -20,12 +20,6 @@ jest.mock('../../../services/account.service', () => ({
     getMyOpenBalances: jest.fn().mockResolvedValue(null),
 }));
 
-// LegalDocumentSheet pulls in react-query without a provider in this unit test.
-// Stub it out — it has its own dedicated component tests.
-jest.mock('../../../components/settings/LegalDocumentSheet', () => ({
-    LegalDocumentSheet: () => null,
-}));
-
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';

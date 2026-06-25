@@ -196,10 +196,12 @@ export function GroupDetailScreen() {
         groupId,
         focusFeedItem: focusFeedItemParam,
         editSettlementId: editSettlementIdParam,
+        openNote: openNoteParam,
     } = route.params as {
         groupId: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
+        openNote?: boolean;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
@@ -475,6 +477,15 @@ export function GroupDetailScreen() {
         setEditingSettlement(target);
         navigation.setParams({ groupId, editSettlementId: undefined });
     }, [editSettlementIdParam, settlements, navigation, groupId]);
+
+    // Deep link from the activity feed / a note push: open the shared note ON
+    // TOP of this group screen so Back returns here (the relevant group). Clear
+    // the param first so returning to this group later won't reopen the note.
+    useEffect(() => {
+        if (!openNoteParam) return;
+        navigation.setParams({ groupId, openNote: undefined });
+        navigation.navigate('GroupNote', { groupId });
+    }, [openNoteParam, navigation, groupId]);
 
     const handleClearFeedSearchAndFilters = useCallback(() => {
         setSearchQuery('');
@@ -835,6 +846,7 @@ export function GroupDetailScreen() {
                             onOpenBalances={handleBalances}
                             onOpenNote={handleNote}
                             onOpenSettleUp={handleSettleUp}
+                            noteHasUnread={storeGroup?.hasUnreadNote ?? false}
                         />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">

@@ -285,6 +285,42 @@ describe('ActivityFeedScreen', () => {
         expect(await findByTestId('expense-detail-sheet')).toBeTruthy();
     });
 
+    it('opens a note-changed row via GroupDetail+openNote so Back returns to the group', async () => {
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'n1',
+                    userId: 'u1',
+                    kind: 'group_note_changed',
+                    groupId: 'g1',
+                    refId: 'g1',
+                    actorUserId: 'u2',
+                    metadata: { group_name: 'Trip' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
+        const card = await findByTestId('activity-card-n1');
+        fireEvent.press(card);
+
+        // A single navigate to GroupDetail with openNote — GroupDetail itself
+        // pushes the note on top, so the note's Back button returns to the group.
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: 'g1', openNote: true },
+            });
+        });
+        // It must NOT navigate straight to GroupNote (that loses the group beneath).
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Groups',
+            expect.objectContaining({ screen: 'GroupNote' }),
+        );
+    });
+
     it('shows an "unavailable" message instead of navigating when the group is gone', async () => {
         // The user's groups no longer include g1 (removed / group deleted).
         mockFetchGroups.mockResolvedValue([] as never);

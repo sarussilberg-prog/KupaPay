@@ -43,6 +43,8 @@ export interface Group {
     name: string;
     description?: string;
     note?: string;  // Shared free-text note editable by any group member
+    /** When the shared note last changed; drives the unread-note dot. */
+    noteUpdatedAt?: Date;
     imageUrl?: string;
     groupType: GroupType;
     defaultCurrency: string;
@@ -236,7 +238,10 @@ export type ActivityEventKind =
     | 'friend_request_received'
     | 'group_added'
     | 'group_member_joined'
-    | 'group_removed';
+    | 'group_removed'
+    | 'group_created'
+    | 'group_deleted'
+    | 'group_note_changed';
 
 /**
  * ActivityEvent — one row of the per-user activity feed.
@@ -510,6 +515,8 @@ export interface GroupWithMembers extends Group {
     isArchivedByMe: boolean;
     /** True when the group is auto-archived for everyone (Type 1). */
     isAutoArchived: boolean;
+    /** True when the note changed since the caller last opened it. */
+    hasUnreadNote: boolean;
 }
 
 // ============================================

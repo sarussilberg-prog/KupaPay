@@ -52,6 +52,9 @@ const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     group_added: 'groups_push',
     group_member_joined: 'groups_push',
     group_removed: 'groups_push',
+    group_created: 'groups_push',
+    group_deleted: 'groups_push',
+    group_note_changed: 'groups_push',
 };
 
 const DEFAULT_PREFS: PrefsRow = {
@@ -99,6 +102,7 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
         body: (md.body as string | undefined) ?? null,
         isEdited: md.is_edited === true,
         isDeleted: md.is_deleted === true,
+        status: (md.status as string | undefined) ?? null,
     });
 
     const messages: ExpoMessage[] = tokens.map((t) => ({
