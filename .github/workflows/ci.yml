@@ -41,9 +41,37 @@ jobs:
       - run: npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
+  sonar:
+    name: SonarCloud analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for blame and new-code detection
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: cost-share-app
+        run: npm test --workspace=@cost-share/mobile -- --coverage --passWithNoTests --ci
+
+      - name: Analyse with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, test]
+    needs: [lint, test, sonar]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
