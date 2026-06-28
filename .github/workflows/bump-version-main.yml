@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,34 +23,31 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Opens a PR with the minor version bump so it goes through branch protection
-      # like any other change. Auto-merge fires once Lint + Mobile tests pass.
-      # NO RECURSION: the bump PR only changes version.json, which is covered by
-      # paths-ignore — so merging it back to main never re-triggers this workflow.
+      # Direct commit on main — no PR. A GITHUB_TOKEN push does not re-trigger
+      # workflows, and paths-ignore skips version-only pushes, so there is no
+      # recursion. The baseline is read from the CURRENT version.json (robust:
+      # the old HEAD~1 lookup broke on the first release after the SSOT landed,
+      # since the previous main commit had no packages/shared/version.json).
       - name: Minor-bump packages/shared/version.json
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          current=$(jq -r '.version' "$VERSION_FILE")
-          IFS='.' read -r major minor patch <<< "$current"
-          new="${major}.$((minor + 1)).0"
-          BUMP_BRANCH="chore/version-bump/${new}"
-
-          git checkout -b "${BUMP_BRANCH}"
-          jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
-          git add "$VERSION_FILE"
-          git commit -m "chore: bump version ${current} → ${new}"
-          git push origin "${BUMP_BRANCH}"
-
-          PR_URL=$(gh pr create \
-            --base main \
-            --head "${BUMP_BRANCH}" \
-            --title "chore: bump version ${current} → ${new}" \
-            --body "Automated minor version bump.")
-          gh pr merge "${PR_URL}" --squash --auto
-          echo "✅ Bump PR ${PR_URL} queued for auto-merge."
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            current=$(jq -r '.version' "$VERSION_FILE")
+            IFS='.' read -r major minor patch <<< "$current"
+            new="${major}.$((minor + 1)).0"
+            jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
+            git add "$VERSION_FILE"
+            git commit -m "chore: bump version ${current} → ${new}"
+            if git push origin HEAD:main; then
+              echo "✅ Bumped ${current} → ${new}"
+              exit 0
+            fi
+            echo "main moved during bump; retrying (${attempt}/3)"
+          done
+          echo "::error::failed to bump version after 3 attempts"
+          exit 1
