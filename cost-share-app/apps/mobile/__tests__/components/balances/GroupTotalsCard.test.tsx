@@ -12,7 +12,8 @@ describe('GroupTotalsCard', () => {
                 defaultCurrency="USD"
             />,
         );
-        expect(getByText('balances.totalSpent')).toBeTruthy();
+        // Single-currency groups render the "total spent in <currency>" label.
+        expect(getByText('balances.totalSpentIn')).toBeTruthy();
         expect(getByText('balances.unsettled')).toBeTruthy();
         // Pluralised — matched via regex because t() mock returns bare key.
         expect(getByText(/balances\.expenseCount/i)).toBeTruthy();
