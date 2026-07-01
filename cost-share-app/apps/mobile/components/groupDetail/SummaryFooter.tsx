@@ -19,12 +19,14 @@ interface SummaryFooterProps {
     settlementCount: number;
     onOpenNote: () => void;
     onOpenSettleUp: () => void;
+    noteHasUnread?: boolean;
 }
 
 export function SummaryFooter({
     settlementCount,
     onOpenNote,
     onOpenSettleUp,
+    noteHasUnread,
 }: SummaryFooterProps) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
@@ -58,6 +60,9 @@ export function SummaryFooter({
                     >
                         {t('groups.actions.note')}
                     </Text>
+                    {noteHasUnread ? (
+                        <View style={styles.noteUnreadDot} testID="summary-note-unread-dot" />
+                    ) : null}
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -113,6 +118,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 5,
+        position: 'relative',
+    },
+    noteUnreadDot: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        width: 9,
+        height: 9,
+        borderRadius: 9999,
+        backgroundColor: colors.warning,
+        borderWidth: 1.5,
+        borderColor: '#fff',
     },
     settlePill: {
         borderRadius: 9999,

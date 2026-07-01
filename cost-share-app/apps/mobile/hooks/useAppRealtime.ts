@@ -91,6 +91,7 @@ export function applyGroupsRealtimeEventToCache(
                 members: existing.members,
                 isArchivedByMe: existing.isArchivedByMe,
                 isAutoArchived: existing.isAutoArchived,
+                hasUnreadNote: existing.hasUnreadNote,
             };
             return list.map((g) => (g.id === id ? merged : g));
         });
@@ -103,6 +104,13 @@ function handleGroupsEvent(payload: RealtimePayload): void {
         applyGroupsRealtimeEventToCache(queryClient, payload);
     } catch (err) {
         Sentry.captureException(err, { tags: { tag: SENTRY_TAGS.REALTIME_ECHO } });
+    }
+    // A groups UPDATE may be a shared-note edit (note_updated_at changed). The
+    // optimistic merge can't know the caller's note_seen_at, so refetch to let
+    // fetchGroups recompute hasUnreadNote correctly (dot appears for other
+    // members, stays clear for the editor whose note_seen_at the trigger bumped).
+    if (payload.eventType === 'UPDATE' && payload.new?.is_active !== false) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
     }
 }
 

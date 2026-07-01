@@ -1,102 +1,147 @@
 /**
  * SettlementHistoryScreen
- * List of past settlements in a group
- * Uses NativeWind styling only, full i18n support
+ * List of past settlements (and consolidation batches) in a group.
  */
 
-import { Text } from '../../components/AppText';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, FlatList, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRoute } from '@react-navigation/native';
-import { Settlement } from '@cost-share/shared';
-import { useLoading } from '../../hooks/useLoading';
+import { ConsolidationBatch, DisplaySettlement, GroupMemberLite, Settlement } from '@cost-share/shared';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
-import { fetchSettlements } from '../../services/settlements.service';
+import { useDisplaySettlementsQuery } from '../../hooks/queries/useConsolidationQueries';
+import { useDeleteConsolidationBatchMutation } from '../../hooks/queries/useConsolidationQueries';
+import { useDeleteSettlementMutation } from '../../hooks/queries/useSettlementQueries';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
-import { MemberAvatar } from '../../components/MemberAvatar';
+import { ConsolidationBatchRow } from '../../components/ConsolidationBatchRow';
+import { SettlementRow } from '../../components/SettlementRow';
+import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
+import { platformAlert } from '../../lib/platformAlert';
 import { colors } from '../../theme';
-import { getDisplayName } from '../../lib/userDisplay';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import { useAppStore } from '../../store';
 
 export function SettlementHistoryScreen() {
     const { t } = useTranslation();
     const route = useRoute<any>();
     const { groupId } = route.params;
-    const { isLoading, startLoading, stopLoading } = useLoading();
-    const isRtl = useRtlLayout();
-    const arrow = isRtl ? '←' : '→';
+    const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
 
-    const [settlements, setSettlements] = useState<Settlement[]>([]);
-    const [refreshing, setRefreshing] = useState(false);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
+    const { data: displayItems = [], isLoading, refetch } = useDisplaySettlementsQuery(groupId);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const loadData = useCallback(async () => {
-        startLoading();
-        const settlementsData = await fetchSettlements(groupId);
-        setSettlements(
-            settlementsData.sort(
-                (a, b) => new Date(b.settlementDate).getTime() - new Date(a.settlementDate).getTime()
-            )
-        );
-        stopLoading();
-    }, [groupId, startLoading, stopLoading]);
+    const memberMap = useMemo<Record<string, GroupMemberLite>>(() => {
+        const map: Record<string, GroupMemberLite> = {};
+        for (const u of allUsers) {
+            map[u.id] = {
+                userId: u.id,
+                displayName: getDisplayName(u, t),
+                avatarUrl: getAvatarUrl(u) ?? undefined,
+                isActive: u.isActive,
+            };
+        }
+        return map;
+    }, [allUsers, t]);
 
-    useEffect(() => {
-        void loadData();
-    }, []);
+    const [detailSettlement, setDetailSettlement] = useState<Settlement | null>(null);
+    const [detailBatch, setDetailBatch] = useState<{
+        batch: ConsolidationBatch;
+        settlements: Settlement[];
+    } | null>(null);
+
+    const deleteSettlementMutation = useDeleteSettlementMutation(groupId);
+    const deleteBatchMutation = useDeleteConsolidationBatchMutation(groupId);
 
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
-        await loadData();
+        await refetch();
         setRefreshing(false);
-    }, [loadData]);
+    }, [refetch]);
 
-    const getUserName = (userId: string): string => {
-        return getDisplayName(allUsers.find((u) => u.id === userId) ?? null, t);
-    };
+    const getUserName = (userId: string): string =>
+        getDisplayName(allUsers.find(u => u.id === userId) ?? null, t);
 
-    const renderSettlement = ({ item }: { item: Settlement }) => {
-        const formattedDate = new Date(item.settlementDate).toLocaleDateString();
+    const handleDeleteSettlement = useCallback(() => {
+        if (!detailSettlement) return;
+        const target = detailSettlement;
+        platformAlert(t('settleUp.confirmDelete'), undefined, [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('common.delete'),
+                style: 'destructive',
+                onPress: () => {
+                    void deleteSettlementMutation.mutateAsync(target.id).then(ok => {
+                        if (ok) setDetailSettlement(null);
+                    });
+                },
+            },
+        ]);
+    }, [detailSettlement, deleteSettlementMutation, t]);
 
-        return (
-            <View className="bg-white rounded-xl p-4 mb-2">
-                <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                        <MemberAvatar name={getUserName(item.fromUserId)} size="sm" />
-                        <View className="mx-2">
-                            <Text className="text-gray-400">{arrow}</Text>
-                        </View>
-                        <MemberAvatar name={getUserName(item.toUserId)} size="sm" />
-                        <View className="ml-3 flex-1">
-                            <Text className="text-sm font-medium text-gray-900">
-                                {getUserName(item.fromUserId)} {arrow} {getUserName(item.toUserId)}
-                            </Text>
-                            <Text className="text-xs text-gray-400 mt-0.5">
-                                {formattedDate}
-                                {item.paymentMethod && ` • ${t(`balances.methods.${item.paymentMethod}`)}`}
-                            </Text>
-                        </View>
-                    </View>
-                    <Text className="text-base font-bold text-green-600">
-                        {item.currency} {item.amount.toFixed(2)}
-                    </Text>
-                </View>
-            </View>
-        );
-    };
+    const handleDeleteBatch = useCallback(() => {
+        if (!detailBatch) return;
+        const target = detailBatch;
+        platformAlert(t('consolidation.confirmDelete'), undefined, [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('common.delete'),
+                style: 'destructive',
+                onPress: () => {
+                    void deleteBatchMutation.mutateAsync(target.batch.id).then(ok => {
+                        if (ok) setDetailBatch(null);
+                    });
+                },
+            },
+        ]);
+    }, [detailBatch, deleteBatchMutation, t]);
 
-    if (isLoading && settlements.length === 0) {
+    const renderItem = useCallback(
+        ({ item }: { item: DisplaySettlement }) => {
+            if (item.kind === 'batch') {
+                return (
+                    <ConsolidationBatchRow
+                        batch={item.batch}
+                        settlements={item.settlements}
+                        currentUserId={currentUserId}
+                        memberMap={memberMap}
+                        onPress={() => setDetailBatch({ batch: item.batch, settlements: item.settlements })}
+                    />
+                );
+            }
+            const s = item.settlement;
+            const fromName = s.fromUserId === currentUserId
+                ? t('settleUp.you')
+                : (memberMap[s.fromUserId]?.displayName ?? getUserName(s.fromUserId));
+            const toName = s.toUserId === currentUserId
+                ? t('settleUp.you')
+                : (memberMap[s.toUserId]?.displayName ?? getUserName(s.toUserId));
+            return (
+                <SettlementRow
+                    settlement={s}
+                    currentUserId={currentUserId}
+                    fromName={fromName}
+                    toName={toName}
+                    onPress={() => setDetailSettlement(s)}
+                />
+            );
+        },
+        [currentUserId, memberMap, t],
+    );
+
+    if (isLoading && displayItems.length === 0) {
         return <LoadingIndicator />;
     }
 
     return (
         <View className="flex-1 bg-slate-50">
             <FlatList
-                data={settlements}
-                keyExtractor={(item) => item.id}
-                renderItem={renderSettlement}
+                data={displayItems}
+                keyExtractor={item =>
+                    item.kind === 'batch' ? `batch-${item.batch.id}` : item.settlement.id
+                }
+                renderItem={renderItem}
                 contentContainerClassName="p-4"
                 refreshControl={
                     <RefreshControl
@@ -112,6 +157,24 @@ export function SettlementHistoryScreen() {
                         message={t('balances.noSettlementsMessage')}
                     />
                 }
+            />
+
+            <FeedItemDetailSheet
+                item={detailSettlement ? { kind: 'settlement', settlement: detailSettlement } : null}
+                memberMap={memberMap}
+                currentUserId={currentUserId}
+                onClose={() => setDetailSettlement(null)}
+                onEdit={() => {}}
+                onDelete={handleDeleteSettlement}
+            />
+
+            <FeedItemDetailSheet
+                item={detailBatch ? { kind: 'consolidation_batch', batch: detailBatch.batch, settlements: detailBatch.settlements } : null}
+                memberMap={memberMap}
+                currentUserId={currentUserId}
+                onClose={() => setDetailBatch(null)}
+                onEdit={() => {}}
+                onDelete={handleDeleteBatch}
             />
         </View>
     );

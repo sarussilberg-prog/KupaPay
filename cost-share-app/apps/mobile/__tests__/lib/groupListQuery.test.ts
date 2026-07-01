@@ -19,6 +19,7 @@ const baseGroup = (overrides: Partial<GroupWithMembers> = {}): GroupWithMembers 
     members: [],
     isArchivedByMe: false,
     isAutoArchived: false,
+    hasUnreadNote: false,
     ...overrides,
 });
 

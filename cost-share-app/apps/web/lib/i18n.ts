@@ -23,27 +23,27 @@ const translations = {
       title: 'למה KupaPay?',
       items: [
         {
-          icon: '🔀',
+          icon: 'simplify',
           title: 'פישוט חובות אוטומטי',
           description: 'הקבוצה שילמה 20 פעמים — KupaPay מחשבת שאתה צריך להעביר פעם אחת בלבד',
         },
         {
-          icon: '⚡',
+          icon: 'realtime',
           title: 'עדכון בזמן אמת',
           description: 'כל הוצאה מתעדכנת מיידית לכל חברי הקבוצה',
         },
         {
-          icon: '👥',
+          icon: 'groups',
           title: 'קבוצות גמישות',
           description: 'צור קבוצות לטיולים, שכירות, ארוחות — כמה שתרצה',
         },
         {
-          icon: '✈️',
+          icon: 'offline',
           title: 'עובד גם אופליין',
           description: 'אפשר להוסיף ולצפות בהוצאות גם בלי אינטרנט — הכול מסתנכרן אוטומטית כשחוזרים לרשת',
         },
         {
-          icon: '🔒',
+          icon: 'security',
           title: 'פרטיות ואבטחה',
           description: 'הנתונים שלך מוגנים ומאובטחים',
         },
@@ -61,7 +61,7 @@ const translations = {
       title: 'שאלות נפוצות',
       items: [
         {
-          question: 'מה ההבדל בין KupaPay לאפלקציות אחרות?',
+          question: 'מה ההבדל בין KupaPay לאפליקציות אחרות?',
           answer:
             'KupaPay משתמשת באלגוריתם פישוט חובות שמפחית את מספר ההעברות לחברים. במקום 10 העברות בין חברים, אולי תצטרך רק 3.',
         },
@@ -72,7 +72,7 @@ const translations = {
         {
           question: 'איך עובד פישוט החובות?',
           answer:
-            'האפלקציה מחשבת את היתרות הנטו של כל אחד בקבוצה ומוצאת את מינימום ההעברות שמסלקות את כל החובות.',
+            'האפליקציה מחשבת את היתרות הנטו של כל אחד בקבוצה ומוצאת את מינימום ההעברות שמסלקות את כל החובות.',
         },
         {
           question: 'האם אפשר למחוק קבוצה?',
@@ -117,28 +117,28 @@ const translations = {
       title: 'Why KupaPay?',
       items: [
         {
-          icon: '🔀',
+          icon: 'simplify',
           title: 'Automatic debt simplification',
           description:
             'Your group made 20 payments — KupaPay figures out you only need to transfer once',
         },
         {
-          icon: '⚡',
+          icon: 'realtime',
           title: 'Real-time updates',
           description: 'Every expense updates instantly for all group members',
         },
         {
-          icon: '👥',
+          icon: 'groups',
           title: 'Flexible groups',
           description: 'Create groups for trips, rent, dinners — as many as you like',
         },
         {
-          icon: '✈️',
+          icon: 'offline',
           title: 'Works offline',
           description: 'Add and view expenses even without internet — everything syncs automatically when you reconnect',
         },
         {
-          icon: '🔒',
+          icon: 'security',
           title: 'Privacy & security',
           description: 'Your data is protected and secure',
         },

@@ -134,11 +134,26 @@
             "findFriendsAfterCreate": "After opening the group — link, text, or contacts.",
             "steps": {
                 "optional": "Optional",
-                "name": { "title": "Kupa name", "helper": "Pick a name everyone recognizes (e.g. \"Beach trip\" or \"Apt 2025\")." },
-                "category": { "title": "Category", "helper": "The type sets the colors — you can change it later." },
-                "currency": { "title": "Currency" },
-                "image": { "title": "Cover image", "summaryDefault": "Default", "summarySet": "Image selected" },
-                "members": { "title": "Invite members", "summarySuffix": "members" }
+                "name": {
+                    "title": "Kupa name",
+                    "helper": "Pick a name everyone recognizes (e.g. \"Beach trip\" or \"Apt 2025\")."
+                },
+                "category": {
+                    "title": "Category",
+                    "helper": "The type sets the colors — you can change it later."
+                },
+                "currency": {
+                    "title": "Currency"
+                },
+                "image": {
+                    "title": "Cover image",
+                    "summaryDefault": "Default",
+                    "summarySet": "Image selected"
+                },
+                "members": {
+                    "title": "Invite members",
+                    "summarySuffix": "members"
+                }
             }
         }
     },
@@ -317,7 +332,8 @@
             "placeholder": "Write a shared note for everyone in this group…",
             "saving": "Saving…",
             "saved": "Saved",
-            "saveError": "Couldn't save"
+            "saveError": "Couldn't save",
+            "titleFor": "Group note for"
         },
         "share": {
             "menuTitle": "Share group",
@@ -359,6 +375,7 @@
             "toNPeople_other": "To {{count}} people",
             "splitLent": "Lent {{amount}}",
             "splitOwes": "Owes {{name}}",
+            "splitOwesYou": "Owes you",
             "paidBadge": "PAID",
             "totalLabel": "Total",
             "splitBetweenCount_one": "Split between · {{count}} person",
@@ -519,6 +536,7 @@
         "settledUp": "Settled up",
         "groupTotals": "Group totals",
         "totalSpent": "Total spent",
+        "totalSpentIn": "Total spent in {{currency}}",
         "unsettled": "Unsettled",
         "expenseCount_one": "1 expense",
         "expenseCount_other": "{{count}} expenses",
@@ -530,7 +548,8 @@
             "row": "{{name}} paid",
             "rowYou": "You paid",
             "detailSection": "Paid for {{name}}",
-            "detailSectionYou": "Paid for you"
+            "detailSectionYou": "Paid for you",
+            "detailSectionOwnerYou": "You paid for {{name}}"
         },
         "spentOnMode": {
             "row": "Spent on {{name}}",
@@ -667,6 +686,9 @@
             "noEvents": "No events captured for this issue",
             "noStack": "No stack trace available"
         },
+        "monetization": {
+            "portalRow": "Monetization Analytics"
+        },
         "supportMessages": {
             "title": "Support Messages",
             "portalRow": "Support messages",
@@ -760,7 +782,9 @@
         "deleted": "Deleted",
         "deletionNotice": {
             "expense": "This expense was deleted by {{name}} on {{when}}.",
-            "settlement": "This payment was deleted by {{name}} on {{when}}."
+            "settlement": "This payment was deleted by {{name}} on {{when}}.",
+            "expenseByYou": "This expense was deleted by you on {{when}}.",
+            "settlementByYou": "This payment was deleted by you on {{when}}."
         },
         "removeFromActivity": "Remove from activity",
         "removeFromActivityConfirm": "Remove this from your activity?",
@@ -777,11 +801,19 @@
             "groupInvite": "{{name}} added you to {{group}}",
             "joinedViaInvite": "You joined {{group}} using an invitation link",
             "memberJoined": "{{name}} joined {{group}}",
+            "memberAddedByYou": "You added {{name}}",
             "memberLeft": "{{name}} left {{group}}",
             "memberRemovedYou": "{{name}} removed you from {{group}}",
             "friendRequest": "Friend request from {{name}}",
             "friendRequestAccepted": "You and {{name}} are now friends",
-            "friendRequestRejected": "You declined {{name}}'s friend request"
+            "friendRequestRejected": "You declined {{name}}'s friend request",
+            "groupCreatedByYou": "Group {{group}} created by you",
+            "groupDeletedByYou": "Group {{group}} deleted by you",
+            "groupDeletedBy": "Group {{group}} deleted by {{name}}",
+            "noteChangedByYou": "Note changed by you · {{group}}",
+            "noteChangedBy": "Note changed by {{name}} · {{group}}",
+            "friendRequestRejectedByThem": "{{name}} declined your friend request",
+            "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}"
         },
         "addedExpense": "added an expense",
         "settledPayment": "settled a payment",
@@ -796,10 +828,13 @@
     },
     "settleUp": {
         "title": "Settle up",
+        "convertedTitle": "Converted settle up",
         "openDebts": "Open debts left to settle",
         "empty": "Everyone is settled up",
         "you": "You",
         "row": "{{from}} owes {{to}} {{amount}}",
+        "rowYouOwe": "You owe {{to}} {{amount}}",
+        "rowOwesYou": "{{from}} owes you {{amount}}",
         "payer": "Payer",
         "receiver": "Receiver",
         "currency": "Currency",
@@ -853,7 +888,10 @@
         "recordPaymentCta": "Record a payment",
         "memberPickerFromTitle": "Choose payer",
         "memberPickerToTitle": "Choose receiver",
-        "sameParticipantError": "Payer and receiver can't be the same"
+        "sameParticipantError": "Payer and receiver can't be the same",
+        "pairGroupLabel": "Debts between {{a}} and {{b}}",
+        "pairGroupLabelSelf": "Debts between you and {{name}}",
+        "pairGroupCount": "{{count}} debts"
     },
     "feed": {
         "settlement": "{{from}} paid {{to}} {{amount}}",
@@ -996,10 +1034,42 @@
         "categoryGroups": "Groups",
         "systemDisabled": "Notifications are turned off for this app",
         "openSettings": "Open settings",
+        "systemDisabledHint": "To update these settings, first turn on notifications in your device settings.",
+        "goToSettings": "Go to settings",
         "primingTitle": "Stay in the loop",
         "primingBody": "Get notified when a friend adds an expense or pays you back.",
         "primingEnable": "Enable notifications",
         "primingLater": "Not now"
+    },
+    "monetization": {
+        "adGateTitle": "Unlock this feature",
+        "watchAdButton": "Watch a short ad",
+        "loadingAd": "Loading ad...",
+        "goProButton": "Go Pro",
+        "goProWorkingOnIt": "We're working on it — this option will be available in the next version update.",
+        "continueBtn": "Continue",
+        "proPromo": {
+            "adLabel": "Ad · KupaPay Pro",
+            "headline": "The full KupaPay experience, without interruptions",
+            "body": "No ads, no friction. One comfortable flow for splitting, tracking, and settling expenses — exactly the way it should feel.",
+            "feature1": "No ads, ever",
+            "feature2": "Instant currency conversion",
+            "feature3": "Seamless, uninterrupted flows",
+            "cta": "Upgrade to Pro",
+            "skipLink": "Continue without Pro"
+        }
+    },
+    "remind": {
+        "sendReminderButton": "Send Reminder",
+        "sheetTitle": "Send a Reminder",
+        "viaApp": "Via KupaPay",
+        "viaShare": "Share outside app",
+        "composeTitle": "Write your reminder",
+        "sendButton": "Send",
+        "sent": "Reminder sent!",
+        "notGroupMember": "You don't have access to this group.",
+        "defaultMessage": "Hey, just a reminder that you owe {{amount}} in {{groupName}} 😊",
+        "amountAnd": " and "
     },
     "deleteAccount": {
         "warningTitle": "Delete account?",
@@ -1020,5 +1090,42 @@
         "openBalancesCta": "Settle up now",
         "reSignupBlockedTitle": "Account deleted",
         "reSignupBlocked": "This account was deleted. Contact {{email}} to restore it."
+    },
+    "consolidation": {
+        "convertButton": "Convert currency",
+        "gateTitle": "Convert currencies",
+        "pickCurrencyTitle": "Choose currency",
+        "confirmTitle": "Confirm conversion",
+        "pickCurrencyHint": "Choose the currency to consolidate into",
+        "confirmButton": "Confirm",
+        "summaryLabel": "Conversion summary",
+        "summaryDescription": "{{from}} will pay {{to}} for {{count}} debt(s) in {{currency}}",
+        "totalLabel": "Total",
+        "rateDisclaimer": "Exchange rates are updated daily",
+        "rateLabel": "@ {{rate}}",
+        "toastCreated": "Currencies consolidated",
+        "toastDeleted": "Consolidation deleted",
+        "recordError": "Could not record consolidation",
+        "noSettlements": "No debts to consolidate",
+        "deleteError": "Could not delete consolidation",
+        "confirmDelete": "Delete this consolidation? All related settlements will be removed.",
+        "batchRowTitle": "{{name}} consolidated debts",
+        "batchRowMeta": "{{count}} currencies merged",
+        "converted": "converted",
+        "detailSheetTitle": "Consolidation",
+        "detailHeaderLabel": "Converted Settlement",
+        "partiesLabel": "Parties",
+        "breakdownLabel": "Currency breakdown",
+        "heroDescription": "{{payer}} settled {{count}} debt(s) to {{payee}}",
+        "youConsolidatedActivity": "You consolidated {{amount}}",
+        "theyConsolidatedActivity": "{{name}} consolidated {{amount}}",
+        "otherCurrency": "Other currency…",
+        "settlingDebtsLabel": "Settling debts",
+        "settledDebtsTitle_one": "{{payer}} settled 1 debt with {{name}}",
+        "settledDebtsTitle_other": "{{payer}} settled {{count}} debts with {{name}}",
+        "netLabel": "Net",
+        "netDirectionTheyPayYou": "{{name}} pays you",
+        "netDirectionYouPayThem": "You pay {{name}}",
+        "netDirectionThirdParty": "{{from}} pays {{to}}"
     }
 }

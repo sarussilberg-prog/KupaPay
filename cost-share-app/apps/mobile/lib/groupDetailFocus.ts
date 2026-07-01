@@ -7,7 +7,8 @@ import type { FeedItem } from '@cost-share/shared';
 export type GroupDetailFocusFeedItem =
     | { kind: 'expense'; id: string }
     | { kind: 'settlement'; id: string }
-    | { kind: 'message'; id: string };
+    | { kind: 'message'; id: string }
+    | { kind: 'consolidation_batch'; id: string };
 
 export function feedItemMatchesFocus(
     item: FeedItem,
@@ -18,6 +19,9 @@ export function feedItemMatchesFocus(
     }
     if (focus.kind === 'message') {
         return item.kind === 'message' && item.message.id === focus.id;
+    }
+    if (focus.kind === 'consolidation_batch') {
+        return item.kind === 'consolidation_batch' && item.batch.id === focus.id;
     }
     return item.kind === 'settlement' && item.settlement.id === focus.id;
 }
@@ -38,6 +42,7 @@ export function focusItemKey(focus: GroupDetailFocusFeedItem): string {
 export function focusRowKey(focus: GroupDetailFocusFeedItem): string {
     if (focus.kind === 'expense') return `e:${focus.id}`;
     if (focus.kind === 'message') return `m:${focus.id}`;
+    if (focus.kind === 'consolidation_batch') return `b:${focus.id}`;
     return `s:${focus.id}`;
 }
 

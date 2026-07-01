@@ -1,10 +1,9 @@
 import React, { useCallback } from 'react';
-import { ScrollView, View, Linking } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SettingsSection } from '../../components/settings/SettingsSection';
 import { SettingsToggleRow } from '../../components/settings/SettingsToggleRow';
-import { SettingsRow } from '../../components/settings/SettingsRow';
 import { useNotificationPreferences, useSaveNotificationPreferences } from '../../hooks/queries/useNotificationPreferences';
 import { DEFAULT_NOTIFICATION_PREFERENCES, type NotificationPreferences } from '@cost-share/shared';
 
@@ -47,15 +46,6 @@ export function NotificationSettingsScreen() {
                         value={prefs.friendsPush} disabled={masterOff} onValueChange={(v) => patch('friendsPush', v)} />
                     <SettingsToggleRow iconName="people-outline" label={t('notifications.categoryGroups')}
                         value={prefs.groupsPush} disabled={masterOff} onValueChange={(v) => patch('groupsPush', v)} />
-                </SettingsSection>
-
-                <SettingsSection title="">
-                    <SettingsRow
-                        iconName="settings-outline"
-                        label={t('notifications.openSettings')}
-                        variant="chevron"
-                        onPress={() => { void Linking.openSettings(); }}
-                    />
                 </SettingsSection>
             </View>
         </ScrollView>

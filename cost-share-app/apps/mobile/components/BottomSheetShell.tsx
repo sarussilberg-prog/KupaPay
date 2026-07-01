@@ -1,6 +1,6 @@
 /**
  * BottomSheetShell — reusable bottom-sheet wrapper.
- * Provides: scrim, sheet container (75% height, rounded top, sheet shadow),
+ * Provides: scrim, sheet container (fits content, caps at 75% height, rounded top, sheet shadow),
  * drag handle, header row (Cancel · uppercase label · Save), hairline divider.
  * Children render in a scrollable body below the header.
  */
@@ -45,7 +45,7 @@ export function BottomSheetShell({
                 />
                 <View
                     style={{
-                        height: sheetHeight,
+                        maxHeight: sheetHeight,
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: -8 },
                         shadowOpacity: 0.18,
@@ -86,7 +86,7 @@ export function BottomSheetShell({
                         </Pressable>
                     </View>
                     <View className="h-px bg-border-soft" />
-                    <View className="flex-1">{children}</View>
+                    <View style={{ flexShrink: 1 }}>{children}</View>
                 </View>
             </View>
         </Modal>

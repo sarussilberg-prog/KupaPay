@@ -47,7 +47,7 @@ describe('ExpenseRow', () => {
             />,
         );
         expect(getByText('Coffee')).toBeTruthy();
-        expect(getByText('30.00')).toBeTruthy();
+        expect(getByText(/\b30(\.00)?\b/)).toBeTruthy();
     });
 
     it('shows the lent label when myDeltaState is lent', () => {

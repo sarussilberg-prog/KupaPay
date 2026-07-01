@@ -62,6 +62,13 @@ interface SettleUpSheetProps {
      */
     allowParticipantEdit?: boolean;
     submitting?: boolean;
+    /**
+     * When this is a consolidation settlement, pass the original per-currency
+     * debts here. A "Settling debts" section is rendered below the payment form
+     * showing what this payment consolidates.
+     */
+    consolidationDebts?: PairwiseDebt[];
+    consolidationMemberMap?: Record<string, GroupMemberLite>;
     onSubmit: (values: SettleUpFormValues) => Promise<void> | void;
     onClose: () => void;
 }
@@ -74,7 +81,7 @@ const METHOD_TILES: ReadonlyArray<{ key: MethodKey; icon: AppIconName }> = [
     { key: 'paypal', icon: 'logo-paypal' },
 ];
 
-const DEFAULT_METHOD: MethodKey = 'credit_card';
+const DEFAULT_METHOD: MethodKey = 'cash';
 
 function normalizeMethodKey(method: PaymentMethod | undefined): MethodKey {
     if (method === 'cash' || method === 'credit_card' || method === 'paypal') {
@@ -87,9 +94,6 @@ const formatAmountText = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : '')
 const formatShortDate = (d: Date, locale: string) =>
     d.toLocaleDateString(locale === 'he' ? 'he-IL' : locale, { month: 'short', day: 'numeric' });
 
-/** Space for the fixed bottom dock (date chip + record button). */
-const BOTTOM_DOCK_PADDING = 132;
-
 export function SettleUpSheet({
     visible,
     members,
@@ -100,6 +104,8 @@ export function SettleUpSheet({
     mode,
     allowParticipantEdit = false,
     submitting = false,
+    consolidationDebts,
+    consolidationMemberMap,
     onSubmit,
     onClose,
 }: SettleUpSheetProps) {
@@ -255,7 +261,12 @@ export function SettleUpSheet({
         settlementDate,
     ]);
 
-    const label = mode === 'edit' ? t('settleUp.edit') : t('settleUp.title');
+    const isConsolidation = consolidationDebts != null && consolidationDebts.length > 0;
+    const label = mode === 'edit'
+        ? t('settleUp.edit')
+        : isConsolidation
+            ? t('settleUp.convertedTitle')
+            : t('settleUp.title');
 
     return (
         <BottomSheetShell
@@ -265,10 +276,10 @@ export function SettleUpSheet({
             onSave={handleSubmit}
             saveDisabled={recordDisabled}
         >
-            <View className="flex-1">
+            <View style={{ flexShrink: 1 }}>
                 <ScrollView
-                    style={{ flex: 1 }}
-                    contentContainerStyle={{ paddingBottom: BOTTOM_DOCK_PADDING }}
+                    style={{ flexShrink: 1, flexGrow: 0 }}
+                    contentContainerStyle={{ paddingBottom: 8 }}
                     keyboardShouldPersistTaps="handled"
                     automaticallyAdjustKeyboardInsets
                     nestedScrollEnabled
@@ -280,6 +291,7 @@ export function SettleUpSheet({
                         currency={currency}
                         amountText={amountText}
                         onAmountChange={setAmountText}
+                        amountLocked={isConsolidation}
                         canPickCurrency={canPickCurrency}
                         onOpenCurrencyPicker={() => setCurrencyPickerOpen(true)}
                         canPickParticipants={allowParticipantEdit}
@@ -300,6 +312,14 @@ export function SettleUpSheet({
                             </Text>
                         </View>
                     ) : null}
+
+                    {consolidationDebts && consolidationDebts.length > 0 && (
+                        <ConsolidationDebtList
+                            debts={consolidationDebts}
+                            memberMap={consolidationMemberMap ?? {}}
+                            currentUserId={_currentUserId}
+                        />
+                    )}
 
                     <PaymentMethodSection
                         selected={paymentMethod}
@@ -390,6 +410,7 @@ interface SettleUpHeroProps {
     currency: string;
     amountText: string;
     onAmountChange: (v: string) => void;
+    amountLocked?: boolean;
     canPickCurrency: boolean;
     onOpenCurrencyPicker: () => void;
     canPickParticipants: boolean;
@@ -406,6 +427,7 @@ function SettleUpHero({
     currency,
     amountText,
     onAmountChange,
+    amountLocked = false,
     canPickCurrency,
     onOpenCurrencyPicker,
     canPickParticipants,
@@ -462,28 +484,48 @@ function SettleUpHero({
                         <View
                             className="flex-row items-baseline rounded-xl px-3 py-1"
                             style={{
-                                backgroundColor: 'rgba(255,255,255,0.14)',
-                                borderWidth: 1,
+                                backgroundColor: amountLocked ? 'transparent' : 'rgba(255,255,255,0.14)',
+                                borderWidth: amountLocked ? 0 : 1,
                                 borderColor: 'rgba(255,255,255,0.32)',
                             }}
                         >
-                            <TextInput
-                                value={amountText}
-                                onChangeText={onAmountChange}
-                                keyboardType="decimal-pad"
-                                selectionColor="#FFFFFF"
-                                style={{
-                                    color: '#FFFFFF',
-                                    fontSize: 26,
-                                    fontWeight: '700',
-                                    fontVariant: ['tabular-nums'],
-                                    letterSpacing: -0.02 * 26,
-                                    minWidth: 80,
-                                    padding: 0,
-                                    textAlign: 'center',
-                                }}
-                                testID="settle-amount-input"
-                            />
+                            {amountLocked ? (
+                                <Text
+                                    style={{
+                                        color: '#FFFFFF',
+                                        fontSize: 26,
+                                        fontWeight: '700',
+                                        fontVariant: ['tabular-nums'],
+                                        letterSpacing: -0.02 * 26,
+                                        minWidth: 80,
+                                        textAlign: 'center',
+                                    }}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.6}
+                                    testID="settle-amount-locked"
+                                >
+                                    {amountText}
+                                </Text>
+                            ) : (
+                                <TextInput
+                                    value={amountText}
+                                    onChangeText={onAmountChange}
+                                    keyboardType="decimal-pad"
+                                    selectionColor="#FFFFFF"
+                                    style={{
+                                        color: '#FFFFFF',
+                                        fontSize: 26,
+                                        fontWeight: '700',
+                                        fontVariant: ['tabular-nums'],
+                                        letterSpacing: -0.02 * 26,
+                                        minWidth: 80,
+                                        padding: 0,
+                                        textAlign: 'center',
+                                    }}
+                                    testID="settle-amount-input"
+                                />
+                            )}
                         </View>
 
                         <CurrencyChip
@@ -648,7 +690,7 @@ function PaymentMethodSection({ selected, onSelect, isRtl }: PaymentMethodSectio
     const { t } = useTranslation();
 
     return (
-        <View className="px-4 pt-5 self-stretch">
+        <View className="px-4 pt-4 self-stretch">
             <SectionLabel isRtl={isRtl} title={t('settleUp.methodType')} />
             <MethodTiles selected={selected} onSelect={onSelect} t={t} isRtl={isRtl} />
         </View>
@@ -753,10 +795,8 @@ function SettleUpBottomDock({
 }: SettleUpBottomDockProps) {
     return (
         <View
-            className="absolute bottom-0 bg-white/95 border-t border-border-soft"
+            className="bg-white/95 border-t border-border-soft"
             style={{
-                left: 0,
-                right: 0,
                 paddingHorizontal: 16,
                 paddingTop: 10,
                 paddingBottom: 22,
@@ -797,6 +837,56 @@ function SettleUpBottomDock({
                     fullWidth={false}
                     testID="settle-record-button"
                 />
+            </View>
+        </View>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ConsolidationDebtList — shown inside SettleUpSheet for consolidation flows
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ConsolidationDebtListProps {
+    debts: PairwiseDebt[];
+    memberMap: Record<string, GroupMemberLite>;
+    currentUserId: string;
+}
+
+function ConsolidationDebtList({ debts, memberMap, currentUserId }: ConsolidationDebtListProps) {
+    const { t } = useTranslation();
+    return (
+        <View className="mx-4 mt-4 mb-2">
+            <Text className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                {t('consolidation.settlingDebtsLabel')}
+            </Text>
+            <View className="bg-gray-50 rounded-2xl overflow-hidden">
+                {debts.map((debt, idx) => {
+                    const payerName = debt.fromUserId === currentUserId
+                        ? t('common.you')
+                        : (memberMap[debt.fromUserId]?.displayName ?? t('common.unknown'));
+                    const receiverName = debt.toUserId === currentUserId
+                        ? t('common.you')
+                        : (memberMap[debt.toUserId]?.displayName ?? t('common.unknown'));
+                    return (
+                        <View
+                            key={`${debt.currency}-${debt.fromUserId}-${idx}`}
+                            className={`flex-row items-center justify-between px-4 py-3 ${
+                                idx < debts.length - 1 ? 'border-b border-gray-100' : ''
+                            }`}
+                        >
+                            <Text
+                                className="text-gray-600 text-sm flex-1 mr-3"
+                                numberOfLines={1}
+                                style={{ writingDirection: 'ltr', textAlign: 'left' }}
+                            >
+                                {payerName} → {receiverName}
+                            </Text>
+                            <Text className="text-gray-800 text-sm font-semibold">
+                                {debt.currency} {debt.amount.toFixed(2)}
+                            </Text>
+                        </View>
+                    );
+                })}
             </View>
         </View>
     );

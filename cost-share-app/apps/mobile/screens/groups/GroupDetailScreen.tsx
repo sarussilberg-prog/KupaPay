@@ -19,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
+    ConsolidationBatch,
     ExpenseCategory,
     ExpenseWithDelta,
     FeedItem,
@@ -50,6 +51,7 @@ import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
 import { useGroupExpensesRealtime } from '../../hooks/useGroupExpensesRealtime';
 import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsRealtime';
+import { useGroupConsolidationBatchesRealtime } from '../../hooks/useGroupConsolidationBatchesRealtime';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchAddExpense } from '../../hooks/queries/prefetchAddExpense';
@@ -102,6 +104,7 @@ import {
     useGroupSettlementsQuery,
     useUpdateSettlementMutation,
 } from '../../hooks/queries/useSettlementQueries';
+import { useGroupConsolidationBatchesQuery, useDeleteConsolidationBatchMutation } from '../../hooks/queries/useConsolidationQueries';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
@@ -196,10 +199,14 @@ export function GroupDetailScreen() {
         groupId,
         focusFeedItem: focusFeedItemParam,
         editSettlementId: editSettlementIdParam,
+        openNote: openNoteParam,
+        openSettleUp: openSettleUpParam,
     } = route.params as {
         groupId: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
+        openNote?: boolean;
+        openSettleUp?: boolean;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
@@ -261,6 +268,10 @@ export function GroupDetailScreen() {
         | { kind: 'settlement'; settlement: Settlement }
         | null
     >(null);
+    const [batchDetail, setBatchDetail] = useState<{
+        batch: ConsolidationBatch;
+        settlements: Settlement[];
+    } | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -269,6 +280,8 @@ export function GroupDetailScreen() {
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
     const deleteSettlementMutation = useDeleteSettlementMutation(groupId);
+    const { data: consolidationBatches = [] } = useGroupConsolidationBatchesQuery(groupId);
+    const deleteBatchMutation = useDeleteConsolidationBatchMutation(groupId);
 
     const expensesQuery = useGroupExpensesQuery(groupId);
     const messagesQuery = useGroupMessagesQuery(groupId);
@@ -287,6 +300,7 @@ export function GroupDetailScreen() {
     useGroupMessagesRealtime(groupId);
     useGroupExpensesRealtime(groupId);
     useGroupSettlementsRealtime(groupId);
+    useGroupConsolidationBatchesRealtime(groupId);
 
     const rollup = simplified?.groupRollups.get(groupId);
     // No balance dataset at all (offline before it was ever cached) → the strip
@@ -411,8 +425,8 @@ export function GroupDetailScreen() {
     }, [loadAll, groupId]);
 
     const feed = useMemo<FeedItem[]>(
-        () => buildFeed(groupId, groupExpenses, messages, settlements, currentUserId),
-        [groupId, groupExpenses, messages, settlements, currentUserId],
+        () => buildFeed(groupId, groupExpenses, messages, settlements, currentUserId, consolidationBatches),
+        [groupId, groupExpenses, messages, settlements, currentUserId, consolidationBatches],
     );
 
     const trimmedQuery = searchQuery.trim().toLowerCase();
@@ -475,6 +489,25 @@ export function GroupDetailScreen() {
         setEditingSettlement(target);
         navigation.setParams({ groupId, editSettlementId: undefined });
     }, [editSettlementIdParam, settlements, navigation, groupId]);
+
+    // Deep link from the activity feed / a note push: open the shared note ON
+    // TOP of this group screen so Back returns here (the relevant group). Clear
+    // the param first so returning to this group later won't reopen the note.
+    useEffect(() => {
+        if (!openNoteParam) return;
+        navigation.setParams({ groupId, openNote: undefined });
+        navigation.navigate('GroupNote', { groupId });
+    }, [openNoteParam, navigation, groupId]);
+
+    // Deep link from the activity feed / a settle-reminder push: open the
+    // settle-up list ON TOP of this group screen so Back returns here (the
+    // relevant group). Same pattern as openNote above — clear the param first
+    // so returning to this group later won't reopen settle-up.
+    useEffect(() => {
+        if (!openSettleUpParam) return;
+        navigation.setParams({ groupId, openSettleUp: undefined });
+        navigation.navigate('SettleUpList', { groupId });
+    }, [openSettleUpParam, navigation, groupId]);
 
     const handleClearFeedSearchAndFilters = useCallback(() => {
         setSearchQuery('');
@@ -771,7 +804,9 @@ export function GroupDetailScreen() {
                         ? `e:${item.expense.id}`
                         : item.kind === 'settlement'
                             ? `s:${item.settlement.id}`
-                            : `m:${item.message.id}`
+                            : item.kind === 'consolidation_batch'
+                                ? `b:${item.batch.id}`
+                                : `m:${item.message.id}`
                 }
                 renderItem={({ item }) => {
                     const itemKey =
@@ -779,7 +814,9 @@ export function GroupDetailScreen() {
                             ? `e:${item.expense.id}`
                             : item.kind === 'settlement'
                                 ? `s:${item.settlement.id}`
-                                : `m:${item.message.id}`;
+                                : item.kind === 'consolidation_batch'
+                                    ? `b:${item.batch.id}`
+                                    : `m:${item.message.id}`;
                     const isFocused = focusedRowKey === itemKey;
                     return (
                     <View className="px-2" style={{ position: 'relative' }}>
@@ -791,6 +828,9 @@ export function GroupDetailScreen() {
                             onMessageEdit={handleMessageEdit}
                             onMessageDelete={handleMessageDelete}
                             onSettlementPress={handleSettlementPress}
+                            onBatchPress={item.kind === 'consolidation_batch'
+                                ? () => setBatchDetail({ batch: item.batch, settlements: item.settlements })
+                                : undefined}
                             searchQuery={trimmedQuery || undefined}
                         />
                         {item.kind === 'expense' &&
@@ -835,6 +875,7 @@ export function GroupDetailScreen() {
                             onOpenBalances={handleBalances}
                             onOpenNote={handleNote}
                             onOpenSettleUp={handleSettleUp}
+                            noteHasUnread={storeGroup?.hasUnreadNote ?? false}
                         />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
@@ -1016,6 +1057,30 @@ export function GroupDetailScreen() {
                 onClose={() => setFeedDetailItem(null)}
                 onEdit={handleFeedDetailEdit}
                 onDelete={handleFeedDetailDeleteRequest}
+            />
+
+            <FeedItemDetailSheet
+                item={batchDetail ? { kind: 'consolidation_batch', batch: batchDetail.batch, settlements: batchDetail.settlements } : null}
+                memberMap={memberMap}
+                currentUserId={currentUserId}
+                onClose={() => setBatchDetail(null)}
+                onEdit={() => {}}
+                onDelete={() => {
+                    if (!batchDetail) return;
+                    const target = batchDetail;
+                    platformAlert(t('consolidation.confirmDelete'), undefined, [
+                        { text: t('common.cancel'), style: 'cancel' },
+                        {
+                            text: t('common.delete'),
+                            style: 'destructive',
+                            onPress: () => {
+                                void deleteBatchMutation.mutateAsync(target.batch.id).then(ok => {
+                                    if (ok) setBatchDetail(null);
+                                });
+                            },
+                        },
+                    ]);
+                }}
             />
 
             {editingSettlement && (

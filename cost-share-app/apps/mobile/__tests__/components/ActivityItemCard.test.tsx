@@ -43,6 +43,9 @@ const t = (key: string, opts?: Record<string, string>) => {
     if (key === 'activity.notifications.memberJoined') {
         return `${opts?.name} joined ${opts?.group}`;
     }
+    if (key === 'activity.notifications.memberAddedByYou') {
+        return `You added ${opts?.name}`;
+    }
     if (key === 'activity.notifications.memberLeft') {
         return `${opts?.name} left ${opts?.group}`;
     }
@@ -51,6 +54,24 @@ const t = (key: string, opts?: Record<string, string>) => {
     }
     if (key === 'activity.notifications.joinedViaInvite') {
         return `You joined ${opts?.group} using an invitation link`;
+    }
+    if (key === 'activity.notifications.groupCreatedByYou') {
+        return `Group ${opts?.group} created by you`;
+    }
+    if (key === 'activity.notifications.groupDeletedByYou') {
+        return `Group ${opts?.group} deleted by you`;
+    }
+    if (key === 'activity.notifications.groupDeletedBy') {
+        return `Group ${opts?.group} deleted by ${opts?.name}`;
+    }
+    if (key === 'activity.notifications.noteChangedByYou') {
+        return `Note changed by you · ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.noteChangedBy') {
+        return `Note changed by ${opts?.name} · ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.friendRequestRejectedByThem') {
+        return `${opts?.name} declined your friend request`;
     }
     if (key === 'common.you') return 'You';
     return key;
@@ -93,10 +114,13 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Friends with Alice');
     });
 
-    it('builds rejected friend request copy', () => {
+    it('builds rejected friend request copy (rejecter sees "you declined")', () => {
         const title = resolveActivityTitle(
-            buildEvent('friend_request_received', { metadata: { status: 'rejected' } }),
-            { actorName: 'Alice', groupName: '' },
+            buildEvent('friend_request_received', {
+                userId: 'u-me',
+                metadata: { status: 'rejected', responder_user_id: 'u-me' },
+            }),
+            { actorName: 'Alice', groupName: '', currentUserId: 'u-me' },
             t as never,
         );
         expect(title).toBe('Rejected Alice');
@@ -129,6 +153,29 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Bob joined Trip');
     });
 
+    it('renders "You added X" when the viewer is the one who added the member', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_member_joined', {
+                userId: 'u-me',
+                metadata: { added_by_user_id: 'u-me' },
+            }),
+            { actorName: 'Alice', groupName: 'Trip', newMemberName: 'Bob', currentUserId: 'u-me' },
+            t as never,
+        );
+        expect(title).toBe('You added Bob');
+    });
+
+    it('keeps "X joined" when someone else added the member', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_member_joined', {
+                metadata: { added_by_user_id: 'u-other' },
+            }),
+            { actorName: 'Alice', groupName: 'Trip', newMemberName: 'Bob', currentUserId: 'u-me' },
+            t as never,
+        );
+        expect(title).toBe('Bob joined Trip');
+    });
+
     it('names the remover when a member was removed by someone else', () => {
         const title = resolveActivityTitle(
             buildEvent('group_removed'),
@@ -145,6 +192,70 @@ describe('resolveActivityTitle', () => {
             t as never,
         );
         expect(title).toBe('You left Trip');
+    });
+});
+
+describe('resolveActivityTitle — group + friend events', () => {
+    it('group_created → created-by-you', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_created', { actorUserId: 'me', userId: 'me' }),
+            { actorName: 'Me', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Group Trip created by you');
+    });
+
+    it('group_deleted by someone else → deleted-by name', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_deleted', { actorUserId: 'u2', userId: 'me' }),
+            { actorName: 'Alice', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Group Trip deleted by Alice');
+    });
+
+    it('group_deleted by you → deleted-by-you', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_deleted', { actorUserId: 'me', userId: 'me' }),
+            { actorName: 'Me', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Group Trip deleted by you');
+    });
+
+    it('group_note_changed by someone else → note-changed-by name', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_note_changed', { actorUserId: 'u2', userId: 'me' }),
+            { actorName: 'Alice', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Note changed by Alice · Trip');
+    });
+
+    it('friend reject — rejecter sees "you declined"', () => {
+        const title = resolveActivityTitle(
+            buildEvent('friend_request_received', {
+                actorUserId: 'u2',
+                userId: 'me',
+                metadata: { status: 'rejected', responder_user_id: 'me' },
+            }),
+            { actorName: 'Bob', groupName: '', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Rejected Bob');
+    });
+
+    it('friend reject — sender sees "{name} declined your request"', () => {
+        const title = resolveActivityTitle(
+            buildEvent('friend_request_received', {
+                actorUserId: 'u2',
+                userId: 'me',
+                metadata: { status: 'rejected', responder_user_id: 'u2' },
+            }),
+            { actorName: 'Bob', groupName: '', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Bob declined your friend request');
     });
 });
 
@@ -243,5 +354,69 @@ describe('ActivityItemCard', () => {
             />,
         );
         expect(queryByTestId('activity-card-amount')).toBeNull();
+    });
+
+    it('renders amount from payment_amount/payment_currency for consolidation_batch_added', () => {
+        const { getByTestId, getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 150, payment_currency: 'ILS' },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        expect(getByTestId('activity-card-amount')).toBeTruthy();
+        expect(getByText(/₪150/)).toBeTruthy();
+    });
+
+    it('renders the currencies-merged badge for consolidation_batch_added with settlement_count', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 200, payment_currency: 'ILS', settlement_count: 3 },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        // The mock t() returns the key as-is for unknown keys with opts
+        expect(getByText('consolidation.batchRowMeta')).toBeTruthy();
+    });
+
+    it('omits the currencies-merged badge when settlement_count is 0', () => {
+        const { queryByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 200, payment_currency: 'ILS', settlement_count: 0 },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        expect(queryByText('consolidation.batchRowMeta')).toBeNull();
+    });
+});
+
+describe('resolveActivityTitle — consolidation_batch_added', () => {
+    it('returns empty string when no description in metadata', () => {
+        const title = resolveActivityTitle(
+            buildEvent('consolidation_batch_added', { metadata: {} }),
+            { actorName: 'Avi', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('');
+    });
+
+    it('returns description from metadata when present', () => {
+        const title = resolveActivityTitle(
+            buildEvent('consolidation_batch_added', { metadata: { description: 'Currency conversion' } }),
+            { actorName: 'Avi', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('Currency conversion');
     });
 });

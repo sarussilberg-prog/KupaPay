@@ -47,7 +47,7 @@ describe('FeedRowCard', () => {
   it('keeps currency amounts LTR with a fixed currency column in Hebrew', () => {
     const { getByText } = render(
       <RtlLayoutProvider>
-        <FeedRowCard {...baseProps} subLine="הלוויתָ ILS 21.05" />
+        <FeedRowCard {...baseProps} subLine="הלווית ILS 21.05" />
       </RtlLayoutProvider>,
     );
 
