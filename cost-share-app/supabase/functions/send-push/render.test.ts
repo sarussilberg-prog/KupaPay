@@ -118,3 +118,43 @@ Deno.test('friend_request_received pending unchanged', () => {
         { title: 'New friend request', body: 'Dana wants to connect' },
     );
 });
+
+// consolidation_batch_added
+Deno.test('consolidation_batch_added new en renders group title and amount', () => {
+    const r = renderNotification('consolidation_batch_added', 'en', {
+        actorName: 'Avi', groupName: 'Summer Trip', amount: 200, currency: 'ILS',
+    });
+    assertEquals(r.title, 'Summer Trip');
+    assertEquals(r.body, 'New payment from Avi · ₪200');
+});
+
+Deno.test('consolidation_batch_added new he renders correctly', () => {
+    const r = renderNotification('consolidation_batch_added', 'he', {
+        actorName: 'אבי', groupName: 'טיול קיץ', amount: 200, currency: 'ILS',
+    });
+    assertEquals(r.title, 'טיול קיץ');
+    assertEquals(r.body, 'תשלום מומר חדש מאת אבי · ₪200');
+});
+
+Deno.test('consolidation_batch_added deleted en omits amount', () => {
+    const r = renderNotification('consolidation_batch_added', 'en', {
+        actorName: 'Avi', groupName: 'Summer Trip', amount: 200, currency: 'ILS', isDeleted: true,
+    });
+    assertEquals(r.title, 'Summer Trip');
+    assertEquals(r.body, 'Avi deleted a payment');
+});
+
+Deno.test('consolidation_batch_added deleted he omits amount', () => {
+    const r = renderNotification('consolidation_batch_added', 'he', {
+        actorName: 'אבי', groupName: 'טיול קיץ', amount: 200, currency: 'ILS', isDeleted: true,
+    });
+    assertEquals(r.title, 'טיול קיץ');
+    assertEquals(r.body, 'תשלום מומר נמחק על ידי אבי');
+});
+
+Deno.test('consolidation_batch_added new with unknown currency falls back to code', () => {
+    const r = renderNotification('consolidation_batch_added', 'en', {
+        actorName: 'Avi', groupName: 'Trip', amount: 50, currency: 'CHF',
+    });
+    assertEquals(r.body, 'New payment from Avi · 50 CHF');
+});

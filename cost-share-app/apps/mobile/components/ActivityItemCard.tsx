@@ -9,6 +9,7 @@ import type { TFunction } from 'i18next';
 import type { ActivityEvent } from '@cost-share/shared';
 import { Text } from './AppText';
 import { FeedRowThumbnail } from './FeedRowThumbnail';
+import { CurrenciesMergedBadge } from './CurrenciesMergedBadge';
 import { formatCurrencyAmount } from '../lib/currencyDisplay';
 import {
     activityCardAmountClass,
@@ -104,6 +105,11 @@ export function resolveActivityTitle(
                 name: t('common.you'),
                 group: groupName,
             });
+        case 'settle_up_reminder':
+            return t('activity.notifications.settleReminder', { name: actorName, group: groupName });
+        case 'consolidation_batch_added':
+            // Full title is built by ActivityItem (needs perspective)
+            return (event.metadata?.description as string | undefined) ?? '';
     }
 }
 
@@ -136,8 +142,10 @@ export function ActivityItemCard({
     const md = event.metadata ?? {};
     const amount = typeof md.amount === 'number' || typeof md.amount === 'string'
         ? Number(md.amount)
-        : 0;
-    const currency = typeof md.currency === 'string' ? md.currency : '';
+        : (typeof md.payment_amount === 'number' || typeof md.payment_amount === 'string'
+            ? Number(md.payment_amount) : 0);
+    const currency = typeof md.currency === 'string' ? md.currency
+        : (typeof md.payment_currency === 'string' ? md.payment_currency : '');
     const showAmount = variant.showAmount && amount > 0 && Boolean(currency);
     const amountText = showAmount ? formatCurrencyAmount(amount, currency) : null;
 
@@ -201,6 +209,11 @@ export function ActivityItemCard({
                     >
                         {amountText}
                     </Text>
+                    {event.kind === 'consolidation_batch_added' ? (
+                        <CurrenciesMergedBadge
+                            count={typeof md.settlement_count === 'number' ? md.settlement_count : 0}
+                        />
+                    ) : null}
                 </View>
             ) : null}
         </View>

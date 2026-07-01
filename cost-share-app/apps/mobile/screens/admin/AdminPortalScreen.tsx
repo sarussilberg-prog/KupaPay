@@ -68,6 +68,13 @@ export function AdminPortalScreen() {
                         testID="admin-portal-support-messages"
                     />
                     <SettingsRow
+                        iconName="bar-chart-outline"
+                        label={t('admin.monetization.portalRow')}
+                        variant="chevron"
+                        onPress={() => navigation.navigate('AdminMonetization')}
+                        testID="admin-portal-monetization"
+                    />
+                    <SettingsRow
                         iconName="refresh-outline"
                         label={t('admin.portal.resetOnboardingRow')}
                         variant="chevron"

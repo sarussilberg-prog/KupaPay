@@ -355,4 +355,68 @@ describe('ActivityItemCard', () => {
         );
         expect(queryByTestId('activity-card-amount')).toBeNull();
     });
+
+    it('renders amount from payment_amount/payment_currency for consolidation_batch_added', () => {
+        const { getByTestId, getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 150, payment_currency: 'ILS' },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        expect(getByTestId('activity-card-amount')).toBeTruthy();
+        expect(getByText(/₪150/)).toBeTruthy();
+    });
+
+    it('renders the currencies-merged badge for consolidation_batch_added with settlement_count', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 200, payment_currency: 'ILS', settlement_count: 3 },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        // The mock t() returns the key as-is for unknown keys with opts
+        expect(getByText('consolidation.batchRowMeta')).toBeTruthy();
+    });
+
+    it('omits the currencies-merged badge when settlement_count is 0', () => {
+        const { queryByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 200, payment_currency: 'ILS', settlement_count: 0 },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        expect(queryByText('consolidation.batchRowMeta')).toBeNull();
+    });
+});
+
+describe('resolveActivityTitle — consolidation_batch_added', () => {
+    it('returns empty string when no description in metadata', () => {
+        const title = resolveActivityTitle(
+            buildEvent('consolidation_batch_added', { metadata: {} }),
+            { actorName: 'Avi', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('');
+    });
+
+    it('returns description from metadata when present', () => {
+        const title = resolveActivityTitle(
+            buildEvent('consolidation_batch_added', { metadata: { description: 'Currency conversion' } }),
+            { actorName: 'Avi', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('Currency conversion');
+    });
 });

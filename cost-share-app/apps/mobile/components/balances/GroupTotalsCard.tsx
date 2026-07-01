@@ -51,7 +51,11 @@ export function GroupTotalsCard({
 
             <View className="flex-row items-start justify-between py-2">
                 <Text className="text-sm text-gray-600">
-                    {t('balances.totalSpent')}
+                    {sortedSpent.length === 1
+                        ? t('balances.totalSpentIn', {
+                              currency: sortedSpent[0].currency,
+                          })
+                        : t('balances.totalSpent')}
                 </Text>
                 <View className="items-end">
                     <CurrencyAmountList

@@ -155,6 +155,7 @@ function buildHistoryLines(
             continue;
         }
 
+        if (item.kind === 'consolidation_batch') continue;
         const s = item.settlement;
         const from = names.get(s.fromUserId) ?? s.fromUserId;
         const to = names.get(s.toUserId) ?? s.toUserId;

@@ -11,6 +11,14 @@ describe('notificationDataToPendingNavigation', () => {
         expect(notificationDataToPendingNavigation({ kind: 'message_posted', groupId: 'g3', refId: 'r' }))
             .toEqual({ target: 'groupDetail', groupId: 'g3' });
     });
+    it('routes consolidation_batch_added to the group', () => {
+        expect(notificationDataToPendingNavigation({ kind: 'consolidation_batch_added', groupId: 'g5', refId: 'r' }))
+            .toEqual({ target: 'groupDetail', groupId: 'g5' });
+    });
+    it('returns null for consolidation_batch_added without a groupId', () => {
+        expect(notificationDataToPendingNavigation({ kind: 'consolidation_batch_added', groupId: null, refId: 'r' }))
+            .toBeNull();
+    });
     it('routes friend requests to the friends screen', () => {
         expect(notificationDataToPendingNavigation({ kind: 'friend_request_received', groupId: null, refId: 'r' }))
             .toEqual({ target: 'friends' });

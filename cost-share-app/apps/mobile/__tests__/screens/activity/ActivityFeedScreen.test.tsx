@@ -321,6 +321,42 @@ describe('ActivityFeedScreen', () => {
         );
     });
 
+    it('opens a settle-reminder row via GroupDetail+openSettleUp so Back returns to the group', async () => {
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'sr1',
+                    userId: 'u1',
+                    kind: 'settle_up_reminder',
+                    groupId: 'g1',
+                    refId: 'r1',
+                    actorUserId: 'u2',
+                    metadata: { group_name: 'Trip', body: 'Please settle up 😊' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
+        const card = await findByTestId('activity-card-sr1');
+        fireEvent.press(card);
+
+        // A single navigate to GroupDetail with openSettleUp — GroupDetail itself
+        // pushes the settle-up list on top, so its Back button returns to the group.
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: 'g1', openSettleUp: true },
+            });
+        });
+        // It must NOT navigate straight to SettleUpList (that loses the group beneath).
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Groups',
+            expect.objectContaining({ screen: 'SettleUpList' }),
+        );
+    });
+
     it('shows an "unavailable" message instead of navigating when the group is gone', async () => {
         // The user's groups no longer include g1 (removed / group deleted).
         mockFetchGroups.mockResolvedValue([] as never);

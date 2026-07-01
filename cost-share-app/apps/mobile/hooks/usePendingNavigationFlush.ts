@@ -25,6 +25,16 @@ export function usePendingNavigationFlush(): void {
             });
             return;
         }
+        if (pendingNavigation.target === 'settleUpList') {
+            // Open settle-up ON TOP of the group (via GroupDetail + openSettleUp)
+            // so Back returns to the relevant group — same pattern as note deep
+            // links. GroupDetail pushes SettleUpList on top of itself.
+            navigation.navigate('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: pendingNavigation.groupId, openSettleUp: true },
+            });
+            return;
+        }
         if (pendingNavigation.target === 'groupsList') {
             navigation.navigate('Groups', { screen: 'GroupsList', merge: true });
         }

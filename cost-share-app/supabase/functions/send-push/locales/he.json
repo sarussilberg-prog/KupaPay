@@ -9,6 +9,10 @@
         "edited": "תשלום עודכן על ידי {actor}",
         "deleted": "תשלום נמחק על ידי {actor}"
     },
+    "consolidation_batch_added": {
+        "new": "תשלום מומר חדש מאת {actor}",
+        "deleted": "תשלום מומר נמחק על ידי {actor}"
+    },
     "message_posted": {
         "edited": "ההודעה נערכה על ידי {actor}",
         "deleted": "ההודעה נמחקה על ידי {actor}"
@@ -27,5 +31,6 @@
     "group_removed": "הוסרת מהקבוצה",
     "group_created": "קבוצה נוצרה",
     "group_deleted": "נמחקה על ידי {actor}",
-    "group_note_changed": "הפתק שונה על ידי {actor}"
+    "group_note_changed": "הפתק שונה על ידי {actor}",
+    "settle_up_reminder": "תזכורת מ-{actor}"
 }

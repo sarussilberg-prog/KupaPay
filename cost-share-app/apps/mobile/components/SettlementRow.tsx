@@ -42,7 +42,7 @@ function SettlementRowBase({
 
     const copy = buildSettlementFeedCopy(settlement, currentUserId);
     const title = t(copy.key);
-    const meta = `${timestamp} · ${t('activity.settlement')}`;
+    const meta = timestamp;
     const amount = `${settlement.currency} ${formatAmountDecimal(settlement.amount)}`;
 
     const thumbnail = (

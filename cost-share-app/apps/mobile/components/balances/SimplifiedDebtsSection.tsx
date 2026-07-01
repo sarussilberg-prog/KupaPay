@@ -27,6 +27,7 @@ interface SimplifiedDebtsSectionProps {
     /** True when the balance dataset is unavailable (offline, no cache). */
     balanceUnknown?: boolean;
     onSettle: (debt: DebtSummary) => void;
+    onRemind?: (debt: DebtSummary) => void;
 }
 
 interface FlatDebt {
@@ -41,6 +42,7 @@ export function SimplifiedDebtsSection({
     currentUserId,
     balanceUnknown,
     onSettle,
+    onRemind,
 }: SimplifiedDebtsSectionProps) {
     const { t } = useTranslation();
     const [othersExpanded, setOthersExpanded] = useState(false);
@@ -103,6 +105,9 @@ export function SimplifiedDebtsSection({
             fromAvatar={avatarById[debt.fromUserId]}
             toAvatar={avatarById[debt.toUserId]}
             onPress={() => onSettle(debt)}
+            onRemind={debt.fromUserId !== currentUserId && onRemind
+                ? () => onRemind(debt)
+                : undefined}
         />
     );
 

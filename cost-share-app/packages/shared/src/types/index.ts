@@ -132,7 +132,39 @@ export interface Settlement {
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date | null;
+    /** Set when this settlement is part of a consolidation batch. */
+    consolidationBatchId?: string;
+    /** FX rate used at time of consolidation (source currency units per 1 target currency). */
+    exchangeRate?: number;
 }
+
+/**
+ * ConsolidationBatch — groups multiple settlements created together in a
+ * "convert all currencies" flow.
+ * Maps to: consolidation_batches table.
+ */
+export interface ConsolidationBatch {
+    id: string;
+    groupId: string;
+    paidByUserId: string;
+    paidToUserId?: string;
+    paymentAmount: number;
+    paymentCurrency: string;
+    settlementCount?: number;
+    createdAt: Date;
+    deletedAt: Date | null;
+}
+
+/**
+ * DisplaySettlement — presentation unit for settlement UI surfaces.
+ * A 'standalone' wraps a single Settlement; a 'batch' groups all
+ * Settlement records that share a consolidation_batch_id.
+ * Use this type everywhere settlements are rendered. For balance
+ * math, use raw Settlement[] from fetchSettlements().
+ */
+export type DisplaySettlement =
+    | { kind: 'standalone'; settlement: Settlement }
+    | { kind: 'batch'; batch: ConsolidationBatch; settlements: Settlement[] };
 
 /** One row in the Settle Up list — a pairwise net debt within a group, per currency. */
 export interface PairwiseDebt {
@@ -234,6 +266,7 @@ export interface UserExpenseView {
 export type ActivityEventKind =
     | 'expense_added'
     | 'settlement_added'
+    | 'consolidation_batch_added'
     | 'message_posted'
     | 'friend_request_received'
     | 'group_added'
@@ -241,7 +274,8 @@ export type ActivityEventKind =
     | 'group_removed'
     | 'group_created'
     | 'group_deleted'
-    | 'group_note_changed';
+    | 'group_note_changed'
+    | 'settle_up_reminder';
 
 /**
  * ActivityEvent — one row of the per-user activity feed.
@@ -682,7 +716,8 @@ export interface ExpenseWithDelta extends ExpenseWithSplits {
 export type FeedItem =
     | { kind: 'expense'; sortAt: Date; expense: ExpenseWithDelta }
     | { kind: 'message'; sortAt: Date; message: GroupMessage }
-    | { kind: 'settlement'; sortAt: Date; settlement: Settlement };
+    | { kind: 'settlement'; sortAt: Date; settlement: Settlement }
+    | { kind: 'consolidation_batch'; sortAt: Date; batch: ConsolidationBatch; settlements: Settlement[] };
 
 // ============================================
 // 7. PROFILE DASHBOARD (RPC payloads)
