@@ -105,6 +105,30 @@ export async function updateSupportMessageStatus(id: string, status: 'open' | 'c
     return true;
 }
 
+export interface MonetizationFunnel {
+    ad_gate_shown: number;
+    ad_gate_watch_tapped: number;
+    ad_gate_watch_completed: number;
+    ad_gate_pro_tapped: number;
+    remind_sent: number;
+}
+
+export interface MonetizationMetrics {
+    funnel: MonetizationFunnel;
+    by_feature: Record<string, MonetizationFunnel>;
+    by_platform: Record<string, number>;
+    daily: Array<{ date: string; ad_gate_shown: number; ad_gate_watch_completed: number; remind_sent: number }>;
+}
+
+export async function fetchAdminMonetizationMetrics(): Promise<MonetizationMetrics | null> {
+    const { data, error } = await supabase.rpc('get_monetization_metrics');
+    if (error || !data) {
+        if (error) console.warn('fetchAdminMonetizationMetrics: RPC failed', error);
+        return null;
+    }
+    return data as MonetizationMetrics;
+}
+
 import type { AdminPlatformMetrics } from '@cost-share/shared';
 
 type MetricsRow = {

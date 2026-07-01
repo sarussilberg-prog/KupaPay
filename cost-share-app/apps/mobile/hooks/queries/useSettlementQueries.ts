@@ -33,6 +33,10 @@ function useInvalidateAfterSettlementChange(groupId: string) {
             queryKey: queryKeys.groupContributions(groupId),
         });
         void queryClient.invalidateQueries({ queryKey: queryKeys.activity });
+        // Invalidate display settlements so groupSettlementsForDisplay re-runs
+        void queryClient.invalidateQueries({
+            queryKey: [...queryKeys.groupSettlements(groupId), 'display'],
+        });
     };
 }
 

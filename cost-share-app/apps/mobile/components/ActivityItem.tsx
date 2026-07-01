@@ -18,6 +18,7 @@ import {
     getAvatarUrlForMember,
     getDisplayNameForMember,
 } from '../lib/userDisplay';
+import { formatAmountDecimal } from '../lib/currencyDisplay';
 
 interface ActivityItemProps {
     event: ActivityEvent;
@@ -61,8 +62,27 @@ export const ActivityItem = React.memo(function ActivityItem({
             'pending' | 'accepted' | 'rejected' | 'cancelled')
         : undefined;
 
-    // Build a settlement description (uses currentUserId for perspective).
+    // Build a perspective-specific description for event kinds that need it.
     let titleOverride: string | undefined;
+    if (event.kind === 'consolidation_batch_added') {
+        const md = event.metadata ?? {};
+        const paidById = md.paid_by_user_id as string | undefined;
+        const toUserId = md.paid_to_user_id as string | undefined;
+        const paymentAmount = Number(md.payment_amount ?? 0);
+        const paymentCurrency = (md.payment_currency as string | undefined) ?? '';
+        const amountText = `${formatAmountDecimal(paymentAmount)} ${paymentCurrency}`;
+        const fromName = paidById === currentUserId ? t('common.you') : actorName;
+        const toName = toUserId === currentUserId
+            ? t('common.you')
+            : getDisplayNameForMember(counterpart ?? null, t);
+        if (paidById === currentUserId) {
+            titleOverride = t('activity.youPaid', { name: toName, amount: amountText });
+        } else if (toUserId === currentUserId) {
+            titleOverride = t('activity.paidYou', { name: fromName, amount: amountText });
+        } else {
+            titleOverride = t('feed.settlement', { from: fromName, to: toName, amount: amountText });
+        }
+    }
     if (event.kind === 'settlement_added') {
         const md = event.metadata ?? {};
         const fromId = md.from_user_id as string | undefined;
@@ -99,11 +119,15 @@ export const ActivityItem = React.memo(function ActivityItem({
         const isEditableKind =
             event.kind === 'expense_added'
             || event.kind === 'settlement_added'
-            || event.kind === 'message_posted';
+            || event.kind === 'message_posted'
+            || event.kind === 'consolidation_batch_added';
         const deleted = isEditableKind && md.is_deleted === true;
         const edited = isEditableKind && !deleted && md.is_edited === true;
         let metaText: string;
         switch (event.kind) {
+            case 'consolidation_batch_added':
+                metaText = timestamp;
+                break;
             case 'settlement_added':
             case 'friend_request_received':
             case 'group_added':
@@ -112,6 +136,7 @@ export const ActivityItem = React.memo(function ActivityItem({
             case 'group_created':
             case 'group_deleted':
             case 'group_note_changed':
+            case 'settle_up_reminder':
                 metaText = timestamp;
                 break;
             case 'expense_added':

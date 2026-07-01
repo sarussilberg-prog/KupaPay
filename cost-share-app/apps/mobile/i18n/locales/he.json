@@ -552,6 +552,7 @@
         "settledUp": "מסודר",
         "groupTotals": "סיכום קבוצה",
         "totalSpent": "סה״כ הוצאות",
+        "totalSpentIn": "סך כל הוצאות ב־{{currency}}",
         "unsettled": "פתוח לסגירה",
         "expenseCount_one": "הוצאה אחת",
         "expenseCount_other": "{{count}} הוצאות",
@@ -563,7 +564,8 @@
             "row": "{{name}} שילם",
             "rowYou": "שילמת",
             "detailSection": "שילם עבור {{name}}",
-            "detailSectionYou": "שילם עבורך"
+            "detailSectionYou": "שילם עבורך",
+            "detailSectionOwnerYou": "שילמת עבור {{name}}"
         },
         "spentOnMode": {
             "row": "הוצא על {{name}}",
@@ -702,6 +704,9 @@
             "noEvents": "לא נתפסו אירועים עבור התקלה הזו",
             "noStack": "אין מחסנית קריאה"
         },
+        "monetization": {
+            "portalRow": "ניתוח הכנסות"
+        },
         "supportMessages": {
             "title": "הודעות תמיכה",
             "portalRow": "הודעות תמיכה",
@@ -795,7 +800,9 @@
         "deleted": "נמחק",
         "deletionNotice": {
             "expense": "ההוצאה הזו נמחקה על ידי {{name}} ב־{{when}}.",
-            "settlement": "התשלום הזה נמחק על ידי {{name}} ב־{{when}}."
+            "settlement": "התשלום הזה נמחק על ידי {{name}} ב־{{when}}.",
+            "expenseByYou": "ההוצאה הזו נמחקה על ידך ב־{{when}}.",
+            "settlementByYou": "התשלום הזה נמחק על ידך ב־{{when}}."
         },
         "removeFromActivity": "הסר מהפעילות",
         "removeFromActivityConfirm": "להסיר את זה מהפעילות שלך?",
@@ -823,7 +830,8 @@
             "groupDeletedBy": "קבוצה {{group}} נמחקה על ידי {{name}}",
             "noteChangedByYou": "הפתק שונה על ידך · {{group}}",
             "noteChangedBy": "הפתק שונה על ידי {{name}} · {{group}}",
-            "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך"
+            "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך",
+            "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}"
         },
         "addedExpense": "הוסיף הוצאה",
         "settledPayment": "ביצע תשלום",
@@ -838,6 +846,7 @@
     },
     "settleUp": {
         "title": "סגירת חשבון",
+        "convertedTitle": "סגירת חשבון מומרת",
         "openDebts": "חשבונות פתוחים שנותר לסגור",
         "empty": "כולם מסודרים",
         "you": "את/ה",
@@ -897,7 +906,10 @@
         "recordPaymentCta": "רשום תשלום",
         "memberPickerFromTitle": "בחר משלם",
         "memberPickerToTitle": "בחר מקבל",
-        "sameParticipantError": "המשלם והמקבל לא יכולים להיות אותו אדם"
+        "sameParticipantError": "המשלם והמקבל לא יכולים להיות אותו אדם",
+        "pairGroupLabel": "חובות בין {{a}} לבין {{b}}",
+        "pairGroupLabelSelf": "חובות בינך לבין {{name}}",
+        "pairGroupCount": "{{count}} חובות"
     },
     "feed": {
         "settlement": "{{from}} שילם/ה ל-{{to}} {{amount}}",
@@ -1047,6 +1059,36 @@
         "primingEnable": "הפעל התראות",
         "primingLater": "לא עכשיו"
     },
+    "monetization": {
+        "adGateTitle": "פתח את התכונה",
+        "watchAdButton": "צפה בפרסומת קצרה",
+        "loadingAd": "טוען פרסומת...",
+        "goProButton": "שדרג ל-pro",
+        "goProWorkingOnIt": "אנחנו עובדים על זה, בעדכון גרסה הבא תהיה לך את האופציה הזו.",
+        "continueBtn": "המשך",
+        "proPromo": {
+            "adLabel": "מודעה · KupaPay Pro",
+            "headline": "חוויית KupaPay המלאה, בלי הפרעות",
+            "body": "ללא מודעות, ללא חיכוך. זרימה נוחה ואחת לפיצול, מעקב וסילוק — בדיוק כמו שזה צריך להרגיש.",
+            "feature1": "ללא מודעות, לעולם",
+            "feature2": "המרת מטבעות מיידית",
+            "feature3": "זרימה חלקה וללא הפרעות",
+            "cta": "שדרג ל-Pro",
+            "skipLink": "המשך בלי Pro"
+        }
+    },
+    "remind": {
+        "sendReminderButton": "שלח תזכורת",
+        "sheetTitle": "שלח תזכורת",
+        "viaApp": "דרך KupaPay",
+        "viaShare": "שתף מחוץ לאפליקציה",
+        "composeTitle": "כתוב את התזכורת שלך",
+        "sendButton": "שלח",
+        "sent": "התזכורת נשלחה!",
+        "notGroupMember": "אין לך גישה לקבוצה הזו.",
+        "defaultMessage": "היי, רק תזכורת שאתה חייב {{amount}} ב-{{groupName}} 😊",
+        "amountAnd": " ו-"
+    },
     "deleteAccount": {
         "warningTitle": "למחוק את החשבון?",
         "warningBullet1": "לא ניתן יהיה להתחבר יותר.",
@@ -1066,5 +1108,42 @@
         "openBalancesCta": "סלק עכשיו",
         "reSignupBlockedTitle": "החשבון נמחק",
         "reSignupBlocked": "החשבון הזה נמחק. ניתן לפנות ל-{{email}} כדי לשחזר."
+    },
+    "consolidation": {
+        "convertButton": "המר מטבע",
+        "gateTitle": "המרת מטבעות",
+        "pickCurrencyTitle": "בחר מטבע",
+        "confirmTitle": "אישור המרה",
+        "pickCurrencyHint": "בחר את המטבע לאיחוד",
+        "confirmButton": "אישור",
+        "summaryLabel": "סיכום ההמרה",
+        "summaryDescription": "{{from}} ישלם ל-{{to}} עבור {{count}} חובות ב-{{currency}}",
+        "totalLabel": "סה\"כ",
+        "rateDisclaimer": "שערי החליפין מתעדכנים כל יום",
+        "rateLabel": "@ {{rate}}",
+        "toastCreated": "המטבעות אוחדו",
+        "toastDeleted": "האיחוד נמחק",
+        "recordError": "לא ניתן לרשום את האיחוד",
+        "noSettlements": "אין חובות לאיחוד",
+        "deleteError": "לא ניתן למחוק את האיחוד",
+        "confirmDelete": "למחוק את האיחוד הזה? כל הסילוקים הקשורים יוסרו.",
+        "batchRowTitle": "{{name}} איחד חובות",
+        "batchRowMeta": "{{count}} מטבעות אוחדו",
+        "converted": "המרה",
+        "detailSheetTitle": "איחוד מטבעות",
+        "detailHeaderLabel": "תשלום מומר",
+        "partiesLabel": "צדדים",
+        "breakdownLabel": "פירוט לפי מטבע",
+        "heroDescription": "{{payer}} סילק {{count}} חובות ל-{{payee}}",
+        "youConsolidatedActivity": "איחדת {{amount}}",
+        "theyConsolidatedActivity": "{{name}} איחד {{amount}}",
+        "otherCurrency": "מטבע אחר…",
+        "settlingDebtsLabel": "חובות לסגירה",
+        "settledDebtsTitle_one": "{{payer}} סגר חוב אחד עם {{name}}",
+        "settledDebtsTitle_other": "{{payer}} סגר {{count}} חובות עם {{name}}",
+        "netLabel": "נטו",
+        "netDirectionTheyPayYou": "{{name}} חייב לך",
+        "netDirectionYouPayThem": "את/ה חייב/ת ל-{{name}}",
+        "netDirectionThirdParty": "{{from}} משלם/ת ל-{{to}}"
     }
 }

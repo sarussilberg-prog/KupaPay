@@ -17,11 +17,13 @@ import { useAppStore } from '../store';
 
 export type InviteRedemptionResult =
     | { kind: 'friend' }
-    | { kind: 'group'; groupId: string };
+    | { kind: 'group'; groupId: string }
+    | { kind: 'settleReminder' };
 
 export type InviteLink =
     | { kind: 'friend'; token: string }
     | { kind: 'group'; token: string }
+    | { kind: 'settleReminder'; token: string }
     | { kind: 'unknown' };
 
 const TOKEN_RE = /^[A-Za-z0-9_-]{10}$/;
@@ -36,23 +38,23 @@ export function parseIncomingUrl(rawUrl: string): InviteLink {
         return { kind: 'unknown' };
     }
 
-    // https://<APP_WEB_HOST>/i/<token> | /g/<token>
+    // https://<APP_WEB_HOST>/i/<token> | /g/<token> | /sr/<token>
     if (parsed.protocol === 'https:' && parsed.hostname === APP_WEB_HOST) {
-        const m = parsed.pathname.match(/^\/(i|g)\/([^/?#]+)\/?$/);
+        const m = parsed.pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
         if (m && TOKEN_RE.test(m[2])) {
-            return m[1] === 'i'
-                ? { kind: 'friend', token: m[2] }
-                : { kind: 'group', token: m[2] };
+            if (m[1] === 'i') return { kind: 'friend', token: m[2] };
+            if (m[1] === 'g') return { kind: 'group', token: m[2] };
+            return { kind: 'settleReminder', token: m[2] };
         }
     }
 
-    // com.kupapay.mobile://invite/i/<token> | /g/<token>
+    // com.kupapay.mobile://invite/i/<token> | /g/<token> | /sr/<token>
     if (parsed.protocol === 'com.kupapay.mobile:' && parsed.hostname === 'invite') {
-        const m = parsed.pathname.match(/^\/(i|g)\/([^/?#]+)\/?$/);
+        const m = parsed.pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
         if (m && TOKEN_RE.test(m[2])) {
-            return m[1] === 'i'
-                ? { kind: 'friend', token: m[2] }
-                : { kind: 'group', token: m[2] };
+            if (m[1] === 'i') return { kind: 'friend', token: m[2] };
+            if (m[1] === 'g') return { kind: 'group', token: m[2] };
+            return { kind: 'settleReminder', token: m[2] };
         }
     }
 
@@ -113,6 +115,25 @@ async function redeemInviteLink(
     navigation: NavigationProp<any> | null,
     queryClient: QueryClient,
 ): Promise<InviteRedemptionResult | null> {
+    if (link.kind === 'settleReminder') {
+        const { data, error } = await supabase.rpc('resolve_settle_reminder_link', { p_token: link.token });
+        if (error) {
+            handleRedemptionError(error, 'settleReminder');
+            return null;
+        }
+        const payload = data as { group_id?: string; error?: string };
+        if (payload.error === 'not_member') {
+            showAppToast({ type: 'error', titleKey: 'remind.notGroupMember' });
+            return null;
+        }
+        if (payload.error || !payload.group_id) {
+            showAppToast({ type: 'error', titleKey: 'common.errorGeneric' });
+            return null;
+        }
+        useAppStore.getState().setPendingNavigation({ target: 'settleUpList', groupId: payload.group_id });
+        return { kind: 'settleReminder' as const };
+    }
+
     if (link.kind === 'friend') {
         const { data, error } = await supabase.rpc('redeem_friend_invite', { p_token: link.token });
         if (error) {
@@ -150,7 +171,7 @@ async function redeemInviteLink(
     return { kind: 'group', groupId: payload.group_id };
 }
 
-function handleRedemptionError(error: { message: string }, kind: 'friend' | 'group'): void {
+function handleRedemptionError(error: { message: string }, kind: 'friend' | 'group' | 'settleReminder'): void {
     const message = error.message;
     // cannot_self_invite is pure UX guidance, not a bug — info toast, no Sentry.
     if (message.includes('cannot_self_invite')) {

@@ -14,6 +14,7 @@ export function notificationDataToPendingNavigation(data: NotificationData): Pen
     switch (kind) {
         case 'expense_added':
         case 'settlement_added':
+        case 'consolidation_batch_added':
         case 'message_posted':
         case 'group_added':
         case 'group_member_joined':
@@ -22,6 +23,8 @@ export function notificationDataToPendingNavigation(data: NotificationData): Pen
             return { target: 'friends' };
         case 'group_removed':
             return { target: 'groupsList' };
+        case 'settle_up_reminder':
+            return groupId ? { target: 'settleUpList', groupId } : null;
         default:
             return null;
     }

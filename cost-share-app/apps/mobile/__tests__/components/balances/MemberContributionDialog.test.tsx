@@ -76,6 +76,27 @@ describe('MemberContributionDialog', () => {
         expect(getByText('USD 25.00')).toBeTruthy();
     });
 
+    it('uses the "you paid for" section title when the owner is the current user in Paid mode', () => {
+        const { getAllByText, queryByText } = render(
+            <MemberContributionDialog
+                open
+                member={members[0]}
+                allMembers={members}
+                matrix={[
+                    { payerId: 'me', consumerId: 'alice', currency: 'USD', amount: 40 },
+                ]}
+                selfTotals={[{ currency: 'USD', amount: 40 }]}
+                mode="paid"
+                currentUserId="me"
+                onClose={() => {}}
+            />,
+        );
+        // Owner (Me) is the payer → each section must read "You paid for {name}",
+        // never the third-person "Paid for {name}".
+        expect(getAllByText('balances.paidMode.detailSectionOwnerYou').length).toBe(2);
+        expect(queryByText('balances.paidMode.detailSection')).toBeNull();
+    });
+
     it('shows "No activity" line for counterparties with zero gross activity', () => {
         const { getAllByText } = render(
             <MemberContributionDialog

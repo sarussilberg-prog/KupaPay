@@ -82,6 +82,7 @@ import { AdminErrorsScreen } from '../screens/admin/AdminErrorsScreen';
 import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen';
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
+import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -411,6 +412,11 @@ export function AppNavigator() {
                 name="AdminErrorEvent"
                 component={AdminErrorEventScreen}
                 options={{ title: t('admin.errors.eventTitle') }}
+            />
+            <RootStack.Screen
+                name="AdminMonetization"
+                component={AdminMonetizationScreen}
+                options={{ title: 'Monetization' }}
             />
 
             <RootStack.Screen

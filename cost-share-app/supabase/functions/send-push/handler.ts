@@ -55,6 +55,8 @@ const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     group_created: 'groups_push',
     group_deleted: 'groups_push',
     group_note_changed: 'groups_push',
+    settle_up_reminder: 'settlements_push',
+    consolidation_batch_added: 'settlements_push',
 };
 
 const DEFAULT_PREFS: PrefsRow = {
@@ -97,8 +99,8 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
         groupName: names.groupName,
         newMemberName: names.newMemberName,
         description: (md.description as string | undefined) ?? null,
-        amount: (md.amount as number | string | undefined) ?? null,
-        currency: (md.currency as string | undefined) ?? null,
+        amount: (md.amount as number | string | undefined) ?? (md.payment_amount as number | string | undefined) ?? null,
+        currency: (md.currency as string | undefined) ?? (md.payment_currency as string | undefined) ?? null,
         body: (md.body as string | undefined) ?? null,
         isEdited: md.is_edited === true,
         isDeleted: md.is_deleted === true,

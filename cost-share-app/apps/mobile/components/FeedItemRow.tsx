@@ -8,6 +8,7 @@ import { FeedItem, GroupMemberLite, GroupMessage, Settlement } from '@cost-share
 import { ExpenseRow } from './ExpenseRow';
 import { MessageRow } from './MessageRow';
 import { SettlementRow } from './SettlementRow';
+import { ConsolidationBatchRow } from './ConsolidationBatchRow';
 import { getAvatarUrlForMember } from '../lib/userDisplay';
 
 interface FeedItemRowProps {
@@ -18,6 +19,7 @@ interface FeedItemRowProps {
     onMessageEdit: (m: GroupMessage) => void;
     onMessageDelete: (m: GroupMessage) => void;
     onSettlementPress: (s: Settlement) => void;
+    onBatchPress?: () => void;
     searchQuery?: string;
 }
 
@@ -29,6 +31,7 @@ export function FeedItemRow({
     onMessageEdit,
     onMessageDelete,
     onSettlementPress,
+    onBatchPress,
     searchQuery,
 }: FeedItemRowProps) {
     const { t } = useTranslation();
@@ -73,6 +76,17 @@ export function FeedItemRow({
                 toName={toName}
                 isMine={item.settlement.createdBy === currentUserId}
                 onPress={() => onSettlementPress(item.settlement)}
+            />
+        );
+    }
+    if (item.kind === 'consolidation_batch') {
+        return (
+            <ConsolidationBatchRow
+                batch={item.batch}
+                settlements={item.settlements}
+                currentUserId={currentUserId}
+                memberMap={memberMap}
+                onPress={onBatchPress}
             />
         );
     }

@@ -9,6 +9,10 @@
         "edited": "{actor} updated a payment",
         "deleted": "{actor} deleted a payment"
     },
+    "consolidation_batch_added": {
+        "new": "New payment from {actor}",
+        "deleted": "{actor} deleted a payment"
+    },
     "message_posted": {
         "edited": "{actor} edited a message",
         "deleted": "{actor} deleted a message"
@@ -27,5 +31,6 @@
     "group_removed": "You were removed from the group",
     "group_created": "Group created",
     "group_deleted": "Deleted by {actor}",
-    "group_note_changed": "Note changed by {actor}"
+    "group_note_changed": "Note changed by {actor}",
+    "settle_up_reminder": "Reminder from {actor}"
 }

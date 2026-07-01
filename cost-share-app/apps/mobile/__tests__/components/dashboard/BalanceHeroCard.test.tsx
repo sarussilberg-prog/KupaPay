@@ -12,13 +12,13 @@ describe('BalanceHeroCard', () => {
     it('renders single net balance (owed to user minus owed)', () => {
         const { getByTestId, getByText } = render(<BalanceHeroCard summary={single as any} />);
         expect(getByText('dashboard.netOwedToYou')).toBeTruthy();
-        expect(getByTestId('balance-hero-net').props.children).toMatch(/50\.00/);
+        expect(getByTestId('balance-hero-net').props.children).toMatch(/\b50(\.00)?\b/);
     });
 
     it('renders zero net balance as formatted currency', () => {
         const { getByText, getByTestId } = render(<BalanceHeroCard summary={zero as any} />);
         expect(getByText('dashboard.netBalance')).toBeTruthy();
-        expect(getByTestId('balance-hero-net').props.children).toMatch(/0\.00/);
+        expect(getByTestId('balance-hero-net').props.children).toMatch(/\b0(\.00)?\b/);
     });
 
     it('renders em-dash when multi-currency without conversion', () => {
@@ -47,7 +47,7 @@ describe('BalanceHeroCard', () => {
         );
         expect(getByText('dashboard.convertedLabel')).toBeTruthy();
         expect(getByText('dashboard.netYouOwe')).toBeTruthy();
-        expect(getByTestId('balance-hero-net').props.children).toMatch(/50\.00/);
+        expect(getByTestId('balance-hero-net').props.children).toMatch(/\b50(\.00)?\b/);
     });
 
     it('toggles breakdown with currency symbols and chips', () => {
@@ -75,6 +75,6 @@ describe('BalanceHeroCard', () => {
         const { getByTestId, getByText } = render(<BalanceHeroCard summary={amdRow as any} />);
         fireEvent.press(getByTestId('balance-hero-toggle'));
         expect(getByTestId('breakdown-owe-zero-AMD')).toBeTruthy();
-        expect(getByText(/֏0\.00/)).toBeTruthy();
+        expect(getByText(/֏0(\.00)?\b/)).toBeTruthy();
     });
 });

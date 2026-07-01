@@ -10,6 +10,7 @@ import {
     ExpenseSplit,
     ExpenseSplitMode,
     Settlement,
+    ConsolidationBatch,
 } from '../types';
 
 type Row = Record<string, unknown>;
@@ -144,5 +145,19 @@ export const settlementFromRow = (r: Row): Settlement => ({
     createdBy: r.created_by as string,
     createdAt: toDate(r.created_at),
     updatedAt: r.updated_at ? toDate(r.updated_at) : toDate(r.created_at),
+    deletedAt: r.deleted_at ? toDate(r.deleted_at) : null,
+    consolidationBatchId: (r.consolidation_batch_id as string) ?? undefined,
+    exchangeRate: r.exchange_rate != null ? Number(r.exchange_rate) : undefined,
+});
+
+export const consolidationBatchFromRow = (r: Row): ConsolidationBatch => ({
+    id: r.id as string,
+    groupId: r.group_id as string,
+    paidByUserId: r.paid_by_user_id as string,
+    paidToUserId: r.paid_to_user_id ? (r.paid_to_user_id as string) : undefined,
+    paymentAmount: Number(r.payment_amount),
+    paymentCurrency: r.payment_currency as string,
+    settlementCount: r.settlement_count != null ? Number(r.settlement_count) : undefined,
+    createdAt: toDate(r.created_at),
     deletedAt: r.deleted_at ? toDate(r.deleted_at) : null,
 });

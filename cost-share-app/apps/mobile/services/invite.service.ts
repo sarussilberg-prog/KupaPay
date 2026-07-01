@@ -19,6 +19,15 @@ export function buildInviteUrl(kind: 'friend' | 'group', token: string): string 
     return `${INVITE_ORIGIN}${prefix}${token}`;
 }
 
+/**
+ * Build the settle-up reminder share link (/sr/<group invite token>).
+ * Uses the same env-based origin as invite links so it stays on the canonical
+ * web host that deepLinks.service recognises — never a hardcoded domain.
+ */
+export function buildSettleReminderUrl(token: string): string {
+    return `${INVITE_ORIGIN}/sr/${token}`;
+}
+
 export function buildFriendInviteMessage(inviterName: string, url: string): string {
     return i18n.t('invite.friend.shareMessage', { inviterName, url });
 }

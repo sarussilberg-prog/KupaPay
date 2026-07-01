@@ -6,7 +6,8 @@ export type Lang = 'he' | 'en';
 export type ActivityKind =
     | 'expense_added' | 'settlement_added' | 'message_posted'
     | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed'
-    | 'group_created' | 'group_deleted' | 'group_note_changed';
+    | 'group_created' | 'group_deleted' | 'group_note_changed' | 'settle_up_reminder'
+    | 'consolidation_batch_added';
 
 export interface RenderParams {
     actorName: string;
@@ -28,6 +29,7 @@ type Variant = 'new' | 'edited' | 'deleted';
 interface Messages {
     expense_added: Record<Variant, string>;
     settlement_added: Record<Variant, string>;
+    consolidation_batch_added: { new: string; deleted: string };
     message_posted: { edited: string; deleted: string };
     friend_request_received: { title: string; body: string; rejectedTitle: string; rejectedBody: string };
     group_added: { title: string; body: string };
@@ -36,6 +38,7 @@ interface Messages {
     group_created: string;
     group_deleted: string;
     group_note_changed: string;
+    settle_up_reminder: string;
 }
 
 const LOCALES: Record<Lang, Messages> = { en: en as Messages, he: he as Messages };
@@ -76,6 +79,13 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
             const parts = p.isDeleted ? [phrase] : [phrase, money];
             return { title: p.groupName, body: joinDot(parts) };
         }
+        case 'consolidation_batch_added': {
+            const phrase = p.isDeleted
+                ? interpolate(t.consolidation_batch_added.deleted, vars)
+                : interpolate(t.consolidation_batch_added.new, vars);
+            const parts = p.isDeleted ? [phrase] : [phrase, money];
+            return { title: p.groupName, body: joinDot(parts) };
+        }
         case 'message_posted': {
             const title = joinDot([p.actorName, p.groupName]);
             if (p.isDeleted) return { title, body: interpolate(t.message_posted.deleted, vars) };
@@ -99,5 +109,13 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
             return { title: p.groupName, body: interpolate(t.group_deleted, vars) };
         case 'group_note_changed':
             return { title: p.groupName, body: interpolate(t.group_note_changed, vars) };
+        case 'settle_up_reminder': {
+            // body comes from metadata.body (the custom message the sender wrote).
+            // Fall back to locale string if somehow absent.
+            return {
+                title: p.groupName,
+                body: p.body ?? interpolate(t.settle_up_reminder, vars),
+            };
+        }
     }
 }

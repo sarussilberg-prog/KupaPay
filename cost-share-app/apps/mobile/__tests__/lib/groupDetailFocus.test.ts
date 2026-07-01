@@ -6,6 +6,24 @@ import {
 } from '../../lib/groupDetailFocus';
 import type { FeedItem } from '@cost-share/shared';
 
+const batchFeed: FeedItem[] = [
+    {
+        kind: 'consolidation_batch',
+        sortAt: new Date(),
+        batch: {
+            id: 'b1',
+            groupId: 'g1',
+            paidByUserId: 'u1',
+            paidToUserId: 'u2',
+            paymentAmount: 100,
+            paymentCurrency: 'ILS',
+            createdAt: new Date(),
+            deletedAt: null,
+        },
+        settlements: [],
+    } as FeedItem,
+];
+
 const feed: FeedItem[] = [
     {
         kind: 'message',
@@ -59,6 +77,14 @@ describe('findFeedItemIndex', () => {
 
     it('returns -1 for a missing message', () => {
         expect(findFeedItemIndex(feed, { kind: 'message', id: 'm9' })).toBe(-1);
+    });
+
+    it('finds consolidation_batch by batch.id', () => {
+        expect(findFeedItemIndex(batchFeed, { kind: 'consolidation_batch', id: 'b1' })).toBe(0);
+    });
+
+    it('returns -1 for a missing consolidation_batch', () => {
+        expect(findFeedItemIndex(batchFeed, { kind: 'consolidation_batch', id: 'b9' })).toBe(-1);
     });
 });
 
@@ -123,6 +149,13 @@ describe('reduceFocusSession', () => {
         // it must not schedule a second highlight for the already-consumed key.
         const second = reduceFocusSession(first.state, message, feed, false);
         expect(second.highlightKey).toBeNull();
+    });
+
+    it('highlights consolidation_batch row with b: prefix', () => {
+        const d = reduceFocusSession(IDLE_FOCUS_SESSION, { kind: 'consolidation_batch', id: 'b1' }, batchFeed, false);
+        expect(d.highlightKey).toBe('b:b1');
+        expect(d.highlightIndex).toBe(0);
+        expect(d.clearParam).toBe(true);
     });
 
     it('REGRESSION: re-focusing the same item after the param clears highlights again', () => {

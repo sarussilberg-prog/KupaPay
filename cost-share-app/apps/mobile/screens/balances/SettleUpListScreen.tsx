@@ -11,7 +11,13 @@ import { View, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { GroupMemberLite, PairwiseDebt, Settlement } from '@cost-share/shared';
+import {
+    ConsolidationBatch,
+    DisplaySettlement,
+    GroupMemberLite,
+    PairwiseDebt,
+    Settlement,
+} from '@cost-share/shared';
 import { Text } from '../../components/AppText';
 import { AppIcon } from '../../components/AppIcon';
 import { MemberAvatar } from '../../components/MemberAvatar';
@@ -19,7 +25,13 @@ import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import { DebtRow } from '../../components/balances/DebtRow';
+import { DebtPairGroup } from '../../components/balances/DebtPairGroup';
+import { groupDebtsByPair, PairGroup } from '../../lib/groupDebtsByPair';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
+import { CurrenciesMergedBadge } from '../../components/CurrenciesMergedBadge';
+import { RemindFlowSheet } from '../../components/remind/RemindFlowSheet';
+import { ConsolidateCurrencySheet, ConsolidatePair } from '../../components/ConsolidateCurrencySheet';
+import { sendSettleReminder, shareSettleReminder } from '../../services/remind.service';
 import { platformAlert } from '../../lib/platformAlert';
 import {
     useCreateSettlementMutation,
@@ -27,6 +39,12 @@ import {
     useGroupSettlementsQuery,
     useUpdateSettlementMutation,
 } from '../../hooks/queries/useSettlementQueries';
+import {
+    useDisplaySettlementsQuery,
+    useDeleteConsolidationBatchMutation,
+    useCreateConsolidationBatchMutation,
+} from '../../hooks/queries/useConsolidationQueries';
+import { ConsolidationSettleData } from '../../components/ConsolidateCurrencySheet';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
@@ -36,6 +54,7 @@ import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsReal
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import { getAvatarUrl, getAvatarUrlForMember, getDisplayName } from '../../lib/userDisplay';
+import { joinAmounts, owedDebts } from '../../lib/reminderMessage';
 
 interface SortedDebts {
     youInvolved: PairwiseDebt[];
@@ -106,14 +125,20 @@ export function SettleUpListScreen() {
         });
         return out;
     }, [simplified, groupId]);
+
     const refetch = useCallback(() => {
         void queryClient.invalidateQueries({ queryKey: queryKeys.simplifiedDebts });
     }, []);
+
     const { data: settlements = [], refetch: refetchSettlements } =
         useGroupSettlementsQuery(groupId);
+    const { data: displaySettlements = [] } = useDisplaySettlementsQuery(groupId);
+
     const createMutation = useCreateSettlementMutation(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
     const deleteSettlementMutation = useDeleteSettlementMutation(groupId);
+    const deleteBatchMutation = useDeleteConsolidationBatchMutation(groupId);
+    const createBatchMutation = useCreateConsolidationBatchMutation(groupId);
 
     useGroupSettlementsRealtime(groupId);
 
@@ -123,6 +148,22 @@ export function SettleUpListScreen() {
     const [othersExpanded, setOthersExpanded] = useState(false);
     const [recordingPayment, setRecordingPayment] = useState(false);
 
+    const [remindTargetDebt, setRemindTargetDebt] = useState<{
+        fromUserId: string;
+        toUserId: string;
+        currency: string;
+        amount: number;
+        groupId: string;
+    } | null>(null);
+    const [remindLoading, setRemindLoading] = useState(false);
+
+    const [convertPair, setConvertPair] = useState<ConsolidatePair | null>(null);
+    const [consolidationSettle, setConsolidationSettle] = useState<ConsolidationSettleData | null>(null);
+    const [detailBatch, setDetailBatch] = useState<{
+        batch: ConsolidationBatch;
+        settlements: Settlement[];
+    } | null>(null);
+
     const memberMap = useMemo<Record<string, GroupMemberLite>>(() => {
         const map: Record<string, GroupMemberLite> = {};
         for (const m of memberLites) {
@@ -131,18 +172,20 @@ export function SettleUpListScreen() {
         return map;
     }, [memberLites]);
 
-    const sortedSettlements = useMemo(
+    const sortedDisplaySettlements = useMemo(
         () =>
-            [...settlements].sort((a, b) => {
-                const da = new Date(a.settlementDate).getTime();
-                const db = new Date(b.settlementDate).getTime();
-                if (db !== da) return db - da;
-                return (
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime()
-                );
+            [...displaySettlements].sort((a, b) => {
+                const ta =
+                    a.kind === 'batch'
+                        ? a.batch.createdAt.getTime()
+                        : a.settlement.createdAt.getTime();
+                const tb =
+                    b.kind === 'batch'
+                        ? b.batch.createdAt.getTime()
+                        : b.settlement.createdAt.getTime();
+                return tb - ta;
             }),
-        [settlements],
+        [displaySettlements],
     );
 
     const { youInvolved, others } = useMemo(
@@ -150,10 +193,35 @@ export function SettleUpListScreen() {
         [debts, currentUserId],
     );
 
-    const involvedItems = useMemo(
-        () => youInvolved.map(d => ({ debt: d, involved: true as const })),
-        [youInvolved],
-    );
+    const involvedGroups = useMemo(() => groupDebtsByPair(youInvolved), [youInvolved]);
+    const othersGroups = useMemo(() => groupDebtsByPair(others), [others]);
+
+    /** All debts grouped by counterpart — used to build ConsolidatePair. */
+    const debtsByCounterpart = useMemo<Map<string, ConsolidatePair>>(() => {
+        const map = new Map<string, ConsolidatePair>();
+        for (const debt of debts) {
+            if (
+                debt.fromUserId !== currentUserId &&
+                debt.toUserId !== currentUserId
+            )
+                continue;
+            const counterpartId =
+                debt.fromUserId === currentUserId
+                    ? debt.toUserId
+                    : debt.fromUserId;
+            const existing = map.get(counterpartId);
+            if (existing) {
+                existing.debts.push(debt);
+            } else {
+                map.set(counterpartId, {
+                    fromUserId: debt.fromUserId,
+                    toUserId: debt.toUserId,
+                    debts: [debt],
+                });
+            }
+        }
+        return map;
+    }, [debts, currentUserId]);
 
     const displayName = useCallback(
         (userId: string): string => {
@@ -173,6 +241,167 @@ export function SettleUpListScreen() {
     const handleRowPress = useCallback((debt: PairwiseDebt) => {
         setActiveDebt(debt);
     }, []);
+
+    const handleRemind = useCallback(
+        (debt: PairwiseDebt) => {
+            setRemindTargetDebt({
+                fromUserId: debt.fromUserId,
+                toUserId: debt.toUserId,
+                currency: debt.currency,
+                amount: debt.amount,
+                groupId,
+            });
+        },
+        [groupId],
+    );
+
+    const handleConvert = useCallback(
+        (counterpartId: string) => {
+            const pair = debtsByCounterpart.get(counterpartId);
+            if (pair) setConvertPair(pair);
+        },
+        [debtsByCounterpart],
+    );
+
+    const buildDefaultMessage = useCallback(
+        (debt: typeof remindTargetDebt) => {
+            if (!debt) return '';
+            const owed = owedDebts(debts, debt.fromUserId, debt.toUserId);
+            const list =
+                owed.length > 0
+                    ? owed
+                    : [
+                          {
+                              fromUserId: debt.fromUserId,
+                              toUserId: debt.toUserId,
+                              currency: debt.currency,
+                              amount: debt.amount,
+                          },
+                      ];
+            const amount = joinAmounts(list, t('remind.amountAnd'));
+            return t('remind.defaultMessage', { amount, groupName: groupName ?? '' });
+        },
+        [t, groupName, debts],
+    );
+
+    /**
+     * Render one DebtRow. `showRemind` / `showConvert` guard whether to
+     * show each action button on this specific row.
+     */
+    const renderDebtRow = useCallback(
+        (
+            debt: PairwiseDebt,
+            involved: boolean,
+            showRemind = true,
+            showConvert = false,
+        ) => {
+            const counterpartId =
+                debt.fromUserId === currentUserId
+                    ? debt.toUserId
+                    : debt.fromUserId;
+            return (
+                <DebtRow
+                    key={`${debt.fromUserId}:${debt.toUserId}:${debt.currency}`}
+                    debt={debt}
+                    involved={involved}
+                    fromName={displayName(debt.fromUserId)}
+                    toName={displayName(debt.toUserId)}
+                    currentUserId={currentUserId}
+                    fromAvatar={memberAvatarFor(debt.fromUserId)}
+                    toAvatar={memberAvatarFor(debt.toUserId)}
+                    onPress={() => handleRowPress(debt)}
+                    onRemind={
+                        showRemind && debt.fromUserId !== currentUserId
+                            ? () => handleRemind(debt)
+                            : undefined
+                    }
+                    onConvert={
+                        showConvert
+                            ? involved
+                                ? () => handleConvert(counterpartId)
+                                : () => setConvertPair({
+                                    fromUserId: debt.fromUserId,
+                                    toUserId: debt.toUserId,
+                                    debts: [debt],
+                                })
+                            : undefined
+                    }
+                />
+            );
+        },
+        [
+            displayName,
+            currentUserId,
+            memberAvatarFor,
+            handleRowPress,
+            handleRemind,
+            handleConvert,
+            setConvertPair,
+        ],
+    );
+
+    const remindTargetForGroup = useCallback(
+        (group: PairGroup<PairwiseDebt>): PairwiseDebt | null => {
+            const owesYou = group.debts.find(
+                d => d.toUserId === currentUserId && d.fromUserId !== currentUserId,
+            );
+            if (owesYou) return owesYou;
+            const involvesYou =
+                group.userA === currentUserId || group.userB === currentUserId;
+            return involvesYou ? null : group.debts[0];
+        },
+        [currentUserId],
+    );
+
+    /**
+     * Render a PairGroup. The "convert" button appears once per counterpart
+     * (tracked via seenConvertCounterparts in the caller).
+     */
+    const renderGroupOrRow = useCallback(
+        (
+            group: PairGroup<PairwiseDebt>,
+            involved: boolean,
+            seenConvertCounterparts: Set<string>,
+        ) => {
+            const counterpartId =
+                group.userA === currentUserId ? group.userB : group.userA;
+            const showConvert = !seenConvertCounterparts.has(counterpartId);
+            if (showConvert) seenConvertCounterparts.add(counterpartId);
+
+            if (group.debts.length === 1) {
+                return renderDebtRow(group.debts[0], involved, true, showConvert);
+            }
+            const remindTarget = remindTargetForGroup(group);
+            const doConvert = showConvert
+                ? involved
+                    ? () => handleConvert(counterpartId)
+                    : () => setConvertPair({ fromUserId: group.userA, toUserId: group.userB, debts: group.debts })
+                : undefined;
+            return (
+                <DebtPairGroup
+                    key={group.pairKey}
+                    group={group}
+                    involved={involved}
+                    currentUserId={currentUserId}
+                    nameFor={displayName}
+                    avatarFor={memberAvatarFor}
+                    renderDebt={debt => renderDebtRow(debt, involved, false, false)}
+                    onRemind={remindTarget ? () => handleRemind(remindTarget) : undefined}
+                    onConvert={doConvert}
+                />
+            );
+        },
+        [
+            renderDebtRow,
+            remindTargetForGroup,
+            currentUserId,
+            displayName,
+            memberAvatarFor,
+            handleRemind,
+            handleConvert,
+            setConvertPair,
+        ],
+    );
 
     const handleSubmit = useCallback(
         async (values: SettleUpFormValues) => {
@@ -194,6 +423,16 @@ export function SettleUpListScreen() {
         setDetailSettlement(s);
     }, []);
 
+    const handleBatchRowPress = useCallback(
+        (item: DisplaySettlement & { kind: 'batch' }) => {
+            setDetailBatch({
+                batch: item.batch,
+                settlements: item.settlements,
+            });
+        },
+        [],
+    );
+
     const handleDetailEdit = useCallback(() => {
         if (!detailSettlement) return;
         const s = detailSettlement;
@@ -203,10 +442,6 @@ export function SettleUpListScreen() {
 
     const handleDetailDeleteRequest = useCallback(() => {
         if (!detailSettlement) return;
-        // Confirm via the native platformAlert (not a React Native <Modal>) so
-        // it presents over the still-open detail-sheet Modal — RN won't stack
-        // two modals, which is why an in-app <Modal> confirm silently failed
-        // here. Matches the Activity and Group Details delete flows.
         const target = detailSettlement;
         platformAlert(t('settleUp.confirmDelete'), undefined, [
             { text: t('common.cancel'), style: 'cancel' },
@@ -224,6 +459,26 @@ export function SettleUpListScreen() {
         ]);
     }, [detailSettlement, deleteSettlementMutation, t]);
 
+    const handleBatchDeleteRequest = useCallback(() => {
+        if (!detailBatch) return;
+        const target = detailBatch;
+        platformAlert(t('consolidation.confirmDelete'), undefined, [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('common.delete'),
+                style: 'destructive',
+                onPress: () => {
+                    void (async () => {
+                        const ok = await deleteBatchMutation.mutateAsync(
+                            target.batch.id,
+                        );
+                        if (ok) setDetailBatch(null);
+                    })();
+                },
+            },
+        ]);
+    }, [detailBatch, deleteBatchMutation, t]);
+
     const handleSettlementEditSubmit = useCallback(
         async (values: SettleUpFormValues) => {
             if (!editingSettlement) return;
@@ -234,7 +489,6 @@ export function SettleUpListScreen() {
                     toUserId: values.toUserId,
                     amount: values.amount,
                     currency: values.currency,
-                    // Note: UpdateSettlementDto does not yet accept paymentMethod / settlementDate
                 },
             });
             if (updated) setEditingSettlement(null);
@@ -246,33 +500,27 @@ export function SettleUpListScreen() {
         return <LoadingIndicator />;
     }
 
+    // seenConvertCounterparts is rebuilt each render from useMemo groups —
+    // we pass it as a mutable Set so renderGroupOrRow can track the first row per pair.
+    const seenConvertInvolved = new Set<string>();
+    const seenConvertOthers = new Set<string>();
+
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']}>
             <FlatList
-                data={involvedItems}
-                keyExtractor={(item, idx) =>
-                    `${item.debt.fromUserId}:${item.debt.toUserId}:${item.debt.currency}:${idx}`
-                }
+                data={involvedGroups}
+                keyExtractor={item => item.pairKey}
                 contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
                 ListHeaderComponent={
-                    involvedItems.length > 0 ? (
+                    involvedGroups.length > 0 ? (
                         <Text className="mb-3 px-1 text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
                             {t('settleUp.openDebts')}
                         </Text>
                     ) : null
                 }
-                renderItem={({ item }) => (
-                    <DebtRow
-                        debt={item.debt}
-                        involved={item.involved}
-                        fromName={displayName(item.debt.fromUserId)}
-                        toName={displayName(item.debt.toUserId)}
-                        currentUserId={currentUserId}
-                        fromAvatar={memberAvatarFor(item.debt.fromUserId)}
-                        toAvatar={memberAvatarFor(item.debt.toUserId)}
-                        onPress={() => handleRowPress(item.debt)}
-                    />
-                )}
+                renderItem={({ item }) =>
+                    renderGroupOrRow(item, true, seenConvertInvolved)
+                }
                 ListEmptyComponent={
                     isFetching || others.length > 0 ? null : (
                         <EmptyState
@@ -285,7 +533,7 @@ export function SettleUpListScreen() {
                 ListFooterComponent={
                     <>
                         {others.length > 0 ? (
-                            <View className={involvedItems.length > 0 ? 'mt-2' : 'mt-4'}>
+                            <View className={involvedGroups.length > 0 ? 'mt-2' : 'mt-4'}>
                                 <TouchableOpacity
                                     onPress={() => setOthersExpanded(v => !v)}
                                     activeOpacity={0.7}
@@ -304,19 +552,9 @@ export function SettleUpListScreen() {
                                 </TouchableOpacity>
                                 {othersExpanded && (
                                     <View className="mt-2">
-                                        {others.map(d => (
-                                            <DebtRow
-                                                key={`${d.fromUserId}:${d.toUserId}:${d.currency}`}
-                                                debt={d}
-                                                involved={false}
-                                                fromName={displayName(d.fromUserId)}
-                                                toName={displayName(d.toUserId)}
-                                                currentUserId={currentUserId}
-                                                fromAvatar={memberAvatarFor(d.fromUserId)}
-                                                toAvatar={memberAvatarFor(d.toUserId)}
-                                                onPress={() => handleRowPress(d)}
-                                            />
-                                        ))}
+                                        {othersGroups.map(group =>
+                                            renderGroupOrRow(group, false, seenConvertOthers),
+                                        )}
                                     </View>
                                 )}
                             </View>
@@ -329,13 +567,17 @@ export function SettleUpListScreen() {
                                 className="mt-3 flex-row items-center justify-center px-3 py-3 rounded-2xl bg-white border border-dashed border-primary-dark"
                                 testID="settle-record-payment-cta"
                             >
-                                <AppIcon name="add-circle-outline" size={18} color={colors.primaryDark} />
+                                <AppIcon
+                                    name="add-circle-outline"
+                                    size={18}
+                                    color={colors.primaryDark}
+                                />
                                 <Text className="ml-2 text-[14px] font-semibold text-primary-dark">
                                     {t('settleUp.recordPaymentCta')}
                                 </Text>
                             </TouchableOpacity>
                         ) : null}
-                        {sortedSettlements.length > 0 ? (
+                        {sortedDisplaySettlements.length > 0 ? (
                             <View className="mt-8 mb-4">
                                 <View className="flex-row items-center mb-3 px-1">
                                     <View className="flex-1 h-px bg-gray-300" />
@@ -352,19 +594,49 @@ export function SettleUpListScreen() {
                                     <View className="flex-1 h-px bg-gray-300" />
                                 </View>
                                 <View className="rounded-2xl bg-slate-100/70 border border-gray-200 overflow-hidden">
-                                    {sortedSettlements.map((s, idx) => (
-                                        <SettlementHistoryRow
-                                            key={s.id}
-                                            settlement={s}
-                                            fromName={displayName(s.fromUserId)}
-                                            toName={displayName(s.toUserId)}
-                                            currentUserId={currentUserId}
-                                            fromAvatar={memberAvatarFor(s.fromUserId)}
-                                            toAvatar={memberAvatarFor(s.toUserId)}
-                                            isLast={idx === sortedSettlements.length - 1}
-                                            onPress={() => handleSettlementRowPress(s)}
-                                        />
-                                    ))}
+                                    {sortedDisplaySettlements.map((item, idx) => {
+                                        const isLast = idx === sortedDisplaySettlements.length - 1;
+                                        if (item.kind === 'batch') {
+                                            const fromId = item.batch.paidByUserId;
+                                            const toId = item.batch.paidToUserId
+                                                ?? (item.settlements.length > 0
+                                                    ? (item.settlements[0].fromUserId === fromId
+                                                        ? item.settlements[0].toUserId
+                                                        : item.settlements[0].fromUserId)
+                                                    : undefined);
+                                            return (
+                                                <BatchHistoryRow
+                                                    key={item.batch.id}
+                                                    batch={item.batch}
+                                                    settlements={item.settlements}
+                                                    fromName={displayName(fromId)}
+                                                    toName={toId ? displayName(toId) : ''}
+                                                    currentUserId={currentUserId}
+                                                    fromAvatar={memberAvatarFor(fromId)}
+                                                    toAvatar={toId ? memberAvatarFor(toId) : undefined}
+                                                    isLast={isLast}
+                                                    onPress={() => handleBatchRowPress(item)}
+                                                />
+                                            );
+                                        }
+                                        return (
+                                            <SettlementHistoryRow
+                                                key={item.settlement.id}
+                                                settlement={item.settlement}
+                                                fromName={displayName(item.settlement.fromUserId)}
+                                                toName={displayName(item.settlement.toUserId)}
+                                                currentUserId={currentUserId}
+                                                fromAvatar={memberAvatarFor(
+                                                    item.settlement.fromUserId,
+                                                )}
+                                                toAvatar={memberAvatarFor(item.settlement.toUserId)}
+                                                isLast={isLast}
+                                                onPress={() =>
+                                                    handleSettlementRowPress(item.settlement)
+                                                }
+                                            />
+                                        );
+                                    })}
                                 </View>
                             </View>
                         ) : null}
@@ -403,7 +675,11 @@ export function SettleUpListScreen() {
             )}
 
             <FeedItemDetailSheet
-                item={detailSettlement ? { kind: 'settlement', settlement: detailSettlement } : null}
+                item={
+                    detailSettlement
+                        ? { kind: 'settlement', settlement: detailSettlement }
+                        : null
+                }
                 memberMap={memberMap}
                 currentUserId={currentUserId}
                 onClose={() => setDetailSettlement(null)}
@@ -455,6 +731,90 @@ export function SettleUpListScreen() {
                     groupName={groupName}
                 />
             )}
+
+            <RemindFlowSheet
+                visible={remindTargetDebt !== null}
+                featureKey="remind_user"
+                defaultMessage={buildDefaultMessage(remindTargetDebt)}
+                sending={remindLoading}
+                onSend={async (mode, message) => {
+                    if (!remindTargetDebt) return;
+                    setRemindLoading(true);
+                    try {
+                        if (mode === 'app') {
+                            await sendSettleReminder({
+                                groupId: remindTargetDebt.groupId,
+                                toUserId: remindTargetDebt.fromUserId,
+                                message,
+                            });
+                        } else {
+                            await shareSettleReminder({
+                                groupId: remindTargetDebt.groupId,
+                                message,
+                            });
+                        }
+                        setRemindTargetDebt(null);
+                    } finally {
+                        setRemindLoading(false);
+                    }
+                }}
+                onClose={() => setRemindTargetDebt(null)}
+            />
+
+            <ConsolidateCurrencySheet
+                visible={convertPair !== null}
+                pair={convertPair}
+                currentUserId={currentUserId}
+                memberMap={memberMap}
+                onClose={() => setConvertPair(null)}
+                onReadyToSettle={data => {
+                    setConvertPair(null);
+                    setConsolidationSettle(data);
+                }}
+            />
+
+            {consolidationSettle && (
+                <SettleUpSheet
+                    visible={consolidationSettle !== null}
+                    members={memberLites}
+                    pairwiseDebts={[]}
+                    currentUserId={currentUserId}
+                    initial={{
+                        fromUserId: consolidationSettle.netPayerId,
+                        toUserId: consolidationSettle.netReceiverId,
+                        currency: consolidationSettle.targetCurrency,
+                        amount: consolidationSettle.netAmount,
+                    }}
+                    mode="create"
+                    submitting={createBatchMutation.isPending}
+                    consolidationDebts={consolidationSettle.pair.debts}
+                    consolidationMemberMap={memberMap}
+                    onSubmit={async values => {
+                        const data = consolidationSettle;
+                        const ok = await createBatchMutation.mutateAsync({
+                            groupId,
+                            fromUserId: data.netPayerId,
+                            toUserId: data.netReceiverId,
+                            paymentCurrency: values.currency,
+                            paymentAmount: values.amount,
+                            settlementDate: values.settlementDate,
+                            settlements: data.settlements,
+                        });
+                        if (ok) setConsolidationSettle(null);
+                    }}
+                    onClose={() => setConsolidationSettle(null)}
+                    groupName={groupName}
+                />
+            )}
+
+            <FeedItemDetailSheet
+                item={detailBatch ? { kind: 'consolidation_batch', batch: detailBatch.batch, settlements: detailBatch.settlements } : null}
+                memberMap={memberMap}
+                currentUserId={currentUserId}
+                onClose={() => setDetailBatch(null)}
+                onEdit={() => {}}
+                onDelete={handleBatchDeleteRequest}
+            />
         </SafeAreaView>
     );
 }
@@ -465,12 +825,6 @@ interface RecordPaymentInitialArgs {
     defaultCurrency: string;
 }
 
-/**
- * Starting point for the "record a payment" sheet: the current user is the
- * default payer; the first other active member is the default receiver; the
- * currency defaults to the group's default. Deleted (inactive) accounts are
- * skipped — the user can swap any of these via the in-sheet pickers.
- */
 function pickRecordPaymentInitial({
     memberLites,
     currentUserId,
@@ -521,9 +875,6 @@ function SettlementHistoryRow({
         day: 'numeric',
     });
     const amountText = `${settlement.currency} ${settlement.amount.toFixed(2)}`;
-    // Perspective-specific copy when the current user is a party — avoids
-    // ungrammatical Hebrew from injecting the "you" label into the generic
-    // template (e.g. "את/ה שילם/ה" instead of "שילמת", or "ל-את/ה" vs "לך").
     const settlementLabel =
         settlement.fromUserId === currentUserId
             ? t('activity.youPaid', { name: toName, amount: amountText })
@@ -550,20 +901,91 @@ function SettlementHistoryRow({
             <MemberAvatar name={toName} avatarUrl={toAvatar} size="xs" />
 
             <View className="flex-1 ml-2.5">
-                <Text
-                    className="text-[13px] text-gray-600"
-                    numberOfLines={1}
-                >
+                <Text className="text-[13px] text-gray-600" numberOfLines={1}>
                     {settlementLabel}
                 </Text>
-                <Text className="text-[10px] text-gray-400 mt-0.5">
-                    {dateText}
-                </Text>
+                <Text className="text-[10px] text-gray-400 mt-0.5">{dateText}</Text>
             </View>
 
-            <Text className="text-[13px] font-semibold text-gray-500">
-                {amountText}
-            </Text>
+            <Text className="text-[13px] font-semibold text-gray-500">{amountText}</Text>
+        </TouchableOpacity>
+    );
+}
+
+interface BatchHistoryRowProps {
+    batch: ConsolidationBatch;
+    settlements: Settlement[];
+    fromName: string;
+    toName: string;
+    currentUserId: string;
+    fromAvatar?: string;
+    toAvatar?: string;
+    isLast: boolean;
+    onPress: () => void;
+}
+
+function BatchHistoryRow({
+    batch,
+    settlements,
+    fromName,
+    toName,
+    currentUserId,
+    fromAvatar,
+    toAvatar,
+    isLast,
+    onPress,
+}: BatchHistoryRowProps) {
+    const { t, i18n } = useTranslation();
+    const isRtl = i18n.language?.startsWith('he') ?? false;
+    const locale = isRtl ? 'he-IL' : undefined;
+    const dateText = new Date(batch.createdAt).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+    const amountText = `${batch.paymentCurrency} ${batch.paymentAmount.toFixed(2)}`;
+    const settlementLabel =
+        batch.paidByUserId === currentUserId
+            ? t('activity.youPaid', { name: toName, amount: amountText })
+            : (batch.paidToUserId === currentUserId || (!batch.paidToUserId && settlements.some(s => s.toUserId === currentUserId)))
+              ? t('activity.paidYou', { name: fromName, amount: amountText })
+              : t('feed.settlement', { from: fromName, to: toName, amount: amountText });
+
+    const currencyCount = new Set(settlements.map(s => s.currency)).size;
+    const count = (batch.settlementCount && batch.settlementCount > 0)
+        ? batch.settlementCount
+        : (currencyCount > 0 ? currencyCount : settlements.length);
+
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            className={`flex-row items-center px-3 py-2.5 bg-transparent ${
+                isLast ? '' : 'border-b border-gray-200'
+            }`}
+            testID={`batch-history-${batch.id}`}
+        >
+            <View className="mr-2">
+                <AppIcon name="checkmark-circle" size={18} color={colors.success.DEFAULT} />
+            </View>
+            <MemberAvatar name={fromName} avatarUrl={fromAvatar} size="xs" />
+            <View className="mx-1.5">
+                <Text className="text-gray-400 text-xs">{isRtl ? '←' : '→'}</Text>
+            </View>
+            <MemberAvatar name={toName} avatarUrl={toAvatar} size="xs" />
+
+            <View className="flex-1 ml-2.5">
+                <Text className="text-[13px] text-gray-600" numberOfLines={1}>
+                    {settlementLabel}
+                </Text>
+                <View className="flex-row items-center mt-0.5" style={{ gap: 4 }}>
+                    <Text className="text-[10px] text-gray-400">{dateText}</Text>
+                    <CurrenciesMergedBadge count={count} darker />
+                </View>
+            </View>
+
+            <Text className="text-[13px] font-semibold text-gray-500">{amountText}</Text>
         </TouchableOpacity>
     );
 }

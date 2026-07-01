@@ -25,6 +25,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
 export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
     expense_added: 'expenses',
     settlement_added: 'settlements',
+    consolidation_batch_added: 'settlements',
     message_posted: 'messages',
     friend_request_received: 'friends',
     group_added: 'groups',
@@ -33,6 +34,7 @@ export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
     group_created: 'groups',
     group_deleted: 'groups',
     group_note_changed: 'groups',
+    settle_up_reminder: 'settlements',
 };
 
 export const CATEGORY_TO_PREF_KEY: Record<ActivityCategory, keyof NotificationPreferences> = {
