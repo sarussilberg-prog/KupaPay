@@ -47,8 +47,9 @@ export function getCurrencySymbol(code: string): string {
 }
 
 export function formatAmountDecimal(value: number): string {
+    const isWhole = value % 1 === 0;
     return value.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
+        minimumFractionDigits: isWhole ? 0 : 2,
         maximumFractionDigits: 2,
     });
 }

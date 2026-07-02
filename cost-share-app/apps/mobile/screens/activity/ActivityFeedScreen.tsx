@@ -18,9 +18,11 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { onlineManager, useQueryClient } from '@tanstack/react-query';
 import {
     ActivityEvent,
+    ConsolidationBatch,
     ExpenseWithDelta,
     GroupMemberLite,
     Settlement,
+    settlementFromRow,
 } from '@cost-share/shared';
 import { useActivityQuery } from '../../hooks/queries/useActivityQuery';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
@@ -34,8 +36,10 @@ import {
 } from '../../services/expenses.service';
 import {
     deleteSettlement,
+    fetchConsolidationBatchById,
     getSettlementById,
 } from '../../services/settlements.service';
+import { deleteConsolidationBatch } from '../../services/consolidation.service';
 import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { decorateExpense } from '../../services/expense-delta';
 import { fetchProfilesByUserIds } from '../../services/groups.service';
@@ -74,7 +78,8 @@ function unique<T>(values: T[]): T[] {
 
 type FeedDetailItem =
     | { kind: 'expense'; expense: ExpenseWithDelta }
-    | { kind: 'settlement'; settlement: Settlement };
+    | { kind: 'settlement'; settlement: Settlement }
+    | { kind: 'consolidation_batch'; batch: ConsolidationBatch; settlements: Settlement[] };
 
 const DIVIDER_ID = '__activity_divider__';
 type DividerItem = { __divider: true; id: typeof DIVIDER_ID };
@@ -200,7 +205,7 @@ export function ActivityFeedScreen() {
     const [detailMembers, setDetailMembers] = useState<Record<string, GroupMemberLite>>({});
     const [detailEventId, setDetailEventId] = useState<string | null>(null);
     const [detailDeletedNotice, setDetailDeletedNotice] = useState<
-        { deletedAt: Date; deletedByName: string; kind: 'expense' | 'settlement' } | null
+        { deletedAt: Date; deletedByName: string; deletedByYou: boolean; kind: 'expense' | 'settlement' } | null
     >(null);
     const [userRefreshing, setUserRefreshing] = useState(false);
     const [profileMap, setProfileMap] = useState<Record<string, GroupMemberLite>>({});
@@ -225,6 +230,8 @@ export function ActivityFeedScreen() {
             const md = (evt.metadata ?? {}) as Record<string, unknown>;
             if (typeof md.from_user_id === 'string') ids.add(md.from_user_id);
             if (typeof md.to_user_id === 'string') ids.add(md.to_user_id);
+            if (typeof md.paid_by_user_id === 'string') ids.add(md.paid_by_user_id);
+            if (typeof md.paid_to_user_id === 'string') ids.add(md.paid_to_user_id);
             if (typeof md.new_member_user_id === 'string') ids.add(md.new_member_user_id);
             if (typeof md.deleted_by === 'string') ids.add(md.deleted_by);
         }
@@ -357,14 +364,20 @@ export function ActivityFeedScreen() {
 
     const detailOpenInGroup = useMemo(() => {
         if (!detailItem) return undefined;
-        const groupId = detailItem.kind === 'expense'
-            ? detailItem.expense.groupId
-            : detailItem.settlement.groupId;
+        let groupId: string;
+        let focusFeedItem: GroupDetailFocusFeedItem;
+        if (detailItem.kind === 'expense') {
+            groupId = detailItem.expense.groupId;
+            focusFeedItem = { kind: 'expense', id: detailItem.expense.id };
+        } else if (detailItem.kind === 'settlement') {
+            groupId = detailItem.settlement.groupId;
+            focusFeedItem = { kind: 'settlement', id: detailItem.settlement.id };
+        } else {
+            groupId = detailItem.batch.groupId;
+            focusFeedItem = { kind: 'consolidation_batch', id: detailItem.batch.id };
+        }
         const groupName = groupNameById[groupId];
         if (!groupName) return undefined;
-        const focusFeedItem: GroupDetailFocusFeedItem = detailItem.kind === 'expense'
-            ? { kind: 'expense', id: detailItem.expense.id }
-            : { kind: 'settlement', id: detailItem.settlement.id };
         return {
             label: t('activity.openInGroup', { group: groupName }),
             onPress: () => navigateToGroupWithFocus(groupId, focusFeedItem),
@@ -418,7 +431,8 @@ export function ActivityFeedScreen() {
             // Deleted row: skip the live fetch, surface the deletion notice.
             if (md.is_deleted === true) {
                 const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
-                const deletedByName = deletedById === currentUser?.id
+                const deletedByYouExpense = deletedById === currentUser?.id;
+                const deletedByName = deletedByYouExpense
                     ? t('common.you')
                     : (profileMap[deletedById]?.displayName
                         ?? seed[deletedById]?.displayName
@@ -426,7 +440,7 @@ export function ActivityFeedScreen() {
                 const deletedAt = typeof md.deleted_at === 'string'
                     ? new Date(md.deleted_at)
                     : event.createdAt;
-                setDetailDeletedNotice({ deletedAt, deletedByName, kind: 'expense' });
+                setDetailDeletedNotice({ deletedAt, deletedByName, deletedByYou: deletedByYouExpense, kind: 'expense' });
                 return;
             }
             setDetailDeletedNotice(null);
@@ -480,7 +494,8 @@ export function ActivityFeedScreen() {
 
             if (md.is_deleted === true) {
                 const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
-                const deletedByName = deletedById === currentUser?.id
+                const deletedByYouSettlement = deletedById === currentUser?.id;
+                const deletedByName = deletedByYouSettlement
                     ? t('common.you')
                     : (profileMap[deletedById]?.displayName
                         ?? seed[deletedById]?.displayName
@@ -488,7 +503,7 @@ export function ActivityFeedScreen() {
                 const deletedAt = typeof md.deleted_at === 'string'
                     ? new Date(md.deleted_at)
                     : event.createdAt;
-                setDetailDeletedNotice({ deletedAt, deletedByName, kind: 'settlement' });
+                setDetailDeletedNotice({ deletedAt, deletedByName, deletedByYou: deletedByYouSettlement, kind: 'settlement' });
                 return;
             }
             setDetailDeletedNotice(null);
@@ -562,6 +577,74 @@ export function ActivityFeedScreen() {
                 void openSettlementDetail(event);
                 return;
             }
+            if (event.kind === 'consolidation_batch_added' && event.groupId && event.refId) {
+                void (async () => {
+                    const md = (event.metadata ?? {}) as Record<string, unknown>;
+                    const seed = seedMemberMapFromGroup(event.groupId);
+                    setDetailMembers(seed);
+                    setDetailEventId(event.id);
+                    // Open immediately with stub data from event metadata
+                    const stubBatch: ConsolidationBatch = {
+                        id: event.refId,
+                        groupId: event.groupId ?? '',
+                        paidByUserId: typeof md.paid_by_user_id === 'string' ? md.paid_by_user_id : '',
+                        paidToUserId: typeof md.paid_to_user_id === 'string' ? md.paid_to_user_id : undefined,
+                        paymentAmount: Number(md.payment_amount ?? 0),
+                        paymentCurrency: typeof md.payment_currency === 'string' ? md.payment_currency : '',
+                        settlementCount: typeof md.settlement_count === 'number' ? md.settlement_count : undefined,
+                        createdAt: event.createdAt,
+                        deletedAt: md.is_deleted === true ? new Date() : null,
+                    };
+                    setDetailItem({ kind: 'consolidation_batch', batch: stubBatch, settlements: [] });
+
+                    if (md.is_deleted === true) {
+                        const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
+                        const deletedByYouBatch = deletedById === currentUser?.id;
+                        const deletedByName = deletedByYouBatch
+                            ? t('common.you')
+                            : (profileMap[deletedById]?.displayName
+                                ?? seed[deletedById]?.displayName
+                                ?? t('common.unknown'));
+                        const deletedAt = typeof md.deleted_at === 'string'
+                            ? new Date(md.deleted_at)
+                            : event.createdAt;
+                        setDetailDeletedNotice({ deletedAt, deletedByName, deletedByYou: deletedByYouBatch, kind: 'settlement' });
+                        return;
+                    }
+                    setDetailDeletedNotice(null);
+
+                    // Fetch batch + settlements in parallel
+                    const [batch, { data: settlementsData }] = await Promise.all([
+                        fetchConsolidationBatchById(event.refId),
+                        supabase
+                            .from('settlements')
+                            .select('*')
+                            .eq('consolidation_batch_id', event.refId)
+                            .is('deleted_at', null),
+                    ]);
+                    if (!batch) {
+                        setDetailItem(null);
+                        showOpenFailedToast();
+                        return;
+                    }
+                    const batchSettlements = (settlementsData ?? []).map((r: Record<string, unknown>) =>
+                        settlementFromRow(r),
+                    );
+                    setDetailItem({ kind: 'consolidation_batch', batch, settlements: batchSettlements });
+                    const referencedIds = new Set<string>([
+                        batch.paidByUserId,
+                        ...batchSettlements.flatMap(s => [s.fromUserId, s.toUserId]),
+                    ].filter(Boolean));
+                    const missing = [...referencedIds].filter(id => !seed[id]);
+                    if (missing.length > 0) {
+                        const extra = await fetchProfilesByUserIds(missing);
+                        if (Object.keys(extra).length > 0) {
+                            setDetailMembers(prev => ({ ...prev, ...extra }));
+                        }
+                    }
+                })();
+                return;
+            }
             // message_posted → navigate to group and highlight the message row,
             // matching the expense/settlement focus behavior. refId is the
             // message id (activity_events.ref_id = messages.id).
@@ -573,6 +656,30 @@ export function ActivityFeedScreen() {
                         focusFeedItem: { kind: 'message', id: event.refId },
                     },
                     merge: true,
+                });
+                return;
+            }
+            // group_note_changed → open the group's shared note. We navigate to
+            // GroupDetail with openNote; GroupDetail then pushes GroupNote on top
+            // of itself (the same path as the in-group note button), guaranteeing
+            // Back from the note returns to the relevant group — not wherever the
+            // Groups tab was last. A single navigate avoids the nested-navigator
+            // coalescing that made two separate navigates unreliable.
+            if (event.kind === 'group_note_changed' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: { groupId: event.groupId, openNote: true },
+                });
+                return;
+            }
+            // settle_up_reminder → open the settle-up list ON TOP of the group
+            // (same pattern as group_note_changed): navigate to GroupDetail with
+            // openSettleUp so GroupDetail pushes SettleUpList on top, guaranteeing
+            // Back returns to the relevant group — not wherever the Groups tab was.
+            if (event.kind === 'settle_up_reminder' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: { groupId: event.groupId, openSettleUp: true },
                 });
                 return;
             }
@@ -591,6 +698,10 @@ export function ActivityFeedScreen() {
             groupsLoaded,
             knownGroupIds,
             showUnavailableToast,
+            seedMemberMapFromGroup,
+            currentUser?.id,
+            t,
+            profileMap,
         ],
     );
 
@@ -602,6 +713,7 @@ export function ActivityFeedScreen() {
             navigation.navigate('AddExpense', { expenseId, groupId });
             return;
         }
+        if (detailItem.kind === 'consolidation_batch') return;
         const { groupId, id } = detailItem.settlement;
         setDetailItem(null);
         navigation.navigate('Groups', {
@@ -630,6 +742,18 @@ export function ActivityFeedScreen() {
                             if (ok) {
                                 setDetailItem(null);
                                 void refetch();
+                            }
+                            return;
+                        }
+                        if (item.kind === 'consolidation_batch') {
+                            const ok = await deleteConsolidationBatch(item.batch.id);
+                            if (ok) {
+                                invalidateBalanceCaches(item.batch.groupId);
+                                void queryClient.invalidateQueries({
+                                    queryKey: queryKeys.consolidationBatches(item.batch.groupId),
+                                });
+                                void refetch();
+                                setDetailItem(null);
                             }
                             return;
                         }
@@ -664,7 +788,7 @@ export function ActivityFeedScreen() {
             if (isDivider(item)) {
                 return <ActivityFeedDivider />;
             }
-            const actor = item.actorUserId ? resolvedProfiles[item.actorUserId] : undefined;
+            let actor = item.actorUserId ? resolvedProfiles[item.actorUserId] : undefined;
             const md = (item.metadata ?? {}) as Record<string, unknown>;
             let counterpart: GroupMemberLite | undefined;
             if (item.kind === 'settlement_added') {
@@ -674,6 +798,14 @@ export function ActivityFeedScreen() {
                     ? md.to_user_id
                     : undefined;
                 if (otherId) counterpart = resolvedProfiles[otherId];
+            }
+            if (item.kind === 'consolidation_batch_added') {
+                // The visual "actor" for a batch is the payer (paid_by_user_id), which may
+                // differ from actorUserId when a non-involved member records the settlement.
+                const paidByUserId = typeof md.paid_by_user_id === 'string' ? md.paid_by_user_id : undefined;
+                if (paidByUserId) actor = resolvedProfiles[paidByUserId];
+                const toUserId = typeof md.paid_to_user_id === 'string' ? md.paid_to_user_id : undefined;
+                if (toUserId) counterpart = resolvedProfiles[toUserId];
             }
             const newMemberId = typeof md.new_member_user_id === 'string'
                 ? md.new_member_user_id
@@ -834,7 +966,7 @@ export function ActivityFeedScreen() {
             />
 
             <FeedItemDetailSheet
-                item={detailItem}
+                item={detailItem ?? null}
                 memberMap={detailMembers}
                 currentUserId={currentUser?.id ?? ''}
                 onClose={() => {

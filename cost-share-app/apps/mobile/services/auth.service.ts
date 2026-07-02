@@ -257,14 +257,10 @@ async function signInWithGoogleNativeIos(): Promise<{ error: AuthError | null }>
 }
 
 export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
-  // iOS uses the native Google account-picker sheet (no browser). Android keeps the partial
-  // Chrome Custom Tab; web uses the standard browser OAuth redirect.
-  if (Platform.OS === 'ios' && isNativeGoogleSignInEnabled()) {
+  // iOS and Android use the native Google account-picker sheet (no browser).
+  // Web uses the standard browser OAuth redirect.
+  if (Platform.OS !== 'web' && isNativeGoogleSignInEnabled()) {
     return signInWithGoogleNativeIos();
-  }
-
-  if (Platform.OS === 'android' && __DEV__) {
-    console.info('[Auth] Google OAuth in partial Chrome bottom sheet (~80%)');
   }
 
   return signInWithProviderBrowser('google');

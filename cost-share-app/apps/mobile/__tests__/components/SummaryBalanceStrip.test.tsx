@@ -16,7 +16,7 @@ describe('SummaryBalanceStrip', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/USD 42\.00/)).toBeTruthy();
+        expect(getByText(/USD 42(\.00)?\b/)).toBeTruthy();
         expect(getByText(/credit/i)).toBeTruthy();
     });
 
@@ -27,7 +27,7 @@ describe('SummaryBalanceStrip', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/USD 10\.00/)).toBeTruthy();
+        expect(getByText(/USD 10(\.00)?\b/)).toBeTruthy();
         expect(getByText(/owe/i)).toBeTruthy();
     });
 
@@ -55,7 +55,7 @@ describe('SummaryBalanceStrip', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/USD 42\.00/)).toBeTruthy();
+        expect(getByText(/USD 42(\.00)?\b/)).toBeTruthy();
         expect(queryByTestId('summary-balance-unknown')).toBeNull();
     });
 

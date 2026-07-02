@@ -40,7 +40,7 @@ describe('GroupSummaryCard', () => {
   it('renders the cover, balance strip, and footer', () => {
     const { getByText, getByTestId } = render(<GroupSummaryCard {...baseProps} />);
     expect(getByText('Paris Trip')).toBeTruthy();
-    expect(getByText(/USD 42\.00/)).toBeTruthy();
+    expect(getByText(/USD 42(\.00)?\b/)).toBeTruthy();
     expect(getByTestId('summary-note-pill')).toBeTruthy();
     expect(getByTestId('summary-settle-pill')).toBeTruthy();
   });

@@ -26,7 +26,7 @@ Deno.test('group_member_joined uses new member name', () => {
         actorName: 'דנה', groupName: 'טיול', newMemberName: 'יוסי',
     });
     assertEquals(r.title, 'טיול');
-    assertEquals(r.body, 'יוסי הצטרף לקבוצה');
+    assertEquals(r.body, 'יוסי הצטרף/ה לקבוצה');
 });
 
 Deno.test('expense_added edited renders he', () => {
@@ -35,7 +35,7 @@ Deno.test('expense_added edited renders he', () => {
         isEdited: true,
     });
     assertEquals(r.title, 'טיול');
-    assertEquals(r.body, 'דנה עדכנה הוצאה · ארוחה · ₪240');
+    assertEquals(r.body, 'הוצאה עודכנה על ידי דנה · ארוחה · ₪240');
 });
 
 Deno.test('expense_added edited renders en', () => {
@@ -65,7 +65,7 @@ Deno.test('settlement_added deleted he', () => {
     const r = renderNotification('settlement_added', 'he', {
         actorName: 'דנה', groupName: 'טיול', amount: 50, currency: 'ILS', isDeleted: true,
     });
-    assertEquals(r.body, 'דנה מחקה תשלום');
+    assertEquals(r.body, 'תשלום נמחק על ידי דנה');
 });
 
 Deno.test('message_posted edited en uses neutral body', () => {
@@ -80,5 +80,81 @@ Deno.test('message_posted deleted he', () => {
     const r = renderNotification('message_posted', 'he', {
         actorName: 'דנה', groupName: 'טיול', body: 'שלום', isDeleted: true,
     });
-    assertEquals(r.body, 'דנה מחקה הודעה');
+    assertEquals(r.body, 'ההודעה נמחקה על ידי דנה');
+});
+
+Deno.test('group_deleted renders en/he with group title', () => {
+    assertEquals(
+        renderNotification('group_deleted', 'en', { actorName: 'Alice', groupName: 'Trip' }),
+        { title: 'Trip', body: 'Deleted by Alice' },
+    );
+    assertEquals(
+        renderNotification('group_deleted', 'he', { actorName: 'דנה', groupName: 'טיול' }),
+        { title: 'טיול', body: 'נמחקה על ידי דנה' },
+    );
+});
+
+Deno.test('group_note_changed renders en/he', () => {
+    assertEquals(
+        renderNotification('group_note_changed', 'en', { actorName: 'Alice', groupName: 'Trip' }),
+        { title: 'Trip', body: 'Note changed by Alice' },
+    );
+    assertEquals(
+        renderNotification('group_note_changed', 'he', { actorName: 'דנה', groupName: 'טיול' }),
+        { title: 'טיול', body: 'הפתק שונה על ידי דנה' },
+    );
+});
+
+Deno.test('friend_request_received rejected uses rejected push copy', () => {
+    assertEquals(
+        renderNotification('friend_request_received', 'en', { actorName: 'Bob', groupName: '', status: 'rejected' }),
+        { title: 'Friend request declined', body: 'Bob declined your friend request' },
+    );
+});
+
+Deno.test('friend_request_received pending unchanged', () => {
+    assertEquals(
+        renderNotification('friend_request_received', 'en', { actorName: 'Dana', groupName: '' }),
+        { title: 'New friend request', body: 'Dana wants to connect' },
+    );
+});
+
+// consolidation_batch_added
+Deno.test('consolidation_batch_added new en renders group title and amount', () => {
+    const r = renderNotification('consolidation_batch_added', 'en', {
+        actorName: 'Avi', groupName: 'Summer Trip', amount: 200, currency: 'ILS',
+    });
+    assertEquals(r.title, 'Summer Trip');
+    assertEquals(r.body, 'New payment from Avi · ₪200');
+});
+
+Deno.test('consolidation_batch_added new he renders correctly', () => {
+    const r = renderNotification('consolidation_batch_added', 'he', {
+        actorName: 'אבי', groupName: 'טיול קיץ', amount: 200, currency: 'ILS',
+    });
+    assertEquals(r.title, 'טיול קיץ');
+    assertEquals(r.body, 'תשלום מומר חדש מאת אבי · ₪200');
+});
+
+Deno.test('consolidation_batch_added deleted en omits amount', () => {
+    const r = renderNotification('consolidation_batch_added', 'en', {
+        actorName: 'Avi', groupName: 'Summer Trip', amount: 200, currency: 'ILS', isDeleted: true,
+    });
+    assertEquals(r.title, 'Summer Trip');
+    assertEquals(r.body, 'Avi deleted a payment');
+});
+
+Deno.test('consolidation_batch_added deleted he omits amount', () => {
+    const r = renderNotification('consolidation_batch_added', 'he', {
+        actorName: 'אבי', groupName: 'טיול קיץ', amount: 200, currency: 'ILS', isDeleted: true,
+    });
+    assertEquals(r.title, 'טיול קיץ');
+    assertEquals(r.body, 'תשלום מומר נמחק על ידי אבי');
+});
+
+Deno.test('consolidation_batch_added new with unknown currency falls back to code', () => {
+    const r = renderNotification('consolidation_batch_added', 'en', {
+        actorName: 'Avi', groupName: 'Trip', amount: 50, currency: 'CHF',
+    });
+    assertEquals(r.body, 'New payment from Avi · 50 CHF');
 });

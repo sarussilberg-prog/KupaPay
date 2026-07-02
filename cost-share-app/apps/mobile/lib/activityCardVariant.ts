@@ -127,6 +127,30 @@ const MEMBER_LEFT: ActivityCardVariant = {
     titleLines: 2,
 };
 
+const CONSOLIDATION: ActivityCardVariant = {
+    iconName: 'swap-horizontal-outline',
+    iconColor: colors.success.DEFAULT,
+    iconBgColor: '#ecfdf5',
+    backgroundColor: colors.white,
+    borderColor: '#bbf7d0',
+    amountTone: 'settlement',
+    showAmount: true,
+    showGroupLine: false,
+    titleLines: 3,
+};
+
+const SETTLE_REMINDER: ActivityCardVariant = {
+    iconName: 'alarm-outline',
+    iconColor: '#b45309',
+    iconBgColor: '#fffbeb',
+    backgroundColor: '#ffffff',
+    borderColor: '#fde68a',
+    amountTone: 'muted',
+    showAmount: false,
+    showGroupLine: true,
+    titleLines: 2,
+};
+
 export function getActivityCardVariant(
     kind: ActivityEventKind,
     friendRequestStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled',
@@ -136,6 +160,8 @@ export function getActivityCardVariant(
             return EXPENSE;
         case 'settlement_added':
             return SETTLEMENT;
+        case 'consolidation_batch_added':
+            return CONSOLIDATION;
         case 'message_posted':
             return MESSAGE;
         case 'friend_request_received':
@@ -148,6 +174,14 @@ export function getActivityCardVariant(
             return MEMBER_JOINED;
         case 'group_removed':
             return MEMBER_LEFT;
+        case 'group_created':
+            return GROUP_INVITE;
+        case 'group_deleted':
+            return MEMBER_LEFT;
+        case 'group_note_changed':
+            return MESSAGE;
+        case 'settle_up_reminder':
+            return SETTLE_REMINDER;
     }
 }
 

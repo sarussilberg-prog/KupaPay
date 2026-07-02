@@ -105,9 +105,18 @@ export function MemberContributionBreakdown({
                 let sectionTitle: string;
                 if (mode === 'paid') {
                     // Self is the payer; counterparty is the consumer.
-                    sectionTitle = counterpartyIsCurrentUser
-                        ? t('balances.paidMode.detailSectionYou')
-                        : t('balances.paidMode.detailSection', { name: other.displayName });
+                    if (counterpartyIsCurrentUser) {
+                        sectionTitle = t('balances.paidMode.detailSectionYou');
+                    } else if (ownerIsCurrentUser) {
+                        // You (owner) are the payer.
+                        sectionTitle = t('balances.paidMode.detailSectionOwnerYou', {
+                            name: other.displayName,
+                        });
+                    } else {
+                        sectionTitle = t('balances.paidMode.detailSection', {
+                            name: other.displayName,
+                        });
+                    }
                 } else if (counterpartyIsCurrentUser) {
                     // Self (owner) is the consumer; counterparty (you) is the payer.
                     sectionTitle = t('balances.spentOnMode.detailSectionNameYou', {

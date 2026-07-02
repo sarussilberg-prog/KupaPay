@@ -89,4 +89,35 @@ describe('applyGroupsRealtimeEventToCache (idempotent upsert)', () => {
         } as any);
         expect(client.getQueryData<any[]>(queryKeys.groups)).toEqual([{ id: 'g1' }]);
     });
+
+    it('UPDATE preserves hasUnreadNote=true so the note dot is not wiped', () => {
+        // Regression: previously the merge hard-coded hasUnreadNote: false,
+        // which silently cleared the unread-note dot on any groups UPDATE (e.g.
+        // a shared-note edit by another member). The flag must be carried over
+        // from the existing cached entry.
+        const client = setup([
+            {
+                id: 'g1',
+                name: 'Old',
+                members: [{ id: 'u1' }],
+                isArchivedByMe: false,
+                isAutoArchived: false,
+                hasUnreadNote: true, // viewer has NOT seen the latest note
+            },
+        ]);
+        applyGroupsRealtimeEventToCache(client, {
+            eventType: 'UPDATE',
+            new: {
+                id: 'g1',
+                name: 'Old',
+                is_active: true,
+                default_currency: 'USD',
+                created_by: 'u1',
+                created_at: '2026-01-01',
+                updated_at: '2026-01-02',
+            },
+        } as any);
+        const next = client.getQueryData<any[]>(queryKeys.groups);
+        expect(next?.find((g) => g.id === 'g1').hasUnreadNote).toBe(true);
+    });
 });

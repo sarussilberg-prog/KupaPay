@@ -6,8 +6,9 @@ import {
     Settlement,
     CreateSettlementDto,
     UpdateSettlementDto,
+    ConsolidationBatch,
 } from '@cost-share/shared';
-import { settlementFromRow } from '@cost-share/shared';
+import { settlementFromRow, consolidationBatchFromRow } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { showSuccessToast, showErrorToast } from '../lib/appToast';
@@ -138,6 +139,46 @@ export async function deleteSettlement(id: string): Promise<boolean> {
             extra: { settlementId: id },
         });
         return false;
+    }
+}
+
+export async function fetchConsolidationBatchById(batchId: string): Promise<ConsolidationBatch | null> {
+    try {
+        const { data, error } = await supabase
+            .from('consolidation_batches')
+            .select('*')
+            .eq('id', batchId)
+            .is('deleted_at', null)
+            .single();
+        if (error) throw error;
+        return data ? consolidationBatchFromRow(data) : null;
+    } catch (error) {
+        handleError(error, {
+            toast: { titleKey: 'consolidation.recordError' },
+            tags: { service: 'consolidation', op: 'fetchBatchById' },
+            extra: { batchId },
+        });
+        return null;
+    }
+}
+
+export async function fetchConsolidationBatches(groupId: string): Promise<ConsolidationBatch[]> {
+    try {
+        const { data, error } = await supabase
+            .from('consolidation_batches')
+            .select('*')
+            .eq('group_id', groupId)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return (data ?? []).map(consolidationBatchFromRow);
+    } catch (error) {
+        handleError(error, {
+            toast: { titleKey: 'consolidation.recordError' },
+            tags: { service: 'consolidation', op: 'fetchBatches' },
+            extra: { groupId },
+        });
+        return [];
     }
 }
 

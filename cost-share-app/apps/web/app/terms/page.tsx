@@ -1,5 +1,3 @@
-import LegalPage from '@/app/_components/LegalPage';
+import { createLegalPageRoute } from '@/app/_components/LegalPage';
 
-export default function TermsPage() {
-  return <LegalPage slug="terms" />;
-}
+export default createLegalPageRoute('terms');

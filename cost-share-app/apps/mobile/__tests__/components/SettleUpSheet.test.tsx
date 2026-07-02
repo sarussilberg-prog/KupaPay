@@ -103,16 +103,16 @@ describe('SettleUpSheet (redesign)', () => {
         );
     });
 
-    it('defaults paymentMethod to credit_card per design', async () => {
+    it('defaults paymentMethod to cash per design', async () => {
         const onSubmit = jest.fn();
         const { getByTestId } = renderSheet({ onSubmit });
         fireEvent.press(getByTestId('settle-record-button'));
         expect(onSubmit).toHaveBeenCalledWith(
-            expect.objectContaining({ paymentMethod: 'credit_card' })
+            expect.objectContaining({ paymentMethod: 'cash' })
         );
     });
 
-    it('maps legacy bank_transfer initial value to credit_card', async () => {
+    it('maps legacy bank_transfer initial value to the default method', async () => {
         const onSubmit = jest.fn();
         const { getByTestId } = renderSheet({
             onSubmit,
@@ -120,7 +120,7 @@ describe('SettleUpSheet (redesign)', () => {
         });
         fireEvent.press(getByTestId('settle-record-button'));
         expect(onSubmit).toHaveBeenCalledWith(
-            expect.objectContaining({ paymentMethod: 'credit_card' })
+            expect.objectContaining({ paymentMethod: 'cash' })
         );
     });
 

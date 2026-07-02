@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev]
+    branches: [dev, main]
 
 concurrency:
   group: ci-${{ github.event.pull_request.number }}
@@ -44,7 +44,8 @@ jobs:
   auto-merge:
     name: Auto-merge to dev
     needs: [lint, test]
-    if: github.event.pull_request.draft == false
+    # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
+    if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
     # Serialize merge + bump across PRs so two concurrent merges can't race on
     # version.json (each PR merge produces exactly one patch bump).
@@ -60,7 +61,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-        run: gh pr merge "$PR_NUMBER" --squash --repo "$REPO"
+        run: gh pr merge "$PR_NUMBER" --squash --repo "$REPO" --auto
 
       - name: Check out dev (post-merge)
         uses: actions/checkout@v4
@@ -69,16 +70,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Patch-bump the App Version SSOT on every merge to dev.
-      # NO RECURSION: this is a push to dev, and CI runs only on `pull_request`, so a
-      # push can never re-trigger this workflow. (GITHUB_TOKEN pushes also don't
-      # trigger workflows, and the old push-triggered bump-version-dev.yml is gone.)
+      # Patch-bump the App Version SSOT on every merge to dev (except version-bump
+      # commits themselves, to prevent recursion). Commits the bump directly to dev:
+      # a GITHUB_TOKEN push does not re-trigger workflows, and CI only runs on
+      # pull_request (not push), so there is no recursion. Mirrors the direct-commit
+      # approach used by bump-version-main.yml — no gh pr create, which the repo's
+      # "Allow GitHub Actions to create and approve pull requests" setting blocks.
       - name: Bump patch version on dev
+        if: "!startsWith(github.head_ref, 'chore/version-bump/')"
         run: |
           set -euo pipefail
           VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           for attempt in 1 2 3; do
             git fetch origin dev
             git reset --hard origin/dev
