@@ -1,7 +1,6 @@
 import type { Translations } from '@/lib/i18n';
 
-// TODO: Replace with real App Store URL when app is live on the App Store
-const APP_STORE_URL = 'https://apps.apple.com/app/kupapay';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/kupapay/id6780216665';
 
 // TODO: Replace with real Google Play URL when app is live on Google Play
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.kupapay.mobile';
