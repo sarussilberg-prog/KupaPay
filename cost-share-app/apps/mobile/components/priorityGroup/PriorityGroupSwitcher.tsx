@@ -1,0 +1,70 @@
+/**
+ * PriorityGroupSwitcher — the small "switch group" button shown at the top of
+ * the Priority Group tab. Shows the active group's name; tapping opens the
+ * GroupPickerSheet, and choosing a group persists it via setPriorityGroupId.
+ */
+import React, { useCallback, useState } from 'react';
+import { View, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { GroupWithMembers } from '@cost-share/shared';
+import { Text } from '../AppText';
+import { AppIcon } from '../AppIcon';
+import { colors } from '../../theme';
+import { useRtlLayout, rtlRowStyle } from '../../hooks/useRtlLayout';
+import { useAppStore } from '../../store';
+import { GroupPickerSheet } from './GroupPickerSheet';
+
+interface Props {
+    /** The effective (resolved) group id currently shown in the tab. */
+    groupId: string;
+    /** Display name of the effective group. */
+    groupName: string;
+    /** All member groups, for the picker list. */
+    groups: GroupWithMembers[];
+}
+
+export function PriorityGroupSwitcher({ groupId, groupName, groups }: Props) {
+    const { t } = useTranslation();
+    const isRtl = useRtlLayout();
+    const setPriorityGroupId = useAppStore((s) => s.setPriorityGroupId);
+    const [pickerOpen, setPickerOpen] = useState(false);
+
+    const handleSelect = useCallback(
+        (id: string) => {
+            setPriorityGroupId(id);
+            setPickerOpen(false);
+        },
+        [setPriorityGroupId],
+    );
+
+    return (
+        <View className="px-4 pt-2 pb-1">
+            <TouchableOpacity
+                onPress={() => setPickerOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('priorityGroup.switchLabel')}
+                testID="priority-switch-btn"
+                style={rtlRowStyle(isRtl)}
+                className="self-start items-center rounded-full bg-gray-100 px-3 h-9"
+            >
+                <AppIcon name="star" size={16} color={colors.primary} />
+                <Text
+                    testID="priority-switch-label"
+                    className="text-sm font-semibold text-gray-900 mx-2"
+                    numberOfLines={1}
+                >
+                    {groupName}
+                </Text>
+                <AppIcon name="swap-horizontal" size={16} color={colors.gray500} />
+            </TouchableOpacity>
+
+            <GroupPickerSheet
+                visible={pickerOpen}
+                groups={groups}
+                selectedGroupId={groupId}
+                onSelectGroup={handleSelect}
+                onClose={() => setPickerOpen(false)}
+            />
+        </View>
+    );
+}
