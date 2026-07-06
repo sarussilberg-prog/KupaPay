@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon, AppIconName } from '../components/AppIcon';
 import { UnreadBadge } from '../components/UnreadBadge';
+import { CustomTabBar } from '../components/navigation/CustomTabBar';
 import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
@@ -313,6 +314,7 @@ function MainTabs() {
     return (
         <Tab.Navigator
             initialRouteName="Groups"
+            tabBar={(props) => <CustomTabBar {...props} />}
             screenOptions={{
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.gray400,
