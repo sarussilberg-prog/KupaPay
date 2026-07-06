@@ -64,4 +64,34 @@ describe('GroupPickerSheet', () => {
         fireEvent.press(getByTestId('group-picker-scrim'));
         expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    it('renders a custom title when provided', () => {
+        const { getByText } = render(
+            <GroupPickerSheet
+                visible
+                groups={groups}
+                selectedGroupId="g1"
+                onSelectGroup={() => {}}
+                onClose={() => {}}
+                title="Custom title"
+            />,
+        );
+        expect(getByText('Custom title')).toBeTruthy();
+    });
+
+    it('falls back to the priority-group title when no title prop is given', () => {
+        const { getByText } = render(
+            <GroupPickerSheet
+                visible
+                groups={groups}
+                selectedGroupId="g1"
+                onSelectGroup={() => {}}
+                onClose={() => {}}
+            />,
+        );
+        // In tests i18n returns the raw key; the important invariant is that the
+        // default title is still driven by the priority-group key (unchanged for
+        // existing callers).
+        expect(getByText('priorityGroup.pickerTitle')).toBeTruthy();
+    });
 });

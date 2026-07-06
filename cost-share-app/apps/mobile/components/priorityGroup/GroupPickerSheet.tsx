@@ -20,6 +20,12 @@ interface Props {
     selectedGroupId: string | null;
     onSelectGroup: (groupId: string) => void;
     onClose: () => void;
+    /**
+     * Optional header title. Defaults to the priority-group picker title so
+     * existing callers (PriorityGroupSwitcher) are unaffected; other callers
+     * (e.g. the Add Expense group pill) can pass a context-appropriate title.
+     */
+    title?: string;
 }
 
 export function GroupPickerSheet({
@@ -28,9 +34,11 @@ export function GroupPickerSheet({
     selectedGroupId,
     onSelectGroup,
     onClose,
+    title,
 }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
+    const headerTitle = title ?? t('priorityGroup.pickerTitle');
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -46,7 +54,7 @@ export function GroupPickerSheet({
                     >
                         <View style={{ flex: 1, minWidth: 0 }}>
                             <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
-                                {t('priorityGroup.pickerTitle')}
+                                {headerTitle}
                             </Text>
                         </View>
                         <TouchableOpacity
