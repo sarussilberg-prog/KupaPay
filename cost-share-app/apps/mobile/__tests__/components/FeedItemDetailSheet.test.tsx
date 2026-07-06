@@ -243,6 +243,7 @@ describe('FeedItemDetailSheet — deletion notice', () => {
                 deletedNotice={{
                     deletedAt: new Date('2026-06-18T18:30:00Z'),
                     deletedByName: 'Avi',
+                    deletedByYou: false,
                     kind: 'expense',
                 }}
                 onRemoveFromActivity={onRemove}
