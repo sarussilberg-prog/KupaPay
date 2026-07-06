@@ -63,7 +63,8 @@ CREATE OR REPLACE FUNCTION emit_expense_activity_events() RETURNS TRIGGER
               AND (OLD.description  IS DISTINCT FROM NEW.description
                    OR OLD.amount    IS DISTINCT FROM NEW.amount
                    OR OLD.currency  IS DISTINCT FROM NEW.currency
-                   OR OLD.expense_date IS DISTINCT FROM NEW.expense_date) THEN
+                   OR OLD.expense_date IS DISTINCT FROM NEW.expense_date
+                   OR OLD.paid_by IS DISTINCT FROM NEW.paid_by) THEN
             UPDATE activity_events ae
             SET metadata = jsonb_build_object(
                     'description', NEW.description,
@@ -102,8 +103,10 @@ CREATE OR REPLACE FUNCTION emit_expense_activity_events() RETURNS TRIGGER
 -- Trigger definition unchanged; recreate idempotently for safety.
 DROP TRIGGER IF EXISTS trg_expense_activity_events ON expenses;
 CREATE TRIGGER trg_expense_activity_events
-    AFTER INSERT OR UPDATE OF is_deleted, description, amount, currency, expense_date ON expenses
+    AFTER INSERT OR UPDATE OF is_deleted, paid_by, description, amount, currency, expense_date ON expenses
     FOR EACH ROW EXECUTE FUNCTION emit_expense_activity_events();
+
+REVOKE EXECUTE ON FUNCTION emit_expense_activity_events() FROM PUBLIC, anon, authenticated;
 
 -- ============================================================================
 -- 2. emit_expense_split_viewer_delta — correct each participant's row once
