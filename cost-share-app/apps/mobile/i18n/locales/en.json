@@ -509,6 +509,8 @@
         "paidBySub": "{{amount}} · paid by {{name}}",
         "v2": {
             "addQuick": "Add expense",
+            "changeGroup": "Group",
+            "selectGroup": "Choose group",
             "headerNew": "NEW EXPENSE",
             "headerEdit": "EDIT EXPENSE",
             "amountPlaceholder": "0.00",
