@@ -100,9 +100,11 @@ function ExpenseRowBase({
     // Amount color mirrors the borrowed/lent sub-line, which is the canonical
     // viewer direction: lent ⇒ owed (green), borrowed ⇒ owes (red), else black.
     const amountClassName = viewerAmountToneClass(
-        userShare > 0
-            ? (expense.myDeltaState === 'lent' ? 'positive' : 'negative')
-            : 'neutral',
+        expense.myDeltaState === 'lent'
+            ? 'positive'
+            : expense.myDeltaState === 'borrowed'
+              ? 'negative'
+              : 'neutral',
     );
 
     return (
