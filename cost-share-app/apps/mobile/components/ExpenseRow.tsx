@@ -22,6 +22,7 @@ import {
     expenseFeedSummaryKey,
     expenseFeedSummaryCount,
 } from '../lib/feedExpensePerspective';
+import { viewerAmountToneClass } from '../lib/viewerAmountTone';
 
 // ExpenseCategory → Ionicon for the icon-thumbnail fallback.
 const CATEGORY_ICON: Record<ExpenseCategory, AppIconName> = {
@@ -96,12 +97,21 @@ function ExpenseRowBase({
         />
     );
 
+    // Amount color mirrors the borrowed/lent sub-line, which is the canonical
+    // viewer direction: lent ⇒ owed (green), borrowed ⇒ owes (red), else black.
+    const amountClassName = viewerAmountToneClass(
+        userShare > 0
+            ? (expense.myDeltaState === 'lent' ? 'positive' : 'negative')
+            : 'neutral',
+    );
+
     return (
         <FeedRowCard
             thumbnail={thumbnail}
             title={expense.description}
             meta={meta}
             amount={amount}
+            amountClassName={amountClassName}
             subLine={subLine}
             onPress={() => onPress(expense.id)}
             testID={`expense-row-${expense.id}`}

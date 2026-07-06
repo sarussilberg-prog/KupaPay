@@ -111,4 +111,43 @@ describe('ExpenseRow', () => {
         fireEvent.press(getByText('Coffee'));
         expect(onPress).toHaveBeenCalledWith('e1');
     });
+
+    it('colors the amount green when the viewer lent (is owed)', () => {
+        const { getByText } = render(
+            <ExpenseRow
+                expense={baseExpense}
+                currentUserId="me"
+                payerName="Alice"
+                onPress={() => {}}
+            />,
+        );
+        const value = getByText('30');
+        expect(value.props.className).toContain('text-green-600');
+    });
+
+    it('colors the amount red when the viewer borrowed (owes)', () => {
+        const { getByText } = render(
+            <ExpenseRow
+                expense={{ ...baseExpense, myDelta: -10, myDeltaState: 'borrowed' }}
+                currentUserId="me"
+                payerName="Alice"
+                onPress={() => {}}
+            />,
+        );
+        const value = getByText('30');
+        expect(value.props.className).toContain('text-red-500');
+    });
+
+    it('colors the amount black when settled / not involved', () => {
+        const { getByText } = render(
+            <ExpenseRow
+                expense={{ ...baseExpense, myDelta: 0, myDeltaState: 'settled' }}
+                currentUserId="me"
+                payerName="Alice"
+                onPress={() => {}}
+            />,
+        );
+        const value = getByText('30');
+        expect(value.props.className).toContain('text-gray-900');
+    });
 });
