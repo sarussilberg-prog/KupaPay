@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { TouchableOpacity, View, Text, Platform } from 'react-native';
+import { TouchableOpacity, View, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { ParamListBase, RouteProp } from '@react-navigation/native';
@@ -20,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon, AppIconName } from '../components/AppIcon';
+import { UnreadBadge } from '../components/UnreadBadge';
 import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
@@ -284,33 +285,10 @@ function MainTabs() {
                                 size={size}
                                 color={color}
                             />
-                            {unreadCount > 0 && (
-                                <View
-                                    style={{
-                                        position: 'absolute',
-                                        top: -6,
-                                        right: -10,
-                                        minWidth: 16,
-                                        height: 16,
-                                        paddingHorizontal: 4,
-                                        borderRadius: 8,
-                                        backgroundColor: colors.primaryExtraLight,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.primaryDark,
-                                            fontSize: 10,
-                                            fontWeight: '600',
-                                            lineHeight: 12,
-                                        }}
-                                    >
-                                        {unreadCount > 99 ? '99+' : unreadCount}
-                                    </Text>
-                                </View>
-                            )}
+                            <UnreadBadge
+                                count={unreadCount}
+                                style={{ position: 'absolute', top: -6, right: -10 }}
+                            />
                         </View>
                     ),
                 }}
