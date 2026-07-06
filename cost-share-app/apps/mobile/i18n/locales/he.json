@@ -522,6 +522,7 @@
         },
         "paidBySub": "{{amount}} · שולם על ידי {{name}}",
         "v2": {
+            "addQuick": "הוספת הוצאה",
             "headerNew": "הוצאה חדשה",
             "headerEdit": "עריכת הוצאה",
             "amountPlaceholder": "0.00",
