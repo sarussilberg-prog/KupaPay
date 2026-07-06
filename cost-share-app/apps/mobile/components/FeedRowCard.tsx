@@ -114,6 +114,8 @@ interface FeedRowCardProps {
     title: string;
     meta: string;
     amount: string;
+    /** Tailwind color class for the main amount (viewer-net tone). Defaults to black. */
+    amountClassName?: string;
     subLine?: React.ReactNode;
     onPress?: () => void;
     testID?: string;
@@ -124,6 +126,7 @@ export function FeedRowCard({
     title,
     meta,
     amount,
+    amountClassName = 'text-gray-900',
     subLine,
     onPress,
     testID,
@@ -156,7 +159,7 @@ export function FeedRowCard({
             >
                 <FeedAmountLine
                     amount={amount}
-                    className="text-[15px] font-bold text-gray-900"
+                    className={`text-[15px] font-bold ${amountClassName}`}
                 />
                 {subLine ? (
                     typeof subLine === 'string' ? (
