@@ -38,6 +38,12 @@ interface AppState {
     // an Alert once the user has been routed back. Reset after display.
     pendingDeactivationNotice: boolean;
     setPendingDeactivationNotice: (value: boolean) => void;
+
+    // Priority group — the group the "Priority Group" tab opens on. Persisted.
+    // Setter only stores the id; the effective/fallback resolution lives in
+    // lib/priorityGroup.ts so it can be unit-tested without a store.
+    priorityGroupId: string | null;
+    setPriorityGroupId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -74,6 +80,10 @@ export const useAppStore = create<AppState>()(
             // Deactivation notice flag
             pendingDeactivationNotice: false,
             setPendingDeactivationNotice: (value) => set({ pendingDeactivationNotice: value }),
+
+            // Priority group state
+            priorityGroupId: null,
+            setPriorityGroupId: (id) => set({ priorityGroupId: id }),
         }),
         {
             name: 'app-store.v1',
@@ -96,6 +106,7 @@ export const useAppStore = create<AppState>()(
             partialize: (state) => ({
                 currentUser: state.currentUser,
                 language: state.language,
+                priorityGroupId: state.priorityGroupId,
             }),
             version: 1,
         },
