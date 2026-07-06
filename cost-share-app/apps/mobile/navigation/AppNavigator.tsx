@@ -59,6 +59,7 @@ function tabBarIcon(
 }
 import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
+import { PriorityGroupScreen } from '../screens/priorityGroup/PriorityGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
@@ -200,6 +201,61 @@ function GroupsStack() {
     );
 }
 
+function PriorityGroupStack() {
+    const { t } = useTranslation();
+    const isRtl = useRtlLayout();
+
+    return (
+        <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
+            <Stack.Screen
+                name="PriorityGroupHome"
+                component={PriorityGroupScreen}
+                // Seed params so GroupDetailScreen's `route.params.groupId`
+                // destructure (which reads `route.params` directly) can't hit
+                // `undefined` on the first frame before PriorityGroupScreen's
+                // useLayoutEffect sets the real id.
+                initialParams={{ groupId: undefined }}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="GroupMembers"
+                component={GroupMembersScreen}
+                options={{ title: t('groups.members.title') }}
+            />
+            <Stack.Screen
+                name="GroupNote"
+                component={GroupNoteScreen}
+                options={{ title: t('groups.note.title') }}
+            />
+            <Stack.Screen
+                name="ExpenseList"
+                component={ExpenseListScreen}
+                options={{ title: t('expenses.title') }}
+            />
+            <Stack.Screen
+                name="ExpenseDetail"
+                component={ExpenseDetailScreen}
+                options={{ title: t('expenses.expenseDetail') }}
+            />
+            <Stack.Screen
+                name="Balances"
+                component={BalancesScreen}
+                options={{ title: t('balances.title') }}
+            />
+            <Stack.Screen
+                name="SettleUpList"
+                component={SettleUpListScreen}
+                options={{ title: t('settleUp.title') }}
+            />
+            <Stack.Screen
+                name="SettlementHistory"
+                component={SettlementHistoryScreen}
+                options={{ title: t('balances.settlementHistory') }}
+            />
+        </Stack.Navigator>
+    );
+}
+
 function ActivityStack() {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
@@ -291,6 +347,15 @@ function MainTabs() {
                             />
                         </View>
                     ),
+                }}
+            />
+            <Tab.Screen
+                name="PriorityGroup"
+                component={PriorityGroupStack}
+                listeners={tabPopToTopOnPress('PriorityGroupHome')}
+                options={{
+                    tabBarLabel: t('tabs.priorityGroup'),
+                    tabBarIcon: tabBarIcon('star', 'star-outline'),
                 }}
             />
             <Tab.Screen
