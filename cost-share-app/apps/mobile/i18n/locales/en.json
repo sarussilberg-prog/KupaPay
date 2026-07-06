@@ -35,7 +35,15 @@
         "groups": "Groups",
         "activity": "Activity",
         "history": "History",
-        "profile": "Profile"
+        "profile": "Profile",
+        "priorityGroup": "Priority Group"
+    },
+    "priorityGroup": {
+        "switchLabel": "Switch group",
+        "pickerTitle": "Choose priority group",
+        "emptyTitle": "No groups yet",
+        "emptyMessage": "Create or join a group to pin it here for quick access.",
+        "emptyCta": "Create a group"
     },
     "auth": {
         "appName": "KupaPay",

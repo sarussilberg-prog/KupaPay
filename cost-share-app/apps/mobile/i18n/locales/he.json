@@ -35,7 +35,15 @@
         "groups": "קופות",
         "activity": "פעילות",
         "history": "היסטוריה",
-        "profile": "פרופיל"
+        "profile": "פרופיל",
+        "priorityGroup": "קבוצה בעדיפות"
+    },
+    "priorityGroup": {
+        "switchLabel": "החלפת קבוצה",
+        "pickerTitle": "בחירת קבוצה בעדיפות",
+        "emptyTitle": "אין עדיין קבוצות",
+        "emptyMessage": "צרו או הצטרפו לקבוצה כדי להצמיד אותה כאן לגישה מהירה.",
+        "emptyCta": "יצירת קבוצה"
     },
     "auth": {
         "appName": "KupaPay",
