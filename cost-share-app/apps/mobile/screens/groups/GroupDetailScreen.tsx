@@ -17,7 +17,7 @@ import {
     Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
     ConsolidationBatch,
     ExpenseCategory,
@@ -53,6 +53,7 @@ import { useGroupExpensesRealtime } from '../../hooks/useGroupExpensesRealtime';
 import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsRealtime';
 import { useGroupConsolidationBatchesRealtime } from '../../hooks/useGroupConsolidationBatchesRealtime';
 import { queryClient } from '../../lib/queryClient';
+import { supabase } from '../../lib/supabase';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchAddExpense } from '../../hooks/queries/prefetchAddExpense';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
@@ -224,6 +225,24 @@ export function GroupDetailScreen() {
             }
         };
     }, []);
+
+    // On focus, mark this group's activity as seen and refresh the per-group
+    // unread badge on the Groups list. Mirrors ActivityFeedScreen's global
+    // mark_activity_seen on focus.
+    useFocusEffect(
+        useCallback(() => {
+            void (async () => {
+                const { error } = await supabase.rpc('mark_group_activity_seen', {
+                    p_group_id: groupId,
+                });
+                if (!error) {
+                    void queryClient.invalidateQueries({
+                        queryKey: queryKeys.groupUnreadCounts,
+                    });
+                }
+            })();
+        }, [groupId]),
+    );
 
     const [group, setGroup] = useState<Group | null>(null);
     const groupsQuery = useGroupsQuery();

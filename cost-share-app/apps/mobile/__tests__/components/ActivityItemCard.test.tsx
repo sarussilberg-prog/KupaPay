@@ -420,3 +420,150 @@ describe('resolveActivityTitle — consolidation_batch_added', () => {
         expect(title).toBe('Currency conversion');
     });
 });
+
+describe('ActivityItemCard — amount color by viewer net', () => {
+    it('colors the settlement amount green when the viewer is the payee', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('settlement_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        from_user_id: 'u-payer',
+                        to_user_id: 'u-recipient',
+                        amount: 20,
+                        currency: 'USD',
+                    },
+                })}
+                title="Bob paid you"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$20/);
+        expect(amount.props.className).toContain('text-green-600');
+    });
+
+    it('colors the settlement amount red when the viewer is the payer', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('settlement_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        from_user_id: 'u-recipient',
+                        to_user_id: 'u-payee',
+                        amount: 20,
+                        currency: 'USD',
+                    },
+                })}
+                title="You paid Bob"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$20/);
+        expect(amount.props.className).toContain('text-red-500');
+    });
+
+    it('colors a third-party settlement amount black', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('settlement_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        from_user_id: 'u-a',
+                        to_user_id: 'u-b',
+                        amount: 20,
+                        currency: 'USD',
+                    },
+                })}
+                title="Alice paid Bob"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$20/);
+        expect(amount.props.className).toContain('text-gray-900');
+    });
+
+    it('colors an expense amount green when the viewer_delta is positive (viewer is owed)', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('expense_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        description: 'Dinner',
+                        amount: 30,
+                        currency: 'USD',
+                        viewer_delta: 20,
+                    },
+                })}
+                title="Dinner"
+                meta="Alice · now"
+                groupName="Trip"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$30/);
+        expect(amount.props.className).toContain('text-green-600');
+    });
+
+    it('colors an expense amount red when the viewer_delta is negative (viewer owes)', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('expense_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        description: 'Dinner',
+                        amount: 30,
+                        currency: 'USD',
+                        viewer_delta: -10,
+                    },
+                })}
+                title="Dinner"
+                meta="Alice · now"
+                groupName="Trip"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$30/);
+        expect(amount.props.className).toContain('text-red-500');
+    });
+
+    it('colors an expense amount black when viewer_delta is absent (pre-Task-0 event)', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('expense_added', {
+                    userId: 'u-recipient',
+                    metadata: { description: 'Coffee', amount: 5.5, currency: 'USD' },
+                })}
+                title="Coffee"
+                meta="Alice · now"
+                groupName="Trip"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$5\.50/);
+        expect(amount.props.className).toContain('text-gray-900');
+    });
+
+    it('colors the consolidation batch amount green when the viewer is the payee', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        paid_by_user_id: 'u-payer',
+                        paid_to_user_id: 'u-recipient',
+                        payment_amount: 150,
+                        payment_currency: 'ILS',
+                    },
+                })}
+                title="Avi paid you"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/₪150/);
+        expect(amount.props.className).toContain('text-green-600');
+    });
+});

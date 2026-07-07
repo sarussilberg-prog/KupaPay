@@ -12,7 +12,7 @@ import { FeedRowThumbnail } from './FeedRowThumbnail';
 import { CurrenciesMergedBadge } from './CurrenciesMergedBadge';
 import { formatCurrencyAmount } from '../lib/currencyDisplay';
 import {
-    activityCardAmountClass,
+    activityCardAmountClassForNet,
     getActivityCardVariant,
 } from '../lib/activityCardVariant';
 import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
@@ -149,6 +149,28 @@ export function ActivityItemCard({
     const showAmount = variant.showAmount && amount > 0 && Boolean(currency);
     const amountText = showAmount ? formatCurrencyAmount(amount, currency) : null;
 
+    // Viewer net for amount color. The feed row belongs to event.userId (the
+    // viewer). Expenses carry the viewer's signed net directly in metadata
+    // (viewer_delta = paid − share, added by the Task 0 migration); rows created
+    // before that migration have no viewer_delta → net 0 → black. Settlements/
+    // consolidations carry the parties, so we sign the amount from the viewer's
+    // perspective.
+    const viewerId = event.userId;
+    let amountNet = 0;
+    if (event.kind === 'expense_added') {
+        amountNet =
+            typeof md.viewer_delta === 'number' || typeof md.viewer_delta === 'string'
+                ? Number(md.viewer_delta)
+                : 0;
+    } else if (event.kind === 'settlement_added') {
+        if (md.to_user_id === viewerId) amountNet = amount;
+        else if (md.from_user_id === viewerId) amountNet = -amount;
+    } else if (event.kind === 'consolidation_batch_added') {
+        if (md.paid_to_user_id === viewerId) amountNet = amount;
+        else if (md.paid_by_user_id === viewerId) amountNet = -amount;
+    }
+    const amountColorClass = activityCardAmountClassForNet(amountNet);
+
     const rowStyle = {
         gap: 12,
         alignItems: 'center' as const,
@@ -201,7 +223,7 @@ export function ActivityItemCard({
                     style={{ flexShrink: 0, maxWidth: 108, alignItems: 'flex-end' }}
                 >
                     <Text
-                        className={`text-[15px] font-bold ${activityCardAmountClass(variant.amountTone)}`}
+                        className={`text-[15px] font-bold ${amountColorClass}`}
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.65}

@@ -4,6 +4,7 @@ export const queryKeys = {
     activity: ['activity'] as const,
     activityFeed: () => ['activity', 'feed'] as const,
     activityUnreadCount: ['activity', 'unread-count'] as const,
+    groupUnreadCounts: ['activity', 'group-unread-counts'] as const,
     groupUsers: (groupId: string) => ['groupUsers', groupId] as const,
     groupMembers: (groupId: string) => ['groupMembers', groupId] as const,
     groupExpenses: (groupId: string) => ['groupExpenses', groupId] as const,

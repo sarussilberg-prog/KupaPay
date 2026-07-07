@@ -116,4 +116,18 @@ describe('GroupCard', () => {
         );
         expect(getByTestId('group-avatar-image')).toBeTruthy();
     });
+
+    it('renders an unread badge when unreadCount > 0', () => {
+        const { getByTestId } = render(
+            <GroupCard group={baseGroup} unreadCount={4} onPress={() => {}} />,
+        );
+        expect(getByTestId('unread-badge')).toBeTruthy();
+    });
+
+    it('does not render an unread badge when unreadCount is 0 or undefined', () => {
+        const { queryByTestId } = render(
+            <GroupCard group={baseGroup} onPress={() => {}} />,
+        );
+        expect(queryByTestId('unread-badge')).toBeNull();
+    });
 });

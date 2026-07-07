@@ -48,6 +48,8 @@ import {
 } from '../../components/expenseV2/EditPayerSplitSheet';
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
+import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
+import { GroupPickerSheet } from '../../components/priorityGroup/GroupPickerSheet';
 
 // iOS localizes the numeric keyboard's "Next" return button from the native
 // bundle, which ignores the in-app language. We provide our own accessory bar
@@ -204,6 +206,7 @@ export function AddExpenseScreen() {
     const [editorVisible, setEditorVisible] = useState(false);
     const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
     const [datePickerVisible, setDatePickerVisible] = useState(false);
+    const [groupPickerVisible, setGroupPickerVisible] = useState(false);
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
@@ -256,6 +259,27 @@ export function AddExpenseScreen() {
         if (isEditMode) return;
         if (!paidBy && currentUser?.id) setPaidBy(currentUser.id);
     }, [isEditMode, paidBy, currentUser?.id]);
+
+    // Switching the target group (create mode only): point every derived value
+    // at the new group. Setting `resolvedGroupId` re-derives `storeGroup`, the
+    // members/users queries, `useAddExpenseMutation`, and the currency-default
+    // effect. Critically we also reset the members-initialized latch and clear
+    // the stale participant selection + unequal draft so the "select all active
+    // members" effect re-runs for the NEW group — otherwise the old group's
+    // members would leak into the split (a debt-correctness bug). Payer stays
+    // the current user (they're a member of any group they can pick).
+    const handleSelectGroup = useCallback(
+        (nextGroupId: string) => {
+            setGroupPickerVisible(false);
+            if (nextGroupId === resolvedGroupId) return;
+            setResolvedGroupId(nextGroupId);
+            setMembersInitialized(false);
+            setSelectedMemberIds([]);
+            setUnequalValues({});
+            setSplitMode('equal');
+        },
+        [resolvedGroupId],
+    );
 
     // Create mode: open with the amount field focused and the keyboard up.
     // Wait for the modal's present animation to finish (InteractionManager) so
@@ -762,6 +786,17 @@ export function AddExpenseScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.heroTop}>
+                    {!isEditMode && storeGroup ? (
+                        <>
+                            <GroupSelectPill
+                                groupName={storeGroup.name}
+                                groupType={storeGroup.groupType}
+                                imageUrl={storeGroup.imageUrl}
+                                onPress={() => setGroupPickerVisible(true)}
+                            />
+                            <View style={{ height: 16 }} />
+                        </>
+                    ) : null}
                     <CurrencyPill
                         currency={currency}
                         onPress={() => setCurrencyPickerVisible(true)}
@@ -958,6 +993,19 @@ export function AddExpenseScreen() {
                     setDatePickerVisible(false);
                 }}
             />
+
+            {/* Group picker — reused priority-group sheet with an expense title.
+                Create mode only; hidden in edit mode (see pill above). */}
+            {!isEditMode ? (
+                <GroupPickerSheet
+                    visible={groupPickerVisible}
+                    groups={groupsQuery.data ?? []}
+                    selectedGroupId={resolvedGroupId ?? null}
+                    onSelectGroup={handleSelectGroup}
+                    onClose={() => setGroupPickerVisible(false)}
+                    title={t('expenses.v2.selectGroup')}
+                />
+            ) : null}
 
             {isLoading ? (
                 <View style={styles.loadingOverlay} pointerEvents="auto" testID="save-loading-overlay">

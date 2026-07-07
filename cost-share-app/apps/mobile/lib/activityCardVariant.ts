@@ -6,6 +6,7 @@
 import type { ActivityEventKind } from '@cost-share/shared';
 import type { AppIconName } from '../components/AppIcon';
 import { colors } from '../theme';
+import { viewerAmountTone, viewerAmountToneClass } from './viewerAmountTone';
 
 export interface ActivityCardVariant {
     iconName: AppIconName;
@@ -194,4 +195,13 @@ export function activityCardAmountClass(tone: ActivityCardVariant['amountTone'])
         default:
             return 'text-gray-900';
     }
+}
+
+/**
+ * Color for the activity card's main amount, keyed off the VIEWER's signed net
+ * (green owed / red owing / black neutral) rather than the card type. This
+ * replaces the old type-keyed coloring where every settlement was green.
+ */
+export function activityCardAmountClassForNet(net: number): string {
+    return viewerAmountToneClass(viewerAmountTone(net));
 }

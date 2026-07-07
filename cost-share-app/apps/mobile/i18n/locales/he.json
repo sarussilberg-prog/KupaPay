@@ -35,7 +35,15 @@
         "groups": "קופות",
         "activity": "פעילות",
         "history": "היסטוריה",
-        "profile": "פרופיל"
+        "profile": "פרופיל",
+        "priorityGroup": "קבוצה בעדיפות"
+    },
+    "priorityGroup": {
+        "switchLabel": "החלפת קבוצה",
+        "pickerTitle": "בחירת קבוצה בעדיפות",
+        "emptyTitle": "אין עדיין קבוצות",
+        "emptyMessage": "צרו או הצטרפו לקבוצה כדי להצמיד אותה כאן לגישה מהירה.",
+        "emptyCta": "יצירת קבוצה"
     },
     "auth": {
         "appName": "KupaPay",
@@ -514,6 +522,9 @@
         },
         "paidBySub": "{{amount}} · שולם על ידי {{name}}",
         "v2": {
+            "addQuick": "הוספת הוצאה",
+            "changeGroup": "קופה",
+            "selectGroup": "בחירת קופה",
             "headerNew": "הוצאה חדשה",
             "headerEdit": "עריכת הוצאה",
             "amountPlaceholder": "0.00",
