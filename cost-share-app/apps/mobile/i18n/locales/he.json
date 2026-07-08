@@ -36,11 +36,11 @@
         "activity": "פעילות",
         "history": "היסטוריה",
         "profile": "פרופיל",
-        "priorityGroup": "קבוצה בעדיפות"
+        "priorityGroup": "קופה בעדיפות"
     },
     "priorityGroup": {
         "switchLabel": "החלפת קבוצה",
-        "pickerTitle": "בחירת קבוצה בעדיפות",
+        "pickerTitle": "בחירת קופה בעדיפות",
         "emptyTitle": "אין עדיין קבוצות",
         "emptyMessage": "צרו או הצטרפו לקבוצה כדי להצמיד אותה כאן לגישה מהירה.",
         "emptyCta": "יצירת קבוצה"
