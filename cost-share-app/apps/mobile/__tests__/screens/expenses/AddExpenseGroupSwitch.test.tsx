@@ -10,7 +10,7 @@ jest.mock('@react-navigation/native', () => {
     return {
         ...actual,
         useNavigation: () => ({ navigate: mockNavigate, goBack: mockGoBack, setOptions: jest.fn() }),
-        // Opened from "+": seeded with the priority group g1.
+        // Opened from "+": seeded with the favorite group g1.
         useRoute: () => ({ params: { groupId: 'g1' } }),
         useFocusEffect: (cb: () => void) => cb(),
         useIsFocused: () => true,
@@ -98,7 +98,7 @@ beforeEach(() => {
     mockCreateExpense.mockResolvedValue({ id: 'e1' } as any);
     useAppStore.setState({
         language: 'en',
-        priorityGroupId: 'g1',
+        favoriteGroupId: 'g1',
         currentUser: {
             id: 'u1', email: 'a@x.com', name: 'Alice', inviteToken: 'alice123456',
             defaultCurrency: 'USD', language: 'en', isActive: true, isAdmin: false,
@@ -110,7 +110,7 @@ beforeEach(() => {
 });
 
 describe('AddExpenseScreen — editable group control', () => {
-    it('shows the seeded priority group in the pill', async () => {
+    it('shows the seeded favorite group in the pill', async () => {
         const { findByTestId, findByText } = renderWithQuery(<AddExpenseScreen />);
         const pill = await findByTestId('add-expense-group-pill');
         expect(pill).toBeTruthy();

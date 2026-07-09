@@ -49,7 +49,7 @@ import {
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
 import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
-import { GroupPickerSheet } from '../../components/priorityGroup/GroupPickerSheet';
+import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
 
 // iOS localizes the numeric keyboard's "Next" return button from the native
 // bundle, which ignores the in-app language. We provide our own accessory bar
@@ -994,7 +994,7 @@ export function AddExpenseScreen() {
                 }}
             />
 
-            {/* Group picker — reused priority-group sheet with an expense title.
+            {/* Group picker — reused favorite-group sheet with an expense title.
                 Create mode only; hidden in edit mode (see pill above). */}
             {!isEditMode ? (
                 <GroupPickerSheet

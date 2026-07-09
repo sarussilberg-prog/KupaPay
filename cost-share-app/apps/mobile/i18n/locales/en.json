@@ -36,11 +36,11 @@
         "activity": "Activity",
         "history": "History",
         "profile": "Profile",
-        "priorityGroup": "Priority Group"
+        "favoriteGroup": "Favorite Group"
     },
-    "priorityGroup": {
+    "favoriteGroup": {
         "switchLabel": "Switch group",
-        "pickerTitle": "Choose priority group",
+        "pickerTitle": "Choose favorite group",
         "emptyTitle": "No groups yet",
         "emptyMessage": "Create or join a group to pin it here for quick access.",
         "emptyCta": "Create a group"

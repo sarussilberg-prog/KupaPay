@@ -5,7 +5,7 @@ beforeEach(() => {
         session: null,
         currentUser: null,
         language: 'en',
-        priorityGroupId: null,
+        favoriteGroupId: null,
     });
 });
 
@@ -87,20 +87,20 @@ describe('useAppStore', () => {
         });
     });
 
-    describe('priorityGroupId', () => {
+    describe('favoriteGroupId', () => {
         it('starts as null', () => {
-            expect(useAppStore.getState().priorityGroupId).toBeNull();
+            expect(useAppStore.getState().favoriteGroupId).toBeNull();
         });
 
-        it('setPriorityGroupId updates the value', () => {
-            useAppStore.getState().setPriorityGroupId('group-42');
-            expect(useAppStore.getState().priorityGroupId).toBe('group-42');
+        it('setFavoriteGroupId updates the value', () => {
+            useAppStore.getState().setFavoriteGroupId('group-42');
+            expect(useAppStore.getState().favoriteGroupId).toBe('group-42');
         });
 
-        it('setPriorityGroupId(null) clears the value', () => {
-            useAppStore.getState().setPriorityGroupId('group-42');
-            useAppStore.getState().setPriorityGroupId(null);
-            expect(useAppStore.getState().priorityGroupId).toBeNull();
+        it('setFavoriteGroupId(null) clears the value', () => {
+            useAppStore.getState().setFavoriteGroupId('group-42');
+            useAppStore.getState().setFavoriteGroupId(null);
+            expect(useAppStore.getState().favoriteGroupId).toBeNull();
         });
     });
 });

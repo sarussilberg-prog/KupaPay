@@ -5,7 +5,7 @@ import { Text } from 'react-native';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { useAppStore } from '../../store';
-import { useEffectivePriorityGroupId } from '../../hooks/useEffectivePriorityGroupId';
+import { useEffectiveFavoriteGroupId } from '../../hooks/useEffectiveFavoriteGroupId';
 import { GroupWithMembers } from '@cost-share/shared';
 
 function makeGroup(id: string, updatedAt: string): GroupWithMembers {
@@ -23,7 +23,7 @@ function makeGroup(id: string, updatedAt: string): GroupWithMembers {
 }
 
 function Probe() {
-    const id = useEffectivePriorityGroupId();
+    const id = useEffectiveFavoriteGroupId();
     return <Text testID="effective">{id ?? 'none'}</Text>;
 }
 
@@ -42,10 +42,10 @@ const groups = [
 
 beforeEach(() => {
     queryClient.clear();
-    useAppStore.setState({ priorityGroupId: null });
+    useAppStore.setState({ favoriteGroupId: null });
 });
 
-describe('useEffectivePriorityGroupId', () => {
+describe('useEffectiveFavoriteGroupId', () => {
     it('returns null when there are no groups', () => {
         queryClient.setQueryData(queryKeys.groups, []);
         const { getByTestId } = renderProbe();
@@ -60,14 +60,14 @@ describe('useEffectivePriorityGroupId', () => {
 
     it('honors a stored valid id', () => {
         queryClient.setQueryData(queryKeys.groups, groups);
-        useAppStore.setState({ priorityGroupId: 'a' });
+        useAppStore.setState({ favoriteGroupId: 'a' });
         const { getByTestId } = renderProbe();
         expect(getByTestId('effective').props.children).toBe('a');
     });
 
     it('falls back to the first group when the stored id is no longer a member group', () => {
         queryClient.setQueryData(queryKeys.groups, groups);
-        useAppStore.setState({ priorityGroupId: 'deleted-group' });
+        useAppStore.setState({ favoriteGroupId: 'deleted-group' });
         const { getByTestId } = renderProbe();
         expect(getByTestId('effective').props.children).toBe('b');
     });

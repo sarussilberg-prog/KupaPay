@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { GroupPickerSheet } from '../../components/priorityGroup/GroupPickerSheet';
+import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
 import { GroupWithMembers } from '@cost-share/shared';
 
 function makeGroup(id: string, name: string): GroupWithMembers {
@@ -79,7 +79,7 @@ describe('GroupPickerSheet', () => {
         expect(getByText('Custom title')).toBeTruthy();
     });
 
-    it('falls back to the priority-group title when no title prop is given', () => {
+    it('falls back to the favorite-group title when no title prop is given', () => {
         const { getByText } = render(
             <GroupPickerSheet
                 visible
@@ -90,8 +90,8 @@ describe('GroupPickerSheet', () => {
             />,
         );
         // In tests i18n returns the raw key; the important invariant is that the
-        // default title is still driven by the priority-group key (unchanged for
+        // default title is still driven by the favorite-group key (unchanged for
         // existing callers).
-        expect(getByText('priorityGroup.pickerTitle')).toBeTruthy();
+        expect(getByText('favoriteGroup.pickerTitle')).toBeTruthy();
     });
 });

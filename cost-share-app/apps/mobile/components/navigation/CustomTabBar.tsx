@@ -22,10 +22,10 @@ import { useActivityUnreadCount } from '../../hooks/queries/useActivityUnreadCou
 
 const ICON_SIZE = 24;
 
-/** Resolve which group the "+" seeds: the priority group, else the first group. */
+/** Resolve which group the "+" seeds: the favorite group, else the first group. */
 function useQuickAddGroupId(): string | undefined {
-    const priorityGroupId = useAppStore((s) => s.priorityGroupId);
-    if (priorityGroupId) return priorityGroupId;
+    const favoriteGroupId = useAppStore((s) => s.favoriteGroupId);
+    if (favoriteGroupId) return favoriteGroupId;
     // Read from the shared query-client singleton (the same instance App.tsx
     // wires into QueryClientProvider), so the "+" resolves the first group even
     // when the tab bar renders outside a provider (unit tests).

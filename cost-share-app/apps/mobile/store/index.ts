@@ -39,11 +39,11 @@ interface AppState {
     pendingDeactivationNotice: boolean;
     setPendingDeactivationNotice: (value: boolean) => void;
 
-    // Priority group — the group the "Priority Group" tab opens on. Persisted.
+    // Favorite group — the group the "Favorite Group" tab opens on. Persisted.
     // Setter only stores the id; the effective/fallback resolution lives in
-    // lib/priorityGroup.ts so it can be unit-tested without a store.
-    priorityGroupId: string | null;
-    setPriorityGroupId: (id: string | null) => void;
+    // lib/favoriteGroup.ts so it can be unit-tested without a store.
+    favoriteGroupId: string | null;
+    setFavoriteGroupId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -81,9 +81,9 @@ export const useAppStore = create<AppState>()(
             pendingDeactivationNotice: false,
             setPendingDeactivationNotice: (value) => set({ pendingDeactivationNotice: value }),
 
-            // Priority group state
-            priorityGroupId: null,
-            setPriorityGroupId: (id) => set({ priorityGroupId: id }),
+            // Favorite group state
+            favoriteGroupId: null,
+            setFavoriteGroupId: (id) => set({ favoriteGroupId: id }),
         }),
         {
             name: 'app-store.v1',
@@ -106,7 +106,7 @@ export const useAppStore = create<AppState>()(
             partialize: (state) => ({
                 currentUser: state.currentUser,
                 language: state.language,
-                priorityGroupId: state.priorityGroupId,
+                favoriteGroupId: state.favoriteGroupId,
             }),
             version: 1,
         },
