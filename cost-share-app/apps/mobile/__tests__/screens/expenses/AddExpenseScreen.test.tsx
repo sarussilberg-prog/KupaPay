@@ -213,6 +213,24 @@ describe('AddExpenseScreen — v2', () => {
         );
     });
 
+    it('lands on the new expense group (GroupDetail) after a successful create', async () => {
+        mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
+        const { findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.changeText(await findByTestId('description-input'), 'Coffee');
+        fireEvent.changeText(await findByTestId('amount-display'), '10');
+
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+        // Same proven RootStack-modal → GroupDetail deep-link as CreateGroupScreen.
+        expect(mockNavigate).toHaveBeenCalledWith('Main', {
+            screen: 'Groups',
+            params: { screen: 'GroupDetail', params: { groupId: 'g1' } },
+        });
+        // Create must NOT just pop back — it replaces onto the group screen.
+        expect(mockGoBack).not.toHaveBeenCalled();
+    });
+
     it('passes splitMode=percent when the user creates a percent-mode expense', async () => {
         mockCreateExpense.mockResolvedValueOnce({ id: 'e1' } as any);
         const { findByTestId } = renderWithQuery(<AddExpenseScreen />);

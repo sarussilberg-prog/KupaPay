@@ -141,6 +141,22 @@ describe('AddExpenseScreen — edit mode (v2)', () => {
         );
     });
 
+    it('goes back after a successful edit — does NOT navigate to GroupDetail', async () => {
+        mockUpdate.mockResolvedValueOnce({ ...expense, description: 'Tea' });
+        const { findByDisplayValue, findByTestId } = renderWithQuery(<AddExpenseScreen />);
+        const descInput = await findByDisplayValue('Coffee');
+        fireEvent.changeText(descInput, 'Tea');
+        fireEvent.press(await findByTestId('add-expense-submit'));
+
+        await waitFor(() => expect(mockGoBack).toHaveBeenCalled());
+        // Edit must keep the pre-change behavior: return to where the user was,
+        // never redirect to the group's GroupDetail (that's the create-only flow).
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Main',
+            expect.anything(),
+        );
+    });
+
     it('opens the editor in percent mode for an expense persisted as percent — even when amounts happen to be equal', async () => {
         // Regression for split-mode persistence (2026-05-26):
         // $50/$50 of $100 is indistinguishable between 'equal', 'percent 50/50',
