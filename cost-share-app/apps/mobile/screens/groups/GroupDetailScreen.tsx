@@ -110,7 +110,8 @@ import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
-import { showInfoToast } from '../../lib/appToast';
+import { showInfoToast, showSuccessMessage } from '../../lib/appToast';
+import { confirmSetFavoriteGroup } from '../../lib/favoriteGroupMenu';
 
 type ComposerState =
     | { open: false }
@@ -275,6 +276,9 @@ export function GroupDetailScreen() {
         Record<string, GroupMemberLite>
     >({});
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
+    const favoriteGroupId = useAppStore(s => s.favoriteGroupId);
+    const setFavoriteGroupId = useAppStore(s => s.setFavoriteGroupId);
+    const isFavoriteGroup = favoriteGroupId === groupId;
     const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<GroupFeedFilters>(DEFAULT_GROUP_FEED_FILTERS);
@@ -597,6 +601,18 @@ export function GroupDetailScreen() {
             },
         ]);
     }, [groupId, navigation, t]);
+    const handleSetFavorite = useCallback(() => {
+        setMenuOpen(false);
+        confirmSetFavoriteGroup({
+            groupId,
+            groupName: displayGroup?.name ?? '',
+            favoriteGroupId,
+            t,
+            alert: platformAlert,
+            setFavoriteGroupId,
+            onApplied: () => showSuccessMessage('groups.favorite.setToast'),
+        });
+    }, [groupId, displayGroup?.name, favoriteGroupId, setFavoriteGroupId, t]);
     const runExport = useCallback(async () => {
         if (!displayGroup) return;
         setExporting(true);
@@ -1153,6 +1169,16 @@ export function GroupDetailScreen() {
                         <DetailMenuRow
                             label={t('groups.editGroup')}
                             onPress={handleEditGroup}
+                        />
+                        <DetailMenuRow
+                            label={
+                                isFavoriteGroup
+                                    ? t('groups.favorite.currentLabel')
+                                    : t('groups.favorite.setOption')
+                            }
+                            onPress={handleSetFavorite}
+                            disabled={isFavoriteGroup}
+                            testID="group-menu-set-favorite"
                         />
                         <DetailMenuRow
                             label={t('groups.share.exportOption')}

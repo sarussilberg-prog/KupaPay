@@ -169,6 +169,14 @@
         "title": "Groups",
         "createGroup": "Create Group",
         "editGroup": "Edit Group",
+        "favorite": {
+            "setOption": "Set as favorite group",
+            "currentLabel": "Your favorite group",
+            "confirmTitle": "Favorite group",
+            "confirmMessage": "Make «{{name}}» your favorite group?",
+            "confirmCta": "Set as favorite",
+            "setToast": "Group set as your favorite"
+        },
         "noGroups": "No groups yet",
         "noGroupsMessage": "Create your first group to start sharing expenses",
         "offlineMessage": "We can't load your groups right now. They'll appear here automatically once you're back online.",
