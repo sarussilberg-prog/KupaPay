@@ -1,5 +1,5 @@
 /**
- * Resolves the "effective" priority group id: the group the Priority Group tab
+ * Resolves the "effective" favorite group id: the group the Favorite Group tab
  * should open on. Kept pure (no React, no store) so it is trivially unit-tested.
  *
  * Rules:
@@ -14,7 +14,7 @@
 import { GroupWithMembers } from '@cost-share/shared';
 import { isGroupArchived, sortGroups } from './groupListQuery';
 
-export function resolvePriorityGroupId(
+export function resolveFavoriteGroupId(
     storedId: string | null,
     groups: GroupWithMembers[],
 ): string | null {

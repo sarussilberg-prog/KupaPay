@@ -11,6 +11,20 @@ describe('GroupSelectPill', () => {
         expect(getByText('Trip')).toBeTruthy();
     });
 
+    it('renders the "Group" label outside the tappable control', () => {
+        const { getByTestId } = render(
+            <GroupSelectPill groupName="Trip" groupType="trip" onPress={() => {}} />,
+        );
+        // In tests i18n returns the raw key.
+        const label = getByTestId('add-expense-group-label');
+        expect(label).toBeTruthy();
+        expect(label.props.children).toBe('expenses.v2.changeGroup');
+        // The label must live OUTSIDE the tappable control (not nested inside it).
+        const control = getByTestId('add-expense-group-pill');
+        const nestedLabels = control.findAllByProps({ testID: 'add-expense-group-label' });
+        expect(nestedLabels).toHaveLength(0);
+    });
+
     it('calls onPress when tapped', () => {
         const onPress = jest.fn();
         const { getByTestId } = render(

@@ -1,9 +1,9 @@
 /**
- * PriorityGroupScreen — root of the Priority Group tab stack.
+ * FavoriteGroupScreen — root of the Favorite Group tab stack.
  *
- * Resolves the effective priority group (stored id or first-group fallback) and:
+ * Resolves the effective favorite group (stored id or first-group fallback) and:
  *  - no groups at all → empty state with a create-group CTA;
- *  - otherwise → a "switch group" header (PriorityGroupSwitcher) above the
+ *  - otherwise → a "switch group" header (FavoriteGroupSwitcher) above the
  *    REUSED GroupDetailScreen, fed the effective groupId via route params.
  *
  * GroupDetailScreen reads route.params.groupId, so we push the resolved id onto
@@ -15,16 +15,16 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
-import { useEffectivePriorityGroupId } from '../../hooks/useEffectivePriorityGroupId';
-import { PriorityGroupSwitcher } from '../../components/priorityGroup/PriorityGroupSwitcher';
+import { useEffectiveFavoriteGroupId } from '../../hooks/useEffectiveFavoriteGroupId';
+import { FavoriteGroupSwitcher } from '../../components/favoriteGroup/FavoriteGroupSwitcher';
 import { GroupDetailScreen } from '../groups/GroupDetailScreen';
 import { EmptyState } from '../../components/EmptyState';
 
-export function PriorityGroupScreen() {
+export function FavoriteGroupScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
     const { data: groups = [] } = useGroupsQuery();
-    const effectiveGroupId = useEffectivePriorityGroupId();
+    const effectiveGroupId = useEffectiveFavoriteGroupId();
 
     const activeGroup = useMemo(
         () => groups.find((g) => g.id === effectiveGroupId) ?? null,
@@ -44,12 +44,12 @@ export function PriorityGroupScreen() {
     if (!effectiveGroupId || !activeGroup) {
         return (
             <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
-                <View testID="priority-empty" className="flex-1">
+                <View testID="favorite-empty" className="flex-1">
                     <EmptyState
                         iconName="star-outline"
-                        title={t('priorityGroup.emptyTitle')}
-                        message={t('priorityGroup.emptyMessage')}
-                        actionTitle={t('priorityGroup.emptyCta')}
+                        title={t('favoriteGroup.emptyTitle')}
+                        message={t('favoriteGroup.emptyMessage')}
+                        actionTitle={t('favoriteGroup.emptyCta')}
                         onAction={() => navigation.navigate('CreateGroup')}
                     />
                 </View>
@@ -59,7 +59,7 @@ export function PriorityGroupScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
-            <PriorityGroupSwitcher
+            <FavoriteGroupSwitcher
                 groupId={effectiveGroupId}
                 groupName={activeGroup.name}
                 groups={groups}

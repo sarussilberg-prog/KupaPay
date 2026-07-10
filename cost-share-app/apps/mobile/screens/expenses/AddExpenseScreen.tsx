@@ -49,7 +49,7 @@ import {
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
 import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
-import { GroupPickerSheet } from '../../components/priorityGroup/GroupPickerSheet';
+import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
 
 // iOS localizes the numeric keyboard's "Next" return button from the native
 // bundle, which ignores the in-app language. We provide our own accessory bar
@@ -593,7 +593,15 @@ export function AddExpenseScreen() {
                 ...(uploadedReceiptUrl ? { receiptUrl: uploadedReceiptUrl } : {}),
             });
             stopLoading();
-            navigation.goBack();
+            // Land on the new expense's group so the user sees it in context
+            // (esp. the quick-add "+" flow, which opens this screen from
+            // anywhere). Navigating to Main → Groups → GroupDetail from this
+            // RootStack modal dismisses the modal, so Back returns to the group,
+            // not to Add Expense. Same proven deep-link as CreateGroupScreen.
+            navigation.navigate('Main', {
+                screen: 'Groups',
+                params: { screen: 'GroupDetail', params: { groupId } },
+            });
             return;
         }
 
@@ -994,7 +1002,7 @@ export function AddExpenseScreen() {
                 }}
             />
 
-            {/* Group picker — reused priority-group sheet with an expense title.
+            {/* Group picker — reused favorite-group sheet with an expense title.
                 Create mode only; hidden in edit mode (see pill above). */}
             {!isEditMode ? (
                 <GroupPickerSheet

@@ -11,7 +11,7 @@ jest.mock('../../hooks/queries/useActivityUnreadCount', () => ({
     useActivityUnreadCount: () => ({ data: 0 }),
 }));
 
-const ROUTE_NAMES = ['Groups', 'Activity', 'Priority', 'Profile'];
+const ROUTE_NAMES = ['Groups', 'Activity', 'Favorite', 'Profile'];
 
 function makeProps(overrides?: {
     navigate?: jest.Mock;
@@ -50,7 +50,7 @@ function makeProps(overrides?: {
 
 beforeEach(() => {
     queryClient.clear();
-    useAppStore.setState({ language: 'en', priorityGroupId: 'g-priority' } as any);
+    useAppStore.setState({ language: 'en', favoriteGroupId: 'g-favorite' } as any);
 });
 
 describe('CustomTabBar', () => {
@@ -79,18 +79,18 @@ describe('CustomTabBar', () => {
         expect(distinctTabIds(right)).toBe(2);
     });
 
-    it('pressing "+" navigates to AddExpense with the priority group id', () => {
+    it('pressing "+" navigates to AddExpense with the favorite group id', () => {
         const navigate = jest.fn();
         const getParent = jest.fn(() => ({ navigate }));
         const { getByTestId } = render(
             <CustomTabBar {...makeProps({ getParent })} />,
         );
         fireEvent.press(getByTestId('center-add-button'));
-        expect(navigate).toHaveBeenCalledWith('AddExpense', { groupId: 'g-priority' });
+        expect(navigate).toHaveBeenCalledWith('AddExpense', { groupId: 'g-favorite' });
     });
 
-    it('falls back to the first group when priorityGroupId is empty', () => {
-        useAppStore.setState({ priorityGroupId: null } as any);
+    it('falls back to the first group when favoriteGroupId is empty', () => {
+        useAppStore.setState({ favoriteGroupId: null } as any);
         queryClient.setQueryData(queryKeys.groups, [
             { id: 'g-first', name: 'First' },
             { id: 'g-second', name: 'Second' },

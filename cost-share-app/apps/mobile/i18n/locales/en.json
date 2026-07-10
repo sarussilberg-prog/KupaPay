@@ -36,11 +36,11 @@
         "activity": "Activity",
         "history": "History",
         "profile": "Profile",
-        "priorityGroup": "Priority Group"
+        "favoriteGroup": "Favorite Group"
     },
-    "priorityGroup": {
+    "favoriteGroup": {
         "switchLabel": "Switch group",
-        "pickerTitle": "Choose priority group",
+        "pickerTitle": "Choose favorite group",
         "emptyTitle": "No groups yet",
         "emptyMessage": "Create or join a group to pin it here for quick access.",
         "emptyCta": "Create a group"
@@ -169,6 +169,14 @@
         "title": "Groups",
         "createGroup": "Create Group",
         "editGroup": "Edit Group",
+        "favorite": {
+            "setOption": "Set as favorite group",
+            "currentLabel": "Your favorite group",
+            "confirmTitle": "Favorite group",
+            "confirmMessage": "Make «{{name}}» your favorite group?",
+            "confirmCta": "Set as favorite",
+            "setToast": "Group set as your favorite"
+        },
         "noGroups": "No groups yet",
         "noGroupsMessage": "Create your first group to start sharing expenses",
         "offlineMessage": "We can't load your groups right now. They'll appear here automatically once you're back online.",

@@ -23,8 +23,8 @@ jest.mock('@react-navigation/native', () => {
 });
 
 // Mock the effective-id hook so we drive the two branches directly.
-jest.mock('../../hooks/useEffectivePriorityGroupId', () => ({
-    useEffectivePriorityGroupId: jest.fn(),
+jest.mock('../../hooks/useEffectiveFavoriteGroupId', () => ({
+    useEffectiveFavoriteGroupId: jest.fn(),
 }));
 // Stub GroupDetailScreen — its real behavior is covered by its own suite.
 jest.mock('../../screens/groups/GroupDetailScreen', () => ({
@@ -34,8 +34,8 @@ jest.mock('../../screens/groups/GroupDetailScreen', () => ({
     },
 }));
 
-import { useEffectivePriorityGroupId } from '../../hooks/useEffectivePriorityGroupId';
-import { PriorityGroupScreen } from '../../screens/priorityGroup/PriorityGroupScreen';
+import { useEffectiveFavoriteGroupId } from '../../hooks/useEffectiveFavoriteGroupId';
+import { FavoriteGroupScreen } from '../../screens/favoriteGroup/FavoriteGroupScreen';
 
 function makeGroup(id: string, name: string): GroupWithMembers {
     return {
@@ -54,31 +54,31 @@ function makeGroup(id: string, name: string): GroupWithMembers {
 function renderScreen() {
     return render(
         <QueryClientProvider client={queryClient}>
-            <PriorityGroupScreen />
+            <FavoriteGroupScreen />
         </QueryClientProvider>,
     );
 }
 
 beforeEach(() => {
     queryClient.clear();
-    (useEffectivePriorityGroupId as jest.Mock).mockReset();
+    (useEffectiveFavoriteGroupId as jest.Mock).mockReset();
 });
 
-describe('PriorityGroupScreen', () => {
+describe('FavoriteGroupScreen', () => {
     it('renders the empty state with a create CTA when there is no group', () => {
-        (useEffectivePriorityGroupId as jest.Mock).mockReturnValue(null);
+        (useEffectiveFavoriteGroupId as jest.Mock).mockReturnValue(null);
         queryClient.setQueryData(queryKeys.groups, []);
         const { getByTestId, queryByTestId } = renderScreen();
-        expect(getByTestId('priority-empty')).toBeTruthy();
+        expect(getByTestId('favorite-empty')).toBeTruthy();
         expect(queryByTestId('group-detail-stub')).toBeNull();
     });
 
     it('renders the switcher + GroupDetail when a group is resolved', () => {
-        (useEffectivePriorityGroupId as jest.Mock).mockReturnValue('g1');
+        (useEffectiveFavoriteGroupId as jest.Mock).mockReturnValue('g1');
         queryClient.setQueryData(queryKeys.groups, [makeGroup('g1', 'Trip')]);
         const { getByTestId } = renderScreen();
-        expect(getByTestId('priority-switch-btn')).toBeTruthy();
-        expect(getByTestId('priority-switch-label').props.children).toBe('Trip');
+        expect(getByTestId('favorite-switch-btn')).toBeTruthy();
+        expect(getByTestId('favorite-switch-label').props.children).toBe('Trip');
         expect(getByTestId('group-detail-stub')).toBeTruthy();
     });
 });

@@ -1,7 +1,7 @@
 /**
- * PriorityGroupSwitcher — the small "switch group" button shown at the top of
- * the Priority Group tab. Shows the active group's name; tapping opens the
- * GroupPickerSheet, and choosing a group persists it via setPriorityGroupId.
+ * FavoriteGroupSwitcher — the small "switch group" button shown at the top of
+ * the Favorite Group tab. Shows the active group's name; tapping opens the
+ * GroupPickerSheet, and choosing a group persists it via setFavoriteGroupId.
  */
 import React, { useCallback, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
@@ -23,18 +23,18 @@ interface Props {
     groups: GroupWithMembers[];
 }
 
-export function PriorityGroupSwitcher({ groupId, groupName, groups }: Props) {
+export function FavoriteGroupSwitcher({ groupId, groupName, groups }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
-    const setPriorityGroupId = useAppStore((s) => s.setPriorityGroupId);
+    const setFavoriteGroupId = useAppStore((s) => s.setFavoriteGroupId);
     const [pickerOpen, setPickerOpen] = useState(false);
 
     const handleSelect = useCallback(
         (id: string) => {
-            setPriorityGroupId(id);
+            setFavoriteGroupId(id);
             setPickerOpen(false);
         },
-        [setPriorityGroupId],
+        [setFavoriteGroupId],
     );
 
     return (
@@ -42,14 +42,14 @@ export function PriorityGroupSwitcher({ groupId, groupName, groups }: Props) {
             <TouchableOpacity
                 onPress={() => setPickerOpen(true)}
                 accessibilityRole="button"
-                accessibilityLabel={t('priorityGroup.switchLabel')}
-                testID="priority-switch-btn"
+                accessibilityLabel={t('favoriteGroup.switchLabel')}
+                testID="favorite-switch-btn"
                 style={rtlRowStyle(isRtl)}
                 className="self-start items-center rounded-full bg-gray-100 px-3 h-9"
             >
                 <AppIcon name="star" size={16} color={colors.primary} />
                 <Text
-                    testID="priority-switch-label"
+                    testID="favorite-switch-label"
                     className="text-sm font-semibold text-gray-900 mx-2"
                     numberOfLines={1}
                 >

@@ -60,7 +60,7 @@ function tabBarIcon(
 }
 import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
-import { PriorityGroupScreen } from '../screens/priorityGroup/PriorityGroupScreen';
+import { FavoriteGroupScreen } from '../screens/favoriteGroup/FavoriteGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
@@ -202,18 +202,18 @@ function GroupsStack() {
     );
 }
 
-function PriorityGroupStack() {
+function FavoriteGroupStack() {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
 
     return (
         <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
             <Stack.Screen
-                name="PriorityGroupHome"
-                component={PriorityGroupScreen}
+                name="FavoriteGroupHome"
+                component={FavoriteGroupScreen}
                 // Seed params so GroupDetailScreen's `route.params.groupId`
                 // destructure (which reads `route.params` directly) can't hit
-                // `undefined` on the first frame before PriorityGroupScreen's
+                // `undefined` on the first frame before FavoriteGroupScreen's
                 // useLayoutEffect sets the real id.
                 initialParams={{ groupId: undefined }}
                 options={{ headerShown: false }}
@@ -352,11 +352,11 @@ function MainTabs() {
                 }}
             />
             <Tab.Screen
-                name="PriorityGroup"
-                component={PriorityGroupStack}
-                listeners={tabPopToTopOnPress('PriorityGroupHome')}
+                name="FavoriteGroup"
+                component={FavoriteGroupStack}
+                listeners={tabPopToTopOnPress('FavoriteGroupHome')}
                 options={{
-                    tabBarLabel: t('tabs.priorityGroup'),
+                    tabBarLabel: t('tabs.favoriteGroup'),
                     tabBarIcon: tabBarIcon('star', 'star-outline'),
                 }}
             />

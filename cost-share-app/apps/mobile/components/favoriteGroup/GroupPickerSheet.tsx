@@ -1,7 +1,7 @@
 /**
- * GroupPickerSheet — a Modal list picker for choosing the priority group.
+ * GroupPickerSheet — a Modal list picker for choosing the favorite group.
  * Presentational: receives `groups` as a prop (no query), so it's reused by the
- * PriorityGroupSwitcher and is easy to unit-test. Modelled on
+ * FavoriteGroupSwitcher and is easy to unit-test. Modelled on
  * components/dashboard/FriendGroupBalancesSheet.tsx.
  */
 import React from 'react';
@@ -21,8 +21,8 @@ interface Props {
     onSelectGroup: (groupId: string) => void;
     onClose: () => void;
     /**
-     * Optional header title. Defaults to the priority-group picker title so
-     * existing callers (PriorityGroupSwitcher) are unaffected; other callers
+     * Optional header title. Defaults to the favorite-group picker title so
+     * existing callers (FavoriteGroupSwitcher) are unaffected; other callers
      * (e.g. the Add Expense group pill) can pass a context-appropriate title.
      */
     title?: string;
@@ -38,7 +38,7 @@ export function GroupPickerSheet({
 }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
-    const headerTitle = title ?? t('priorityGroup.pickerTitle');
+    const headerTitle = title ?? t('favoriteGroup.pickerTitle');
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>

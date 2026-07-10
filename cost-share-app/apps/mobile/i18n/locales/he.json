@@ -36,14 +36,14 @@
         "activity": "פעילות",
         "history": "היסטוריה",
         "profile": "פרופיל",
-        "priorityGroup": "קבוצה בעדיפות"
+        "favoriteGroup": "קופה מועדפת"
     },
-    "priorityGroup": {
-        "switchLabel": "החלפת קבוצה",
-        "pickerTitle": "בחירת קבוצה בעדיפות",
-        "emptyTitle": "אין עדיין קבוצות",
-        "emptyMessage": "צרו או הצטרפו לקבוצה כדי להצמיד אותה כאן לגישה מהירה.",
-        "emptyCta": "יצירת קבוצה"
+    "favoriteGroup": {
+        "switchLabel": "החלפת קופה",
+        "pickerTitle": "בחירת קופה מועדפת",
+        "emptyTitle": "אין עדיין קופות",
+        "emptyMessage": "צרו או הצטרפו לקופה כדי להצמיד אותה כאן לגישה מהירה.",
+        "emptyCta": "פתיחת קופה"
     },
     "auth": {
         "appName": "KupaPay",
@@ -169,6 +169,14 @@
         "title": "קופות",
         "createGroup": "פתח קופה",
         "editGroup": "ערוך קופה",
+        "favorite": {
+            "setOption": "קבע כקופה מועדפת",
+            "currentLabel": "הקופה המועדפת שלך",
+            "confirmTitle": "קופה מועדפת",
+            "confirmMessage": "להפוך את «{{name}}» לקופה המועדפת שלך?",
+            "confirmCta": "קבע כמועדפת",
+            "setToast": "הקופה סומנה כמועדפת"
+        },
         "noGroups": "אין קופות עדיין",
         "noGroupsMessage": "פתח את הקופה הראשונה שלך כדי להתחיל לשתף הוצאות",
         "offlineMessage": "לא ניתן לטעון את הקופות שלך כרגע. הן יופיעו כאן אוטומטית כשהחיבור יחזור.",
