@@ -72,4 +72,18 @@ describe('FeedRowCard', () => {
     expect(value.props.numberOfLines).toBe(1);
     expect(value.props.adjustsFontSizeToFit).toBe(true);
   });
+
+  it('applies amountClassName to the amount when provided', () => {
+    const { getByText } = render(
+      <FeedRowCard {...baseProps} amountClassName="text-green-600" />,
+    );
+    const value = getByText('84.20');
+    expect(value.props.className).toContain('text-green-600');
+  });
+
+  it('defaults the amount to text-gray-900 when no amountClassName is given', () => {
+    const { getByText } = render(<FeedRowCard {...baseProps} />);
+    const value = getByText('84.20');
+    expect(value.props.className).toContain('text-gray-900');
+  });
 });

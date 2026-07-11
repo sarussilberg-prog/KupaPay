@@ -22,6 +22,7 @@ import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
+import { useGroupUnreadCounts } from '../../hooks/queries/useGroupUnreadCounts';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
 import { prefetchAddExpensePrerequisitesForGroup } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
@@ -80,6 +81,7 @@ export function GroupsListScreen() {
         groupsQuery.data === undefined && groupsQuery.fetchStatus === 'fetching';
 
     const { data: simplified } = useSimplifiedDebts();
+    const { data: unreadByGroup } = useGroupUnreadCounts();
     const balanceNetsByGroup = useMemo(() => {
         const out: Record<string, { net: number }> = {};
         simplified?.groupRollups.forEach((rollup, groupId) => {
@@ -222,10 +224,11 @@ export function GroupsListScreen() {
                 matchedMemberNames={
                     item.matched.length > 0 ? item.matched : undefined
                 }
+                unreadCount={unreadByGroup?.[item.group.id] ?? 0}
                 onPress={handleGroupPress}
             />
         ),
-        [simplified, balanceUnknown, groupHasOpenDebts, trimmedQuery, handleGroupPress],
+        [simplified, balanceUnknown, groupHasOpenDebts, unreadByGroup, trimmedQuery, handleGroupPress],
     );
 
     const renderItem = useCallback<ListRenderItem<FilteredRow>>(

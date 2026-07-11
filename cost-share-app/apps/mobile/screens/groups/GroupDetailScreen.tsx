@@ -17,7 +17,7 @@ import {
     Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
     ConsolidationBatch,
     ExpenseCategory,
@@ -53,6 +53,7 @@ import { useGroupExpensesRealtime } from '../../hooks/useGroupExpensesRealtime';
 import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsRealtime';
 import { useGroupConsolidationBatchesRealtime } from '../../hooks/useGroupConsolidationBatchesRealtime';
 import { queryClient } from '../../lib/queryClient';
+import { supabase } from '../../lib/supabase';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchAddExpense } from '../../hooks/queries/prefetchAddExpense';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
@@ -109,7 +110,8 @@ import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
-import { showInfoToast } from '../../lib/appToast';
+import { showInfoToast, showSuccessMessage } from '../../lib/appToast';
+import { confirmSetFavoriteGroup } from '../../lib/favoriteGroupMenu';
 
 type ComposerState =
     | { open: false }
@@ -225,6 +227,24 @@ export function GroupDetailScreen() {
         };
     }, []);
 
+    // On focus, mark this group's activity as seen and refresh the per-group
+    // unread badge on the Groups list. Mirrors ActivityFeedScreen's global
+    // mark_activity_seen on focus.
+    useFocusEffect(
+        useCallback(() => {
+            void (async () => {
+                const { error } = await supabase.rpc('mark_group_activity_seen', {
+                    p_group_id: groupId,
+                });
+                if (!error) {
+                    void queryClient.invalidateQueries({
+                        queryKey: queryKeys.groupUnreadCounts,
+                    });
+                }
+            })();
+        }, [groupId]),
+    );
+
     const [group, setGroup] = useState<Group | null>(null);
     const groupsQuery = useGroupsQuery();
     const storeGroup = groupsQuery.data?.find((g) => g.id === groupId);
@@ -256,6 +276,9 @@ export function GroupDetailScreen() {
         Record<string, GroupMemberLite>
     >({});
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
+    const favoriteGroupId = useAppStore(s => s.favoriteGroupId);
+    const setFavoriteGroupId = useAppStore(s => s.setFavoriteGroupId);
+    const isFavoriteGroup = favoriteGroupId === groupId;
     const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<GroupFeedFilters>(DEFAULT_GROUP_FEED_FILTERS);
@@ -578,6 +601,18 @@ export function GroupDetailScreen() {
             },
         ]);
     }, [groupId, navigation, t]);
+    const handleSetFavorite = useCallback(() => {
+        setMenuOpen(false);
+        confirmSetFavoriteGroup({
+            groupId,
+            groupName: displayGroup?.name ?? '',
+            favoriteGroupId,
+            t,
+            alert: platformAlert,
+            setFavoriteGroupId,
+            onApplied: () => showSuccessMessage('groups.favorite.setToast'),
+        });
+    }, [groupId, displayGroup?.name, favoriteGroupId, setFavoriteGroupId, t]);
     const runExport = useCallback(async () => {
         if (!displayGroup) return;
         setExporting(true);
@@ -1134,6 +1169,16 @@ export function GroupDetailScreen() {
                         <DetailMenuRow
                             label={t('groups.editGroup')}
                             onPress={handleEditGroup}
+                        />
+                        <DetailMenuRow
+                            label={
+                                isFavoriteGroup
+                                    ? t('groups.favorite.currentLabel')
+                                    : t('groups.favorite.setOption')
+                            }
+                            onPress={handleSetFavorite}
+                            disabled={isFavoriteGroup}
+                            testID="group-menu-set-favorite"
                         />
                         <DetailMenuRow
                             label={t('groups.share.exportOption')}

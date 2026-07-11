@@ -35,7 +35,15 @@
         "groups": "קופות",
         "activity": "פעילות",
         "history": "היסטוריה",
-        "profile": "פרופיל"
+        "profile": "פרופיל",
+        "favoriteGroup": "קופה מועדפת"
+    },
+    "favoriteGroup": {
+        "switchLabel": "החלפת קופה",
+        "pickerTitle": "בחירת קופה מועדפת",
+        "emptyTitle": "אין עדיין קופות",
+        "emptyMessage": "צרו או הצטרפו לקופה כדי להצמיד אותה כאן לגישה מהירה.",
+        "emptyCta": "פתיחת קופה"
     },
     "auth": {
         "appName": "KupaPay",
@@ -161,6 +169,14 @@
         "title": "קופות",
         "createGroup": "פתח קופה",
         "editGroup": "ערוך קופה",
+        "favorite": {
+            "setOption": "קבע כקופה מועדפת",
+            "currentLabel": "הקופה המועדפת שלך",
+            "confirmTitle": "קופה מועדפת",
+            "confirmMessage": "להפוך את «{{name}}» לקופה המועדפת שלך?",
+            "confirmCta": "קבע כמועדפת",
+            "setToast": "הקופה סומנה כמועדפת"
+        },
         "noGroups": "אין קופות עדיין",
         "noGroupsMessage": "פתח את הקופה הראשונה שלך כדי להתחיל לשתף הוצאות",
         "offlineMessage": "לא ניתן לטעון את הקופות שלך כרגע. הן יופיעו כאן אוטומטית כשהחיבור יחזור.",
@@ -514,6 +530,9 @@
         },
         "paidBySub": "{{amount}} · שולם על ידי {{name}}",
         "v2": {
+            "addQuick": "הוספת הוצאה",
+            "changeGroup": "קופה",
+            "selectGroup": "בחירת קופה",
             "headerNew": "הוצאה חדשה",
             "headerEdit": "עריכת הוצאה",
             "amountPlaceholder": "0.00",

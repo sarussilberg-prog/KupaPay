@@ -35,7 +35,15 @@
         "groups": "Groups",
         "activity": "Activity",
         "history": "History",
-        "profile": "Profile"
+        "profile": "Profile",
+        "favoriteGroup": "Favorite Group"
+    },
+    "favoriteGroup": {
+        "switchLabel": "Switch group",
+        "pickerTitle": "Choose favorite group",
+        "emptyTitle": "No groups yet",
+        "emptyMessage": "Create or join a group to pin it here for quick access.",
+        "emptyCta": "Create a group"
     },
     "auth": {
         "appName": "KupaPay",
@@ -161,6 +169,14 @@
         "title": "Groups",
         "createGroup": "Create Group",
         "editGroup": "Edit Group",
+        "favorite": {
+            "setOption": "Set as favorite group",
+            "currentLabel": "Your favorite group",
+            "confirmTitle": "Favorite group",
+            "confirmMessage": "Make «{{name}}» your favorite group?",
+            "confirmCta": "Set as favorite",
+            "setToast": "Group set as your favorite"
+        },
         "noGroups": "No groups yet",
         "noGroupsMessage": "Create your first group to start sharing expenses",
         "offlineMessage": "We can't load your groups right now. They'll appear here automatically once you're back online.",
@@ -500,6 +516,9 @@
         },
         "paidBySub": "{{amount}} · paid by {{name}}",
         "v2": {
+            "addQuick": "Add expense",
+            "changeGroup": "Group",
+            "selectGroup": "Choose group",
             "headerNew": "NEW EXPENSE",
             "headerEdit": "EDIT EXPENSE",
             "amountPlaceholder": "0.00",

@@ -12,6 +12,7 @@ import { useAppLanguage } from '../hooks/useRtlLayout';
 import { formatAmountDecimal } from '../lib/currencyDisplay';
 import { formatFeedDateTime } from '../lib/formatFeedDateTime';
 import { buildSettlementFeedCopy } from '../lib/feedSettlementPerspective';
+import { viewerAmountToneClass } from '../lib/viewerAmountTone';
 import { colors } from '../theme';
 
 interface SettlementRowProps {
@@ -45,6 +46,15 @@ function SettlementRowBase({
     const meta = timestamp;
     const amount = `${settlement.currency} ${formatAmountDecimal(settlement.amount)}`;
 
+    // Payee ⇒ +amount (green), payer ⇒ −amount (red), otherwise black.
+    const amountClassName = viewerAmountToneClass(
+        settlement.toUserId === currentUserId
+            ? 'positive'
+            : settlement.fromUserId === currentUserId
+                ? 'negative'
+                : 'neutral',
+    );
+
     const thumbnail = (
         <FeedRowThumbnail
             iconName="swap-horizontal-outline"
@@ -59,6 +69,7 @@ function SettlementRowBase({
             title={title}
             meta={meta}
             amount={amount}
+            amountClassName={amountClassName}
             onPress={onPress}
             testID={`settlement-press-${settlement.id}`}
         />
