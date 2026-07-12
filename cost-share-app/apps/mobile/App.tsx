@@ -248,8 +248,12 @@ function App() {
   useBootWatchdog(isReady, markReady);
 
   useEffect(() => {
-    if (isReady) SplashScreen.hideAsync().catch(() => {});
-  }, [isReady]);
+    // Hide the native (static) splash on the first JS frame so the animated
+    // AppGateSkeleton loading screen is visible during boot. Previously this
+    // waited for `isReady`, so the static splash covered the skeleton for the
+    // whole load and the brand animation was never seen on native.
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
 
   useEffect(() => {
     const unsubscribe = wireNetworkStatusToOnlineManager();
