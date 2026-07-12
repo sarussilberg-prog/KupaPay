@@ -22,6 +22,7 @@ import {
     expenseFeedSummaryKey,
     expenseFeedSummaryCount,
 } from '../lib/feedExpensePerspective';
+import { viewerAmountToneClass } from '../lib/viewerAmountTone';
 
 // ExpenseCategory → Ionicon for the icon-thumbnail fallback.
 const CATEGORY_ICON: Record<ExpenseCategory, AppIconName> = {
@@ -65,7 +66,18 @@ function ExpenseRowBase({
     });
     const meta = `${timestamp} · ${summary}`.trim();
 
+    // Viewer-net tone from the canonical myDeltaState: lent ⇒ owed (green),
+    // borrowed ⇒ owes (red), settled/none ⇒ neutral. This drives the sub-line
+    // color below; the main total stays black.
+    const viewerTone =
+        expense.myDeltaState === 'lent'
+            ? 'positive'
+            : expense.myDeltaState === 'borrowed'
+              ? 'negative'
+              : 'neutral';
+
     // Involvement sub-line — label + amount on separate lines for stable LTR grid.
+    // The amount carries the viewer-net tone (green/red); settled stays subtle gray.
     let subLine: React.ReactNode | undefined;
     const userShare = Math.abs(expense.myDelta);
     if (userShare > 0) {
@@ -74,12 +86,16 @@ function ExpenseRowBase({
             expense.myDeltaState === 'lent'
                 ? 'groups.expense.youLent'
                 : 'groups.expense.youBorrowed';
+        const subToneClass =
+            viewerTone === 'neutral'
+                ? 'text-gray-500'
+                : viewerAmountToneClass(viewerTone);
         subLine = (
             <View style={{ width: '100%' }}>
                 <FeedInvolvementLabel label={t(key, { amount: '' }).trim()} />
                 <FeedAmountLine
                     amount={formatted}
-                    className="text-[11px] font-medium text-gray-500"
+                    className={`text-[11px] font-medium ${subToneClass}`}
                     baseFontSize={11}
                 />
             </View>
@@ -96,6 +112,8 @@ function ExpenseRowBase({
         />
     );
 
+    // The main total amount stays black (FeedRowCard's default) — viewer-net
+    // tone lives on the involvement sub-line above.
     return (
         <FeedRowCard
             thumbnail={thumbnail}

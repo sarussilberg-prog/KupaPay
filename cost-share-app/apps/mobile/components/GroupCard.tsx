@@ -13,6 +13,7 @@ import { AppIcon } from './AppIcon';
 import { GroupAvatar } from './GroupAvatar';
 import { BalanceChip } from './BalanceChip';
 import { HighlightedText } from './HighlightedText';
+import { UnreadBadge } from './UnreadBadge';
 import { colors } from '../theme';
 
 interface GroupCardProps {
@@ -20,8 +21,12 @@ interface GroupCardProps {
     rollup?: GroupRollup;
     /** Forwarded to BalanceChip — distinguishes "You are settled" from "Settled". */
     groupHasOpenDebts?: boolean;
+    /** Forwarded to BalanceChip — true when balance data is unavailable (offline, no cache). */
+    balanceUnknown?: boolean;
     searchQuery?: string;
     matchedMemberNames?: string[];
+    /** Count of new activity events in this group since last opened. */
+    unreadCount?: number;
     onPress: (groupId: string) => void;
 }
 
@@ -29,8 +34,10 @@ function GroupCardBase({
     group,
     rollup,
     groupHasOpenDebts,
+    balanceUnknown,
     searchQuery,
     matchedMemberNames,
+    unreadCount,
     onPress,
 }: GroupCardProps) {
     const { t } = useTranslation();
@@ -72,6 +79,12 @@ function GroupCardBase({
                                 numberOfLines={1}
                             />
                         </View>
+                        {!isArchived && (unreadCount ?? 0) > 0 && (
+                            <UnreadBadge
+                                count={unreadCount ?? 0}
+                                style={{ marginStart: 8, marginEnd: 4 }}
+                            />
+                        )}
                         {isArchived && (
                             <View
                                 className="px-2 py-1 rounded-md bg-gray-200"
@@ -113,6 +126,7 @@ function GroupCardBase({
                     rollup={rollup}
                     defaultCurrency={group.defaultCurrency}
                     groupHasOpenDebts={groupHasOpenDebts}
+                    balanceUnknown={balanceUnknown}
                 />
 
                 <View className="ml-2">

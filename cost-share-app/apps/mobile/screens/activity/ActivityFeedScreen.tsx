@@ -15,12 +15,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useQueryClient } from '@tanstack/react-query';
+import { onlineManager, useQueryClient } from '@tanstack/react-query';
 import {
     ActivityEvent,
+    ConsolidationBatch,
     ExpenseWithDelta,
     GroupMemberLite,
     Settlement,
+    settlementFromRow,
 } from '@cost-share/shared';
 import { useActivityQuery } from '../../hooks/queries/useActivityQuery';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
@@ -34,8 +36,10 @@ import {
 } from '../../services/expenses.service';
 import {
     deleteSettlement,
+    fetchConsolidationBatchById,
     getSettlementById,
 } from '../../services/settlements.service';
+import { deleteConsolidationBatch } from '../../services/consolidation.service';
 import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { decorateExpense } from '../../services/expense-delta';
 import { fetchProfilesByUserIds } from '../../services/groups.service';
@@ -49,6 +53,7 @@ import { ActivityItemSkeleton } from '../../components/ActivityItemSkeleton';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { platformAlert } from '../../lib/platformAlert';
+import { showAppToast } from '../../lib/appToast';
 import { removeActivityEvent } from '../../services/activityEvents.service';
 import {
     ActivityFiltersSheet,
@@ -73,7 +78,8 @@ function unique<T>(values: T[]): T[] {
 
 type FeedDetailItem =
     | { kind: 'expense'; expense: ExpenseWithDelta }
-    | { kind: 'settlement'; settlement: Settlement };
+    | { kind: 'settlement'; settlement: Settlement }
+    | { kind: 'consolidation_batch'; batch: ConsolidationBatch; settlements: Settlement[] };
 
 const DIVIDER_ID = '__activity_divider__';
 type DividerItem = { __divider: true; id: typeof DIVIDER_ID };
@@ -128,6 +134,59 @@ export function ActivityFeedScreen() {
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
 
+    // Offline-safe actor directory. The groups query is persisted, so its
+    // members (id + name + avatar + isActive) are available with no network.
+    // This lets the feed resolve who performed each action even offline —
+    // without it, every actor falls back to an unresolved profile and the row
+    // mislabels real people. Network-fetched profiles (profileMap) layer on
+    // top for ids not in any cached roster (e.g. former members).
+    const memberDirectory = useMemo<Record<string, GroupMemberLite>>(() => {
+        const map: Record<string, GroupMemberLite> = {};
+        for (const g of groups) {
+            for (const m of g.members) map[m.userId] = m;
+        }
+        if (currentUser) {
+            map[currentUser.id] = {
+                userId: currentUser.id,
+                displayName: currentUser.name,
+                avatarUrl: currentUser.avatarUrl,
+                isActive: true,
+            };
+        }
+        return map;
+    }, [groups, currentUser?.id, currentUser?.name, currentUser?.avatarUrl]);
+
+    // Groups the user can currently open. fetchGroups only returns groups with
+    // an active membership in an active group, so a groupId missing here means
+    // the group was deleted or the user was removed. Archived groups stay in
+    // the list, so they aren't falsely treated as gone.
+    const knownGroupIds = useMemo(() => new Set(groups.map(g => g.id)), [groups]);
+    // Only trust the set once the query has resolved (data may come from the
+    // persisted cache, even offline). Until then, fall back to navigating.
+    const groupsLoaded = groupsQuery.data !== undefined;
+
+    // The activity referenced something that's gone or that the user can no
+    // longer access. Offline takes precedence: when we couldn't reach the
+    // server we say so rather than wrongly claiming the data is gone.
+    const showUnavailableToast = useCallback(() => {
+        showAppToast({
+            type: 'info',
+            titleKey: 'activity.unavailableTitle',
+            messageKey: 'activity.unavailableMessage',
+        });
+    }, []);
+    const showOpenFailedToast = useCallback(() => {
+        if (onlineManager.isOnline()) {
+            showUnavailableToast();
+        } else {
+            showAppToast({
+                type: 'error',
+                titleKey: 'common.error',
+                messageKey: 'common.networkError',
+            });
+        }
+    }, [showUnavailableToast]);
+
     const {
         data,
         isLoading,
@@ -146,7 +205,7 @@ export function ActivityFeedScreen() {
     const [detailMembers, setDetailMembers] = useState<Record<string, GroupMemberLite>>({});
     const [detailEventId, setDetailEventId] = useState<string | null>(null);
     const [detailDeletedNotice, setDetailDeletedNotice] = useState<
-        { deletedAt: Date; deletedByName: string; kind: 'expense' | 'settlement' } | null
+        { deletedAt: Date; deletedByName: string; deletedByYou: boolean; kind: 'expense' | 'settlement' } | null
     >(null);
     const [userRefreshing, setUserRefreshing] = useState(false);
     const [profileMap, setProfileMap] = useState<Record<string, GroupMemberLite>>({});
@@ -171,15 +230,23 @@ export function ActivityFeedScreen() {
             const md = (evt.metadata ?? {}) as Record<string, unknown>;
             if (typeof md.from_user_id === 'string') ids.add(md.from_user_id);
             if (typeof md.to_user_id === 'string') ids.add(md.to_user_id);
+            if (typeof md.paid_by_user_id === 'string') ids.add(md.paid_by_user_id);
+            if (typeof md.paid_to_user_id === 'string') ids.add(md.paid_to_user_id);
             if (typeof md.new_member_user_id === 'string') ids.add(md.new_member_user_id);
             if (typeof md.deleted_by === 'string') ids.add(md.deleted_by);
         }
-        const missing = [...ids].filter(id => !profileMap[id]);
+        const missing = [...ids].filter(id => !profileMap[id] && !memberDirectory[id]);
         if (missing.length === 0) return;
         void fetchProfilesByUserIds(missing).then(extra => {
             setProfileMap(prev => ({ ...prev, ...extra }));
         });
-    }, [activities, profileMap]);
+    }, [activities, profileMap, memberDirectory]);
+
+    // Cached roster first, authoritative network profiles override.
+    const resolvedProfiles = useMemo<Record<string, GroupMemberLite>>(
+        () => ({ ...memberDirectory, ...profileMap }),
+        [memberDirectory, profileMap],
+    );
 
     const handleRefresh = useCallback(async () => {
         canLoadMoreRef.current = false;
@@ -297,14 +364,20 @@ export function ActivityFeedScreen() {
 
     const detailOpenInGroup = useMemo(() => {
         if (!detailItem) return undefined;
-        const groupId = detailItem.kind === 'expense'
-            ? detailItem.expense.groupId
-            : detailItem.settlement.groupId;
+        let groupId: string;
+        let focusFeedItem: GroupDetailFocusFeedItem;
+        if (detailItem.kind === 'expense') {
+            groupId = detailItem.expense.groupId;
+            focusFeedItem = { kind: 'expense', id: detailItem.expense.id };
+        } else if (detailItem.kind === 'settlement') {
+            groupId = detailItem.settlement.groupId;
+            focusFeedItem = { kind: 'settlement', id: detailItem.settlement.id };
+        } else {
+            groupId = detailItem.batch.groupId;
+            focusFeedItem = { kind: 'consolidation_batch', id: detailItem.batch.id };
+        }
         const groupName = groupNameById[groupId];
         if (!groupName) return undefined;
-        const focusFeedItem: GroupDetailFocusFeedItem = detailItem.kind === 'expense'
-            ? { kind: 'expense', id: detailItem.expense.id }
-            : { kind: 'settlement', id: detailItem.settlement.id };
         return {
             label: t('activity.openInGroup', { group: groupName }),
             onPress: () => navigateToGroupWithFocus(groupId, focusFeedItem),
@@ -358,7 +431,8 @@ export function ActivityFeedScreen() {
             // Deleted row: skip the live fetch, surface the deletion notice.
             if (md.is_deleted === true) {
                 const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
-                const deletedByName = deletedById === currentUser?.id
+                const deletedByYouExpense = deletedById === currentUser?.id;
+                const deletedByName = deletedByYouExpense
                     ? t('common.you')
                     : (profileMap[deletedById]?.displayName
                         ?? seed[deletedById]?.displayName
@@ -366,7 +440,7 @@ export function ActivityFeedScreen() {
                 const deletedAt = typeof md.deleted_at === 'string'
                     ? new Date(md.deleted_at)
                     : event.createdAt;
-                setDetailDeletedNotice({ deletedAt, deletedByName, kind: 'expense' });
+                setDetailDeletedNotice({ deletedAt, deletedByName, deletedByYou: deletedByYouExpense, kind: 'expense' });
                 return;
             }
             setDetailDeletedNotice(null);
@@ -374,6 +448,7 @@ export function ActivityFeedScreen() {
             const expense = await getExpenseWithSplitsById(event.refId);
             if (!expense) {
                 setDetailItem(null);
+                showOpenFailedToast();
                 return;
             }
             const decorated = decorateExpense(expense, currentUser?.id ?? '');
@@ -391,7 +466,7 @@ export function ActivityFeedScreen() {
                 }
             }
         },
-        [currentUser?.id, profileMap, seedMemberMapFromGroup, t],
+        [currentUser?.id, profileMap, seedMemberMapFromGroup, showOpenFailedToast, t],
     );
 
     const openSettlementDetail = useCallback(
@@ -419,7 +494,8 @@ export function ActivityFeedScreen() {
 
             if (md.is_deleted === true) {
                 const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
-                const deletedByName = deletedById === currentUser?.id
+                const deletedByYouSettlement = deletedById === currentUser?.id;
+                const deletedByName = deletedByYouSettlement
                     ? t('common.you')
                     : (profileMap[deletedById]?.displayName
                         ?? seed[deletedById]?.displayName
@@ -427,7 +503,7 @@ export function ActivityFeedScreen() {
                 const deletedAt = typeof md.deleted_at === 'string'
                     ? new Date(md.deleted_at)
                     : event.createdAt;
-                setDetailDeletedNotice({ deletedAt, deletedByName, kind: 'settlement' });
+                setDetailDeletedNotice({ deletedAt, deletedByName, deletedByYou: deletedByYouSettlement, kind: 'settlement' });
                 return;
             }
             setDetailDeletedNotice(null);
@@ -435,6 +511,7 @@ export function ActivityFeedScreen() {
             const settlement = await getSettlementById(event.refId);
             if (!settlement) {
                 setDetailItem(null);
+                showOpenFailedToast();
                 return;
             }
             setDetailItem({ kind: 'settlement', settlement });
@@ -451,7 +528,7 @@ export function ActivityFeedScreen() {
                 }
             }
         },
-        [currentUser?.id, profileMap, seedMemberMapFromGroup, t],
+        [currentUser?.id, profileMap, seedMemberMapFromGroup, showOpenFailedToast, t],
     );
 
     const handleRemoveFromActivity = useCallback(() => {
@@ -485,6 +562,13 @@ export function ActivityFeedScreen() {
                 navigation.navigate('Profile', { screen: 'Friends' });
                 return;
             }
+            // The group this activity lives in was deleted or the user was
+            // removed from it — there's nothing to open. Covers expense,
+            // settlement, message and group-navigation events alike.
+            if (event.groupId && groupsLoaded && !knownGroupIds.has(event.groupId)) {
+                showUnavailableToast();
+                return;
+            }
             if (event.kind === 'expense_added') {
                 void openExpenseDetail(event);
                 return;
@@ -493,7 +577,113 @@ export function ActivityFeedScreen() {
                 void openSettlementDetail(event);
                 return;
             }
-            // group_added / group_member_joined / message_posted → navigate to group
+            if (event.kind === 'consolidation_batch_added' && event.groupId && event.refId) {
+                void (async () => {
+                    const md = (event.metadata ?? {}) as Record<string, unknown>;
+                    const seed = seedMemberMapFromGroup(event.groupId);
+                    setDetailMembers(seed);
+                    setDetailEventId(event.id);
+                    // Open immediately with stub data from event metadata
+                    const stubBatch: ConsolidationBatch = {
+                        id: event.refId,
+                        groupId: event.groupId ?? '',
+                        paidByUserId: typeof md.paid_by_user_id === 'string' ? md.paid_by_user_id : '',
+                        paidToUserId: typeof md.paid_to_user_id === 'string' ? md.paid_to_user_id : undefined,
+                        paymentAmount: Number(md.payment_amount ?? 0),
+                        paymentCurrency: typeof md.payment_currency === 'string' ? md.payment_currency : '',
+                        settlementCount: typeof md.settlement_count === 'number' ? md.settlement_count : undefined,
+                        createdAt: event.createdAt,
+                        deletedAt: md.is_deleted === true ? new Date() : null,
+                    };
+                    setDetailItem({ kind: 'consolidation_batch', batch: stubBatch, settlements: [] });
+
+                    if (md.is_deleted === true) {
+                        const deletedById = typeof md.deleted_by === 'string' ? md.deleted_by : '';
+                        const deletedByYouBatch = deletedById === currentUser?.id;
+                        const deletedByName = deletedByYouBatch
+                            ? t('common.you')
+                            : (profileMap[deletedById]?.displayName
+                                ?? seed[deletedById]?.displayName
+                                ?? t('common.unknown'));
+                        const deletedAt = typeof md.deleted_at === 'string'
+                            ? new Date(md.deleted_at)
+                            : event.createdAt;
+                        setDetailDeletedNotice({ deletedAt, deletedByName, deletedByYou: deletedByYouBatch, kind: 'settlement' });
+                        return;
+                    }
+                    setDetailDeletedNotice(null);
+
+                    // Fetch batch + settlements in parallel
+                    const [batch, { data: settlementsData }] = await Promise.all([
+                        fetchConsolidationBatchById(event.refId),
+                        supabase
+                            .from('settlements')
+                            .select('*')
+                            .eq('consolidation_batch_id', event.refId)
+                            .is('deleted_at', null),
+                    ]);
+                    if (!batch) {
+                        setDetailItem(null);
+                        showOpenFailedToast();
+                        return;
+                    }
+                    const batchSettlements = (settlementsData ?? []).map((r: Record<string, unknown>) =>
+                        settlementFromRow(r),
+                    );
+                    setDetailItem({ kind: 'consolidation_batch', batch, settlements: batchSettlements });
+                    const referencedIds = new Set<string>([
+                        batch.paidByUserId,
+                        ...batchSettlements.flatMap(s => [s.fromUserId, s.toUserId]),
+                    ].filter(Boolean));
+                    const missing = [...referencedIds].filter(id => !seed[id]);
+                    if (missing.length > 0) {
+                        const extra = await fetchProfilesByUserIds(missing);
+                        if (Object.keys(extra).length > 0) {
+                            setDetailMembers(prev => ({ ...prev, ...extra }));
+                        }
+                    }
+                })();
+                return;
+            }
+            // message_posted → navigate to group and highlight the message row,
+            // matching the expense/settlement focus behavior. refId is the
+            // message id (activity_events.ref_id = messages.id).
+            if (event.kind === 'message_posted' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: {
+                        groupId: event.groupId,
+                        focusFeedItem: { kind: 'message', id: event.refId },
+                    },
+                    merge: true,
+                });
+                return;
+            }
+            // group_note_changed → open the group's shared note. We navigate to
+            // GroupDetail with openNote; GroupDetail then pushes GroupNote on top
+            // of itself (the same path as the in-group note button), guaranteeing
+            // Back from the note returns to the relevant group — not wherever the
+            // Groups tab was last. A single navigate avoids the nested-navigator
+            // coalescing that made two separate navigates unreliable.
+            if (event.kind === 'group_note_changed' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: { groupId: event.groupId, openNote: true },
+                });
+                return;
+            }
+            // settle_up_reminder → open the settle-up list ON TOP of the group
+            // (same pattern as group_note_changed): navigate to GroupDetail with
+            // openSettleUp so GroupDetail pushes SettleUpList on top, guaranteeing
+            // Back returns to the relevant group — not wherever the Groups tab was.
+            if (event.kind === 'settle_up_reminder' && event.groupId) {
+                navigation.navigate('Groups', {
+                    screen: 'GroupDetail',
+                    params: { groupId: event.groupId, openSettleUp: true },
+                });
+                return;
+            }
+            // group_added / group_member_joined → navigate to group
             if (event.groupId) {
                 navigation.navigate('Groups', {
                     screen: 'GroupDetail',
@@ -501,7 +691,18 @@ export function ActivityFeedScreen() {
                 });
             }
         },
-        [navigation, openExpenseDetail, openSettlementDetail],
+        [
+            navigation,
+            openExpenseDetail,
+            openSettlementDetail,
+            groupsLoaded,
+            knownGroupIds,
+            showUnavailableToast,
+            seedMemberMapFromGroup,
+            currentUser?.id,
+            t,
+            profileMap,
+        ],
     );
 
     const handleDetailEdit = useCallback(() => {
@@ -512,6 +713,7 @@ export function ActivityFeedScreen() {
             navigation.navigate('AddExpense', { expenseId, groupId });
             return;
         }
+        if (detailItem.kind === 'consolidation_batch') return;
         const { groupId, id } = detailItem.settlement;
         setDetailItem(null);
         navigation.navigate('Groups', {
@@ -543,6 +745,18 @@ export function ActivityFeedScreen() {
                             }
                             return;
                         }
+                        if (item.kind === 'consolidation_batch') {
+                            const ok = await deleteConsolidationBatch(item.batch.id);
+                            if (ok) {
+                                invalidateBalanceCaches(item.batch.groupId);
+                                void queryClient.invalidateQueries({
+                                    queryKey: queryKeys.consolidationBatches(item.batch.groupId),
+                                });
+                                void refetch();
+                                setDetailItem(null);
+                            }
+                            return;
+                        }
                         const ok = await deleteSettlement(item.settlement.id);
                         if (ok) {
                             invalidateBalanceCaches(item.settlement.groupId);
@@ -555,12 +769,26 @@ export function ActivityFeedScreen() {
         ]);
     }, [detailItem, refetch, t]);
 
+    // Current user as a member profile — the avatar for self-actions
+    // (invite-link self-join / self-initiated leave) that store no actor.
+    const selfProfile = useMemo<GroupMemberLite | undefined>(
+        () => (currentUser
+            ? {
+                userId: currentUser.id,
+                displayName: currentUser.name,
+                avatarUrl: currentUser.avatarUrl,
+                isActive: true,
+            }
+            : undefined),
+        [currentUser?.id, currentUser?.name, currentUser?.avatarUrl],
+    );
+
     const renderActivity = useCallback(
         ({ item }: { item: FeedListItem }) => {
             if (isDivider(item)) {
                 return <ActivityFeedDivider />;
             }
-            const actor = item.actorUserId ? profileMap[item.actorUserId] : undefined;
+            let actor = item.actorUserId ? resolvedProfiles[item.actorUserId] : undefined;
             const md = (item.metadata ?? {}) as Record<string, unknown>;
             let counterpart: GroupMemberLite | undefined;
             if (item.kind === 'settlement_added') {
@@ -569,26 +797,40 @@ export function ActivityFeedScreen() {
                     : typeof md.to_user_id === 'string'
                     ? md.to_user_id
                     : undefined;
-                if (otherId) counterpart = profileMap[otherId];
+                if (otherId) counterpart = resolvedProfiles[otherId];
+            }
+            if (item.kind === 'consolidation_batch_added') {
+                // The visual "actor" for a batch is the payer (paid_by_user_id), which may
+                // differ from actorUserId when a non-involved member records the settlement.
+                const paidByUserId = typeof md.paid_by_user_id === 'string' ? md.paid_by_user_id : undefined;
+                if (paidByUserId) actor = resolvedProfiles[paidByUserId];
+                const toUserId = typeof md.paid_to_user_id === 'string' ? md.paid_to_user_id : undefined;
+                if (toUserId) counterpart = resolvedProfiles[toUserId];
             }
             const newMemberId = typeof md.new_member_user_id === 'string'
                 ? md.new_member_user_id
                 : undefined;
-            const newMember = newMemberId ? profileMap[newMemberId] : undefined;
-            const groupName = item.groupId ? groupNameById[item.groupId] : undefined;
+            const newMember = newMemberId ? resolvedProfiles[newMemberId] : undefined;
+            // A removed member no longer has the group in their cache (and RLS
+            // blocks re-reading it), so fall back to the name snapshotted on the
+            // event metadata by the membership trigger.
+            const groupName =
+                (item.groupId ? groupNameById[item.groupId] : undefined) ??
+                (typeof md.group_name === 'string' ? md.group_name : undefined);
             return (
                 <ActivityItem
                     event={item}
                     actor={actor}
                     counterpart={counterpart}
                     newMember={newMember}
+                    selfProfile={selfProfile}
                     groupName={groupName}
                     currentUserId={currentUser?.id ?? ''}
                     onPress={handleActivityPress}
                 />
             );
         },
-        [handleActivityPress, groupNameById, profileMap, currentUser?.id],
+        [handleActivityPress, groupNameById, resolvedProfiles, currentUser?.id, selfProfile],
     );
 
     const keyExtractor = useCallback(
@@ -724,7 +966,7 @@ export function ActivityFeedScreen() {
             />
 
             <FeedItemDetailSheet
-                item={detailItem}
+                item={detailItem ?? null}
                 memberMap={detailMembers}
                 currentUserId={currentUser?.id ?? ''}
                 onClose={() => {

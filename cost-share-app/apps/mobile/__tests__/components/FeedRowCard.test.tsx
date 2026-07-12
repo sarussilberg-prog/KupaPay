@@ -47,7 +47,7 @@ describe('FeedRowCard', () => {
   it('keeps currency amounts LTR with a fixed currency column in Hebrew', () => {
     const { getByText } = render(
       <RtlLayoutProvider>
-        <FeedRowCard {...baseProps} subLine="הלוויתָ ILS 21.05" />
+        <FeedRowCard {...baseProps} subLine="הלווית ILS 21.05" />
       </RtlLayoutProvider>,
     );
 
@@ -71,5 +71,19 @@ describe('FeedRowCard', () => {
     });
     expect(value.props.numberOfLines).toBe(1);
     expect(value.props.adjustsFontSizeToFit).toBe(true);
+  });
+
+  it('applies amountClassName to the amount when provided', () => {
+    const { getByText } = render(
+      <FeedRowCard {...baseProps} amountClassName="text-green-600" />,
+    );
+    const value = getByText('84.20');
+    expect(value.props.className).toContain('text-green-600');
+  });
+
+  it('defaults the amount to text-gray-900 when no amountClassName is given', () => {
+    const { getByText } = render(<FeedRowCard {...baseProps} />);
+    const value = getByText('84.20');
+    expect(value.props.className).toContain('text-gray-900');
   });
 });

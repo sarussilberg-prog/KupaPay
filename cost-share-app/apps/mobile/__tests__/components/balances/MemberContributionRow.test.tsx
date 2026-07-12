@@ -73,7 +73,8 @@ describe('MemberContributionRow', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByTestId('member-avatar-image').props.source.uri).toBe(
+        // expo-image takes the URL string directly as `source`.
+        expect(getByTestId('member-avatar-image').props.source).toBe(
             'https://example.com/alice.png',
         );
     });

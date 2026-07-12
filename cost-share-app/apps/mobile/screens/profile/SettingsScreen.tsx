@@ -3,9 +3,8 @@ import React, { useCallback, useState } from 'react';
 import { View, ScrollView, Linking, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import Constants from 'expo-constants';
 import * as StoreReview from 'expo-store-review';
-import { Language } from '@cost-share/shared';
+import { APP_VERSION, APP_WEB_ORIGIN, Language } from '@cost-share/shared';
 import { useAppStore } from '../../store';
 import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
@@ -16,7 +15,6 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { SettingsSection } from '../../components/settings/SettingsSection';
 import { SettingsRow } from '../../components/settings/SettingsRow';
 import { ContactSupportRow } from '../../components/settings/ContactSupportRow';
-import { LegalDocumentSheet } from '../../components/settings/LegalDocumentSheet';
 import { LanguageSheet } from '../../components/settings/LanguageSheet';
 import { CurrencyPicker } from '../../components/CurrencyPicker';
 import { showAppToast, showSuccessMessage } from '../../lib/appToast';
@@ -28,10 +26,14 @@ import { DeleteAccountConfirmSheet } from '../../components/settings/DeleteAccou
 import currencyCodes from 'currency-codes';
 import { getCurrencyDisplayName } from '../../lib/currencyDisplay';
 import { InviteLinkBlock } from '../../components/InviteLinkBlock';
+import { useSystemNotificationsDenied } from '../../hooks/useSystemNotificationsDenied';
+import { NotificationsDisabledHint } from '../../components/settings/NotificationsDisabledHint';
 
-const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
 const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
+// Legal documents live on the website, not in the app. Pass the app's current
+// language so the page renders in the same locale (web falls back to English).
+const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
 
 export function SettingsScreen() {
     const { t } = useTranslation();
@@ -43,13 +45,12 @@ export function SettingsScreen() {
     const [showLogout, setShowLogout] = useState(false);
     const [showLanguage, setShowLanguage] = useState(false);
     const [showCurrency, setShowCurrency] = useState(false);
-    const [showTerms, setShowTerms] = useState(false);
-    const [showPrivacy, setShowPrivacy] = useState(false);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [openBalances, setOpenBalances] = useState<OpenBalancesSummary | null>(null);
 
     const navigation = useNavigation<any>();
+    const notificationsDenied = useSystemNotificationsDenied();
 
     const handleLanguagePick = useCallback(
         async (lang: Language) => {
@@ -95,6 +96,13 @@ export function SettingsScreen() {
         if (url) await Linking.openURL(url);
     }, []);
 
+    const openLegal = useCallback(
+        async (slug: 'terms' | 'privacy') => {
+            await Linking.openURL(`${WEB_ORIGIN}/${slug}?lang=${language}`);
+        },
+        [language],
+    );
+
     const handleLogout = useCallback(async () => {
         setShowLogout(false);
         await signOut();
@@ -139,11 +147,19 @@ export function SettingsScreen() {
                         onPress={() => setShowCurrency(true)}
                         testID="settings-currency-row"
                     />
+                </SettingsSection>
+
+                <SettingsSection
+                    title={t('notifications.title')}
+                    footer={notificationsDenied ? <NotificationsDisabledHint /> : undefined}
+                >
                     <SettingsRow
                         iconName="notifications-outline"
                         label={t('notifications.title')}
                         variant="chevron"
+                        disabled={notificationsDenied}
                         onPress={() => navigation.navigate('NotificationSettings')}
+                        testID="settings-notifications-row"
                     />
                 </SettingsSection>
 
@@ -165,8 +181,8 @@ export function SettingsScreen() {
                 </SettingsSection>
 
                 <SettingsSection title={t('settings.legal')}>
-                    <SettingsRow iconName="document-text-outline" label={t('settings.terms')} variant="chevron" onPress={() => setShowTerms(true)} />
-                    <SettingsRow iconName="shield-outline" label={t('settings.privacy')} variant="chevron" onPress={() => setShowPrivacy(true)} />
+                    <SettingsRow iconName="document-text-outline" label={t('settings.terms')} variant="chevron" onPress={() => openLegal('terms')} />
+                    <SettingsRow iconName="shield-outline" label={t('settings.privacy')} variant="chevron" onPress={() => openLegal('privacy')} />
                 </SettingsSection>
 
                 <SettingsSection title={t('settings.account')}>
@@ -216,9 +232,6 @@ export function SettingsScreen() {
                 visible={showCurrency}
                 onClose={() => setShowCurrency(false)}
             />
-
-            <LegalDocumentSheet visible={showTerms} slug="terms" onClose={() => setShowTerms(false)} />
-            <LegalDocumentSheet visible={showPrivacy} slug="privacy" onClose={() => setShowPrivacy(false)} />
 
             <DeleteAccountWarningSheet
                 visible={showDeleteWarning}

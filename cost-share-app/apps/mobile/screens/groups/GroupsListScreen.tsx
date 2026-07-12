@@ -22,10 +22,12 @@ import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
+import { useGroupUnreadCounts } from '../../hooks/queries/useGroupUnreadCounts';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
 import { prefetchAddExpensePrerequisitesForGroup } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
-import { AppGateSkeleton } from '../../components/skeletons/AppGateSkeleton';
+import { useNetworkStatus } from '../../lib/networkStatus';
+import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
 import { CreateGroupFabAnchor, createGroupFabScrollPadding } from '../../components/groups/CreateGroupFabAnchor';
@@ -67,13 +69,19 @@ export function GroupsListScreen() {
     const listBottomPadding = createGroupFabScrollPadding() + FAB_LIST_GAP;
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
-    // Suppress the empty state while any fetch is in flight and we have no
-    // data yet — covers the cold-start case where a persisted-empty cache
-    // briefly resolves with `isLoading=false` while the background refetch
-    // is still loading the user's groups.
-    const isInitialLoading = groupsQuery.isFetching && groups.length === 0;
+    // "Initial loading" = we have NO cached data yet AND a fetch is actively in
+    // flight (not offline-paused). The gate (AuthenticatedAppGate) seeds the
+    // groups cache before the navigator mounts, so in practice data is already
+    // present and this is false. Keying on `data === undefined` (not
+    // `groups.length === 0`) means a seeded EMPTY list shows the empty state
+    // rather than a loading screen — and this screen never renders the
+    // full-screen boot splash, which would leak the tab bar (it lives inside the
+    // bottom-tab navigator).
+    const isInitialLoading =
+        groupsQuery.data === undefined && groupsQuery.fetchStatus === 'fetching';
 
     const { data: simplified } = useSimplifiedDebts();
+    const { data: unreadByGroup } = useGroupUnreadCounts();
     const balanceNetsByGroup = useMemo(() => {
         const out: Record<string, { net: number }> = {};
         simplified?.groupRollups.forEach((rollup, groupId) => {
@@ -99,6 +107,11 @@ export function GroupsListScreen() {
 
     const [refreshing, setRefreshing] = useState(false);
     const loadError = groupsQuery.isError;
+    const { online } = useNetworkStatus();
+    // Which empty-state to show when the list has no groups. Offline wins over a
+    // generic load error so the user gets the honest "you're offline" message
+    // instead of a bare "failed to load".
+    const emptyVariant = resolveEmptyStateVariant({ online, hasError: loadError });
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -195,20 +208,27 @@ export function GroupsListScreen() {
 
     type FilteredRow = (typeof activeRows)[number];
 
+    // No balance dataset at all (e.g. offline before it was ever cached) →
+    // tell each card its balance is unknown so it shows a neutral placeholder
+    // instead of a false "Settled".
+    const balanceUnknown = simplified === undefined;
+
     const renderGroupRow = useCallback(
         (item: FilteredRow) => (
             <GroupCard
                 group={item.group}
                 rollup={simplified?.groupRollups.get(item.group.id)}
                 groupHasOpenDebts={groupHasOpenDebts[item.group.id] === true}
+                balanceUnknown={balanceUnknown}
                 searchQuery={trimmedQuery || undefined}
                 matchedMemberNames={
                     item.matched.length > 0 ? item.matched : undefined
                 }
+                unreadCount={unreadByGroup?.[item.group.id] ?? 0}
                 onPress={handleGroupPress}
             />
         ),
-        [simplified, groupHasOpenDebts, trimmedQuery, handleGroupPress],
+        [simplified, balanceUnknown, groupHasOpenDebts, unreadByGroup, trimmedQuery, handleGroupPress],
     );
 
     const renderItem = useCallback<ListRenderItem<FilteredRow>>(
@@ -246,7 +266,12 @@ export function GroupsListScreen() {
     }, [archivedRows, archivedExpanded, renderGroupRow, t]);
 
     if (isInitialLoading) {
-        return <AppGateSkeleton />;
+        // Render nothing — never the full-screen boot splash. The gate owns that
+        // splash (full-screen, above the tabs); showing it here would put the icon
+        // behind the bottom bar. With the gate seeding the cache this is reached
+        // only in rare degraded-network edges, where blank-until-data beats both a
+        // tab-bar-leaking splash and a premature empty-state flash.
+        return null;
     }
 
     return (
@@ -335,7 +360,15 @@ export function GroupsListScreen() {
                     }
                     ListFooterComponent={archivedFooter}
                     ListEmptyComponent={
-                        loadError && groups.length === 0 ? (
+                        // Archived groups exist (just no active ones) → the
+                        // archived footer renders them; no empty state needed.
+                        archivedRows.length > 0 ? null : emptyVariant === 'offline' ? (
+                            <EmptyState
+                                iconName="cloud-offline-outline"
+                                title={t('common.offlineTitle')}
+                                message={t('groups.offlineMessage')}
+                            />
+                        ) : emptyVariant === 'error' ? (
                             <EmptyState
                                 iconName="alert-circle-outline"
                                 title={t('groups.loadError')}
@@ -343,7 +376,7 @@ export function GroupsListScreen() {
                                 actionTitle={t('common.retry')}
                                 onAction={handleRefresh}
                             />
-                        ) : archivedRows.length > 0 ? null : (
+                        ) : (
                             <EmptyState
                                 iconName="people-outline"
                                 title={t('groups.noGroups')}

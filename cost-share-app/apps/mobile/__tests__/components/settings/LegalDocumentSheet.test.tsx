@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
+import { APP_VERSION } from '@cost-share/shared';
 
 const mockUseLegalDocument = jest.fn();
 
@@ -29,7 +30,7 @@ jest.mock('react-i18next', () => ({
                 'legal.errorBody': 'Check your connection and try again.',
                 'legal.retry': 'Try again',
                 'legal.lastUpdated': 'Updated: {{date}}',
-                'legal.versionLabel': 'v{{version}}',
+                'legal.appVersion': 'App version {{version}}',
                 'legal.understood': 'I understand',
             };
             let value = dict[key] ?? key;
@@ -90,14 +91,17 @@ describe('LegalDocumentSheet', () => {
         expect(getByText('Try again')).toBeTruthy();
     });
 
-    it('renders title, version, effective date, and markdown body on success', () => {
+    it('renders title, app version, effective date, and markdown body on success', () => {
         mockUseLegalDocument.mockReturnValue({ data: baseDoc, isLoading: false, isError: false, refetch: jest.fn() });
         const { getByText, getByTestId } = render(
             <LegalDocumentSheet visible={true} slug="terms" onClose={() => {}} />,
         );
         expect(getByText('Terms of Service')).toBeTruthy();
         expect(getByTestId('markdown-body').props.children).toBe('# Welcome\n\nBody text.');
-        expect(getByText(/v1\.0\.0/)).toBeTruthy();
+        // Subtitle is one Text node: "Updated: <date> · App version <APP_VERSION>".
+        // exact:false matches the appVersion substring, and APP_VERSION (1.0.1) differs
+        // from baseDoc.version (1.0.0) — proving the sheet shows the APP version, not the doc's.
+        expect(getByText(`App version ${APP_VERSION}`, { exact: false })).toBeTruthy();
     });
 
     it('passes slug to useLegalDocument', () => {

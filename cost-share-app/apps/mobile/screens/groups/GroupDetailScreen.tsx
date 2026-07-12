@@ -14,10 +14,12 @@ import {
     Pressable,
     TextInput,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
+    ConsolidationBatch,
     ExpenseCategory,
     ExpenseWithDelta,
     FeedItem,
@@ -49,7 +51,9 @@ import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
 import { useGroupExpensesRealtime } from '../../hooks/useGroupExpensesRealtime';
 import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsRealtime';
+import { useGroupConsolidationBatchesRealtime } from '../../hooks/useGroupConsolidationBatchesRealtime';
 import { queryClient } from '../../lib/queryClient';
+import { supabase } from '../../lib/supabase';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchAddExpense } from '../../hooks/queries/prefetchAddExpense';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
@@ -89,7 +93,9 @@ import {
 } from '../../components/GroupFeedFiltersSheet';
 import { filterAndSortGroupFeed } from '../../lib/groupFeedFilters';
 import {
-    findFeedItemIndex,
+    IDLE_FOCUS_SESSION,
+    reduceFocusSession,
+    type FocusSessionState,
     type GroupDetailFocusFeedItem,
 } from '../../lib/groupDetailFocus';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
@@ -99,11 +105,13 @@ import {
     useGroupSettlementsQuery,
     useUpdateSettlementMutation,
 } from '../../hooks/queries/useSettlementQueries';
+import { useGroupConsolidationBatchesQuery, useDeleteConsolidationBatchMutation } from '../../hooks/queries/useConsolidationQueries';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
-import { showInfoToast } from '../../lib/appToast';
+import { showInfoToast, showSuccessMessage } from '../../lib/appToast';
+import { confirmSetFavoriteGroup } from '../../lib/favoriteGroupMenu';
 
 type ComposerState =
     | { open: false }
@@ -193,14 +201,17 @@ export function GroupDetailScreen() {
         groupId,
         focusFeedItem: focusFeedItemParam,
         editSettlementId: editSettlementIdParam,
+        openNote: openNoteParam,
+        openSettleUp: openSettleUpParam,
     } = route.params as {
         groupId: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
+        openNote?: boolean;
+        openSettleUp?: boolean;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
-    const focusConsumedRef = useRef(false);
-    const pendingFocusKeyRef = useRef<string | null>(null);
+    const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
     const focusScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const focusClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [focusedRowKey, setFocusedRowKey] = useState<string | null>(null);
@@ -215,6 +226,24 @@ export function GroupDetailScreen() {
             }
         };
     }, []);
+
+    // On focus, mark this group's activity as seen and refresh the per-group
+    // unread badge on the Groups list. Mirrors ActivityFeedScreen's global
+    // mark_activity_seen on focus.
+    useFocusEffect(
+        useCallback(() => {
+            void (async () => {
+                const { error } = await supabase.rpc('mark_group_activity_seen', {
+                    p_group_id: groupId,
+                });
+                if (!error) {
+                    void queryClient.invalidateQueries({
+                        queryKey: queryKeys.groupUnreadCounts,
+                    });
+                }
+            })();
+        }, [groupId]),
+    );
 
     const [group, setGroup] = useState<Group | null>(null);
     const groupsQuery = useGroupsQuery();
@@ -247,6 +276,9 @@ export function GroupDetailScreen() {
         Record<string, GroupMemberLite>
     >({});
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
+    const favoriteGroupId = useAppStore(s => s.favoriteGroupId);
+    const setFavoriteGroupId = useAppStore(s => s.setFavoriteGroupId);
+    const isFavoriteGroup = favoriteGroupId === groupId;
     const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<GroupFeedFilters>(DEFAULT_GROUP_FEED_FILTERS);
@@ -259,13 +291,20 @@ export function GroupDetailScreen() {
         | { kind: 'settlement'; settlement: Settlement }
         | null
     >(null);
+    const [batchDetail, setBatchDetail] = useState<{
+        batch: ConsolidationBatch;
+        settlements: Settlement[];
+    } | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
+    const [pendingExport, setPendingExport] = useState(false);
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
     const deleteSettlementMutation = useDeleteSettlementMutation(groupId);
+    const { data: consolidationBatches = [] } = useGroupConsolidationBatchesQuery(groupId);
+    const deleteBatchMutation = useDeleteConsolidationBatchMutation(groupId);
 
     const expensesQuery = useGroupExpensesQuery(groupId);
     const messagesQuery = useGroupMessagesQuery(groupId);
@@ -279,12 +318,17 @@ export function GroupDetailScreen() {
     );
     const isLoading = expensesQuery.isLoading || messagesQuery.isLoading;
     const isFeedLoading = isLoading && groupExpenses.length === 0 && messages.length === 0;
+    const { online } = useNetworkStatus();
 
     useGroupMessagesRealtime(groupId);
     useGroupExpensesRealtime(groupId);
     useGroupSettlementsRealtime(groupId);
+    useGroupConsolidationBatchesRealtime(groupId);
 
     const rollup = simplified?.groupRollups.get(groupId);
+    // No balance dataset at all (offline before it was ever cached) → the strip
+    // should say "unavailable", never a false "settled".
+    const balanceUnknown = simplified === undefined;
     const pairwiseDebts = useMemo(() => {
         const perCurrency = simplified?.byGroupCurrency.get(groupId);
         if (!perCurrency) return [];
@@ -404,8 +448,8 @@ export function GroupDetailScreen() {
     }, [loadAll, groupId]);
 
     const feed = useMemo<FeedItem[]>(
-        () => buildFeed(groupId, groupExpenses, messages, settlements, currentUserId),
-        [groupId, groupExpenses, messages, settlements, currentUserId],
+        () => buildFeed(groupId, groupExpenses, messages, settlements, currentUserId, consolidationBatches),
+        [groupId, groupExpenses, messages, settlements, currentUserId, consolidationBatches],
     );
 
     const trimmedQuery = searchQuery.trim().toLowerCase();
@@ -418,31 +462,28 @@ export function GroupDetailScreen() {
     );
 
     useEffect(() => {
-        const focus = focusFeedItemParam;
-        if (!focus) return;
-        const key = `${focus.kind}:${focus.id}`;
-        if (pendingFocusKeyRef.current === key) return;
-        pendingFocusKeyRef.current = key;
-        focusConsumedRef.current = false;
-        setSearchQuery('');
-        setFilters(DEFAULT_GROUP_FEED_FILTERS);
-    }, [focusFeedItemParam]);
+        const decision = reduceFocusSession(
+            focusSessionRef.current,
+            focusFeedItemParam,
+            filteredFeed,
+            isFeedLoading,
+        );
+        focusSessionRef.current = decision.state;
 
-    useEffect(() => {
-        const focus = focusFeedItemParam;
-        if (!focus || focusConsumedRef.current || isFeedLoading) return;
+        if (decision.resetFilters) {
+            setSearchQuery('');
+            setFilters(DEFAULT_GROUP_FEED_FILTERS);
+        }
 
-        const index = findFeedItemIndex(filteredFeed, focus);
-        if (index < 0) return;
+        if (decision.highlightKey === null) return;
 
-        const rowKey =
-            focus.kind === 'expense' ? `e:${focus.id}` : `s:${focus.id}`;
-        focusConsumedRef.current = true;
-        // Do NOT clear focusFeedItem from route params here — that would
-        // trigger a re-render and fire this effect's cleanup, which would
-        // cancel the scheduled scroll/highlight timers before they run.
-        // Route params naturally reset on the next navigation, so leaving
-        // it alone is safe.
+        const { highlightKey: rowKey, highlightIndex: index } = decision;
+        // Clear the route param now that we've consumed it. This re-runs the
+        // effect with no focus (a no-op that returns the session to idle), which
+        // is what lets the SAME item be focused again on a later navigation.
+        // Clearing does not cancel the timers below — they live in refs and are
+        // only cleared on unmount.
+        navigation.setParams({ groupId, focusFeedItem: undefined });
 
         focusScrollTimerRef.current = setTimeout(() => {
             listRef.current?.scrollToIndex({
@@ -471,6 +512,25 @@ export function GroupDetailScreen() {
         setEditingSettlement(target);
         navigation.setParams({ groupId, editSettlementId: undefined });
     }, [editSettlementIdParam, settlements, navigation, groupId]);
+
+    // Deep link from the activity feed / a note push: open the shared note ON
+    // TOP of this group screen so Back returns here (the relevant group). Clear
+    // the param first so returning to this group later won't reopen the note.
+    useEffect(() => {
+        if (!openNoteParam) return;
+        navigation.setParams({ groupId, openNote: undefined });
+        navigation.navigate('GroupNote', { groupId });
+    }, [openNoteParam, navigation, groupId]);
+
+    // Deep link from the activity feed / a settle-reminder push: open the
+    // settle-up list ON TOP of this group screen so Back returns here (the
+    // relevant group). Same pattern as openNote above — clear the param first
+    // so returning to this group later won't reopen settle-up.
+    useEffect(() => {
+        if (!openSettleUpParam) return;
+        navigation.setParams({ groupId, openSettleUp: undefined });
+        navigation.navigate('SettleUpList', { groupId });
+    }, [openSettleUpParam, navigation, groupId]);
 
     const handleClearFeedSearchAndFilters = useCallback(() => {
         setSearchQuery('');
@@ -541,9 +601,20 @@ export function GroupDetailScreen() {
             },
         ]);
     }, [groupId, navigation, t]);
-    const handleExport = useCallback(async () => {
+    const handleSetFavorite = useCallback(() => {
         setMenuOpen(false);
-        if (!displayGroup || exporting) return;
+        confirmSetFavoriteGroup({
+            groupId,
+            groupName: displayGroup?.name ?? '',
+            favoriteGroupId,
+            t,
+            alert: platformAlert,
+            setFavoriteGroupId,
+            onApplied: () => showSuccessMessage('groups.favorite.setToast'),
+        });
+    }, [groupId, displayGroup?.name, favoriteGroupId, setFavoriteGroupId, t]);
+    const runExport = useCallback(async () => {
+        if (!displayGroup) return;
         setExporting(true);
         showInfoToast('groups.share.exporting');
         try {
@@ -555,7 +626,19 @@ export function GroupDetailScreen() {
         } finally {
             setExporting(false);
         }
-    }, [displayGroup, exporting, feed, memberLites, pairwiseDebts, t]);
+    }, [displayGroup, feed, memberLites, pairwiseDebts]);
+    const handleExport = useCallback(() => {
+        if (!displayGroup || exporting) return;
+        setMenuOpen(false);
+        // iOS can't present the native share sheet while the menu Modal is
+        // still dismissing — the sheet silently never appears. Defer until the
+        // Modal's onDismiss fires. Android shares via Intent, so no race.
+        if (Platform.OS === 'ios') {
+            setPendingExport(true);
+        } else {
+            void runExport();
+        }
+    }, [displayGroup, exporting, runExport]);
     const handleSettleUp = useCallback(
         () => navigation.navigate('SettleUpList', { groupId }),
         [navigation, groupId],
@@ -756,7 +839,9 @@ export function GroupDetailScreen() {
                         ? `e:${item.expense.id}`
                         : item.kind === 'settlement'
                             ? `s:${item.settlement.id}`
-                            : `m:${item.message.id}`
+                            : item.kind === 'consolidation_batch'
+                                ? `b:${item.batch.id}`
+                                : `m:${item.message.id}`
                 }
                 renderItem={({ item }) => {
                     const itemKey =
@@ -764,7 +849,9 @@ export function GroupDetailScreen() {
                             ? `e:${item.expense.id}`
                             : item.kind === 'settlement'
                                 ? `s:${item.settlement.id}`
-                                : `m:${item.message.id}`;
+                                : item.kind === 'consolidation_batch'
+                                    ? `b:${item.batch.id}`
+                                    : `m:${item.message.id}`;
                     const isFocused = focusedRowKey === itemKey;
                     return (
                     <View className="px-2" style={{ position: 'relative' }}>
@@ -776,6 +863,9 @@ export function GroupDetailScreen() {
                             onMessageEdit={handleMessageEdit}
                             onMessageDelete={handleMessageDelete}
                             onSettlementPress={handleSettlementPress}
+                            onBatchPress={item.kind === 'consolidation_batch'
+                                ? () => setBatchDetail({ batch: item.batch, settlements: item.settlements })
+                                : undefined}
                             searchQuery={trimmedQuery || undefined}
                         />
                         {item.kind === 'expense' &&
@@ -812,6 +902,7 @@ export function GroupDetailScreen() {
                             group={displayGroup}
                             members={memberLites}
                             rollup={rollup}
+                            balanceUnknown={balanceUnknown}
                             settlementCount={settlementCount}
                             onBack={handleBack}
                             onShare={handleShare}
@@ -819,6 +910,7 @@ export function GroupDetailScreen() {
                             onOpenBalances={handleBalances}
                             onOpenNote={handleNote}
                             onOpenSettleUp={handleSettleUp}
+                            noteHasUnread={storeGroup?.hasUnreadNote ?? false}
                         />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
@@ -880,6 +972,21 @@ export function GroupDetailScreen() {
                             testID="feed-loading"
                         >
                             <ActivityIndicator size="large" color={colors.primary} />
+                        </View>
+                    ) : feed.length === 0 && !online ? (
+                        // Offline with nothing cached for this group: be honest,
+                        // and reassure that adding an expense still works (it
+                        // queues via the add-expense FAB and syncs on reconnect).
+                        // The add-members / share-link actions need the network,
+                        // so we omit them here.
+                        <View className="mx-4 my-6 bg-white rounded-2xl p-6 items-center border border-gray-100">
+                            <AppIcon name="cloud-offline-outline" size={40} color={colors.gray300} />
+                            <Text className="text-base font-semibold text-gray-900 mt-3 mb-1">
+                                {t('common.offlineTitle')}
+                            </Text>
+                            <Text className="text-sm text-gray-500 text-center">
+                                {t('groups.emptyFeed.offlineMessage')}
+                            </Text>
                         </View>
                     ) : feed.length === 0 ? (
                         <View className="mx-4 my-6 bg-white rounded-2xl p-6 items-center border border-gray-100">
@@ -987,6 +1094,30 @@ export function GroupDetailScreen() {
                 onDelete={handleFeedDetailDeleteRequest}
             />
 
+            <FeedItemDetailSheet
+                item={batchDetail ? { kind: 'consolidation_batch', batch: batchDetail.batch, settlements: batchDetail.settlements } : null}
+                memberMap={memberMap}
+                currentUserId={currentUserId}
+                onClose={() => setBatchDetail(null)}
+                onEdit={() => {}}
+                onDelete={() => {
+                    if (!batchDetail) return;
+                    const target = batchDetail;
+                    platformAlert(t('consolidation.confirmDelete'), undefined, [
+                        { text: t('common.cancel'), style: 'cancel' },
+                        {
+                            text: t('common.delete'),
+                            style: 'destructive',
+                            onPress: () => {
+                                void deleteBatchMutation.mutateAsync(target.batch.id).then(ok => {
+                                    if (ok) setBatchDetail(null);
+                                });
+                            },
+                        },
+                    ]);
+                }}
+            />
+
             {editingSettlement && (
                 <SettleUpSheet
                     visible={Boolean(editingSettlement)}
@@ -1014,6 +1145,12 @@ export function GroupDetailScreen() {
                 transparent
                 animationType="fade"
                 onRequestClose={() => setMenuOpen(false)}
+                onDismiss={() => {
+                    if (pendingExport) {
+                        setPendingExport(false);
+                        void runExport();
+                    }
+                }}
             >
                 <Pressable className="flex-1" onPress={() => setMenuOpen(false)}>
                     <View
@@ -1032,6 +1169,16 @@ export function GroupDetailScreen() {
                         <DetailMenuRow
                             label={t('groups.editGroup')}
                             onPress={handleEditGroup}
+                        />
+                        <DetailMenuRow
+                            label={
+                                isFavoriteGroup
+                                    ? t('groups.favorite.currentLabel')
+                                    : t('groups.favorite.setOption')
+                            }
+                            onPress={handleSetFavorite}
+                            disabled={isFavoriteGroup}
+                            testID="group-menu-set-favorite"
                         />
                         <DetailMenuRow
                             label={t('groups.share.exportOption')}

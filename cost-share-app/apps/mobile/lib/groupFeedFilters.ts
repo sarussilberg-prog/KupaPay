@@ -9,7 +9,7 @@ import {
 } from '@cost-share/shared';
 import { toEpochMs } from './dateUtils';
 
-export type GroupFeedTypeFilter = 'expense' | 'settlement' | 'message';
+export type GroupFeedTypeFilter = 'expense' | 'settlement' | 'message' | 'consolidation_batch';
 export type GroupFeedSortOption = 'dateDesc' | 'dateAsc';
 
 export interface GroupFeedFilters {
@@ -77,6 +77,12 @@ function passesSearch(
         const toName = memberMap[s.toUserId]?.displayName ?? '';
         const hay = `${fromName} ${toName}`.toLowerCase();
         return hay.includes(query);
+    }
+    if (item.kind === 'consolidation_batch') {
+        const names = [...new Set(item.settlements.flatMap(s => [s.fromUserId, s.toUserId]))]
+            .map(id => memberMap[id]?.displayName ?? '')
+            .join(' ');
+        return names.toLowerCase().includes(query);
     }
     const sender = memberMap[item.message.userId]?.displayName ?? '';
     const hay = `${item.message.body} ${sender}`.toLowerCase();
@@ -150,6 +156,13 @@ export function filterAndSortGroupFeed(
         }
         if (item.kind === 'settlement') {
             return passesSettlementFilters(item, filters, dateFromMs, dateToMs);
+        }
+        if (item.kind === 'consolidation_batch') {
+            if (filters.memberIds.length > 0) {
+                const memberIds = new Set(item.settlements.flatMap(s => [s.fromUserId, s.toUserId]));
+                return filters.memberIds.some(id => memberIds.has(id));
+            }
+            return true;
         }
         if (filters.categories.length > 0 || filters.memberIds.length > 0) {
             if (filters.memberIds.length > 0) {

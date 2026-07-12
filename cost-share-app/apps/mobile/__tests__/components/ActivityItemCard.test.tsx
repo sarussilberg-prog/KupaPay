@@ -43,8 +43,35 @@ const t = (key: string, opts?: Record<string, string>) => {
     if (key === 'activity.notifications.memberJoined') {
         return `${opts?.name} joined ${opts?.group}`;
     }
+    if (key === 'activity.notifications.memberAddedByYou') {
+        return `You added ${opts?.name}`;
+    }
     if (key === 'activity.notifications.memberLeft') {
         return `${opts?.name} left ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.memberRemovedYou') {
+        return `${opts?.name} removed you from ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.joinedViaInvite') {
+        return `You joined ${opts?.group} using an invitation link`;
+    }
+    if (key === 'activity.notifications.groupCreatedByYou') {
+        return `Group ${opts?.group} created by you`;
+    }
+    if (key === 'activity.notifications.groupDeletedByYou') {
+        return `Group ${opts?.group} deleted by you`;
+    }
+    if (key === 'activity.notifications.groupDeletedBy') {
+        return `Group ${opts?.group} deleted by ${opts?.name}`;
+    }
+    if (key === 'activity.notifications.noteChangedByYou') {
+        return `Note changed by you · ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.noteChangedBy') {
+        return `Note changed by ${opts?.name} · ${opts?.group}`;
+    }
+    if (key === 'activity.notifications.friendRequestRejectedByThem') {
+        return `${opts?.name} declined your friend request`;
     }
     if (key === 'common.you') return 'You';
     return key;
@@ -87,10 +114,13 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Friends with Alice');
     });
 
-    it('builds rejected friend request copy', () => {
+    it('builds rejected friend request copy (rejecter sees "you declined")', () => {
         const title = resolveActivityTitle(
-            buildEvent('friend_request_received', { metadata: { status: 'rejected' } }),
-            { actorName: 'Alice', groupName: '' },
+            buildEvent('friend_request_received', {
+                userId: 'u-me',
+                metadata: { status: 'rejected', responder_user_id: 'u-me' },
+            }),
+            { actorName: 'Alice', groupName: '', currentUserId: 'u-me' },
             t as never,
         );
         expect(title).toBe('Rejected Alice');
@@ -105,6 +135,15 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Alice added you to Trip');
     });
 
+    it('builds invite-link self-join copy when there is no actor', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_added', { actorUserId: null }),
+            { actorName: '', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('You joined Trip using an invitation link');
+    });
+
     it('uses the new member name when supplied for joins', () => {
         const title = resolveActivityTitle(
             buildEvent('group_member_joined'),
@@ -114,13 +153,109 @@ describe('resolveActivityTitle', () => {
         expect(title).toBe('Bob joined Trip');
     });
 
-    it('builds group_removed copy', () => {
+    it('renders "You added X" when the viewer is the one who added the member', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_member_joined', {
+                userId: 'u-me',
+                metadata: { added_by_user_id: 'u-me' },
+            }),
+            { actorName: 'Alice', groupName: 'Trip', newMemberName: 'Bob', currentUserId: 'u-me' },
+            t as never,
+        );
+        expect(title).toBe('You added Bob');
+    });
+
+    it('keeps "X joined" when someone else added the member', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_member_joined', {
+                metadata: { added_by_user_id: 'u-other' },
+            }),
+            { actorName: 'Alice', groupName: 'Trip', newMemberName: 'Bob', currentUserId: 'u-me' },
+            t as never,
+        );
+        expect(title).toBe('Bob joined Trip');
+    });
+
+    it('names the remover when a member was removed by someone else', () => {
         const title = resolveActivityTitle(
             buildEvent('group_removed'),
             { actorName: 'Alice', groupName: 'Trip' },
             t as never,
         );
-        expect(title).toBe('Alice left Trip');
+        expect(title).toBe('Alice removed you from Trip');
+    });
+
+    it('falls back to "You left" when there is no actor (self-leave)', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_removed', { actorUserId: null }),
+            { actorName: '', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('You left Trip');
+    });
+});
+
+describe('resolveActivityTitle — group + friend events', () => {
+    it('group_created → created-by-you', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_created', { actorUserId: 'me', userId: 'me' }),
+            { actorName: 'Me', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Group Trip created by you');
+    });
+
+    it('group_deleted by someone else → deleted-by name', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_deleted', { actorUserId: 'u2', userId: 'me' }),
+            { actorName: 'Alice', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Group Trip deleted by Alice');
+    });
+
+    it('group_deleted by you → deleted-by-you', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_deleted', { actorUserId: 'me', userId: 'me' }),
+            { actorName: 'Me', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Group Trip deleted by you');
+    });
+
+    it('group_note_changed by someone else → note-changed-by name', () => {
+        const title = resolveActivityTitle(
+            buildEvent('group_note_changed', { actorUserId: 'u2', userId: 'me' }),
+            { actorName: 'Alice', groupName: 'Trip', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Note changed by Alice · Trip');
+    });
+
+    it('friend reject — rejecter sees "you declined"', () => {
+        const title = resolveActivityTitle(
+            buildEvent('friend_request_received', {
+                actorUserId: 'u2',
+                userId: 'me',
+                metadata: { status: 'rejected', responder_user_id: 'me' },
+            }),
+            { actorName: 'Bob', groupName: '', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Rejected Bob');
+    });
+
+    it('friend reject — sender sees "{name} declined your request"', () => {
+        const title = resolveActivityTitle(
+            buildEvent('friend_request_received', {
+                actorUserId: 'u2',
+                userId: 'me',
+                metadata: { status: 'rejected', responder_user_id: 'u2' },
+            }),
+            { actorName: 'Bob', groupName: '', currentUserId: 'me' },
+            t as never,
+        );
+        expect(title).toBe('Bob declined your friend request');
     });
 });
 
@@ -219,5 +354,216 @@ describe('ActivityItemCard', () => {
             />,
         );
         expect(queryByTestId('activity-card-amount')).toBeNull();
+    });
+
+    it('renders amount from payment_amount/payment_currency for consolidation_batch_added', () => {
+        const { getByTestId, getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 150, payment_currency: 'ILS' },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        expect(getByTestId('activity-card-amount')).toBeTruthy();
+        expect(getByText(/₪150/)).toBeTruthy();
+    });
+
+    it('renders the currencies-merged badge for consolidation_batch_added with settlement_count', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 200, payment_currency: 'ILS', settlement_count: 3 },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        // The mock t() returns the key as-is for unknown keys with opts
+        expect(getByText('consolidation.batchRowMeta')).toBeTruthy();
+    });
+
+    it('omits the currencies-merged badge when settlement_count is 0', () => {
+        const { queryByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    metadata: { payment_amount: 200, payment_currency: 'ILS', settlement_count: 0 },
+                })}
+                title="Avi paid Nave"
+                meta="now"
+                testID="card"
+            />,
+        );
+        expect(queryByText('consolidation.batchRowMeta')).toBeNull();
+    });
+});
+
+describe('resolveActivityTitle — consolidation_batch_added', () => {
+    it('returns empty string when no description in metadata', () => {
+        const title = resolveActivityTitle(
+            buildEvent('consolidation_batch_added', { metadata: {} }),
+            { actorName: 'Avi', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('');
+    });
+
+    it('returns description from metadata when present', () => {
+        const title = resolveActivityTitle(
+            buildEvent('consolidation_batch_added', { metadata: { description: 'Currency conversion' } }),
+            { actorName: 'Avi', groupName: 'Trip' },
+            t as never,
+        );
+        expect(title).toBe('Currency conversion');
+    });
+});
+
+describe('ActivityItemCard — amount color by viewer net', () => {
+    it('colors the settlement amount green when the viewer is the payee', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('settlement_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        from_user_id: 'u-payer',
+                        to_user_id: 'u-recipient',
+                        amount: 20,
+                        currency: 'USD',
+                    },
+                })}
+                title="Bob paid you"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$20/);
+        expect(amount.props.className).toContain('text-green-600');
+    });
+
+    it('colors the settlement amount red when the viewer is the payer', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('settlement_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        from_user_id: 'u-recipient',
+                        to_user_id: 'u-payee',
+                        amount: 20,
+                        currency: 'USD',
+                    },
+                })}
+                title="You paid Bob"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$20/);
+        expect(amount.props.className).toContain('text-red-500');
+    });
+
+    it('colors a third-party settlement amount black', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('settlement_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        from_user_id: 'u-a',
+                        to_user_id: 'u-b',
+                        amount: 20,
+                        currency: 'USD',
+                    },
+                })}
+                title="Alice paid Bob"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$20/);
+        expect(amount.props.className).toContain('text-gray-900');
+    });
+
+    it('colors an expense amount green when the viewer_delta is positive (viewer is owed)', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('expense_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        description: 'Dinner',
+                        amount: 30,
+                        currency: 'USD',
+                        viewer_delta: 20,
+                    },
+                })}
+                title="Dinner"
+                meta="Alice · now"
+                groupName="Trip"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$30/);
+        expect(amount.props.className).toContain('text-green-600');
+    });
+
+    it('colors an expense amount red when the viewer_delta is negative (viewer owes)', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('expense_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        description: 'Dinner',
+                        amount: 30,
+                        currency: 'USD',
+                        viewer_delta: -10,
+                    },
+                })}
+                title="Dinner"
+                meta="Alice · now"
+                groupName="Trip"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$30/);
+        expect(amount.props.className).toContain('text-red-500');
+    });
+
+    it('colors an expense amount black when viewer_delta is absent (pre-Task-0 event)', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('expense_added', {
+                    userId: 'u-recipient',
+                    metadata: { description: 'Coffee', amount: 5.5, currency: 'USD' },
+                })}
+                title="Coffee"
+                meta="Alice · now"
+                groupName="Trip"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/\$5\.50/);
+        expect(amount.props.className).toContain('text-gray-900');
+    });
+
+    it('colors the consolidation batch amount green when the viewer is the payee', () => {
+        const { getByText } = render(
+            <ActivityItemCard
+                event={buildEvent('consolidation_batch_added', {
+                    userId: 'u-recipient',
+                    metadata: {
+                        paid_by_user_id: 'u-payer',
+                        paid_to_user_id: 'u-recipient',
+                        payment_amount: 150,
+                        payment_currency: 'ILS',
+                    },
+                })}
+                title="Avi paid you"
+                meta="now"
+                testID="card"
+            />,
+        );
+        const amount = getByText(/₪150/);
+        expect(amount.props.className).toContain('text-green-600');
     });
 });

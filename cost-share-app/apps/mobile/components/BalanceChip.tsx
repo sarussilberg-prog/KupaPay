@@ -23,6 +23,12 @@ interface BalanceChipProps {
      * "You are settled" (others still owe) from "Settled" (whole group clear).
      */
     groupHasOpenDebts?: boolean;
+    /**
+     * True when the balance dataset itself is unavailable (e.g. offline with no
+     * cached balances). We then show a neutral placeholder instead of claiming
+     * "Settled" — never report a balance we don't actually have.
+     */
+    balanceUnknown?: boolean;
 }
 
 function formatAmount(amount: number, currency: string): string {
@@ -33,12 +39,28 @@ export function BalanceChip({
     rollup,
     defaultCurrency,
     groupHasOpenDebts,
+    balanceUnknown,
 }: BalanceChipProps) {
     const { t } = useTranslation();
     const primary = rollup?.primary;
     const extraCount = (rollup?.others ?? []).filter(
         o => Math.abs(o.net) >= 0.01,
     ).length;
+    const hasRealBalance = primary && Math.abs(primary.net) >= 0.01;
+
+    // No real balance to show AND the dataset is unavailable → neutral
+    // placeholder. We don't have the data, so we don't claim "settled".
+    if (!hasRealBalance && balanceUnknown) {
+        return (
+            <View
+                className="rounded-full bg-gray-100 px-2.5 py-1"
+                testID="balance-chip-unknown"
+                accessibilityLabel={t('groups.card.balanceUnavailable')}
+            >
+                <Text className="text-xs font-medium text-gray-400">—</Text>
+            </View>
+        );
+    }
 
     if (!primary || Math.abs(primary.net) < 0.01) {
         const label = groupHasOpenDebts

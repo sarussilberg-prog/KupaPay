@@ -1,4 +1,7 @@
-import { getActivityCardVariant } from '../../lib/activityCardVariant';
+import {
+    getActivityCardVariant,
+    activityCardAmountClassForNet,
+} from '../../lib/activityCardVariant';
 
 describe('getActivityCardVariant', () => {
     it('uses distinct icons per activity kind', () => {
@@ -51,5 +54,19 @@ describe('getActivityCardVariant', () => {
         const variant = getActivityCardVariant('group_removed');
         expect(variant.iconName).toBe('exit-outline');
         expect(variant.showAmount).toBe(false);
+    });
+});
+
+describe('activityCardAmountClassForNet', () => {
+    it('colors a positive viewer net green', () => {
+        expect(activityCardAmountClassForNet(20)).toBe('text-green-600');
+    });
+
+    it('colors a negative viewer net red', () => {
+        expect(activityCardAmountClassForNet(-20)).toBe('text-red-500');
+    });
+
+    it('colors a zero / uninvolved viewer net black', () => {
+        expect(activityCardAmountClassForNet(0)).toBe('text-gray-900');
     });
 });

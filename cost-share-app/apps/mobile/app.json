@@ -3,7 +3,6 @@
     "name": "KupaPay",
     "slug": "kupapay",
     "scheme": "com.kupapay.mobile",
-    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kupapay.mobile",
-      "buildNumber": "4",
+      "buildNumber": "8",
       "usesAppleSignIn": true,
       "associatedDomains": [
         "applinks:kupa-pay.com"
@@ -37,7 +36,7 @@
           "remote-notification"
         ]
       },
-      "appleTeamId": "K3M6R85KA6"
+      "appleTeamId": "HVW3H3DLRB"
     },
     "android": {
       "package": "com.kupapay.mobile",
@@ -77,6 +76,11 @@
               "scheme": "https",
               "host": "kupa-pay.com",
               "pathPattern": "/g/.*"
+            },
+            {
+              "scheme": "https",
+              "host": "kupa-pay.com",
+              "pathPattern": "/sr/.*"
             }
           ],
           "category": [
@@ -99,6 +103,13 @@
     },
     "plugins": [
       "expo-dev-client",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-8860544182475196~9463098647",
+          "iosAppId": "ca-app-pub-8860544182475196~4183153126"
+        }
+      ],
       "expo-web-browser",
       [
         "expo-splash-screen",
@@ -151,6 +162,7 @@
           "project": "copay-mobile-prod"
         }
       ],
+      "./plugins/withAndroidSplashFullBleed",
       "./plugins/withFastStackTransitions",
       "./plugins/withReleaseNodeEnv",
       "./plugins/withModularHeaders"

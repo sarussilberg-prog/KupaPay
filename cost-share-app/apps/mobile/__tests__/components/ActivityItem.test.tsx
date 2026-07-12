@@ -188,6 +188,57 @@ describe('ActivityItem', () => {
         expect(queryByTestId('activity-card-amount')).toBeNull();
     });
 
+    it('renders the remover avatar for a removal performed by someone else', () => {
+        const event = buildEvent('group_removed', { id: 'gr-rm', actorUserId: 'u1' });
+        const { getByTestId } = render(
+            <ActivityItem
+                event={event}
+                actor={{ ...actor, avatarUrl: 'https://example.com/alice.png' }}
+                currentUserId="u-me"
+                groupName="Trip"
+            />,
+        );
+        expect(getByTestId('activity-avatar-image')).toBeTruthy();
+    });
+
+    it('falls back to the current user avatar for a self-initiated leave (no actor)', () => {
+        const event = buildEvent('group_removed', { id: 'gr-self', actorUserId: null });
+        const selfProfile: GroupMemberLite = {
+            userId: 'u-me',
+            displayName: 'Me',
+            avatarUrl: 'https://example.com/me.png',
+            isActive: true,
+        };
+        const { getByTestId } = render(
+            <ActivityItem
+                event={event}
+                selfProfile={selfProfile}
+                currentUserId="u-me"
+                groupName="Trip"
+            />,
+        );
+        expect(getByTestId('activity-avatar-image')).toBeTruthy();
+    });
+
+    it('falls back to the current user avatar for an invite-link self-join (no actor)', () => {
+        const event = buildEvent('group_added', { id: 'ga-self', actorUserId: null });
+        const selfProfile: GroupMemberLite = {
+            userId: 'u-me',
+            displayName: 'Me',
+            avatarUrl: 'https://example.com/me.png',
+            isActive: true,
+        };
+        const { getByTestId } = render(
+            <ActivityItem
+                event={event}
+                selfProfile={selfProfile}
+                currentUserId="u-me"
+                groupName="Trip"
+            />,
+        );
+        expect(getByTestId('activity-avatar-image')).toBeTruthy();
+    });
+
     it('group_removed is not pressable even when onPress is provided', () => {
         const event = buildEvent('group_removed', { id: 'gr1' });
         const onPress = jest.fn();

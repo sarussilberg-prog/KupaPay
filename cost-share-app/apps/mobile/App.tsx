@@ -23,6 +23,7 @@ import {
   isInvalidRefreshTokenError,
   setupSupabaseAuthAutoRefresh,
 } from './lib/authSessionLifecycle';
+import { syncRealtimeAuth } from './lib/realtimeAuth';
 import { syncPushRegistrationOnSignIn, clearPushRegistrationOnSignOut } from './lib/pushRegistrationLifecycle';
 import { configureNativeGoogleSignIn } from './lib/googleSignInNative';
 import { supabase } from './lib/supabase';
@@ -33,10 +34,10 @@ import { queryClient } from './lib/queryClient';
 import { restoreClient } from './lib/persistQueryClient';
 import { wireNetworkStatusToOnlineManager } from './lib/networkStatus';
 import { sweepIfOnline } from './lib/zombieSweep';
-import { initAvatarCache } from './lib/avatarCache';
 import { AppGateSkeleton } from './components/skeletons/AppGateSkeleton';
 import { useAppStore } from './store';
 import { useAppRealtime } from './hooks/useAppRealtime';
+import { useBootWatchdog } from './hooks/useBootWatchdog';
 import { colors } from './theme';
 import { RtlLayoutProvider } from './hooks/useRtlLayout';
 import { WebAlertHost } from './components/WebAlertHost';
@@ -177,7 +178,15 @@ function App() {
         const hydratedSession = await hydrateAuthSession();
         if (!mounted) return;
 
-        await Promise.all([restoreClient(), initAvatarCache()]);
+        await restoreClient();
+
+        // supabase-js only auths Realtime on SIGNED_IN / TOKEN_REFRESHED, not on
+        // the INITIAL_SESSION a cold-start restore emits — so live updates
+        // (expenses, settlements, activity) wouldn't arrive until the next token
+        // refresh. Set Realtime auth explicitly from the restored session, and
+        // BEFORE acceptSession (which sets currentUser and mounts the realtime
+        // channels) so the socket is authenticated before any channel joins.
+        syncRealtimeAuth(hydratedSession);
 
         if (hydratedSession) {
           await acceptSession(hydratedSession, 'hydration');
@@ -233,6 +242,11 @@ function App() {
     };
   }, []);
 
+  // Safety net: never let a hung boot step strand the user on the native splash.
+  // init() is already fully bounded, so this only matters if that ever regresses.
+  const markReady = useCallback(() => setIsReady(true), []);
+  useBootWatchdog(isReady, markReady);
+
   useEffect(() => {
     if (isReady) SplashScreen.hideAsync().catch(() => {});
   }, [isReady]);
@@ -251,22 +265,6 @@ function App() {
     });
     return () => sub.remove();
   }, [guardSession]);
-
-  if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined' && globalThis.location.pathname === '/.well-known/apple-app-site-association') {
-    const aasa = {
-      applinks: {
-        apps: [],
-        details: [{ appID: 'K3M6R85KA6.com.kupapay.mobile', paths: ['/i/*', '/g/*'] }],
-      },
-    };
-    // Write raw JSON directly — this path must return JSON, not a React screen.
-    if (typeof globalThis.document !== 'undefined') {
-      globalThis.document.open('application/json');
-      globalThis.document.write(JSON.stringify(aasa));
-      globalThis.document.close();
-    }
-    return null;
-  }
 
   if (!isReady) {
     return (

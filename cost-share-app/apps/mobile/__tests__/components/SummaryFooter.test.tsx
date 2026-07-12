@@ -45,4 +45,18 @@ describe('SummaryFooter', () => {
     expect(onOpenNote).toHaveBeenCalledTimes(1);
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
   });
+
+  it('shows the unread-note dot when noteHasUnread is true', () => {
+    const { getByTestId } = render(
+      <SummaryFooter settlementCount={0} onOpenNote={jest.fn()} onOpenSettleUp={jest.fn()} noteHasUnread />,
+    );
+    expect(getByTestId('summary-note-unread-dot')).toBeTruthy();
+  });
+
+  it('hides the unread-note dot by default', () => {
+    const { queryByTestId } = render(
+      <SummaryFooter settlementCount={0} onOpenNote={jest.fn()} onOpenSettleUp={jest.fn()} />,
+    );
+    expect(queryByTestId('summary-note-unread-dot')).toBeNull();
+  });
 });

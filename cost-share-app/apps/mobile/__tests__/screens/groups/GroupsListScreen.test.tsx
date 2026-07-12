@@ -1,5 +1,5 @@
 import React from 'react';
-import { waitFor, fireEvent } from '@testing-library/react-native';
+import { waitFor, fireEvent, act } from '@testing-library/react-native';
 import { renderWithQuery as render } from '../../helpers/renderWithQuery';
 
 const mockNavigate = jest.fn();
@@ -84,6 +84,32 @@ describe('GroupsListScreen', () => {
     it('shows EmptyState when no groups exist', async () => {
         const { findByText } = render(<GroupsListScreen />);
         expect(await findByText('groups.noGroups')).toBeTruthy();
+    });
+
+    it('shows the empty state (not the full-screen boot splash) when the cache holds an empty list, even while a refetch is in flight', async () => {
+        // The gate seeds an empty groups list before the tab navigator mounts.
+        // This screen lives INSIDE the bottom-tab navigator, so rendering the
+        // full-screen brand splash here leaks the icon together with the bottom
+        // bar. Keep the mount refetch pending so `isFetching` stays true: the old
+        // code showed the splash in exactly this window and the empty state would
+        // never appear (this assertion would time out).
+        let resolveFetch: () => void = () => {};
+        mockFetchGroups.mockImplementation(
+            () =>
+                new Promise(resolve => {
+                    resolveFetch = () => resolve([] as never);
+                }) as never,
+        );
+        queryClient.setQueryData(queryKeys.groups, []);
+
+        const { findByText } = render(<GroupsListScreen />);
+        expect(await findByText('groups.noGroups')).toBeTruthy();
+
+        // Flush the pending refetch inside act so it doesn't update after unmount.
+        await act(async () => {
+            resolveFetch();
+            await Promise.resolve();
+        });
     });
 
     it('shows network error state when fetch fails', async () => {

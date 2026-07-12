@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { TouchableOpacity, View, Text, Platform } from 'react-native';
+import { TouchableOpacity, View, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { ParamListBase, RouteProp } from '@react-navigation/native';
@@ -20,6 +20,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon, AppIconName } from '../components/AppIcon';
+import { UnreadBadge } from '../components/UnreadBadge';
+import { CustomTabBar } from '../components/navigation/CustomTabBar';
 import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
@@ -58,6 +60,7 @@ function tabBarIcon(
 }
 import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
+import { FavoriteGroupScreen } from '../screens/favoriteGroup/FavoriteGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
@@ -82,6 +85,7 @@ import { AdminErrorsScreen } from '../screens/admin/AdminErrorsScreen';
 import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen';
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
+import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -198,6 +202,61 @@ function GroupsStack() {
     );
 }
 
+function FavoriteGroupStack() {
+    const { t } = useTranslation();
+    const isRtl = useRtlLayout();
+
+    return (
+        <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
+            <Stack.Screen
+                name="FavoriteGroupHome"
+                component={FavoriteGroupScreen}
+                // Seed params so GroupDetailScreen's `route.params.groupId`
+                // destructure (which reads `route.params` directly) can't hit
+                // `undefined` on the first frame before FavoriteGroupScreen's
+                // useLayoutEffect sets the real id.
+                initialParams={{ groupId: undefined }}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="GroupMembers"
+                component={GroupMembersScreen}
+                options={{ title: t('groups.members.title') }}
+            />
+            <Stack.Screen
+                name="GroupNote"
+                component={GroupNoteScreen}
+                options={{ title: t('groups.note.title') }}
+            />
+            <Stack.Screen
+                name="ExpenseList"
+                component={ExpenseListScreen}
+                options={{ title: t('expenses.title') }}
+            />
+            <Stack.Screen
+                name="ExpenseDetail"
+                component={ExpenseDetailScreen}
+                options={{ title: t('expenses.expenseDetail') }}
+            />
+            <Stack.Screen
+                name="Balances"
+                component={BalancesScreen}
+                options={{ title: t('balances.title') }}
+            />
+            <Stack.Screen
+                name="SettleUpList"
+                component={SettleUpListScreen}
+                options={{ title: t('settleUp.title') }}
+            />
+            <Stack.Screen
+                name="SettlementHistory"
+                component={SettlementHistoryScreen}
+                options={{ title: t('balances.settlementHistory') }}
+            />
+        </Stack.Navigator>
+    );
+}
+
 function ActivityStack() {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
@@ -255,6 +314,7 @@ function MainTabs() {
     return (
         <Tab.Navigator
             initialRouteName="Groups"
+            tabBar={(props) => <CustomTabBar {...props} />}
             screenOptions={{
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.gray400,
@@ -283,35 +343,21 @@ function MainTabs() {
                                 size={size}
                                 color={color}
                             />
-                            {unreadCount > 0 && (
-                                <View
-                                    style={{
-                                        position: 'absolute',
-                                        top: -6,
-                                        right: -10,
-                                        minWidth: 16,
-                                        height: 16,
-                                        paddingHorizontal: 4,
-                                        borderRadius: 8,
-                                        backgroundColor: colors.primaryExtraLight,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.primaryDark,
-                                            fontSize: 10,
-                                            fontWeight: '600',
-                                            lineHeight: 12,
-                                        }}
-                                    >
-                                        {unreadCount > 99 ? '99+' : unreadCount}
-                                    </Text>
-                                </View>
-                            )}
+                            <UnreadBadge
+                                count={unreadCount}
+                                style={{ position: 'absolute', top: -6, right: -10 }}
+                            />
                         </View>
                     ),
+                }}
+            />
+            <Tab.Screen
+                name="FavoriteGroup"
+                component={FavoriteGroupStack}
+                listeners={tabPopToTopOnPress('FavoriteGroupHome')}
+                options={{
+                    tabBarLabel: t('tabs.favoriteGroup'),
+                    tabBarIcon: tabBarIcon('star', 'star-outline'),
                 }}
             />
             <Tab.Screen
@@ -411,6 +457,11 @@ export function AppNavigator() {
                 name="AdminErrorEvent"
                 component={AdminErrorEventScreen}
                 options={{ title: t('admin.errors.eventTitle') }}
+            />
+            <RootStack.Screen
+                name="AdminMonetization"
+                component={AdminMonetizationScreen}
+                options={{ title: 'Monetization' }}
             />
 
             <RootStack.Screen

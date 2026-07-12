@@ -18,6 +18,7 @@ import {
     getAvatarUrlForMember,
     getDisplayNameForMember,
 } from '../lib/userDisplay';
+import { formatAmountDecimal } from '../lib/currencyDisplay';
 
 interface ActivityItemProps {
     event: ActivityEvent;
@@ -26,6 +27,8 @@ interface ActivityItemProps {
     counterpart?: GroupMemberLite;
     /** For group_member_joined: profile of the new member from metadata.new_member_user_id. */
     newMember?: GroupMemberLite;
+    /** Current user's profile — the avatar for self-actions (invite-link self-join / self-leave) that store no actor. */
+    selfProfile?: GroupMemberLite;
     groupName?: string;
     currentUserId: string;
     onPress?: (event: ActivityEvent) => void;
@@ -36,6 +39,7 @@ export const ActivityItem = React.memo(function ActivityItem({
     actor,
     counterpart,
     newMember,
+    selfProfile,
     groupName,
     currentUserId,
     onPress,
@@ -45,15 +49,40 @@ export const ActivityItem = React.memo(function ActivityItem({
     const pressable = Boolean(onPress) && event.kind !== 'group_removed';
 
     const timestamp = formatFeedDateTime(event.createdAt, language);
-    const actorName = getDisplayNameForMember(actor ?? null, t);
+    // An absent actorUserId means there is no actor at all (e.g. an invite-link
+    // self-join or a self-initiated leave), NOT a deleted one. Render it as an
+    // empty name so title resolution can substitute "You"/invite-link copy
+    // instead of mislabelling the missing actor as a "deleted user".
+    const actorName = event.actorUserId
+        ? getDisplayNameForMember(actor ?? null, t)
+        : '';
     const newMemberName = newMember ? getDisplayNameForMember(newMember, t) : undefined;
     const friendRequestStatus = event.kind === 'friend_request_received'
         ? (((event.metadata?.status as string | undefined) ?? 'pending') as
             'pending' | 'accepted' | 'rejected' | 'cancelled')
         : undefined;
 
-    // Build a settlement description (uses currentUserId for perspective).
+    // Build a perspective-specific description for event kinds that need it.
     let titleOverride: string | undefined;
+    if (event.kind === 'consolidation_batch_added') {
+        const md = event.metadata ?? {};
+        const paidById = md.paid_by_user_id as string | undefined;
+        const toUserId = md.paid_to_user_id as string | undefined;
+        const paymentAmount = Number(md.payment_amount ?? 0);
+        const paymentCurrency = (md.payment_currency as string | undefined) ?? '';
+        const amountText = `${formatAmountDecimal(paymentAmount)} ${paymentCurrency}`;
+        const fromName = paidById === currentUserId ? t('common.you') : actorName;
+        const toName = toUserId === currentUserId
+            ? t('common.you')
+            : getDisplayNameForMember(counterpart ?? null, t);
+        if (paidById === currentUserId) {
+            titleOverride = t('activity.youPaid', { name: toName, amount: amountText });
+        } else if (toUserId === currentUserId) {
+            titleOverride = t('activity.paidYou', { name: fromName, amount: amountText });
+        } else {
+            titleOverride = t('feed.settlement', { from: fromName, to: toName, amount: amountText });
+        }
+    }
     if (event.kind === 'settlement_added') {
         const md = event.metadata ?? {};
         const fromId = md.from_user_id as string | undefined;
@@ -81,7 +110,7 @@ export const ActivityItem = React.memo(function ActivityItem({
 
     const title = titleOverride ?? resolveActivityTitle(
         event,
-        { actorName, groupName: groupName ?? '', newMemberName },
+        { actorName, groupName: groupName ?? '', newMemberName, currentUserId },
         t,
     );
 
@@ -90,16 +119,24 @@ export const ActivityItem = React.memo(function ActivityItem({
         const isEditableKind =
             event.kind === 'expense_added'
             || event.kind === 'settlement_added'
-            || event.kind === 'message_posted';
+            || event.kind === 'message_posted'
+            || event.kind === 'consolidation_batch_added';
         const deleted = isEditableKind && md.is_deleted === true;
         const edited = isEditableKind && !deleted && md.is_edited === true;
         let metaText: string;
         switch (event.kind) {
+            case 'consolidation_batch_added':
+                metaText = timestamp;
+                break;
             case 'settlement_added':
             case 'friend_request_received':
             case 'group_added':
             case 'group_member_joined':
             case 'group_removed':
+            case 'group_created':
+            case 'group_deleted':
+            case 'group_note_changed':
+            case 'settle_up_reminder':
                 metaText = timestamp;
                 break;
             case 'expense_added':
@@ -110,10 +147,18 @@ export const ActivityItem = React.memo(function ActivityItem({
         return { meta: metaText, isDeleted: deleted, isEdited: edited };
     }, [event.kind, event.metadata, actorName, timestamp]);
 
+    // The avatar shows whoever performed the action. Self-actions (an
+    // invite-link self-join or a self-initiated leave) store no actor; the row
+    // belongs to the current user, so fall back to their own avatar.
+    const avatarMember = event.actorUserId ? (actor ?? null) : (selfProfile ?? null);
+    const avatarName = event.actorUserId
+        ? actorName
+        : (selfProfile ? getDisplayNameForMember(selfProfile, t) : '');
+
     const avatar = (
         <MemberAvatar
-            name={actorName}
-            avatarUrl={getAvatarUrlForMember(actor ?? null)}
+            name={avatarName}
+            avatarUrl={getAvatarUrlForMember(avatarMember)}
             size="xs"
             testID="activity-avatar"
         />

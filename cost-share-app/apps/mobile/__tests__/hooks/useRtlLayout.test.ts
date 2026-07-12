@@ -1,6 +1,7 @@
 import {
     centeredTextStyle,
     feedActorNameStyle,
+    resolveAutoTextInputStyle,
     resolveAutoTextStyle,
     rtlTextAlign,
     rtlTextClassName,
@@ -35,6 +36,15 @@ describe('useRtlLayout helpers', () => {
         expect(rtlTextClassName(true, 'text-sm')).toContain('text-right');
         expect(rtlTextClassName(true, 'text-sm')).toContain('self-stretch');
         expect(rtlTextClassName(false, 'text-sm')).toContain('text-left');
+    });
+
+    it('aligns a TextInput by direction WITHOUT writingDirection (iOS duplicates the placeholder when it is set)', () => {
+        expect(resolveAutoTextInputStyle(true)).toEqual({ textAlign: 'right' });
+        expect(resolveAutoTextInputStyle(false)).toEqual({ textAlign: 'left' });
+    });
+
+    it('defers to an explicit textAlign passed in the TextInput style', () => {
+        expect(resolveAutoTextInputStyle(true, { textAlign: 'center' })).toBeUndefined();
     });
 
     it('applies RTL text styles unless textAlign is explicit', () => {

@@ -1,8 +1,13 @@
+import en from './locales/en.json' with { type: 'json' };
+import he from './locales/he.json' with { type: 'json' };
+
 export type Lang = 'he' | 'en';
 
 export type ActivityKind =
     | 'expense_added' | 'settlement_added' | 'message_posted'
-    | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed';
+    | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed'
+    | 'group_created' | 'group_deleted' | 'group_note_changed' | 'settle_up_reminder'
+    | 'consolidation_batch_added';
 
 export interface RenderParams {
     actorName: string;
@@ -14,9 +19,29 @@ export interface RenderParams {
     body?: string | null;
     isEdited?: boolean;
     isDeleted?: boolean;
+    status?: string | null;
 }
 
 export interface Rendered { title: string; body: string; }
+
+type Variant = 'new' | 'edited' | 'deleted';
+
+interface Messages {
+    expense_added: Record<Variant, string>;
+    settlement_added: Record<Variant, string>;
+    consolidation_batch_added: { new: string; deleted: string };
+    message_posted: { edited: string; deleted: string };
+    friend_request_received: { title: string; body: string; rejectedTitle: string; rejectedBody: string };
+    group_added: { title: string; body: string };
+    group_member_joined: string;
+    group_removed: string;
+    group_created: string;
+    group_deleted: string;
+    group_note_changed: string;
+    settle_up_reminder: string;
+}
+
+const LOCALES: Record<Lang, Messages> = { en: en as Messages, he: he as Messages };
 
 const SYMBOLS: Record<string, string> = { ILS: '₪', USD: '$', EUR: '€', GBP: '£' };
 
@@ -32,89 +57,65 @@ function joinDot(parts: Array<string | null | undefined>): string {
     return parts.map((p) => (p ?? '').trim()).filter((p) => p.length > 0).join(' · ');
 }
 
+function interpolate(template: string, vars: Record<string, string>): string {
+    return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '');
+}
+
 export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderParams): Rendered {
+    const t = LOCALES[lang];
     const money = formatMoney(p.amount, p.currency);
-    const he = lang === 'he';
+    const vars = { actor: p.actorName, group: p.groupName, member: p.newMemberName ?? '' };
+    const variant: Variant = p.isDeleted ? 'deleted' : p.isEdited ? 'edited' : 'new';
+
     switch (kind) {
         case 'expense_added': {
-            if (p.isDeleted) {
-                return {
-                    title: p.groupName,
-                    body: he
-                        ? joinDot([`${p.actorName} מחקה הוצאה`, p.description])
-                        : joinDot([`${p.actorName} deleted an expense`, p.description]),
-                };
-            }
-            if (p.isEdited) {
-                return {
-                    title: p.groupName,
-                    body: he
-                        ? joinDot([`${p.actorName} עדכנה הוצאה`, p.description, money])
-                        : joinDot([`${p.actorName} updated an expense`, p.description, money]),
-                };
-            }
-            return {
-                title: p.groupName,
-                body: he
-                    ? joinDot([`הוצאה חדשה מאת ${p.actorName}`, p.description, money])
-                    : joinDot([`New expense from ${p.actorName}`, p.description, money]),
-            };
+            const phrase = interpolate(t.expense_added[variant], vars);
+            // amount is omitted on delete (the expense no longer exists)
+            const parts = p.isDeleted ? [phrase, p.description] : [phrase, p.description, money];
+            return { title: p.groupName, body: joinDot(parts) };
         }
         case 'settlement_added': {
-            if (p.isDeleted) {
-                return {
-                    title: p.groupName,
-                    body: he
-                        ? `${p.actorName} מחקה תשלום`
-                        : `${p.actorName} deleted a payment`,
-                };
-            }
-            if (p.isEdited) {
-                return {
-                    title: p.groupName,
-                    body: he
-                        ? joinDot([`${p.actorName} עדכנה תשלום`, money])
-                        : joinDot([`${p.actorName} updated a payment`, money]),
-                };
-            }
-            return {
-                title: p.groupName,
-                body: he
-                    ? joinDot([`תשלום חדש מאת ${p.actorName}`, money])
-                    : joinDot([`New payment from ${p.actorName}`, money]),
-            };
+            const phrase = interpolate(t.settlement_added[variant], vars);
+            const parts = p.isDeleted ? [phrase] : [phrase, money];
+            return { title: p.groupName, body: joinDot(parts) };
+        }
+        case 'consolidation_batch_added': {
+            const phrase = p.isDeleted
+                ? interpolate(t.consolidation_batch_added.deleted, vars)
+                : interpolate(t.consolidation_batch_added.new, vars);
+            const parts = p.isDeleted ? [phrase] : [phrase, money];
+            return { title: p.groupName, body: joinDot(parts) };
         }
         case 'message_posted': {
-            if (p.isDeleted) {
-                return {
-                    title: joinDot([p.actorName, p.groupName]),
-                    body: he ? `${p.actorName} מחקה הודעה` : `${p.actorName} deleted a message`,
-                };
-            }
-            if (p.isEdited) {
-                return {
-                    title: joinDot([p.actorName, p.groupName]),
-                    body: he ? `${p.actorName} ערכה הודעה` : `${p.actorName} edited a message`,
-                };
-            }
-            return { title: joinDot([p.actorName, p.groupName]), body: (p.body ?? '').trim() };
+            const title = joinDot([p.actorName, p.groupName]);
+            if (p.isDeleted) return { title, body: interpolate(t.message_posted.deleted, vars) };
+            if (p.isEdited) return { title, body: interpolate(t.message_posted.edited, vars) };
+            return { title, body: (p.body ?? '').trim() };
         }
         case 'friend_request_received':
-            return he
-                ? { title: 'בקשת חברות חדשה', body: `${p.actorName} רוצה להתחבר איתך` }
-                : { title: 'New friend request', body: `${p.actorName} wants to connect` };
+            if (p.status === 'rejected') {
+                return { title: t.friend_request_received.rejectedTitle, body: interpolate(t.friend_request_received.rejectedBody, vars) };
+            }
+            return { title: t.friend_request_received.title, body: interpolate(t.friend_request_received.body, vars) };
         case 'group_added':
-            return he
-                ? { title: 'צורפת לקבוצה', body: joinDot([`${p.actorName} צירף אותך`, p.groupName]) }
-                : { title: 'You were added to a group', body: joinDot([`${p.actorName} added you`, p.groupName]) };
+            return { title: t.group_added.title, body: joinDot([interpolate(t.group_added.body, vars), p.groupName]) };
         case 'group_member_joined':
+            return { title: p.groupName, body: interpolate(t.group_member_joined, vars) };
+        case 'group_removed':
+            return { title: p.groupName, body: interpolate(t.group_removed, vars) };
+        case 'group_created':
+            return { title: p.groupName, body: interpolate(t.group_created, vars) };
+        case 'group_deleted':
+            return { title: p.groupName, body: interpolate(t.group_deleted, vars) };
+        case 'group_note_changed':
+            return { title: p.groupName, body: interpolate(t.group_note_changed, vars) };
+        case 'settle_up_reminder': {
+            // body comes from metadata.body (the custom message the sender wrote).
+            // Fall back to locale string if somehow absent.
             return {
                 title: p.groupName,
-                body: he ? `${p.newMemberName ?? ''} הצטרף לקבוצה` : `${p.newMemberName ?? ''} joined the group`,
+                body: p.body ?? interpolate(t.settle_up_reminder, vars),
             };
-        case 'group_removed':
-            return he
-                ? { title: p.groupName, body: 'הוסרת מהקבוצה' }
-                : { title: p.groupName, body: 'You were removed from the group' };
+        }
     }
 }

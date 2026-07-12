@@ -2,10 +2,19 @@ import { supabase } from './supabase';
 import { clearStaleAuthSession } from './authSessionLifecycle';
 import { useAppStore } from '../store';
 
-/** Returns the signed-in Supabase user id, or null if not authenticated. */
+/**
+ * Returns the signed-in Supabase user id, or null if not authenticated.
+ *
+ * Reads from the locally-stored session (`getSession`) rather than `getUser()`.
+ * `getUser()` is a network round-trip that resolves to `null` the moment the
+ * device goes offline — which made every balance/query think the user had
+ * vanished, fabricating a false "Settled" on every group and evicting the
+ * persisted cache. The session id is stored locally and survives airplane mode;
+ * the server still enforces real authorization via RLS on each request.
+ */
 export async function getCurrentUserId(): Promise<string | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user?.id ?? null;
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.id ?? null;
 }
 
 export type ProfileStatus = 'active' | 'deactivated' | 'missing' | 'unknown';

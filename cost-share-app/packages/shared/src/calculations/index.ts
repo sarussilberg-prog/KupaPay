@@ -1,6 +1,11 @@
 import { UserBalance } from '../types';
 
 export {
+    groupSettlementsForDisplay,
+    unwrapDisplaySettlement,
+} from './groupSettlementsForDisplay';
+
+export {
     aggregateBalanceInBaseCurrency,
     aggregateBalanceWithoutFx,
     convertToBaseCurrency,

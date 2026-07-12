@@ -4,6 +4,7 @@ export const queryKeys = {
     activity: ['activity'] as const,
     activityFeed: () => ['activity', 'feed'] as const,
     activityUnreadCount: ['activity', 'unread-count'] as const,
+    groupUnreadCounts: ['activity', 'group-unread-counts'] as const,
     groupUsers: (groupId: string) => ['groupUsers', groupId] as const,
     groupMembers: (groupId: string) => ['groupMembers', groupId] as const,
     groupExpenses: (groupId: string) => ['groupExpenses', groupId] as const,
@@ -18,12 +19,14 @@ export const queryKeys = {
         id ? (['invite-link', kind, id] as const) : (['invite-link', kind] as const),
     groupPairwiseDebts: (groupId: string) => ['groupPairwiseDebts', groupId] as const,
     groupSettlements: (groupId: string) => ['groupSettlements', groupId] as const,
+    consolidationBatches: (groupId: string) => ['consolidationBatches', groupId] as const,
     groupContributions: (groupId: string) => ['group-contributions', groupId] as const,
     groupSimplifiedDebtsByCurrency: (groupId: string) =>
         ['group-simplified-debts-by-currency', groupId] as const,
     legalDocument: (slug: 'terms' | 'privacy', locale: 'en' | 'he') =>
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
+    adminMonetizationMetrics: ['admin', 'monetization-metrics'] as const,
     adminSupportMessages: ['admin', 'support-messages'] as const,
     adminSentryIssues: (params: {
         environment: 'dev' | 'prod';

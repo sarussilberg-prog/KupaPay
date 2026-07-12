@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { APP_VERSION } from '@cost-share/shared';
 import type { Translations, Language } from '@/lib/i18n';
 
 interface Props {
@@ -33,7 +34,9 @@ export default function LandingFooter({ t, locale }: Props) {
               {t.locale.toggle}
             </button>
           </form>
-          <span>{t.footer.copyright}</span>
+          <span>
+            {t.footer.copyright} · v{APP_VERSION}
+          </span>
         </div>
       </div>
     </footer>

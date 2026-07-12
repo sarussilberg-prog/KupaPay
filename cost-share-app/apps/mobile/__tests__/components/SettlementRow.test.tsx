@@ -43,4 +43,46 @@ describe('SettlementRow', () => {
         );
         expect(getByText(/feed\.settlementClosedAndPaidYou/)).toBeTruthy();
     });
+
+    it('colors the amount red when the viewer paid (is the payer)', () => {
+        const { getByText } = render(
+            <SettlementRow
+                settlement={settlement}
+                currentUserId="me"
+                fromName="את/ה"
+                toName="Bob"
+                onPress={() => {}}
+            />,
+        );
+        const value = getByText('50');
+        expect(value.props.className).toContain('text-red-500');
+    });
+
+    it('colors the amount green when the viewer was paid (is the payee)', () => {
+        const { getByText } = render(
+            <SettlementRow
+                settlement={settlement}
+                currentUserId="bob"
+                fromName="Me"
+                toName="את/ה"
+                onPress={() => {}}
+            />,
+        );
+        const value = getByText('50');
+        expect(value.props.className).toContain('text-green-600');
+    });
+
+    it('colors the amount black for a third-party settlement', () => {
+        const { getByText } = render(
+            <SettlementRow
+                settlement={settlement}
+                currentUserId="carol"
+                fromName="Me"
+                toName="Bob"
+                onPress={() => {}}
+            />,
+        );
+        const value = getByText('50');
+        expect(value.props.className).toContain('text-gray-900');
+    });
 });

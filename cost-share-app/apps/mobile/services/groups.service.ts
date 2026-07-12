@@ -193,7 +193,7 @@ async function fetchGroupsInternal(): Promise<GroupWithMembers[]> {
         const { data, error: groupsErr } = await supabase
             .from('groups')
             .select(
-                '*, group_members!inner(user_id, is_active, profiles!group_members_user_id_fkey(id, name, avatar_url, is_active))',
+                '*, group_members!inner(user_id, is_active, note_seen_at, profiles!group_members_user_id_fkey(id, name, avatar_url, is_active))',
             )
             .in('id', groupIds)
             .eq('is_active', true)
@@ -201,7 +201,16 @@ async function fetchGroupsInternal(): Promise<GroupWithMembers[]> {
             .order('created_at', { ascending: false });
         if (groupsErr) throw groupsErr;
 
-        const groups = (data ?? []).map(row => groupWithMembersFromRow(row));
+        const groups = (data ?? []).map((row) => {
+            const g = groupWithMembersFromRow(row);
+            const myRow = (row.group_members ?? []).find(
+                (m: { user_id?: unknown; note_seen_at?: unknown }) => String(m.user_id) === userId,
+            );
+            const seenAt = myRow?.note_seen_at ? new Date(myRow.note_seen_at as string) : null;
+            const updatedAt = g.noteUpdatedAt ?? null;
+            const hasUnreadNote = !!updatedAt && (!seenAt || seenAt < updatedAt);
+            return { ...g, hasUnreadNote };
+        });
         hydrateGroupsArchiveStateInBackground();
         return groups;
     } catch (error) {
@@ -317,6 +326,7 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
             members: [],
             isArchivedByMe: false,
             isAutoArchived: false,
+            hasUnreadNote: false,
         };
         queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
             [group, ...(prev ?? []).filter((g) => g.id !== group.id)],
@@ -372,6 +382,7 @@ export async function updateGroup(id: string, dto: UpdateGroupDto): Promise<Grou
         members: existing?.members ?? [],
         isArchivedByMe: existing?.isArchivedByMe ?? false,
         isAutoArchived: existing?.isAutoArchived ?? false,
+        hasUnreadNote: false,
     };
     queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
         (prev ?? []).map((g) => (g.id === id ? group : g)),
@@ -405,6 +416,19 @@ export async function deleteGroup(id: string): Promise<boolean> {
     );
     showSuccessMessage('groups.groupDeleted');
     return true;
+}
+
+/**
+ * Mark the caller's group note as read — clears the unread-note dot. Called when
+ * the GroupNote screen opens (whether reached intentionally or via a push tap).
+ */
+export async function markGroupNoteSeen(groupId: string): Promise<void> {
+    const { error } = await supabase.rpc('mark_group_note_seen', { p_group_id: groupId });
+    if (error) {
+        console.error('markGroupNoteSeen failed:', error);
+        return;
+    }
+    void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
 }
 
 export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {

@@ -6,6 +6,7 @@
 import type { ActivityEventKind } from '@cost-share/shared';
 import type { AppIconName } from '../components/AppIcon';
 import { colors } from '../theme';
+import { viewerAmountTone, viewerAmountToneClass } from './viewerAmountTone';
 
 export interface ActivityCardVariant {
     iconName: AppIconName;
@@ -127,6 +128,30 @@ const MEMBER_LEFT: ActivityCardVariant = {
     titleLines: 2,
 };
 
+const CONSOLIDATION: ActivityCardVariant = {
+    iconName: 'swap-horizontal-outline',
+    iconColor: colors.success.DEFAULT,
+    iconBgColor: '#ecfdf5',
+    backgroundColor: colors.white,
+    borderColor: '#bbf7d0',
+    amountTone: 'settlement',
+    showAmount: true,
+    showGroupLine: false,
+    titleLines: 3,
+};
+
+const SETTLE_REMINDER: ActivityCardVariant = {
+    iconName: 'alarm-outline',
+    iconColor: '#b45309',
+    iconBgColor: '#fffbeb',
+    backgroundColor: '#ffffff',
+    borderColor: '#fde68a',
+    amountTone: 'muted',
+    showAmount: false,
+    showGroupLine: true,
+    titleLines: 2,
+};
+
 export function getActivityCardVariant(
     kind: ActivityEventKind,
     friendRequestStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled',
@@ -136,6 +161,8 @@ export function getActivityCardVariant(
             return EXPENSE;
         case 'settlement_added':
             return SETTLEMENT;
+        case 'consolidation_batch_added':
+            return CONSOLIDATION;
         case 'message_posted':
             return MESSAGE;
         case 'friend_request_received':
@@ -148,6 +175,14 @@ export function getActivityCardVariant(
             return MEMBER_JOINED;
         case 'group_removed':
             return MEMBER_LEFT;
+        case 'group_created':
+            return GROUP_INVITE;
+        case 'group_deleted':
+            return MEMBER_LEFT;
+        case 'group_note_changed':
+            return MESSAGE;
+        case 'settle_up_reminder':
+            return SETTLE_REMINDER;
     }
 }
 
@@ -160,4 +195,13 @@ export function activityCardAmountClass(tone: ActivityCardVariant['amountTone'])
         default:
             return 'text-gray-900';
     }
+}
+
+/**
+ * Color for the activity card's main amount, keyed off the VIEWER's signed net
+ * (green owed / red owing / black neutral) rather than the card type. This
+ * replaces the old type-keyed coloring where every settlement was green.
+ */
+export function activityCardAmountClassForNet(net: number): string {
+    return viewerAmountToneClass(viewerAmountTone(net));
 }

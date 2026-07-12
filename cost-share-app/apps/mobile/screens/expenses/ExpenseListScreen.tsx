@@ -15,6 +15,7 @@ import { queryKeys } from '../../hooks/queries/keys';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
 import { ExpenseCard } from '../../components/ExpenseCard';
+import { useNetworkStatus } from '../../lib/networkStatus';
 import { colors } from '../../theme';
 
 export function ExpenseListScreen() {
@@ -23,6 +24,7 @@ export function ExpenseListScreen() {
     const route = useRoute<any>();
     const { groupId } = route.params;
     const expensesQuery = useGroupExpensesQuery(groupId);
+    const { online } = useNetworkStatus();
     const [refreshing, setRefreshing] = useState(false);
 
     const expenses = useMemo(
@@ -73,11 +75,22 @@ export function ExpenseListScreen() {
                     />
                 }
                 ListEmptyComponent={
-                    <EmptyState
-                        iconName="cash-outline"
-                        title={t('expenses.noExpenses')}
-                        message={t('expenses.noExpensesMessage')}
-                    />
+                    online ? (
+                        <EmptyState
+                            iconName="cash-outline"
+                            title={t('expenses.noExpenses')}
+                            message={t('expenses.noExpensesMessage')}
+                        />
+                    ) : (
+                        // Offline with nothing cached: be honest, and point to the
+                        // action that still works — adding an expense (it queues
+                        // and syncs on reconnect).
+                        <EmptyState
+                            iconName="cloud-offline-outline"
+                            title={t('common.offlineTitle')}
+                            message={t('expenses.offlineMessage')}
+                        />
+                    )
                 }
             />
         </View>

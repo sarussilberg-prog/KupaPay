@@ -85,7 +85,7 @@ describe('FeedItemDetailSheet', () => {
 
         expect(getByTestId('expense-detail-sheet')).toBeTruthy();
         expect(getByText('Dinner')).toBeTruthy();
-        expect(getByText('USD 100.00')).toBeTruthy();
+        expect(getByText(/USD 100(\.00)?\b/)).toBeTruthy();
         expect(getByTestId('expense-detail-hero')).toBeTruthy();
         expect(getAllByTestId('member-avatar-image').length).toBeGreaterThan(0);
 
@@ -162,7 +162,7 @@ describe('FeedItemDetailSheet', () => {
         expect(getByText('settleUp.youReceivedAmount')).toBeTruthy();
         expect(getByText('settleUp.fromVia')).toBeTruthy();
         expect(getByText('feed.settlementClosedAndPaidYou')).toBeTruthy();
-        expect(getByText('USD 30.00')).toBeTruthy();
+        expect(getByText(/\b30(\.00)? USD\b/)).toBeTruthy();
     });
 
     it('renders the "you paid" involvement strip when current user is the payer', () => {
@@ -180,7 +180,7 @@ describe('FeedItemDetailSheet', () => {
         expect(getByText('settleUp.youPaidAmount')).toBeTruthy();
         expect(getByText('settleUp.toVia')).toBeTruthy();
         expect(getByText('feed.settlementYouClosedAndPaid')).toBeTruthy();
-        expect(getByText('USD 30.00')).toBeTruthy();
+        expect(getByText(/\b30(\.00)? USD\b/)).toBeTruthy();
     });
 
     it('renders the third-party "someone paid" copy when current user is neither party', () => {
@@ -243,6 +243,7 @@ describe('FeedItemDetailSheet — deletion notice', () => {
                 deletedNotice={{
                     deletedAt: new Date('2026-06-18T18:30:00Z'),
                     deletedByName: 'Avi',
+                    deletedByYou: false,
                     kind: 'expense',
                 }}
                 onRemoveFromActivity={onRemove}

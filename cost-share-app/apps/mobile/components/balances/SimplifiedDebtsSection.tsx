@@ -24,7 +24,10 @@ interface SimplifiedDebtsSectionProps {
     avatarById: Record<string, string | undefined>;
     nameById: Record<string, string>;
     currentUserId: string;
+    /** True when the balance dataset is unavailable (offline, no cache). */
+    balanceUnknown?: boolean;
     onSettle: (debt: DebtSummary) => void;
+    onRemind?: (debt: DebtSummary) => void;
 }
 
 interface FlatDebt {
@@ -37,7 +40,9 @@ export function SimplifiedDebtsSection({
     avatarById,
     nameById,
     currentUserId,
+    balanceUnknown,
     onSettle,
+    onRemind,
 }: SimplifiedDebtsSectionProps) {
     const { t } = useTranslation();
     const [othersExpanded, setOthersExpanded] = useState(false);
@@ -60,6 +65,20 @@ export function SimplifiedDebtsSection({
     }, [entries, currentUserId]);
 
     if (involved.length === 0 && others.length === 0) {
+        // No balance data at all → say so. Only claim "all settled" when we
+        // actually have the dataset and it really is empty.
+        if (balanceUnknown) {
+            return (
+                <View
+                    className="bg-gray-50 rounded-xl p-6 items-center"
+                    testID="debts-unavailable"
+                >
+                    <Text className="text-base font-medium text-gray-500 text-center">
+                        {t('balances.unavailableOffline')}
+                    </Text>
+                </View>
+            );
+        }
         return (
             <View className="bg-green-50 rounded-xl p-6 items-center">
                 <Text className="text-base font-medium text-green-700 text-center">
@@ -82,9 +101,13 @@ export function SimplifiedDebtsSection({
             involved={involvedRow}
             fromName={resolveName(debt.fromUserId)}
             toName={resolveName(debt.toUserId)}
+            currentUserId={currentUserId}
             fromAvatar={avatarById[debt.fromUserId]}
             toAvatar={avatarById[debt.toUserId]}
             onPress={() => onSettle(debt)}
+            onRemind={debt.fromUserId !== currentUserId && onRemind
+                ? () => onRemind(debt)
+                : undefined}
         />
     );
 

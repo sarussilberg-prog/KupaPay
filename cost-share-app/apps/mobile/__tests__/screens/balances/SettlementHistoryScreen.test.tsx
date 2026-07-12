@@ -14,6 +14,8 @@ jest.mock('@react-navigation/native', () => {
 
 jest.mock('../../../services/settlements.service', () => ({
     fetchSettlements: jest.fn(),
+    fetchConsolidationBatches: jest.fn().mockResolvedValue([]),
+    deleteSettlement: jest.fn(),
 }));
 
 jest.mock('../../../services/users.service', () => ({
@@ -25,11 +27,14 @@ jest.mock('../../../services/users.service', () => ({
 
 import { SettlementHistoryScreen } from '../../../screens/balances/SettlementHistoryScreen';
 import { fetchSettlements } from '../../../services/settlements.service';
+import { queryClient } from '../../../lib/queryClient';
 
 const mockFetch = fetchSettlements as jest.MockedFunction<typeof fetchSettlements>;
 
 beforeEach(() => {
     mockFetch.mockReset();
+    // renderWithQuery uses a singleton client; clear cache for test isolation.
+    queryClient.clear();
 });
 
 describe('SettlementHistoryScreen', () => {
@@ -39,7 +44,7 @@ describe('SettlementHistoryScreen', () => {
         expect(await findByText('balances.noSettlements')).toBeTruthy();
     });
 
-    it('renders settlements with from/to user names and amount', async () => {
+    it('renders a settlement row with its amount', async () => {
         mockFetch.mockResolvedValueOnce([
             {
                 id: 's1',
@@ -54,8 +59,10 @@ describe('SettlementHistoryScreen', () => {
                 createdAt: new Date(),
             } as any,
         ]);
-        const { findByText } = renderWithQuery(<SettlementHistoryScreen />);
-        expect(await findByText(/Alice/)).toBeTruthy();
-        expect(await findByText(/USD 100\.00/)).toBeTruthy();
+        const { findByText, getByTestId } = renderWithQuery(<SettlementHistoryScreen />);
+        // The row uses perspective-based feed copy; currency + amount render as
+        // separate text nodes, so assert the row and the amount node.
+        expect(await findByText(/^100(\.00)?$/)).toBeTruthy();
+        expect(getByTestId('settlement-press-s1')).toBeTruthy();
     });
 });

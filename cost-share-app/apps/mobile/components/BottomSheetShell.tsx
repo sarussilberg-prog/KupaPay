@@ -1,6 +1,6 @@
 /**
  * BottomSheetShell — reusable bottom-sheet wrapper.
- * Provides: scrim, sheet container (75% height, rounded top, sheet shadow),
+ * Provides: scrim, sheet container (fits content, caps at 75% height, rounded top, sheet shadow),
  * drag handle, header row (Cancel · uppercase label · Save), hairline divider.
  * Children render in a scrollable body below the header.
  */
@@ -9,8 +9,6 @@ import {
     Modal,
     Pressable,
     View,
-    KeyboardAvoidingView,
-    Platform,
     useWindowDimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -45,53 +43,51 @@ export function BottomSheetShell({
                     onPress={onClose}
                     className="absolute inset-0"
                 />
-                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                    <View
-                        style={{
-                            height: sheetHeight,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: -8 },
-                            shadowOpacity: 0.18,
-                            shadowRadius: 24,
-                            elevation: 24,
-                        }}
-                        className="bg-white rounded-t-3xl overflow-hidden"
-                    >
-                        <View className="items-center pt-2">
-                            <View className="w-10 h-1 rounded-full bg-gray-200" />
-                        </View>
-                        <View className="flex-row items-center justify-between px-4 py-3">
-                            <Pressable onPress={onClose} hitSlop={8}>
-                                <Text className="text-[15px] font-medium text-gray-600">
-                                    {t('common.cancel')}
-                                </Text>
-                            </Pressable>
-                            <Text
-                                className="text-xs font-semibold text-gray-500 uppercase"
-                                style={{ letterSpacing: 0.06 * 12 }}
-                            >
-                                {label}
-                            </Text>
-                            <Pressable
-                                onPress={() => { if (!saveDisabled && onSave) onSave(); }}
-                                hitSlop={8}
-                                disabled={saveDisabled}
-                            >
-                                <Text
-                                    className={
-                                        saveDisabled
-                                            ? 'text-[15px] font-bold text-gray-300'
-                                            : 'text-[15px] font-bold text-primary-dark'
-                                    }
-                                >
-                                    {t('common.save')}
-                                </Text>
-                            </Pressable>
-                        </View>
-                        <View className="h-px bg-border-soft" />
-                        <View className="flex-1">{children}</View>
+                <View
+                    style={{
+                        maxHeight: sheetHeight,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: -8 },
+                        shadowOpacity: 0.18,
+                        shadowRadius: 24,
+                        elevation: 24,
+                    }}
+                    className="bg-white rounded-t-3xl overflow-hidden"
+                >
+                    <View className="items-center pt-2">
+                        <View className="w-10 h-1 rounded-full bg-gray-200" />
                     </View>
-                </KeyboardAvoidingView>
+                    <View className="flex-row items-center justify-between px-4 py-3">
+                        <Pressable onPress={onClose} hitSlop={8}>
+                            <Text className="text-[15px] font-medium text-gray-600">
+                                {t('common.cancel')}
+                            </Text>
+                        </Pressable>
+                        <Text
+                            className="text-xs font-semibold text-gray-500 uppercase"
+                            style={{ letterSpacing: 0.06 * 12 }}
+                        >
+                            {label}
+                        </Text>
+                        <Pressable
+                            onPress={() => { if (!saveDisabled && onSave) onSave(); }}
+                            hitSlop={8}
+                            disabled={saveDisabled}
+                        >
+                            <Text
+                                className={
+                                    saveDisabled
+                                        ? 'text-[15px] font-bold text-gray-300'
+                                        : 'text-[15px] font-bold text-primary-dark'
+                                }
+                            >
+                                {t('common.save')}
+                            </Text>
+                        </Pressable>
+                    </View>
+                    <View className="h-px bg-border-soft" />
+                    <View style={{ flexShrink: 1 }}>{children}</View>
+                </View>
             </View>
         </Modal>
     );

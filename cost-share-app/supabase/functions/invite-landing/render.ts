@@ -74,7 +74,7 @@ function shell({
       location.replace('https://kupa-pay.com/');
       return;
     }
-    var m = location.pathname.match(/^\/(i|g)\/([A-Za-z0-9_-]{10})$/);
+    var m = location.pathname.match(/^[/](i|g)[/]([A-Za-z0-9_-]{10})$/);
     var t = setTimeout(function() { location.replace('https://kupa-pay.com/'); }, 1500);
     document.addEventListener('visibilitychange', function() { if (document.hidden) clearTimeout(t); });
     if (m) location.href = 'com.kupapay.mobile://invite/' + m[1] + '/' + m[2];

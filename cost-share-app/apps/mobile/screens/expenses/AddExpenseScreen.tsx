@@ -17,6 +17,9 @@ import {
     ActivityIndicator,
     Animated,
     Image,
+    InputAccessoryView,
+    InteractionManager,
+    Platform,
     ScrollView,
     StyleSheet,
     TextInput,
@@ -45,6 +48,13 @@ import {
 } from '../../components/expenseV2/EditPayerSplitSheet';
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
+import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
+import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
+
+// iOS localizes the numeric keyboard's "Next" return button from the native
+// bundle, which ignores the in-app language. We provide our own accessory bar
+// with an i18n-driven label instead so it follows the app's language.
+const AMOUNT_ACCESSORY_ID = 'amountKeyboardAccessory';
 
 /**
  * Keep only digits and a single decimal separator (`.` or `,` → `.`),
@@ -172,6 +182,12 @@ export function AddExpenseScreen() {
 
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
+    // Controlled selection used only to drop the caret at the end when focusing a
+    // pre-filled amount; released on the first selection change so the user can
+    // still reposition the caret freely afterwards.
+    const [amountSelection, setAmountSelection] = useState<
+        { start: number; end: number } | undefined
+    >(undefined);
     const [currency, setCurrency] = useState<string>(
         storeGroup?.defaultCurrency ?? DEFAULT_CURRENCY,
     );
@@ -190,10 +206,12 @@ export function AddExpenseScreen() {
     const [editorVisible, setEditorVisible] = useState(false);
     const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
     const [datePickerVisible, setDatePickerVisible] = useState(false);
+    const [groupPickerVisible, setGroupPickerVisible] = useState(false);
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
     const amountInputRef = useRef<TextInput>(null);
+    const descriptionInputRef = useRef<TextInput>(null);
 
     const { data: membersData = [], isLoading: membersLoading } = useGroupMembersQuery(groupId);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
@@ -241,6 +259,39 @@ export function AddExpenseScreen() {
         if (isEditMode) return;
         if (!paidBy && currentUser?.id) setPaidBy(currentUser.id);
     }, [isEditMode, paidBy, currentUser?.id]);
+
+    // Switching the target group (create mode only): point every derived value
+    // at the new group. Setting `resolvedGroupId` re-derives `storeGroup`, the
+    // members/users queries, `useAddExpenseMutation`, and the currency-default
+    // effect. Critically we also reset the members-initialized latch and clear
+    // the stale participant selection + unequal draft so the "select all active
+    // members" effect re-runs for the NEW group — otherwise the old group's
+    // members would leak into the split (a debt-correctness bug). Payer stays
+    // the current user (they're a member of any group they can pick).
+    const handleSelectGroup = useCallback(
+        (nextGroupId: string) => {
+            setGroupPickerVisible(false);
+            if (nextGroupId === resolvedGroupId) return;
+            setResolvedGroupId(nextGroupId);
+            setMembersInitialized(false);
+            setSelectedMemberIds([]);
+            setUnequalValues({});
+            setSplitMode('equal');
+        },
+        [resolvedGroupId],
+    );
+
+    // Create mode: open with the amount field focused and the keyboard up.
+    // Wait for the modal's present animation to finish (InteractionManager) so
+    // the keyboard reliably surfaces. Edit mode skips this — it opens read-first
+    // on a loading screen and shouldn't pop the keyboard on entry.
+    useEffect(() => {
+        if (isEditMode) return;
+        const task = InteractionManager.runAfterInteractions(() => {
+            amountInputRef.current?.focus();
+        });
+        return () => task.cancel();
+    }, [isEditMode]);
 
     // Edit mode: load the existing expense and prefill the form.
     useEffect(() => {
@@ -542,7 +593,15 @@ export function AddExpenseScreen() {
                 ...(uploadedReceiptUrl ? { receiptUrl: uploadedReceiptUrl } : {}),
             });
             stopLoading();
-            navigation.goBack();
+            // Land on the new expense's group so the user sees it in context
+            // (esp. the quick-add "+" flow, which opens this screen from
+            // anywhere). Navigating to Main → Groups → GroupDetail from this
+            // RootStack modal dismisses the modal, so Back returns to the group,
+            // not to Add Expense. Same proven deep-link as CreateGroupScreen.
+            navigation.navigate('Main', {
+                screen: 'Groups',
+                params: { screen: 'GroupDetail', params: { groupId } },
+            });
             return;
         }
 
@@ -735,6 +794,17 @@ export function AddExpenseScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.heroTop}>
+                    {!isEditMode && storeGroup ? (
+                        <>
+                            <GroupSelectPill
+                                groupName={storeGroup.name}
+                                groupType={storeGroup.groupType}
+                                imageUrl={storeGroup.imageUrl}
+                                onPress={() => setGroupPickerVisible(true)}
+                            />
+                            <View style={{ height: 16 }} />
+                        </>
+                    ) : null}
                     <CurrencyPill
                         currency={currency}
                         onPress={() => setCurrencyPickerVisible(true)}
@@ -745,6 +815,13 @@ export function AddExpenseScreen() {
                             ref={amountInputRef}
                             value={amount}
                             onChangeText={text => setAmount(sanitizeAmountInput(text))}
+                            selection={amountSelection}
+                            onFocus={() =>
+                                setAmountSelection({ start: amount.length, end: amount.length })
+                            }
+                            onSelectionChange={() => {
+                                if (amountSelection !== undefined) setAmountSelection(undefined);
+                            }}
                             keyboardType="decimal-pad"
                             inputMode="decimal"
                             placeholder="0.00"
@@ -752,14 +829,28 @@ export function AddExpenseScreen() {
                             style={styles.amountInput}
                             testID="amount-display"
                             autoFocus
-                            onFocus={() => {
-                                const len = amount.length;
-                                setTimeout(() => {
-                                    amountInputRef.current?.setNativeProps({ selection: { start: len, end: len } });
-                                }, 0);
-                            }}
+                            blurOnSubmit={false}
+                            onSubmitEditing={() => descriptionInputRef.current?.focus()}
+                            inputAccessoryViewID={
+                                Platform.OS === 'ios' ? AMOUNT_ACCESSORY_ID : undefined
+                            }
                         />
                     </Animated.View>
+                    {Platform.OS === 'ios' ? (
+                        <InputAccessoryView nativeID={AMOUNT_ACCESSORY_ID}>
+                            <View style={styles.keyboardAccessory}>
+                                <TouchableOpacity
+                                    onPress={() => descriptionInputRef.current?.focus()}
+                                    style={styles.keyboardAccessoryButton}
+                                    testID="amount-accessory-next"
+                                >
+                                    <Text style={styles.keyboardAccessoryText}>
+                                        {t('common.next')}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </InputAccessoryView>
+                    ) : null}
                     <Animated.View
                         style={{
                             alignItems: 'center',
@@ -767,6 +858,7 @@ export function AddExpenseScreen() {
                         }}
                     >
                         <TextInput
+                            ref={descriptionInputRef}
                             value={description}
                             onChangeText={setDescription}
                             placeholder={t('expenses.v2.descriptionPlaceholder')}
@@ -910,6 +1002,19 @@ export function AddExpenseScreen() {
                 }}
             />
 
+            {/* Group picker — reused favorite-group sheet with an expense title.
+                Create mode only; hidden in edit mode (see pill above). */}
+            {!isEditMode ? (
+                <GroupPickerSheet
+                    visible={groupPickerVisible}
+                    groups={groupsQuery.data ?? []}
+                    selectedGroupId={resolvedGroupId ?? null}
+                    onSelectGroup={handleSelectGroup}
+                    onClose={() => setGroupPickerVisible(false)}
+                    title={t('expenses.v2.selectGroup')}
+                />
+            ) : null}
+
             {isLoading ? (
                 <View style={styles.loadingOverlay} pointerEvents="auto" testID="save-loading-overlay">
                     <ActivityIndicator size="large" color={colors.primaryDark} />
@@ -1039,6 +1144,32 @@ const styles = StyleSheet.create({
         height: 2,
         borderRadius: 9999,
         backgroundColor: colors.primaryLight,
+    },
+    // Transparent bar so only the rounded white "bubble" floats above the
+    // keyboard, matching iOS's native number-pad return button look.
+    keyboardAccessory: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        backgroundColor: 'transparent',
+        paddingHorizontal: 12,
+        paddingBottom: 6,
+    },
+    keyboardAccessoryButton: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 18,
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    keyboardAccessoryText: {
+        fontSize: 17,
+        fontWeight: '500',
+        color: colors.text.primary,
+        textAlign: 'center',
     },
     bottomSaveRow: {
         alignItems: 'center',

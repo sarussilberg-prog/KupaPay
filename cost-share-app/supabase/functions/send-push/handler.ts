@@ -28,7 +28,7 @@ export interface ResolvedNames {
 }
 
 export interface SendPushDeps {
-    recordPending(eventId: string, recipientId: string): Promise<'new' | 'duplicate'>;
+    recordPending(eventId: string, recipientId: string, eventCreatedAt: string): Promise<'new' | 'duplicate'>;
     markSkipped(eventId: string, reason: string): Promise<void>;
     markSent(eventId: string, ticketIds: string[]): Promise<void>;
     markFailed(eventId: string, error: string): Promise<void>;
@@ -52,6 +52,11 @@ const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     group_added: 'groups_push',
     group_member_joined: 'groups_push',
     group_removed: 'groups_push',
+    group_created: 'groups_push',
+    group_deleted: 'groups_push',
+    group_note_changed: 'groups_push',
+    settle_up_reminder: 'settlements_push',
+    consolidation_batch_added: 'settlements_push',
 };
 
 const DEFAULT_PREFS: PrefsRow = {
@@ -66,7 +71,7 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
         return 'skipped_self';
     }
 
-    if ((await deps.recordPending(record.id, record.user_id)) === 'duplicate') {
+    if ((await deps.recordPending(record.id, record.user_id, record.created_at)) === 'duplicate') {
         return 'duplicate';
     }
 
@@ -94,11 +99,12 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
         groupName: names.groupName,
         newMemberName: names.newMemberName,
         description: (md.description as string | undefined) ?? null,
-        amount: (md.amount as number | string | undefined) ?? null,
-        currency: (md.currency as string | undefined) ?? null,
+        amount: (md.amount as number | string | undefined) ?? (md.payment_amount as number | string | undefined) ?? null,
+        currency: (md.currency as string | undefined) ?? (md.payment_currency as string | undefined) ?? null,
         body: (md.body as string | undefined) ?? null,
         isEdited: md.is_edited === true,
         isDeleted: md.is_deleted === true,
+        status: (md.status as string | undefined) ?? null,
     });
 
     const messages: ExpoMessage[] = tokens.map((t) => ({

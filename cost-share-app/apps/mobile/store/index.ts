@@ -27,6 +27,7 @@ interface AppState {
         | { target: 'friends' }
         | { target: 'groupDetail'; groupId: string }
         | { target: 'groupsList' }
+        | { target: 'settleUpList'; groupId: string }
         | null;
     setPendingNavigation: (
         nav: AppState['pendingNavigation'],
@@ -37,6 +38,12 @@ interface AppState {
     // an Alert once the user has been routed back. Reset after display.
     pendingDeactivationNotice: boolean;
     setPendingDeactivationNotice: (value: boolean) => void;
+
+    // Favorite group — the group the "Favorite Group" tab opens on. Persisted.
+    // Setter only stores the id; the effective/fallback resolution lives in
+    // lib/favoriteGroup.ts so it can be unit-tested without a store.
+    favoriteGroupId: string | null;
+    setFavoriteGroupId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -73,6 +80,10 @@ export const useAppStore = create<AppState>()(
             // Deactivation notice flag
             pendingDeactivationNotice: false,
             setPendingDeactivationNotice: (value) => set({ pendingDeactivationNotice: value }),
+
+            // Favorite group state
+            favoriteGroupId: null,
+            setFavoriteGroupId: (id) => set({ favoriteGroupId: id }),
         }),
         {
             name: 'app-store.v1',
@@ -95,6 +106,7 @@ export const useAppStore = create<AppState>()(
             partialize: (state) => ({
                 currentUser: state.currentUser,
                 language: state.language,
+                favoriteGroupId: state.favoriteGroupId,
             }),
             version: 1,
         },

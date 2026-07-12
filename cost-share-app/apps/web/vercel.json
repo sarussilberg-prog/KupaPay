@@ -13,14 +13,6 @@
       "destination": "https://jfqxjjjbpxbwwvoygahu.supabase.co/functions/v1/invite-landing/.well-known/assetlinks.json"
     },
     {
-      "source": "/i/:token",
-      "destination": "https://jfqxjjjbpxbwwvoygahu.supabase.co/functions/v1/invite-landing/i/:token"
-    },
-    {
-      "source": "/g/:token",
-      "destination": "https://jfqxjjjbpxbwwvoygahu.supabase.co/functions/v1/invite-landing/g/:token"
-    },
-    {
       "source": "/legal/:slug",
       "destination": "https://jfqxjjjbpxbwwvoygahu.supabase.co/functions/v1/invite-landing/legal/:slug"
     },

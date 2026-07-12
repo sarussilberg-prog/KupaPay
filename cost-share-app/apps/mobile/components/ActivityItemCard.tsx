@@ -4,13 +4,15 @@
 
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { ActivityEvent } from '@cost-share/shared';
 import { Text } from './AppText';
 import { FeedRowThumbnail } from './FeedRowThumbnail';
+import { CurrenciesMergedBadge } from './CurrenciesMergedBadge';
 import { formatCurrencyAmount } from '../lib/currencyDisplay';
 import {
-    activityCardAmountClass,
+    activityCardAmountClassForNet,
     getActivityCardVariant,
 } from '../lib/activityCardVariant';
 import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
@@ -19,6 +21,7 @@ interface ResolveTitleArgs {
     actorName: string;
     groupName: string;
     newMemberName?: string;
+    currentUserId?: string;
 }
 
 export function resolveActivityTitle(
@@ -26,7 +29,7 @@ export function resolveActivityTitle(
     args: ResolveTitleArgs,
     t: TFunction,
 ): string {
-    const { actorName, groupName, newMemberName } = args;
+    const { actorName, groupName, newMemberName, currentUserId } = args;
     const meta = event.metadata ?? {};
     switch (event.kind) {
         case 'expense_added':
@@ -42,22 +45,71 @@ export function resolveActivityTitle(
                 return t('activity.notifications.friendRequestAccepted', { name: actorName });
             }
             if (status === 'rejected') {
-                return t('activity.notifications.friendRequestRejected', { name: actorName });
+                const responder = meta.responder_user_id as string | undefined;
+                // Rejecter's own row → "You declined {name}'s request".
+                // Sender's row (responder is the other person) → "{name} declined your request".
+                if (responder && currentUserId && responder === currentUserId) {
+                    return t('activity.notifications.friendRequestRejected', { name: actorName });
+                }
+                return t('activity.notifications.friendRequestRejectedByThem', { name: actorName });
             }
             return t('activity.notifications.friendRequest', { name: actorName });
         }
+        case 'group_created':
+            return t('activity.notifications.groupCreatedByYou', { group: groupName });
+        case 'group_deleted':
+            if (event.actorUserId && currentUserId && event.actorUserId === currentUserId) {
+                return t('activity.notifications.groupDeletedByYou', { group: groupName });
+            }
+            return t('activity.notifications.groupDeletedBy', { name: actorName, group: groupName });
+        case 'group_note_changed':
+            if (event.actorUserId && currentUserId && event.actorUserId === currentUserId) {
+                return t('activity.notifications.noteChangedByYou', { group: groupName });
+            }
+            return t('activity.notifications.noteChangedBy', { name: actorName, group: groupName });
         case 'group_added':
+            // No actor → the user joined themselves via an invitation link
+            // (redeem_group_invite inserts membership with a NULL added_by).
+            // Without an adder there is nobody to name, so never fall through
+            // to "{{name}} added you" — that renders the absent actor as a
+            // bogus "deleted user".
+            if (!actorName) {
+                return t('activity.notifications.joinedViaInvite', { group: groupName });
+            }
             return t('activity.notifications.groupInvite', { name: actorName, group: groupName });
-        case 'group_member_joined':
+        case 'group_member_joined': {
+            // The viewer is an existing member; when they were the one who added
+            // the new member (added_by === them), render the first-person
+            // "You added X" instead of the neutral "X joined".
+            const addedByUserId = meta.added_by_user_id as string | undefined;
+            if (addedByUserId && currentUserId && addedByUserId === currentUserId) {
+                return t('activity.notifications.memberAddedByYou', {
+                    name: newMemberName ?? actorName,
+                });
+            }
             return t('activity.notifications.memberJoined', {
                 name: newMemberName ?? actorName,
                 group: groupName,
             });
+        }
         case 'group_removed':
+            // An actor means someone else removed this member; name them.
+            // No actor → a self-initiated leave, rendered as "You left".
+            if (actorName) {
+                return t('activity.notifications.memberRemovedYou', {
+                    name: actorName,
+                    group: groupName,
+                });
+            }
             return t('activity.notifications.memberLeft', {
-                name: actorName || t('common.you'),
+                name: t('common.you'),
                 group: groupName,
             });
+        case 'settle_up_reminder':
+            return t('activity.notifications.settleReminder', { name: actorName, group: groupName });
+        case 'consolidation_batch_added':
+            // Full title is built by ActivityItem (needs perspective)
+            return (event.metadata?.description as string | undefined) ?? '';
     }
 }
 
@@ -84,15 +136,40 @@ export function ActivityItemCard({
     onPress,
     testID,
 }: ActivityItemCardProps) {
+    const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const variant = getActivityCardVariant(event.kind, friendRequestStatus);
     const md = event.metadata ?? {};
     const amount = typeof md.amount === 'number' || typeof md.amount === 'string'
         ? Number(md.amount)
-        : 0;
-    const currency = typeof md.currency === 'string' ? md.currency : '';
+        : (typeof md.payment_amount === 'number' || typeof md.payment_amount === 'string'
+            ? Number(md.payment_amount) : 0);
+    const currency = typeof md.currency === 'string' ? md.currency
+        : (typeof md.payment_currency === 'string' ? md.payment_currency : '');
     const showAmount = variant.showAmount && amount > 0 && Boolean(currency);
     const amountText = showAmount ? formatCurrencyAmount(amount, currency) : null;
+
+    // Viewer net for amount color. The feed row belongs to event.userId (the
+    // viewer). Expenses carry the viewer's signed net directly in metadata
+    // (viewer_delta = paid − share, added by the Task 0 migration); rows created
+    // before that migration have no viewer_delta → net 0 → black. Settlements/
+    // consolidations carry the parties, so we sign the amount from the viewer's
+    // perspective.
+    const viewerId = event.userId;
+    let amountNet = 0;
+    if (event.kind === 'expense_added') {
+        amountNet =
+            typeof md.viewer_delta === 'number' || typeof md.viewer_delta === 'string'
+                ? Number(md.viewer_delta)
+                : 0;
+    } else if (event.kind === 'settlement_added') {
+        if (md.to_user_id === viewerId) amountNet = amount;
+        else if (md.from_user_id === viewerId) amountNet = -amount;
+    } else if (event.kind === 'consolidation_batch_added') {
+        if (md.paid_to_user_id === viewerId) amountNet = amount;
+        else if (md.paid_by_user_id === viewerId) amountNet = -amount;
+    }
+    const amountColorClass = activityCardAmountClassForNet(amountNet);
 
     const rowStyle = {
         gap: 12,
@@ -146,7 +223,7 @@ export function ActivityItemCard({
                     style={{ flexShrink: 0, maxWidth: 108, alignItems: 'flex-end' }}
                 >
                     <Text
-                        className={`text-[15px] font-bold ${activityCardAmountClass(variant.amountTone)}`}
+                        className={`text-[15px] font-bold ${amountColorClass}`}
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.65}
@@ -154,6 +231,11 @@ export function ActivityItemCard({
                     >
                         {amountText}
                     </Text>
+                    {event.kind === 'consolidation_batch_added' ? (
+                        <CurrenciesMergedBadge
+                            count={typeof md.settlement_count === 'number' ? md.settlement_count : 0}
+                        />
+                    ) : null}
                 </View>
             ) : null}
         </View>
@@ -173,7 +255,7 @@ export function ActivityItemCard({
             }}
         >
             <Text style={{ fontSize: 10, fontWeight: '600', color: '#DC2626', letterSpacing: 0.2 }}>
-                Deleted
+                {t('activity.deleted')}
             </Text>
         </View>
     ) : isEdited ? (
@@ -190,7 +272,7 @@ export function ActivityItemCard({
             }}
         >
             <Text style={{ fontSize: 10, fontWeight: '600', color: '#6B7280', letterSpacing: 0.2 }}>
-                Edited
+                {t('activity.edited')}
             </Text>
         </View>
     ) : null;

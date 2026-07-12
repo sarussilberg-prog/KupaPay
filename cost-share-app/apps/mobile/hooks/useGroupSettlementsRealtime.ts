@@ -39,7 +39,16 @@ export function useGroupSettlementsRealtime(
                     }
                 },
             )
-            .subscribe();
+            .subscribe((status) => {
+                // Parity with the expenses/messages channels: reconcile any
+                // events missed during a disconnect when the channel (re)joins.
+                if (status === 'SUBSCRIBED') {
+                    void queryClient.invalidateQueries({
+                        queryKey: queryKeys.groupContributions(groupId),
+                    });
+                    invalidateBalanceCaches(groupId);
+                }
+            });
 
         return () => {
             void channel.unsubscribe();

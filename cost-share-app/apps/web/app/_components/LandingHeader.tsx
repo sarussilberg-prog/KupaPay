@@ -1,26 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { createClient } from '@/utils/supabase/server';
 import { getLocale } from '@/lib/locale';
 import { getTranslations } from '@/lib/i18n';
 import { APP_BRAND_TITLE } from '@/lib/brand';
 
-async function signOut() {
-  'use server';
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect('/');
-}
-
+// The marketing site is identical for everyone — it has no logged-in surface and
+// shows no user-specific state. Signing in happens inside the app, which is served
+// under this same domain at /login (proxied via the next.config rewrite).
 export default async function LandingHeader() {
   const locale = await getLocale();
   const t = getTranslations(locale);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const displayName = user?.user_metadata?.full_name ?? user?.email ?? '';
   const otherLocale = locale === 'he' ? 'en' : 'he';
 
   return (
@@ -44,30 +33,6 @@ export default async function LandingHeader() {
               {t.locale.toggle}
             </button>
           </form>
-
-          {/* Auth */}
-          {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 hidden sm:block">
-                {t.header.hello}, {displayName}
-              </span>
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                >
-                  {t.header.signOut}
-                </button>
-              </form>
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition-colors"
-            >
-              {t.header.signIn}
-            </Link>
-          )}
         </div>
       </div>
     </header>

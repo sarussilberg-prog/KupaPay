@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import type { Translations } from '@/lib/i18n';
 
-// TODO: Replace with real App Store URL when app is live on the App Store
-const APP_STORE_URL = 'https://apps.apple.com/app/kupapay';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/kupapay/id6780216665';
 
 // TODO: Replace with real Google Play URL when app is live on Google Play
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.kupapay.mobile';
@@ -57,12 +55,12 @@ export default function HeroSection({ t }: Props) {
           </a>
 
           {/* Web sign-in */}
-          <Link
+          <a
             href="/login"
             className="px-7 py-3.5 border-2 border-blue-500 text-blue-500 rounded-full font-semibold text-base hover:bg-blue-50 transition-colors"
           >
             {t.hero.ctaSignIn}
-          </Link>
+          </a>
         </div>
       </div>
     </section>

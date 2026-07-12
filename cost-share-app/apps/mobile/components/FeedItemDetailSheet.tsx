@@ -17,6 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
+    ConsolidationBatch,
     ExpenseWithDelta,
     GroupMemberLite,
     Settlement,
@@ -62,7 +63,8 @@ const categoryBg: Record<string, string> = {
 
 type FeedDetailItem =
     | { kind: 'expense'; expense: ExpenseWithDelta }
-    | { kind: 'settlement'; settlement: Settlement };
+    | { kind: 'settlement'; settlement: Settlement }
+    | { kind: 'consolidation_batch'; batch: ConsolidationBatch; settlements: Settlement[] };
 
 export interface FeedItemDetailSheetProps {
     item: FeedDetailItem | null;
@@ -78,6 +80,7 @@ export interface FeedItemDetailSheetProps {
     deletedNotice?: {
         deletedAt: Date;
         deletedByName: string;
+        deletedByYou: boolean;
         kind: 'expense' | 'settlement';
     };
     /** Required when deletedNotice is set; powers the kebab "Remove from activity" action. */
@@ -119,10 +122,11 @@ export function FeedItemDetailSheet({
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
     const visible =
-        item !== null &&
-        (item.kind === 'expense'
-            ? Boolean(item.expense)
-            : Boolean(item.settlement));
+        item !== null && (
+            item.kind === 'expense' ? Boolean(item.expense) :
+            item.kind === 'settlement' ? Boolean(item.settlement) :
+            Boolean(item.batch)
+        );
 
     return (
         <Modal
@@ -155,10 +159,12 @@ export function FeedItemDetailSheet({
                             label={
                                 item.kind === 'expense'
                                     ? t('groups.feedDetail.expenseHeaderLabel')
-                                    : t('settleUp.detailHeaderLabel')
+                                    : item.kind === 'consolidation_batch'
+                                        ? t('consolidation.detailHeaderLabel')
+                                        : t('settleUp.detailHeaderLabel')
                             }
                             onClose={onClose}
-                            onEdit={deletedNotice ? undefined : onEdit}
+                            onEdit={item.kind === 'consolidation_batch' ? undefined : (deletedNotice ? undefined : onEdit)}
                             onDelete={deletedNotice ? undefined : onDelete}
                             onRemoveFromActivity={deletedNotice ? onRemoveFromActivity : undefined}
                             onOpenInGroup={onOpenInGroup}
@@ -176,6 +182,7 @@ export function FeedItemDetailSheet({
                             <DeletionNoticeBody
                                 deletedAt={deletedNotice.deletedAt}
                                 deletedByName={deletedNotice.deletedByName}
+                                deletedByYou={deletedNotice.deletedByYou}
                                 kind={deletedNotice.kind}
                                 language={language}
                             />
@@ -195,6 +202,14 @@ export function FeedItemDetailSheet({
                                         memberMap={memberMap}
                                         currentUserId={currentUserId}
                                         language={language}
+                                    />
+                                )}
+                                {item?.kind === 'consolidation_batch' && (
+                                    <ConsolidationBatchDetailBody
+                                        batch={item.batch}
+                                        settlements={item.settlements}
+                                        memberMap={memberMap}
+                                        currentUserId={currentUserId}
                                     />
                                 )}
                             </>
@@ -352,9 +367,11 @@ function ExpenseDetailBody({
                                                   expense.amount - split.amount,
                                               ),
                                           })
-                                        : t('groups.expense.splitOwes', {
-                                              name: payerFirstName,
-                                          });
+                                        : expense.paidBy === currentUserId
+                                          ? t('groups.expense.splitOwesYou')
+                                          : t('groups.expense.splitOwes', {
+                                                name: payerFirstName,
+                                            });
                                     return (
                                         <View
                                             key={split.id}
@@ -467,6 +484,8 @@ function FlowAmountCenter({
                     textShadowRadius: 3,
                 }}
                 numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}
             >
                 {amountText}
             </Text>
@@ -853,52 +872,29 @@ function InvolvementStrip({
     const { t } = useTranslation();
     const isBorrowed = state === 'borrowed';
 
-    const bg = isBorrowed ? '#FEF2F2' : '#ECFDF5';
-    const border = isBorrowed ? '#FECACA' : '#A7F3D0';
     const textColor = isBorrowed ? '#B91C1C' : '#047857';
-    const iconColor = isBorrowed ? colors.error : colors.success.DEFAULT;
-    const iconName: AppIconName = isBorrowed
-        ? 'arrow-up-circle-outline'
-        : 'arrow-down-circle-outline';
     const headingKey = isBorrowed
         ? 'groups.expense.youBorrowed'
         : 'groups.expense.youLent';
 
     return (
-        <View
-            className="flex-row items-center mx-4 mt-1.5 rounded-xl"
-            style={{
-                backgroundColor: bg,
-                borderColor: border,
-                borderWidth: 1,
-                paddingVertical: 12,
-                paddingHorizontal: 14,
-            }}
-        >
-            <View
-                className="items-center justify-center bg-white"
-                style={{ width: 32, height: 32, borderRadius: 9999 }}
+        <View className="mx-4 mt-2">
+            <Text
+                className="font-semibold"
+                style={{ fontSize: 13, color: textColor }}
             >
-                <AppIcon name={iconName} size={18} color={iconColor} />
-            </View>
-            <View className="flex-1 mx-3 min-w-0">
-                <Text
-                    className="font-bold"
-                    style={{ fontSize: 14, color: textColor }}
-                >
-                    {t(headingKey, { amount: amountText })}
-                </Text>
-                <Text
-                    style={{
-                        fontSize: 11,
-                        color: textColor,
-                        opacity: 0.8,
-                        marginTop: 1,
-                    }}
-                >
-                    {subText}
-                </Text>
-            </View>
+                {t(headingKey, { amount: amountText })}
+            </Text>
+            <Text
+                style={{
+                    fontSize: 11,
+                    color: textColor,
+                    opacity: 0.7,
+                    marginTop: 1,
+                }}
+            >
+                {subText}
+            </Text>
         </View>
     );
 }
@@ -1076,14 +1072,8 @@ function SettlementInvolvementStrip({
 
     return (
         <View
-            className="flex-row items-center mx-4 mt-3.5 mb-6 rounded-xl"
-            style={{
-                backgroundColor: '#ECFDF5',
-                borderColor: '#A7F3D0',
-                borderWidth: 1,
-                paddingVertical: 14,
-                paddingHorizontal: 14,
-            }}
+            className="flex-row items-center mx-4 mt-3.5 mb-6"
+            style={{ paddingVertical: 10, paddingHorizontal: 4 }}
         >
             <View
                 className="items-center justify-center bg-white"
@@ -1144,7 +1134,7 @@ function SettlementDetailBody({
         t('settleUp.you'),
         t('common.unknown'),
     );
-    const amountText = `${settlement.currency} ${formatAmountDecimal(settlement.amount)}`;
+    const amountText = `${formatAmountDecimal(settlement.amount)} ${settlement.currency}`;
     const heroDate = formatHeroDate(
         new Date(settlement.settlementDate ?? settlement.createdAt),
         language,
@@ -1183,11 +1173,13 @@ function SettlementDetailBody({
 function DeletionNoticeBody({
     deletedAt,
     deletedByName,
+    deletedByYou,
     kind,
     language,
 }: {
     deletedAt: Date;
     deletedByName: string;
+    deletedByYou: boolean;
     kind: 'expense' | 'settlement';
     language: 'en' | 'he';
 }) {
@@ -1196,9 +1188,13 @@ function DeletionNoticeBody({
         month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
     });
     const when = formatter.format(deletedAt);
-    const key = kind === 'expense'
-        ? 'activity.deletionNotice.expense'
-        : 'activity.deletionNotice.settlement';
+    const key = deletedByYou
+        ? kind === 'expense'
+            ? 'activity.deletionNotice.expenseByYou'
+            : 'activity.deletionNotice.settlementByYou'
+        : kind === 'expense'
+          ? 'activity.deletionNotice.expense'
+          : 'activity.deletionNotice.settlement';
     return (
         <View className="px-6 py-8 items-center" testID="feed-detail-deletion-notice">
             <AppIcon name="trash-outline" size={32} color={colors.gray500} />
@@ -1222,4 +1218,134 @@ const styles = StyleSheet.create({
         maxHeight: '88%',
         overflow: 'hidden',
     },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ConsolidationBatchDetailBody — settlement-style card + settled debts list
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ConsolidationBatchDetailBodyProps {
+    batch: ConsolidationBatch;
+    settlements: Settlement[];
+    memberMap: Record<string, GroupMemberLite>;
+    currentUserId: string;
+}
+
+function ConsolidationBatchDetailBody({
+    batch,
+    settlements,
+    memberMap,
+    currentUserId,
+}: ConsolidationBatchDetailBodyProps) {
+    const { t } = useTranslation();
+    const language = useAppLanguage();
+
+    const counterpartId = settlements.length > 0
+        ? (settlements[0].fromUserId === batch.paidByUserId
+            ? settlements[0].toUserId
+            : settlements[0].fromUserId)
+        : '';
+
+    const fromName = memberName(memberMap, batch.paidByUserId, currentUserId, t('settleUp.you'), t('common.unknown'));
+    const toName = memberName(memberMap, counterpartId, currentUserId, t('settleUp.you'), t('common.unknown'));
+    const fromAvatarUrl = memberAvatarUrl(memberMap, batch.paidByUserId);
+    const toAvatarUrl = memberAvatarUrl(memberMap, counterpartId);
+    const amountText = `${formatAmountDecimal(batch.paymentAmount)} ${batch.paymentCurrency}`;
+    const heroDate = formatHeroDate(new Date(batch.createdAt), language);
+
+    // Minimal stub — SettlementHero and SettlementInvolvementStrip only use
+    // fromUserId / toUserId for direction checks and buildSettlementFeedCopy.
+    const batchAsSettlement = {
+        fromUserId: batch.paidByUserId,
+        toUserId: counterpartId,
+    } as Settlement;
+
+    const settledTitle = t('consolidation.settledDebtsTitle', {
+        payer: fromName,
+        count: settlements.length,
+        name: toName,
+    });
+
+    return (
+        <View>
+            <SettlementHero
+                settlement={batchAsSettlement}
+                currentUserId={currentUserId}
+                fromName={fromName}
+                toName={toName}
+                fromAvatarUrl={fromAvatarUrl}
+                toAvatarUrl={toAvatarUrl}
+                amountText={amountText}
+                heroDate={heroDate}
+            />
+            <SettlementInvolvementStrip
+                settlement={batchAsSettlement}
+                currentUserId={currentUserId}
+                fromName={fromName}
+                toName={toName}
+                amountText={amountText}
+                methodLabel={null}
+            />
+
+            {settlements.length > 0 && (
+                <View style={{ paddingHorizontal: 16, paddingBottom: 24 }}>
+                    <Text style={batchStyles.sectionTitle}>{settledTitle}</Text>
+                    <View style={batchStyles.card}>
+                        {settlements.map((s, idx) => {
+                            const isOwedToMe = s.toUserId === currentUserId;
+                            const sPayerName = memberName(memberMap, s.fromUserId, currentUserId, t('settleUp.you'), t('common.unknown'));
+                            const sReceiverName = memberName(memberMap, s.toUserId, currentUserId, t('settleUp.you'), t('common.unknown'));
+                            return (
+                                <View
+                                    key={s.id ?? idx}
+                                    style={[batchStyles.debtRow, idx < settlements.length - 1 && batchStyles.debtRowBorder]}
+                                >
+                                    <View style={batchStyles.debtLeft}>
+                                        <View style={[batchStyles.arrow, isOwedToMe ? batchStyles.arrowGreen : batchStyles.arrowRed]}>
+                                            <AppIcon
+                                                name={isOwedToMe ? 'arrow-down' : 'arrow-up'}
+                                                size={11}
+                                                color={isOwedToMe ? colors.success.DEFAULT : colors.error}
+                                            />
+                                        </View>
+                                        <Text style={batchStyles.debtDir} numberOfLines={1}>
+                                            {sPayerName} → {sReceiverName}
+                                        </Text>
+                                    </View>
+                                    <Text style={[batchStyles.debtAmt, isOwedToMe ? batchStyles.amtGreen : batchStyles.amtRed]}>
+                                        {s.currency} {s.amount.toFixed(2)}
+                                    </Text>
+                                </View>
+                            );
+                        })}
+                    </View>
+                </View>
+            )}
+        </View>
+    );
+}
+
+const batchStyles = StyleSheet.create({
+    sectionTitle: { fontSize: 13, fontWeight: '600', color: '#6B7280', marginBottom: 8 },
+    card: {
+        backgroundColor: '#EFF6FF',
+        borderRadius: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 4,
+    },
+    debtRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+    },
+    debtRowBorder: { borderBottomWidth: 1, borderBottomColor: '#DBEAFE' },
+    debtLeft: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 12 },
+    arrow: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+    arrowGreen: { backgroundColor: '#DCFCE7' },
+    arrowRed: { backgroundColor: '#FEE2E2' },
+    debtDir: { fontSize: 13, color: '#4B5563', flex: 1, writingDirection: 'ltr' } as const,
+    debtAmt: { fontSize: 13, fontWeight: '600' },
+    amtGreen: { color: '#15803D' },
+    amtRed: { color: '#DC2626' },
 });

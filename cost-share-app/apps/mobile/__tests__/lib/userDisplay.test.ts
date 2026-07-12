@@ -44,8 +44,11 @@ describe('userDisplay', () => {
         it('returns common.deletedUser for deleted users', () => {
             expect(getDisplayName(deleted, t as any)).toBe('common.deletedUser');
         });
-        it('returns common.deletedUser for null user', () => {
-            expect(getDisplayName(null, t as any)).toBe('common.deletedUser');
+        it('returns the neutral common.groupMember for an unresolved (null) user', () => {
+            // An absent profile means "we could not resolve who this is" (e.g.
+            // offline, or a former member not in the loaded roster) — NOT that
+            // the account was deleted. Only isActive===false means deleted.
+            expect(getDisplayName(null, t as any)).toBe('common.groupMember');
         });
         it('returns common.unknownUser for active user with blank name', () => {
             expect(getDisplayName(nameless, t as any)).toBe('common.unknownUser');
@@ -99,10 +102,10 @@ describe('userDisplay', () => {
             expect(getDisplayNameForMember(member, t as any)).toBe('Alice'));
         it('getDisplayNameForMember returns deletedUser for inactive', () =>
             expect(getDisplayNameForMember(deletedMember, t as any)).toBe('common.deletedUser'));
-        it('getDisplayNameForMember returns deletedUser for null', () =>
-            expect(getDisplayNameForMember(null, t as any)).toBe('common.deletedUser'));
-        it('getDisplayNameForMember returns deletedUser for undefined', () =>
-            expect(getDisplayNameForMember(undefined, t as any)).toBe('common.deletedUser'));
+        it('getDisplayNameForMember returns neutral common.groupMember for null', () =>
+            expect(getDisplayNameForMember(null, t as any)).toBe('common.groupMember'));
+        it('getDisplayNameForMember returns neutral common.groupMember for undefined', () =>
+            expect(getDisplayNameForMember(undefined, t as any)).toBe('common.groupMember'));
         it('getAvatarUrlForMember returns avatar for active member', () =>
             expect(getAvatarUrlForMember(member)).toBe('x'));
         it('getAvatarUrlForMember returns undefined for inactive', () =>
@@ -117,8 +120,16 @@ describe('userDisplay', () => {
             expect(resolveDebtPartyName('me', 'me', names, t as any)).toBe('settleUp.you'));
         it('returns the roster name for a known member', () =>
             expect(resolveDebtPartyName('alice', 'me', names, t as any)).toBe('Alice'));
-        it('returns deletedUser for an id absent from the roster (left / deleted member)', () =>
-            expect(resolveDebtPartyName('ghost', 'me', names, t as any)).toBe('common.deletedUser'));
+        it('returns the resolved name (incl. pre-resolved "Deleted user") when present', () =>
+            // The caller resolves deleted accounts into nameById via
+            // getDisplayNameForMember, so a real deletion already arrives here.
+            expect(
+                resolveDebtPartyName('ghost', 'me', { ...names, ghost: 'common.deletedUser' }, t as any),
+            ).toBe('common.deletedUser'));
+        it('returns neutral common.formerMember for an unresolved id (offline / never fetched)', () =>
+            // Absent from nameById means "couldn't resolve" — NOT proof of
+            // deletion, so never claim "deleted user" here.
+            expect(resolveDebtPartyName('ghost', 'me', names, t as any)).toBe('common.formerMember'));
     });
 
     describe('Friend helpers', () => {
@@ -129,8 +140,8 @@ describe('userDisplay', () => {
             expect(getDisplayNameForFriend(friend, t as any)).toBe('Bob'));
         it('getDisplayNameForFriend returns deletedUser for inactive', () =>
             expect(getDisplayNameForFriend(deletedFriend, t as any)).toBe('common.deletedUser'));
-        it('getDisplayNameForFriend returns deletedUser for null', () =>
-            expect(getDisplayNameForFriend(null, t as any)).toBe('common.deletedUser'));
+        it('getDisplayNameForFriend returns neutral common.groupMember for null', () =>
+            expect(getDisplayNameForFriend(null, t as any)).toBe('common.groupMember'));
         it('getDisplayNameForFriend tolerates missing name/avatar fields', () =>
             expect(getDisplayNameForFriend({ userId: 'u', isActive: true }, t as any))
                 .toBe('common.unknownUser'));

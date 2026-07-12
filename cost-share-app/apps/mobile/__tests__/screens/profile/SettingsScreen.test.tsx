@@ -2,13 +2,14 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Linking } from 'react-native';
 
-jest.mock('expo-constants', () => ({
-    __esModule: true,
-    default: { expoConfig: { version: '1.0.0' } },
-}));
 jest.mock('expo-store-review', () => ({
     requestReview: jest.fn().mockResolvedValue(undefined),
     isAvailableAsync: jest.fn().mockResolvedValue(true),
+}));
+
+const mockUseSystemNotificationsDenied = jest.fn(() => false);
+jest.mock('../../../hooks/useSystemNotificationsDenied', () => ({
+    useSystemNotificationsDenied: () => mockUseSystemNotificationsDenied(),
 }));
 
 jest.mock('../../../services/auth.service', () => ({ signOut: jest.fn() }));
@@ -39,13 +40,6 @@ jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: mockNavigate }),
 }));
 
-// LegalDocumentSheet depends on react-query (QueryClientProvider) which is not
-// wired up in these unit tests. Replace it with a no-op stub — the legal sheet
-// itself is covered by its own component tests.
-jest.mock('../../../components/settings/LegalDocumentSheet', () => ({
-    LegalDocumentSheet: () => null,
-}));
-
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';
 import { useAppStore } from '../../../store';
 import { updateUser } from '../../../services/users.service';
@@ -73,6 +67,8 @@ beforeEach(() => {
         totalOwing: 0,
         currency: 'ILS',
     });
+    mockUseSystemNotificationsDenied.mockReturnValue(false);
+    mockNavigate.mockClear();
     useAppStore.setState({
         language: 'en',
         currentUser: { id: 'u1', email: 'a@x.com', name: 'Alice', inviteToken: 'alice123456', defaultCurrency: 'USD', language: 'en', isActive: true, isAdmin: false, createdAt: new Date(), updatedAt: new Date() },
@@ -130,6 +126,18 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         await waitFor(() => expect(mockGetMyOpenBalances).toHaveBeenCalledTimes(1));
     });
 
+    it('opens the Terms page on the website with the current language', () => {
+        const { getByText } = render(<SettingsScreen />);
+        fireEvent.press(getByText('settings.terms'));
+        expect(mockOpenURL).toHaveBeenCalledWith(expect.stringMatching(/\/terms\?lang=en$/));
+    });
+
+    it('opens the Privacy page on the website with the current language', () => {
+        const { getByText } = render(<SettingsScreen />);
+        fireEvent.press(getByText('settings.privacy'));
+        expect(mockOpenURL).toHaveBeenCalledWith(expect.stringMatching(/\/privacy\?lang=en$/));
+    });
+
     it('renders default currency row in General section', () => {
         const { getByText, getByTestId } = render(<SettingsScreen />);
         expect(getByText('settings.defaultCurrency')).toBeTruthy();
@@ -140,5 +148,23 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         const { getByTestId, getByText } = render(<SettingsScreen />);
         fireEvent.press(getByTestId('settings-currency-row'));
         expect(getByText('currencyPicker.title')).toBeTruthy();
+    });
+});
+
+describe('SettingsScreen — notifications gating', () => {
+    it('navigates to NotificationSettings when notifications are allowed', () => {
+        mockUseSystemNotificationsDenied.mockReturnValue(false);
+        const { getByTestId, queryByText } = render(<SettingsScreen />);
+        fireEvent.press(getByTestId('settings-notifications-row'));
+        expect(mockNavigate).toHaveBeenCalledWith('NotificationSettings');
+        expect(queryByText('notifications.systemDisabledHint')).toBeNull();
+    });
+
+    it('blocks navigation and shows the hint when notifications are denied', () => {
+        mockUseSystemNotificationsDenied.mockReturnValue(true);
+        const { getByTestId, getByText } = render(<SettingsScreen />);
+        fireEvent.press(getByTestId('settings-notifications-row'));
+        expect(mockNavigate).not.toHaveBeenCalledWith('NotificationSettings');
+        expect(getByText('notifications.systemDisabledHint')).toBeTruthy();
     });
 });

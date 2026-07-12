@@ -22,7 +22,7 @@ describe('FriendBalanceRow', () => {
         );
         expect(getByText('Bob')).toBeTruthy();
         expect(getByTestId('friend-u2-avatar')).toBeTruthy();
-        expect(getByText(/25\.00/)).toBeTruthy();
+        expect(getByText(/\b25(\.00)?\b/)).toBeTruthy();
         expect(getByText('dashboard.owesYou')).toBeTruthy();
     });
 
@@ -32,7 +32,7 @@ describe('FriendBalanceRow', () => {
             <FriendBalanceRow friend={friend} onPress={() => {}} />,
         );
         expect(getByText('dashboard.youOweFriend')).toBeTruthy();
-        expect(getByText(/10\.00/)).toBeTruthy();
+        expect(getByText(/\b10(\.00)?\b/)).toBeTruthy();
     });
 
     it('renders the largest currency as headline and "+N" for the rest', () => {
@@ -44,7 +44,7 @@ describe('FriendBalanceRow', () => {
         const { getByText, getByTestId } = render(
             <FriendBalanceRow friend={friend} onPress={() => {}} testID="friend-u2" />,
         );
-        expect(getByText(/30\.00/)).toBeTruthy();
+        expect(getByText(/\b30(\.00)?\b/)).toBeTruthy();
         expect(getByTestId('friend-u2-extra-count')).toBeTruthy();
     });
 

@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from 'supabase';
 import type { ActivityRecord, ResolvedNames, PrefsRow, SendPushDeps } from './handler.ts';
 import { sendExpoPush } from './expo.ts';
+import { classifyDelivery, type ExistingDelivery } from './dedup.ts';
 
 export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): SendPushDeps {
     const sb: SupabaseClient = createClient(opts.url, opts.serviceRole, {
@@ -8,16 +9,27 @@ export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): Se
     });
 
     return {
-        async recordPending(eventId, recipientId) {
+        async recordPending(eventId, recipientId, eventCreatedAt) {
             const { error } = await sb.from('push_deliveries').insert({
-                activity_event_id: eventId, recipient_user_id: recipientId, status: 'pending', attempts: 0,
+                activity_event_id: eventId, recipient_user_id: recipientId,
+                event_created_at: eventCreatedAt, status: 'pending', attempts: 0,
             });
             if (!error) return 'new';
             if (error.code !== '23505') throw error; // surface non-conflict failures, don't swallow
             const { data } = await sb.from('push_deliveries')
-                .select('status').eq('activity_event_id', eventId).maybeSingle();
-            // Once a delivery is in-flight ('pending') or done ('sent'), block a duplicate send.
-            return data?.status === 'sent' || data?.status === 'pending' ? 'duplicate' : 'new';
+                .select('status, event_created_at').eq('activity_event_id', eventId).maybeSingle();
+            const decision = classifyDelivery(data as ExistingDelivery | null, eventCreatedAt);
+            if (decision === 'duplicate') return 'duplicate';
+            // 'revised': the event was edited/deleted since the last push (created_at bumped).
+            // Reset the single per-event row for a fresh send and advance the revision marker,
+            // so a duplicate trigger delivery for this same revision is then blocked.
+            if (decision === 'revised') {
+                await sb.from('push_deliveries').update({
+                    status: 'pending', attempts: 0, last_error: null, sent_at: null,
+                    expo_ticket_ids: null, event_created_at: eventCreatedAt,
+                }).eq('activity_event_id', eventId);
+            }
+            return 'new';
         },
         async markSkipped(eventId, reason) {
             await sb.from('push_deliveries')

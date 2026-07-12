@@ -44,11 +44,16 @@ export function MemberContributionRow({
             }`}
             testID={`member-row-${userId}`}
         >
-            <MemberAvatar name={name} avatarUrl={avatarUrl} size="xs" />
-            <Text className="flex-1 ml-3 text-sm text-gray-900">
-                {displayName}
-            </Text>
-            <View className="items-end">
+            <View className="flex-1 flex-row items-center">
+                <MemberAvatar name={name} avatarUrl={avatarUrl} size="xs" />
+                <Text
+                    className="ml-3 shrink text-sm text-gray-900"
+                    numberOfLines={1}
+                >
+                    {displayName}
+                </Text>
+            </View>
+            <View className="items-end pl-2">
                 <CurrencyAmountList
                     amounts={amounts}
                     textClassName="text-sm font-semibold text-gray-900"

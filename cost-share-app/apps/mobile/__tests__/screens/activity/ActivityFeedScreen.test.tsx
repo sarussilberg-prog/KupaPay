@@ -2,11 +2,12 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => {
     const actual = jest.requireActual('@react-navigation/native');
     return {
         ...actual,
-        useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+        useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
         useRoute: () => ({ params: {} }),
         useFocusEffect: jest.fn(),
         useIsFocused: () => true,
@@ -23,6 +24,13 @@ jest.mock('../../../services/activity.service', () => ({
 
 jest.mock('../../../services/groups.service', () => ({
     fetchProfilesByUserIds: jest.fn().mockResolvedValue({}),
+    fetchGroups: jest.fn().mockResolvedValue([
+        { id: 'g1', name: 'Trip', defaultCurrency: 'USD', groupType: 'trip', members: [] },
+    ]),
+}));
+
+jest.mock('../../../lib/appToast', () => ({
+    showAppToast: jest.fn(),
 }));
 
 jest.mock('../../../services/expenses.service', () => ({
@@ -50,13 +58,17 @@ jest.mock('../../../store', () => ({
 
 import { ActivityFeedScreen } from '../../../screens/activity/ActivityFeedScreen';
 import { fetchRecentActivity } from '../../../services/activity.service';
+import { fetchGroups } from '../../../services/groups.service';
 import { useAppStore } from '../../../store';
 import { supabase } from '../../../lib/supabase';
+import { showAppToast } from '../../../lib/appToast';
 import { queryKeys } from '../../../hooks/queries/keys';
 
 const mockFetchRecentActivity = fetchRecentActivity as jest.MockedFunction<
     typeof fetchRecentActivity
 >;
+const mockFetchGroups = fetchGroups as jest.MockedFunction<typeof fetchGroups>;
+const mockShowAppToast = showAppToast as jest.MockedFunction<typeof showAppToast>;
 const mockUseAppStore = useAppStore as unknown as jest.Mock;
 const mockSupabaseRpc = supabase.rpc as jest.MockedFunction<typeof supabase.rpc>;
 
@@ -72,6 +84,12 @@ function renderWithQuery(ui: React.ReactElement) {
 
 beforeEach(() => {
     mockFetchRecentActivity.mockReset();
+    mockNavigate.mockClear();
+    mockShowAppToast.mockClear();
+    mockFetchGroups.mockReset();
+    mockFetchGroups.mockResolvedValue([
+        { id: 'g1', name: 'Trip', defaultCurrency: 'USD', groupType: 'trip', members: [] },
+    ] as never);
     mockSupabaseRpc.mockClear();
     mockSupabaseRpc.mockResolvedValue({ data: null, error: null } as never);
     const navMock = jest.requireMock('@react-navigation/native');
@@ -265,6 +283,143 @@ describe('ActivityFeedScreen', () => {
             expect(getExpenseWithSplitsById).toHaveBeenCalledWith('exp1');
         });
         expect(await findByTestId('expense-detail-sheet')).toBeTruthy();
+    });
+
+    it('opens a note-changed row via GroupDetail+openNote so Back returns to the group', async () => {
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'n1',
+                    userId: 'u1',
+                    kind: 'group_note_changed',
+                    groupId: 'g1',
+                    refId: 'g1',
+                    actorUserId: 'u2',
+                    metadata: { group_name: 'Trip' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
+        const card = await findByTestId('activity-card-n1');
+        fireEvent.press(card);
+
+        // A single navigate to GroupDetail with openNote — GroupDetail itself
+        // pushes the note on top, so the note's Back button returns to the group.
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: 'g1', openNote: true },
+            });
+        });
+        // It must NOT navigate straight to GroupNote (that loses the group beneath).
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Groups',
+            expect.objectContaining({ screen: 'GroupNote' }),
+        );
+    });
+
+    it('opens a settle-reminder row via GroupDetail+openSettleUp so Back returns to the group', async () => {
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'sr1',
+                    userId: 'u1',
+                    kind: 'settle_up_reminder',
+                    groupId: 'g1',
+                    refId: 'r1',
+                    actorUserId: 'u2',
+                    metadata: { group_name: 'Trip', body: 'Please settle up 😊' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
+        const card = await findByTestId('activity-card-sr1');
+        fireEvent.press(card);
+
+        // A single navigate to GroupDetail with openSettleUp — GroupDetail itself
+        // pushes the settle-up list on top, so its Back button returns to the group.
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('Groups', {
+                screen: 'GroupDetail',
+                params: { groupId: 'g1', openSettleUp: true },
+            });
+        });
+        // It must NOT navigate straight to SettleUpList (that loses the group beneath).
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Groups',
+            expect.objectContaining({ screen: 'SettleUpList' }),
+        );
+    });
+
+    it('shows an "unavailable" message instead of navigating when the group is gone', async () => {
+        // The user's groups no longer include g1 (removed / group deleted).
+        mockFetchGroups.mockResolvedValue([] as never);
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'm1',
+                    userId: 'u1',
+                    kind: 'message_posted',
+                    groupId: 'g1',
+                    refId: 'msg1',
+                    actorUserId: 'u1',
+                    metadata: { body: 'Hello everyone' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        // Wait until the groups query has resolved so the membership set is trusted.
+        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
+        const card = await findByTestId('activity-card-m1');
+        fireEvent.press(card);
+
+        await waitFor(() => {
+            expect(mockShowAppToast).toHaveBeenCalledWith(
+                expect.objectContaining({ titleKey: 'activity.unavailableTitle' }),
+            );
+        });
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('shows an "unavailable" message when a tapped expense can no longer be loaded', async () => {
+        const { getExpenseWithSplitsById } = jest.requireMock('../../../services/expenses.service');
+        // g1 is still a member group, but the expense itself is gone (deleted / no access).
+        (getExpenseWithSplitsById as jest.Mock).mockResolvedValue(null);
+        mockFetchRecentActivity.mockResolvedValue({
+            items: [
+                {
+                    id: 'a1',
+                    userId: 'u1',
+                    kind: 'expense_added',
+                    groupId: 'g1',
+                    refId: 'exp1',
+                    actorUserId: 'u2',
+                    metadata: { description: 'Lunch', amount: 12, currency: 'USD' },
+                    createdAt: new Date('2026-05-01'),
+                },
+            ],
+        });
+
+        const { findByTestId } = renderWithQuery(<ActivityFeedScreen />);
+        const card = await findByTestId('activity-card-a1');
+        fireEvent.press(card);
+
+        await waitFor(() => {
+            expect(getExpenseWithSplitsById).toHaveBeenCalledWith('exp1');
+        });
+        await waitFor(() => {
+            expect(mockShowAppToast).toHaveBeenCalledWith(
+                expect.objectContaining({ titleKey: 'activity.unavailableTitle' }),
+            );
+        });
     });
 
     it('invalidates the unread-count query with the correct queryKey on focus', async () => {
