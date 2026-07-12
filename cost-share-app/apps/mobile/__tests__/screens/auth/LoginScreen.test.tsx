@@ -87,7 +87,7 @@ describe('LoginScreen', () => {
 
         const { getByTestId, getByText } = render(<LoginScreen />);
         fireEvent.press(getByTestId('login-language-button'));
-        fireEvent.press(getByText('profile.hebrew'));
+        fireEvent.press(getByText('עברית'));
         expect(changeAppLanguage).toHaveBeenCalledWith('he');
     });
 
