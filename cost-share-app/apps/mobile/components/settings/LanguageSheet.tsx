@@ -14,9 +14,12 @@ interface Props {
     testID?: string;
 }
 
-const OPTIONS: { code: Language; labelKey: string }[] = [
-    { code: 'en', labelKey: 'profile.english' },
-    { code: 'he', labelKey: 'profile.hebrew' },
+// Each language is labeled in its own native form (endonym), not translated
+// into the currently active app language — so "English" always reads as
+// "English" and "עברית" always reads as "עברית", regardless of UI locale.
+const OPTIONS: { code: Language; nativeLabel: string }[] = [
+    { code: 'en', nativeLabel: 'English' },
+    { code: 'he', nativeLabel: 'עברית' },
 ];
 
 export function LanguageSheet({ visible, current, onSelect, onClose, testID }: Props) {
@@ -40,7 +43,12 @@ export function LanguageSheet({ visible, current, onSelect, onClose, testID }: P
                             onPress={() => onSelect(opt.code)}
                             className="flex-row items-center px-5 py-4 border-t border-gray-100"
                         >
-                            <Text className="flex-1 text-base text-gray-900">{t(opt.labelKey)}</Text>
+                            <Text
+                                className="flex-1 text-base text-gray-900"
+                                style={{ textAlign: 'left', writingDirection: opt.code === 'he' ? 'rtl' : 'ltr' }}
+                            >
+                                {opt.nativeLabel}
+                            </Text>
                             {opt.code === current ? <AppIcon name="checkmark" size={20} color={colors.primary} /> : null}
                         </TouchableOpacity>
                     ))}

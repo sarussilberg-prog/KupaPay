@@ -76,6 +76,11 @@
               "scheme": "https",
               "host": "kupa-pay.com",
               "pathPattern": "/g/.*"
+            },
+            {
+              "scheme": "https",
+              "host": "kupa-pay.com",
+              "pathPattern": "/sr/.*"
             }
           ],
           "category": [
@@ -102,7 +107,9 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-8860544182475196~9463098647",
-          "iosAppId": "ca-app-pub-8860544182475196~4183153126"
+          "iosAppId": "ca-app-pub-8860544182475196~4183153126",
+          "android_app_id": "ca-app-pub-8860544182475196~9463098647",
+          "ios_app_id": "ca-app-pub-8860544182475196~4183153126"
         }
       ],
       "expo-web-browser",

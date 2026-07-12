@@ -68,11 +68,14 @@ jobs:
         with:
           ref: dev
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ADMIN_PAT }}
 
       # Patch-bump the App Version SSOT on every merge to dev (except version-bump
       # commits themselves, to prevent recursion). Commits the bump directly to dev:
-      # a GITHUB_TOKEN push does not re-trigger workflows, and CI only runs on
+      # dev requires status checks (Lint, Mobile tests, SonarCloud) before any push,
+      # including direct ones, so pushing with GITHUB_TOKEN gets rejected (GH006) —
+      # a fresh bump commit has no checks recorded against it. An admin PAT bypasses
+      # required status checks (enforce_admins is false). CI only runs on
       # pull_request (not push), so there is no recursion. Mirrors the direct-commit
       # approach used by bump-version-main.yml — no gh pr create, which the repo's
       # "Allow GitHub Actions to create and approve pull requests" setting blocks.

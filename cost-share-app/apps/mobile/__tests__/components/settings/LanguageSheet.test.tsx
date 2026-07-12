@@ -6,7 +6,7 @@ describe('LanguageSheet', () => {
     it('calls onSelect', () => {
         const onSelect = jest.fn();
         const { getByText } = render(<LanguageSheet visible current="en" onSelect={onSelect} onClose={() => {}} />);
-        fireEvent.press(getByText('profile.hebrew'));
+        fireEvent.press(getByText('עברית'));
         expect(onSelect).toHaveBeenCalledWith('he');
     });
 });

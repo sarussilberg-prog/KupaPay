@@ -1,34 +1,19 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, Platform, View } from 'react-native';
+import React from 'react';
+import { Platform, View } from 'react-native';
+import { AppLogoAnimated } from '../AppLogoAnimated';
 
+// Match the previous static-splash footprint so the hand-off from the native
+// splash to this screen is visually seamless (same logo, same white field).
 const LOGO_SIZE = Platform.OS === 'ios' ? 216 : 200;
 
+/**
+ * Boot / loading gate. Shown from app launch until `isReady` (see App.tsx) and
+ * on web during load. Renders the animated KupaPay brand mark (the "Transfer
+ * Loop") so the loading screen carries the brand animation instead of a static
+ * pulse. AppLogoAnimated falls back to the assembled mark when the OS "reduce
+ * motion" setting is on.
+ */
 export function AppGateSkeleton() {
-    const scale = useRef(new Animated.Value(1)).current;
-
-    useEffect(() => {
-        const loop = Animated.loop(
-            Animated.sequence([
-                Animated.timing(scale, {
-                    toValue: 1.06,
-                    duration: 700,
-                    easing: Easing.inOut(Easing.ease),
-                    useNativeDriver: true,
-                }),
-                Animated.timing(scale, {
-                    toValue: 1,
-                    duration: 700,
-                    easing: Easing.inOut(Easing.ease),
-                    useNativeDriver: true,
-                }),
-            ]),
-        );
-        loop.start();
-        return () => {
-            loop.stop();
-        };
-    }, [scale]);
-
     return (
         <View
             style={{
@@ -38,15 +23,7 @@ export function AppGateSkeleton() {
                 justifyContent: 'center',
             }}
         >
-            <Animated.Image
-                source={require('../../assets/splash-icon.png')}
-                style={{
-                    width: LOGO_SIZE,
-                    height: LOGO_SIZE,
-                    transform: [{ scale }],
-                }}
-                resizeMode="contain"
-            />
+            <AppLogoAnimated size={LOGO_SIZE} testID="app-gate-skeleton-logo" />
         </View>
     );
 }
