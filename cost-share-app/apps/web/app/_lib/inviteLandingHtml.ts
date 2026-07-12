@@ -53,7 +53,7 @@ export function inviteLandingHtml(): string {
   var marketing = ${JSON.stringify(MARKETING_SITE)};
   var ua = navigator.userAgent || '';
   var isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
-  var m = location.pathname.match(/[/](i|g)[/]([A-Za-z0-9_-]{10})[/]?$/);
+  var m = location.pathname.match(/[/](i|g|sr)[/]([A-Za-z0-9_-]{10})[/]?$/);
   if (!m) { location.replace(marketing); return; }
   var deeplink = 'com.kupapay.mobile://invite/' + m[1] + '/' + m[2];
   var btn = document.getElementById('open');
