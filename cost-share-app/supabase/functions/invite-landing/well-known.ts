@@ -32,7 +32,7 @@ const AASA_JSON = JSON.stringify({
         apps: [],
         details: [{
             appID: `${TEAM_ID}.com.kupapay.mobile`,
-            paths: ['/i/*', '/g/*'],
+            paths: ['/i/*', '/g/*', '/sr/*'],
         }],
     },
 });

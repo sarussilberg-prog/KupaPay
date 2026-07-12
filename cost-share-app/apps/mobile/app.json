@@ -76,6 +76,11 @@
               "scheme": "https",
               "host": "kupa-pay.com",
               "pathPattern": "/g/.*"
+            },
+            {
+              "scheme": "https",
+              "host": "kupa-pay.com",
+              "pathPattern": "/sr/.*"
             }
           ],
           "category": [
