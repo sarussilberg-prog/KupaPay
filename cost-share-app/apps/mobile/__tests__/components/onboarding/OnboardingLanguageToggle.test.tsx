@@ -35,7 +35,7 @@ describe('OnboardingLanguageToggle', () => {
 
         const { getByTestId, getByText } = render(<OnboardingLanguageToggle />);
         fireEvent.press(getByTestId('onboarding-language-button'));
-        fireEvent.press(getByText('profile.hebrew'));
+        fireEvent.press(getByText('עברית'));
         expect(changeAppLanguage).toHaveBeenCalledWith('he');
     });
 });
