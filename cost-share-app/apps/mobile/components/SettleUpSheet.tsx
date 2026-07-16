@@ -10,7 +10,7 @@
  *   └────────────────────────────────────────┘
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import type { GroupMemberLite, PairwiseDebt, PaymentMethod } from '@cost-share/shared';
@@ -93,6 +93,34 @@ function normalizeMethodKey(method: PaymentMethod | undefined): MethodKey {
 const formatAmountText = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : '');
 const formatShortDate = (d: Date, locale: string) =>
     d.toLocaleDateString(locale === 'he' ? 'he-IL' : locale, { month: 'short', day: 'numeric' });
+
+const FLOW_SIDE_WIDTH = 96;
+const AMOUNT_FONT_SIZE = 26;
+const AMOUNT_BOX_PAD_X = 12;
+/** ~tabular digit advance at 26px/700 — native fallback before layout. */
+const AMOUNT_CHAR_WIDTH = 15.5;
+
+let webMeasureCanvas: HTMLCanvasElement | null = null;
+
+/**
+ * Content width of the amount digits. On web, TextInput defaults to 100% of its
+ * parent — so we must set an explicit width *before* first paint. Canvas
+ * measureText is synchronous and content-sized; onLayout alone is too late
+ * (parent already expanded).
+ */
+function measureSettleAmountWidth(text: string): number {
+    const sample = text.length > 0 ? text : '0';
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+        webMeasureCanvas ??= document.createElement('canvas');
+        const ctx = webMeasureCanvas.getContext('2d');
+        if (ctx) {
+            ctx.font = `700 ${AMOUNT_FONT_SIZE}px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif`;
+            const letterSpacing = -0.02 * AMOUNT_FONT_SIZE;
+            return Math.ceil(ctx.measureText(sample).width + Math.abs(letterSpacing) * sample.length);
+        }
+    }
+    return Math.ceil(Math.max(sample.length, 1) * AMOUNT_CHAR_WIDTH);
+}
 
 export function SettleUpSheet({
     visible,
@@ -472,61 +500,27 @@ function SettleUpHero({
                     ) : null}
                 </View>
 
-                <View className="flex-1 flex-row items-center justify-between px-3">
-                    <FlowAvatar
-                        member={fromMember}
-                        label={t('settleUp.from')}
-                        onPress={canPickParticipants ? onOpenFromPicker : undefined}
-                        testID="settle-from-avatar"
-                    />
+                <View
+                    style={[heroStyles.flowRow, { direction: isRtl ? 'rtl' : 'ltr' }]}
+                    {...(Platform.OS === 'web'
+                        ? ({ dir: isRtl ? 'rtl' : 'ltr' } as const)
+                        : {})}
+                >
+                    <View style={heroStyles.flowSide}>
+                        <FlowAvatar
+                            member={fromMember}
+                            label={t('settleUp.from')}
+                            onPress={canPickParticipants ? onOpenFromPicker : undefined}
+                            testID="settle-from-avatar"
+                        />
+                    </View>
 
-                    <View className="flex-1 items-center">
-                        <View
-                            className="flex-row items-baseline rounded-xl px-3 py-1"
-                            style={{
-                                backgroundColor: amountLocked ? 'transparent' : 'rgba(255,255,255,0.14)',
-                                borderWidth: amountLocked ? 0 : 1,
-                                borderColor: 'rgba(255,255,255,0.32)',
-                            }}
-                        >
-                            {amountLocked ? (
-                                <Text
-                                    style={{
-                                        color: '#FFFFFF',
-                                        fontSize: 26,
-                                        fontWeight: '700',
-                                        fontVariant: ['tabular-nums'],
-                                        letterSpacing: -0.02 * 26,
-                                        minWidth: 80,
-                                        textAlign: 'center',
-                                    }}
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.6}
-                                    testID="settle-amount-locked"
-                                >
-                                    {amountText}
-                                </Text>
-                            ) : (
-                                <TextInput
-                                    value={amountText}
-                                    onChangeText={onAmountChange}
-                                    keyboardType="decimal-pad"
-                                    selectionColor="#FFFFFF"
-                                    style={{
-                                        color: '#FFFFFF',
-                                        fontSize: 26,
-                                        fontWeight: '700',
-                                        fontVariant: ['tabular-nums'],
-                                        letterSpacing: -0.02 * 26,
-                                        minWidth: 80,
-                                        padding: 0,
-                                        textAlign: 'center',
-                                    }}
-                                    testID="settle-amount-input"
-                                />
-                            )}
-                        </View>
+                    <View style={heroStyles.flowCenter}>
+                        <SettleUpAmountField
+                            amountText={amountText}
+                            amountLocked={amountLocked}
+                            onAmountChange={onAmountChange}
+                        />
 
                         <CurrencyChip
                             currency={currency}
@@ -535,14 +529,14 @@ function SettleUpHero({
                             label={t('settleUp.currency')}
                         />
 
-                        <View className="flex-row items-center mt-2 w-3/4">
-                            <View className="flex-1 h-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.85)' }} />
+                        <View style={[heroStyles.arrowRow, { direction: isRtl ? 'rtl' : 'ltr' }]}>
+                            <View style={heroStyles.arrowLine} />
                             <AppIcon
                                 name={isRtl ? 'chevron-back' : 'chevron-forward'}
                                 size={18}
                                 color="rgba(255,255,255,0.95)"
                             />
-                            <View className="flex-1 h-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.85)' }} />
+                            <View style={heroStyles.arrowLine} />
                         </View>
 
                         {canPickParticipants ? (
@@ -566,14 +560,71 @@ function SettleUpHero({
                         ) : null}
                     </View>
 
-                    <FlowAvatar
-                        member={toMember}
-                        label={t('settleUp.to')}
-                        onPress={canPickParticipants ? onOpenToPicker : undefined}
-                        testID="settle-to-avatar"
-                    />
+                    <View style={heroStyles.flowSide}>
+                        <FlowAvatar
+                            member={toMember}
+                            label={t('settleUp.to')}
+                            onPress={canPickParticipants ? onOpenToPicker : undefined}
+                            testID="settle-to-avatar"
+                        />
+                    </View>
                 </View>
             </LinearGradient>
+        </View>
+    );
+}
+
+interface SettleUpAmountFieldProps {
+    amountText: string;
+    amountLocked: boolean;
+    onAmountChange: (value: string) => void;
+}
+
+/** Background pill hugs digit content — explicit width every render (web-safe). */
+function SettleUpAmountField({
+    amountText,
+    amountLocked,
+    onAmountChange,
+}: SettleUpAmountFieldProps) {
+    const fieldWidth = measureSettleAmountWidth(amountText);
+    const wrapWidth = fieldWidth + AMOUNT_BOX_PAD_X * 2;
+
+    return (
+        <View
+            style={[
+                heroStyles.amountWrap,
+                { width: wrapWidth },
+                amountLocked
+                    ? heroStyles.amountBoxLocked
+                    : heroStyles.amountBoxEditable,
+                Platform.OS === 'web' && heroStyles.amountWrapWeb,
+            ]}
+            {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
+        >
+            {amountLocked ? (
+                <Text
+                    style={[heroStyles.amountText, { width: fieldWidth }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.6}
+                    testID="settle-amount-locked"
+                >
+                    {amountText}
+                </Text>
+            ) : (
+                <TextInput
+                    value={amountText}
+                    onChangeText={onAmountChange}
+                    keyboardType="decimal-pad"
+                    selectionColor="#FFFFFF"
+                    style={[
+                        heroStyles.amountText,
+                        { width: fieldWidth },
+                        Platform.OS === 'web' && heroStyles.amountInputWeb,
+                    ]}
+                    testID="settle-amount-input"
+                />
+            )}
         </View>
     );
 }
@@ -584,6 +635,81 @@ interface FlowAvatarProps {
     onPress?: () => void;
     testID?: string;
 }
+
+const heroStyles = StyleSheet.create({
+    flowRow: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+    },
+    flowSide: {
+        width: FLOW_SIDE_WIDTH,
+        alignItems: 'center',
+    },
+    flowCenter: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 0,
+    },
+    amountWrap: {
+        alignSelf: 'center',
+        flexGrow: 0,
+        flexShrink: 0,
+        borderRadius: 12,
+        paddingHorizontal: AMOUNT_BOX_PAD_X,
+        paddingVertical: 4,
+        direction: 'ltr',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    amountWrapWeb: {
+        display: 'inline-flex',
+        maxWidth: '100%',
+    } as const,
+    amountText: {
+        color: '#FFFFFF',
+        fontSize: AMOUNT_FONT_SIZE,
+        fontWeight: '700',
+        fontVariant: ['tabular-nums'],
+        letterSpacing: -0.02 * AMOUNT_FONT_SIZE,
+        padding: 0,
+        margin: 0,
+        textAlign: 'center',
+        flexGrow: 0,
+        flexShrink: 0,
+    },
+    amountInputWeb: {
+        outlineStyle: 'none',
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        boxSizing: 'content-box',
+        maxWidth: '100%',
+    } as const,
+    amountBoxEditable: {
+        backgroundColor: 'rgba(255,255,255,0.14)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.32)',
+    },
+    amountBoxLocked: {
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+    },
+    arrowRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        width: '75%',
+        maxWidth: 220,
+    },
+    arrowLine: {
+        flex: 1,
+        height: 2,
+        backgroundColor: 'rgba(255,255,255,0.85)',
+    },
+});
 
 function FlowAvatar({ member, label, onPress, testID }: FlowAvatarProps) {
     const Wrapper: React.ComponentType<any> = onPress ? Pressable : View;

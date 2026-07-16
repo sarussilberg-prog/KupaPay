@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useAppStore } from '../store';
 import { notificationDataToPendingNavigation, type NotificationData } from '../lib/pushTapRouting';
@@ -9,9 +10,11 @@ function handleTap(data: NotificationData): void {
 }
 
 // Wired once at the navigation root. Tap handling reuses the existing pendingNavigation flush,
-// so it works for both warm taps and cold starts.
+// so it works for both warm taps and cold starts. No-op on web — expo-notifications APIs are native-only.
 export function usePushNotificationListeners(): void {
     useEffect(() => {
+        if (Platform.OS === 'web') return;
+
         // Cold start: app opened by tapping a notification.
         void Notifications.getLastNotificationResponseAsync().then((response) => {
             const data = response?.notification.request.content.data as NotificationData | undefined;
