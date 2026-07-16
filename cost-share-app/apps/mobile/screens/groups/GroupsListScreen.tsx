@@ -30,7 +30,7 @@ import { useNetworkStatus } from '../../lib/networkStatus';
 import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
-import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 import {
     BalanceState,
     DEFAULT_FILTERS,
@@ -290,7 +290,7 @@ export function GroupsListScreen() {
                         autoCorrect={false}
                         autoCapitalize="none"
                         returnKeyType="search"
-                        style={resolveAutoTextInputStyle(isRtl)}
+                        style={resolveCompactTextInputStyle(isRtl)}
                         testID="groups-search-input"
                     />
                     {searchQuery.length > 0 && (

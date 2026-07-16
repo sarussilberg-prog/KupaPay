@@ -46,7 +46,7 @@ import { fetchProfilesByUserIds } from '../../services/groups.service';
 import { supabase } from '../../lib/supabase';
 import { queryKeys } from '../../hooks/queries/keys';
 import { toEpochMs } from '../../lib/dateUtils';
-import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 import { EmptyState } from '../../components/EmptyState';
 import { ActivityItem } from '../../components/ActivityItem';
 import { ActivityItemSkeleton } from '../../components/ActivityItemSkeleton';
@@ -894,7 +894,7 @@ export function ActivityFeedScreen() {
                         autoCorrect={false}
                         autoCapitalize="none"
                         returnKeyType="search"
-                        style={resolveAutoTextInputStyle(isRtl)}
+                        style={resolveCompactTextInputStyle(isRtl)}
                         testID="activity-search-input"
                     />
                     {searchQuery.length > 0 && (
