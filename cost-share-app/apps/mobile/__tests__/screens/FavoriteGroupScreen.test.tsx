@@ -26,11 +26,21 @@ jest.mock('@react-navigation/native', () => {
 jest.mock('../../hooks/useEffectiveFavoriteGroupId', () => ({
     useEffectiveFavoriteGroupId: jest.fn(),
 }));
-// Stub GroupDetailScreen — its real behavior is covered by its own suite.
+// Stub GroupDetailScreen — its real behavior (incl. the switcher button
+// rendered inside SummaryCover via onSwitcherPress) is covered by its own
+// suite and by SummaryCover.test.tsx. Here we only assert FavoriteGroupScreen
+// wires the right props through.
 jest.mock('../../screens/groups/GroupDetailScreen', () => ({
-    GroupDetailScreen: () => {
+    GroupDetailScreen: (props: { showBack?: boolean; onSwitcherPress?: () => void }) => {
         const { Text } = require('react-native');
-        return <Text testID="group-detail-stub">detail</Text>;
+        return (
+            <Text
+                testID="group-detail-stub"
+                onPress={props.onSwitcherPress}
+            >
+                {`detail:showBack=${String(props.showBack)}`}
+            </Text>
+        );
     },
 }));
 
@@ -73,12 +83,12 @@ describe('FavoriteGroupScreen', () => {
         expect(queryByTestId('group-detail-stub')).toBeNull();
     });
 
-    it('renders the switcher + GroupDetail when a group is resolved', () => {
+    it('renders GroupDetail flush-top with the switcher wired via onSwitcherPress', () => {
         (useEffectiveFavoriteGroupId as jest.Mock).mockReturnValue('g1');
         queryClient.setQueryData(queryKeys.groups, [makeGroup('g1', 'Trip')]);
         const { getByTestId } = renderScreen();
-        expect(getByTestId('favorite-switch-btn')).toBeTruthy();
-        expect(getByTestId('favorite-switch-label').props.children).toBe('Trip');
-        expect(getByTestId('group-detail-stub')).toBeTruthy();
+        const stub = getByTestId('group-detail-stub');
+        expect(stub.props.children).toBe('detail:showBack=false');
+        expect(typeof stub.props.onPress).toBe('function');
     });
 });

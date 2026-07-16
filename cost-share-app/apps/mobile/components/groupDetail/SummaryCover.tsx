@@ -1,8 +1,11 @@
 /**
  * SummaryCover — top region of GroupSummaryCard.
  * Image OR type-gradient background, scrim, title block (name · type · members),
- * member stack, and the three top-bar buttons (back · share · menu)
- * overlaid on the cover.
+ * member stack, and the top-bar buttons (back · switcher · menu) overlaid on the cover.
+ *
+ * #10: share button removed; share lives in the ⋮ overflow menu.
+ * #4:  onSwitcherPress when provided shows a compact star+swap button (Favorite tab).
+ * #11a: onMembersPress when provided makes the member stack tappable.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -25,8 +28,12 @@ interface SummaryCoverProps {
     members: GroupMemberLite[];
     topInset: number;
     onBack: () => void;
-    onShare: () => void;
+    showBack?: boolean;
     onMenu: () => void;
+    /** When provided (Favorite tab), renders a compact star+swap switcher button. */
+    onSwitcherPress?: () => void;
+    /** When provided, the member stack becomes tappable to open the members sheet. */
+    onMembersPress?: () => void;
 }
 
 export function SummaryCover({
@@ -34,8 +41,10 @@ export function SummaryCover({
     members,
     topInset,
     onBack,
-    onShare,
+    showBack = true,
     onMenu,
+    onSwitcherPress,
+    onMembersPress,
 }: SummaryCoverProps) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
@@ -51,6 +60,20 @@ export function SummaryCover({
     useEffect(() => setAttempt(0), [group.imageUrl]);
     const showCoverImage = Boolean(group.imageUrl) && attempt <= 2;
 
+    const memberStackNode = onMembersPress ? (
+        <TouchableOpacity
+            onPress={onMembersPress}
+            accessibilityRole="button"
+            accessibilityLabel={t('groups.members.seeAll')}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            testID="cover-members-stack"
+        >
+            <MemberStack members={members} showAddAvatar />
+        </TouchableOpacity>
+    ) : (
+        <MemberStack members={members} />
+    );
+
     const buttons = (
         <View
             style={{
@@ -65,30 +88,38 @@ export function SummaryCover({
                 elevation: 20,
             }}
         >
-            <TouchableOpacity
-                onPress={onBack}
-                accessibilityRole="button"
-                accessibilityLabel="Back"
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                testID="appbar-back"
-                style={styles.circleButton}
-            >
-                <AppIcon
-                    name={isRtl ? 'chevron-forward' : 'chevron-back'}
-                    size={22}
-                    color="#fff"
-                />
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {showBack ? (
                 <TouchableOpacity
-                    onPress={onShare}
+                    onPress={onBack}
                     accessibilityRole="button"
+                    accessibilityLabel="Back"
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    testID="appbar-share"
+                    testID="appbar-back"
                     style={styles.circleButton}
                 >
-                    <AppIcon name="share-outline" size={20} color="#fff" />
+                    <AppIcon
+                        name={isRtl ? 'chevron-forward' : 'chevron-back'}
+                        size={22}
+                        color="#fff"
+                    />
                 </TouchableOpacity>
+            ) : (
+                <View style={{ width: 40 }} />
+            )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                {onSwitcherPress && (
+                    <TouchableOpacity
+                        onPress={onSwitcherPress}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('favoriteGroup.switchLabel')}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        testID="appbar-switcher"
+                        style={styles.circleButton}
+                    >
+                        <AppIcon name="star" size={16} color="#FBBF24" />
+                        <AppIcon name="swap-horizontal" size={14} color="#fff" />
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
                     onPress={onMenu}
                     accessibilityRole="button"
@@ -149,7 +180,7 @@ export function SummaryCover({
                         {t('groups.memberCount', { count: members.length })}
                     </Text>
                 </View>
-                <MemberStack members={members} />
+                {memberStackNode}
             </View>
 
             {buttons}
@@ -233,5 +264,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.4)',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'row',
     },
 });

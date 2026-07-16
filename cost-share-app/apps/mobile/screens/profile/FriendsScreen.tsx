@@ -34,9 +34,11 @@ import { User } from '@cost-share/shared';
 import { FriendRequest } from '../../services/friends.service';
 import { shareFriendInvite } from '../../services/invite.service';
 import { getAvatarUrl, getDisplayEmail, getDisplayName, isDeleted } from '../../lib/userDisplay';
+import { useRtlLayout } from '../../hooks/useRtlLayout';
 
 export function FriendsScreen() {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
 
     const friendsQ = useFriendsQuery();
@@ -175,7 +177,7 @@ export function FriendsScreen() {
                             {t('invite.friend.title')}
                         </Text>
                     </View>
-                    <AppIcon name="chevron-forward" size={18} color={colors.gray400} />
+                    <AppIcon name={isRtl ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.gray400} />
                 </TouchableOpacity>
 
                 {/* Incoming requests */}

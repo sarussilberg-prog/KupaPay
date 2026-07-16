@@ -133,16 +133,10 @@ describe('GroupsListScreen', () => {
         expect(mockNavigate).toHaveBeenCalledWith('GroupDetail', { groupId: 'g1' });
     });
 
-    it('renders the big create CTA when list has items', async () => {
+    it('renders the header create button', async () => {
         queryClient.setQueryData(queryKeys.groups, [makeGroup({})]);
         const { findByTestId } = render(<GroupsListScreen />);
-        expect(await findByTestId('groups-bottom-cta')).toBeTruthy();
-    });
-
-    it('renders the bottom create CTA even when the filtered list is empty', async () => {
-        const { findByTestId } = render(<GroupsListScreen />);
-        await waitFor(() => expect(mockFetchGroups).toHaveBeenCalled());
-        expect(await findByTestId('groups-bottom-cta')).toBeTruthy();
+        expect(await findByTestId('groups-create-btn')).toBeTruthy();
     });
 
     it('filters groups by member name', async () => {

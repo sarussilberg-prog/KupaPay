@@ -1,5 +1,5 @@
 /**
- * FindFriendsScreen — search profiles by name/email/phone.
+ * FindFriendsScreen — search profiles by name/email.
  * Each row shows the relationship state and the right CTA.
  */
 
