@@ -1,17 +1,21 @@
 /**
  * MemberStack — overlapping member avatars for the group summary cover.
  * Shows every member; shrinks avatars when the row would overflow.
+ * #11a: showAddAvatar adds a gray "+" circle at the end of the stack.
  */
 
 import React, { useMemo } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { MemberAvatar } from '../MemberAvatar';
+import { AppIcon } from '../AppIcon';
 import { GroupMemberLite } from '@cost-share/shared';
 
 interface MemberStackProps {
     members: GroupMemberLite[];
     /** Max width for the avatar row (defaults from screen width). */
     maxWidth?: number;
+    /** When true, appends a gray "+" avatar at the end (used on tappable stacks). */
+    showAddAvatar?: boolean;
     testID?: string;
 }
 
@@ -45,7 +49,12 @@ export function getMemberStackLayout(
     return { size, overlap: Math.round(size * OVERLAP_RATIO) };
 }
 
-export function MemberStack({ members, maxWidth: maxWidthProp, testID }: MemberStackProps) {
+export function MemberStack({
+    members,
+    maxWidth: maxWidthProp,
+    showAddAvatar = false,
+    testID,
+}: MemberStackProps) {
     const { width: screenWidth } = useWindowDimensions();
     const maxWidth = maxWidthProp ?? Math.max(120, Math.floor(screenWidth * 0.48));
 
@@ -79,6 +88,23 @@ export function MemberStack({ members, maxWidth: maxWidthProp, testID }: MemberS
                     />
                 </View>
             ))}
+            {showAddAvatar && (
+                <View
+                    style={{
+                        marginLeft: -overlap,
+                        width: size,
+                        height: size,
+                        borderRadius: 9999,
+                        borderWidth: size >= 24 ? 2 : 1,
+                        borderColor: '#fff',
+                        backgroundColor: 'rgba(255,255,255,0.25)',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <AppIcon name="add" size={size * 0.55} color="#fff" />
+                </View>
+            )}
         </View>
     );
 }

@@ -25,6 +25,7 @@ import { useFriendsQuery } from '../hooks/queries/useFriendsQueries';
 import { addGroupMember } from '../services/groups.service';
 import { shareGroupInvite } from '../services/invite.service';
 import { getDisplayEmail, getDisplayName, isDeleted } from '../lib/userDisplay';
+import { useRtlLayout } from '../hooks/useRtlLayout';
 
 interface AddMembersSheetProps {
     visible: boolean;
@@ -53,6 +54,7 @@ function AddMembersSheetView({
     onFindFriends,
 }: AddMembersSheetViewProps) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     const { data: friends, isLoading, refetch } = useFriendsQuery();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
@@ -234,7 +236,7 @@ function AddMembersSheetView({
                                 <Text className="flex-1 ml-3 text-sm font-medium text-gray-800">
                                     {t('invite.addMembers.sendLink')}
                                 </Text>
-                                <AppIcon name="chevron-forward" size={18} color={colors.gray400} />
+                                <AppIcon name={isRtl ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.gray400} />
                             </TouchableOpacity>
                         )}
 

@@ -27,7 +27,6 @@ describe('SummaryCover', () => {
         members={[]}
         topInset={0}
         onBack={noop}
-        onShare={noop}
         onMenu={noop}
       />,
     );
@@ -42,7 +41,6 @@ describe('SummaryCover', () => {
         members={[]}
         topInset={20}
         onBack={noop}
-        onShare={noop}
         onMenu={noop}
       />,
     );
@@ -60,16 +58,14 @@ describe('SummaryCover', () => {
         ]}
         topInset={0}
         onBack={noop}
-        onShare={noop}
         onMenu={noop}
       />,
     );
     expect(getByText('Paris Trip')).toBeTruthy();
   });
 
-  it('fires onBack / onShare / onMenu when buttons are tapped', () => {
+  it('fires onBack and onMenu when buttons are tapped', () => {
     const onBack = jest.fn();
-    const onShare = jest.fn();
     const onMenu = jest.fn();
     const { getByTestId } = render(
       <SummaryCover
@@ -77,15 +73,57 @@ describe('SummaryCover', () => {
         members={[]}
         topInset={0}
         onBack={onBack}
-        onShare={onShare}
         onMenu={onMenu}
       />,
     );
     fireEvent.press(getByTestId('appbar-back'));
-    fireEvent.press(getByTestId('appbar-share'));
     fireEvent.press(getByTestId('appbar-menu'));
     expect(onBack).toHaveBeenCalledTimes(1);
-    expect(onShare).toHaveBeenCalledTimes(1);
     expect(onMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render standalone share button (share is in overflow menu)', () => {
+    const { queryByTestId } = render(
+      <SummaryCover
+        group={mockGroup()}
+        members={[]}
+        topInset={0}
+        onBack={noop}
+        onMenu={noop}
+      />,
+    );
+    expect(queryByTestId('appbar-share')).toBeNull();
+  });
+
+  it('renders switcher button when onSwitcherPress is provided', () => {
+    const onSwitcherPress = jest.fn();
+    const { getByTestId } = render(
+      <SummaryCover
+        group={mockGroup()}
+        members={[]}
+        topInset={0}
+        onBack={noop}
+        onMenu={noop}
+        onSwitcherPress={onSwitcherPress}
+      />,
+    );
+    fireEvent.press(getByTestId('appbar-switcher'));
+    expect(onSwitcherPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders tappable member stack when onMembersPress is provided', () => {
+    const onMembersPress = jest.fn();
+    const { getByTestId } = render(
+      <SummaryCover
+        group={mockGroup()}
+        members={[{ userId: 'u1', displayName: 'A', isActive: true }]}
+        topInset={0}
+        onBack={noop}
+        onMenu={noop}
+        onMembersPress={onMembersPress}
+      />,
+    );
+    fireEvent.press(getByTestId('cover-members-stack'));
+    expect(onMembersPress).toHaveBeenCalledTimes(1);
   });
 });

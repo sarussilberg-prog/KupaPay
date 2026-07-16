@@ -2,6 +2,7 @@ import {
     formatCurrencyAmount,
     getCurrencyDisplayName,
     getCurrencySymbol,
+    getDistinctCurrencySymbol,
     getLocalizedCurrencyName,
     matchesCurrencySearch,
 } from '../../lib/currencyDisplay';
@@ -22,6 +23,20 @@ describe('currencyDisplay', () => {
 
         it('falls back to code for unknown currency', () => {
             expect(getCurrencySymbol('XYZ')).toBe('XYZ');
+        });
+    });
+
+    describe('getDistinctCurrencySymbol', () => {
+        it('returns $ for USD', () => {
+            expect(getDistinctCurrencySymbol('USD')).toBe('$');
+        });
+
+        it('returns null for AED (no glyph — code only)', () => {
+            expect(getDistinctCurrencySymbol('AED')).toBeNull();
+        });
+
+        it('returns null when symbol would repeat the ISO code', () => {
+            expect(getDistinctCurrencySymbol('XYZ')).toBeNull();
         });
     });
 

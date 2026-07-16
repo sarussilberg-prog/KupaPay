@@ -30,9 +30,6 @@ import { useNetworkStatus } from '../../lib/networkStatus';
 import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
-import { CreateGroupFabAnchor, createGroupFabScrollPadding } from '../../components/groups/CreateGroupFabAnchor';
-import { CreateGroupFloatingButton } from '../../components/groups/CreateGroupFloatingButton';
-import { FAB_LIST_GAP } from '../../components/GroupDetailFloatingActions';
 import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 import {
     BalanceState,
@@ -66,7 +63,7 @@ export function GroupsListScreen() {
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
-    const listBottomPadding = createGroupFabScrollPadding() + FAB_LIST_GAP;
+    const listBottomPadding = 24;
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
     // "Initial loading" = we have NO cached data yet AND a fetch is actively in
@@ -330,10 +327,10 @@ export function GroupsListScreen() {
                     onPress={handleCreateGroup}
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.createGroup')}
-                    className="ml-1 h-9 w-9 items-center justify-center rounded-full bg-primary"
+                    className="ml-2 h-9 px-4 items-center justify-center rounded-full bg-primary"
                     testID="groups-create-btn"
                 >
-                    <AppIcon name="add" size={22} color={colors.white} />
+                    <Text className="text-sm font-semibold text-white">{t('groups.createGroup')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -389,15 +386,6 @@ export function GroupsListScreen() {
                 />
 
             </View>
-
-            <CreateGroupFabAnchor>
-                <CreateGroupFloatingButton
-                    title={t('groups.createGroup')}
-                    onPress={handleCreateGroup}
-                    icon="add"
-                    testID="groups-bottom-cta"
-                />
-            </CreateGroupFabAnchor>
 
             <FiltersSheet
                 visible={filtersOpen}

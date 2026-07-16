@@ -222,10 +222,20 @@ describe('AddExpenseScreen — v2', () => {
         fireEvent.press(await findByTestId('add-expense-submit'));
 
         await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
-        // Same proven RootStack-modal → GroupDetail deep-link as CreateGroupScreen.
+        // Lands on GroupDetail with GroupsList underneath it in the nested stack,
+        // so tab re-press / Back can return to the list (orphan GroupDetail
+        // stacks make popToTop a no-op — see navigation/tabNavigation.ts).
         expect(mockNavigate).toHaveBeenCalledWith('Main', {
             screen: 'Groups',
-            params: { screen: 'GroupDetail', params: { groupId: 'g1' } },
+            params: {
+                state: {
+                    routes: [
+                        { name: 'GroupsList' },
+                        { name: 'GroupDetail', params: { groupId: 'g1' } },
+                    ],
+                    index: 1,
+                },
+            },
         });
         // Create must NOT just pop back — it replaces onto the group screen.
         expect(mockGoBack).not.toHaveBeenCalled();

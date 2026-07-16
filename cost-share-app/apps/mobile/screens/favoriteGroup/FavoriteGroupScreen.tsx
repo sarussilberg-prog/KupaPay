@@ -3,28 +3,32 @@
  *
  * Resolves the effective favorite group (stored id or first-group fallback) and:
  *  - no groups at all → empty state with a create-group CTA;
- *  - otherwise → a "switch group" header (FavoriteGroupSwitcher) above the
- *    REUSED GroupDetailScreen, fed the effective groupId via route params.
+ *  - otherwise → GroupDetailScreen (flush top, no SafeAreaView edges=['top']).
+ *    The SummaryCover inside GroupDetailScreen handles the top inset itself.
  *
- * GroupDetailScreen reads route.params.groupId, so we push the resolved id onto
- * THIS route's params (not a new navigation) before rendering it.
+ * #4: Switcher (star+swap) now lives INSIDE the cover action row (via onSwitcherPress).
+ *     GroupPickerSheet is managed here and shown above everything.
+ *     SafeAreaView edges=['top'] removed — cover is flush to top.
  */
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { useEffectiveFavoriteGroupId } from '../../hooks/useEffectiveFavoriteGroupId';
-import { FavoriteGroupSwitcher } from '../../components/favoriteGroup/FavoriteGroupSwitcher';
+import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
 import { GroupDetailScreen } from '../groups/GroupDetailScreen';
 import { EmptyState } from '../../components/EmptyState';
+import { useAppStore } from '../../store';
 
 export function FavoriteGroupScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
     const { data: groups = [] } = useGroupsQuery();
     const effectiveGroupId = useEffectiveFavoriteGroupId();
+    const setFavoriteGroupId = useAppStore(s => s.setFavoriteGroupId);
+    const [pickerOpen, setPickerOpen] = useState(false);
 
     const activeGroup = useMemo(
         () => groups.find((g) => g.id === effectiveGroupId) ?? null,
@@ -37,9 +41,18 @@ export function FavoriteGroupScreen() {
         if (effectiveGroupId) {
             navigation.setParams({ groupId: effectiveGroupId });
         }
-        // TODO(task2): when useMarkGroupSeen from Task 2 is merged, mark the
-        // effective group as seen on focus here (spec §משימה 2).
     }, [effectiveGroupId, navigation]);
+
+    const handleSwitcherPress = useCallback(() => setPickerOpen(true), []);
+
+    const handleSelect = useCallback(
+        (id: string) => {
+            setFavoriteGroupId(id);
+            setPickerOpen(false);
+            navigation.setParams({ groupId: id });
+        },
+        [setFavoriteGroupId, navigation],
+    );
 
     if (!effectiveGroupId || !activeGroup) {
         return (
@@ -58,15 +71,15 @@ export function FavoriteGroupScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
-            <FavoriteGroupSwitcher
-                groupId={effectiveGroupId}
-                groupName={activeGroup.name}
+        <View className="flex-1 bg-slate-50">
+            <GroupDetailScreen showBack={false} onSwitcherPress={handleSwitcherPress} />
+            <GroupPickerSheet
+                visible={pickerOpen}
                 groups={groups}
+                selectedGroupId={effectiveGroupId}
+                onSelectGroup={handleSelect}
+                onClose={() => setPickerOpen(false)}
             />
-            <View className="flex-1">
-                <GroupDetailScreen />
-            </View>
-        </SafeAreaView>
+        </View>
     );
 }

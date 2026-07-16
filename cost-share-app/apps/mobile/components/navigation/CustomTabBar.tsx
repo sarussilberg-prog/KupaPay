@@ -13,31 +13,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { colors } from '../../theme';
 import { useRtlLayout } from '../../hooks/useRtlLayout';
-import { useAppStore } from '../../store';
-import { queryClient } from '../../lib/queryClient';
-import { queryKeys } from '../../hooks/queries/keys';
+import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
 import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
 import { AppIcon } from '../AppIcon';
 import { useActivityUnreadCount } from '../../hooks/queries/useActivityUnreadCount';
 
 const ICON_SIZE = 24;
 
-/** Resolve which group the "+" seeds: the favorite group, else the first group. */
-function useQuickAddGroupId(): string | undefined {
-    const favoriteGroupId = useAppStore((s) => s.favoriteGroupId);
-    if (favoriteGroupId) return favoriteGroupId;
-    // Read from the shared query-client singleton (the same instance App.tsx
-    // wires into QueryClientProvider), so the "+" resolves the first group even
-    // when the tab bar renders outside a provider (unit tests).
-    const groups =
-        queryClient.getQueryData<Array<{ id: string }>>(queryKeys.groups) ?? [];
-    return groups[0]?.id;
-}
-
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const isRtl = useRtlLayout();
     const insets = useSafeAreaInsets();
-    const quickAddGroupId = useQuickAddGroupId();
+    const quickAddGroupId = useQuickAddGroupId(state);
     const { data: unreadCount = 0 } = useActivityUnreadCount();
 
     const centerIndex = Math.floor(state.routes.length / 2);

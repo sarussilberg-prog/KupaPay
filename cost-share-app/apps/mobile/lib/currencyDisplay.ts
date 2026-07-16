@@ -46,6 +46,13 @@ export function getCurrencySymbol(code: string): string {
     return CURRENCY_SYMBOL_OVERRIDES[code] ?? symbolFromIntl(code) ?? code;
 }
 
+/** Symbol for inline amount prefix — null when the only label is the ISO code (already in the pill). */
+export function getDistinctCurrencySymbol(code: string): string | null {
+    const normalized = normalizeCurrencyCode(code);
+    const symbol = getCurrencySymbol(normalized);
+    return symbol.toUpperCase() === normalized ? null : symbol;
+}
+
 export function formatAmountDecimal(value: number): string {
     const isWhole = value % 1 === 0;
     return value.toLocaleString(undefined, {

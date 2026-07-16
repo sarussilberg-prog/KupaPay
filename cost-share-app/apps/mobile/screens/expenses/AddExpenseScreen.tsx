@@ -39,6 +39,7 @@ import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { CurrencyPicker } from '../../components/CurrencyPicker';
 
 import { CurrencyPill } from '../../components/expenseV2/CurrencyPill';
+import { getDistinctCurrencySymbol } from '../../lib/currencyDisplay';
 import { QuietIconPill } from '../../components/expenseV2/QuietIconPill';
 import { CombinedPayerSplitButton } from '../../components/expenseV2/CombinedPayerSplitButton';
 import {
@@ -50,6 +51,10 @@ import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdo
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
 import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
 import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
+
+/** Web inherits `dir=rtl` from RtlLayoutProvider — force physical LTR for amount row. */
+const WEB_LTR_DIR = Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {};
+const IS_WEB = Platform.OS === 'web';
 
 // iOS localizes the numeric keyboard's "Next" return button from the native
 // bundle, which ignores the in-app language. We provide our own accessory bar
@@ -205,6 +210,15 @@ export function AddExpenseScreen() {
     const [date, setDate] = useState<Date>(new Date());
     const [editorVisible, setEditorVisible] = useState(false);
     const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
+    const amountCurrencySymbol = useMemo(
+        () => getDistinctCurrencySymbol(currency),
+        [currency],
+    );
+    const amountInputWidth = useMemo(() => {
+        const charCount = Math.max(amount.length || 4, 4);
+        // Extra room so the focus caret never clips the last digit.
+        return Math.min(280, charCount * 34 + 20);
+    }, [amount]);
     const [datePickerVisible, setDatePickerVisible] = useState(false);
     const [groupPickerVisible, setGroupPickerVisible] = useState(false);
     const amountShake = useRef(new Animated.Value(0)).current;
@@ -593,14 +607,20 @@ export function AddExpenseScreen() {
                 ...(uploadedReceiptUrl ? { receiptUrl: uploadedReceiptUrl } : {}),
             });
             stopLoading();
-            // Land on the new expense's group so the user sees it in context
-            // (esp. the quick-add "+" flow, which opens this screen from
-            // anywhere). Navigating to Main → Groups → GroupDetail from this
-            // RootStack modal dismisses the modal, so Back returns to the group,
-            // not to Add Expense. Same proven deep-link as CreateGroupScreen.
+            // Land on the new expense's group with GroupsList underneath so
+            // tab re-press / Back can return to the list (orphan GroupDetail
+            // stacks make popToTop a no-op).
             navigation.navigate('Main', {
                 screen: 'Groups',
-                params: { screen: 'GroupDetail', params: { groupId } },
+                params: {
+                    state: {
+                        routes: [
+                            { name: 'GroupsList' },
+                            { name: 'GroupDetail', params: { groupId } },
+                        ],
+                        index: 1,
+                    },
+                },
             });
             return;
         }
@@ -805,36 +825,125 @@ export function AddExpenseScreen() {
                             <View style={{ height: 16 }} />
                         </>
                     ) : null}
-                    <CurrencyPill
-                        currency={currency}
-                        onPress={() => setCurrencyPickerVisible(true)}
-                    />
-                    <View style={{ height: 24 }} />
-                    <Animated.View style={{ transform: [{ translateX: amountShake }] }}>
-                        <TextInput
-                            ref={amountInputRef}
-                            value={amount}
-                            onChangeText={text => setAmount(sanitizeAmountInput(text))}
-                            selection={amountSelection}
-                            onFocus={() =>
-                                setAmountSelection({ start: amount.length, end: amount.length })
-                            }
-                            onSelectionChange={() => {
-                                if (amountSelection !== undefined) setAmountSelection(undefined);
-                            }}
-                            keyboardType="decimal-pad"
-                            inputMode="decimal"
-                            placeholder="0.00"
-                            placeholderTextColor={colors.gray300}
-                            style={styles.amountInput}
-                            testID="amount-display"
-                            autoFocus
-                            blurOnSubmit={false}
-                            onSubmitEditing={() => descriptionInputRef.current?.focus()}
-                            inputAccessoryViewID={
-                                Platform.OS === 'ios' ? AMOUNT_ACCESSORY_ID : undefined
-                            }
-                        />
+                    <View style={{ height: 20 }} />
+                    {/* Web: pill absolute-left + amount centered. Native: LTR flex row (RTL-safe). */}
+                    <Animated.View
+                        style={[
+                            IS_WEB ? styles.amountRowWeb : styles.amountRowNative,
+                            { transform: [{ translateX: amountShake }] },
+                        ]}
+                        {...WEB_LTR_DIR}
+                    >
+                        {IS_WEB ? (
+                            <>
+                                <View style={styles.amountCenteredWeb}>
+                                    <View style={styles.amountWithSymbolWeb} {...WEB_LTR_DIR}>
+                                        {amountCurrencySymbol ? (
+                                            <Text
+                                                style={styles.currencySymbolWeb}
+                                                testID="amount-currency-symbol"
+                                            >
+                                                {amountCurrencySymbol}
+                                            </Text>
+                                        ) : null}
+                                        <TextInput
+                                            ref={amountInputRef}
+                                            value={amount}
+                                            onChangeText={text =>
+                                                setAmount(sanitizeAmountInput(text))
+                                            }
+                                            selection={amountSelection}
+                                            onFocus={() =>
+                                                setAmountSelection({
+                                                    start: amount.length,
+                                                    end: amount.length,
+                                                })
+                                            }
+                                            onSelectionChange={() => {
+                                                if (amountSelection !== undefined) {
+                                                    setAmountSelection(undefined);
+                                                }
+                                            }}
+                                            keyboardType="decimal-pad"
+                                            inputMode="decimal"
+                                            placeholder="0.00"
+                                            placeholderTextColor={colors.gray300}
+                                            style={[
+                                                styles.amountInputWeb,
+                                                { width: amountInputWidth },
+                                            ]}
+                                            testID="amount-display"
+                                            autoFocus
+                                            blurOnSubmit={false}
+                                            onSubmitEditing={() =>
+                                                descriptionInputRef.current?.focus()
+                                            }
+                                        />
+                                    </View>
+                                </View>
+                                <View style={styles.currencyPillWeb} {...WEB_LTR_DIR}>
+                                    <CurrencyPill
+                                        currency={currency}
+                                        onPress={() => setCurrencyPickerVisible(true)}
+                                    />
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                <CurrencyPill
+                                    currency={currency}
+                                    onPress={() => setCurrencyPickerVisible(true)}
+                                />
+                                <View style={styles.amountWithSymbolNative}>
+                                    {amountCurrencySymbol ? (
+                                        <Text
+                                            style={styles.currencySymbolNative}
+                                            testID="amount-currency-symbol"
+                                        >
+                                            {amountCurrencySymbol}
+                                        </Text>
+                                    ) : null}
+                                    <TextInput
+                                        ref={amountInputRef}
+                                        value={amount}
+                                        onChangeText={text =>
+                                            setAmount(sanitizeAmountInput(text))
+                                        }
+                                        selection={amountSelection}
+                                        onFocus={() =>
+                                            setAmountSelection({
+                                                start: amount.length,
+                                                end: amount.length,
+                                            })
+                                        }
+                                        onSelectionChange={() => {
+                                            if (amountSelection !== undefined) {
+                                                setAmountSelection(undefined);
+                                            }
+                                        }}
+                                        keyboardType="decimal-pad"
+                                        inputMode="decimal"
+                                        placeholder="0.00"
+                                        placeholderTextColor={colors.gray300}
+                                        style={[
+                                            styles.amountInputNative,
+                                            { width: amountInputWidth },
+                                        ]}
+                                        testID="amount-display"
+                                        autoFocus
+                                        blurOnSubmit={false}
+                                        onSubmitEditing={() =>
+                                            descriptionInputRef.current?.focus()
+                                        }
+                                        inputAccessoryViewID={
+                                            Platform.OS === 'ios'
+                                                ? AMOUNT_ACCESSORY_ID
+                                                : undefined
+                                        }
+                                    />
+                                </View>
+                            </>
+                        )}
                     </Animated.View>
                     {Platform.OS === 'ios' ? (
                         <InputAccessoryView nativeID={AMOUNT_ACCESSORY_ID}>
@@ -1075,11 +1184,130 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
     },
     headerTitle: {
-        fontSize: 12,
-        fontWeight: '600',
-        letterSpacing: 0.72,
-        textTransform: 'uppercase',
-        color: colors.text.secondary,
+        fontSize: 28,
+        fontWeight: '800',
+        letterSpacing: -0.6,
+        color: colors.text.primary,
+    },
+    amountRowWeb: {
+        width: '100%',
+        minHeight: 72,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'visible',
+        paddingVertical: 6,
+        direction: 'ltr',
+    },
+    amountCenteredWeb: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'visible',
+    },
+    currencyPillWeb: {
+        position: 'absolute',
+        left: 4,
+        top: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        zIndex: 1,
+    },
+    amountWithSymbolWeb: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 2,
+        direction: 'ltr',
+        overflow: 'visible',
+        minHeight: 64,
+    },
+    currencySymbolWeb: {
+        fontSize: 44,
+        fontWeight: '700',
+        color: colors.text.primary,
+        letterSpacing: -1.2,
+        lineHeight: 44,
+        flexShrink: 0,
+    },
+    amountInputWeb: {
+        fontSize: 56,
+        fontWeight: '700',
+        color: colors.text.primary,
+        letterSpacing: -1.9,
+        lineHeight: 64,
+        minHeight: 64,
+        textAlign: 'center',
+        padding: 0,
+        marginVertical: 0,
+        fontVariant: ['tabular-nums'],
+        flexShrink: 0,
+    },
+    // Native amount row. `baseline` alignment looked wrong here because setting
+    // an explicit `lineHeight` on the smaller symbol Text shifts what RN reports
+    // as its baseline (the padding from lineHeight isn't split evenly above the
+    // glyph), so the symbol rendered near the top instead of visually centered.
+    // Fix: `alignItems: 'center'` centers each child's own box within the row,
+    // and neither child sets `lineHeight`/`height` — letting each platform's
+    // native text layout size the box from real font metrics is what keeps the
+    // glyph itself centered in that box (rather than us guessing an offset).
+    // The iOS focus-clipping bug was a *fixed* height fighting the TextInput's
+    // real focused layout — fixed by never constraining height, only giving the
+    // row comfortable minHeight/padding so nothing needs to get clipped.
+    amountRowNative: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        direction: 'ltr',
+        width: '100%',
+        minHeight: 80,
+        paddingVertical: 12,
+        paddingHorizontal: 4,
+    },
+    amountWithSymbolNative: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        // `baseline` — not `center` — is the correct alignment for two different
+        // font sizes sharing one visual line (how $ next to a numeral is actually
+        // typeset). `center` centers each element's *box*, but boxes aren't
+        // symmetric around the glyph on native text engines, so it looked off.
+        alignItems: 'baseline',
+        gap: 2,
+        direction: 'ltr',
+        flexShrink: 1,
+        minWidth: 0,
+    },
+    currencySymbolNative: {
+        fontSize: 44,
+        fontWeight: '700',
+        color: colors.text.primary,
+        letterSpacing: -1.2,
+        flexShrink: 0,
+        // Our shared `Text` wrapper (AppText) auto-injects a `self-stretch`
+        // NativeWind class on native whenever `textAlign` isn't explicitly set
+        // — that silently overrides any `alignItems` on the parent row (stretches
+        // this Text to the row's full height, top-anchoring the glyph). Setting
+        // `textAlign` here opts out of that injection so `baseline` alignment on
+        // the parent actually takes effect.
+        textAlign: 'left',
+        ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+    },
+    amountInputNative: {
+        fontSize: 56,
+        fontWeight: '700',
+        color: colors.text.primary,
+        letterSpacing: -1.9,
+        padding: 0,
+        margin: 0,
+        textAlign: 'left',
+        fontVariant: ['tabular-nums'],
+        flexShrink: 0,
+        ...(Platform.OS === 'android'
+            ? { textAlignVertical: 'center', includeFontPadding: false }
+            : null),
     },
     cancelText: {
         fontSize: 15,
@@ -1114,19 +1342,6 @@ const styles = StyleSheet.create({
     },
     heroTop: {
         alignItems: 'center',
-    },
-    amountInput: {
-        fontSize: 64,
-        fontWeight: '700',
-        color: colors.text.primary,
-        letterSpacing: -1.9,
-        lineHeight: 78,
-        textAlign: 'center',
-        padding: 0,
-        marginVertical: 0,
-        paddingTop: 8,
-        fontVariant: ['tabular-nums'],
-        minWidth: 120,
     },
     descriptionInput: {
         marginTop: 12,

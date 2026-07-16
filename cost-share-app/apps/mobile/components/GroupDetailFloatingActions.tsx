@@ -1,5 +1,9 @@
 /**
- * Floating message + expense actions pinned above the tab bar.
+ * Floating message action pinned above the tab bar.
+ * Expense creation uses the center tab "+" (derived group context).
+ *
+ * Anchored to the physical START side (left in LTR layout coords) in both
+ * Hebrew and English — do not flip with RTL.
  */
 
 import React from 'react';
@@ -19,12 +23,10 @@ export const FAB_ROW_HEIGHT = 48;
 
 interface GroupDetailFloatingActionsProps {
     onMessage: () => void;
-    onExpense: () => void;
 }
 
 export function GroupDetailFloatingActions({
     onMessage,
-    onExpense,
 }: GroupDetailFloatingActionsProps) {
     const { t } = useTranslation();
 
@@ -44,18 +46,6 @@ export function GroupDetailFloatingActions({
                 <AppIcon name="chatbubble-outline" size={24} color={colors.primary} />
                 <Text style={styles.fabLabelMessage}>{t('groups.actions.message')}</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={onExpense}
-                activeOpacity={0.85}
-                accessibilityRole="button"
-                accessibilityLabel={t('expenses.addExpense')}
-                style={[styles.fab, styles.fabExpense]}
-                testID="detail-add-expense"
-            >
-                <AppIcon name="add" size={26} color={colors.white} />
-                <Text style={styles.fabLabelExpense}>{t('expenses.addExpense')}</Text>
-            </TouchableOpacity>
         </View>
     );
 }
@@ -66,9 +56,10 @@ const styles = StyleSheet.create({
         left: 16,
         right: 16,
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        // Physical left in both HE and EN (message used to sit opposite the
+        // expense FAB on the right).
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        gap: 12,
         direction: 'ltr',
     },
     fab: {
@@ -93,19 +84,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(37, 99, 235, 0.2)',
     },
-    fabExpense: {
-        backgroundColor: colors.primary,
-    },
     fabLabelMessage: {
         marginStart: 8,
         fontSize: 15,
         fontWeight: '600',
         color: colors.primaryDark,
-    },
-    fabLabelExpense: {
-        marginStart: 6,
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.white,
     },
 });

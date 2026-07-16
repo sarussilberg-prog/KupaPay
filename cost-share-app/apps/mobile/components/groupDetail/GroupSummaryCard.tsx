@@ -3,6 +3,10 @@
  * Composes SummaryCover (with overlaid app-bar buttons), SummaryBalanceStrip,
  * and SummaryFooter inside one flat-top / rounded-bottom card frame that
  * fills the top region of the screen edge-to-edge.
+ *
+ * #10: onShare removed from cover (share now in ⋮ overflow menu).
+ * #4:  onSwitcherPress passes through to SummaryCover for Favorite tab.
+ * #11a: onMembersPress passes through to SummaryCover for tappable avatar stack.
  */
 
 import React from 'react';
@@ -26,12 +30,16 @@ interface GroupSummaryCardProps {
     balanceUnknown?: boolean;
     settlementCount: number;
     onBack: () => void;
-    onShare: () => void;
+    showBack?: boolean;
     onMenu: () => void;
     onOpenBalances: () => void;
     onOpenNote: () => void;
     onOpenSettleUp: () => void;
     noteHasUnread?: boolean;
+    /** When provided (Favorite tab), cover shows a compact star+swap switcher button. */
+    onSwitcherPress?: () => void;
+    /** When provided, the member stack becomes tappable to open the members sheet. */
+    onMembersPress?: () => void;
 }
 
 export function GroupSummaryCard({
@@ -41,12 +49,14 @@ export function GroupSummaryCard({
     balanceUnknown,
     settlementCount,
     onBack,
-    onShare,
+    showBack = true,
     onMenu,
     onOpenBalances,
     onOpenNote,
     onOpenSettleUp,
     noteHasUnread,
+    onSwitcherPress,
+    onMembersPress,
 }: GroupSummaryCardProps) {
     const insets = useSafeAreaInsets();
     return (
@@ -68,8 +78,10 @@ export function GroupSummaryCard({
                 members={members}
                 topInset={insets.top}
                 onBack={onBack}
-                onShare={onShare}
+                showBack={showBack}
                 onMenu={onMenu}
+                onSwitcherPress={onSwitcherPress}
+                onMembersPress={onMembersPress}
             />
             <SummaryBalanceStrip
                 rollup={rollup}

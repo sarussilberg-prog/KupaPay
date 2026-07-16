@@ -29,7 +29,6 @@ const baseProps = {
   rollup,
   settlementCount: 1,
   onBack: noop,
-  onShare: noop,
   onMenu: noop,
   onOpenBalances: noop,
   onOpenNote: noop,
@@ -65,23 +64,24 @@ describe('GroupSummaryCard', () => {
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
   });
 
-  it('routes the back/share/menu taps to their handlers', () => {
+  it('routes the back and menu taps to their handlers', () => {
     const onBack = jest.fn();
-    const onShare = jest.fn();
     const onMenu = jest.fn();
     const { getByTestId } = render(
       <GroupSummaryCard
         {...baseProps}
         onBack={onBack}
-        onShare={onShare}
         onMenu={onMenu}
       />,
     );
     fireEvent.press(getByTestId('appbar-back'));
-    fireEvent.press(getByTestId('appbar-share'));
     fireEvent.press(getByTestId('appbar-menu'));
     expect(onBack).toHaveBeenCalledTimes(1);
-    expect(onShare).toHaveBeenCalledTimes(1);
     expect(onMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render standalone share button (share is in overflow menu)', () => {
+    const { queryByTestId } = render(<GroupSummaryCard {...baseProps} />);
+    expect(queryByTestId('appbar-share')).toBeNull();
   });
 });

@@ -167,7 +167,7 @@
     },
     "groups": {
         "title": "Groups",
-        "createGroup": "Create Group",
+        "createGroup": "Create group",
         "editGroup": "Edit Group",
         "favorite": {
             "setOption": "Set as favorite group",
@@ -519,8 +519,8 @@
             "addQuick": "Add expense",
             "changeGroup": "Group",
             "selectGroup": "Choose group",
-            "headerNew": "NEW EXPENSE",
-            "headerEdit": "EDIT EXPENSE",
+            "headerNew": "New expense",
+            "headerEdit": "Edit expense",
             "amountPlaceholder": "0.00",
             "descriptionPlaceholder": "What was this for?",
             "today": "Today",
@@ -848,7 +848,7 @@
     "settleUp": {
         "title": "Settle up",
         "convertedTitle": "Converted settle up",
-        "openDebts": "Open debts left to settle",
+        "openDebts": "Open debts",
         "empty": "Everyone is settled up",
         "you": "You",
         "row": "{{from}} owes {{to}} {{amount}}",
@@ -910,7 +910,9 @@
         "sameParticipantError": "Payer and receiver can't be the same",
         "pairGroupLabel": "Debts between {{a}} and {{b}}",
         "pairGroupLabelSelf": "Debts between you and {{name}}",
-        "pairGroupCount": "{{count}} debts"
+        "pairGroupCount": "{{count}} debts",
+        "tapHint": "Tap a card to settle",
+        "whichDebt": "Which debt do you want to settle?"
     },
     "feed": {
         "settlement": "{{from}} paid {{to}} {{amount}}",
@@ -1028,7 +1030,7 @@
         },
         "find": {
             "title": "Find friends",
-            "searchPlaceholder": "Name, email, or phone",
+            "searchPlaceholder": "Name or email",
             "tooShort": "Type at least 2 characters",
             "noResults": "No matches",
             "self": "(You)"

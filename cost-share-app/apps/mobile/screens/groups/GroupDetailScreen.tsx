@@ -50,12 +50,12 @@ import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
 import { useGroupExpensesRealtime } from '../../hooks/useGroupExpensesRealtime';
+import { useGroupMembersRealtime } from '../../hooks/useGroupMembersRealtime';
 import { useGroupSettlementsRealtime } from '../../hooks/useGroupSettlementsRealtime';
 import { useGroupConsolidationBatchesRealtime } from '../../hooks/useGroupConsolidationBatchesRealtime';
 import { queryClient } from '../../lib/queryClient';
 import { supabase } from '../../lib/supabase';
 import { queryKeys } from '../../hooks/queries/keys';
-import { prefetchAddExpense } from '../../hooks/queries/prefetchAddExpense';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { useGroupExpensesQuery } from '../../hooks/queries/useGroupExpensesQuery';
@@ -74,6 +74,7 @@ import {
 import { useNetworkStatus } from '../../lib/networkStatus';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupSummaryCard } from '../../components/groupDetail/GroupSummaryCard';
+import { GroupMembersSheet } from '../../components/groupDetail/GroupMembersSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedItemRow } from '../../components/FeedItemRow';
 import {
@@ -112,11 +113,22 @@ import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
 import { showInfoToast, showSuccessMessage } from '../../lib/appToast';
 import { confirmSetFavoriteGroup } from '../../lib/favoriteGroupMenu';
+import {
+    canPopWithinStack,
+    exitGroupToGroupsList,
+} from '../../navigation/tabNavigation';
 
 type ComposerState =
     | { open: false }
     | { open: true; mode: 'create' }
     | { open: true; mode: 'edit'; messageId: string; initialBody: string };
+
+export type GroupDetailScreenProps = {
+    /** Hide cover Back when embedded as Favorite tab root (no prior screen). */
+    showBack?: boolean;
+    /** When provided (Favorite tab), tapping star+swap in the cover calls this. */
+    onSwitcherPress?: () => void;
+};
 
 const CATEGORIES: ExpenseCategory[] = [
     'food',
@@ -192,7 +204,7 @@ function PendingSyncBadge({
     );
 }
 
-export function GroupDetailScreen() {
+export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDetailScreenProps = {}) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
@@ -263,14 +275,22 @@ export function GroupDetailScreen() {
             avatarUrl: getAvatarUrl(u) ?? undefined,
             isActive: u.isActive,
         }));
-        if (!storeGroup?.members?.length) return fromUsers;
-        const avatarByUserId = new Map(
-            fromUsers.map(m => [m.userId, m.avatarUrl]),
-        );
-        return storeGroup.members.map(m => ({
-            ...m,
-            avatarUrl: m.avatarUrl ?? avatarByUserId.get(m.userId),
-        }));
+        // groupUsers is authority for who's active — a users refetch alone can
+        // update the cover stack without waiting for queryKeys.groups.
+        if (fromUsers.length > 0) {
+            const storeById = new Map(
+                (storeGroup?.members ?? []).map(m => [m.userId, m]),
+            );
+            return fromUsers.map(m => {
+                const fromStore = storeById.get(m.userId);
+                return {
+                    ...m,
+                    displayName: m.displayName || fromStore?.displayName || m.displayName,
+                    avatarUrl: m.avatarUrl ?? fromStore?.avatarUrl,
+                };
+            });
+        }
+        return storeGroup?.members ?? [];
     }, [storeGroup?.members, groupUsers, t]);
     const [feedParticipants, setFeedParticipants] = useState<
         Record<string, GroupMemberLite>
@@ -296,6 +316,7 @@ export function GroupDetailScreen() {
         settlements: Settlement[];
     } | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [membersSheetOpen, setMembersSheetOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [pendingExport, setPendingExport] = useState(false);
@@ -322,6 +343,7 @@ export function GroupDetailScreen() {
 
     useGroupMessagesRealtime(groupId);
     useGroupExpensesRealtime(groupId);
+    useGroupMembersRealtime(groupId);
     useGroupSettlementsRealtime(groupId);
     useGroupConsolidationBatchesRealtime(groupId);
 
@@ -537,7 +559,13 @@ export function GroupDetailScreen() {
         setFilters(DEFAULT_GROUP_FEED_FILTERS);
     }, []);
 
-    const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+    const handleBack = useCallback(() => {
+        if (canPopWithinStack(navigation)) {
+            navigation.goBack();
+            return;
+        }
+        exitGroupToGroupsList(navigation);
+    }, [navigation]);
     const handleOpenGroupMenu = useCallback(() => setMenuOpen(true), []);
     const handleEditGroup = useCallback(() => {
         setMenuOpen(false);
@@ -579,7 +607,7 @@ export function GroupDetailScreen() {
                     void (async () => {
                         if (!currentUserId) return;
                         const ok = await removeGroupMember(groupId, currentUserId);
-                        if (ok) navigation.popToTop?.() ?? navigation.goBack();
+                        if (ok) exitGroupToGroupsList(navigation);
                     })();
                 },
             },
@@ -595,7 +623,7 @@ export function GroupDetailScreen() {
                 onPress: () => {
                     void (async () => {
                         const ok = await deleteGroup(groupId);
-                        if (ok) navigation.popToTop?.() ?? navigation.goBack();
+                        if (ok) exitGroupToGroupsList(navigation);
                     })();
                 },
             },
@@ -651,10 +679,6 @@ export function GroupDetailScreen() {
         () => navigation.navigate('GroupNote', { groupId }),
         [navigation, groupId],
     );
-    const handleAddExpense = useCallback(() => {
-        prefetchAddExpense(groupId);
-        navigation.navigate('AddExpense', { groupId });
-    }, [navigation, groupId]);
     const handleExpensePress = useCallback(
         (expenseId: string) => {
             const match = feed.find(
@@ -672,9 +696,12 @@ export function GroupDetailScreen() {
         [],
     );
 
-    const handleShare = useCallback(() => {
+    const handleShareFromMenu = useCallback(() => {
+        setMenuOpen(false);
         void shareGroupInvite(groupId);
     }, [groupId]);
+
+    const handleMembersPress = useCallback(() => setMembersSheetOpen(true), []);
 
     const handleMessageEdit = useCallback(
         (m: GroupMessage) =>
@@ -905,12 +932,14 @@ export function GroupDetailScreen() {
                             balanceUnknown={balanceUnknown}
                             settlementCount={settlementCount}
                             onBack={handleBack}
-                            onShare={handleShare}
+                            showBack={showBack}
                             onMenu={handleOpenGroupMenu}
                             onOpenBalances={handleBalances}
                             onOpenNote={handleNote}
                             onOpenSettleUp={handleSettleUp}
                             noteHasUnread={storeGroup?.hasUnreadNote ?? false}
+                            onSwitcherPress={onSwitcherPress}
+                            onMembersPress={handleMembersPress}
                         />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
@@ -1053,7 +1082,6 @@ export function GroupDetailScreen() {
 
             <GroupDetailFloatingActions
                 onMessage={handleOpenComposer}
-                onExpense={handleAddExpense}
             />
 
             <GroupFeedFiltersSheet
@@ -1140,6 +1168,13 @@ export function GroupDetailScreen() {
                 />
             )}
 
+            <GroupMembersSheet
+                visible={membersSheetOpen}
+                members={memberLites}
+                onClose={() => setMembersSheetOpen(false)}
+                onAddMembers={() => setAddMembersOpen(true)}
+            />
+
             <Modal
                 visible={menuOpen}
                 transparent
@@ -1179,6 +1214,11 @@ export function GroupDetailScreen() {
                             onPress={handleSetFavorite}
                             disabled={isFavoriteGroup}
                             testID="group-menu-set-favorite"
+                        />
+                        <DetailMenuRow
+                            label={t('groups.share.inviteOption')}
+                            onPress={handleShareFromMenu}
+                            testID="group-menu-share"
                         />
                         <DetailMenuRow
                             label={t('groups.share.exportOption')}

@@ -104,6 +104,57 @@ describe('CustomTabBar', () => {
         expect(navigate).toHaveBeenCalledWith('AddExpense', { groupId: 'g-first' });
     });
 
+    it('emits tabPress when the focused tab is pressed again', () => {
+        const emit = jest.fn(() => ({ defaultPrevented: false }));
+        const props = makeProps({ index: 0 });
+        props.navigation.emit = emit;
+        const { getByTestId } = render(<CustomTabBar {...props} />);
+        fireEvent.press(getByTestId('tab-Groups'));
+        expect(emit).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'tabPress',
+                target: 'Groups-0',
+                canPreventDefault: true,
+            }),
+        );
+        // Focused re-press must not navigate away — listener owns pop-to-top.
+        expect(props.navigation.navigate).not.toHaveBeenCalled();
+    });
+
+    it('navigates to AddExpense with GroupDetail groupId when Groups tab is focused', () => {
+        const navigate = jest.fn();
+        const getParent = jest.fn(() => ({ navigate }));
+        const props = makeProps({ getParent, index: 0 });
+        props.state = {
+            index: 0,
+            routes: [
+                {
+                    key: 'Groups-0',
+                    name: 'Groups',
+                    state: {
+                        index: 1,
+                        routes: [
+                            { key: 'gl', name: 'GroupsList' },
+                            {
+                                key: 'gd',
+                                name: 'GroupDetail',
+                                params: { groupId: 'g-viewing' },
+                            },
+                        ],
+                    },
+                },
+                { key: 'Activity-1', name: 'Activity' },
+                { key: 'Favorite-2', name: 'Favorite' },
+                { key: 'Profile-3', name: 'Profile' },
+            ],
+        };
+        const { getByTestId } = render(<CustomTabBar {...props} />);
+        fireEvent.press(getByTestId('center-add-button'));
+        expect(navigate).toHaveBeenCalledWith('AddExpense', {
+            groupId: 'g-viewing',
+        });
+    });
+
     it('mirrors the row direction in RTL (Hebrew)', () => {
         useAppStore.setState({ language: 'he' } as any);
         const { getByTestId } = render(<CustomTabBar {...makeProps()} />);
