@@ -41,6 +41,7 @@ import { useBootWatchdog } from './hooks/useBootWatchdog';
 import { colors } from './theme';
 import { RtlLayoutProvider } from './hooks/useRtlLayout';
 import { WebAlertHost } from './components/WebAlertHost';
+import { AppExitGuard } from './components/AppExitGuard';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
 
@@ -323,4 +324,13 @@ function App() {
   );
 }
 
-export default Sentry.wrap(App);
+function Root() {
+  return (
+    <>
+      <AppExitGuard />
+      <App />
+    </>
+  );
+}
+
+export default Sentry.wrap(Root);

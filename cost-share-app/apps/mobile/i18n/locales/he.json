@@ -31,6 +31,12 @@
         "openMail": "פתח מייל",
         "linkCopied": "הקישור הועתק ללוח"
     },
+    "appExitGuard": {
+        "title": "לעזוב את KupaPay?",
+        "message": "האם אתם בטוחים שברצונכם לעזוב את האפליקציה?",
+        "leave": "עזיבה",
+        "stay": "הישארות"
+    },
     "tabs": {
         "groups": "קופות",
         "activity": "פעילות",

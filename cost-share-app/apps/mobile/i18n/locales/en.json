@@ -31,6 +31,12 @@
         "openMail": "Open mail",
         "linkCopied": "Link copied to clipboard"
     },
+    "appExitGuard": {
+        "title": "Leave KupaPay?",
+        "message": "Are you sure you want to leave the app?",
+        "leave": "Leave",
+        "stay": "Stay"
+    },
     "tabs": {
         "groups": "Groups",
         "activity": "Activity",
