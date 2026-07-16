@@ -167,7 +167,7 @@
     },
     "groups": {
         "title": "קופות",
-        "createGroup": "פתח קופה",
+        "createGroup": "יצירת קופה",
         "editGroup": "ערוך קופה",
         "favorite": {
             "setOption": "קבע כקופה מועדפת",
@@ -866,7 +866,7 @@
     "settleUp": {
         "title": "סגירת חשבון",
         "convertedTitle": "סגירת חשבון מומרת",
-        "openDebts": "חשבונות פתוחים שנותר לסגור",
+        "openDebts": "חשבונות פתוחים",
         "empty": "כולם מסודרים",
         "you": "את/ה",
         "row": "{{from}} חייב/ת ל-{{to}} {{amount}}",
@@ -928,7 +928,9 @@
         "sameParticipantError": "המשלם והמקבל לא יכולים להיות אותו אדם",
         "pairGroupLabel": "חובות בין {{a}} לבין {{b}}",
         "pairGroupLabelSelf": "חובות בינך לבין {{name}}",
-        "pairGroupCount": "{{count}} חובות"
+        "pairGroupCount": "{{count}} חובות",
+        "tapHint": "הקש על כרטיס כדי לסגור חשבון",
+        "whichDebt": "איזה חוב לסגור?"
     },
     "feed": {
         "settlement": "{{from}} שילם/ה ל-{{to}} {{amount}}",
@@ -1046,7 +1048,7 @@
         },
         "find": {
             "title": "מצא חברים",
-            "searchPlaceholder": "שם, אימייל או טלפון",
+            "searchPlaceholder": "שם או אימייל",
             "tooShort": "יש להקליד לפחות 2 תווים",
             "noResults": "לא נמצאו תוצאות",
             "self": "(את/ה)"

@@ -513,9 +513,17 @@ export function SettleUpListScreen() {
                 contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
                 ListHeaderComponent={
                     involvedGroups.length > 0 ? (
-                        <Text className="mb-3 px-1 text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                            {t('settleUp.openDebts')}
-                        </Text>
+                        <View className="mb-3">
+                            <Text className="px-1 text-[17px] font-bold text-gray-900">
+                                {t('settleUp.openDebts')}
+                            </Text>
+                            <Text className="mt-1 px-1 text-[14px] font-medium text-gray-600">
+                                {t('settleUp.whichDebt')}
+                            </Text>
+                            <Text className="mt-1 px-1 text-[12px] text-gray-400">
+                                {t('settleUp.tapHint')}
+                            </Text>
+                        </View>
                     ) : null
                 }
                 renderItem={({ item }) =>

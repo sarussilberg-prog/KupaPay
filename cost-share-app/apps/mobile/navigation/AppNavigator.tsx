@@ -10,13 +10,11 @@
 import React, { useEffect } from 'react';
 import { TouchableOpacity, View, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import type { ParamListBase, RouteProp } from '@react-navigation/native';
-import { shouldPopStackToInitial } from './shouldPopStackToInitial';
 import {
     createNativeStackNavigator,
     type NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
+import { createTabPopToTopListener } from './tabNavigation';
 import { useTranslation } from 'react-i18next';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon, AppIconName } from '../components/AppIcon';
@@ -114,36 +112,6 @@ function buildStackScreenOptions(isRtl: boolean) {
         headerLeft: navigation.canGoBack()
             ? () => <HeaderBackButton onPress={() => navigation.goBack()} />
             : undefined,
-    });
-}
-
-/** Pop nested stack to its root when the already-focused tab is pressed again. */
-function tabPopToTopOnPress(initialScreen: string) {
-    return ({
-        navigation,
-        route,
-    }: {
-        navigation: BottomTabNavigationProp<ParamListBase>;
-        route: RouteProp<ParamListBase>;
-    }) => ({
-        tabPress: (e: { preventDefault: () => void }) => {
-            if (!navigation.isFocused()) return;
-
-            // Read the COMMITTED nested state, not getFocusedRouteNameFromRoute —
-            // its params.screen fallback stays stale after deep navigations
-            // (navigate('Groups', { screen: 'GroupDetail' })) and would fire a
-            // spurious pop-to-top that replays the stack enter animation.
-            const nestedState = navigation
-                .getState()
-                .routes.find((r) => r.key === route.key)?.state;
-            if (shouldPopStackToInitial(nestedState, initialScreen)) {
-                e.preventDefault();
-                // pop: true is required — without it, NAVIGATE on a v7 stack
-                // pushes a duplicate initial screen onto the existing stack
-                // instead of popping back to the existing one.
-                navigation.navigate(route.name, { screen: initialScreen, pop: true });
-            }
-        },
     });
 }
 
@@ -324,7 +292,7 @@ function MainTabs() {
             <Tab.Screen
                 name="Profile"
                 component={ProfileStack}
-                listeners={tabPopToTopOnPress('ProfileMain')}
+                listeners={createTabPopToTopListener('ProfileMain')}
                 options={{
                     tabBarLabel: t('tabs.profile'),
                     tabBarIcon: tabBarIcon('person', 'person-outline'),
@@ -333,7 +301,7 @@ function MainTabs() {
             <Tab.Screen
                 name="Activity"
                 component={ActivityStack}
-                listeners={tabPopToTopOnPress('ActivityFeed')}
+                listeners={createTabPopToTopListener('ActivityFeed')}
                 options={{
                     tabBarLabel: t('tabs.activity'),
                     tabBarIcon: ({ color, size, focused }) => (
@@ -354,7 +322,7 @@ function MainTabs() {
             <Tab.Screen
                 name="FavoriteGroup"
                 component={FavoriteGroupStack}
-                listeners={tabPopToTopOnPress('FavoriteGroupHome')}
+                listeners={createTabPopToTopListener('FavoriteGroupHome')}
                 options={{
                     tabBarLabel: t('tabs.favoriteGroup'),
                     tabBarIcon: tabBarIcon('star', 'star-outline'),
@@ -363,7 +331,7 @@ function MainTabs() {
             <Tab.Screen
                 name="Groups"
                 component={GroupsStack}
-                listeners={tabPopToTopOnPress('GroupsList')}
+                listeners={createTabPopToTopListener('GroupsList')}
                 options={{
                     tabBarLabel: t('tabs.groups'),
                     tabBarIcon: tabBarIcon('people', 'people-outline'),

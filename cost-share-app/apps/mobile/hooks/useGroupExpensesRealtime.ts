@@ -1,43 +1,20 @@
 /**
- * useGroupExpensesRealtime — subscribes to postgres_changes on expenses
- * filtered by group_id while the screen is mounted. Refetches the affected
- * row (with splits) on INSERT/UPDATE, removes on soft-delete or hard DELETE,
- * and invalidates derived caches (settlements, pairwise debts, balances).
- *
- * Writes through the React Query cache (queryKeys.groupExpenses) — upsert by
- * id so realtime echoes for rows already in cache are no-ops. On SUBSCRIBED
- * the hook invalidates the query so any events missed during a disconnect
- * get reconciled.
+ * useGroupExpensesRealtime — payload-first upsert into groupExpenses, then
+ * hydrate splits via REST. On hydrate miss/error, invalidate the expenses
+ * query (never silent-drop the feed update).
  */
 
 import { useEffect, useId } from 'react';
 import * as Sentry from '@sentry/react-native';
-import type { ExpenseWithSplits } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getExpenseWithSplitsById } from '../services/expenses.service';
 import { queryClient } from '../lib/queryClient';
-import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
+import {
+    applyExpenseRealtimeEventSync,
+    hydrateExpenseAfterRealtime,
+} from '../lib/applyExpenseRealtimeEvent';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
-
-function removeExpenseFromCache(groupId: string, expenseId: string): void {
-    queryClient.setQueryData<ExpenseWithSplits[]>(
-        queryKeys.groupExpenses(groupId),
-        (prev) => (prev ?? []).filter((e) => e.id !== expenseId),
-    );
-}
-
-function upsertExpenseInCache(groupId: string, expense: ExpenseWithSplits): void {
-    queryClient.setQueryData<ExpenseWithSplits[]>(
-        queryKeys.groupExpenses(groupId),
-        (prev) => {
-            const list = prev ?? [];
-            return list.some((e) => e.id === expense.id)
-                ? list.map((e) => (e.id === expense.id ? expense : e))
-                : [...list, expense];
-        },
-    );
-}
 
 export function useGroupExpensesRealtime(groupId: string | undefined | null): void {
     const instanceId = useId();
@@ -59,45 +36,31 @@ export function useGroupExpensesRealtime(groupId: string | undefined | null): vo
                     new?: Record<string, unknown>;
                     old?: Record<string, unknown>;
                 }) => {
-                    void (async () => {
-                        try {
-                            if (payload.eventType === 'DELETE' && payload.old) {
-                                const oldId = payload.old.id as string | undefined;
-                                if (oldId) removeExpenseFromCache(groupId, oldId);
-                                invalidateBalanceCaches(groupId);
-                                return;
-                            }
-
-                            if (
-                                (payload.eventType === 'INSERT' ||
-                                    payload.eventType === 'UPDATE') &&
-                                payload.new
-                            ) {
-                                const id = payload.new.id as string | undefined;
-                                const isDeleted = payload.new.is_deleted === true;
-                                if (!id) return;
-
-                                if (isDeleted) {
-                                    removeExpenseFromCache(groupId, id);
-                                    invalidateBalanceCaches(groupId);
-                                    return;
-                                }
-
-                                const expense = await getExpenseWithSplitsById(id);
-                                if (!expense) {
-                                    invalidateBalanceCaches(groupId);
-                                    return;
-                                }
-
-                                upsertExpenseInCache(groupId, expense);
-                                invalidateBalanceCaches(groupId);
-                            }
-                        } catch (err) {
+                    try {
+                        const hydrateId = applyExpenseRealtimeEventSync(
+                            queryClient,
+                            groupId,
+                            payload,
+                        );
+                        if (!hydrateId) return;
+                        void hydrateExpenseAfterRealtime(
+                            queryClient,
+                            groupId,
+                            hydrateId,
+                            getExpenseWithSplitsById,
+                        ).catch((err) => {
                             Sentry.captureException(err, {
                                 tags: { tag: SENTRY_TAGS.REALTIME_ECHO },
                             });
-                        }
-                    })();
+                        });
+                    } catch (err) {
+                        Sentry.captureException(err, {
+                            tags: { tag: SENTRY_TAGS.REALTIME_ECHO },
+                        });
+                        void queryClient.invalidateQueries({
+                            queryKey: queryKeys.groupExpenses(groupId),
+                        });
+                    }
                 },
             )
             .subscribe((status) => {
