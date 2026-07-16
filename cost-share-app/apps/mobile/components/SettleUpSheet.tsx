@@ -97,6 +97,30 @@ const formatShortDate = (d: Date, locale: string) =>
 const FLOW_SIDE_WIDTH = 96;
 const AMOUNT_FONT_SIZE = 26;
 const AMOUNT_BOX_PAD_X = 12;
+/** ~tabular digit advance at 26px/700 — native fallback before layout. */
+const AMOUNT_CHAR_WIDTH = 15.5;
+
+let webMeasureCanvas: HTMLCanvasElement | null = null;
+
+/**
+ * Content width of the amount digits. On web, TextInput defaults to 100% of its
+ * parent — so we must set an explicit width *before* first paint. Canvas
+ * measureText is synchronous and content-sized; onLayout alone is too late
+ * (parent already expanded).
+ */
+function measureSettleAmountWidth(text: string): number {
+    const sample = text.length > 0 ? text : '0';
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+        webMeasureCanvas ??= document.createElement('canvas');
+        const ctx = webMeasureCanvas.getContext('2d');
+        if (ctx) {
+            ctx.font = `700 ${AMOUNT_FONT_SIZE}px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif`;
+            const letterSpacing = -0.02 * AMOUNT_FONT_SIZE;
+            return Math.ceil(ctx.measureText(sample).width + Math.abs(letterSpacing) * sample.length);
+        }
+    }
+    return Math.ceil(Math.max(sample.length, 1) * AMOUNT_CHAR_WIDTH);
+}
 
 export function SettleUpSheet({
     visible,
@@ -556,67 +580,51 @@ interface SettleUpAmountFieldProps {
     onAmountChange: (value: string) => void;
 }
 
-/** Background pill hugs the rendered digit width (onLayout), not a fixed estimate. */
+/** Background pill hugs digit content — explicit width every render (web-safe). */
 function SettleUpAmountField({
     amountText,
     amountLocked,
     onAmountChange,
 }: SettleUpAmountFieldProps) {
-    const [textWidth, setTextWidth] = useState(0);
-    const measureText = amountText.length > 0 ? amountText : '0';
-    const fieldWidth = textWidth > 0 ? textWidth : undefined;
-    const wrapWidth =
-        textWidth > 0 ? textWidth + AMOUNT_BOX_PAD_X * 2 : undefined;
+    const fieldWidth = measureSettleAmountWidth(amountText);
+    const wrapWidth = fieldWidth + AMOUNT_BOX_PAD_X * 2;
 
     return (
-        <View style={heroStyles.amountOuter}>
-            <Text
-                pointerEvents="none"
-                accessible={false}
-                importantForAccessibility="no-hide-descendants"
-                style={[heroStyles.amountText, heroStyles.amountMeasure]}
-                onLayout={event => {
-                    const next = Math.ceil(event.nativeEvent.layout.width);
-                    if (next !== textWidth) setTextWidth(next);
-                }}
-            >
-                {measureText}
-            </Text>
-            <View
-                style={[
-                    heroStyles.amountWrap,
-                    wrapWidth != null ? { width: wrapWidth } : null,
-                    amountLocked
-                        ? heroStyles.amountBoxLocked
-                        : heroStyles.amountBoxEditable,
-                ]}
-                {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
-            >
-                {amountLocked ? (
-                    <Text
-                        style={[heroStyles.amountText, fieldWidth != null && { width: fieldWidth }]}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.6}
-                        testID="settle-amount-locked"
-                    >
-                        {amountText}
-                    </Text>
-                ) : (
-                    <TextInput
-                        value={amountText}
-                        onChangeText={onAmountChange}
-                        keyboardType="decimal-pad"
-                        selectionColor="#FFFFFF"
-                        style={[
-                            heroStyles.amountText,
-                            fieldWidth != null && { width: fieldWidth },
-                            Platform.OS === 'web' && heroStyles.amountInputWeb,
-                        ]}
-                        testID="settle-amount-input"
-                    />
-                )}
-            </View>
+        <View
+            style={[
+                heroStyles.amountWrap,
+                { width: wrapWidth },
+                amountLocked
+                    ? heroStyles.amountBoxLocked
+                    : heroStyles.amountBoxEditable,
+                Platform.OS === 'web' && heroStyles.amountWrapWeb,
+            ]}
+            {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
+        >
+            {amountLocked ? (
+                <Text
+                    style={[heroStyles.amountText, { width: fieldWidth }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.6}
+                    testID="settle-amount-locked"
+                >
+                    {amountText}
+                </Text>
+            ) : (
+                <TextInput
+                    value={amountText}
+                    onChangeText={onAmountChange}
+                    keyboardType="decimal-pad"
+                    selectionColor="#FFFFFF"
+                    style={[
+                        heroStyles.amountText,
+                        { width: fieldWidth },
+                        Platform.OS === 'web' && heroStyles.amountInputWeb,
+                    ]}
+                    testID="settle-amount-input"
+                />
+            )}
         </View>
     );
 }
@@ -645,16 +653,6 @@ const heroStyles = StyleSheet.create({
         justifyContent: 'center',
         minWidth: 0,
     },
-    amountOuter: {
-        alignSelf: 'center',
-        position: 'relative',
-    },
-    amountMeasure: {
-        position: 'absolute',
-        opacity: 0,
-        top: 0,
-        left: 0,
-    },
     amountWrap: {
         alignSelf: 'center',
         flexGrow: 0,
@@ -663,7 +661,14 @@ const heroStyles = StyleSheet.create({
         paddingHorizontal: AMOUNT_BOX_PAD_X,
         paddingVertical: 4,
         direction: 'ltr',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
     },
+    amountWrapWeb: {
+        display: 'inline-flex',
+        maxWidth: '100%',
+    } as const,
     amountText: {
         color: '#FFFFFF',
         fontSize: AMOUNT_FONT_SIZE,
@@ -680,7 +685,8 @@ const heroStyles = StyleSheet.create({
         outlineStyle: 'none',
         borderWidth: 0,
         backgroundColor: 'transparent',
-        boxSizing: 'border-box',
+        boxSizing: 'content-box',
+        maxWidth: '100%',
     } as const,
     amountBoxEditable: {
         backgroundColor: 'rgba(255,255,255,0.14)',
