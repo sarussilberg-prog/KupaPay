@@ -119,6 +119,23 @@ export function resolveAutoTextInputStyle(
     };
 }
 
+/** Single-line inputs in fixed-height pill bars (search fields). */
+export function resolveCompactTextInputStyle(
+    isRtl: boolean,
+    style?: StyleProp<TextStyle>,
+): TextStyle {
+    const flat = StyleSheet.flatten(style);
+    return {
+        textAlign: flat?.textAlign ?? rtlTextAlign(isRtl),
+        ...(Platform.OS === 'android' && {
+            includeFontPadding: false,
+            textAlignVertical: 'center',
+            paddingVertical: 0,
+        }),
+        ...flat,
+    };
+}
+
 type RtlLayoutProviderProps = {
     children: React.ReactNode;
 };

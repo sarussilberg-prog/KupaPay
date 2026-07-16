@@ -7,7 +7,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from './AppText';
-import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../hooks/useRtlLayout';
+import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../hooks/useRtlLayout';
 import { AppIcon } from './AppIcon';
 import { colors } from '../theme';
 
@@ -72,7 +72,7 @@ export function SearchExpandable({
                     autoCorrect={false}
                     autoCapitalize="none"
                     returnKeyType="search"
-                    style={resolveAutoTextInputStyle(isRtl)}
+                    style={resolveCompactTextInputStyle(isRtl)}
                     testID={testID ? `${testID}-input` : undefined}
                 />
             </View>
