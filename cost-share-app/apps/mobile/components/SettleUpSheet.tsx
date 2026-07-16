@@ -95,10 +95,14 @@ const formatShortDate = (d: Date, locale: string) =>
     d.toLocaleDateString(locale === 'he' ? 'he-IL' : locale, { month: 'short', day: 'numeric' });
 
 const FLOW_SIDE_WIDTH = 96;
+const AMOUNT_FONT_SIZE = 26;
+const AMOUNT_BOX_PAD_X = 12;
+/** Approximate tabular digit width at 26px — used to shrink-wrap the amount pill on web. */
+const AMOUNT_CHAR_WIDTH = 15.5;
 
-/** Shrink-wrap width for the editable amount — TextInput defaults to 100% on web. */
-function settleAmountFieldWidth(charCount: number): number {
-    return Math.max(80, Math.ceil(Math.max(charCount, 4) * 15.5));
+function settleAmountWrapWidth(charCount: number): number {
+    const chars = Math.max(charCount, 1);
+    return Math.ceil(chars * AMOUNT_CHAR_WIDTH) + AMOUNT_BOX_PAD_X * 2;
 }
 
 export function SettleUpSheet({
@@ -498,6 +502,7 @@ function SettleUpHero({
                         <View
                             style={[
                                 heroStyles.amountWrap,
+                                { width: settleAmountWrapWidth(amountText.length) },
                                 amountLocked
                                     ? heroStyles.amountBoxLocked
                                     : heroStyles.amountBoxEditable,
@@ -506,10 +511,7 @@ function SettleUpHero({
                         >
                             {amountLocked ? (
                                 <Text
-                                    style={[
-                                        heroStyles.amountText,
-                                        { width: settleAmountFieldWidth(amountText.length) },
-                                    ]}
+                                    style={heroStyles.amountText}
                                     numberOfLines={1}
                                     adjustsFontSizeToFit
                                     minimumFontScale={0.6}
@@ -525,7 +527,7 @@ function SettleUpHero({
                                     selectionColor="#FFFFFF"
                                     style={[
                                         heroStyles.amountText,
-                                        { width: settleAmountFieldWidth(amountText.length) },
+                                        Platform.OS === 'web' && heroStyles.amountInputWeb,
                                     ]}
                                     testID="settle-amount-input"
                                 />
@@ -613,24 +615,30 @@ const heroStyles = StyleSheet.create({
         flexGrow: 0,
         flexShrink: 0,
         borderRadius: 12,
-        paddingHorizontal: 12,
+        paddingHorizontal: AMOUNT_BOX_PAD_X,
         paddingVertical: 4,
         direction: 'ltr',
-        ...(Platform.OS === 'web'
-            ? ({ width: 'fit-content', maxWidth: '100%' } as const)
-            : null),
+        overflow: 'hidden',
     },
     amountText: {
         color: '#FFFFFF',
-        fontSize: 26,
+        fontSize: AMOUNT_FONT_SIZE,
         fontWeight: '700',
         fontVariant: ['tabular-nums'],
-        letterSpacing: -0.02 * 26,
+        letterSpacing: -0.02 * AMOUNT_FONT_SIZE,
         padding: 0,
+        margin: 0,
         textAlign: 'center',
         flexGrow: 0,
         flexShrink: 0,
+        width: '100%',
     },
+    amountInputWeb: {
+        outlineStyle: 'none',
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        boxSizing: 'border-box',
+    } as const,
     amountBoxEditable: {
         backgroundColor: 'rgba(255,255,255,0.14)',
         borderWidth: 1,
