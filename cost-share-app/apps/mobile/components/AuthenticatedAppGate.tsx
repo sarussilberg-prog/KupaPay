@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { onlineManager } from '@tanstack/react-query';
 import type { GroupWithMembers } from '@cost-share/shared';
 import { AppNavigator } from '../navigation/AppNavigator';
 import { navigationIntegration } from '../lib/sentry';
+import { rootNavigationRef } from '../lib/rootNavigationRef';
 import { OnboardingCreateGroupScreen } from '../screens/onboarding/OnboardingCreateGroupScreen';
 import {
     hasCompletedPostLoginOnboarding,
@@ -45,7 +46,6 @@ type GateState = 'loading' | 'create' | 'main';
 
 export function AuthenticatedAppGate() {
     const [gate, setGate] = useState<GateState>('loading');
-    const navigationRef = useNavigationContainerRef();
 
     const enterMainAfterGroupInvite = useCallback(async () => {
         await markPostLoginOnboardingComplete();
@@ -91,8 +91,8 @@ export function AuthenticatedAppGate() {
 
     return (
         <NavigationContainer
-            ref={navigationRef}
-            onReady={() => navigationIntegration.registerNavigationContainer(navigationRef)}
+            ref={rootNavigationRef}
+            onReady={() => navigationIntegration.registerNavigationContainer(rootNavigationRef)}
         >
             <AppNavigator />
         </NavigationContainer>

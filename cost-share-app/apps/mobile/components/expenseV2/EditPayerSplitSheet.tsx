@@ -11,6 +11,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Animated,
+    Keyboard,
     KeyboardAvoidingView,
     Modal,
     Platform,
@@ -20,6 +21,7 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    useWindowDimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { User } from '@cost-share/shared';
@@ -94,6 +96,43 @@ export function EditPayerSplitSheet({
     // the remainder over the rest so the split always sums to the total.
     const [lockedIds, setLockedIds] = useState<Set<string>>(() => lockedFromValues(initial.unequalValues));
     const splitInputRefs = useRef<Record<string, TextInput | null>>({});
+    const scrollRef = useRef<ScrollView>(null);
+    const memberRowOffsets = useRef<Record<string, number>>({});
+    const focusedMemberIdRef = useRef<string | null>(null);
+    const { height: windowHeight } = useWindowDimensions();
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+    const scrollFocusedInputIntoView = useCallback(() => {
+        const id = focusedMemberIdRef.current;
+        if (!id) return;
+        const y = memberRowOffsets.current[id];
+        if (y == null) return;
+        scrollRef.current?.scrollTo({ y: Math.max(0, y - 16), animated: true });
+    }, []);
+
+    useEffect(() => {
+        if (!visible) {
+            setKeyboardHeight(0);
+            return;
+        }
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+        const showSub = Keyboard.addListener(showEvent, e => {
+            setKeyboardHeight(e.endCoordinates.height);
+            if (Platform.OS === 'android') {
+                setTimeout(scrollFocusedInputIntoView, 50);
+            }
+        });
+        const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, [visible, scrollFocusedInputIntoView]);
+
+    const sheetMaxHeight = keyboardHeight > 0
+        ? windowHeight - keyboardHeight - 12
+        : windowHeight * 0.75;
 
     useEffect(() => {
         if (visible) {
@@ -276,7 +315,7 @@ export function EditPayerSplitSheet({
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
             <KeyboardAvoidingView
                 style={styles.kavRoot}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <View style={styles.backdrop}>
                     <Pressable
@@ -284,7 +323,7 @@ export function EditPayerSplitSheet({
                         onPress={handleSave}
                         testID="edit-payer-split-scrim"
                     />
-                    <View style={styles.sheet}>
+                    <View style={[styles.sheet, { maxHeight: sheetMaxHeight }]}>
                     <View style={styles.grabber} />
                     <View style={styles.titleRow}>
                         <TouchableOpacity
@@ -303,9 +342,14 @@ export function EditPayerSplitSheet({
                     </View>
 
                     <ScrollView
-                        contentContainerStyle={{ paddingBottom: 8 }}
+                        ref={scrollRef}
+                        style={styles.sheetScroll}
+                        contentContainerStyle={{
+                            paddingBottom: keyboardHeight > 0 ? 16 : 8,
+                        }}
                         showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
+                        nestedScrollEnabled
                     >
                         {/* Section: Paid by */}
                         <Text style={styles.eyebrow}>{t('expenses.v2.sectionPaidBy')}</Text>
@@ -372,7 +416,19 @@ export function EditPayerSplitSheet({
                             />
                         </View>
 
-                        <View style={styles.memberList}>
+                        <View
+                            style={styles.memberList}
+                            onLayout={e => {
+                                const listTop = e.nativeEvent.layout.y;
+                                memberRowOffsets.current['__listTop'] = listTop;
+                                members.forEach(member => {
+                                    const localY = memberRowOffsets.current[`${member.id}:local`];
+                                    if (localY != null) {
+                                        memberRowOffsets.current[member.id] = listTop + localY;
+                                    }
+                                });
+                            }}
+                        >
                             {members.map((member, idx) => {
                                 const isLast = idx === members.length - 1;
                                 const checked = selectedIds.includes(member.id);
@@ -386,6 +442,14 @@ export function EditPayerSplitSheet({
                                 return (
                                     <View
                                         key={member.id}
+                                        onLayout={e => {
+                                            const localY = e.nativeEvent.layout.y;
+                                            memberRowOffsets.current[`${member.id}:local`] = localY;
+                                            const listTop = memberRowOffsets.current['__listTop'];
+                                            if (listTop != null) {
+                                                memberRowOffsets.current[member.id] = listTop + localY;
+                                            }
+                                        }}
                                         style={[styles.memberRow, !isLast && styles.memberRowDivider]}
                                     >
                                         <TouchableOpacity
@@ -429,10 +493,12 @@ export function EditPayerSplitSheet({
                                                     editable={checked}
                                                     testID={`split-input-${member.id}`}
                                                     onFocus={() => {
+                                                        focusedMemberIdRef.current = member.id;
                                                         const len = (values[member.id] ?? '').length;
                                                         setTimeout(() => {
                                                             splitInputRefs.current[member.id]?.setNativeProps({ selection: { start: len, end: len } });
-                                                        }, 0);
+                                                            scrollFocusedInputIntoView();
+                                                        }, Platform.OS === 'android' ? 80 : 0);
                                                     }}
                                                 />
                                                 <Text style={styles.inputSuffix}>
@@ -471,12 +537,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 8,
         paddingBottom: 22,
-        maxHeight: '75%',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -8 },
         shadowOpacity: 0.2,
         shadowRadius: 24,
         elevation: 12,
+    },
+    sheetScroll: {
+        flexGrow: 0,
+        flexShrink: 1,
     },
     grabber: {
         alignSelf: 'center',
