@@ -97,13 +97,6 @@ const formatShortDate = (d: Date, locale: string) =>
 const FLOW_SIDE_WIDTH = 96;
 const AMOUNT_FONT_SIZE = 26;
 const AMOUNT_BOX_PAD_X = 12;
-/** Approximate tabular digit width at 26px — used to shrink-wrap the amount pill on web. */
-const AMOUNT_CHAR_WIDTH = 15.5;
-
-function settleAmountWrapWidth(charCount: number): number {
-    const chars = Math.max(charCount, 1);
-    return Math.ceil(chars * AMOUNT_CHAR_WIDTH) + AMOUNT_BOX_PAD_X * 2;
-}
 
 export function SettleUpSheet({
     visible,
@@ -499,40 +492,11 @@ function SettleUpHero({
                     </View>
 
                     <View style={heroStyles.flowCenter}>
-                        <View
-                            style={[
-                                heroStyles.amountWrap,
-                                { width: settleAmountWrapWidth(amountText.length) },
-                                amountLocked
-                                    ? heroStyles.amountBoxLocked
-                                    : heroStyles.amountBoxEditable,
-                            ]}
-                            {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
-                        >
-                            {amountLocked ? (
-                                <Text
-                                    style={heroStyles.amountText}
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.6}
-                                    testID="settle-amount-locked"
-                                >
-                                    {amountText}
-                                </Text>
-                            ) : (
-                                <TextInput
-                                    value={amountText}
-                                    onChangeText={onAmountChange}
-                                    keyboardType="decimal-pad"
-                                    selectionColor="#FFFFFF"
-                                    style={[
-                                        heroStyles.amountText,
-                                        Platform.OS === 'web' && heroStyles.amountInputWeb,
-                                    ]}
-                                    testID="settle-amount-input"
-                                />
-                            )}
-                        </View>
+                        <SettleUpAmountField
+                            amountText={amountText}
+                            amountLocked={amountLocked}
+                            onAmountChange={onAmountChange}
+                        />
 
                         <CurrencyChip
                             currency={currency}
@@ -586,6 +550,77 @@ function SettleUpHero({
     );
 }
 
+interface SettleUpAmountFieldProps {
+    amountText: string;
+    amountLocked: boolean;
+    onAmountChange: (value: string) => void;
+}
+
+/** Background pill hugs the rendered digit width (onLayout), not a fixed estimate. */
+function SettleUpAmountField({
+    amountText,
+    amountLocked,
+    onAmountChange,
+}: SettleUpAmountFieldProps) {
+    const [textWidth, setTextWidth] = useState(0);
+    const measureText = amountText.length > 0 ? amountText : '0';
+    const fieldWidth = textWidth > 0 ? textWidth : undefined;
+    const wrapWidth =
+        textWidth > 0 ? textWidth + AMOUNT_BOX_PAD_X * 2 : undefined;
+
+    return (
+        <View style={heroStyles.amountOuter}>
+            <Text
+                pointerEvents="none"
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+                style={[heroStyles.amountText, heroStyles.amountMeasure]}
+                onLayout={event => {
+                    const next = Math.ceil(event.nativeEvent.layout.width);
+                    if (next !== textWidth) setTextWidth(next);
+                }}
+            >
+                {measureText}
+            </Text>
+            <View
+                style={[
+                    heroStyles.amountWrap,
+                    wrapWidth != null ? { width: wrapWidth } : null,
+                    amountLocked
+                        ? heroStyles.amountBoxLocked
+                        : heroStyles.amountBoxEditable,
+                ]}
+                {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
+            >
+                {amountLocked ? (
+                    <Text
+                        style={[heroStyles.amountText, fieldWidth != null && { width: fieldWidth }]}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.6}
+                        testID="settle-amount-locked"
+                    >
+                        {amountText}
+                    </Text>
+                ) : (
+                    <TextInput
+                        value={amountText}
+                        onChangeText={onAmountChange}
+                        keyboardType="decimal-pad"
+                        selectionColor="#FFFFFF"
+                        style={[
+                            heroStyles.amountText,
+                            fieldWidth != null && { width: fieldWidth },
+                            Platform.OS === 'web' && heroStyles.amountInputWeb,
+                        ]}
+                        testID="settle-amount-input"
+                    />
+                )}
+            </View>
+        </View>
+    );
+}
+
 interface FlowAvatarProps {
     member: GroupMemberLite | undefined;
     label: string;
@@ -610,6 +645,16 @@ const heroStyles = StyleSheet.create({
         justifyContent: 'center',
         minWidth: 0,
     },
+    amountOuter: {
+        alignSelf: 'center',
+        position: 'relative',
+    },
+    amountMeasure: {
+        position: 'absolute',
+        opacity: 0,
+        top: 0,
+        left: 0,
+    },
     amountWrap: {
         alignSelf: 'center',
         flexGrow: 0,
@@ -618,7 +663,6 @@ const heroStyles = StyleSheet.create({
         paddingHorizontal: AMOUNT_BOX_PAD_X,
         paddingVertical: 4,
         direction: 'ltr',
-        overflow: 'hidden',
     },
     amountText: {
         color: '#FFFFFF',
@@ -631,7 +675,6 @@ const heroStyles = StyleSheet.create({
         textAlign: 'center',
         flexGrow: 0,
         flexShrink: 0,
-        width: '100%',
     },
     amountInputWeb: {
         outlineStyle: 'none',
