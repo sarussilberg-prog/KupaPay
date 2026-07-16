@@ -1,8 +1,10 @@
+import { Platform } from 'react-native';
 import {
     centeredTextStyle,
     feedActorNameStyle,
     resolveAutoTextInputStyle,
     resolveAutoTextStyle,
+    resolveCompactTextInputStyle,
     rtlTextAlign,
     rtlTextClassName,
 } from '../../hooks/useRtlLayout';
@@ -45,6 +47,18 @@ describe('useRtlLayout helpers', () => {
 
     it('defers to an explicit textAlign passed in the TextInput style', () => {
         expect(resolveAutoTextInputStyle(true, { textAlign: 'center' })).toBeUndefined();
+    });
+
+    it('keeps compact search inputs vertically centered on Android', () => {
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'android' });
+        expect(resolveCompactTextInputStyle(true)).toEqual({
+            textAlign: 'right',
+            includeFontPadding: false,
+            textAlignVertical: 'center',
+            paddingVertical: 0,
+        });
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
     });
 
     it('applies RTL text styles unless textAlign is explicit', () => {

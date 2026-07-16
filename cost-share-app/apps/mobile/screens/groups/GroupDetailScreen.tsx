@@ -83,7 +83,7 @@ import {
     FAB_ROW_HEIGHT,
     GroupDetailFloatingActions,
 } from '../../components/GroupDetailFloatingActions';
-import { resolveAutoTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 import { MessageComposerSheet } from '../../components/MessageComposerSheet';
 import { AddMembersSheet } from '../../components/AddMembersSheet';
 import {
@@ -958,7 +958,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                                     autoCorrect={false}
                                     autoCapitalize="none"
                                     returnKeyType="search"
-                                    style={resolveAutoTextInputStyle(isRtl)}
+                                    style={resolveCompactTextInputStyle(isRtl)}
                                     testID="detail-search-input"
                                 />
                                 {searchQuery.length > 0 && (
