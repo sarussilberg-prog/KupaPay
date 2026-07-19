@@ -97,30 +97,6 @@ const formatShortDate = (d: Date, locale: string) =>
 const FLOW_SIDE_WIDTH = 96;
 const AMOUNT_FONT_SIZE = 26;
 const AMOUNT_BOX_PAD_X = 12;
-/** ~tabular digit advance at 26px/700 — native fallback before layout. */
-const AMOUNT_CHAR_WIDTH = 15.5;
-
-let webMeasureCanvas: HTMLCanvasElement | null = null;
-
-/**
- * Content width of the amount digits. On web, TextInput defaults to 100% of its
- * parent — so we must set an explicit width *before* first paint. Canvas
- * measureText is synchronous and content-sized; onLayout alone is too late
- * (parent already expanded).
- */
-function measureSettleAmountWidth(text: string): number {
-    const sample = text.length > 0 ? text : '0';
-    if (Platform.OS === 'web' && typeof document !== 'undefined') {
-        webMeasureCanvas ??= document.createElement('canvas');
-        const ctx = webMeasureCanvas.getContext('2d');
-        if (ctx) {
-            ctx.font = `700 ${AMOUNT_FONT_SIZE}px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif`;
-            const letterSpacing = -0.02 * AMOUNT_FONT_SIZE;
-            return Math.ceil(ctx.measureText(sample).width + Math.abs(letterSpacing) * sample.length);
-        }
-    }
-    return Math.ceil(Math.max(sample.length, 1) * AMOUNT_CHAR_WIDTH);
-}
 
 export function SettleUpSheet({
     visible,
@@ -580,30 +556,60 @@ interface SettleUpAmountFieldProps {
     onAmountChange: (value: string) => void;
 }
 
-/** Background pill hugs digit content — explicit width every render (web-safe). */
+/**
+ * Amount + translucent pill.
+ *
+ * On web, RN TextInput defaults to width:100% and stretches any parent. Canvas /
+ * onLayout fixes still race that default. Instead: a Text (content-sized) owns
+ * the pill; a transparent TextInput overlays it for editing.
+ */
 function SettleUpAmountField({
     amountText,
     amountLocked,
     onAmountChange,
 }: SettleUpAmountFieldProps) {
-    const fieldWidth = measureSettleAmountWidth(amountText);
-    const wrapWidth = fieldWidth + AMOUNT_BOX_PAD_X * 2;
+    const display = amountText.length > 0 ? amountText : '0';
+    const pillStyle = [
+        heroStyles.amountWrap,
+        amountLocked ? heroStyles.amountBoxLocked : heroStyles.amountBoxEditable,
+    ];
+
+    if (Platform.OS === 'web') {
+        return (
+            <View
+                style={[pillStyle, heroStyles.amountWrapWeb]}
+                {...({ dir: 'ltr' } as const)}
+            >
+                <Text
+                    style={heroStyles.amountText}
+                    pointerEvents="none"
+                    accessible={false}
+                    importantForAccessibility="no-hide-descendants"
+                    testID={amountLocked ? 'settle-amount-locked' : undefined}
+                >
+                    {display}
+                </Text>
+                {amountLocked ? null : (
+                    <TextInput
+                        value={amountText}
+                        onChangeText={onAmountChange}
+                        keyboardType="decimal-pad"
+                        selectionColor="#FFFFFF"
+                        caretHidden={false}
+                        style={heroStyles.amountInputOverlayWeb}
+                        testID="settle-amount-input"
+                        accessibilityLabel={display}
+                    />
+                )}
+            </View>
+        );
+    }
 
     return (
-        <View
-            style={[
-                heroStyles.amountWrap,
-                { width: wrapWidth },
-                amountLocked
-                    ? heroStyles.amountBoxLocked
-                    : heroStyles.amountBoxEditable,
-                Platform.OS === 'web' && heroStyles.amountWrapWeb,
-            ]}
-            {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
-        >
+        <View style={pillStyle}>
             {amountLocked ? (
                 <Text
-                    style={[heroStyles.amountText, { width: fieldWidth }]}
+                    style={heroStyles.amountText}
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     minimumFontScale={0.6}
@@ -617,11 +623,7 @@ function SettleUpAmountField({
                     onChangeText={onAmountChange}
                     keyboardType="decimal-pad"
                     selectionColor="#FFFFFF"
-                    style={[
-                        heroStyles.amountText,
-                        { width: fieldWidth },
-                        Platform.OS === 'web' && heroStyles.amountInputWeb,
-                    ]}
+                    style={[heroStyles.amountText, { minWidth: 80 }]}
                     testID="settle-amount-input"
                 />
             )}
@@ -646,12 +648,15 @@ const heroStyles = StyleSheet.create({
     flowSide: {
         width: FLOW_SIDE_WIDTH,
         alignItems: 'center',
+        zIndex: 2,
     },
     flowCenter: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 0,
+        overflow: 'hidden',
+        zIndex: 1,
     },
     amountWrap: {
         alignSelf: 'center',
@@ -663,11 +668,17 @@ const heroStyles = StyleSheet.create({
         direction: 'ltr',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
     },
+    /** Web: shrink-wrap to the Text child; never stretch to the flex column. */
     amountWrapWeb: {
+        position: 'relative',
         display: 'inline-flex',
+        width: 'auto',
         maxWidth: '100%',
+        alignSelf: 'center',
+        flexGrow: 0,
+        flexShrink: 0,
+        flexBasis: 'auto',
     } as const,
     amountText: {
         color: '#FFFFFF',
@@ -681,12 +692,28 @@ const heroStyles = StyleSheet.create({
         flexGrow: 0,
         flexShrink: 0,
     },
-    amountInputWeb: {
-        outlineStyle: 'none',
+    /** Invisible editor layered on the sizing Text — absolute so it cannot expand the pill. */
+    amountInputOverlayWeb: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        margin: 0,
+        padding: 0,
         borderWidth: 0,
         backgroundColor: 'transparent',
-        boxSizing: 'content-box',
-        maxWidth: '100%',
+        color: 'transparent',
+        caretColor: '#FFFFFF',
+        outlineStyle: 'none',
+        fontSize: AMOUNT_FONT_SIZE,
+        fontWeight: '700',
+        fontVariant: ['tabular-nums'],
+        letterSpacing: -0.02 * AMOUNT_FONT_SIZE,
+        textAlign: 'center',
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
     } as const,
     amountBoxEditable: {
         backgroundColor: 'rgba(255,255,255,0.14)',
