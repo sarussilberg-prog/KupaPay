@@ -15,15 +15,26 @@ export function usePushNotificationListeners(): void {
     useEffect(() => {
         if (Platform.OS === 'web') return;
 
-        // Cold start: app opened by tapping a notification.
-        void Notifications.getLastNotificationResponseAsync().then((response) => {
-            const data = response?.notification.request.content.data as NotificationData | undefined;
-            if (data) handleTap(data);
-        });
+        let sub: { remove: () => void } | undefined;
+        try {
+            // Cold start: app opened by tapping a notification.
+            void Notifications.getLastNotificationResponseAsync()
+                .then((response) => {
+                    const data = response?.notification.request.content.data as
+                        | NotificationData
+                        | undefined;
+                    if (data) handleTap(data);
+                })
+                .catch(() => {
+                    // Native module unavailable (e.g. web / incomplete link) — ignore.
+                });
 
-        const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-            handleTap(response.notification.request.content.data as NotificationData);
-        });
-        return () => sub.remove();
+            sub = Notifications.addNotificationResponseReceivedListener((response) => {
+                handleTap(response.notification.request.content.data as NotificationData);
+            });
+        } catch {
+            // expo-notifications not linked on this platform
+        }
+        return () => sub?.remove();
     }, []);
 }

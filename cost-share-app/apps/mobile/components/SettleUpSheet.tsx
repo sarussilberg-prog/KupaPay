@@ -10,7 +10,7 @@
  *   └────────────────────────────────────────┘
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text as RNText, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import type { GroupMemberLite, PairwiseDebt, PaymentMethod } from '@cost-share/shared';
@@ -557,11 +557,11 @@ interface SettleUpAmountFieldProps {
 }
 
 /**
- * Amount + translucent pill.
+ * Amount + translucent pill (create settle-up only).
  *
- * On web, RN TextInput defaults to width:100% and stretches any parent. Canvas /
- * onLayout fixes still race that default. Instead: a Text (content-sized) owns
- * the pill; a transparent TextInput overlays it for editing.
+ * Web: RN View defaults to flex + stretch in a column, and TextInput is width:100%.
+ * Put the pill background on a content-sized RN Text (`max-content`) and overlay a
+ * transparent TextInput — never put background on a stretching View.
  */
 function SettleUpAmountField({
     amountText,
@@ -569,26 +569,25 @@ function SettleUpAmountField({
     onAmountChange,
 }: SettleUpAmountFieldProps) {
     const display = amountText.length > 0 ? amountText : '0';
-    const pillStyle = [
-        heroStyles.amountWrap,
-        amountLocked ? heroStyles.amountBoxLocked : heroStyles.amountBoxEditable,
-    ];
 
     if (Platform.OS === 'web') {
         return (
-            <View
-                style={[pillStyle, heroStyles.amountWrapWeb]}
-                {...({ dir: 'ltr' } as const)}
-            >
-                <Text
-                    style={heroStyles.amountText}
+            <View style={heroStyles.amountHostWeb} {...({ dir: 'ltr' } as const)}>
+                <RNText
+                    style={[
+                        heroStyles.amountText,
+                        heroStyles.amountTextWeb,
+                        amountLocked
+                            ? heroStyles.amountBoxLocked
+                            : heroStyles.amountBoxEditable,
+                    ]}
                     pointerEvents="none"
                     accessible={false}
                     importantForAccessibility="no-hide-descendants"
                     testID={amountLocked ? 'settle-amount-locked' : undefined}
                 >
                     {display}
-                </Text>
+                </RNText>
                 {amountLocked ? null : (
                     <TextInput
                         value={amountText}
@@ -606,7 +605,12 @@ function SettleUpAmountField({
     }
 
     return (
-        <View style={pillStyle}>
+        <View
+            style={[
+                heroStyles.amountWrap,
+                amountLocked ? heroStyles.amountBoxLocked : heroStyles.amountBoxEditable,
+            ]}
+        >
             {amountLocked ? (
                 <Text
                     style={heroStyles.amountText}
@@ -669,16 +673,16 @@ const heroStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    /** Web: shrink-wrap to the Text child; never stretch to the flex column. */
-    amountWrapWeb: {
+    /** Host only — no background. Sized by the RNText child. */
+    amountHostWeb: {
         position: 'relative',
-        display: 'inline-flex',
-        width: 'auto',
-        maxWidth: '100%',
         alignSelf: 'center',
         flexGrow: 0,
         flexShrink: 0,
         flexBasis: 'auto',
+        display: 'inline-flex',
+        width: 'max-content',
+        maxWidth: '100%',
     } as const,
     amountText: {
         color: '#FFFFFF',
@@ -692,7 +696,18 @@ const heroStyles = StyleSheet.create({
         flexGrow: 0,
         flexShrink: 0,
     },
-    /** Invisible editor layered on the sizing Text — absolute so it cannot expand the pill. */
+    /** Web: pill chrome on the text itself so width tracks glyphs. */
+    amountTextWeb: {
+        display: 'inline-block',
+        width: 'max-content',
+        maxWidth: '100%',
+        paddingHorizontal: AMOUNT_BOX_PAD_X,
+        paddingVertical: 4,
+        borderRadius: 12,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+    } as const,
+    /** Invisible editor — absolute so it cannot expand layout. */
     amountInputOverlayWeb: {
         position: 'absolute',
         top: 0,
