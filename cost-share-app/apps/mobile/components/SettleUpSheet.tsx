@@ -10,7 +10,7 @@
  *   └────────────────────────────────────────┘
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text as RNText, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import type { GroupMemberLite, PairwiseDebt, PaymentMethod } from '@cost-share/shared';
@@ -97,30 +97,6 @@ const formatShortDate = (d: Date, locale: string) =>
 const FLOW_SIDE_WIDTH = 96;
 const AMOUNT_FONT_SIZE = 26;
 const AMOUNT_BOX_PAD_X = 12;
-/** ~tabular digit advance at 26px/700 — native fallback before layout. */
-const AMOUNT_CHAR_WIDTH = 15.5;
-
-let webMeasureCanvas: HTMLCanvasElement | null = null;
-
-/**
- * Content width of the amount digits. On web, TextInput defaults to 100% of its
- * parent — so we must set an explicit width *before* first paint. Canvas
- * measureText is synchronous and content-sized; onLayout alone is too late
- * (parent already expanded).
- */
-function measureSettleAmountWidth(text: string): number {
-    const sample = text.length > 0 ? text : '0';
-    if (Platform.OS === 'web' && typeof document !== 'undefined') {
-        webMeasureCanvas ??= document.createElement('canvas');
-        const ctx = webMeasureCanvas.getContext('2d');
-        if (ctx) {
-            ctx.font = `700 ${AMOUNT_FONT_SIZE}px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif`;
-            const letterSpacing = -0.02 * AMOUNT_FONT_SIZE;
-            return Math.ceil(ctx.measureText(sample).width + Math.abs(letterSpacing) * sample.length);
-        }
-    }
-    return Math.ceil(Math.max(sample.length, 1) * AMOUNT_CHAR_WIDTH);
-}
 
 export function SettleUpSheet({
     visible,
@@ -580,30 +556,64 @@ interface SettleUpAmountFieldProps {
     onAmountChange: (value: string) => void;
 }
 
-/** Background pill hugs digit content — explicit width every render (web-safe). */
+/**
+ * Amount + translucent pill (create settle-up only).
+ *
+ * Web: RN View defaults to flex + stretch in a column, and TextInput is width:100%.
+ * Put the pill background on a content-sized RN Text (`max-content`) and overlay a
+ * transparent TextInput — never put background on a stretching View.
+ */
 function SettleUpAmountField({
     amountText,
     amountLocked,
     onAmountChange,
 }: SettleUpAmountFieldProps) {
-    const fieldWidth = measureSettleAmountWidth(amountText);
-    const wrapWidth = fieldWidth + AMOUNT_BOX_PAD_X * 2;
+    const display = amountText.length > 0 ? amountText : '0';
+
+    if (Platform.OS === 'web') {
+        return (
+            <View style={heroStyles.amountHostWeb} {...({ dir: 'ltr' } as const)}>
+                <RNText
+                    style={[
+                        heroStyles.amountText,
+                        heroStyles.amountTextWeb,
+                        amountLocked
+                            ? heroStyles.amountBoxLocked
+                            : heroStyles.amountBoxEditable,
+                    ]}
+                    pointerEvents="none"
+                    accessible={false}
+                    importantForAccessibility="no-hide-descendants"
+                    testID={amountLocked ? 'settle-amount-locked' : undefined}
+                >
+                    {display}
+                </RNText>
+                {amountLocked ? null : (
+                    <TextInput
+                        value={amountText}
+                        onChangeText={onAmountChange}
+                        keyboardType="decimal-pad"
+                        selectionColor="#FFFFFF"
+                        caretHidden={false}
+                        style={heroStyles.amountInputOverlayWeb}
+                        testID="settle-amount-input"
+                        accessibilityLabel={display}
+                    />
+                )}
+            </View>
+        );
+    }
 
     return (
         <View
             style={[
                 heroStyles.amountWrap,
-                { width: wrapWidth },
-                amountLocked
-                    ? heroStyles.amountBoxLocked
-                    : heroStyles.amountBoxEditable,
-                Platform.OS === 'web' && heroStyles.amountWrapWeb,
+                amountLocked ? heroStyles.amountBoxLocked : heroStyles.amountBoxEditable,
             ]}
-            {...(Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {})}
         >
             {amountLocked ? (
                 <Text
-                    style={[heroStyles.amountText, { width: fieldWidth }]}
+                    style={heroStyles.amountText}
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     minimumFontScale={0.6}
@@ -617,11 +627,7 @@ function SettleUpAmountField({
                     onChangeText={onAmountChange}
                     keyboardType="decimal-pad"
                     selectionColor="#FFFFFF"
-                    style={[
-                        heroStyles.amountText,
-                        { width: fieldWidth },
-                        Platform.OS === 'web' && heroStyles.amountInputWeb,
-                    ]}
+                    style={[heroStyles.amountText, { minWidth: 80 }]}
                     testID="settle-amount-input"
                 />
             )}
@@ -646,12 +652,15 @@ const heroStyles = StyleSheet.create({
     flowSide: {
         width: FLOW_SIDE_WIDTH,
         alignItems: 'center',
+        zIndex: 2,
     },
     flowCenter: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 0,
+        overflow: 'hidden',
+        zIndex: 1,
     },
     amountWrap: {
         alignSelf: 'center',
@@ -663,10 +672,16 @@ const heroStyles = StyleSheet.create({
         direction: 'ltr',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
     },
-    amountWrapWeb: {
+    /** Host only — no background. Sized by the RNText child. */
+    amountHostWeb: {
+        position: 'relative',
+        alignSelf: 'center',
+        flexGrow: 0,
+        flexShrink: 0,
+        flexBasis: 'auto',
         display: 'inline-flex',
+        width: 'max-content',
         maxWidth: '100%',
     } as const,
     amountText: {
@@ -681,12 +696,39 @@ const heroStyles = StyleSheet.create({
         flexGrow: 0,
         flexShrink: 0,
     },
-    amountInputWeb: {
-        outlineStyle: 'none',
+    /** Web: pill chrome on the text itself so width tracks glyphs. */
+    amountTextWeb: {
+        display: 'inline-block',
+        width: 'max-content',
+        maxWidth: '100%',
+        paddingHorizontal: AMOUNT_BOX_PAD_X,
+        paddingVertical: 4,
+        borderRadius: 12,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+    } as const,
+    /** Invisible editor — absolute so it cannot expand layout. */
+    amountInputOverlayWeb: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        margin: 0,
+        padding: 0,
         borderWidth: 0,
         backgroundColor: 'transparent',
-        boxSizing: 'content-box',
-        maxWidth: '100%',
+        color: 'transparent',
+        caretColor: '#FFFFFF',
+        outlineStyle: 'none',
+        fontSize: AMOUNT_FONT_SIZE,
+        fontWeight: '700',
+        fontVariant: ['tabular-nums'],
+        letterSpacing: -0.02 * AMOUNT_FONT_SIZE,
+        textAlign: 'center',
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
     } as const,
     amountBoxEditable: {
         backgroundColor: 'rgba(255,255,255,0.14)',
