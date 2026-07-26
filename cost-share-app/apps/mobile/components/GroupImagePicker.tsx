@@ -6,7 +6,6 @@
 import { Text } from './AppText';
 import React, { useCallback } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { platformAlert } from '../lib/platformAlert';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
 import { GroupType } from '@cost-share/shared';
@@ -30,13 +29,8 @@ export function GroupImagePicker({
     const { t } = useTranslation();
     const displayUri = localUri ?? imageUrl ?? null;
 
+    // System photo picker — no READ_MEDIA_* / gallery permission (Play policy).
     const pickImage = useCallback(async () => {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-            platformAlert(t('groups.imagePermissionTitle'), t('groups.imagePermissionMessage'));
-            return;
-        }
-
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -47,7 +41,7 @@ export function GroupImagePicker({
         if (!result.canceled && result.assets[0]?.uri) {
             onChange(result.assets[0].uri);
         }
-    }, [onChange, t]);
+    }, [onChange]);
 
     const removeImage = useCallback(() => {
         onChange(null);

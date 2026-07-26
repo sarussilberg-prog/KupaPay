@@ -523,15 +523,8 @@ export function AddExpenseScreen() {
                 setReceiptRemoved(false);
             }
         };
+        // System photo picker — no READ_MEDIA_* / gallery permission (Play policy).
         const pickFromLibrary = async () => {
-            const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (!perm.granted) {
-                platformAlert(
-                    t('expenses.receiptPermissionTitle'),
-                    t('expenses.receiptLibraryPermissionMessage'),
-                );
-                return;
-            }
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
                 allowsEditing: true,

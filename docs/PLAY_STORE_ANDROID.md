@@ -32,14 +32,14 @@ Then replace the `[Partnership Name]` placeholder in each row (Supabase Studio i
 
 ### 0.2 Android permissions — sensitive ones must be blocked
 
-`app.json` now declares only the permissions KupaPay actually uses (camera + image gallery + vibrate). `RECORD_AUDIO`, `SYSTEM_ALERT_WINDOW`, and the legacy `READ/WRITE_EXTERNAL_STORAGE` are explicitly **blocked**.
+`app.json` declares only the permissions KupaPay actually uses (**camera** for receipt capture, vibrate, notifications). Photo/video **library** access uses the Android system photo picker via `expo-image-picker` — **no** `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO`. Those plus `RECORD_AUDIO`, `SYSTEM_ALERT_WINDOW`, and legacy `READ/WRITE_EXTERNAL_STORAGE` are explicitly **blocked** (Play Photo and Video Permissions policy: “Use alternative system pickers”).
 
 This change takes effect on the next `eas build` (EAS runs `expo prebuild` from scratch — the local `/android` folder is gitignored and irrelevant). Verify after the build:
 - Download the `.aab` from EAS.
 - `unzip -p <build>.aab base/manifest/AndroidManifest.xml | aapt2 dump xmltree --file -` (or just open in Android Studio APK Analyzer).
-- Confirm there is **no** `RECORD_AUDIO` and **no** `SYSTEM_ALERT_WINDOW`.
+- Confirm there is **no** `RECORD_AUDIO`, **no** `SYSTEM_ALERT_WINDOW`, **no** `READ_MEDIA_IMAGES`, and **no** `READ_MEDIA_VIDEO`.
 
-If either appears, fail fast — do NOT submit until they are gone. Otherwise the Data Safety declaration in §6 (which truthfully says we do not record audio) contradicts the manifest and triggers a rejection.
+If any of those appear, fail fast — do NOT submit until they are gone. Otherwise Play rejects under the photo picker policy, or the Data Safety declaration in §6 (which truthfully says we do not record audio) contradicts the manifest.
 
 ### 0.3 In-app account deletion verified working
 
@@ -210,11 +210,20 @@ curl -sS https://kupa.pro/legal/privacy | head -40
 |-----------|-----------|-------------------------|----------|---------|-----|
 | **Name** | Yes | No | No (required for account) | App functionality, Account management | Sign-in & display name in groups |
 | **Email address** | Yes | No | No | App functionality, Account management | Primary account identifier |
-| **User IDs** | Yes | No | No | App functionality, Analytics (none today) | Supabase `auth.users.id` |
-| **Photos** | Yes (optional avatar / group image) | No | Yes | App functionality | User-uploaded avatars |
+| **User IDs** | Yes | No | No | App functionality, Account management | Supabase `auth.users.id` |
+| **Photos** | Yes (optional avatar / group / receipt — system photo picker; **no** `READ_MEDIA_*` in the AAB) | No | Yes | App functionality | User-uploaded images |
 | **App interactions** | Yes (expenses, groups, settlements user creates) | No | No | App functionality | Core product data |
-| **Crash logs** | No (no Sentry / Crashlytics today) | — | — | — | — |
-| **Diagnostics** | No | — | — | — | — |
+| **Crash logs** | Yes (Sentry when `EXPO_PUBLIC_SENTRY_DSN` is set) | Yes — Sentry | No | App functionality / Analytics | Crash reporting (`@sentry/react-native`) |
+| **Diagnostics** | Yes (Sentry breadcrumbs / performance sample) | Yes — Sentry | No | App functionality / Analytics | Same SDK |
+| **Device or other IDs** | Yes — Advertising ID (`com.google.android.gms.permission.AD_ID` via AdMob) | Yes — Google (AdMob) | No | Advertising or marketing | Rewarded ads (`react-native-google-mobile-ads`) |
+
+**Play Console forms that must match the AAB (or Google rejects / blocks rollout):**
+
+| Form | Expected answer |
+|------|-----------------|
+| **App content → Photos and videos permissions** | App does **not** need broad photo/video access; uses the **system photo picker**. Do **not** declare a core use-case for `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO`. |
+| **App content → Advertising ID** | **Yes** — used for advertising (AdMob rewarded). Manifest includes `AD_ID`. |
+| **App content → Data safety** | Mirror the table above (Photos, Crash logs, Device IDs, ads sharing). |
 
 **Security practices**:
 - Data is encrypted in transit (HTTPS to Supabase) → **Yes**.
@@ -224,7 +233,7 @@ curl -sS https://kupa.pro/legal/privacy | head -40
 - Independent security review? → **No**.
 - Committed to Play Families Policy? → **No**.
 
-If you add Sentry, PostHog, or any analytics SDK later, this section MUST be updated **before** rolling out a build that contains it.
+If you add PostHog or another analytics SDK later, this section MUST be updated **before** rolling out a build that contains it.
 
 ---
 
