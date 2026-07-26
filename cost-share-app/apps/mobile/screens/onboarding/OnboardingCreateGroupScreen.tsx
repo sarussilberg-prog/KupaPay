@@ -99,12 +99,8 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
         showInfoToast('onboarding.create.findFriendsAfterCreate');
     }, []);
 
+    // System photo picker — no READ_MEDIA_* / gallery permission (Play policy).
     const pickImage = useCallback(async () => {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-            platformAlert(t('groups.imagePermissionTitle'), t('groups.imagePermissionMessage'));
-            return;
-        }
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -114,7 +110,7 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
         if (!result.canceled && result.assets[0]?.uri) {
             setLocalImageUri(result.assets[0].uri);
         }
-    }, [t]);
+    }, []);
 
     const handleCreate = useCallback(async () => {
         if (!name.trim()) {

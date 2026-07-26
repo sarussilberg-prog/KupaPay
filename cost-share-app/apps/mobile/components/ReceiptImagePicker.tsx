@@ -26,16 +26,8 @@ export function ReceiptImagePicker({
     const { t } = useTranslation();
     const displayUri = localUri ?? imageUrl ?? null;
 
+    // System photo picker — no READ_MEDIA_* / gallery permission (Play policy).
     const pickFromLibrary = useCallback(async () => {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-            platformAlert(
-                t('expenses.receiptPermissionTitle'),
-                t('expenses.receiptLibraryPermissionMessage'),
-            );
-            return;
-        }
-
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -45,7 +37,7 @@ export function ReceiptImagePicker({
         if (!result.canceled && result.assets[0]?.uri) {
             onChange(result.assets[0].uri);
         }
-    }, [onChange, t]);
+    }, [onChange]);
 
     const takePhoto = useCallback(async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
