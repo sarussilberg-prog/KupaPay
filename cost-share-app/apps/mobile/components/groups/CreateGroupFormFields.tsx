@@ -4,7 +4,6 @@
 
 import React, { useCallback } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
-import { platformAlert } from '../../lib/platformAlert';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
 import { GroupType, User } from '@cost-share/shared';
@@ -63,12 +62,8 @@ export function CreateGroupFormFields({
 }: CreateGroupFormFieldsProps) {
     const { t } = useTranslation();
 
+    // System photo picker — no READ_MEDIA_* / gallery permission (Play policy).
     const pickImage = useCallback(async () => {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-            platformAlert(t('groups.imagePermissionTitle'), t('groups.imagePermissionMessage'));
-            return;
-        }
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -78,7 +73,7 @@ export function CreateGroupFormFields({
         if (!result.canceled && result.assets[0]?.uri) {
             onImageChange(result.assets[0].uri);
         }
-    }, [onImageChange, t]);
+    }, [onImageChange]);
 
     const displayUri = localImageUri ?? imageUrl ?? null;
 
