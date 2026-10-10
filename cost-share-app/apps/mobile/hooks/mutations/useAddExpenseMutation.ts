@@ -28,6 +28,7 @@ import {
 } from '../../lib/pendingFollowUps';
 import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { SENTRY_TAGS } from '../../lib/sentryTags';
+import { captureProductEvent } from '../../lib/productAnalytics';
 
 /**
  * Variables are self-contained (include groupId + pendingId) so a persisted
@@ -168,6 +169,9 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
             // useGroupExpensesRealtime arrives — which only fires while
             // GroupDetailScreen is mounted and the channel is connected.
             invalidateBalanceCaches(groupId);
+            if (serverRow?.id) {
+                void captureProductEvent('expense_added', { group_id: groupId });
+            }
 
             if (serverRow?.id && pendingId) {
                 const followUp = takePendingFollowUp(pendingId);

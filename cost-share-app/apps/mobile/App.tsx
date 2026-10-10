@@ -40,6 +40,7 @@ import { useAppRealtime } from './hooks/useAppRealtime';
 import { useBootWatchdog } from './hooks/useBootWatchdog';
 import { colors } from './theme';
 import { RtlLayoutProvider } from './hooks/useRtlLayout';
+import { captureProductEvent, identifyProductUser } from './lib/productAnalytics';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
 import type { Session } from '@supabase/supabase-js';
@@ -74,6 +75,7 @@ function WebFrame({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const appOpenedSentRef = React.useRef(false);
   const [isReady, setIsReady] = useState(false);
   const [preOnboardingDone, setPreOnboardingDone] = useState<boolean | null>(null);
   const session = useAppStore((s) => s.session);
@@ -88,6 +90,21 @@ function App() {
   useEffect(() => {
     applySentryUser(currentUser ?? null);
   }, [currentUser]);
+
+  useEffect(() => {
+    const user = session?.user;
+    if (!user?.id) return;
+    void identifyProductUser(user.id, {
+      email: user.email ?? null,
+      language: language ?? null,
+    });
+  }, [session?.user?.id, session?.user?.email, language]);
+
+  useEffect(() => {
+    if (!isReady || !session || appOpenedSentRef.current) return;
+    appOpenedSentRef.current = true;
+    void captureProductEvent('app_opened');
+  }, [isReady, session]);
 
   useEffect(() => {
     if (currentUserId) void syncPushRegistrationOnSignIn();
@@ -211,6 +228,7 @@ function App() {
           if (!nextSession) return;
 
           if (event === 'SIGNED_IN') {
+            void captureProductEvent('signed_in', { provider: nextSession.user.app_metadata?.provider ?? 'unknown' });
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');
             }, 0);

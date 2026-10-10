@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { showSuccessToast, showErrorToast } from '../lib/appToast';
 import { handleError } from '../lib/handleError';
+import { captureProductEvent } from '../lib/productAnalytics';
 
 export async function fetchSettlements(groupId?: string): Promise<Settlement[]> {
     try {
@@ -77,6 +78,10 @@ export async function createSettlement(dto: CreateSettlementDto): Promise<Settle
         if (error) throw error;
 
         showSuccessToast('settleUp.toastRecorded');
+        void captureProductEvent('settle_up_recorded', {
+            group_id: dto.groupId,
+            currency: dto.currency,
+        });
         return settlementFromRow(data);
     } catch (error) {
         handleError(error, {

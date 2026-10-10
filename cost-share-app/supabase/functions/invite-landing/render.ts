@@ -5,7 +5,8 @@
 // publication time; before publication, the env var falls back to the marketing
 // site itself. Set KUPAPAY_APP_STORE_URL once the app is published (KUPAY_*/KUPA_* still accepted).
 const APP_STORE_URL =
-    Deno.env.get('KUPAPAY_APP_STORE_URL') ?? Deno.env.get('KUPAY_APP_STORE_URL') ?? Deno.env.get('KUPA_APP_STORE_URL') ?? 'https://kupa-pay.com/';
+    Deno.env.get('KUPAPAY_APP_STORE_URL') ?? Deno.env.get('KUPAY_APP_STORE_URL') ?? Deno.env.get('KUPA_APP_STORE_URL') ??
+    'https://apps.apple.com/us/app/kupapay/id6780216665';
 const PLAY_STORE_URL =
     Deno.env.get('KUPAPAY_PLAY_STORE_URL') ?? Deno.env.get('KUPAY_PLAY_STORE_URL') ?? Deno.env.get('KUPA_PLAY_STORE_URL')
         ?? 'https://play.google.com/store/apps/details?id=com.kupapay.mobile';

@@ -24,6 +24,11 @@
       ],
       "icon": "./assets/icon.png",
       "infoPlist": {
+        "CFBundleDevelopmentRegion": "he",
+        "CFBundleLocalizations": [
+          "he",
+          "en"
+        ],
         "CFBundleDisplayName": "KupaPay",
         "CFBundleName": "KupaPay",
         "LSApplicationQueriesSchemes": [

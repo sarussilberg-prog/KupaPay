@@ -16,7 +16,7 @@
 // side, so it can be cached and needs no server round-trip for invite data.
 
 const MARKETING_SITE = 'https://kupa-pay.com/';
-const APP_STORE_URL = 'https://kupa-pay.com/';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/kupapay/id6780216665';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.kupapay.mobile';
 
 export function inviteLandingHtml(): string {
@@ -59,11 +59,7 @@ export function inviteLandingHtml(): string {
   var btn = document.getElementById('open');
   if (btn) { btn.setAttribute('href', deeplink); }
   if (!isMobile) { location.replace(marketing); return; }
-  // Fall back to the marketing site only if the app does not take over.
-  var t = setTimeout(function () { location.replace(marketing); }, 1600);
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { clearTimeout(t); }
-  });
+  // Try to open the app; stay on this page if it does not take over (user can tap the button).
   window.location.href = deeplink;
 })();
 </script>

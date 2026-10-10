@@ -39,6 +39,7 @@ import {
     showSuccessMessage,
     showSuccessToast,
 } from '../lib/appToast';
+import { trackFirstGroupCreated, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
 type GroupArchiveState = { mine: boolean; auto: boolean };
 
 async function fetchGroupsArchiveState(): Promise<Map<string, GroupArchiveState>> {
@@ -332,6 +333,10 @@ export async function createGroup(dto: CreateGroupDto): Promise<Group | null> {
             [group, ...(prev ?? []).filter((g) => g.id !== group.id)],
         );
         showSuccessToast('groups.groupCreated');
+        void trackFirstGroupCreated(group.id);
+        if (memberIds.size >= 2) {
+            void trackSecondGroupMemberJoined(group.id);
+        }
         return group;
     } catch (error) {
         handleError(error, {
