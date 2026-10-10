@@ -36,6 +36,11 @@ export async function hydrateCurrentUserProfile(userId: string): Promise<Profile
         return 'deactivated';
     }
 
+    const { data: inviteToken } = await supabase.rpc('get_my_invite_token');
+    if (typeof inviteToken === 'string' && inviteToken.length > 0) {
+        profile.inviteToken = inviteToken;
+    }
+
     // Resolve the caller's admin status via the SECURITY DEFINER RPC.
     // app_admins is RLS-locked; this RPC is the only client-facing read path.
     const { data: isAdminFlag } = await supabase.rpc('is_app_admin');
@@ -114,6 +119,9 @@ export async function updateUser(id: string, dto: UpdateProfileDto): Promise<Use
 
     const user = profileFromRow(data);
     const currentUser = useAppStore.getState().currentUser;
+    if (currentUser && currentUser.id === id && !user.inviteToken && currentUser.inviteToken) {
+        user.inviteToken = currentUser.inviteToken;
+    }
     if (currentUser && currentUser.id === id) {
         useAppStore.getState().setCurrentUser(user);
         void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
