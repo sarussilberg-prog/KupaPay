@@ -361,8 +361,11 @@
             "menuTitle": "Share group",
             "inviteOption": "Invite a friend to join",
             "inviteDescription": "Send a link to add someone to this group",
-            "exportOption": "Export to Excel / CSV",
+            "exportOption": "Export group report",
             "exportDescription": "Save group activity and balances as a CSV file (opens in Excel / Google Sheets)",
+            "exportCsv": "CSV (free)",
+            "exportPdf": "PDF report (Pro)",
+            "exportExcel": "Excel workbook (Pro)",
             "exportTitle": "Share group report",
             "exportDownloaded": "Report downloaded",
             "exportError": "Couldn't generate the file",
@@ -1085,6 +1088,52 @@
             "feature3": "Seamless, uninterrupted flows",
             "cta": "Upgrade to Pro",
             "skipLink": "Continue without Pro"
+        }
+    },
+    "pro": {
+        "badge": "Pro",
+        "paywall": {
+            "title": "KupaPay Pro",
+            "feature1": "No ads",
+            "feature2": "Auto currency conversion for trips",
+            "feature3": "Clean PDF report for every group",
+            "planMonthly": "Monthly",
+            "planYearly": "Yearly",
+            "planTripPass": "Trip Pass",
+            "yearlyIncludesTripPass": "Includes 1 Trip Pass for a group while subscribed",
+            "tripPassLine": "Trip Pass: Pro for the whole group, 30 days, no renewal — {{price}}",
+            "tripPassNoRenewal": "One-time purchase. Unlocks Pro for every member of one group for 30 days, then ends automatically with no renewal.",
+            "renewalDisclosure": "Renews automatically at {{price}}/{{period}} until canceled. Cancel anytime in Settings at least 24h before renewal.",
+            "periodMonth": "month",
+            "periodYear": "year",
+            "subscribe": "Subscribe",
+            "subscribeAtPrice": "Subscribe — {{price}}",
+            "buyTripPass": "Buy Trip Pass — {{price}}",
+            "restore": "Restore Purchases",
+            "manageSubscription": "Manage subscription",
+            "storeNotConfigured": "Purchases are not available in this build.",
+            "purchaseSuccess": "Welcome to Pro!",
+            "purchaseError": "Purchase could not be completed.",
+            "restoreSuccess": "Purchases restored.",
+            "restoreNone": "No active purchases found.",
+            "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group."
+        },
+        "includedTripPass": {
+            "title": "Included Trip Pass",
+            "body": "Your yearly Pro plan includes one Trip Pass. Activate Pro for every member of this group for 30 days.",
+            "cta": "Use your included Trip Pass",
+            "redeemed": "Trip Pass activated for this group.",
+            "inactiveSub": "An active Pro subscription is required.",
+            "noCredit": "No Trip Pass credit available.",
+            "error": "Could not activate Trip Pass. Try again."
+        },
+        "tripCurrency": {
+            "title": "Trip currency view",
+            "lockedBody": "Convert all group balances into one trip currency with Pro.",
+            "upgrade": "Upgrade to Pro",
+            "pickerLabel": "Showing amounts in {{currency}}",
+            "ratesMissing": "Exchange rates are unavailable right now.",
+            "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
         }
     },
     "remind": {

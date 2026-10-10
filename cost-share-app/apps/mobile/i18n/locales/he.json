@@ -361,8 +361,11 @@
             "menuTitle": "שיתוף קופה",
             "inviteOption": "הזמנת חבר להצטרפות",
             "inviteDescription": "שלח קישור להוספת חבר לקופה",
-            "exportOption": "ייצוא לקובץ אקסל",
+            "exportOption": "ייצוא דוח קופה",
             "exportDescription": "שמור את פעילות הקופה והיתרות כקובץ CSV (פתיחה באקסל / Google Sheets)",
+            "exportCsv": "CSV (חינם)",
+            "exportPdf": "דוח PDF (Pro)",
+            "exportExcel": "Excel (Pro)",
             "exportTitle": "שיתוף דוח קופה",
             "exportDownloaded": "הדוח הורד",
             "exportError": "לא ניתן ליצור את הקובץ",
@@ -1103,6 +1106,52 @@
             "feature3": "זרימה חלקה וללא הפרעות",
             "cta": "שדרג ל-Pro",
             "skipLink": "המשך בלי Pro"
+        }
+    },
+    "pro": {
+        "badge": "Pro",
+        "paywall": {
+            "title": "הקופה, בלי הגבלות",
+            "feature1": "בלי פרסומות",
+            "feature2": "המרת מטבע אוטומטית לטיול",
+            "feature3": "דוח PDF מסודר לכל קבוצה",
+            "planMonthly": "חודשי",
+            "planYearly": "שנתי",
+            "planTripPass": "Trip Pass",
+            "yearlyIncludesTripPass": "כולל Trip Pass אחד לקבוצה כל עוד המנוי פעיל",
+            "tripPassLine": "Trip Pass לכל הקבוצה – 30 יום, בלי חידוש — {{price}}",
+            "tripPassNoRenewal": "רכישה חד-פעמית. פותח Pro לכל חברי קבוצה אחת למשך 30 יום, ומסתיים אוטומטית בלי חידוש.",
+            "renewalDisclosure": "מתחדש אוטומטית ב-{{price}} ל{{period}} עד לביטול. אפשר לבטל בכל עת בהגדרות, לפחות 24 שעות לפני החידוש.",
+            "periodMonth": "חודש",
+            "periodYear": "שנה",
+            "subscribe": "הצטרפות ל-Pro",
+            "subscribeAtPrice": "הצטרפות — {{price}}",
+            "buyTripPass": "רכישת Trip Pass — {{price}}",
+            "restore": "שחזור רכישות",
+            "manageSubscription": "ניהול מנוי",
+            "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
+            "purchaseSuccess": "ברוכים הבאים ל-Pro!",
+            "purchaseError": "לא ניתן להשלים את הרכישה.",
+            "restoreSuccess": "הרכישות שוחזרו.",
+            "restoreNone": "לא נמצאו רכישות פעילות.",
+            "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה."
+        },
+        "includedTripPass": {
+            "title": "Trip Pass מהמנוי השנתי",
+            "body": "למנוי Pro השנתי שלך כלול Trip Pass אחד. הפעל/י Pro לכל חברי הקבוצה למשך 30 יום.",
+            "cta": "השתמש/י ב-Trip Pass הכלול",
+            "redeemed": "Trip Pass הופעל לקבוצה זו.",
+            "inactiveSub": "נדרש מנוי Pro פעיל.",
+            "noCredit": "אין Trip Pass זמין לשימוש.",
+            "error": "לא ניתן להפעיל Trip Pass. נסה/י שוב."
+        },
+        "tripCurrency": {
+            "title": "תצוגת מטבע טיול",
+            "lockedBody": "המרת כל היתרות בקבוצה למטבע טיול אחד — עם Pro.",
+            "upgrade": "שדרוג ל-Pro",
+            "pickerLabel": "סכומים ב-{{currency}}",
+            "ratesMissing": "שערי המרה לא זמינים כרגע.",
+            "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
         }
     },
     "remind": {

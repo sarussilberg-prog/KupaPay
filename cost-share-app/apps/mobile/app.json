@@ -110,6 +110,7 @@
     },
     "plugins": [
       "expo-dev-client",
+      "react-native-purchases",
       [
         "react-native-google-mobile-ads",
         {

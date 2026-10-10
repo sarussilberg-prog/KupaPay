@@ -28,6 +28,8 @@ import { getCurrencyDisplayName } from '../../lib/currencyDisplay';
 import { InviteLinkBlock } from '../../components/InviteLinkBlock';
 import { useSystemNotificationsDenied } from '../../hooks/useSystemNotificationsDenied';
 import { NotificationsDisabledHint } from '../../components/settings/NotificationsDisabledHint';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { isPurchasesConfigured, openSubscriptionManagement } from '../../services/purchases.service';
 
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
 const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
@@ -171,6 +173,27 @@ export function SettingsScreen() {
                             variant="chevron"
                             onPress={() => navigation.navigate('AdminPortal')}
                             testID="settings-admin-portal"
+                        />
+                    </SettingsSection>
+                ) : null}
+
+                {KUPAPAY_PRO_ENABLED && isPurchasesConfigured() ? (
+                    <SettingsSection title={t('pro.paywall.manageSubscription')}>
+                        <SettingsRow
+                            iconName="card-outline"
+                            label={t('pro.paywall.manageSubscription')}
+                            variant="chevron"
+                            onPress={() => {
+                                void openSubscriptionManagement();
+                            }}
+                            testID="settings-manage-subscription"
+                        />
+                        <SettingsRow
+                            iconName="star-outline"
+                            label={t('monetization.goProButton')}
+                            variant="chevron"
+                            onPress={() => navigation.navigate('Paywall', { featureKey: 'settings' })}
+                            testID="settings-go-pro"
                         />
                     </SettingsSection>
                 ) : null}

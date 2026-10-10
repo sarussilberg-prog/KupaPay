@@ -743,6 +743,7 @@ export function SettleUpListScreen() {
             <RemindFlowSheet
                 visible={remindTargetDebt !== null}
                 featureKey="remind_user"
+                groupId={groupId}
                 defaultMessage={buildDefaultMessage(remindTargetDebt)}
                 sending={remindLoading}
                 onSend={async (mode, message) => {
@@ -771,6 +772,7 @@ export function SettleUpListScreen() {
 
             <ConsolidateCurrencySheet
                 visible={convertPair !== null}
+                groupId={groupId}
                 pair={convertPair}
                 currentUserId={currentUserId}
                 memberMap={memberMap}
