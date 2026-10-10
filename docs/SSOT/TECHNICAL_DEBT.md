@@ -52,19 +52,15 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 ## Observability & ops (deferred from 2026-06-02 pre-Play audit)
 
 ### 1. Crash & error reporting (Sentry / Crashlytics)
-- **What:** Native + JS crash capture, source-map upload, breadcrumbs, release tagging tied to EAS Updates.
-- **Why deferred:** First internal track is for our own developer testing — we're the only testers and we'll see crashes in `adb logcat`/Xcode. Worth adding before external beta when a tester silence ≠ a working app.
-- **Revisit when:** Opening external testing track, OR after the first round of internal feedback if we lose data on a reproducible crash.
+- **Status (2026-10-11):** **Shipped in app** (`@sentry/react-native`, admin proxy edge function). **Still open:** EAS production source-map upload (`SENTRY_DISABLE_AUTO_UPLOAD` in `eas.json`) — enable before relying on symbolicated prod stacks.
+- **Revisit when:** Next store release build, or first prod crash where stack is minified-only.
 
 ### 2. Product analytics (PostHog / Amplitude / similar)
-- **What:** Funnel events for sign-in, onboarding completion, first expense, settle-up.
-- **Why deferred:** Pre-product-market-fit; no funnel decisions in flight that need data yet. GDPR/consent banner work isn't budgeted.
-- **Revisit when:** First marketing campaign launches OR product asks "where do users drop off in onboarding."
+- **Status (2026-10-11):** **Partial** — `productAnalytics.ts` + PostHog key wiring; privacy policy updated (`20261010210000`). Funnel coverage still growing (Phase 1).
+- **Revisit when:** Dashboards exist for install → sign-in → first group → first expense → invite → settle.
 
 ### 3. CI: TypeScript strict gate + workspace `tsc` in `ci.yml`
-- **What:** Add a `typecheck` job that runs `npx tsc --noEmit` for `apps/mobile` and `packages/shared`. Currently only lint + jest run on PRs.
-- **Why deferred from immediate fix:** Lower priority than fixing the 9 outstanding TS errors first (KI-004). The CI gap (KI-015) is logged but adding the job before zero-erroring locally would just block every PR. Sequence: fix KI-004 → then add the CI gate.
-- **Revisit when:** KI-004 reaches zero errors.
+- **Status (2026-10-11):** **Done** — KI-015 resolved; `npm run typecheck` in CI (see security stack PR).
 
 ### 4. RLS performance optimization at scale (`auth.uid()` → `(SELECT auth.uid())`)
 - **What:** Wrap every `auth.uid()` call inside RLS policies in `(SELECT …)` to prevent per-row re-evaluation. Supabase advisor flags ~12 policies on prod (`profiles`, `groups`, `settlements`, `group_members`, `friendships`, `friend_requests`, `friend_blocks`, `group_messages`, `activity_events`).

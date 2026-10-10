@@ -94,6 +94,16 @@ GRANT SELECT (
     updated_at
 ) ON TABLE public.profiles TO anon, authenticated;
 
+GRANT UPDATE (
+    name,
+    email,
+    phone,
+    avatar_url,
+    default_currency,
+    language,
+    updated_at
+) ON TABLE public.profiles TO authenticated;
+
 -- ---------------------------------------------------------------------------
 -- 3. Support message abuse: basic length bounds (public INSERT policy remains).
 -- ---------------------------------------------------------------------------
