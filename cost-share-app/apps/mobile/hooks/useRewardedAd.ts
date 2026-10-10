@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Platform } from 'react-native';
 import { logMonetizationEvent } from '../services/monetization.service';
+import {
+    isRewardedAdsAllowedInRegion,
+    REWARDED_AD_REQUEST_OPTIONS,
+} from '../lib/rewardedAdsCompliance';
 
 const IS_NATIVE = Platform.OS === 'ios' || Platform.OS === 'android';
 
@@ -41,17 +45,19 @@ export interface UseRewardedAdResult {
 export function useRewardedAd(featureKey: string): UseRewardedAdResult {
     // Immediately mark unavailable if not on a native platform or SDK missing
     const nativeSupported = IS_NATIVE && RewardedAd !== null;
+    const regionAllowed = isRewardedAdsAllowedInRegion();
+    const adsEnabled = nativeSupported && regionAllowed;
 
-    const [loading, setLoading] = useState(nativeSupported);
+    const [loading, setLoading] = useState(adsEnabled);
     const [earned, setEarned] = useState(false);
-    const [unavailable, setUnavailable] = useState(!nativeSupported);
+    const [unavailable, setUnavailable] = useState(!adsEnabled);
     const adRef = useRef<any>(null);
 
     useEffect(() => {
-        if (!nativeSupported) return;
+        if (!adsEnabled) return;
 
         const rewarded = RewardedAd.createForAdRequest(AD_UNIT_ID, {
-            requestNonPersonalizedAdsOnly: true,
+            ...REWARDED_AD_REQUEST_OPTIONS,
         });
         adRef.current = rewarded;
 
@@ -83,7 +89,7 @@ export function useRewardedAd(featureKey: string): UseRewardedAdResult {
             unsubError();
             adRef.current = null;
         };
-    }, [featureKey, nativeSupported]);
+    }, [featureKey, adsEnabled]);
 
     const show = useCallback(() => {
         const ad = adRef.current;
