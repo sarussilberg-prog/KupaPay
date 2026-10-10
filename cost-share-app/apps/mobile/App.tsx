@@ -41,6 +41,10 @@ import { useBootWatchdog } from './hooks/useBootWatchdog';
 import { colors } from './theme';
 import { RtlLayoutProvider } from './hooks/useRtlLayout';
 import { captureProductEvent, identifyProductUser } from './lib/productAnalytics';
+import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
+import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
+import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
+import { configureRewardedAdsSdk } from './lib/rewardedAdsCompliance';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
 import type { Session } from '@supabase/supabase-js';
@@ -105,6 +109,30 @@ function App() {
     appOpenedSentRef.current = true;
     void captureProductEvent('app_opened');
   }, [isReady, session]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    void recordAppLaunchForStoreReview();
+  }, [isReady]);
+
+  const setPendingInvite = useAppStore((s) => s.setPendingInvite);
+
+  useEffect(() => {
+    if (session || !incomingUrl) return;
+    void capturePreAuthInvite(incomingUrl, setPendingInvite);
+  }, [incomingUrl, session, setPendingInvite]);
+
+  useEffect(() => {
+    if (session) return;
+    let cancelled = false;
+    void Linking.getInitialURL().then((url) => {
+      if (cancelled || !url) return;
+      void capturePreAuthInvite(url, setPendingInvite);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session, setPendingInvite]);
 
   useEffect(() => {
     if (currentUserId) void syncPushRegistrationOnSignIn();
@@ -193,6 +221,7 @@ function App() {
 
       try {
         configureNativeGoogleSignIn();
+        await configureRewardedAdsSdk();
         await initializeLanguage();
         const preDone = await hasCompletedPreLoginOnboarding();
         if (mounted) setPreOnboardingDone(preDone);
@@ -209,6 +238,11 @@ function App() {
         if (!mounted) return;
 
         await restoreClient();
+
+        const persistedInvite = await loadPersistedPendingInvite();
+        if (persistedInvite) {
+            store.setPendingInvite(persistedInvite);
+        }
 
         // supabase-js only auths Realtime on SIGNED_IN / TOKEN_REFRESHED, not on
         // the INITIAL_SESSION a cold-start restore emits — so live updates

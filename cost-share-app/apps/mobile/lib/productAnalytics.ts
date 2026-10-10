@@ -23,6 +23,7 @@ export type ProductAnalyticsEvent =
     | 'invite_accepted'
     | 'second_group_member_joined'
     | 'settle_up_recorded'
+    | 'review_prompt_shown'
     | 'paywall_viewed'
     | 'purchase_started'
     | 'purchase_completed'

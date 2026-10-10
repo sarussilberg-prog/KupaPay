@@ -42,11 +42,13 @@ Supabase Edge Function secrets (dev + prod separately):
 
 ## Database
 
-Migration `20261010220000_kupapay_pro_entitlements.sql`:
+Migrations (apply after `20261010230000_privacy_admob_google_llc.sql` and security `20261011010000+`):
 
-- `profiles.pro_until`
-- `group_passes(group_id, purchased_by, until, …)` with RLS read for group members
-- RPC `get_my_pro_status(group_id)` and SQL helper `has_pro(user_id, group_id)`
+| Version | File |
+|---|---|
+| `20261011020000` | `kupapay_pro_entitlements.sql` — `profiles.pro_until`, `group_passes`, `get_my_pro_status`, `has_pro` |
+| `20261011021000` | `pro_legal_documents.sql` — Terms §9 + RevenueCat privacy (stacks on AdMob/EU ad text) |
+| `20261011022000` | `pro_webhook_idempotency_trip_pass_intents.sql` — idempotent webhook RPC, Trip Pass intents |
 
 Apply on **development** first (`dev` branch / `drxfbicunusmipdgbgdk`). Production only when releasing Pro publicly.
 

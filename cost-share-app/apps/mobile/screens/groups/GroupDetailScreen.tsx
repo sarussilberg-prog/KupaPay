@@ -52,6 +52,7 @@ import {
 } from '../../services/group-share.service';
 import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
 import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
+import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { shareGroupInvite } from '../../services/invite.service';
@@ -962,6 +963,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             onSwitcherPress={onSwitcherPress}
                             onMembersPress={handleMembersPress}
                         />
+                        <UnassignedTripPassBanner groupId={groupId} />
                         <IncludedTripPassBanner groupId={groupId} />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">

@@ -1127,6 +1127,14 @@
             "noCredit": "No Trip Pass credit available.",
             "error": "Could not activate Trip Pass. Try again."
         },
+        "unassignedTripPass": {
+            "title": "Trip Pass ready to apply",
+            "body": "You have {{count}} Trip Pass purchase(s) not linked to a group yet. Apply one to this group for 30 days of Pro for everyone.",
+            "cta": "Apply Trip Pass to this group",
+            "assigned": "Trip Pass applied to this group.",
+            "none": "No Trip Pass is waiting to be applied.",
+            "error": "Could not apply Trip Pass. Try again."
+        },
         "tripCurrency": {
             "title": "Trip currency view",
             "lockedBody": "Convert all group balances into one trip currency with Pro.",

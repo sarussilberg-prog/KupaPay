@@ -15,6 +15,26 @@ const env: WebhookEnv = {
     REVENUECAT_WEBHOOK_SECRET: 'secret',
 };
 
+function mockRpcFetch(
+    handler: (body: Record<string, unknown>) => { status: number; json: Record<string, unknown> },
+): () => void {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes('/rpc/handle_revenuecat_webhook')) {
+            const parsed = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+            const { status, json } = handler(parsed);
+            return Promise.resolve(
+                new Response(JSON.stringify(json), { status, headers: { 'Content-Type': 'application/json' } }),
+            );
+        }
+        return originalFetch(input as RequestInfo, init);
+    }) as typeof fetch;
+    return () => {
+        globalThis.fetch = originalFetch;
+    };
+}
+
 Deno.test('verifyAuthorization accepts raw secret and Bearer', () => {
     assertEquals(
         verifyAuthorization(new Request('https://x', { headers: { authorization: 'secret' } }), 'secret'),
@@ -51,18 +71,12 @@ Deno.test('tripPassUntilFromEvent defaults to 30 days', () => {
     assertEquals(until, '2026-01-31T00:00:00.000Z');
 });
 
-Deno.test('applyWebhookEvent updates profile on subscription purchase', async () => {
-    const calls: string[] = [];
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-        const url = typeof input === 'string' ? input : input.toString();
-        calls.push(`${init?.method ?? 'GET'} ${url}`);
-        if (url.includes('/profiles?id=eq.user-1')) {
-            return Promise.resolve(new Response(null, { status: 204 }));
-        }
-        return originalFetch(input as RequestInfo, init);
-    }) as typeof fetch;
-
+Deno.test('applyWebhookEvent calls RPC for subscription purchase', async () => {
+    const captured: { body?: Record<string, unknown> } = {};
+    const restore = mockRpcFetch(body => {
+        captured.body = body;
+        return { status: 200, json: { duplicate: false, action: 'individual' } };
+    });
     try {
         const outcome = await applyWebhookEvent(
             {
@@ -78,27 +92,20 @@ Deno.test('applyWebhookEvent updates profile on subscription purchase', async ()
             env,
         );
         assertEquals(outcome, { ok: true, action: 'individual' });
-        assertEquals(calls.some(c => c.startsWith('PATCH') && c.includes('profiles')), true);
+        assertEquals(captured.body?.p_event_id, 'evt-1');
+        assertEquals(captured.body?.p_is_trip_pass, false);
+        assertEquals(captured.body?.p_is_yearly, false);
     } finally {
-        globalThis.fetch = originalFetch;
+        restore();
     }
 });
 
-Deno.test('applyWebhookEvent grants yearly credit on annual subscription', async () => {
-    const urls: string[] = [];
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-        const url = typeof input === 'string' ? input : input.toString();
-        urls.push(url);
-        if (url.includes('/profiles?id=eq.user-1')) {
-            return Promise.resolve(new Response(null, { status: 204 }));
-        }
-        if (url.includes('grant_included_trip_pass_credit')) {
-            return Promise.resolve(new Response(null, { status: 204 }));
-        }
-        return originalFetch(input as RequestInfo, init);
-    }) as typeof fetch;
-
+Deno.test('applyWebhookEvent calls RPC with yearly flag on annual subscription', async () => {
+    const captured: { body?: Record<string, unknown> } = {};
+    const restore = mockRpcFetch(body => {
+        captured.body = body;
+        return { status: 200, json: { duplicate: false, action: 'yearly_credit' } };
+    });
     try {
         const outcome = await applyWebhookEvent(
             {
@@ -114,24 +121,56 @@ Deno.test('applyWebhookEvent grants yearly credit on annual subscription', async
             env,
         );
         assertEquals(outcome, { ok: true, action: 'yearly_credit' });
-        assertEquals(urls.some(u => u.includes('grant_included_trip_pass_credit')), true);
+        assertEquals(captured.body?.p_is_yearly, true);
     } finally {
-        globalThis.fetch = originalFetch;
+        restore();
     }
 });
 
-Deno.test('applyWebhookEvent rejects trip pass without group_id attribute', async () => {
-    const outcome = await applyWebhookEvent(
-        {
-            event: {
-                type: 'NON_RENEWING_PURCHASE',
-                id: 'evt-2',
-                app_user_id: 'user-1',
-                product_id: PRODUCT_TRIP_PASS,
+Deno.test('applyWebhookEvent trip pass without group stores unassigned via RPC', async () => {
+    const restore = mockRpcFetch(() => ({
+        status: 200,
+        json: { duplicate: false, action: 'trip_pass_unassigned' },
+    }));
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'NON_RENEWING_PURCHASE',
+                    id: 'evt-2',
+                    app_user_id: 'user-1',
+                    product_id: PRODUCT_TRIP_PASS,
+                },
             },
-        },
-        env,
-    );
-    assertEquals(outcome.ok, false);
-    if (!outcome.ok) assertEquals(outcome.error, 'trip_pass_missing_group_id');
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'trip_pass_unassigned' });
+    } finally {
+        restore();
+    }
+});
+
+Deno.test('applyWebhookEvent duplicate event is ignored', async () => {
+    const restore = mockRpcFetch(() => ({
+        status: 200,
+        json: { duplicate: true, action: 'ignored' },
+    }));
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'INITIAL_PURCHASE',
+                    id: 'evt-dup',
+                    app_user_id: 'user-1',
+                    product_id: PRODUCT_PRO_MONTHLY,
+                    entitlement_ids: ['pro'],
+                    expiration_at_ms: 1_800_000_000_000,
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'ignored', duplicate: true });
+    } finally {
+        restore();
+    }
 });

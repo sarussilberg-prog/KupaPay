@@ -1145,6 +1145,14 @@
             "noCredit": "אין Trip Pass זמין לשימוש.",
             "error": "לא ניתן להפעיל Trip Pass. נסה/י שוב."
         },
+        "unassignedTripPass": {
+            "title": "Trip Pass ממתין להפעלה",
+            "body": "יש לך {{count}} רכישות Trip Pass שלא שויכו לקבוצה. הפעל/י אחת מהן על קבוצה זו ל-30 יום Pro לכל החברים.",
+            "cta": "הפעל/י Trip Pass על קבוצה זו",
+            "assigned": "Trip Pass הופעל על קבוצה זו.",
+            "none": "אין Trip Pass שממתין להפעלה.",
+            "error": "לא ניתן להפעיל Trip Pass. נסה/י שוב."
+        },
         "tripCurrency": {
             "title": "תצוגת מטבע טיול",
             "lockedBody": "המרת כל היתרות בקבוצה למטבע טיול אחד — עם Pro.",

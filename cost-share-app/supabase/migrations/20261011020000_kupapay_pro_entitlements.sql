@@ -1,4 +1,4 @@
--- KupaPay Pro v1: individual subscription (profiles.pro_until) + group Trip Pass (group_passes).
+-- KupaPay Pro v1 (20261011020000+, after #102 + security migrations): profiles.pro_until + group_passes.
 
 ALTER TABLE public.profiles
     ADD COLUMN IF NOT EXISTS pro_until TIMESTAMPTZ;

@@ -8,7 +8,9 @@ import {
     REVENUECAT_PACKAGE_ANNUAL,
     REVENUECAT_PACKAGE_MONTHLY,
     REVENUECAT_PACKAGE_TRIP_PASS,
+    STORE_PRODUCT_TRIP_PASS,
 } from '../lib/proConstants';
+import { registerTripPassPurchaseIntent } from './proEntitlements.service';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 import { logMonetizationEvent } from './monetization.service';
 import { captureProductEvent } from '../lib/productAnalytics';
@@ -116,6 +118,21 @@ export async function purchasePackage(
     const Purchases = await getPurchases();
     if (!Purchases) return { ok: false };
 
+    const isTripPassPkg =
+        pkg.identifier === REVENUECAT_PACKAGE_TRIP_PASS ||
+        pkg.product.identifier === STORE_PRODUCT_TRIP_PASS;
+
+    if (isTripPassPkg && opts.groupId) {
+        const intent = await registerTripPassPurchaseIntent(opts.groupId);
+        if (!intent.ok) {
+            await trackPurchaseEvent('purchase_failed', opts.featureKey, {
+                package_id: pkg.identifier,
+                reason: intent.error,
+            });
+            return { ok: false };
+        }
+    }
+
     if (opts.groupId) {
         await Purchases.default.setAttributes({ group_id: opts.groupId });
     }
@@ -127,7 +144,12 @@ export async function purchasePackage(
     try {
         const { customerInfo } = await Purchases.default.purchasePackage(pkg);
         const active = customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
-        if (active) {
+        const tripPassPurchased =
+            isTripPassPkg ||
+            customerInfo.nonSubscriptionTransactions.some(
+                t => t.productIdentifier === STORE_PRODUCT_TRIP_PASS,
+            );
+        if (active || tripPassPurchased) {
             await trackPurchaseEvent('purchase_completed', opts.featureKey, {
                 package_id: pkg.identifier,
             });

@@ -14,6 +14,10 @@ import { getCurrentUserId } from '../lib/auth';
 import { showSuccessToast, showErrorToast } from '../lib/appToast';
 import { handleError } from '../lib/handleError';
 import { captureProductEvent } from '../lib/productAnalytics';
+import {
+    incrementSettleCountForStoreReview,
+    maybeRequestStoreReview,
+} from '../lib/storeReviewPrompt';
 
 export async function fetchSettlements(groupId?: string): Promise<Settlement[]> {
     try {
@@ -82,6 +86,9 @@ export async function createSettlement(dto: CreateSettlementDto): Promise<Settle
             group_id: dto.groupId,
             currency: dto.currency,
         });
+        void incrementSettleCountForStoreReview().then(() =>
+            maybeRequestStoreReview('first_settle_up'),
+        );
         return settlementFromRow(data);
     } catch (error) {
         handleError(error, {

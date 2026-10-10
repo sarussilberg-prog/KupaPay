@@ -113,6 +113,17 @@ describe('authenticatedGateResolve', () => {
             expect(seedGroups).not.toHaveBeenCalled();
         });
 
+        it('skips create-group onboarding when a deferred invite is pending', async () => {
+            const { deps, markComplete } = makeDeps({
+                hasPendingInvite: () => true,
+                hasCompletedPostLoginOnboarding: jest.fn().mockResolvedValue(false),
+            });
+
+            await expect(runAuthenticatedGate(deps)).resolves.toBe('main');
+            expect(markComplete).toHaveBeenCalledTimes(1);
+            expect(deps.fetchGroups).not.toHaveBeenCalled();
+        });
+
         it('marks onboarding complete when cached groups exist but the flag was unset', async () => {
             const { deps, markComplete } = makeDeps({
                 getCachedGroupsCount: jest.fn().mockReturnValue(1),

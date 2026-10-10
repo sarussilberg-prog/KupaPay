@@ -4,16 +4,19 @@ import { supabase } from '../lib/supabase';
 export interface MyProStatus extends ProStatusTimestamps {
     hasPro: boolean;
     includedTripPassCredits: number;
+    unassignedTripPassCount: number;
 }
 
 function parseStatusRow(data: Record<string, unknown> | null): MyProStatus {
     const individual = (data?.individualProUntil ?? data?.individual_pro_until) as string | null;
     const groupPass = (data?.groupPassUntil ?? data?.group_pass_until) as string | null;
     const creditsRaw = data?.includedTripPassCredits ?? data?.included_trip_pass_credits;
+    const unassignedRaw = data?.unassignedTripPassCount ?? data?.unassigned_trip_pass_count;
     const status: MyProStatus = {
         individualProUntil: individual ?? null,
         groupPassUntil: groupPass ?? null,
         includedTripPassCredits: typeof creditsRaw === 'number' ? creditsRaw : 0,
+        unassignedTripPassCount: typeof unassignedRaw === 'number' ? unassignedRaw : 0,
         hasPro: false,
     };
     status.hasPro =
@@ -33,6 +36,7 @@ export async function fetchMyProStatus(groupId?: string | null): Promise<MyProSt
             individualProUntil: null,
             groupPassUntil: null,
             includedTripPassCredits: 0,
+            unassignedTripPassCount: 0,
         };
     }
     if (typeof data === 'object') {
@@ -43,6 +47,7 @@ export async function fetchMyProStatus(groupId?: string | null): Promise<MyProSt
         individualProUntil: null,
         groupPassUntil: null,
         includedTripPassCredits: 0,
+        unassignedTripPassCount: 0,
     };
 }
 
@@ -65,5 +70,43 @@ export async function redeemIncludedTripPass(
     const row = data as Record<string, unknown>;
     if (row.ok === true) return { ok: true };
     const code = row.error as RedeemIncludedTripPassError | undefined;
+    return { ok: false, error: code ?? 'unknown' };
+}
+
+export type TripPassIntentError = 'not_authenticated' | 'not_a_member' | 'unknown';
+
+export async function registerTripPassPurchaseIntent(
+    groupId: string,
+): Promise<{ ok: true } | { ok: false; error: TripPassIntentError }> {
+    const { data, error } = await supabase.rpc('register_trip_pass_purchase_intent', {
+        p_group_id: groupId,
+    });
+    if (error || !data || typeof data !== 'object') {
+        return { ok: false, error: 'unknown' };
+    }
+    const row = data as Record<string, unknown>;
+    if (row.ok === true) return { ok: true };
+    const code = row.error as TripPassIntentError | undefined;
+    return { ok: false, error: code ?? 'unknown' };
+}
+
+export type AssignPurchasedTripPassError =
+    | 'not_authenticated'
+    | 'not_a_member'
+    | 'no_unassigned_pass'
+    | 'unknown';
+
+export async function assignPurchasedTripPass(
+    groupId: string,
+): Promise<{ ok: true } | { ok: false; error: AssignPurchasedTripPassError }> {
+    const { data, error } = await supabase.rpc('assign_purchased_trip_pass', {
+        p_group_id: groupId,
+    });
+    if (error || !data || typeof data !== 'object') {
+        return { ok: false, error: 'unknown' };
+    }
+    const row = data as Record<string, unknown>;
+    if (row.ok === true) return { ok: true };
+    const code = row.error as AssignPurchasedTripPassError | undefined;
     return { ok: false, error: code ?? 'unknown' };
 }

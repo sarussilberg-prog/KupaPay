@@ -1,5 +1,5 @@
 /**
- * RevenueCat webhook → Supabase entitlement writes.
+ * RevenueCat webhook → Supabase entitlement writes (idempotent via handle_revenuecat_webhook RPC).
  * @see docs/KUPAPAY_PRO_SETUP.md
  */
 
@@ -19,6 +19,7 @@ export interface RevenueCatEvent {
     id: string;
     app_user_id: string;
     product_id?: string;
+    transaction_id?: string;
     entitlement_ids?: string[];
     expiration_at_ms?: number | null;
     purchased_at_ms?: number;
@@ -44,6 +45,13 @@ function readAttr(event: RevenueCatEvent, key: string): string | null {
     return raw.trim();
 }
 
+function parseUuid(value: string | null): string | null {
+    if (!value) return null;
+    const uuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuid.test(value) ? value : null;
+}
+
 export function verifyAuthorization(req: Request, secret: string): boolean {
     if (!secret) return false;
     const auth = req.headers.get('authorization') ?? '';
@@ -59,7 +67,6 @@ export function proUntilFromEvent(event: RevenueCatEvent): string | null {
     const product = event.product_id ?? '';
     if (product === PRODUCT_TRIP_PASS) return null;
     if (product !== PRODUCT_PRO_MONTHLY && product !== PRODUCT_PRO_YEARLY) {
-        // Unknown subscription product — still honor entitlement + expiration if present.
         if (!event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID)) return null;
     }
     return msToIso(event.expiration_at_ms ?? undefined);
@@ -77,8 +84,15 @@ export function tripPassUntilFromEvent(event: RevenueCatEvent, now = new Date())
     return d.toISOString();
 }
 
+export type WebhookAction =
+    | 'individual'
+    | 'trip_pass'
+    | 'trip_pass_unassigned'
+    | 'yearly_credit'
+    | 'ignored';
+
 export type HandleOutcome =
-    | { ok: true; action: 'individual' | 'trip_pass' | 'yearly_credit' | 'ignored' }
+    | { ok: true; action: WebhookAction; duplicate?: boolean }
     | { ok: false; status: number; error: string };
 
 export async function applyWebhookEvent(
@@ -86,13 +100,11 @@ export async function applyWebhookEvent(
     env: WebhookEnv,
 ): Promise<HandleOutcome> {
     const event = body.event;
-    if (!event?.app_user_id) {
+    if (!event?.app_user_id || !event.id) {
         return { ok: false, status: 400, error: 'missing_event' };
     }
 
-    const userId = event.app_user_id;
     const type = event.type ?? '';
-
     const grantTypes = new Set([
         'INITIAL_PURCHASE',
         'RENEWAL',
@@ -102,121 +114,50 @@ export async function applyWebhookEvent(
     ]);
     const revokeTypes = new Set(['EXPIRATION', 'CANCELLATION']);
 
-    if (isTripPassProduct(event) && (grantTypes.has(type) || type === 'NON_RENEWING_PURCHASE')) {
-        const groupId = readAttr(event, 'group_id');
-        if (!groupId) {
-            return { ok: false, status: 422, error: 'trip_pass_missing_group_id' };
-        }
-        const until = tripPassUntilFromEvent(event);
-        const res = await upsertGroupPass(env, {
-            groupId,
-            purchasedBy: userId,
-            until,
-            storeProductId: event.product_id ?? PRODUCT_TRIP_PASS,
-            revenuecatEventId: event.id,
-            passSource: 'purchase',
-        });
-        if (!res.ok) return res;
-        return { ok: true, action: 'trip_pass' };
-    }
-
+    const isTripPass = isTripPassProduct(event) &&
+        (grantTypes.has(type) || type === 'NON_RENEWING_PURCHASE');
     const proUntil = proUntilFromEvent(event);
-    if (proUntil && grantTypes.has(type)) {
-        const res = await setProfileProUntil(env, userId, proUntil);
-        if (!res.ok) return res;
-        if (event.product_id === PRODUCT_PRO_YEARLY) {
-            const credit = await grantIncludedTripPassCredit(env, userId);
-            if (!credit.ok) return credit;
-            return { ok: true, action: 'yearly_credit' };
-        }
-        return { ok: true, action: 'individual' };
+    const isRevoke = revokeTypes.has(type) &&
+        event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID) === true;
+    const isGrantSub = proUntil != null && grantTypes.has(type);
+    const isYearly = event.product_id === PRODUCT_PRO_YEARLY && isGrantSub;
+
+    if (!isTripPass && !isGrantSub && !isRevoke) {
+        return { ok: true, action: 'ignored' };
     }
 
-    if (revokeTypes.has(type) && event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID)) {
-        const exp = msToIso(event.expiration_at_ms ?? undefined) ?? new Date(0).toISOString();
-        const res = await setProfileProUntil(env, userId, exp);
-        if (!res.ok) return res;
-        return { ok: true, action: 'individual' };
-    }
-
-    return { ok: true, action: 'ignored' };
-}
-
-async function setProfileProUntil(
-    env: WebhookEnv,
-    userId: string,
-    proUntil: string,
-): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
-    const url = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`;
-    const res = await fetch(url, {
-        method: 'PATCH',
-        headers: {
-            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({ pro_until: proUntil }),
-    });
-    if (!res.ok) {
-        return { ok: false, status: 502, error: 'profile_update_failed' };
-    }
-    return { ok: true };
-}
-
-async function grantIncludedTripPassCredit(
-    env: WebhookEnv,
-    userId: string,
-): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
-    const url = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/grant_included_trip_pass_credit`;
+    const url = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/handle_revenuecat_webhook`;
     const res = await fetch(url, {
         method: 'POST',
         headers: {
             apikey: env.SUPABASE_SERVICE_ROLE_KEY,
             Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ p_user_id: userId }),
-    });
-    if (!res.ok) {
-        return { ok: false, status: 502, error: 'trip_pass_credit_failed' };
-    }
-    return { ok: true };
-}
-
-async function upsertGroupPass(
-    env: WebhookEnv,
-    row: {
-        groupId: string;
-        purchasedBy: string;
-        until: string;
-        storeProductId: string;
-        revenuecatEventId: string;
-        passSource: 'purchase' | 'included_yearly';
-    },
-): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
-    const base = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/group_passes`;
-    const res = await fetch(`${base}?on_conflict=group_id`, {
-        method: 'POST',
-        headers: {
-            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-            Prefer: 'resolution=merge-duplicates,return=minimal',
         },
         body: JSON.stringify({
-            group_id: row.groupId,
-            purchased_by: row.purchasedBy,
-            until: row.until,
-            store_product_id: row.storeProductId,
-            revenuecat_event_id: row.revenuecatEventId,
-            pass_source: row.passSource,
+            p_event_id: event.id,
+            p_user_id: event.app_user_id,
+            p_event_type: type,
+            p_product_id: event.product_id ?? null,
+            p_pro_until: isRevoke || isGrantSub ? (proUntil ?? new Date(0).toISOString()) : null,
+            p_trip_pass_until: isTripPass ? tripPassUntilFromEvent(event) : null,
+            p_attr_group_id: parseUuid(readAttr(event, 'group_id')),
+            p_is_trip_pass: isTripPass,
+            p_is_yearly: isYearly,
+            p_is_revoke: isRevoke,
         }),
     });
+
     if (!res.ok) {
-        return { ok: false, status: 502, error: 'group_pass_upsert_failed' };
+        return { ok: false, status: 502, error: 'webhook_rpc_failed' };
     }
-    return { ok: true };
+
+    const data = (await res.json()) as Record<string, unknown>;
+    if (data.duplicate === true) {
+        return { ok: true, action: 'ignored', duplicate: true };
+    }
+    const action = (data.action as WebhookAction) ?? 'ignored';
+    return { ok: true, action };
 }
 
 export async function handleRequest(req: Request, env: WebhookEnv): Promise<Response> {
@@ -247,5 +188,9 @@ export async function handleRequest(req: Request, env: WebhookEnv): Promise<Resp
     if (!outcome.ok) {
         return Response.json({ ok: false, error: outcome.error }, { status: outcome.status });
     }
-    return Response.json({ ok: true, action: outcome.action });
+    return Response.json({
+        ok: true,
+        action: outcome.action,
+        duplicate: outcome.duplicate === true,
+    });
 }

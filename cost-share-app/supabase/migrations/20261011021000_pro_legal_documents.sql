@@ -1,8 +1,8 @@
--- Pro v1 legal: Terms "Subscriptions & Trip Pass" + Privacy RevenueCat processor (EN + HE).
+-- Pro v1 legal (order: #102 AdMob 20261010230000, security 20261011010000+, then this file): Terms + RevenueCat privacy rows.
 
 UPDATE public.legal_documents
 SET
-    version = '1.2.0',
+    version = '1.3.0',
     effective_date = DATE '2026-10-11',
     content_md = replace(
         content_md,
@@ -13,7 +13,7 @@ WHERE slug = 'terms' AND locale = 'en' AND is_published = true;
 
 UPDATE public.legal_documents
 SET
-    version = '1.2.0',
+    version = '1.3.0',
     effective_date = DATE '2026-10-11',
     content_md = replace(
         content_md,
@@ -22,41 +22,41 @@ SET
     )
 WHERE slug = 'terms' AND locale = 'he' AND is_published = true;
 
--- Privacy EN: RevenueCat processor + transfers abroad
+-- Privacy EN: insert RevenueCat after AdMob #102 processor row (do not revert AdMob text).
 UPDATE public.legal_documents
 SET
-    version = '1.2.0',
+    version = '1.3.0',
     effective_date = DATE '2026-10-11',
     content_md = replace(
         content_md,
-        E'- **Apple App Store / Google Play** \u2014 for delivering the app and handling in-app purchases or subscriptions when offered.\n- **Google AdMob** \u2014 rewarded video ads when you unlock certain features.',
-        E'- **Apple App Store / Google Play** \u2014 for delivering the app and handling in-app purchases or subscriptions when offered.\n- **RevenueCat, Inc.** (USA) \u2014 manages in-app subscriptions and purchases. It receives an anonymous app user ID, purchase and transaction details, and device and platform information. It does not receive your card details, which stay with Apple or Google.\n- **Google AdMob** \u2014 rewarded video ads when you unlock certain features.'
+        E'- **Apple App Store / Google Play** \u2014 for delivering the app and handling in-app purchases or subscriptions when offered.\n- **Google LLC (AdMob, USA)** \u2014 serves rewarded video ads when you choose to unlock certain features.',
+        E'- **Apple App Store / Google Play** \u2014 for delivering the app and handling in-app purchases or subscriptions when offered.\n- **RevenueCat, Inc.** (USA) \u2014 manages in-app subscriptions and purchases. It receives an anonymous app user ID, purchase and transaction details, and device and platform information. It does not receive your card details, which stay with Apple or Google.\n- **Google LLC (AdMob, USA)** \u2014 serves rewarded video ads when you choose to unlock certain features.'
     )
 WHERE slug = 'privacy' AND locale = 'en' AND is_published = true;
 
 UPDATE public.legal_documents
 SET content_md = replace(
     content_md,
-    E'Your information is processed and stored by **Supabase**, and may also be processed by **Sentry** and **PostHog**, which host data in regions **outside Israel** (including the United States and the European Union).',
-    E'Your information is processed and stored by **Supabase**, and may also be processed by **Sentry**, **PostHog**, and **RevenueCat**, which host data in regions **outside Israel** (including the United States and the European Union).'
+    E'Your information is processed and stored by **Supabase**, and may also be processed by **Sentry**, **PostHog**, and **Google LLC (AdMob)** when you use rewarded ads, which host or process data in regions **outside Israel** (including the United States and the European Union).',
+    E'Your information is processed and stored by **Supabase**, and may also be processed by **Sentry**, **PostHog**, **RevenueCat**, and **Google LLC (AdMob)** when you use rewarded ads or in-app purchases, which host or process data in regions **outside Israel** (including the United States and the European Union).'
 )
 WHERE slug = 'privacy' AND locale = 'en' AND is_published = true;
 
 UPDATE public.legal_documents
 SET
-    version = '1.2.0',
+    version = '1.3.0',
     effective_date = DATE '2026-10-11',
     content_md = replace(
         content_md,
-        E'- **Apple App Store / Google Play** \u2014 הפצת האפליקציה ורכישות/מנויים when offered.\n- **Google AdMob** \u2014 פרסומות וידאו מתגמלות when you unlock features.',
-        E'- **Apple App Store / Google Play** \u2014 הפצת האפליקציה ורכישות/מנויים when offered.\n- **RevenueCat, Inc.** (ארה\"ב) \u2014 מנהלת את המנויים והרכישות באפליקציה. היא מקבלת מזהה משתמש אנונימי באפליקציה, פרטי רכישה ועסקה, ומידע על המכשיר והפלטפורמה. היא לא מקבלת את פרטי הכרטיס שלך, שנשארים אצל Apple או Google.\n- **Google AdMob** \u2014 פרסומות וידאו מתגמלות when you unlock features.'
+        E'- **Apple App Store / Google Play** \u2014 \u05d4\u05e4\u05e6\u05ea \u05d4\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4 \u05d5\u05e8\u05db\u05d9\u05e9\u05d5\u05ea/\u05de\u05e0\u05d5\u05d9\u05d9\u05dd when offered.\n- **Google LLC (AdMob, \u05d0\u05e8\u05d4\"\u05d1)** \u2014 \u05de\u05e9\u05e8\u05d4 \u05e4\u05e8\u05e1\u05d5\u05de\u05d5\u05ea \u05d5\u05d9\u05d3\u05d0\u05d5 \u05de\u05ea\u05d2\u05de\u05dc\u05d5\u05ea \u05db\u05d0\u05e9\u05e8 \u05d1\u05d5\u05d7\u05e8\u05d9\u05dd \u05dc\u05e4\u05ea\u05d5\u05d7 \u05ea\u05db\u05d5\u05e0\u05d4.',
+        E'- **Apple App Store / Google Play** \u2014 \u05d4\u05e4\u05e6\u05ea \u05d4\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4 \u05d5\u05e8\u05db\u05d9\u05e9\u05d5\u05ea/\u05de\u05e0\u05d5\u05d9\u05d9\u05dd when offered.\n- **RevenueCat, Inc.** (\u05d0\u05e8\u05d4\"\u05d1) \u2014 \u05de\u05e0\u05d4\u05dc\u05ea \u05d0\u05ea \u05d4\u05de\u05e0\u05d5\u05d9\u05d9\u05dd \u05d5\u05d4\u05e8\u05db\u05d9\u05e9\u05d5\u05ea \u05d1\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4. \u05d4\u05d9\u05d0 \u05de\u05e7\u05d1\u05dc\u05ea \u05de\u05d6\u05d4\u05d4 \u05de\u05e9\u05ea\u05de\u05e9 \u05d0\u05e0\u05d5\u05e0\u05d9 \u05d1\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4, \u05e4\u05e8\u05d8\u05d9 \u05e8\u05db\u05d9\u05e9\u05d4 \u05d5\u05e2\u05e1\u05e7\u05d4, \u05d5\u05de\u05d9\u05d3\u05e2 \u05e2\u05dc \u05d4\u05de\u05db\u05e9\u05d9\u05e8 \u05d5\u05d4\u05e4\u05dc\u05d8\u05e4\u05d5\u05e8\u05de\u05d4. \u05d4\u05d9\u05d0 \u05dc\u05d0 \u05de\u05e7\u05d1\u05dc\u05ea \u05d0\u05ea \u05e4\u05e8\u05d8\u05d9 \u05d4\u05db\u05e8\u05d8\u05d9\u05e1 \u05e9\u05dc\u05da, \u05e9\u05e0\u05e9\u05d0\u05e8\u05d9\u05dd \u05d0\u05e6\u05dc Apple \u05d0\u05d5 Google.\n- **Google LLC (AdMob, \u05d0\u05e8\u05d4\"\u05d1)** \u2014 \u05de\u05e9\u05e8\u05d4 \u05e4\u05e8\u05e1\u05d5\u05de\u05d5\u05ea \u05d5\u05d9\u05d3\u05d0\u05d5 \u05de\u05ea\u05d2\u05de\u05dc\u05d5\u05ea \u05db\u05d0\u05e9\u05e8 \u05d1\u05d5\u05d7\u05e8\u05d9\u05dd \u05dc\u05e4\u05ea\u05d5\u05d7 \u05ea\u05db\u05d5\u05e0\u05d4.'
     )
 WHERE slug = 'privacy' AND locale = 'he' AND is_published = true;
 
 UPDATE public.legal_documents
 SET content_md = replace(
     content_md,
-    E'המידע שלך מעובד ונשמר אצל **Supabase**, וייתכן גם אצל **Sentry** ו-**PostHog**, המארחים נתונים **מחוץ לישראל** (כולל ארה\"ב ואיחוד אירופי).',
-    E'המידע שלך מעובד ונשמר אצל **Supabase**, וייתכן גם אצל **Sentry**, **PostHog** ו-**RevenueCat**, המארחים נתונים **מחוץ לישראל** (כולל ארה\"ב ואיחוד אירופי).'
+    E'\u05d4\u05de\u05d9\u05d3\u05e2 \u05e9\u05dc\u05da \u05de\u05e2\u05d5\u05d1\u05d3 \u05d5\u05e0\u05e9\u05de\u05e8 \u05d0\u05e6\u05dc **Supabase**, \u05d5\u05d9\u05d9\u05ea\u05db\u05df \u05d2\u05dd \u05d0\u05e6\u05dc **Sentry**, **PostHog** \u05d5-**Google LLC (AdMob)** \u05db\u05d0\u05e9\u05e8 \u05e0\u05d5\u05d2\u05e2\u05d9\u05dd \u05d1\u05e4\u05e8\u05e1\u05d5\u05de\u05d5\u05ea \u05de\u05ea\u05d2\u05de\u05dc\u05d5\u05ea',
+    E'\u05d4\u05de\u05d9\u05d3\u05e2 \u05e9\u05dc\u05da \u05de\u05e2\u05d5\u05d1\u05d3 \u05d5\u05e0\u05e9\u05de\u05e8 \u05d0\u05e6\u05dc **Supabase**, \u05d5\u05d9\u05d9\u05ea\u05db\u05df \u05d2\u05dd \u05d0\u05e6\u05dc **Sentry**, **PostHog**, **RevenueCat** \u05d5-**Google LLC (AdMob)** \u05db\u05d0\u05e9\u05e8 \u05e0\u05d5\u05d2\u05e2\u05d9\u05dd \u05d1\u05e8\u05db\u05d9\u05e9\u05d5\u05ea \u05d0\u05d5 \u05d1\u05e4\u05e8\u05e1\u05d5\u05de\u05d5\u05ea \u05de\u05ea\u05d2\u05de\u05dc\u05d5\u05ea'
 )
 WHERE slug = 'privacy' AND locale = 'he' AND is_published = true;
