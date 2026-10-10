@@ -73,9 +73,8 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 - **Revisit when:** A Postgres upgrade changes an error format, OR we add a second consumer of these RPCs, OR i18n on RPC errors becomes a release requirement.
 
 ### 6. Atomic multi-table writes via SECURITY DEFINER RPCs
-- **What:** Wrap `createExpense` (expense + N splits), `createSettlement` (settlement + activity emission), and `acceptInvite` (membership + activity + notification) in single-transaction RPCs. Today they're sequential client-side inserts with no rollback (KI-019).
-- **Why deferred:** Orphan rows are recoverable manually; risk surface is small at tester scale. Refactoring all three at once is the right unit, not piecemeal.
-- **Revisit when:** First orphan-row support ticket, OR external testers start hitting flaky networks.
+- **Status (2026-10-11):** **Partial** — `create_expense_with_splits` + `update_expense_with_splits` shipped (KI-019 resolved). Settlement + invite flows still worth auditing for remaining multi-step client paths.
+- **Revisit when:** Any new orphan-row incident, or before scaling concurrent editors in one group.
 
 ### 7. Pagination on `fetchMessages` / activity feed
 - **What:** `messages.service.ts` calls `get_group_messages` with hardcoded `p_limit: 100`. No cursor / `offset`. Activity feed has similar full-fetch pattern.
