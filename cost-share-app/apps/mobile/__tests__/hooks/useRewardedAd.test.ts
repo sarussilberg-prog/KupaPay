@@ -28,6 +28,11 @@ jest.mock('../../services/monetization.service', () => ({
     logMonetizationEvent: jest.fn(),
 }));
 
+jest.mock('../../lib/rewardedAdsCompliance', () => ({
+    ...jest.requireActual('../../lib/rewardedAdsCompliance'),
+    isRewardedAdsAllowedInRegion: jest.fn(() => true),
+}));
+
 import { useRewardedAd } from '../../hooks/useRewardedAd';
 
 function fire(type: string) {

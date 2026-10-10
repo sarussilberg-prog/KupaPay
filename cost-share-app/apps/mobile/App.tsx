@@ -44,6 +44,7 @@ import { captureProductEvent, identifyProductUser } from './lib/productAnalytics
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
 import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
+import { configureRewardedAdsSdk } from './lib/rewardedAdsCompliance';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
 import type { Session } from '@supabase/supabase-js';
@@ -208,6 +209,7 @@ function App() {
 
       try {
         configureNativeGoogleSignIn();
+        await configureRewardedAdsSdk();
         await initializeLanguage();
         const preDone = await hasCompletedPreLoginOnboarding();
         if (mounted) setPreOnboardingDone(preDone);
