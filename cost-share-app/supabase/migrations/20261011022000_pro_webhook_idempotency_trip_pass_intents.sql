@@ -70,6 +70,8 @@ REVOKE ALL ON FUNCTION public.is_active_group_member(UUID, UUID) FROM PUBLIC; --
 GRANT EXECUTE ON FUNCTION public.is_active_group_member(UUID, UUID) TO authenticated, service_role;
 
 -- At most one unredeemed included credit (skip grant when already 1).
+-- 20261011020000 created this as RETURNS void; replace with boolean for webhook idempotency.
+DROP FUNCTION IF EXISTS public.grant_included_trip_pass_credit(UUID);
 CREATE OR REPLACE FUNCTION public.grant_included_trip_pass_credit(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
