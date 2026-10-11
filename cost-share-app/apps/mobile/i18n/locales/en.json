@@ -1212,5 +1212,11 @@
         "netDirectionTheyPayYou": "{{name}} pays you",
         "netDirectionYouPayThem": "You pay {{name}}",
         "netDirectionThirdParty": "{{from}} pays {{to}}"
+    },
+    "updateRequired": {
+        "title": "Update required",
+        "body": "This version of KupaPay is no longer supported. Please install the latest update from the store to continue.",
+        "versionLine": "Your version: {{current}} · Required: {{required}} or newer",
+        "cta": "Open store"
     }
 }

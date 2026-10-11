@@ -47,6 +47,11 @@ import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
 import { configureRewardedAdsSdk } from './lib/configureRewardedAdsSdk';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
+import { UpdateRequiredScreen } from './screens/UpdateRequiredScreen';
+import {
+    evaluateMinimumAppVersion,
+    type AppClientConfig,
+} from './services/appClientConfig.service';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
 
@@ -82,6 +87,7 @@ function App() {
   const appOpenedSentRef = React.useRef(false);
   const [isReady, setIsReady] = useState(false);
   const [preOnboardingDone, setPreOnboardingDone] = useState<boolean | null>(null);
+  const [forcedUpdateConfig, setForcedUpdateConfig] = useState<AppClientConfig | null>(null);
   const session = useAppStore((s) => s.session);
   const setSession = useAppStore((s) => s.setSession);
   const currentUser = useAppStore((s) => s.currentUser);
@@ -220,9 +226,17 @@ function App() {
       };
 
       try {
+        await initializeLanguage();
+
+        const versionGate = await evaluateMinimumAppVersion();
+        if (!mounted) return;
+        if (versionGate.status === 'update_required') {
+          setForcedUpdateConfig(versionGate.config);
+          return;
+        }
+
         configureNativeGoogleSignIn();
         await configureRewardedAdsSdk();
-        await initializeLanguage();
         const preDone = await hasCompletedPreLoginOnboarding();
         if (mounted) setPreOnboardingDone(preDone);
 
@@ -334,6 +348,18 @@ function App() {
     });
     return () => sub.remove();
   }, [guardSession]);
+
+  if (forcedUpdateConfig) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <UpdateRequiredScreen config={forcedUpdateConfig} />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
 
   if (!isReady) {
     return (

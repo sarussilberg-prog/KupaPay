@@ -1230,5 +1230,11 @@
         "netDirectionTheyPayYou": "{{name}} חייב לך",
         "netDirectionYouPayThem": "את/ה חייב/ת ל-{{name}}",
         "netDirectionThirdParty": "{{from}} משלם/ת ל-{{to}}"
+    },
+    "updateRequired": {
+        "title": "נדרש עדכון",
+        "body": "גרסה זו של KupaPay אינה נתמכת עוד. יש להתקין את העדכון האחרון מהחנות כדי להמשיך.",
+        "versionLine": "הגרסה שלך: {{current}} · נדרש: {{required}} ומעלה",
+        "cta": "פתיחת החנות"
     }
 }
