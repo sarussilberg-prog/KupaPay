@@ -96,7 +96,7 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.update_expense_with_splits(uuid, jsonb, jsonb)
+REVOKE EXECUTE ON FUNCTION public.update_expense_with_splits(uuid, jsonb, jsonb) -- safe-breaking: RPC never granted to anon; v2.0+ uses authenticated-only
     FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.update_expense_with_splits(uuid, jsonb, jsonb)
     TO authenticated;
