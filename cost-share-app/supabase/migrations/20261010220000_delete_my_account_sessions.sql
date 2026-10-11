@@ -72,5 +72,5 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.delete_my_account() FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.delete_my_account() FROM PUBLIC, anon; -- safe-breaking: self-serve delete is authenticated-only since v2.0
 GRANT EXECUTE ON FUNCTION public.delete_my_account() TO authenticated;

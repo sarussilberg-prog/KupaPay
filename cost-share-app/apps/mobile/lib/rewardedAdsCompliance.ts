@@ -6,7 +6,6 @@
  * - EU/EEA/UK: ads are disabled (UMP not integrated); gated features stay usable without ads.
  */
 
-import { Platform } from 'react-native';
 import * as Localization from 'expo-localization';
 
 /** Passed to RewardedAd.createForAdRequest — required for NPA. */
@@ -66,20 +65,3 @@ export function isRewardedAdsAllowedInRegion(regionCode?: string | null): boolea
     return !EU_EEA_UK_REGIONS.has(code);
 }
 
-let sdkInitStarted = false;
-
-/** Optional SDK init (no ATT). Safe to call multiple times. */
-export async function configureRewardedAdsSdk(): Promise<void> {
-    if (sdkInitStarted || Platform.OS === 'web') return;
-    sdkInitStarted = true;
-    try {
-        const { default: mobileAds } = require('react-native-google-mobile-ads');
-        await mobileAds().setRequestConfiguration({
-            tagForUnderAgeOfConsent: false,
-            tagForChildDirectedTreatment: false,
-        });
-        await mobileAds().initialize();
-    } catch {
-        // Native module missing in tests / Expo Go — hook marks ads unavailable.
-    }
-}
