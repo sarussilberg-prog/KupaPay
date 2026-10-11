@@ -221,6 +221,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS after_consolidation_batch_insert ON consolidation_batches;
 CREATE TRIGGER after_consolidation_batch_insert
     AFTER INSERT ON consolidation_batches
     FOR EACH ROW EXECUTE FUNCTION handle_consolidation_batch_activity_event();
