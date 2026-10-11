@@ -1,2 +1,2 @@
-/** Web — AdMob SDK is native-only; no init on web export. */
+/** AdMob SDK is native-only; web builds skip initialization. */
 export async function configureRewardedAdsSdk(): Promise<void> {}
