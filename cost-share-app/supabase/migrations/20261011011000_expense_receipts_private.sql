@@ -4,7 +4,7 @@ UPDATE storage.buckets
 SET public = false
 WHERE id = 'expense-receipts';
 
-DROP POLICY IF EXISTS "Expense receipts are publicly readable" ON storage.objects;
+DROP POLICY IF EXISTS "Expense receipts are publicly readable" ON storage.objects; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 
 CREATE POLICY "Group members can read expense receipts"
     ON storage.objects FOR SELECT

@@ -57,10 +57,10 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.admin_list_support_messages() FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.admin_list_support_messages() FROM PUBLIC, anon; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 GRANT EXECUTE ON FUNCTION public.admin_list_support_messages() TO authenticated;
 
-REVOKE EXECUTE ON FUNCTION public.admin_update_support_message_status(uuid, text) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.admin_update_support_message_status(uuid, text) FROM PUBLIC, anon; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 GRANT EXECUTE ON FUNCTION public.admin_update_support_message_status(uuid, text) TO authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -77,10 +77,10 @@ AS $$
     SELECT invite_token FROM public.profiles WHERE id = auth.uid();
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.get_my_invite_token() FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.get_my_invite_token() FROM PUBLIC, anon; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 GRANT EXECUTE ON FUNCTION public.get_my_invite_token() TO authenticated;
 
-REVOKE ALL ON TABLE public.profiles FROM anon, authenticated;
+REVOKE ALL ON TABLE public.profiles FROM anon, authenticated; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 GRANT SELECT (
     id,
     email,
@@ -146,18 +146,18 @@ $$;
 -- ---------------------------------------------------------------------------
 -- 5. RLS initplan: wrap auth.uid() for hot policies (Postgres 14+).
 -- ---------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 CREATE POLICY "Users can update own profile" ON public.profiles
     FOR UPDATE
     USING ((select auth.uid()) = id AND public.is_caller_active())
     WITH CHECK ((select auth.uid()) = id AND public.is_caller_active());
 
-DROP POLICY IF EXISTS "Users can create groups" ON public.groups;
+DROP POLICY IF EXISTS "Users can create groups" ON public.groups; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 CREATE POLICY "Users can create groups" ON public.groups
     FOR INSERT
     WITH CHECK ((select auth.uid()) = created_by AND public.is_caller_active());
 
-DROP POLICY IF EXISTS "Users can insert group members" ON public.group_members;
+DROP POLICY IF EXISTS "Users can insert group members" ON public.group_members; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 CREATE POLICY "Users can insert group members" ON public.group_members
     FOR INSERT
     WITH CHECK (
@@ -170,7 +170,7 @@ CREATE POLICY "Users can insert group members" ON public.group_members
         )
     );
 
-DROP POLICY IF EXISTS "Either party can delete settlement" ON public.settlements;
+DROP POLICY IF EXISTS "Either party can delete settlement" ON public.settlements; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 CREATE POLICY "Either party can delete settlement" ON public.settlements
     FOR DELETE
     USING (
@@ -179,7 +179,7 @@ CREATE POLICY "Either party can delete settlement" ON public.settlements
         AND ((select auth.uid()) = from_user_id OR (select auth.uid()) = to_user_id)
     );
 
-DROP POLICY IF EXISTS "users insert own monetization events" ON public.monetization_events;
+DROP POLICY IF EXISTS "users insert own monetization events" ON public.monetization_events; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration
 CREATE POLICY "users insert own monetization events"
     ON public.monetization_events FOR INSERT
     TO authenticated
