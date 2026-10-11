@@ -14,6 +14,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
+import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
 
 export type InviteRedemptionResult =
     | { kind: 'friend' }
@@ -149,6 +150,7 @@ async function redeemInviteLink(
         void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
         void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
         navigateAfterFriendInvite(navigation);
+        void captureProductEvent('invite_accepted', { kind: 'friend' });
         return { kind: 'friend' };
     }
 
@@ -168,6 +170,10 @@ async function redeemInviteLink(
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
     void queryClient.invalidateQueries({ queryKey: ['groups'] });
     navigateAfterGroupInvite(navigation, payload.group_id);
+    if (!payload.already_member) {
+        void captureProductEvent('invite_accepted', { kind: 'group' });
+        void trackSecondGroupMemberJoined(payload.group_id);
+    }
     return { kind: 'group', groupId: payload.group_id };
 }
 

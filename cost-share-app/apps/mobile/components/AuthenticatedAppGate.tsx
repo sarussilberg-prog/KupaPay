@@ -73,6 +73,7 @@ export function AuthenticatedAppGate() {
             isOnline: () => onlineManager.isOnline(),
             fetchGroups: () => withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS),
             seedGroups: (groups) => queryClient.setQueryData(queryKeys.groups, groups),
+            hasPendingInvite: () => Boolean(useAppStore.getState().pendingInvite),
         });
         setGate(target);
     }, []);

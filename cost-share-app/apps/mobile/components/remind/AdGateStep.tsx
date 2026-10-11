@@ -5,6 +5,7 @@ import { Text } from '../AppText';
 import { useRewardedAd } from '../../hooks/useRewardedAd';
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { ProPromoInterstitial } from './ProPromoInterstitial';
+import { SHOW_KUPAPAY_PRO_UPSELL } from '../../lib/featureFlags';
 
 interface AdGateStepProps {
     active: boolean;
@@ -32,6 +33,7 @@ export function AdGateStep({ active, featureKey, onCompleted }: AdGateStepProps)
 
     // Determine once on mount whether this open is a Pro promo slot
     const [showProPromo] = useState<boolean>(() => {
+        if (!SHOW_KUPAPAY_PRO_UPSELL) return false;
         gateOpenCount += 1;
         return gateOpenCount % PRO_PROMO_EVERY_N === 0;
     });
@@ -51,8 +53,41 @@ export function AdGateStep({ active, featureKey, onCompleted }: AdGateStepProps)
         setProMessageShown(true);
     };
 
-    // ── Pro promo interstitial (every 4th open, OR when ads are unavailable) ─
-    if (showProPromo || unavailable) {
+    // ── Pro promo interstitial (every 4th open when Pro upsell is enabled) ─────
+    if (showProPromo) {
+        return (
+            <ProPromoInterstitial
+                visible={active}
+                onDismiss={() => {
+                    void logMonetizationEvent(featureKey, 'pro_promo_dismissed');
+                    onCompleted();
+                }}
+            />
+        );
+    }
+
+    // Ads unavailable (web / load error): skip the gate when Pro upsell is hidden.
+    if (unavailable && !SHOW_KUPAPAY_PRO_UPSELL) {
+        return (
+            <View className="px-4 pb-6 pt-2 gap-3">
+                <Text className="text-gray-700 text-base text-center leading-6">
+                    {t('monetization.adUnavailableContinue')}
+                </Text>
+                <TouchableOpacity
+                    onPress={onCompleted}
+                    activeOpacity={0.8}
+                    className="bg-primary rounded-2xl py-4 items-center"
+                    testID="ad-gate-continue-without-ad"
+                >
+                    <Text className="text-white font-semibold text-base text-center">
+                        {t('monetization.continueBtn')}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    if (unavailable && SHOW_KUPAPAY_PRO_UPSELL) {
         return (
             <ProPromoInterstitial
                 visible={active}
@@ -102,16 +137,18 @@ export function AdGateStep({ active, featureKey, onCompleted }: AdGateStepProps)
                 </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-                onPress={handleGoPro}
-                activeOpacity={0.7}
-                className="border border-gray-200 rounded-2xl py-4 flex-row items-center justify-center"
-                testID="ad-gate-pro-button"
-            >
-                <Text className="text-gray-700 font-medium text-base text-center">
-                    {t('monetization.goProButton')}
-                </Text>
-            </TouchableOpacity>
+            {SHOW_KUPAPAY_PRO_UPSELL && (
+                <TouchableOpacity
+                    onPress={handleGoPro}
+                    activeOpacity={0.7}
+                    className="border border-gray-200 rounded-2xl py-4 flex-row items-center justify-center"
+                    testID="ad-gate-pro-button"
+                >
+                    <Text className="text-gray-700 font-medium text-base text-center">
+                        {t('monetization.goProButton')}
+                    </Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
