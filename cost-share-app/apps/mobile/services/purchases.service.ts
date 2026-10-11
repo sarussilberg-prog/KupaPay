@@ -29,7 +29,7 @@ function platformApiKey(): string | null {
             ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY
             : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY;
     const trimmed = key?.trim();
-    return trimmed ? trimmed : null;
+    return trimmed || null;
 }
 
 export function isPurchasesConfigured(): boolean {

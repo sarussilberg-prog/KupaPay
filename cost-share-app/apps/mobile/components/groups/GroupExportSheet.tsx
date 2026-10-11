@@ -6,13 +6,13 @@ import { Text } from '../AppText';
 
 export type GroupExportFormat = 'csv' | 'pdf' | 'excel';
 
-interface GroupExportSheetProps {
+type GroupExportSheetProps = Readonly<{
     visible: boolean;
     onClose: () => void;
     onSelect: (format: GroupExportFormat) => void;
     proLocked: boolean;
     onUpgrade: () => void;
-}
+}>;
 
 export function GroupExportSheet({
     visible,
@@ -51,15 +51,13 @@ export function GroupExportSheet({
     );
 }
 
-function ExportRow({
-    label,
-    onPress,
-    badge,
-}: {
+type ExportRowProps = Readonly<{
     label: string;
     onPress: () => void;
     badge?: string;
-}) {
+}>;
+
+function ExportRow({ label, onPress, badge }: ExportRowProps) {
     return (
         <TouchableOpacity
             onPress={onPress}

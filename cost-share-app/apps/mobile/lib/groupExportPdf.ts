@@ -3,24 +3,26 @@ import { buildGroupExportCsv } from './groupExportCsv';
 
 function escapeHtml(s: string): string {
     return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+}
+
+function csvCellToHtml(cell: string): string {
+    const unquoted = cell.replace(/^"|"$/g, '').replaceAll('""', '"');
+    return `<td style="border:1px solid #ccc;padding:4px 8px;">${escapeHtml(unquoted)}</td>`;
 }
 
 export function buildGroupExportPdfHtml(params: GroupExportInput): string {
     const csv = buildGroupExportCsv(params);
     const lines = csv.split(/\r?\n/).filter(Boolean);
-    const rows = lines.map(line => {
-        const cells = line.match(/("([^"]|"")*"|[^,]*)/g)?.filter(Boolean) ?? [line];
-        return cells.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
-    });
-    const body = rows
-        .map(
-            row =>
-                `<tr>${row.map(c => `<td style="border:1px solid #ccc;padding:4px 8px;">${escapeHtml(c)}</td>`).join('')}</tr>`,
-        )
+    const body = lines
+        .map(line => {
+            const cells = line.match(/("([^"]|"")*"|[^,]*)/g)?.filter(Boolean) ?? [line];
+            const rowHtml = cells.map(csvCellToHtml).join('');
+            return `<tr>${rowHtml}</tr>`;
+        })
         .join('');
     const title = escapeHtml(params.group.name);
     return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${title}</title></head>

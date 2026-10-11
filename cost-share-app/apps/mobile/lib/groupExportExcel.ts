@@ -1,5 +1,4 @@
 import * as XLSX from 'xlsx';
-import type { Group, FeedItem, GroupMemberLite, PairwiseDebt } from '@cost-share/shared';
 import { buildGroupExportCsv, type GroupExportInput } from './groupExportCsv';
 
 export function buildGroupExportExcelBuffer(params: GroupExportInput): ArrayBuffer {
@@ -15,8 +14,8 @@ export function buildGroupExportExcelBase64(params: GroupExportInput): string {
     const buf = buildGroupExportExcelBuffer(params);
     const bytes = new Uint8Array(buf);
     let binary = '';
-    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+    for (const byte of bytes) {
+        binary += String.fromCodePoint(byte);
+    }
     return btoa(binary);
 }
-
-export type { Group, FeedItem, GroupMemberLite, PairwiseDebt };

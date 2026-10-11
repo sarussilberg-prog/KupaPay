@@ -12,7 +12,6 @@ import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery
 import { convertDebtsToTripCurrency } from '../../lib/tripCurrencyConversion';
 
 interface GroupTripCurrencySectionProps {
-    groupId: string;
     defaultCurrency: string;
     debts: PairwiseDebt[];
     memberNames: Record<string, string>;

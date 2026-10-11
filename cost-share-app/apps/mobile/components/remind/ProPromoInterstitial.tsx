@@ -28,12 +28,12 @@ const APP_LOGO = require('../../assets/logo.png');
 
 const COUNTDOWN_SECONDS = 5;
 
-interface ProPromoInterstitialProps {
+type ProPromoInterstitialProps = Readonly<{
     visible: boolean;
     onDismiss: () => void;
     /** When set, CTA opens the Pro paywall instead of the legacy “coming soon” alert. */
     onUpgrade?: () => void;
-}
+}>;
 
 export function ProPromoInterstitial({ visible, onDismiss, onUpgrade }: ProPromoInterstitialProps) {
     const { t } = useTranslation();

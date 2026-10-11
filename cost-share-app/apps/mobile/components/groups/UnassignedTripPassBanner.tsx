@@ -9,8 +9,15 @@ import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { showAppToast } from '../../lib/appToast';
 
-interface UnassignedTripPassBannerProps {
+type UnassignedTripPassBannerProps = Readonly<{
     groupId: string;
+}>;
+
+function unassignedTripPassErrorKey(
+    error: string | undefined,
+): 'pro.unassignedTripPass.none' | 'pro.unassignedTripPass.error' {
+    if (error === 'no_unassigned_pass') return 'pro.unassignedTripPass.none';
+    return 'pro.unassignedTripPass.error';
 }
 
 export function UnassignedTripPassBanner({ groupId }: UnassignedTripPassBannerProps) {
@@ -30,11 +37,7 @@ export function UnassignedTripPassBanner({ groupId }: UnassignedTripPassBannerPr
             await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus(groupId) });
             return;
         }
-        const key =
-            result.error === 'no_unassigned_pass'
-                ? 'pro.unassignedTripPass.none'
-                : 'pro.unassignedTripPass.error';
-        showAppToast({ type: 'error', titleKey: key });
+        showAppToast({ type: 'error', titleKey: unassignedTripPassErrorKey(result.error) });
     }, [groupId]);
 
     if (!show) return null;

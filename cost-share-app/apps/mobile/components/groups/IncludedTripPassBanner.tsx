@@ -9,8 +9,16 @@ import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { showAppToast } from '../../lib/appToast';
 
-interface IncludedTripPassBannerProps {
+type IncludedTripPassBannerProps = Readonly<{
     groupId: string;
+}>;
+
+function includedTripPassErrorKey(
+    error: string | undefined,
+): 'pro.includedTripPass.inactiveSub' | 'pro.includedTripPass.noCredit' | 'pro.includedTripPass.error' {
+    if (error === 'subscription_inactive') return 'pro.includedTripPass.inactiveSub';
+    if (error === 'no_credit') return 'pro.includedTripPass.noCredit';
+    return 'pro.includedTripPass.error';
 }
 
 export function IncludedTripPassBanner({ groupId }: IncludedTripPassBannerProps) {
@@ -33,13 +41,7 @@ export function IncludedTripPassBanner({ groupId }: IncludedTripPassBannerProps)
             await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus(groupId) });
             return;
         }
-        const key =
-            result.error === 'subscription_inactive'
-                ? 'pro.includedTripPass.inactiveSub'
-                : result.error === 'no_credit'
-                  ? 'pro.includedTripPass.noCredit'
-                  : 'pro.includedTripPass.error';
-        showAppToast({ type: 'error', titleKey: key });
+        showAppToast({ type: 'error', titleKey: includedTripPassErrorKey(result.error) });
     }, [groupId]);
 
     if (!show) return null;

@@ -114,7 +114,11 @@ export async function exportGroupExcel(
         if (Platform.OS === 'web') {
             const binary = atob(base64);
             const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            let i = 0;
+            for (const ch of binary) {
+                bytes[i] = ch.codePointAt(0) ?? 0;
+                i += 1;
+            }
             const blob = new Blob([bytes], {
                 type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             });

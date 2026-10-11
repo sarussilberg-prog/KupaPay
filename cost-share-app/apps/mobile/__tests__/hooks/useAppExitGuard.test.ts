@@ -46,7 +46,7 @@ describe('useAppExitGuard', () => {
             setPlatform('android');
             backHandler = null;
             jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_event, handler) => {
-                backHandler = handler;
+                backHandler = handler as () => boolean;
                 return { remove: jest.fn() };
             });
             jest.spyOn(BackHandler, 'exitApp').mockImplementation(() => undefined);

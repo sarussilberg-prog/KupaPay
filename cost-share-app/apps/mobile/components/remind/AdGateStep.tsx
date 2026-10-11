@@ -10,12 +10,12 @@ import { ProPromoInterstitial } from './ProPromoInterstitial';
 import { isProUpsellSurfaceEnabled, KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 
-interface AdGateStepProps {
+type AdGateStepProps = Readonly<{
     active: boolean;
     featureKey: string;
     groupId?: string;
     onCompleted: () => void;
-}
+}>;
 
 // Module-level counter: every 4th gate open shows the Pro promo instead of
 // the "Watch Ad" / "Go Pro" buttons. Resets on app restart — intentional.

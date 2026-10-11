@@ -31,6 +31,7 @@
     "ios:clean": "bash scripts/ios-clean-build.sh",
     "build": "eas build",
     "clean": "rm -rf .expo node_modules",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

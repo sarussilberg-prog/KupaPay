@@ -61,7 +61,7 @@ export function ProPaywallContent({
     showTripPass = true,
     onClose,
     onPurchaseSuccess,
-}: ProPaywallContentProps) {
+}: Readonly<ProPaywallContentProps>) {
     const { t } = useTranslation();
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
@@ -79,7 +79,7 @@ export function ProPaywallContent({
 
     useEffect(() => {
         let cancelled = false;
-        (async () => {
+        void (async () => {
             setLoading(true);
             const pkgs = isPurchasesConfigured() ? await loadOfferingPackages() : null;
             if (!cancelled) {
@@ -165,6 +165,55 @@ export function ProPaywallContent({
         return t('pro.paywall.subscribeAtPrice', { price });
     }, [selected, selectedPackage, t]);
 
+    const planPickerSection = useMemo(() => {
+        if (loading) {
+            return <ActivityIndicator className="my-8" />;
+        }
+        if (!storeConfigured) {
+            return (
+                <Text className="text-center text-gray-500 mb-6">
+                    {t('pro.paywall.storeNotConfigured')}
+                </Text>
+            );
+        }
+        return (
+            <>
+                <View className="gap-2 mb-3">
+                    <PlanPicker
+                        label={t('pro.paywall.planMonthly')}
+                        price={priceLabel(packages?.monthly ?? null)}
+                        selected={selected === 'monthly'}
+                        onPress={() => setSelected('monthly')}
+                        testID="paywall-pick-monthly"
+                    />
+                    <PlanPicker
+                        label={t('pro.paywall.planYearly')}
+                        price={priceLabel(packages?.annual ?? null)}
+                        selected={selected === 'yearly'}
+                        onPress={() => setSelected('yearly')}
+                        testID="paywall-pick-yearly"
+                        hint={t('pro.paywall.yearlyIncludesTripPass')}
+                    />
+                    {showTripPass ? (
+                        <PlanPicker
+                            label={t('pro.paywall.planTripPass')}
+                            price={tripPassPrice}
+                            selected={selected === 'trip_pass'}
+                            onPress={() => setSelected('trip_pass')}
+                            testID="paywall-pick-trip-pass"
+                        />
+                    ) : null}
+                </View>
+
+                {showTripPass && packages?.tripPass ? (
+                    <Text className="text-sm text-gray-600 text-center mb-4 leading-5">
+                        {t('pro.paywall.tripPassLine', { price: tripPassPrice })}
+                    </Text>
+                ) : null}
+            </>
+        );
+    }, [loading, packages, selected, showTripPass, storeConfigured, t, tripPassPrice]);
+
     return (
         <ScrollView
             className="flex-1 bg-slate-50"
@@ -200,46 +249,7 @@ export function ProPaywallContent({
                 ))}
             </View>
 
-            {loading ? (
-                <ActivityIndicator className="my-8" />
-            ) : !storeConfigured ? (
-                <Text className="text-center text-gray-500 mb-6">{t('pro.paywall.storeNotConfigured')}</Text>
-            ) : (
-                <>
-                    <View className="gap-2 mb-3">
-                        <PlanPicker
-                            label={t('pro.paywall.planMonthly')}
-                            price={priceLabel(packages?.monthly ?? null)}
-                            selected={selected === 'monthly'}
-                            onPress={() => setSelected('monthly')}
-                            testID="paywall-pick-monthly"
-                        />
-                        <PlanPicker
-                            label={t('pro.paywall.planYearly')}
-                            price={priceLabel(packages?.annual ?? null)}
-                            selected={selected === 'yearly'}
-                            onPress={() => setSelected('yearly')}
-                            testID="paywall-pick-yearly"
-                            hint={t('pro.paywall.yearlyIncludesTripPass')}
-                        />
-                        {showTripPass ? (
-                            <PlanPicker
-                                label={t('pro.paywall.planTripPass')}
-                                price={tripPassPrice}
-                                selected={selected === 'trip_pass'}
-                                onPress={() => setSelected('trip_pass')}
-                                testID="paywall-pick-trip-pass"
-                            />
-                        ) : null}
-                    </View>
-
-                    {showTripPass && packages?.tripPass ? (
-                        <Text className="text-sm text-gray-600 text-center mb-4 leading-5">
-                            {t('pro.paywall.tripPassLine', { price: tripPassPrice })}
-                        </Text>
-                    ) : null}
-                </>
-            )}
+            {planPickerSection}
 
             <Pressable
                 onPress={handlePurchase}
@@ -281,21 +291,16 @@ export function ProPaywallContent({
     );
 }
 
-function PlanPicker({
-    label,
-    price,
-    selected,
-    onPress,
-    testID,
-    hint,
-}: {
+type PlanPickerProps = Readonly<{
     label: string;
     price: string;
     selected: boolean;
     onPress: () => void;
     testID?: string;
     hint?: string;
-}) {
+}>;
+
+function PlanPicker({ label, price, selected, onPress, testID, hint }: PlanPickerProps) {
     return (
         <Pressable
             onPress={onPress}
