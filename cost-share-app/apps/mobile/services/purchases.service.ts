@@ -16,6 +16,9 @@ import { logMonetizationEvent } from './monetization.service';
 import { captureProductEvent } from '../lib/productAnalytics';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
+import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
+
+export type { PaywallPackages, PurchasesPackageLike };
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesPackage = import('react-native-purchases').PurchasesPackage;
@@ -67,12 +70,6 @@ export async function logOutPurchases(): Promise<void> {
     }
 }
 
-export interface PaywallPackages {
-    monthly: PurchasesPackage | null;
-    annual: PurchasesPackage | null;
-    tripPass: PurchasesPackage | null;
-}
-
 export async function loadOfferingPackages(): Promise<PaywallPackages> {
     const empty: PaywallPackages = { monthly: null, annual: null, tripPass: null };
     const Purchases = await getPurchases();
@@ -112,7 +109,7 @@ async function trackPurchaseEvent(
 }
 
 export async function purchasePackage(
-    pkg: PurchasesPackage,
+    pkg: PurchasesPackageLike,
     opts: { featureKey: string; groupId?: string },
 ): Promise<{ ok: true } | { ok: false; userCancelled?: boolean }> {
     const Purchases = await getPurchases();
@@ -142,7 +139,7 @@ export async function purchasePackage(
     });
 
     try {
-        const { customerInfo } = await Purchases.default.purchasePackage(pkg);
+        const { customerInfo } = await Purchases.default.purchasePackage(pkg as PurchasesPackage);
         const active = customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
         const tripPassPurchased =
             isTripPassPkg ||

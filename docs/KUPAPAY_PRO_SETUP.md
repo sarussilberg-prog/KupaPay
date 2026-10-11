@@ -23,6 +23,7 @@ Create these in **App Store Connect**, **Google Play Console**, and link them in
    - iOS public SDK key → `EXPO_PUBLIC_REVENUECAT_IOS_KEY`
    - Android public SDK key → `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`
 4. **App user ID:** SDK calls `Purchases.logIn(supabaseUserId)` after sign-in.
+5. **Expo config:** Do **not** add `react-native-purchases` to `app.json` `plugins` (it is not a config plugin and breaks `expo export --platform web`). Native linking comes from the npm dependency + prebuild; web uses `purchases.service.web.ts` stubs.
 5. **Trip Pass (one-time):** Before purchase, app sets subscriber attribute `group_id` to the active group UUID. Unlocks Pro for **every member** of that group for **30 days**, **no renewal**.
 6. **Yearly plan perk:** Each yearly purchase or renewal grants **one** redeemable Trip Pass credit on the subscriber’s profile (`included_trip_pass_credits`). The user redeems it in-app for a chosen group while their individual Pro subscription is active (`redeem_included_trip_pass` RPC).
 

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import type { PurchasesPackage } from 'react-native-purchases';
+import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
 import { APP_WEB_ORIGIN } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
@@ -35,12 +35,12 @@ const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 type PlanKey = 'monthly' | 'yearly' | 'trip_pass';
 
-function priceLabel(pkg: PurchasesPackage | null): string {
+function priceLabel(pkg: PurchasesPackageLike | null): string {
     if (!pkg) return '—';
     return pkg.product.priceString;
 }
 
-function subscriptionPeriodKey(pkg: PurchasesPackage | null): string {
+function subscriptionPeriodKey(pkg: PurchasesPackageLike | null): string {
     if (!pkg) return '';
     const id = pkg.product.identifier;
     if (id.includes('yearly') || id.includes('annual')) return 'pro.paywall.periodYear';
@@ -92,7 +92,7 @@ export function ProPaywallContent({
         };
     }, []);
 
-    const selectedPackage = useMemo((): PurchasesPackage | null => {
+    const selectedPackage = useMemo((): PurchasesPackageLike | null => {
         if (!packages) return null;
         if (selected === 'monthly') return packages.monthly;
         if (selected === 'yearly') return packages.annual;
