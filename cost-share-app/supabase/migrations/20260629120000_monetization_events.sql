@@ -17,12 +17,14 @@ CREATE TABLE IF NOT EXISTS monetization_events (
 -- Users can insert their own rows; nobody reads others
 ALTER TABLE monetization_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users insert own monetization events" ON monetization_events;
 CREATE POLICY "users insert own monetization events"
     ON monetization_events FOR INSERT
     TO authenticated
     WITH CHECK (user_id = auth.uid());
 
 -- Admins read all
+DROP POLICY IF EXISTS "admins read monetization events" ON monetization_events;
 CREATE POLICY "admins read monetization events"
     ON monetization_events FOR SELECT
     TO authenticated
