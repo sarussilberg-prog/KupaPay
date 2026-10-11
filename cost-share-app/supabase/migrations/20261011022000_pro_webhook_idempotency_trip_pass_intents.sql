@@ -66,7 +66,7 @@ AS $$
     );
 $$;
 
-REVOKE ALL ON FUNCTION public.is_active_group_member(UUID, UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.is_active_group_member(UUID, UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.is_active_group_member(UUID, UUID) TO authenticated, service_role;
 
 -- At most one unredeemed included credit (skip grant when already 1).
@@ -113,7 +113,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.register_trip_pass_purchase_intent(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.register_trip_pass_purchase_intent(UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.register_trip_pass_purchase_intent(UUID) TO authenticated;
 
 -- Apply a purchased Trip Pass to a group when webhook could not bind (or user picks later).
@@ -165,7 +165,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.assign_purchased_trip_pass(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.assign_purchased_trip_pass(UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.assign_purchased_trip_pass(UUID) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.get_my_pro_status(p_group_id UUID DEFAULT NULL)
@@ -291,7 +291,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.handle_revenuecat_webhook(
+REVOKE ALL ON FUNCTION public.handle_revenuecat_webhook( -- safe-breaking: Pro RPCs authenticated/service-only (#103)
     TEXT, UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, UUID, BOOLEAN, BOOLEAN, BOOLEAN
 ) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.handle_revenuecat_webhook(

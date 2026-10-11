@@ -78,7 +78,7 @@ AS $$
         );
 $$;
 
-REVOKE ALL ON FUNCTION public.has_pro(UUID, UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.has_pro(UUID, UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.has_pro(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.has_pro(UUID, UUID) TO service_role;
 
@@ -114,7 +114,7 @@ AS $$
     WHERE id = p_user_id;
 $$;
 
-REVOKE ALL ON FUNCTION public.grant_included_trip_pass_credit(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.grant_included_trip_pass_credit(UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.grant_included_trip_pass_credit(UUID) TO service_role;
 
 -- Redeem one included credit while individual Pro is active (yearly perk).
@@ -179,10 +179,10 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.redeem_included_trip_pass(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.redeem_included_trip_pass(UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.redeem_included_trip_pass(UUID) TO authenticated;
 
-REVOKE ALL ON FUNCTION public.get_my_pro_status(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_my_pro_status(UUID) FROM PUBLIC; -- safe-breaking: Pro RPCs authenticated/service-only (#103)
 GRANT EXECUTE ON FUNCTION public.get_my_pro_status(UUID) TO authenticated;
 
 -- Paywall / purchase analytics (extends monetization_events).
