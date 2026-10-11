@@ -45,7 +45,16 @@ import {
     updateMessage,
     deleteMessage,
 } from '../../services/messages.service';
-import { exportGroupCsv } from '../../services/group-share.service';
+import {
+    exportGroupCsv,
+    exportGroupExcel,
+    exportGroupPdf,
+} from '../../services/group-share.service';
+import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
+import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
+import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -320,6 +329,9 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [pendingExport, setPendingExport] = useState(false);
+    const [exportSheetOpen, setExportSheetOpen] = useState(false);
+    const { data: proStatus } = useProStatusQuery(groupId);
+    const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -641,20 +653,30 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
             onApplied: () => showSuccessMessage('groups.favorite.setToast'),
         });
     }, [groupId, displayGroup?.name, favoriteGroupId, setFavoriteGroupId, t]);
-    const runExport = useCallback(async () => {
-        if (!displayGroup) return;
-        setExporting(true);
-        showInfoToast('groups.share.exporting');
-        try {
-            await exportGroupCsv(displayGroup, {
+    const runExport = useCallback(
+        async (format: GroupExportFormat) => {
+            if (!displayGroup) return;
+            setExporting(true);
+            showInfoToast('groups.share.exporting');
+            const payload = {
                 feed,
                 debts: pairwiseDebts,
                 members: memberLites,
-            });
-        } finally {
-            setExporting(false);
-        }
-    }, [displayGroup, feed, memberLites, pairwiseDebts]);
+            };
+            try {
+                if (format === 'pdf') await exportGroupPdf(displayGroup, payload);
+                else if (format === 'excel') await exportGroupExcel(displayGroup, payload);
+                else await exportGroupCsv(displayGroup, payload);
+            } finally {
+                setExporting(false);
+            }
+        },
+        [displayGroup, feed, memberLites, pairwiseDebts],
+    );
+    const openExportFlow = useCallback(() => {
+        if (KUPAPAY_PRO_ENABLED) setExportSheetOpen(true);
+        else void runExport('csv');
+    }, [runExport]);
     const handleExport = useCallback(() => {
         if (!displayGroup || exporting) return;
         setMenuOpen(false);
@@ -664,9 +686,9 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         if (Platform.OS === 'ios') {
             setPendingExport(true);
         } else {
-            void runExport();
+            openExportFlow();
         }
-    }, [displayGroup, exporting, runExport]);
+    }, [displayGroup, exporting, openExportFlow]);
     const handleSettleUp = useCallback(
         () => navigation.navigate('SettleUpList', { groupId }),
         [navigation, groupId],
@@ -941,6 +963,8 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             onSwitcherPress={onSwitcherPress}
                             onMembersPress={handleMembersPress}
                         />
+                        <UnassignedTripPassBanner groupId={groupId} />
+                        <IncludedTripPassBanner groupId={groupId} />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                                 <AppIcon name="search" size={18} color={colors.gray500} />
@@ -1183,7 +1207,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                 onDismiss={() => {
                     if (pendingExport) {
                         setPendingExport(false);
-                        void runExport();
+                        openExportFlow();
                     }
                 }}
             >
@@ -1248,6 +1272,21 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                     </View>
                 </Pressable>
             </Modal>
+
+            <GroupExportSheet
+                visible={exportSheetOpen}
+                onClose={() => setExportSheetOpen(false)}
+                proLocked={exportProLocked}
+                onUpgrade={() => {
+                    setExportSheetOpen(false);
+                    navigation.navigate('Paywall', {
+                        featureKey: 'group_export',
+                        groupId,
+                        showTripPass: true,
+                    });
+                }}
+                onSelect={format => void runExport(format)}
+            />
         </View>
     );
 }

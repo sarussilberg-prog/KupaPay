@@ -23,7 +23,12 @@ export type ProductAnalyticsEvent =
     | 'invite_accepted'
     | 'second_group_member_joined'
     | 'settle_up_recorded'
-    | 'review_prompt_shown';
+    | 'review_prompt_shown'
+    | 'paywall_viewed'
+    | 'purchase_started'
+    | 'purchase_completed'
+    | 'purchase_failed'
+    | 'restore';
 
 function posthogConfig(): { key: string; host: string } | null {
     const key = process.env.EXPO_PUBLIC_POSTHOG_API_KEY?.trim();

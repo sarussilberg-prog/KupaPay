@@ -65,3 +65,5 @@ export function isRewardedAdsAllowedInRegion(regionCode?: string | null): boolea
     return !EU_EEA_UK_REGIONS.has(code);
 }
 
+export { configureRewardedAdsSdk } from './configureRewardedAdsSdk';
+

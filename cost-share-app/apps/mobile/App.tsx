@@ -139,6 +139,18 @@ function App() {
   }, [currentUserId]);
 
   useEffect(() => {
+    if (!currentUserId) return;
+    void import('./services/purchases.service').then(({ configurePurchasesForUser }) =>
+      configurePurchasesForUser(currentUserId),
+    );
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (currentUserId) return;
+    void import('./services/purchases.service').then(({ logOutPurchases }) => logOutPurchases());
+  }, [currentUserId]);
+
+  useEffect(() => {
     applySentryLanguage(language);
   }, [language]);
 

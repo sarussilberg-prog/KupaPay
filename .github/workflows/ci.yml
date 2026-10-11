@@ -41,6 +41,19 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
 
+  revenuecat-webhook:
+    name: RevenueCat webhook (Deno)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app/supabase/functions/revenuecat-webhook
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: v2.x
+      - run: deno test --allow-env
+
   test:
     name: Mobile tests
     runs-on: ubuntu-latest
@@ -59,7 +72,7 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test]
+    needs: [lint, typecheck, test, revenuecat-webhook]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest

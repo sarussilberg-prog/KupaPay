@@ -13,3 +13,4 @@ export * from './calculations';
 export * from './notifications';
 export * from './version';
 export * from './receiptStorage';
+export * from './pro/hasPro';
