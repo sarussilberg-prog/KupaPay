@@ -17,6 +17,7 @@ import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
+import { useAppStore } from '../store';
 
 /**
  * Hard ceiling on how long resolveGate will wait for fetchGroups before

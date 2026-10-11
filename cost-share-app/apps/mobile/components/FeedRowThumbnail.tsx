@@ -10,9 +10,13 @@ import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { AppIcon, AppIconName } from './AppIcon';
 import { colors } from '../theme';
+import { useExpenseReceiptDisplayUrl } from '../hooks/useExpenseReceiptDisplayUrl';
 
 interface FeedRowThumbnailProps {
+    /** Legacy direct URL (avatars, etc.) */
     imageUrl?: string;
+    /** expenses.receipt_url path or legacy public URL — resolved to signed URL */
+    receiptStorageRef?: string;
     iconName?: AppIconName;
     iconColor?: string;
     iconBgColor?: string;
@@ -23,19 +27,22 @@ const MAX_RETRIES = 2;
 
 export function FeedRowThumbnail({
     imageUrl,
+    receiptStorageRef,
     iconName,
     iconColor = colors.primaryDark,
     iconBgColor = colors.primaryExtraLight,
     testID,
 }: FeedRowThumbnailProps) {
+    const signedReceiptUrl = useExpenseReceiptDisplayUrl(receiptStorageRef);
+    const resolvedUrl = receiptStorageRef ? signedReceiptUrl : imageUrl;
     const [attempt, setAttempt] = useState(0);
-    useEffect(() => setAttempt(0), [imageUrl]);
+    useEffect(() => setAttempt(0), [resolvedUrl]);
 
-    if (imageUrl && attempt <= MAX_RETRIES) {
+    if (resolvedUrl && attempt <= MAX_RETRIES) {
         return (
             <Image
-                recyclingKey={`${imageUrl}#${attempt}`}
-                source={imageUrl}
+                recyclingKey={`${resolvedUrl}#${attempt}`}
+                source={resolvedUrl}
                 cachePolicy="memory-disk"
                 transition={0}
                 onError={() => setAttempt((a) => a + 1)}

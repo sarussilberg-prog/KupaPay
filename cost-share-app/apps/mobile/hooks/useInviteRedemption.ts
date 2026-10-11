@@ -32,8 +32,15 @@ export function useInviteRedemption(): void {
         const link = parseIncomingUrl(incomingUrl);
         if (link.kind === 'unknown') return;
 
+        if (link.kind === 'settleReminder') {
+            if (session) {
+                void handleInviteLink(link, navigation, queryClient);
+            }
+            return;
+        }
+
         if (!session) {
-            const pending = { kind: link.kind, token: link.token } as const;
+            const pending = { kind: link.kind, token: link.token };
             setPendingInvite(pending);
             void persistPendingInvite(pending);
             return;

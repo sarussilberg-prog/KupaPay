@@ -1,16 +1,19 @@
--- Idempotent: public expense-receipts storage bucket for expense receipt images.
--- Path convention: <groupId>/<filename>. RLS gates access by group membership.
+-- Idempotent: private expense-receipts bucket. Path: <groupId>/<filename>.
+-- Clients store paths in expenses.receipt_url and use signed URLs to display.
 
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('expense-receipts', 'expense-receipts', true)
-ON CONFLICT (id) DO NOTHING;
+VALUES ('expense-receipts', 'expense-receipts', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
 
--- Bucket is public, so getPublicUrl() works without auth. Write policies below
--- still gate uploads/edits/deletes by group membership.
 DROP POLICY IF EXISTS "Expense receipts are publicly readable" ON storage.objects;
-CREATE POLICY "Expense receipts are publicly readable"
+DROP POLICY IF EXISTS "Group members can read expense receipts" ON storage.objects;
+CREATE POLICY "Group members can read expense receipts"
     ON storage.objects FOR SELECT
-    USING (bucket_id = 'expense-receipts');
+    TO authenticated
+    USING (
+        bucket_id = 'expense-receipts'
+        AND public.is_group_member(((storage.foldername(name))[1])::uuid)
+    );
 
 DROP POLICY IF EXISTS "Group members can upload expense receipts" ON storage.objects;
 CREATE POLICY "Group members can upload expense receipts"

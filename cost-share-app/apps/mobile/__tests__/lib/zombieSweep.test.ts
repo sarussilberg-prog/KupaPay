@@ -4,9 +4,24 @@ import { sweepZombiePendingRows } from '../../lib/zombieSweep';
 
 describe('sweepZombiePendingRows', () => {
     const groupId = 'g1';
+    const clients: QueryClient[] = [];
+
+    afterEach(() => {
+        for (const c of clients) {
+            c.clear();
+        }
+        clients.length = 0;
+    });
 
     function makeClient() {
-        return new QueryClient();
+        const c = new QueryClient({
+            defaultOptions: {
+                queries: { gcTime: 0 },
+                mutations: { gcTime: 0 },
+            },
+        });
+        clients.push(c);
+        return c;
     }
 
     it('removes a pending row with no matching mutation in the queue', () => {

@@ -27,7 +27,8 @@ export type InviteLink =
     | { kind: 'settleReminder'; token: string }
     | { kind: 'unknown' };
 
-const TOKEN_RE = /^[A-Za-z0-9_-]{10}$/;
+/** Matches legacy 10-char tokens and new 14-char tokens from generate_invite_token(). */
+const TOKEN_RE = /^[A-Za-z0-9_-]{10,14}$/;
 
 export function parseIncomingUrl(rawUrl: string): InviteLink {
     if (!rawUrl) return { kind: 'unknown' };

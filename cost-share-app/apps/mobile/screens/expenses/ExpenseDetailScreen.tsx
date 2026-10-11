@@ -21,6 +21,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { AppIcon } from '../../components/AppIcon';
 import { colors } from '../../theme';
 import { getDisplayName } from '../../lib/userDisplay';
+import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
 
 const categoryEmoji: Record<string, string> = {
     food: '🍕',
@@ -45,6 +46,7 @@ export function ExpenseDetailScreen() {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showReceiptModal, setShowReceiptModal] = useState(false);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
+    const receiptDisplayUrl = useExpenseReceiptDisplayUrl(expense?.receiptUrl);
 
     useEffect(() => {
         const loadData = async () => {
@@ -163,7 +165,7 @@ export function ExpenseDetailScreen() {
                         testID="expense-receipt-thumbnail"
                     >
                         <Image
-                            source={{ uri: expense.receiptUrl }}
+                            source={{ uri: receiptDisplayUrl ?? undefined }}
                             className="w-full h-56 rounded-xl bg-gray-100"
                             resizeMode="cover"
                         />
@@ -197,9 +199,9 @@ export function ExpenseDetailScreen() {
                     className="flex-1 bg-black"
                     testID="expense-receipt-modal"
                 >
-                    {expense.receiptUrl ? (
+                    {receiptDisplayUrl ? (
                         <Image
-                            source={{ uri: expense.receiptUrl }}
+                            source={{ uri: receiptDisplayUrl }}
                             style={{ width: '100%', height: '100%' }}
                             resizeMode="cover"
                         />
