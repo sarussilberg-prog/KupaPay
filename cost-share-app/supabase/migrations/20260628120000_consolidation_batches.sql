@@ -132,6 +132,7 @@ GRANT EXECUTE ON FUNCTION delete_consolidation_batch TO authenticated;
 
 ALTER TABLE consolidation_batches ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Members can view active batches in their groups" ON consolidation_batches;
 CREATE POLICY "Members can view active batches in their groups"
     ON consolidation_batches FOR SELECT
     USING (
