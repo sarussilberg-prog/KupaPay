@@ -258,4 +258,47 @@ describe('calculateUserBalancesByCurrencyFromData', () => {
         expect(a).toMatchObject({ currency: 'EUR', netBalance: 25 });
         expect(b).toMatchObject({ currency: 'EUR', netBalance: -25 });
     });
+
+    it('nets to zero after odd-cent 50/50 splits and matching settle-up (archive regression)', () => {
+        const groupId = 'g-archive-cents';
+        const expenses = [
+            { id: 'e1', paidBy: 'A', amount: 10.01, currency: 'USD' },
+            { id: 'e2', paidBy: 'A', amount: 3, currency: 'USD' },
+            { id: 'e3', paidBy: 'A', amount: 100, currency: 'USD' },
+            { id: 'e4', paidBy: 'A', amount: 25, currency: 'USD' },
+        ];
+        const splits = [
+            { expenseId: 'e1', userId: 'A', amount: 5.0 },
+            { expenseId: 'e1', userId: 'B', amount: 5.01 },
+            { expenseId: 'e2', userId: 'A', amount: 1.5 },
+            { expenseId: 'e2', userId: 'B', amount: 1.5 },
+            { expenseId: 'e3', userId: 'A', amount: 50 },
+            { expenseId: 'e3', userId: 'B', amount: 50 },
+            { expenseId: 'e4', userId: 'A', amount: 12.5 },
+            { expenseId: 'e4', userId: 'B', amount: 12.5 },
+        ];
+        const settlements = [
+            { fromUserId: 'B', toUserId: 'A', amount: 69.01, currency: 'USD' },
+        ];
+        const result = calculateUserBalancesByCurrencyFromData({
+            groupId,
+            userIds: ['A', 'B'],
+            expenses,
+            splits,
+            settlements,
+        });
+
+        for (const uid of ['A', 'B'] as const) {
+            const row = result.find(r => r.userId === uid)!.byCurrency[0];
+            expect(Math.abs(row.netBalance)).toBeLessThan(0.01);
+        }
+
+        const payer = result.find(r => r.userId === 'A')!.byCurrency[0];
+        const legacyArchiveNet =
+            payer.totalPaid -
+            payer.totalOwed +
+            payer.totalSettledReceived -
+            payer.totalSettledPaid;
+        expect(Math.abs(legacyArchiveNet)).toBeGreaterThanOrEqual(0.01);
+    });
 });
