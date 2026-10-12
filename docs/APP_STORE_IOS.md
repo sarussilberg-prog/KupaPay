@@ -108,6 +108,10 @@ After the first interactive build, credentials persist on EAS and later builds c
 
 ## 3. Submit to TestFlight
 
+**CI (recommended for repeat uploads):** manual GitHub Actions workflow — see [TESTFLIGHT_GITHUB_ACTIONS.md](TESTFLIGHT_GITHUB_ACTIONS.md).
+
+**Local:**
+
 ```bash
 cd cost-share-app/apps/mobile
 eas submit -p ios --profile production --latest
