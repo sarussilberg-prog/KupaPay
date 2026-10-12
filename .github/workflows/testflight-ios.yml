@@ -35,10 +35,10 @@ jobs:
 
       - name: Install dependencies
         working-directory: cost-share-app
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Install EAS CLI
-        run: npm install -g eas-cli@latest
+        run: npm install -g eas-cli@24.12.1 --ignore-scripts
 
       - name: Write ASC API key
         env:
@@ -72,5 +72,5 @@ jobs:
             --non-interactive \
             --output ./build-kupapay.ipa
           bash scripts/eas-submit-testflight.sh ./build-kupapay.ipa
-          EXPECTED="$(npx eas-cli build:version:get -p ios 2>/dev/null | grep -oE '[0-9]+$' || jq -r '.expo.ios.buildNumber' app.json)"
+          EXPECTED="$(eas build:version:get -p ios 2>/dev/null | grep -oE '[0-9]+$' || jq -r '.expo.ios.buildNumber' app.json)"
           node scripts/asc-poll-build.mjs "$EXPECTED"

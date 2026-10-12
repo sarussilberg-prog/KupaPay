@@ -17,13 +17,13 @@ submit_once() {
 }
 
 attempt=1
-while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
+while [[ "$attempt" -le "$MAX_ATTEMPTS" ]]; do
   set +e
   submit_once
   exit_code=$?
   set -e
 
-  if [ "$exit_code" -eq 0 ]; then
+  if [[ "$exit_code" -eq 0 ]]; then
     echo "Submission scheduled (attempt ${attempt})."
     exit 0
   fi
@@ -33,7 +33,7 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
     exit 0
   fi
 
-  if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
+  if [[ "$attempt" -eq "$MAX_ATTEMPTS" ]]; then
     echo "eas submit failed after ${MAX_ATTEMPTS} attempts." >&2
     exit "$exit_code"
   fi
