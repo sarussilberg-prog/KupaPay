@@ -21,9 +21,12 @@ async function pollOnce(elapsedSec) {
   const builds = await fetchAscBuilds(appId, token, 5);
   const hit = builds.find((b) => Number(b.attributes?.version) >= minBuild);
   if (hit) {
-    const { version, processingState, uploadedDate } = hit.attributes ?? {};
-    console.log(`ASC build ${String(version)} ${String(processingState)} (${String(uploadedDate)})`);
-    if (processingState === "VALID" || processingState === "PROCESSING") {
+    const { version, processingState } = hit.attributes ?? {};
+    const buildNum = Number(version);
+    const state =
+      processingState === "VALID" || processingState === "PROCESSING" ? processingState : "OTHER";
+    console.log("ASC build ready:", { buildNum, state });
+    if (state === "VALID" || state === "PROCESSING") {
       return true;
     }
   }
