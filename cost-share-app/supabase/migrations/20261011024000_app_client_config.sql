@@ -35,5 +35,5 @@ AS $$
     );
 $$;
 
-REVOKE ALL ON FUNCTION public.get_app_client_config() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_app_client_config() FROM PUBLIC; -- safe-breaking: new forced-update RPC; old clients never call this (#123)
 GRANT EXECUTE ON FUNCTION public.get_app_client_config() TO anon, authenticated;
