@@ -28,7 +28,8 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pin avoids GitHub API rate limits from resolving "latest" on every run.
+          version: 2.33.9
 
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
