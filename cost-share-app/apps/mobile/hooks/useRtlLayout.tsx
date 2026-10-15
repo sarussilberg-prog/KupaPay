@@ -1,30 +1,32 @@
 import React, { createContext, useContext } from 'react';
 import { Platform, StyleProp, TextStyle, View, ViewStyle, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { isLanguage, isRtlLanguage, type Language } from '@cost-share/shared';
 import { useAppStore } from '../store';
 
 const RtlLayoutContext = createContext<boolean | null>(null);
 
 /** App UI language — prefers Zustand store over i18n (kept in sync on language change). */
-export function useAppLanguage(): 'en' | 'he' {
+export function useAppLanguage(): Language {
     const language = useAppStore((s) => s.language);
-    if (language === 'he' || language === 'en') return language;
+    if (isLanguage(language)) return language;
 
     const { i18n } = useTranslation();
-    return i18n.language.startsWith('he') ? 'he' : 'en';
+    const code = i18n.language.split('-')[0];
+    return isLanguage(code) ? code : 'en';
 }
 
-/** True when UI should mirror for Hebrew — driven by app language, not device locale. */
+/** True when UI should mirror for RTL languages — driven by app language, not device locale. */
 export function useRtlLayout(): boolean {
     const fromContext = useContext(RtlLayoutContext);
     if (fromContext !== null) return fromContext;
 
     const language = useAppStore((s) => s.language);
-    if (language === 'he') return true;
-    if (language === 'en') return false;
+    if (isLanguage(language)) return isRtlLanguage(language);
 
     const { i18n } = useTranslation();
-    return i18n.language.startsWith('he');
+    const code = i18n.language.split('-')[0];
+    return isLanguage(code) ? isRtlLanguage(code) : false;
 }
 
 export function rtlRowStyle(isRtl: boolean): ViewStyle {

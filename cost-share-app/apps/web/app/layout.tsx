@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { APP_BRAND_COLOR, APP_BRAND_TITLE } from '@/lib/brand';
+import { isRtlLanguage } from '@cost-share/shared';
 import { getLocale } from '@/lib/locale';
 import './globals.css';
 
@@ -25,7 +26,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const dir = locale === 'he' ? 'rtl' : 'ltr';
+  const dir = isRtlLanguage(locale) ? 'rtl' : 'ltr';
 
   return (
     <html lang={locale} dir={dir}>
