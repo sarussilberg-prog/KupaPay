@@ -55,6 +55,11 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
+echo "▶ CI auth schema compat (Supabase Postgres image drift)"
+psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS banned_until timestamptz;
+SQL
+
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
 head -n "$SCHEMA_CORE_LINES" supabase/schema.sql | psql "$DB_URL" -v ON_ERROR_STOP=1 -f -
