@@ -1116,7 +1116,18 @@
             "purchaseError": "Purchase could not be completed.",
             "restoreSuccess": "Purchases restored.",
             "restoreNone": "No active purchases found.",
-            "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group."
+            "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group.",
+            "tryFreeTrialCta": "Try 7 days free",
+            "trialRenewalDisclosure": "After 7 days, you'll be charged {{price}}/{{period}}. Cancel anytime in Settings."
+        },
+        "settings": {
+            "sectionTitle": "KupaPay Pro",
+            "manageSubscription": "Manage subscription",
+            "freeTrialUntil": "Free trial until {{date}}"
+        },
+        "trialReminder": {
+            "title": "KupaPay Pro trial ending soon",
+            "body": "Your free KupaPay Pro trial ends in two days. Don't want to continue? You can cancel in Settings."
         },
         "includedTripPass": {
             "title": "Included Trip Pass",

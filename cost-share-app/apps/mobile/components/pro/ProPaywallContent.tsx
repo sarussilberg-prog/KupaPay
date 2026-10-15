@@ -20,12 +20,15 @@ import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
 import {
+    checkIntroductoryPriceEligibility,
     isPurchasesConfigured,
     loadOfferingPackages,
     openSubscriptionManagement,
     purchasePackage,
     restorePurchases,
+    type IntroEligibilityMap,
 } from '../../services/purchases.service';
+import { planShowsFreeTrial } from '../../lib/proTrialPaywall';
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
@@ -71,6 +74,7 @@ export function ProPaywallContent({
     const [packages, setPackages] = useState<Awaited<ReturnType<typeof loadOfferingPackages>> | null>(
         null,
     );
+    const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -82,8 +86,13 @@ export function ProPaywallContent({
         void (async () => {
             setLoading(true);
             const pkgs = isPurchasesConfigured() ? await loadOfferingPackages() : null;
+            const eligibility =
+                pkgs && isPurchasesConfigured()
+                    ? await checkIntroductoryPriceEligibility(pkgs)
+                    : {};
             if (!cancelled) {
                 setPackages(pkgs);
+                setIntroEligibility(eligibility);
                 setLoading(false);
             }
         })();
@@ -147,14 +156,23 @@ export function ProPaywallContent({
 
     const storeConfigured = isPurchasesConfigured();
 
+    const subscriptionPlanKey = selected === 'monthly' ? 'monthly' : selected === 'yearly' ? 'yearly' : null;
+
+    const showFreeTrial =
+        subscriptionPlanKey != null &&
+        planShowsFreeTrial(subscriptionPlanKey, packages, introEligibility);
+
     const disclosureText = useMemo(() => {
         if (selected === 'trip_pass') {
             return t('pro.paywall.tripPassNoRenewal');
         }
         const price = priceLabel(selectedPackage);
         const period = t(subscriptionPeriodKey(selectedPackage));
+        if (showFreeTrial) {
+            return t('pro.paywall.trialRenewalDisclosure', { price, period });
+        }
         return t('pro.paywall.renewalDisclosure', { price, period });
-    }, [selected, selectedPackage, t]);
+    }, [selected, selectedPackage, showFreeTrial, t]);
 
     const purchaseCta = useMemo(() => {
         if (!selectedPackage) return t('pro.paywall.subscribe');
@@ -162,8 +180,11 @@ export function ProPaywallContent({
         if (selected === 'trip_pass') {
             return t('pro.paywall.buyTripPass', { price });
         }
+        if (showFreeTrial) {
+            return t('pro.paywall.tryFreeTrialCta');
+        }
         return t('pro.paywall.subscribeAtPrice', { price });
-    }, [selected, selectedPackage, t]);
+    }, [selected, selectedPackage, showFreeTrial, t]);
 
     const planPickerSection = useMemo(() => {
         if (loading) {
