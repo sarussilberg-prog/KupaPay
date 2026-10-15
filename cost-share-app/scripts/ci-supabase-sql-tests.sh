@@ -19,7 +19,11 @@ PG_PORT=54322
 SCHEMA_CORE_LINES=1038
 
 psql_docker() {
-  docker exec -i "$PG_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
+  docker exec -e PGPASSWORD=postgres -i "$PG_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
+}
+
+psql_docker_auth() {
+  docker exec -e PGPASSWORD=postgres -i "$PG_CONTAINER" psql -U supabase_auth_admin -d postgres -v ON_ERROR_STOP=1 "$@"
 }
 
 psql_docker_file() {
@@ -43,7 +47,7 @@ docker run -d --name "$PG_CONTAINER" \
 
 ready=0
 for _ in $(seq 1 90); do
-  if docker exec "$PG_CONTAINER" psql -U postgres -d postgres -c 'SELECT 1' >/dev/null 2>&1; then
+  if docker exec -e PGPASSWORD=postgres "$PG_CONTAINER" psql -U postgres -d postgres -c 'SELECT 1' >/dev/null 2>&1; then
     ready=1
     break
   fi
@@ -73,7 +77,7 @@ PATCH_FILES=(
   supabase/get-user-dashboard.sql
   supabase/get-user-balance-summary.sql
   supabase/account-deletion-v2.sql
-  supabase/account-deletion-v3-fixes.sql
+  # account-deletion-v3-fixes.sql omitted — covered by 20260617140100_* migrations; auth.users DDL needs auth owner.
   supabase/fix-profiles-account-deactivation.sql
   supabase/fix-groups-select-creator.sql
   supabase/friends-system.sql
