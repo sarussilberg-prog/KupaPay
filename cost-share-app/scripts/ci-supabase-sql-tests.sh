@@ -61,6 +61,7 @@ PATCH_FILES=(
   supabase/group-messages.sql
   supabase/invite-links.sql
   supabase/legal-documents.sql
+  supabase/settle-up-v1.sql
 )
 for patch in "${PATCH_FILES[@]}"; do
   echo "▶ patch — $(basename "$patch")"
