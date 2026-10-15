@@ -1,0 +1,32 @@
+name: Shadow migration check (weekly)
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: shadow-migration-weekly
+  cancel-in-progress: false
+
+jobs:
+  safe-migration-check:
+    name: Safe migration regex (weekly)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run safe-migration-check (migrations touched in last 7 days)
+        run: |
+          set -euo pipefail
+          BEFORE="$(git rev-list -1 --before='7 days ago' HEAD || true)"
+          if [[ -z "$BEFORE" ]]; then
+            BEFORE="$(git hash-object -t tree /dev/null)"
+          fi
+          export GITHUB_EVENT_BEFORE="$BEFORE"
+          bash scripts/supabase-safe-migration-check.sh
