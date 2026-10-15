@@ -1,6 +1,7 @@
 import { assertEquals } from '@std/assert';
 import {
     applyWebhookEvent,
+    handleRequest,
     proUntilFromEvent,
     tripPassUntilFromEvent,
     verifyAuthorization,
@@ -34,6 +35,20 @@ function mockRpcFetch(
         globalThis.fetch = originalFetch;
     };
 }
+
+Deno.test('handleRequest returns 401 when authorization is invalid', async () => {
+    const res = await handleRequest(
+        new Request('https://example.com/webhook', {
+            method: 'POST',
+            headers: { authorization: 'not-the-secret', 'content-type': 'application/json' },
+            body: JSON.stringify({ event: { type: 'TEST', id: '1', app_user_id: 'u' } }),
+        }),
+        env,
+    );
+    assertEquals(res.status, 401);
+    const json = (await res.json()) as { error?: string };
+    assertEquals(json.error, 'unauthorized');
+});
 
 Deno.test('verifyAuthorization accepts raw secret and Bearer', () => {
     assertEquals(
@@ -122,6 +137,36 @@ Deno.test('applyWebhookEvent calls RPC with yearly flag on annual subscription',
         );
         assertEquals(outcome, { ok: true, action: 'yearly_credit' });
         assertEquals(captured.body?.p_is_yearly, true);
+    } finally {
+        restore();
+    }
+});
+
+Deno.test('applyWebhookEvent trip pass with group_id sends p_attr_group_id to RPC', async () => {
+    const groupId = '11111111-1111-4111-8111-111111111111';
+    const captured: { body?: Record<string, unknown> } = {};
+    const restore = mockRpcFetch(body => {
+        captured.body = body;
+        return { status: 200, json: { duplicate: false, action: 'trip_pass' } };
+    });
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'NON_RENEWING_PURCHASE',
+                    id: 'evt-g',
+                    app_user_id: 'user-1',
+                    product_id: PRODUCT_TRIP_PASS,
+                    subscriber_attributes: {
+                        group_id: { value: groupId },
+                    },
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'trip_pass' });
+        assertEquals(captured.body?.p_attr_group_id, groupId);
+        assertEquals(captured.body?.p_is_trip_pass, true);
     } finally {
         restore();
     }
