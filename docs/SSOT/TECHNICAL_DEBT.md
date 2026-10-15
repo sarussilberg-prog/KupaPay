@@ -52,19 +52,15 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 ## Observability & ops (deferred from 2026-06-02 pre-Play audit)
 
 ### 1. Crash & error reporting (Sentry / Crashlytics)
-- **What:** Native + JS crash capture, source-map upload, breadcrumbs, release tagging tied to EAS Updates.
-- **Why deferred:** First internal track is for our own developer testing — we're the only testers and we'll see crashes in `adb logcat`/Xcode. Worth adding before external beta when a tester silence ≠ a working app.
-- **Revisit when:** Opening external testing track, OR after the first round of internal feedback if we lose data on a reproducible crash.
+- **Status (2026-10-15):** **Shipped** — `@sentry/react-native` (EU DSN), release/dist tagging, `sendDefaultPii: false`, user id only. Source-map upload runs on EAS when `SENTRY_AUTH_TOKEN` is set; otherwise `SENTRY_DISABLE_AUTO_UPLOAD=true` from `app.config.ts`.
+- **Revisit when:** First prod crash where stack is still minified (verify token + upload).
 
 ### 2. Product analytics (PostHog / Amplitude / similar)
-- **What:** Funnel events for sign-in, onboarding completion, first expense, settle-up.
-- **Why deferred:** Pre-product-market-fit; no funnel decisions in flight that need data yet. GDPR/consent banner work isn't budgeted.
-- **Revisit when:** First marketing campaign launches OR product asks "where do users drop off in onboarding."
+- **Status (2026-10-15):** **Shipped (Phase 1)** — `posthog-react-native` + `productAnalytics.ts` wrapper (EU host, no replay/autocapture/PII); funnel events through paywall/purchases/invites. Privacy policy (`20261010210000`+).
+- **Revisit when:** PostHog dashboards for install → signup → group → expense → invite → settle → Pro trial/purchase.
 
 ### 3. CI: TypeScript strict gate + workspace `tsc` in `ci.yml`
-- **What:** Add a `typecheck` job that runs `npx tsc --noEmit` for `apps/mobile` and `packages/shared`. Currently only lint + jest run on PRs.
-- **Why deferred from immediate fix:** Lower priority than fixing the 9 outstanding TS errors first (KI-004). The CI gap (KI-015) is logged but adding the job before zero-erroring locally would just block every PR. Sequence: fix KI-004 → then add the CI gate.
-- **Revisit when:** KI-004 reaches zero errors.
+- **Status (2026-10-11):** **Done** — KI-015 resolved; `npm run typecheck` in CI (see security stack PR).
 
 ### 4. RLS performance optimization at scale (`auth.uid()` → `(SELECT auth.uid())`)
 - **What:** Wrap every `auth.uid()` call inside RLS policies in `(SELECT …)` to prevent per-row re-evaluation. Supabase advisor flags ~12 policies on prod (`profiles`, `groups`, `settlements`, `group_members`, `friendships`, `friend_requests`, `friend_blocks`, `group_messages`, `activity_events`).
@@ -77,9 +73,8 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 - **Revisit when:** A Postgres upgrade changes an error format, OR we add a second consumer of these RPCs, OR i18n on RPC errors becomes a release requirement.
 
 ### 6. Atomic multi-table writes via SECURITY DEFINER RPCs
-- **What:** Wrap `createExpense` (expense + N splits), `createSettlement` (settlement + activity emission), and `acceptInvite` (membership + activity + notification) in single-transaction RPCs. Today they're sequential client-side inserts with no rollback (KI-019).
-- **Why deferred:** Orphan rows are recoverable manually; risk surface is small at tester scale. Refactoring all three at once is the right unit, not piecemeal.
-- **Revisit when:** First orphan-row support ticket, OR external testers start hitting flaky networks.
+- **Status (2026-10-11):** **Partial** — `create_expense_with_splits` + `update_expense_with_splits` shipped (KI-019 resolved). Settlement + invite flows still worth auditing for remaining multi-step client paths.
+- **Revisit when:** Any new orphan-row incident, or before scaling concurrent editors in one group.
 
 ### 7. Pagination on `fetchMessages` / activity feed
 - **What:** `messages.service.ts` calls `get_group_messages` with hardcoded `p_limit: 100`. No cursor / `offset`. Activity feed has similar full-fetch pattern.

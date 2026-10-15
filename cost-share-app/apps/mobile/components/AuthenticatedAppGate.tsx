@@ -17,6 +17,7 @@ import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
+import { useAppStore } from '../store';
 
 /**
  * Hard ceiling on how long resolveGate will wait for fetchGroups before
@@ -73,6 +74,7 @@ export function AuthenticatedAppGate() {
             isOnline: () => onlineManager.isOnline(),
             fetchGroups: () => withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS),
             seedGroups: (groups) => queryClient.setQueryData(queryKeys.groups, groups),
+            hasPendingInvite: () => Boolean(useAppStore.getState().pendingInvite),
         });
         setGate(target);
     }, []);

@@ -84,6 +84,7 @@ import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen'
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
 import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
+import { PaywallScreen } from '../screens/pro/PaywallScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -376,6 +377,11 @@ export function AppNavigator() {
                 name="Settings"
                 component={SettingsScreen}
                 options={{ title: t('settings.title') }}
+            />
+            <RootStack.Screen
+                name="Paywall"
+                component={PaywallScreen}
+                options={{ title: t('pro.paywall.title'), presentation: 'modal' }}
             />
             <RootStack.Screen
                 name="NotificationSettings"

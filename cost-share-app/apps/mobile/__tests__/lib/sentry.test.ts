@@ -45,7 +45,7 @@ describe('Sentry identity helpers', () => {
         outerSentry.setTag.mockClear();
     });
 
-    it('applySentryUser sets id/email/username on login and stamps the currency tag', () => {
+    it('applySentryUser sets id only on login and stamps the currency tag', () => {
         applySentryUser({
             id: 'u1',
             email: 'a@b.com',
@@ -54,8 +54,6 @@ describe('Sentry identity helpers', () => {
         });
         expect(outerSentry.setUser).toHaveBeenCalledWith({
             id: 'u1',
-            email: 'a@b.com',
-            username: 'Alice',
         });
         expect(outerSentry.setTag).toHaveBeenCalledWith('default_currency', 'ILS');
     });

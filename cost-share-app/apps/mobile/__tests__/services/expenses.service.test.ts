@@ -1,11 +1,11 @@
+const mockRpc = jest.fn();
 const mockFrom = jest.fn();
 const mockToastShow = jest.fn();
-const mockSplitsInsert = jest.fn().mockResolvedValue({ error: null });
-const mockSplitsDeleteEq = jest.fn().mockResolvedValue({ error: null });
 
 jest.mock('../../lib/supabase', () => ({
     supabase: {
         from: (...args: unknown[]) => mockFrom(...args),
+        rpc: (...args: unknown[]) => mockRpc(...args),
     },
 }));
 
@@ -32,6 +32,7 @@ const expenseRow = {
     paid_by: 'u1',
     created_by: 'u1',
     is_deleted: false,
+    split_mode: 'equal',
     created_at: '2026-05-01T00:00:00.000Z',
     updated_at: '2026-05-01T00:00:00.000Z',
 };
@@ -47,21 +48,6 @@ function mockExpenseSelect() {
                         }),
                     }),
                 }),
-                update: jest.fn().mockReturnValue({
-                    eq: jest.fn().mockReturnValue({
-                        select: jest.fn().mockReturnValue({
-                            maybeSingle: jest.fn().mockResolvedValue({ data: expenseRow, error: null }),
-                        }),
-                    }),
-                }),
-            };
-        }
-        if (table === 'expense_splits') {
-            return {
-                delete: jest.fn().mockReturnValue({
-                    eq: mockSplitsDeleteEq,
-                }),
-                insert: mockSplitsInsert,
             };
         }
         throw new Error(`Unexpected table ${table}`);
@@ -71,12 +57,11 @@ function mockExpenseSelect() {
 describe('updateExpense', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        mockSplitsInsert.mockResolvedValue({ error: null });
-        mockSplitsDeleteEq.mockResolvedValue({ error: null });
         mockExpenseSelect();
+        mockRpc.mockResolvedValue({ data: expenseRow, error: null });
     });
 
-    it('resolves equal splits when amounts are omitted', async () => {
+    it('calls update_expense_with_splits RPC with resolved equal splits', async () => {
         queryClient.setQueryData(queryKeys.groupExpenses('g1'), []);
 
         const result = await updateExpense('e1', {
@@ -84,27 +69,16 @@ describe('updateExpense', () => {
         });
 
         expect(result).not.toBeNull();
+        expect(mockRpc).toHaveBeenCalledWith('update_expense_with_splits', {
+            p_expense_id: 'e1',
+            p_expense_patch: null,
+            p_splits: [
+                { user_id: 'u1', amount: 50 },
+                { user_id: 'u2', amount: 50 },
+            ],
+        });
         expect(mockToastShow).toHaveBeenCalledWith(
             expect.objectContaining({ type: 'success' }),
-        );
-
-        expect(mockSplitsInsert).toHaveBeenCalledWith([
-            { expense_id: 'e1', user_id: 'u1', amount: 50 },
-            { expense_id: 'e1', user_id: 'u2', amount: 50 },
-        ]);
-
-        const cached = queryClient.getQueryData<Array<{ splits: Array<{ userId: string; amount: number }> }>>(
-            queryKeys.groupExpenses('g1'),
-        );
-        expect(cached).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    splits: expect.arrayContaining([
-                        expect.objectContaining({ userId: 'u1', amount: 50 }),
-                        expect.objectContaining({ userId: 'u2', amount: 50 }),
-                    ]),
-                }),
-            ]),
         );
     });
 
@@ -117,6 +91,7 @@ describe('updateExpense', () => {
         });
 
         expect(result).toBeNull();
+        expect(mockRpc).not.toHaveBeenCalled();
         expect(mockToastShow).toHaveBeenCalledWith(
             expect.objectContaining({
                 type: 'error',

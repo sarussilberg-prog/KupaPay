@@ -104,7 +104,7 @@ function ExpenseRowBase({
 
     const thumbnail = (
         <FeedRowThumbnail
-            imageUrl={expense.receiptUrl ?? undefined}
+            receiptStorageRef={expense.receiptUrl ?? undefined}
             iconName={
                 CATEGORY_ICON[expense.category as ExpenseCategory] ??
                 CATEGORY_ICON.other

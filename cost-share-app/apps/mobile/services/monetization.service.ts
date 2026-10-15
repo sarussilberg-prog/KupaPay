@@ -8,7 +8,13 @@ type MonetizationEventType =
     | 'ad_gate_watch_completed'
     | 'ad_gate_pro_tapped'
     | 'pro_promo_dismissed'
-    | 'remind_sent';
+    | 'remind_sent'
+    | 'paywall_viewed'
+    | 'purchase_started'
+    | 'purchase_completed'
+    | 'purchase_failed'
+    | 'restore_completed'
+    | 'restore_failed';
 
 export async function logMonetizationEvent(
     featureKey: string,

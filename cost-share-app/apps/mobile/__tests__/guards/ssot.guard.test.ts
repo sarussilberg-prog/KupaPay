@@ -145,6 +145,8 @@ describe('App version — single source of truth', () => {
       expect(text).toContain('cost-share-app/packages/shared/version.json');
       expect(text).not.toContain('cost-share-app/apps/mobile/version.json');
     }
+    expect(main).toContain('workflow_dispatch');
+    expect(main).not.toMatch(/^\s*push:\s*$/m);
   });
 
   it('the old push-triggered dev bump workflow is gone (folded into the ci.yml auto-merge job)', () => {

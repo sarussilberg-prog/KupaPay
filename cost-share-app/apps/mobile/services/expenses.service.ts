@@ -176,49 +176,34 @@ export async function updateExpense(id: string, dto: UpdateExpenseDto): Promise<
                 );
                 return null;
             }
-
-            const { error: delErr } = await supabase
-                .from('expense_splits')
-                .delete()
-                .eq('expense_id', id);
-            if (delErr) throw delErr;
-
-            const splitRows = resolvedSplits.map(s => ({
-                expense_id: id,
-                user_id: s.userId,
-                amount: s.amount,
-            }));
-            const { error: insErr } = await supabase.from('expense_splits').insert(splitRows);
-            if (insErr) throw insErr;
         }
 
-        const patch: Record<string, unknown> = {};
-        if (dto.description !== undefined) patch.description = dto.description;
-        if (dto.amount !== undefined) patch.amount = dto.amount;
-        if (dto.currency !== undefined) patch.currency = dto.currency;
-        if (dto.category !== undefined) patch.category = dto.category;
+        const expensePatch: Record<string, unknown> = {};
+        if (dto.description !== undefined) expensePatch.description = dto.description;
+        if (dto.amount !== undefined) expensePatch.amount = dto.amount;
+        if (dto.currency !== undefined) expensePatch.currency = dto.currency;
+        if (dto.category !== undefined) expensePatch.category = dto.category;
         if (dto.expenseDate !== undefined) {
-            patch.expense_date = dto.expenseDate.toISOString().slice(0, 10);
+            expensePatch.expense_date = dto.expenseDate.toISOString().slice(0, 10);
         }
-        if (dto.receiptUrl !== undefined) patch.receipt_url = dto.receiptUrl;
-        if (dto.paidBy !== undefined) patch.paid_by = dto.paidBy;
-        if (dto.splitMode !== undefined) patch.split_mode = dto.splitMode;
+        if (dto.receiptUrl !== undefined) expensePatch.receipt_url = dto.receiptUrl;
+        if (dto.paidBy !== undefined) expensePatch.paid_by = dto.paidBy;
+        if (dto.splitMode !== undefined) expensePatch.split_mode = dto.splitMode;
 
-        if (Object.keys(patch).length === 0 && !dto.splits) {
+        if (Object.keys(expensePatch).length === 0 && !dto.splits) {
             return existing;
         }
 
-        let baseExpense = existing;
-        if (Object.keys(patch).length > 0) {
-            const { data, error } = await supabase
-                .from('expenses')
-                .update(patch)
-                .eq('id', id)
-                .select()
-                .maybeSingle();
-            if (error || !data) throw error ?? new Error('Update failed');
-            baseExpense = expenseFromRow(data);
-        }
+        const { data: expenseRow, error: rpcErr } = await supabase.rpc('update_expense_with_splits', {
+            p_expense_id: id,
+            p_expense_patch: Object.keys(expensePatch).length > 0 ? expensePatch : null,
+            p_splits: resolvedSplits
+                ? resolvedSplits.map(s => ({ user_id: s.userId, amount: s.amount }))
+                : null,
+        });
+        if (rpcErr) throw rpcErr;
+        if (!expenseRow) throw new Error('updateExpense: rpc returned no row');
+        const baseExpense = expenseFromRow(expenseRow);
 
         const groupId = baseExpense.groupId;
         const cachedExpenses =

@@ -28,12 +28,14 @@ const APP_LOGO = require('../../assets/logo.png');
 
 const COUNTDOWN_SECONDS = 5;
 
-interface ProPromoInterstitialProps {
+type ProPromoInterstitialProps = Readonly<{
     visible: boolean;
     onDismiss: () => void;
-}
+    /** When set, CTA opens the Pro paywall instead of the legacy “coming soon” alert. */
+    onUpgrade?: () => void;
+}>;
 
-export function ProPromoInterstitial({ visible, onDismiss }: ProPromoInterstitialProps) {
+export function ProPromoInterstitial({ visible, onDismiss, onUpgrade }: ProPromoInterstitialProps) {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
@@ -156,13 +158,17 @@ export function ProPromoInterstitial({ visible, onDismiss }: ProPromoInterstitia
                     {canDismiss && (
                         <Pressable
                             style={styles.cta}
-                            onPress={() =>
+                            onPress={() => {
+                                if (onUpgrade) {
+                                    onUpgrade();
+                                    return;
+                                }
                                 platformAlert(
                                     t('monetization.goProButton'),
                                     t('monetization.goProWorkingOnIt'),
                                     [{ text: t('common.ok'), onPress: onDismiss }],
-                                )
-                            }
+                                );
+                            }}
                             testID="pro-promo-cta-btn"
                         >
                             <Text style={styles.ctaText}>

@@ -14,6 +14,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
+import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
 
 export type InviteRedemptionResult =
     | { kind: 'friend' }
@@ -26,7 +27,8 @@ export type InviteLink =
     | { kind: 'settleReminder'; token: string }
     | { kind: 'unknown' };
 
-const TOKEN_RE = /^[A-Za-z0-9_-]{10}$/;
+/** Matches legacy 10-char tokens and new 14-char tokens from generate_invite_token(). */
+const TOKEN_RE = /^[A-Za-z0-9_-]{10,14}$/;
 
 export function parseIncomingUrl(rawUrl: string): InviteLink {
     if (!rawUrl) return { kind: 'unknown' };
@@ -149,6 +151,7 @@ async function redeemInviteLink(
         void queryClient.invalidateQueries({ queryKey: queryKeys.friends });
         void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
         navigateAfterFriendInvite(navigation);
+        void captureProductEvent('invite_accepted', { kind: 'friend' });
         return { kind: 'friend' };
     }
 
@@ -168,6 +171,10 @@ async function redeemInviteLink(
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
     void queryClient.invalidateQueries({ queryKey: ['groups'] });
     navigateAfterGroupInvite(navigation, payload.group_id);
+    if (!payload.already_member) {
+        void captureProductEvent('invite_accepted', { kind: 'group' });
+        void trackSecondGroupMemberJoined(payload.group_id);
+    }
     return { kind: 'group', groupId: payload.group_id };
 }
 

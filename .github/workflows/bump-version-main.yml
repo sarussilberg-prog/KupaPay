@@ -1,10 +1,17 @@
-name: Bump minor version (main)
+name: Bump app version (manual)
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - 'cost-share-app/packages/shared/version.json'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Semver segment to increment (or skip to leave version unchanged)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - none
 
 concurrency:
   group: version-bump-main
@@ -12,7 +19,7 @@ concurrency:
 
 jobs:
   bump:
-    name: Minor-bump version on main
+    name: Bump version on main
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,17 +30,8 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.ADMIN_PAT }}
 
-      # Direct commit on main — no PR. main requires status checks (Lint,
-      # Mobile tests) before any push, including direct ones; a fresh bump
-      # commit has no checks recorded against it, so GITHUB_TOKEN gets
-      # rejected with GH006. Pushing with an admin PAT works because
-      # enforce_admins is false, so admins bypass required status checks.
-      # A GITHUB_TOKEN push (were it usable) would not re-trigger workflows,
-      # and paths-ignore skips version-only pushes, so there is no recursion.
-      # The baseline is read from the CURRENT version.json (robust: the old
-      # HEAD~1 lookup broke on the first release after the SSOT landed, since
-      # the previous main commit had no packages/shared/version.json).
-      - name: Minor-bump packages/shared/version.json
+      - name: Bump packages/shared/version.json
+        if: inputs.bump != 'none'
         run: |
           set -euo pipefail
           VERSION_FILE="cost-share-app/packages/shared/version.json"
@@ -44,7 +42,12 @@ jobs:
             git reset --hard origin/main
             current=$(jq -r '.version' "$VERSION_FILE")
             IFS='.' read -r major minor patch <<< "$current"
-            new="${major}.$((minor + 1)).0"
+            case "${{ inputs.bump }}" in
+              patch) new="${major}.${minor}.$((patch + 1))" ;;
+              minor) new="${major}.$((minor + 1)).0" ;;
+              major) new="$((major + 1)).0.0" ;;
+              *) echo "No bump selected"; exit 0 ;;
+            esac
             jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
             git add "$VERSION_FILE"
             git commit -m "chore: bump version ${current} → ${new}"

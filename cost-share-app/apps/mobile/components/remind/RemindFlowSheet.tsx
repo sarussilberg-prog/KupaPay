@@ -26,6 +26,7 @@ type Step = 'gate' | 'options' | 'compose';
 interface RemindFlowSheetProps {
     visible: boolean;
     featureKey: string;
+    groupId?: string;
     defaultMessage: string;
     sending?: boolean;
     onSend: (mode: 'app' | 'share', message: string) => void;
@@ -35,6 +36,7 @@ interface RemindFlowSheetProps {
 export function RemindFlowSheet({
     visible,
     featureKey,
+    groupId,
     defaultMessage,
     sending = false,
     onSend,
@@ -95,6 +97,7 @@ export function RemindFlowSheet({
                     key={openSeq}
                     active={visible}
                     featureKey={featureKey}
+                    groupId={groupId}
                     onCompleted={() => setStep('options')}
                 />
             )}
