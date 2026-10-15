@@ -5,6 +5,12 @@ export interface PurchasesPackageLike {
     product: {
         identifier: string;
         priceString: string;
+        introPrice?: {
+            price: number;
+            priceString: string;
+            periodNumberOfUnits: number;
+            periodUnit: string;
+        } | null;
     };
 }
 

@@ -17,14 +17,27 @@ import { captureProductEvent } from '../lib/productAnalytics';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
+import {
+    collectSubscriptionProductIds,
+    type IntroEligibilityMap,
+} from '../lib/proTrialPaywall';
+import { syncProTrialReminder } from './proTrialReminder.service';
 
 export type { PaywallPackages, PurchasesPackageLike };
+export type { IntroEligibilityMap };
+
+export interface ProSubscriptionUiState {
+    isInFreeTrial: boolean;
+    trialEndsAt: string | null;
+    manageSubscriptionsAvailable: boolean;
+}
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesPackage = import('react-native-purchases').PurchasesPackage;
 
 let purchasesMod: PurchasesModule | null = null;
 let configured = false;
+let customerInfoListenerAttached = false;
 
 function platformApiKey(): string | null {
     const key =
@@ -58,6 +71,22 @@ export async function configurePurchasesForUser(userId: string): Promise<void> {
         configured = true;
     }
     await Purchases.default.logIn(userId);
+
+    if (!customerInfoListenerAttached) {
+        Purchases.default.addCustomerInfoUpdateListener(info => {
+            void syncProTrialReminder({
+                entitlementId: REVENUECAT_ENTITLEMENT_PRO,
+                customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
+            });
+        });
+        customerInfoListenerAttached = true;
+    }
+
+    const info = await Purchases.default.getCustomerInfo();
+    await syncProTrialReminder({
+        entitlementId: REVENUECAT_ENTITLEMENT_PRO,
+        customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
+    });
 }
 
 export async function logOutPurchases(): Promise<void> {
@@ -67,6 +96,45 @@ export async function logOutPurchases(): Promise<void> {
         await Purchases.default.logOut();
     } catch {
         // ignore
+    }
+}
+
+export async function checkIntroductoryPriceEligibility(
+    packages: PaywallPackages | null,
+): Promise<IntroEligibilityMap> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !packages) return {};
+    const productIds = collectSubscriptionProductIds(packages);
+    try {
+        return await Purchases.default.checkTrialOrIntroductoryPriceEligibility(productIds);
+    } catch {
+        return {};
+    }
+}
+
+export async function fetchProSubscriptionUiState(): Promise<ProSubscriptionUiState> {
+    const empty: ProSubscriptionUiState = {
+        isInFreeTrial: false,
+        trialEndsAt: null,
+        manageSubscriptionsAvailable: false,
+    };
+    const Purchases = await getPurchases();
+    if (!Purchases) return empty;
+
+    try {
+        const info = await Purchases.default.getCustomerInfo();
+        const ent = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
+        if (!ent) return { ...empty, manageSubscriptionsAvailable: true };
+
+        const periodType = ent.periodType;
+        const inTrial = periodType === 'TRIAL' || periodType === 'INTRO';
+        return {
+            isInFreeTrial: inTrial,
+            trialEndsAt: inTrial ? (ent.expirationDate ?? null) : null,
+            manageSubscriptionsAvailable: true,
+        };
+    } catch {
+        return empty;
     }
 }
 
@@ -150,6 +218,14 @@ export async function purchasePackage(
             await trackPurchaseEvent('purchase_completed', opts.featureKey, {
                 package_id: pkg.identifier,
             });
+            if (active && !isTripPassPkg) {
+                await syncProTrialReminder({
+                    entitlementId: REVENUECAT_ENTITLEMENT_PRO,
+                    customerInfo: customerInfo as Parameters<
+                        typeof syncProTrialReminder
+                    >[0]['customerInfo'],
+                });
+            }
             await invalidateProQueries(opts.groupId);
             return { ok: true };
         }
@@ -182,6 +258,10 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
         const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
         if (active) {
             await trackPurchaseEvent('restore_completed', featureKey);
+            await syncProTrialReminder({
+                entitlementId: REVENUECAT_ENTITLEMENT_PRO,
+                customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
+            });
             await invalidateProQueries(groupId);
             return true;
         }

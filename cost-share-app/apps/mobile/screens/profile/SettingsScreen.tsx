@@ -1,5 +1,5 @@
 import { Text } from '../../components/AppText';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, Linking, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +29,11 @@ import { InviteLinkBlock } from '../../components/InviteLinkBlock';
 import { useSystemNotificationsDenied } from '../../hooks/useSystemNotificationsDenied';
 import { NotificationsDisabledHint } from '../../components/settings/NotificationsDisabledHint';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
-import { isPurchasesConfigured, openSubscriptionManagement } from '../../services/purchases.service';
+import {
+    fetchProSubscriptionUiState,
+    isPurchasesConfigured,
+    openSubscriptionManagement,
+} from '../../services/purchases.service';
 
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
 const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
@@ -53,6 +57,37 @@ export function SettingsScreen() {
 
     const navigation = useNavigation<any>();
     const notificationsDenied = useSystemNotificationsDenied();
+    const [proSubUi, setProSubUi] = useState<{
+        isInFreeTrial: boolean;
+        trialEndsAt: string | null;
+    }>({ isInFreeTrial: false, trialEndsAt: null });
+
+    useEffect(() => {
+        if (!KUPAPAY_PRO_ENABLED || !isPurchasesConfigured()) return;
+        let cancelled = false;
+        void fetchProSubscriptionUiState().then(state => {
+            if (!cancelled) {
+                setProSubUi({
+                    isInFreeTrial: state.isInFreeTrial,
+                    trialEndsAt: state.trialEndsAt,
+                });
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const trialEndsLabel = useCallback(() => {
+        if (!proSubUi.trialEndsAt) return null;
+        const d = new Date(proSubUi.trialEndsAt);
+        if (Number.isNaN(d.getTime())) return null;
+        return d.toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+    }, [language, proSubUi.trialEndsAt]);
 
     const handleLanguagePick = useCallback(
         async (lang: Language) => {
@@ -178,10 +213,19 @@ export function SettingsScreen() {
                 ) : null}
 
                 {KUPAPAY_PRO_ENABLED && isPurchasesConfigured() ? (
-                    <SettingsSection title={t('pro.paywall.manageSubscription')}>
+                    <SettingsSection
+                        title={t('pro.settings.sectionTitle')}
+                        footer={
+                            proSubUi.isInFreeTrial && trialEndsLabel() ? (
+                                <Text className="text-xs text-gray-500 px-4 pb-2">
+                                    {t('pro.settings.freeTrialUntil', { date: trialEndsLabel() })}
+                                </Text>
+                            ) : undefined
+                        }
+                    >
                         <SettingsRow
                             iconName="card-outline"
-                            label={t('pro.paywall.manageSubscription')}
+                            label={t('pro.settings.manageSubscription')}
                             variant="chevron"
                             onPress={() => {
                                 void openSubscriptionManagement();

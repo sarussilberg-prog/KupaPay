@@ -1134,7 +1134,18 @@
             "purchaseError": "לא ניתן להשלים את הרכישה.",
             "restoreSuccess": "הרכישות שוחזרו.",
             "restoreNone": "לא נמצאו רכישות פעילות.",
-            "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה."
+            "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
+            "tryFreeTrialCta": "נסו 7 ימים בחינם",
+            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}}. ניתן לבטל בכל עת בהגדרות."
+        },
+        "settings": {
+            "sectionTitle": "KupaPay Pro",
+            "manageSubscription": "ניהול מנוי",
+            "freeTrialUntil": "ניסיון חינם עד {{date}}"
+        },
+        "trialReminder": {
+            "title": "ניסיון KupaPay Pro מסתיים בקרוב",
+            "body": "הניסיון החינמי שלך ב-KupaPay Pro מסתיים בעוד יומיים. לא רוצה להמשיך? אפשר לבטל בהגדרות."
         },
         "includedTripPass": {
             "title": "Trip Pass מהמנוי השנתי",

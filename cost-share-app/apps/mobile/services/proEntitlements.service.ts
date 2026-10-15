@@ -96,6 +96,16 @@ export type AssignPurchasedTripPassError =
     | 'no_unassigned_pass'
     | 'unknown';
 
+/** Persist trial end for server-side reminder dispatch when local scheduling fails. */
+export async function registerProTrialReminderOnServer(trialEndsAtIso: string | null): Promise<void> {
+    const { error } = await supabase.rpc('register_pro_trial_reminder', {
+        p_trial_ends_at: trialEndsAtIso,
+    });
+    if (error) {
+        console.warn('register_pro_trial_reminder failed', error.message);
+    }
+}
+
 export async function assignPurchasedTripPass(
     groupId: string,
 ): Promise<{ ok: true } | { ok: false; error: AssignPurchasedTripPassError }> {

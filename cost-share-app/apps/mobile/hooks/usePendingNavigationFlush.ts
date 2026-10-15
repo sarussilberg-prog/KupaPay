@@ -5,6 +5,7 @@
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useAppStore } from '../store';
+import { openSubscriptionManagement } from '../services/purchases.service';
 
 export function usePendingNavigationFlush(): void {
     const navigation = useNavigation() as any;
@@ -37,6 +38,10 @@ export function usePendingNavigationFlush(): void {
         }
         if (pendingNavigation.target === 'groupsList') {
             navigation.navigate('Groups', { screen: 'GroupsList', merge: true });
+            return;
+        }
+        if (pendingNavigation.target === 'manageSubscription') {
+            void openSubscriptionManagement();
         }
     }, [pendingNavigation, navigation, setPendingNavigation]);
 }

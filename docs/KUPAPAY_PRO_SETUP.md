@@ -67,3 +67,16 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
 ## Apple Guideline 3.1.2
 
 Paywall shows localized price/period from StoreKit via RevenueCat, auto-renew disclosure, cancel instructions, Terms + Privacy links, and Restore Purchases. Settings includes **Manage subscription** (opens platform subscription management).
+
+When monthly/yearly products include a **7-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+
+### Trial reminder cron (server fallback)
+
+Deploy `pro-trial-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRET` as `send-push`):
+
+| Item | Value |
+|---|---|
+| URL | `https://<project-ref>.supabase.co/functions/v1/pro-trial-reminder-dispatch` |
+| Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
+
+Apply migration `20261015120000_pro_trial_reminder.sql` on dev before production.
