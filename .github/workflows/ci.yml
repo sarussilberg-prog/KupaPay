@@ -23,10 +23,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - run: npm ci
-      - uses: actions/cache/save@v4
+      - uses: actions/upload-artifact@v4
         with:
-          path: cost-share-app/node_modules
-          key: npm-ci-${{ hashFiles('cost-share-app/package-lock.json') }}
+          name: npm-node-modules
+          path: |
+            cost-share-app/node_modules
+            cost-share-app/apps/mobile/node_modules
+            cost-share-app/packages/shared/node_modules
+          if-no-files-found: error
+          retention-days: 1
 
   lint:
     name: Lint
@@ -40,10 +45,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - uses: actions/cache/restore@v4
+      - uses: actions/download-artifact@v4
         with:
-          path: cost-share-app/node_modules
-          key: npm-ci-${{ hashFiles('cost-share-app/package-lock.json') }}
+          name: npm-node-modules
+          path: cost-share-app
       - run: npm run lint
 
   typecheck:
@@ -58,10 +63,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - uses: actions/cache/restore@v4
+      - uses: actions/download-artifact@v4
         with:
-          path: cost-share-app/node_modules
-          key: npm-ci-${{ hashFiles('cost-share-app/package-lock.json') }}
+          name: npm-node-modules
+          path: cost-share-app
       - run: npm run typecheck
 
   test:
@@ -76,10 +81,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - uses: actions/cache/restore@v4
+      - uses: actions/download-artifact@v4
         with:
-          path: cost-share-app/node_modules
-          key: npm-ci-${{ hashFiles('cost-share-app/package-lock.json') }}
+          name: npm-node-modules
+          path: cost-share-app
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
   revenuecat-webhook:
