@@ -9,8 +9,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  setup:
+    name: Install dependencies
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,10 +23,35 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - run: npm ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+          if-no-files-found: error
+          retention-days: 1
+
+  lint:
+    name: Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/turbo || npm ci
       - run: npm run lint
 
   typecheck:
     name: Typecheck
+    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,10 +61,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: cost-share-app/package-lock.json
-      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/tsc || npm ci
       - run: npm run typecheck
+
+  test:
+    name: Mobile tests
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/jest || npm ci
+      - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
   revenuecat-webhook:
     name: RevenueCat webhook (Deno)
@@ -53,22 +99,6 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno test --allow-env
-
-  test:
-    name: Mobile tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cost-share-app
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: cost-share-app/package-lock.json
-      - run: npm ci
-      - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
   auto-merge:
     name: Auto-merge to dev
