@@ -7,11 +7,6 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-if ! command -v psql >/dev/null 2>&1; then
-  echo "::error::psql not found"
-  exit 1
-fi
-
 if ! command -v docker >/dev/null 2>&1; then
   echo "::error::docker not found"
   exit 1
@@ -22,6 +17,15 @@ PG_CONTAINER="kupapay-sql-ci-postgres"
 PG_IMAGE="ghcr.io/supabase/postgres:17.6.1.136"
 PG_PORT=54322
 SCHEMA_CORE_LINES=1038
+
+psql_docker() {
+  docker exec -i "$PG_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
+}
+
+psql_docker_file() {
+  local file="$1"
+  cat "$file" | psql_docker -f -
+}
 
 cleanup() {
   docker rm -f "$PG_CONTAINER" 2>/dev/null || true
@@ -37,11 +41,9 @@ docker run -d --name "$PG_CONTAINER" \
   -p "${PG_PORT}:5432" \
   "$PG_IMAGE" >/dev/null
 
-DB_URL="postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/postgres"
-
 ready=0
 for _ in $(seq 1 90); do
-  if psql "$DB_URL" -c 'SELECT 1' >/dev/null 2>&1; then
+  if docker exec "$PG_CONTAINER" psql -U postgres -d postgres -c 'SELECT 1' >/dev/null 2>&1; then
     ready=1
     break
   fi
@@ -51,18 +53,18 @@ if [[ "$ready" -ne 1 ]]; then
   echo "::group::Postgres container logs"
   docker logs "$PG_CONTAINER" 2>&1 | tail -80 || true
   echo "::endgroup::"
-  echo "::error::Postgres did not accept connections on ${PG_PORT}"
+  echo "::error::Postgres did not accept connections"
   exit 1
 fi
 
 echo "▶ CI auth schema compat (Supabase Postgres image drift)"
-psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+psql_docker <<'SQL'
 ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS banned_until timestamptz;
 SQL
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
-head -n "$SCHEMA_CORE_LINES" supabase/schema.sql | psql "$DB_URL" -v ON_ERROR_STOP=1 -f -
+head -n "$SCHEMA_CORE_LINES" supabase/schema.sql | psql_docker -f -
 
 # Same order as scripts/supabase-apply-patches.sh (remote dev bootstrap).
 PATCH_FILES=(
@@ -82,7 +84,7 @@ PATCH_FILES=(
 )
 for patch in "${PATCH_FILES[@]}"; do
   echo "▶ patch — $(basename "$patch")"
-  psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$patch"
+  psql_docker_file "$patch"
 done
 
 echo "▶ Applying incremental migrations"
@@ -92,7 +94,7 @@ IFS=$'\n' migration_files_sorted=($(printf '%s\n' "${migration_files[@]}" | sort
 unset IFS
 for f in "${migration_files_sorted[@]}"; do
   echo "▶ migration — $(basename "$f")"
-  psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f"
+  psql_docker_file "$f"
 done
 
 shopt -s nullglob
@@ -121,7 +123,7 @@ for f in "${files[@]}"; do
     continue
   fi
   echo "▶ psql — ${base}"
-  psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f"
+  psql_docker_file "$f"
   ran=$((ran + 1))
 done
 

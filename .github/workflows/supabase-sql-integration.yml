@@ -26,8 +26,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install psql client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
       - name: Run SQL regression suite (local stack)
         run: bash scripts/ci-supabase-sql-tests.sh
