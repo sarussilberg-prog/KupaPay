@@ -136,13 +136,13 @@ BEGIN
     WHERE id = v_fr;
 
     SELECT COUNT(*) INTO v_count FROM activity_events
-    WHERE kind = 'friend_request_received' AND ref_id = v_fr;
+    WHERE kind = 'friend_request_received' AND ref_id = v_fr AND user_id = v_alice;
     IF v_count <> 1 THEN
-        RAISE EXCEPTION 'Case 6 failed: friend request produced % rows', v_count;
+        RAISE EXCEPTION 'Case 6 failed: friend request produced % rows for Alice', v_count;
     END IF;
 
     SELECT metadata->>'status' INTO v_status FROM activity_events
-        WHERE kind = 'friend_request_received' AND ref_id = v_fr;
+        WHERE kind = 'friend_request_received' AND ref_id = v_fr AND user_id = v_alice;
     IF v_status IS DISTINCT FROM 'accepted' THEN
         RAISE EXCEPTION 'Case 6 failed: expected metadata.status=accepted, got %', v_status;
     END IF;
