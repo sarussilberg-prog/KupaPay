@@ -13,9 +13,14 @@ fi
 supabase start -x studio,imgproxy,vector,logflare
 trap 'supabase stop --no-backup 2>/dev/null || true' EXIT
 
-supabase db reset --no-seed
-
 DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+
+# Remote dev/prod were bootstrapped from schema.sql before incremental migrations.
+echo "▶ Loading baseline schema.sql"
+psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/schema.sql
+
+echo "▶ Applying pending migrations"
+supabase migration up --local
 shopt -s nullglob
 files=(supabase/__tests__/*.test.sql)
 if [[ ${#files[@]} -eq 0 ]]; then
