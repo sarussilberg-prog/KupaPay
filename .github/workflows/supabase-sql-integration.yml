@@ -27,7 +27,7 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: 2.20.12
+          version: latest
 
       - name: Run SQL regression suite (local stack)
         run: bash scripts/ci-supabase-sql-tests.sh
