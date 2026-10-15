@@ -73,6 +73,24 @@ CREATE TABLE IF NOT EXISTS auth.refresh_tokens (
   token TEXT,
   revoked BOOLEAN DEFAULT FALSE
 );
+
+CREATE SCHEMA IF NOT EXISTS storage;
+
+CREATE TABLE IF NOT EXISTS storage.buckets (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  public BOOLEAN DEFAULT FALSE
+);
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('expense-receipts', 'expense-receipts', TRUE)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS storage.objects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  bucket_id TEXT REFERENCES storage.buckets (id),
+  name TEXT
+);
 SQL
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
