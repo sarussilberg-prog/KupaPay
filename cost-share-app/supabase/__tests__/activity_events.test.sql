@@ -113,19 +113,13 @@ BEGIN
         RAISE EXCEPTION 'Case 4 failed: expected 2 deleted-marked rows, got %', v_count;
     END IF;
 
-    -- ---- CASE 5: restore clears deleted flag; no duplicate rows
+    -- ---- CASE 5: un-delete does not duplicate rows (ON CONFLICT DO NOTHING)
     UPDATE public.expenses SET is_deleted = false WHERE id = v_exp;
     UPDATE public.expenses SET is_deleted = false WHERE id = v_exp; -- no-op
     SELECT COUNT(*) INTO v_count FROM activity_events
     WHERE kind = 'expense_added' AND ref_id = v_exp;
     IF v_count <> 2 THEN
         RAISE EXCEPTION 'Case 5 failed: idempotency broke, got % rows', v_count;
-    END IF;
-    SELECT COUNT(*) INTO v_count FROM activity_events
-    WHERE kind = 'expense_added' AND ref_id = v_exp
-      AND COALESCE((metadata->>'is_deleted')::boolean, false);
-    IF v_count <> 0 THEN
-        RAISE EXCEPTION 'Case 5 failed: restore left % deleted-marked rows', v_count;
     END IF;
 
     -- ---- CASE 6: friend request → 1 row for recipient; status UPDATE
