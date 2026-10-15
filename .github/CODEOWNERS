@@ -1,0 +1,5 @@
+# Phase 0 — required reviewers for high-risk paths (see docs/PRO_V2_PLAN.md §2.3)
+
+/cost-share-app/supabase/migrations/     @sarussilberg-prog
+/cost-share-app/supabase/functions/     @sarussilberg-prog
+/.github/workflows/                     @sarussilberg-prog
