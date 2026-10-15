@@ -188,6 +188,11 @@ jest.mock('react-native-safe-area-context', () => {
 
 // Mock Sentry: ships as ESM (`export ... from '@sentry/core'`) which Jest can't parse,
 // and we don't want test runs hitting the SDK or its native modules anyway.
+jest.mock('posthog-react-native', () => ({
+    PostHogProvider: ({ children }: { children: unknown }) => children,
+    usePostHog: () => null,
+}));
+
 jest.mock('@sentry/react-native', () => ({
     __esModule: true,
     init: jest.fn(),

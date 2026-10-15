@@ -10,7 +10,7 @@ export interface IdentityUser {
 /** Apply (or clear) the Sentry user identity. Called from App.tsx on auth changes. */
 export function applySentryUser(user: IdentityUser | null): void {
     if (user) {
-        Sentry.setUser({ id: user.id, email: user.email, username: user.name });
+        Sentry.setUser({ id: user.id });
         Sentry.setTag('default_currency', user.defaultCurrency);
     } else {
         Sentry.setUser(null);

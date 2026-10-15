@@ -40,7 +40,13 @@ import { useAppRealtime } from './hooks/useAppRealtime';
 import { useBootWatchdog } from './hooks/useBootWatchdog';
 import { colors } from './theme';
 import { RtlLayoutProvider } from './hooks/useRtlLayout';
-import { captureProductEvent, identifyProductUser } from './lib/productAnalytics';
+import {
+    captureProductEvent,
+    identifyProductUser,
+    isNewAccountSignup,
+    resetProductAnalyticsUser,
+} from './lib/productAnalytics';
+import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
 import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
@@ -104,16 +110,13 @@ function App() {
   useEffect(() => {
     const user = session?.user;
     if (!user?.id) return;
-    void identifyProductUser(user.id, {
-      email: user.email ?? null,
-      language: language ?? null,
-    });
-  }, [session?.user?.id, session?.user?.email, language]);
+    void identifyProductUser(user.id);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (!isReady || !session || appOpenedSentRef.current) return;
     appOpenedSentRef.current = true;
-    void captureProductEvent('app_opened');
+    void captureProductEvent('app_open');
   }, [isReady, session]);
 
   useEffect(() => {
@@ -282,13 +285,18 @@ function App() {
           if (event === 'SIGNED_OUT') {
             useAppStore.getState().setSession(null);
             void clearPushRegistrationOnSignOut();
+            void resetProductAnalyticsUser();
             return;
           }
 
           if (!nextSession) return;
 
           if (event === 'SIGNED_IN') {
-            void captureProductEvent('signed_in', { provider: nextSession.user.app_metadata?.provider ?? 'unknown' });
+            if (isNewAccountSignup(nextSession.user)) {
+              void captureProductEvent('signup', {
+                provider: nextSession.user.app_metadata?.provider ?? 'unknown',
+              });
+            }
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');
             }, 0);
@@ -416,10 +424,10 @@ function App() {
 
 function Root() {
   return (
-    <>
+    <PostHogAnalyticsProvider>
       <AppExitGuard />
       <App />
-    </>
+    </PostHogAnalyticsProvider>
   );
 }
 

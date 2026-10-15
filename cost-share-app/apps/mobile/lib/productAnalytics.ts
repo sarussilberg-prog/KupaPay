@@ -1,107 +1,115 @@
 /**
- * Lightweight product analytics (PostHog HTTP capture). No-ops when unset.
+ * Product analytics (PostHog via posthog-react-native). No-ops when unset or client unbound.
  *
- * Owner setup:
- * - EXPO_PUBLIC_POSTHOG_API_KEY — project API key from PostHog
- * - EXPO_PUBLIC_POSTHOG_HOST (optional) — default https://us.i.posthog.com
+ * Privacy: internal user id only (no email/PII), no session replay, no IDFA/ATT,
+ * explicit events only (see ProductAnalyticsEvent). Aligns with rewarded-ads compliance
+ * (non-personalized / no cross-app ad tracking) in rewardedAdsCompliance.ts.
  *
- * PostHog project settings (owner): disable session replay; do not enable
- * autocapture of text inputs on mobile (we only send explicit events below).
+ * Env: EXPO_PUBLIC_POSTHOG_KEY (legacy EXPO_PUBLIC_POSTHOG_API_KEY), EXPO_PUBLIC_POSTHOG_HOST.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentUserId } from './auth';
+import { isPostHogConfigured } from './posthogEnv';
 import { supabase } from './supabase';
 
 const FIRST_GROUP_FLAG = '@kupapay/analytics/first_group_sent';
 
 export type ProductAnalyticsEvent =
-    | 'signed_in'
-    | 'app_opened'
-    | 'first_group_created'
+    | 'app_open'
+    | 'signup'
+    | 'group_created'
     | 'expense_added'
-    | 'invite_accepted'
-    | 'second_group_member_joined'
-    | 'settle_up_recorded'
-    | 'review_prompt_shown'
+    | 'settle_up'
     | 'paywall_viewed'
-    | 'purchase_started'
+    | 'trial_started'
     | 'purchase_completed'
     | 'purchase_failed'
-    | 'restore';
+    | 'purchase_started'
+    | 'restore'
+    | 'invite_sent'
+    | 'invite_accepted'
+    | 'second_group_member_joined'
+    | 'review_prompt_shown';
 
-function posthogConfig(): { key: string; host: string } | null {
-    const key = process.env.EXPO_PUBLIC_POSTHOG_API_KEY?.trim();
-    if (!key) return null;
-    const hostRaw = process.env.EXPO_PUBLIC_POSTHOG_HOST?.trim();
-    const host = (hostRaw && hostRaw !== 'undefined' ? hostRaw : 'https://us.i.posthog.com').replace(
-        /\/$/,
-        '',
-    );
-    return { key, host };
+export interface ProductAnalyticsClient {
+    capture: (event: string, properties?: Record<string, unknown>) => void;
+    identify: (distinctId: string, properties?: Record<string, unknown>) => void;
+    reset: () => void;
 }
 
-async function posthogPost(body: Record<string, unknown>): Promise<void> {
-    const cfg = posthogConfig();
-    if (!cfg) return;
+let boundClient: ProductAnalyticsClient | null = null;
+
+/** Wired from PostHogAnalyticsProvider (or tests). */
+export function setProductAnalyticsClient(client: ProductAnalyticsClient | null): void {
+    boundClient = client;
+}
+
+export function getProductAnalyticsClient(): ProductAnalyticsClient | null {
+    return boundClient;
+}
+
+function canCapture(): boolean {
+    return isPostHogConfigured() && boundClient != null;
+}
+
+/** True when the auth user was just created (first sign-in / sign-up). */
+export function isNewAccountSignup(user: {
+    created_at?: string;
+    last_sign_in_at?: string | null;
+}): boolean {
+    if (!user.created_at) return false;
+    const created = Date.parse(user.created_at);
+    if (Number.isNaN(created)) return false;
+    const lastSignIn = user.last_sign_in_at ? Date.parse(user.last_sign_in_at) : created;
+    if (Number.isNaN(lastSignIn)) return false;
+    return Math.abs(lastSignIn - created) <= 120_000;
+}
+
+/** Links events to a stable user id for retention. No PII in properties. */
+export async function identifyProductUser(userId: string): Promise<void> {
+    if (!canCapture()) return;
     try {
-        await fetch(`${cfg.host}/capture/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api_key: cfg.key, ...body }),
-        });
+        boundClient!.identify(userId, {});
     } catch {
         // Analytics must never break user flows
     }
 }
 
-async function distinctIdForCapture(): Promise<string> {
+export async function resetProductAnalyticsUser(): Promise<void> {
+    if (!canCapture()) return;
     try {
-        const uid = await getCurrentUserId();
-        if (uid) return uid;
+        boundClient!.reset();
     } catch {
         // ignore
     }
-    return 'anonymous';
-}
-
-/** Links events to a stable user id for retention (PostHog $identify). */
-export async function identifyProductUser(
-    userId: string,
-    traits?: { email?: string | null; language?: string | null },
-): Promise<void> {
-    const $set: Record<string, string> = {};
-    if (traits?.email) $set.email = traits.email;
-    if (traits?.language) $set.language = traits.language;
-
-    await posthogPost({
-        event: '$identify',
-        distinct_id: userId,
-        properties: Object.keys($set).length > 0 ? { $set } : {},
-    });
 }
 
 export async function captureProductEvent(
     event: ProductAnalyticsEvent,
     properties?: Record<string, string | number | boolean | null>,
 ): Promise<void> {
-    const distinctId = await distinctIdForCapture();
-    await posthogPost({
-        event,
-        distinct_id: distinctId,
-        properties: {
+    if (!canCapture()) return;
+    try {
+        const uid = await getCurrentUserId();
+        if (uid) {
+            boundClient!.identify(uid, {});
+        }
+        boundClient!.capture(event, {
             ...properties,
             $lib: 'kupapay-mobile',
-        },
-    });
+        });
+    } catch {
+        // ignore
+    }
 }
 
-/** Fires `first_group_created` once per install/user. */
+/** Fires `group_created` once per install/user. */
 export async function trackFirstGroupCreated(groupId: string): Promise<void> {
     try {
         const sent = await AsyncStorage.getItem(FIRST_GROUP_FLAG);
         if (sent === '1') return;
-        await captureProductEvent('first_group_created', { group_id: groupId });
+        await captureProductEvent('group_created', { group_id: groupId });
         await AsyncStorage.setItem(FIRST_GROUP_FLAG, '1');
     } catch {
         // ignore

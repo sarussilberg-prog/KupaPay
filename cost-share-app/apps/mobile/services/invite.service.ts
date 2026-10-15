@@ -11,6 +11,7 @@ import { supabase } from '../lib/supabase';
 import { useAppStore } from '../store';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
+import { captureProductEvent } from '../lib/productAnalytics';
 
 const INVITE_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
 
@@ -50,6 +51,7 @@ export async function shareFriendInvite(): Promise<void> {
     const url = buildInviteUrl('friend', user.inviteToken);
     const message = buildFriendInviteMessage(user.name, url);
     await openShare(message);
+    void captureProductEvent('invite_sent', { kind: 'friend' });
 }
 
 export async function shareGroupInvite(groupId: string): Promise<void> {
@@ -61,6 +63,7 @@ export async function shareGroupInvite(groupId: string): Promise<void> {
     const url = buildInviteUrl('group', group.inviteToken);
     const message = buildGroupInviteMessage(user.name, group.name, url);
     await openShare(message);
+    void captureProductEvent('invite_sent', { kind: 'group', group_id: groupId });
 }
 
 export async function rotateFriendInvite(): Promise<string> {

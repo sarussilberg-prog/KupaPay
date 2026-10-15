@@ -82,7 +82,7 @@ export async function createSettlement(dto: CreateSettlementDto): Promise<Settle
         if (error) throw error;
 
         showSuccessToast('settleUp.toastRecorded');
-        void captureProductEvent('settle_up_recorded', {
+        void captureProductEvent('settle_up', {
             group_id: dto.groupId,
             currency: dto.currency,
         });
