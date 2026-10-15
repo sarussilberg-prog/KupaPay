@@ -29,12 +29,23 @@ export function flattenLocale(obj: unknown, prefix = ''): FlatLocale {
     return {};
 }
 
-const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g;
+const PLACEHOLDER_RE = /\{\{[^{}]+\}\}/g;
 
 export function extractPlaceholders(value: string): string[] {
     const matches = value.match(PLACEHOLDER_RE);
     if (!matches) return [];
-    return [...matches].sort();
+    return [...matches].sort((a, b) => a.localeCompare(b));
+}
+
+const PLURAL_SUFFIX_RE = /_(zero|one|two|few|many|other)$/;
+
+/**
+ * Plural variants may differ in whether they spell out {{count}}: English `_one` often hardcodes "1",
+ * while languages like Russian must keep {{count}} because their "one" form also covers 21, 31, ...
+ */
+function placeholdersForParity(key: string, value: string): string[] {
+    const placeholders = extractPlaceholders(value);
+    return PLURAL_SUFFIX_RE.test(key) ? placeholders.filter((p) => p !== '{{count}}') : placeholders;
 }
 
 export type LocaleParityIssue =
@@ -56,8 +67,8 @@ export function compareLocaleToBase(
             issues.push({ kind: 'missing_key', locale: localeCode, key });
             continue;
         }
-        const basePh = extractPlaceholders(baseLocale[key] ?? '');
-        const otherPh = extractPlaceholders(otherLocale[key] ?? '');
+        const basePh = placeholdersForParity(key, baseLocale[key] ?? '');
+        const otherPh = placeholdersForParity(key, otherLocale[key] ?? '');
         if (basePh.join('|') !== otherPh.join('|')) {
             issues.push({
                 kind: 'placeholder_mismatch',
@@ -77,5 +88,25 @@ export function compareLocaleToBase(
         }
     }
 
+    return issues;
+}
+
+export type UntranslatedIssue = { kind: 'untranslated'; locale: string; key: string; value: string };
+
+export function findUntranslatedFromBase(
+    baseLocale: FlatLocale,
+    otherLocale: FlatLocale,
+    localeCode: string,
+    isAllowed: (value: string) => boolean,
+): UntranslatedIssue[] {
+    const issues: UntranslatedIssue[] = [];
+    for (const key of Object.keys(baseLocale)) {
+        const baseVal = baseLocale[key];
+        const otherVal = otherLocale[key];
+        if (otherVal === undefined) continue;
+        if (otherVal === baseVal && !isAllowed(baseVal)) {
+            issues.push({ kind: 'untranslated', locale: localeCode, key, value: baseVal });
+        }
+    }
     return issues;
 }
