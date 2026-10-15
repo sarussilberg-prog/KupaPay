@@ -52,7 +52,7 @@ jobs:
           ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
           ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
           ASC_APP_ID: "6780216665"
-        run: node scripts/sync-eas-ios-build-number.mjs || true
+        run: node scripts/sync-eas-ios-build-number.mjs
 
       - name: Build iOS locally & submit to TestFlight
         env:
