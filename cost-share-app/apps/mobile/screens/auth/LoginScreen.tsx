@@ -77,7 +77,7 @@ export function LoginScreen() {
     }, [pendingDeactivationNotice, setPendingDeactivationNotice, showDeletedAccountNotice]);
 
     const handleLanguageChange = useCallback(
-        async (lang: 'en' | 'he') => {
+        async (lang: import('@cost-share/shared').Language) => {
             setLanguagePickerVisible(false);
             await changeAppLanguage(lang);
         },

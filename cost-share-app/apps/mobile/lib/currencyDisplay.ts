@@ -1,3 +1,4 @@
+import { isLanguage, languageToIntlLocale } from '@cost-share/shared';
 import { CURRENCY_LOCALE_NAMES } from './currencyLocaleNames';
 
 const displayNamesCache = new Map<string, Intl.DisplayNames>();
@@ -53,9 +54,12 @@ export function getDistinctCurrencySymbol(code: string): string | null {
     return symbol.toUpperCase() === normalized ? null : symbol;
 }
 
-export function formatAmountDecimal(value: number): string {
+export function formatAmountDecimal(value: number, language?: string): string {
     const isWhole = value % 1 === 0;
-    return value.toLocaleString(undefined, {
+    const code = language?.split('-')[0];
+    const locale =
+        code && isLanguage(code) ? languageToIntlLocale(code) : undefined;
+    return value.toLocaleString(locale, {
         minimumFractionDigits: isWhole ? 0 : 2,
         maximumFractionDigits: 2,
     });
@@ -70,6 +74,10 @@ export function formatCurrencyAmount(value: number, currency: string): string {
 }
 
 export function resolveCurrencyLocale(language: string): string {
+    const code = language.split('-')[0];
+    if (isLanguage(code)) {
+        return languageToIntlLocale(code).split('-')[0];
+    }
     if (language.startsWith('he')) return 'he';
     return 'en';
 }

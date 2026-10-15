@@ -5,7 +5,7 @@ import Markdown from 'react-native-markdown-display';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { useLegalDocument } from '../../hooks/queries/useLegalDocument';
-import { APP_VERSION, type LegalSlug } from '@cost-share/shared';
+import { APP_VERSION, isLanguage, isRtlLanguage, legalDocumentLocale, type LegalSlug } from '@cost-share/shared';
 
 interface Props {
     visible: boolean;
@@ -17,8 +17,11 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
     const { t, i18n } = useTranslation();
     const query = useLegalDocument(slug);
 
-    const docLocale = query.data?.locale ?? (i18n.language === 'he' ? 'he' : 'en');
-    const isRtl = docLocale === 'he';
+    const uiLangCode = i18n.language.split('-')[0];
+    const uiLanguage = isLanguage(uiLangCode) ? uiLangCode : 'en';
+    const fallbackLocale = legalDocumentLocale(uiLanguage);
+    const docLocale = query.data?.locale ?? fallbackLocale;
+    const isRtl = isRtlLanguage(uiLanguage);
     const styles = useMemo(() => buildMarkdownStyles(isRtl), [isRtl]);
     const contentMd = useMemo(
         () => (isRtl && query.data ? prepareRtlMarkdown(query.data.contentMd) : query.data?.contentMd ?? ''),

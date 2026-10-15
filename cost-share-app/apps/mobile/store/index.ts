@@ -15,8 +15,8 @@ interface AppState {
     setCurrentUser: (user: User | null) => void;
 
     // Language state
-    language: 'en' | 'he';
-    setLanguage: (language: 'en' | 'he') => void;
+    language: import('@cost-share/shared').Language;
+    setLanguage: (language: import('@cost-share/shared').Language) => void;
 
     // Pending invite — set when an invite link arrives before sign-in.
     pendingInvite: PendingInvite | null;

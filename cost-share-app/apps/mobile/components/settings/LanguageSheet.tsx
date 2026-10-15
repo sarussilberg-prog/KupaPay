@@ -2,7 +2,7 @@ import { Text } from '../AppText';
 import React from 'react';
 import { View, Modal, TouchableOpacity, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Language } from '@cost-share/shared';
+import { LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES, isRtlLanguage, type Language } from '@cost-share/shared';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 
@@ -17,10 +17,10 @@ interface Props {
 // Each language is labeled in its own native form (endonym), not translated
 // into the currently active app language — so "English" always reads as
 // "English" and "עברית" always reads as "עברית", regardless of UI locale.
-const OPTIONS: { code: Language; nativeLabel: string }[] = [
-    { code: 'en', nativeLabel: 'English' },
-    { code: 'he', nativeLabel: 'עברית' },
-];
+const OPTIONS: { code: Language; nativeLabel: string }[] = SUPPORTED_LANGUAGES.map((code) => ({
+    code,
+    nativeLabel: LANGUAGE_NATIVE_LABELS[code],
+}));
 
 export function LanguageSheet({ visible, current, onSelect, onClose, testID }: Props) {
     const { t } = useTranslation();
@@ -45,7 +45,10 @@ export function LanguageSheet({ visible, current, onSelect, onClose, testID }: P
                         >
                             <Text
                                 className="flex-1 text-base text-gray-900"
-                                style={{ textAlign: 'left', writingDirection: opt.code === 'he' ? 'rtl' : 'ltr' }}
+                                style={{
+                                    textAlign: 'left',
+                                    writingDirection: isRtlLanguage(opt.code) ? 'rtl' : 'ltr',
+                                }}
                             >
                                 {opt.nativeLabel}
                             </Text>

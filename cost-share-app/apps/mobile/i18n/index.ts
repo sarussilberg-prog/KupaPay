@@ -15,9 +15,20 @@ import { DevSettings, I18nManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import * as Updates from 'expo-updates';
-import type { Language } from '@cost-share/shared';
+import {
+    DEFAULT_LANGUAGE,
+    RTL_LANGUAGES,
+    SUPPORTED_LANGUAGES,
+    type Language,
+    isLanguage,
+} from '@cost-share/shared';
 import en from './locales/en.json';
 import he from './locales/he.json';
+import ru from './locales/ru.json';
+import ar from './locales/ar.json';
+import fr from './locales/fr.json';
+import es from './locales/es.json';
+import de from './locales/de.json';
 import { useAppStore } from '../store';
 
 type SupportedLanguage = Language;
@@ -25,14 +36,17 @@ type SupportedLanguage = Language;
 const resources: Record<SupportedLanguage, { translation: object }> = {
     en: { translation: en },
     he: { translation: he },
+    ru: { translation: ru },
+    ar: { translation: ar },
+    fr: { translation: fr },
+    es: { translation: es },
+    de: { translation: de },
 };
 
-const SUPPORTED_LANGUAGES = Object.keys(resources) as readonly SupportedLanguage[];
-
-const DEFAULT_LANGUAGE: SupportedLanguage = 'en';
-
-/** Languages whose script is right-to-left. Add new RTL languages (e.g. 'ar', 'fa', 'ur') here. */
-const RTL_LANGUAGES = new Set<SupportedLanguage>(['he']);
+const RESOURCE_LANGUAGES = Object.keys(resources) as SupportedLanguage[];
+if (RESOURCE_LANGUAGES.length !== SUPPORTED_LANGUAGES.length) {
+    throw new Error('Mobile i18n resources must match SUPPORTED_LANGUAGES in @cost-share/shared');
+}
 
 // Java's `Locale.getLanguage()` returns deprecated ISO 639-1 codes for backwards
 // compatibility — Hebrew is "iw" (not "he"), Indonesian is "in" (not "id"), Yiddish
@@ -51,7 +65,7 @@ const normalizeLanguageCode = (code: string | null | undefined): string | null =
 };
 
 const isSupportedLanguage = (code: string | null | undefined): code is SupportedLanguage =>
-    !!code && (SUPPORTED_LANGUAGES as readonly string[]).includes(code);
+    isLanguage(code);
 
 /** Picks the first device-preferred locale we have a translation for. Falls back to the default. */
 const resolveDeviceLanguage = (): SupportedLanguage => {
