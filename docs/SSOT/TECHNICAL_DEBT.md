@@ -52,12 +52,12 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 ## Observability & ops (deferred from 2026-06-02 pre-Play audit)
 
 ### 1. Crash & error reporting (Sentry / Crashlytics)
-- **Status (2026-10-11):** **Shipped in app** (`@sentry/react-native`, admin proxy edge function). **Still open:** EAS production source-map upload (`SENTRY_DISABLE_AUTO_UPLOAD` in `eas.json`) — enable before relying on symbolicated prod stacks.
-- **Revisit when:** Next store release build, or first prod crash where stack is minified-only.
+- **Status (2026-10-15):** **Shipped** — `@sentry/react-native` (EU DSN), release/dist tagging, `sendDefaultPii: false`, user id only. Source-map upload runs on EAS when `SENTRY_AUTH_TOKEN` is set; otherwise `SENTRY_DISABLE_AUTO_UPLOAD=true` from `app.config.ts`.
+- **Revisit when:** First prod crash where stack is still minified (verify token + upload).
 
 ### 2. Product analytics (PostHog / Amplitude / similar)
-- **Status (2026-10-11):** **Partial** — `productAnalytics.ts` + PostHog key wiring; privacy policy updated (`20261010210000`). Funnel coverage still growing (Phase 1).
-- **Revisit when:** Dashboards exist for install → sign-in → first group → first expense → invite → settle.
+- **Status (2026-10-15):** **Shipped (Phase 1)** — `posthog-react-native` + `productAnalytics.ts` wrapper (EU host, no replay/autocapture/PII); funnel events through paywall/purchases/invites. Privacy policy (`20261010210000`+).
+- **Revisit when:** PostHog dashboards for install → signup → group → expense → invite → settle → Pro trial/purchase.
 
 ### 3. CI: TypeScript strict gate + workspace `tsc` in `ci.yml`
 - **Status (2026-10-11):** **Done** — KI-015 resolved; `npm run typecheck` in CI (see security stack PR).

@@ -1,6 +1,3 @@
-const mockFetch = jest.fn().mockResolvedValue({ ok: true });
-global.fetch = mockFetch as unknown as typeof fetch;
-
 const mockFrom = jest.fn();
 
 jest.mock('../../lib/auth', () => ({
@@ -19,56 +16,74 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 describe('productAnalytics', () => {
-    const prevKey = process.env.EXPO_PUBLIC_POSTHOG_API_KEY;
+    const mockClient = {
+        capture: jest.fn(),
+        identify: jest.fn(),
+        reset: jest.fn(),
+    };
+
+    const prevKey = process.env.EXPO_PUBLIC_POSTHOG_KEY;
+    const prevLegacyKey = process.env.EXPO_PUBLIC_POSTHOG_API_KEY;
     const prevHost = process.env.EXPO_PUBLIC_POSTHOG_HOST;
 
     beforeEach(() => {
+        mockClient.capture.mockClear();
+        mockClient.identify.mockClear();
+        mockClient.reset.mockClear();
         delete process.env.EXPO_PUBLIC_POSTHOG_HOST;
-        mockFetch.mockClear();
     });
 
     afterEach(() => {
-        process.env.EXPO_PUBLIC_POSTHOG_API_KEY = prevKey;
-        if (prevHost === undefined) {
-            delete process.env.EXPO_PUBLIC_POSTHOG_HOST;
-        } else {
-            process.env.EXPO_PUBLIC_POSTHOG_HOST = prevHost;
-        }
+        if (prevKey === undefined) delete process.env.EXPO_PUBLIC_POSTHOG_KEY;
+        else process.env.EXPO_PUBLIC_POSTHOG_KEY = prevKey;
+        if (prevLegacyKey === undefined) delete process.env.EXPO_PUBLIC_POSTHOG_API_KEY;
+        else process.env.EXPO_PUBLIC_POSTHOG_API_KEY = prevLegacyKey;
+        if (prevHost === undefined) delete process.env.EXPO_PUBLIC_POSTHOG_HOST;
+        else process.env.EXPO_PUBLIC_POSTHOG_HOST = prevHost;
         jest.resetModules();
     });
 
-    it('no-ops when EXPO_PUBLIC_POSTHOG_API_KEY is unset', async () => {
-        delete process.env.EXPO_PUBLIC_POSTHOG_API_KEY;
-        const { captureProductEvent } = require('../../lib/productAnalytics');
-        await captureProductEvent('signed_in');
-        expect(mockFetch).not.toHaveBeenCalled();
+    it('no-ops when PostHog key is explicitly disabled', async () => {
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = '';
+        const {
+            captureProductEvent,
+            setProductAnalyticsClient,
+        } = require('../../lib/productAnalytics');
+        setProductAnalyticsClient(mockClient);
+        await captureProductEvent('app_open');
+        expect(mockClient.capture).not.toHaveBeenCalled();
     });
 
-    it('posts capture payload when configured', async () => {
-        process.env.EXPO_PUBLIC_POSTHOG_API_KEY = 'phc_test';
-        const { captureProductEvent } = require('../../lib/productAnalytics');
+    it('no-ops when client is not bound', async () => {
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = 'phc_test';
+        const { captureProductEvent, setProductAnalyticsClient } = require('../../lib/productAnalytics');
+        setProductAnalyticsClient(null);
         await captureProductEvent('expense_added', { group_id: 'g1' });
-        expect(mockFetch).toHaveBeenCalledWith(
-            'https://us.i.posthog.com/capture/',
-            expect.objectContaining({ method: 'POST' }),
-        );
-        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
-        expect(body.event).toBe('expense_added');
-        expect(body.distinct_id).toBe('user-1');
+        expect(mockClient.capture).not.toHaveBeenCalled();
     });
 
-    it('sends $identify for retention', async () => {
-        process.env.EXPO_PUBLIC_POSTHOG_API_KEY = 'phc_test';
-        const { identifyProductUser } = require('../../lib/productAnalytics');
-        await identifyProductUser('user-1', { email: 'a@b.com' });
-        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
-        expect(body.event).toBe('$identify');
-        expect(body.distinct_id).toBe('user-1');
-        expect(body.properties.$set.email).toBe('a@b.com');
+    it('captures events with distinct_id when configured and bound', async () => {
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = 'phc_test';
+        const { captureProductEvent, setProductAnalyticsClient } = require('../../lib/productAnalytics');
+        setProductAnalyticsClient(mockClient);
+        await captureProductEvent('expense_added', { group_id: 'g1' });
+        expect(mockClient.identify).toHaveBeenCalledWith('user-1', {});
+        expect(mockClient.capture).toHaveBeenCalledWith(
+            'expense_added',
+            expect.objectContaining({ group_id: 'g1', $lib: 'kupapay-mobile' }),
+        );
+    });
+
+    it('identify uses user id only (no email / PII)', async () => {
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = 'phc_test';
+        const { identifyProductUser, setProductAnalyticsClient } = require('../../lib/productAnalytics');
+        setProductAnalyticsClient(mockClient);
+        await identifyProductUser('user-1');
+        expect(mockClient.identify).toHaveBeenCalledWith('user-1', {});
     });
 
     it('fires second_group_member_joined when count is 2', async () => {
-        process.env.EXPO_PUBLIC_POSTHOG_API_KEY = 'phc_test';
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = 'phc_test';
         mockFrom.mockReturnValue({
             select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
@@ -76,9 +91,27 @@ describe('productAnalytics', () => {
                 }),
             }),
         });
-        const { trackSecondGroupMemberJoined } = require('../../lib/productAnalytics');
+        const { trackSecondGroupMemberJoined, setProductAnalyticsClient } =
+            require('../../lib/productAnalytics');
+        setProductAnalyticsClient(mockClient);
         await trackSecondGroupMemberJoined('g1');
-        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
-        expect(body.event).toBe('second_group_member_joined');
+        expect(mockClient.capture).toHaveBeenCalledWith(
+            'second_group_member_joined',
+            expect.objectContaining({ group_id: 'g1' }),
+        );
+    });
+
+    it('detects new account signup from auth timestamps', () => {
+        const { isNewAccountSignup } = require('../../lib/productAnalytics');
+        const now = new Date().toISOString();
+        expect(
+            isNewAccountSignup({ created_at: now, last_sign_in_at: now }),
+        ).toBe(true);
+        expect(
+            isNewAccountSignup({
+                created_at: '2020-01-01T00:00:00.000Z',
+                last_sign_in_at: '2026-01-01T00:00:00.000Z',
+            }),
+        ).toBe(false);
     });
 });

@@ -218,6 +218,17 @@ export async function purchasePackage(
             await trackPurchaseEvent('purchase_completed', opts.featureKey, {
                 package_id: pkg.identifier,
             });
+            const periodType = active?.periodType;
+            if (
+                active &&
+                !isTripPassPkg &&
+                (periodType === 'TRIAL' || periodType === 'INTRO')
+            ) {
+                await captureProductEvent('trial_started', {
+                    package_id: pkg.identifier,
+                    feature_key: opts.featureKey,
+                });
+            }
             if (active && !isTripPassPkg) {
                 await syncProTrialReminder({
                     entitlementId: REVENUECAT_ENTITLEMENT_PRO,

@@ -22,6 +22,9 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 | Secret | Description |
 |--------|-------------|
 | `EXPO_PUBLIC_REVENUECAT_IOS_KEY` | RevenueCat iOS public SDK key (`appl_…`). Passed into the build when set; omit if Pro is disabled for that run. |
+| `SENTRY_AUTH_TOKEN` | Sentry auth token for **source map upload** during the local EAS iOS build (`@sentry/react-native/expo` plugin). When unset, `app.config.ts` sets `SENTRY_DISABLE_AUTO_UPLOAD=true` and the build continues without uploading maps. |
+| `SENTRY_ORG` | Sentry organization slug (e.g. `kupay-hb`). Used with the auth token; defaults to `kupay-hb` in `app.config.ts` if omitted but token is set. |
+| `SENTRY_URL` | Sentry instance URL (e.g. `https://de.sentry.io/`). Matches the org region; defaults in `app.config.ts` when token is set. Project slug comes from `app.json` → `@sentry/react-native/expo` (`copay-mobile-prod` for production TestFlight builds). |
 
 ## Workflow input
 

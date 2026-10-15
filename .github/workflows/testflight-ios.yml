@@ -63,6 +63,10 @@ jobs:
           ASC_APP_ID: "6780216665"
           EXPO_PUBLIC_KUPAPAY_PRO_ENABLED: ${{ inputs.pro_enabled == true && 'true' || 'false' }}
           EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
+          # Sentry source maps (optional — app.config.ts sets SENTRY_DISABLE_AUTO_UPLOAD when token absent)
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
         run: |
           source scripts/ci-export-asc-env.sh
           eas build \
