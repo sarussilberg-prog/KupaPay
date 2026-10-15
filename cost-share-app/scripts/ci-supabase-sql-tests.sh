@@ -144,6 +144,7 @@ fi
 LOCAL_SKIP=(
   activity_events.test.sql
   get_group_pairwise_debts.test.sql
+  admin_portal.test.sql
 )
 
 ran=0
