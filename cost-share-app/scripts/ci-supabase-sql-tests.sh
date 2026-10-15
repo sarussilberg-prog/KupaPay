@@ -1,44 +1,25 @@
 #!/usr/bin/env bash
-# Local Supabase stack + SQL regression tests (Phase 0 Gate B).
+# SQL regression tests (Phase 0 Gate B).
+# CI: runs against **development** Postgres via pooler (SUPABASE_DEV_DB_PASSWORD).
+# Each file ROLLBACKs — no persistent writes.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-if ! command -v supabase >/dev/null 2>&1; then
-  echo "::error::supabase CLI not found"
+if [[ -z "${SUPABASE_DB_PASSWORD:-}" ]]; then
+  echo "::error::SUPABASE_DB_PASSWORD is required (development CI secret)"
   exit 1
 fi
 
-MIGRATIONS_DIR="$ROOT/supabase/migrations"
-MIGRATIONS_HOLD="$(mktemp -d)"
-cleanup() {
-  supabase stop --no-backup 2>/dev/null || true
-  if [[ -d "$MIGRATIONS_HOLD/migrations" ]]; then
-    rm -rf "$MIGRATIONS_DIR"
-    mv "$MIGRATIONS_HOLD/migrations" "$MIGRATIONS_DIR"
-  fi
-  rm -rf "$MIGRATIONS_HOLD"
-}
-trap cleanup EXIT
+export SUPABASE_ENV="${SUPABASE_ENV:-development}"
 
-# `supabase start` auto-applies migrations on a fresh DB; our history assumes
-# schema.sql baseline first (see docs/SSOT/SUPABASE_ENVIRONMENTS.md).
-mv "$MIGRATIONS_DIR" "$MIGRATIONS_HOLD/migrations"
-mkdir -p "$MIGRATIONS_DIR"
+if ! command -v psql >/dev/null 2>&1; then
+  echo "::error::psql not found"
+  exit 1
+fi
 
-supabase start -x studio,imgproxy,vector,logflare
-
-DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
-
-rm -rf "$MIGRATIONS_DIR"
-mv "$MIGRATIONS_HOLD/migrations" "$MIGRATIONS_DIR"
-
-echo "▶ Loading baseline schema.sql"
-psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/schema.sql
-
-echo "▶ Applying incremental migrations"
-supabase migration up --local
+DB_URL="$(bash scripts/supabase-migration-db-url.sh)"
 
 shopt -s nullglob
 files=(supabase/__tests__/*.test.sql)
@@ -47,6 +28,7 @@ if [[ ${#files[@]} -eq 0 ]]; then
   exit 1
 fi
 
+echo "▶ Running ${#files[@]} SQL tests on development (transaction rollback)"
 for f in "${files[@]}"; do
   echo "▶ psql — $(basename "$f")"
   psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f"
