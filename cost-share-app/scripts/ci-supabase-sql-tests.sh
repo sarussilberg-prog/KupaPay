@@ -18,7 +18,8 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 PG_CONTAINER="kupapay-sql-ci-postgres"
-PG_IMAGE="postgres:17-alpine"
+# Supabase-flavored Postgres (auth.*, extensions.*) — matches config.toml db major_version 17.
+PG_IMAGE="ghcr.io/supabase/postgres:17.6.1.136"
 PG_PORT=54322
 SCHEMA_CORE_LINES=1038
 
