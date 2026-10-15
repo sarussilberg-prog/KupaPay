@@ -122,6 +122,27 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Wait for SonarCloud quality gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 90); do
+            if gh pr checks "$PR_NUMBER" --repo "$REPO" 2>/dev/null | grep -E 'SonarCloud Code Analysis' | grep -q pass; then
+              echo "SonarCloud passed"
+              exit 0
+            fi
+            if gh pr checks "$PR_NUMBER" --repo "$REPO" 2>/dev/null | grep -E 'SonarCloud Code Analysis' | grep -q fail; then
+              echo "::error::SonarCloud quality gate failed"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out waiting for SonarCloud"
+          exit 1
+
       - name: Squash-merge the PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
