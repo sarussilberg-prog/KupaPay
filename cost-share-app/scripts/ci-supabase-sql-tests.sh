@@ -36,7 +36,8 @@ trap cleanup EXIT
 mv "$MIGRATIONS_DIR" "$MIGRATIONS_HOLD/migrations"
 mkdir -p "$MIGRATIONS_DIR"
 
-supabase start -x studio,imgproxy,vector,logflare
+# Exclude services that run their own migrations before our baseline + patch bootstrap.
+supabase start -x studio,imgproxy,vector,logflare,storage,realtime,auth,edge-runtime,analytics,supavisor
 
 DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
