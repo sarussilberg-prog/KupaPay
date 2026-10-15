@@ -78,9 +78,13 @@ if [[ ${#files[@]} -eq 0 ]]; then
   exit 1
 fi
 
-# activity_events.test.sql assumes dev trigger parity (membership rejoin clears
-# group_removed); run full suite on linked dev via deploy-staging verify (#180).
-LOCAL_SKIP=(activity_events.test.sql)
+# Skipped locally — run on development DB post-deploy (#180):
+# - activity_events: dev trigger parity (membership rejoin clears group_removed)
+# - get_group_pairwise_debts: RPC dropped in 20260617200000_drop_legacy_balance_rpcs
+LOCAL_SKIP=(
+  activity_events.test.sql
+  get_group_pairwise_debts.test.sql
+)
 
 ran=0
 skipped=0
