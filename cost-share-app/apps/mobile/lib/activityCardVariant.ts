@@ -182,6 +182,7 @@ export function getActivityCardVariant(
         case 'group_note_changed':
             return MESSAGE;
         case 'settle_up_reminder':
+        case 'trip_budget_alert':
             return SETTLE_REMINDER;
     }
 }

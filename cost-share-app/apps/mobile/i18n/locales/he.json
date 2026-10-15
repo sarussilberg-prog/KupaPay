@@ -1171,6 +1171,17 @@
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
+        },
+        "tripBudget": {
+            "title": "תקציב טיול",
+            "lockedBody": "הגדרת תקרת הוצאות והתראות ב-80% ו-100% — עם Pro.",
+            "body": "מעקב אחר סך ההוצאות במטבע אחד. חברים מקבלים התראה ב-80% וב-100%.",
+            "amountPlaceholder": "סכום תקציב",
+            "save": "שמור תקציב",
+            "saved": "התקציב נשמר",
+            "proRequired": "נדרש Pro או Trip Pass לתקציב טיול",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "alertNote": "התראה פעם אחת לכל סף, עד שמשנים את התקציב."
         }
     },
     "remind": {

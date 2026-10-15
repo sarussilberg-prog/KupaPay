@@ -1153,6 +1153,17 @@
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
+        },
+        "tripBudget": {
+            "title": "Trip budget",
+            "lockedBody": "Set a group spending cap and get alerts at 80% and 100% with Pro.",
+            "body": "Track total expenses in one currency. Members get a push when you cross 80% and 100%.",
+            "amountPlaceholder": "Budget amount",
+            "save": "Save budget",
+            "saved": "Budget saved",
+            "proRequired": "Pro or Trip Pass required for trip budget",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "alertNote": "Alerts fire once per threshold until you change the budget."
         }
     },
     "remind": {

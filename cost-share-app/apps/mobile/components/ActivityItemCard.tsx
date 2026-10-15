@@ -107,6 +107,8 @@ export function resolveActivityTitle(
             });
         case 'settle_up_reminder':
             return t('activity.notifications.settleReminder', { name: actorName, group: groupName });
+        case 'trip_budget_alert':
+            return (event.metadata?.body as string | undefined) ?? t('pro.tripBudget.title');
         case 'consolidation_batch_added':
             // Full title is built by ActivityItem (needs perspective)
             return (event.metadata?.description as string | undefined) ?? '';

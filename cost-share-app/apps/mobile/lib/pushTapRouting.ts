@@ -24,6 +24,7 @@ export function notificationDataToPendingNavigation(data: NotificationData): Pen
         case 'group_removed':
             return { target: 'groupsList' };
         case 'settle_up_reminder':
+        case 'trip_budget_alert':
             return groupId ? { target: 'settleUpList', groupId } : null;
         case 'pro_trial_reminder':
             return { target: 'manageSubscription' };
