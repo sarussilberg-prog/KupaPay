@@ -55,6 +55,8 @@ import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPass
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { GroupSpendingInsightsSheet } from '../../components/pro/GroupSpendingInsightsSheet';
+import { isProPerkUnlocked } from '@cost-share/shared';
 import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -330,8 +332,11 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [exporting, setExporting] = useState(false);
     const [pendingExport, setPendingExport] = useState(false);
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
+    const [insightsSheetOpen, setInsightsSheetOpen] = useState(false);
     const { data: proStatus } = useProStatusQuery(groupId);
-    const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
+    const hasPro = proStatus?.hasPro === true;
+    const exportProLocked = KUPAPAY_PRO_ENABLED && !hasPro;
+    const insightsUnlocked = isProPerkUnlocked(hasPro, KUPAPAY_PRO_ENABLED);
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -1250,6 +1255,16 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             disabled={exporting}
                             testID="group-menu-export"
                         />
+                        {KUPAPAY_PRO_ENABLED && (
+                            <DetailMenuRow
+                                label={t('pro.insights.menuLabel')}
+                                onPress={() => {
+                                    setMenuOpen(false);
+                                    setInsightsSheetOpen(true);
+                                }}
+                                testID="group-menu-insights"
+                            />
+                        )}
                         <DetailMenuRow
                             label={
                                 isArchivedByMe
@@ -1286,6 +1301,25 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                     });
                 }}
                 onSelect={format => void runExport(format)}
+            />
+
+            <GroupSpendingInsightsSheet
+                visible={insightsSheetOpen}
+                onClose={() => setInsightsSheetOpen(false)}
+                unlocked={insightsUnlocked}
+                onUpgrade={() => {
+                    setInsightsSheetOpen(false);
+                    navigation.navigate('Paywall', {
+                        featureKey: 'spending_insights',
+                        groupId,
+                        showTripPass: true,
+                    });
+                }}
+                defaultCurrency={displayGroup.defaultCurrency}
+                expenses={groupExpenses}
+                memberNames={Object.fromEntries(
+                    Object.entries(memberMap).map(([id, m]) => [id, m.displayName]),
+                )}
             />
         </View>
     );

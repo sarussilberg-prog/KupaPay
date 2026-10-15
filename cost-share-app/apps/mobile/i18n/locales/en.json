@@ -1153,6 +1153,16 @@
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
+        },
+        "insights": {
+            "menuLabel": "Spending insights",
+            "title": "Spending insights",
+            "lockedBody": "See category, member, and weekly spending charts with Pro.",
+            "currencyNote": "Totals use group default currency ({{currency}}) only.",
+            "byCategory": "By category",
+            "byMember": "By member (paid)",
+            "overTime": "Over time (weekly)",
+            "empty": "No expenses in this currency yet."
         }
     },
     "remind": {
