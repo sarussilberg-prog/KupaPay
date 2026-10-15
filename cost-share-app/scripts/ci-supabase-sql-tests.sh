@@ -152,6 +152,7 @@ LOCAL_SKIP=(
   security_support_admin.test.sql
   group_friend_activity_events.test.sql
   profile_invite_token_acl.test.sql
+  redeem_group_invite_atomic.test.sql
 )
 
 ran=0
