@@ -1,15 +1,17 @@
 # KupaPay Pro v2 — implementation plan (architecture + quality gates)
 
-**Status:** Draft for owner approval — **no feature implementation until this plan is signed off.**  
-**Last updated:** 2026-10-15 (review loops 1–5 applied to Part 1–2)  
-**Scope:** Five Pro v2 features behind `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED`, RevenueCat entitlement `pro`, and group Trip Pass (`group_passes`).  
+**Status:** **Approved (Naveh, 2026-10-15)** — Phase 0 quality work may proceed; **no Pro v2 feature implementation until Phase 0 sign-off.**  
+**Last updated:** 2026-10-15 (feature 6 recurring expenses + i18n phase + ads policy)  
+**Scope:** Six Pro v2 features behind `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED`, RevenueCat entitlement `pro`, and group Trip Pass (`group_passes`); **locales** HE+EN at launch, **Russian + Arabic (RTL)** in a later phase.  
 **Related:** [PRO_FEATURES_PROPOSAL.md](PRO_FEATURES_PROPOSAL.md), [KUPAPAY_PRO_SETUP.md](KUPAPAY_PRO_SETUP.md), [SSOT/SUPABASE_ENVIRONMENTS.md](SSOT/SUPABASE_ENVIRONMENTS.md)
 
 ---
 
 ## Executive summary
 
-Pro v2 adds **trip tooling** (FX view, reminders, insights, budget, receipt OCR) without limiting free-tier splitting. Shipping money-adjacent features requires **quality gates first**: payment webhook hardening, migration safety, RLS/integration tests, staging discipline, E2E purchase smoke, monitoring, and release checklists. **Features are phased only after Phase 0 (gates) is complete.**
+Pro v2 adds **trip tooling** (FX view, reminders, insights, budget, receipt OCR, **recurring expenses**) without limiting free-tier splitting. **Monetization stays non-intrusive:** keep **rewarded ads only** (e.g. Remind to Settle Up via `AdOrGoProModal`); **no** interstitials, banners, or full-screen ad breaks on core flows — Pro removes rewarded gates via `shouldSkipAdGate`, not via new ad surfaces.
+
+Shipping money-adjacent features requires **quality gates first**: payment webhook hardening, migration safety, RLS/integration tests, staging discipline, E2E purchase smoke, monitoring, and release checklists. **Features are phased only after Phase 0 (gates) is complete.**
 
 Closed exploratory PRs (#128–#132) are superseded by this plan.
 
@@ -29,6 +31,7 @@ This document was stress-tested in **five explicit review loops** (see [Appendix
 | **Clean boundaries** | Domain math in `@cost-share/shared`; Supabase RPCs for authoritative aggregates; edge functions for cron/webhooks/OCR; mobile infrastructure for I/O. |
 | **Offline-first honesty** | Pro features that need network show unavailable states; no fake “Pro active” UX when entitlement or FX cannot be verified. |
 | **Cost awareness** | OCR and frequent cron jobs are bounded; analytics prefer SQL/materialized paths over repeated full-table client pulls. |
+| **Ads** | **Rewarded-only** opt-in gates; never block expense creation or settlement with forced ads. |
 
 ### 1.2 Shared modules (target architecture)
 
@@ -154,6 +157,35 @@ This document was stress-tested in **five explicit review loops** (see [Appendix
 
 **Cost:** OCR external API per scan — Pro-gated; monitor invocations in Supabase dashboard.
 
+#### G. Recurring expenses (Pro series)
+
+**UX (Add Expense screen):**
+
+| Control | Placement | Behavior |
+|---------|-----------|----------|
+| **Recurring toggle** | Bottom row alongside **receipt** and **date** controls | Pro-gated when `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED`; upsell when locked |
+| **Start date** | Reuse existing **date picker** (same component as expense date) | First occurrence date; timezone = user/device local, stored as `DATE` |
+| **Frequency** | Segmented control or picker | `weekly` \| `monthly` \| `yearly` |
+| **Series actions** | Expense detail / edit flow | **Edit series** (amount, splits, category, frequency, end date) vs **this occurrence only**; **Stop series** sets `ended_at` |
+
+**Server:**
+
+| Component | Role |
+|-----------|------|
+| **`recurring_expense_series`** | `group_id`, template fields (amount, currency, splits JSON, category, paid_by, description), `frequency`, `start_date`, `next_run_date`, `ended_at`, `created_by`, `timezone` hint |
+| **`recurring_expense_occurrences`** | Optional link `expense_id` ↔ `series_id` + `scheduled_for` for idempotency audit |
+| **Generator RPC** | `generate_due_recurring_expenses(p_limit)` — SECURITY DEFINER, service_role/cron only; inserts `expenses` from due series; advances `next_run_date`; **idempotent** on `(series_id, scheduled_for)` unique constraint |
+| **Cron edge** | `pro-recurring-expense-dispatch` — daily POST + `PUSH_WEBHOOK_SECRET`; **advisory lock** (or `pg_try_advisory_lock`) so overlapping runs do not double-create |
+| **Member RPCs** | `create_recurring_expense_series`, `update_recurring_expense_series`, `stop_recurring_expense_series` — require `has_pro(auth.uid(), group_id)` + membership |
+
+**Rules:**
+
+- Generation runs server-side only (client may preview next dates locally for UX, not authoritative).
+- Stopping a series does not delete past generated expenses.
+- Bulk cron uses **batch `LIMIT`** (same pattern as smart reminders §1.9).
+
+**i18n:** Copy for frequency labels and series edit/stop flows must use i18next keys from day one (EN/HE); **Russian + Arabic** ship in Phase 7.
+
 ### 1.3 Feature specs (concise)
 
 | # | Feature | Primary UI | Server | Existing building blocks |
@@ -163,6 +195,7 @@ This document was stress-tested in **five explicit review loops** (see [Appendix
 | 3 | **Spending insights** | Group menu sheet | Analytics RPCs | Categories on `expenses`, group expenses query |
 | 4 | **Trip budget + alerts** | Group detail | Budget RPC + trigger | Group totals patterns, `activity_events`, push kinds |
 | 5 | **Receipt OCR** | Add expense receipt menu | `receipt-ocr` edge | Receipt upload, Add Expense form |
+| 6 | **Recurring expenses** | Add expense footer (toggle + frequency) | Series table + daily cron RPC | Add Expense form, date picker, expense insert patterns |
 
 ### 1.4 Data model & migrations (planned)
 
@@ -174,6 +207,7 @@ All migrations: idempotent patterns, `-- safe-breaking:` annotations where REVOK
 | Analytics | RPCs only (no new tables v1) |
 | Budget | `groups.trip_budget_*`, `trip_budget_alert` activity kind, trigger on `expenses` |
 | OCR | No DB schema required v1; optional `receipt_ocr_audit` table later for support |
+| Recurring expenses | `recurring_expense_series`, optional `recurring_expense_occurrences`, RPCs + idempotency unique index |
 
 **RLS:** New tables member-read; writes via SECURITY DEFINER RPCs only. Cron functions **service_role only**.
 
@@ -186,6 +220,7 @@ All migrations: idempotent patterns, `-- safe-breaking:` annotations where REVOK
 | `pro-trial-reminder-dispatch` | Webhook secret | Daily cron |
 | `pro-smart-reminder-dispatch` | Webhook secret | Daily cron |
 | `receipt-ocr` | User JWT | On demand |
+| `pro-recurring-expense-dispatch` | Webhook secret | Daily cron |
 
 Deploy checklist per function: secrets documented in `KUPAPAY_PRO_SETUP.md` / `RECEIPT_OCR.md`.
 
@@ -198,6 +233,7 @@ Deploy checklist per function: secrets documented in `KUPAPAY_PRO_SETUP.md` / `R
 | Insights | RPC fetch | Hide or “offline” if no cached snapshot (v1: hide) |
 | Budget | Edit budget + live progress | Show last budget; progress stale |
 | Receipt scan | Edge OCR | Camera + attach photo; OCR when online |
+| Recurring series | Configure / stop series | Show last template; no generation offline |
 
 React Query: invalidate pro status after purchase restore; invalidate group on budget/reminder settings change.
 
@@ -524,7 +560,33 @@ flowchart LR
 - [ ] With fixture text: draft fields pre-filled correctly (EN/HE receipts sample set).
 - [ ] Rate limit prevents abuse.
 
-### Phase 6 — Production Pro v2 launch
+### Phase 6 — Recurring expenses (Pro)
+
+**Depends on:** Phase 5.
+
+**Deliverables:** Series schema + RPCs, `pro-recurring-expense-dispatch` cron, Add Expense footer UI (toggle + frequency + start date), edit/stop series flows, EN/HE strings.
+
+**Acceptance:**
+
+- [ ] Pro user can start weekly/monthly/yearly series from Add Expense.
+- [ ] Cron creates expenses idempotently (no duplicates on re-run / overlapping cron).
+- [ ] Stop series prevents future generation; past expenses remain.
+- [ ] Edit series updates template; optional “this occurrence only” documented in UX.
+- [ ] Non-Pro sees upsell when master flag on.
+
+### Phase 7 — i18n expansion (Russian + Arabic RTL)
+
+**Depends on:** Phase 6 (or parallel late Phase 5 if strings-only prep).
+
+**Deliverables:** `ru` and `ar` locale files (mobile + shared copy); RTL layout audit for Arabic (reuse existing RTL infrastructure from Hebrew); push/send-push locale strings where applicable; store listing copy coordination.
+
+**Acceptance:**
+
+- [ ] Language switcher includes RU + AR; Arabic forces RTL.
+- [ ] Critical flows (auth, add expense, settle up, paywall, Pro surfaces) translated.
+- [ ] No new intrusive ad formats introduced during localization.
+
+### Phase 8 — Production Pro v2 launch
 
 **Acceptance:**
 
@@ -665,9 +727,12 @@ Each loop re-read **Part 1 (architecture)** and **Part 2 (CI/CD)** against the r
 3. Phase 2 reminders (migration + edge + mobile).  
 4. Phase 3 insights (RPC + mobile).  
 5. Phase 4 budget (migration + push kind + mobile).  
-6. Phase 5 receipt OCR (edge + mobile + docs).
+6. Phase 5 receipt OCR (edge + mobile + docs).  
+7. Phase 6 recurring expenses (migration + cron + mobile).  
+8. Phase 7 Russian + Arabic (locales + RTL QA).  
+9. Phase 8 production launch.
 
-Each feature PR: tests, migration safe annotations, EN/HE, RTL screenshot in PR description, link to this plan section.
+Each feature PR: tests, migration safe annotations, EN/HE (Phase 7 adds RU/AR), RTL screenshot in PR description, link to this plan section.
 
 ---
 
@@ -675,5 +740,5 @@ Each feature PR: tests, migration safe annotations, EN/HE, RTL screenshot in PR 
 
 | Role | Name | Date | Approved |
 |------|------|------|----------|
-| Owner | | | ☐ |
+| Owner (Naveh) | Naveh | 2026-10-15 | ☑ |
 | Engineering | | | ☐ |
