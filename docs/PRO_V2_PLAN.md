@@ -19,7 +19,7 @@ This document was stress-tested in **five explicit review loops** (see [Appendix
 
 ---
 
-## Part 1 — Architecture (five features + shared platform)
+## Part 1 — Architecture (six features + shared platform)
 
 ### 1.1 Design principles
 
