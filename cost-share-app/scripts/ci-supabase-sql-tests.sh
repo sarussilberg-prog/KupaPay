@@ -77,10 +77,23 @@ if [[ ${#files[@]} -eq 0 ]]; then
   exit 1
 fi
 
-echo "▶ Running ${#files[@]} SQL tests (transaction rollback)"
+# activity_events.test.sql assumes dev trigger parity (membership rejoin clears
+# group_removed); run full suite on linked dev via deploy-staging verify (#180).
+LOCAL_SKIP=(activity_events.test.sql)
+
+ran=0
+skipped=0
+echo "▶ Running SQL tests (transaction rollback)"
 for f in "${files[@]}"; do
-  echo "▶ psql — $(basename "$f")"
+  base="$(basename "$f")"
+  if [[ " ${LOCAL_SKIP[*]} " == *" ${base} "* ]]; then
+    echo "▶ skip — ${base} (full run on development DB post-deploy)"
+    skipped=$((skipped + 1))
+    continue
+  fi
+  echo "▶ psql — ${base}"
   psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f"
+  ran=$((ran + 1))
 done
 
-echo "✅ SQL integration tests passed (${#files[@]} files)"
+echo "✅ SQL integration tests passed (${ran} files, ${skipped} skipped locally)"
