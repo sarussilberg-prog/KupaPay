@@ -52,6 +52,9 @@ PATCH_FILES=(
   supabase/fix-rls-group-members-recursion.sql
   supabase/fix-is-group-member-anon-grants.sql
   supabase/get-user-dashboard.sql
+  supabase/get-user-balance-summary.sql
+  supabase/account-deletion-v2.sql
+  supabase/account-deletion-v3-fixes.sql
   supabase/fix-profiles-account-deactivation.sql
   supabase/fix-groups-select-creator.sql
   supabase/friends-system.sql
