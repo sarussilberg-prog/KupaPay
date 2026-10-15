@@ -32,3 +32,26 @@ jobs:
           SUPABASE_ENV: development
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
         run: bash scripts/supabase-ci-db-push.sh
+
+  verify-staging-db:
+    name: Verify development DB (post-migrate)
+    needs: supabase-migrations
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Post-deploy DB smoke
+        env:
+          SUPABASE_ENV: development
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
+        run: bash scripts/ci-staging-db-smoke.sh
