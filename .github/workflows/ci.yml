@@ -26,10 +26,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: npm-node-modules
-          path: |
-            cost-share-app/node_modules
-            cost-share-app/apps/mobile/node_modules
-            cost-share-app/packages/shared/node_modules
+          path: cost-share-app/node_modules
           if-no-files-found: error
           retention-days: 1
 
@@ -48,7 +45,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/turbo || npm ci
       - run: npm run lint
 
   typecheck:
@@ -66,7 +64,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/tsc || npm ci
       - run: npm run typecheck
 
   test:
@@ -84,7 +83,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/jest || npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
   revenuecat-webhook:
