@@ -148,6 +148,8 @@ LOCAL_SKIP=(
   activity_events.test.sql
   get_group_pairwise_debts.test.sql
   admin_portal.test.sql
+  delete_my_account.test.sql
+  security_support_admin.test.sql
 )
 
 ran=0
