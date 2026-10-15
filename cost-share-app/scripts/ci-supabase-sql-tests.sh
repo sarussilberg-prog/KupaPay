@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SQL regression tests (Phase 0 Gate B).
-# CI: Postgres 17 container (schema baseline + patches + migrations), no remote secrets.
+# CI: Supabase Postgres 17 Docker (pg_net, auth, vault) + schema bootstrap.
 # Each __tests__ file uses BEGIN/ROLLBACK — no persistent writes.
 set -euo pipefail
 
@@ -13,12 +13,14 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 PG_CONTAINER="kupapay-sql-ci-postgres"
-PG_IMAGE="postgres:17-alpine"
+PG_IMAGE="ghcr.io/supabase/postgres:17.6.1.136"
 PG_PORT=54322
 SCHEMA_CORE_LINES=1038
+# supabase_admin is the bootstrap superuser in the Supabase Postgres image.
+PGUSER=supabase_admin
 
 psql_docker() {
-  docker exec -e PGPASSWORD=postgres -i "$PG_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
+  docker exec -e PGPASSWORD=postgres -i "$PG_CONTAINER" psql -U "$PGUSER" -d postgres -v ON_ERROR_STOP=1 "$@"
 }
 
 psql_docker_file() {
@@ -31,16 +33,18 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "▶ Starting Postgres (${PG_IMAGE}) on port ${PG_PORT}"
+echo "▶ Starting Postgres (${PG_IMAGE})"
 docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 docker run -d --name "$PG_CONTAINER" \
   -e POSTGRES_PASSWORD=postgres \
+  -e JWT_SECRET=ci-local-jwt-secret-at-least-32-chars \
+  -e JWT_EXP=3600 \
   -p "${PG_PORT}:5432" \
   "$PG_IMAGE" >/dev/null
 
 ready=0
 for _ in $(seq 1 90); do
-  if docker exec -e PGPASSWORD=postgres "$PG_CONTAINER" psql -U postgres -d postgres -c 'SELECT 1' >/dev/null 2>&1; then
+  if docker exec -e PGPASSWORD=postgres "$PG_CONTAINER" psql -U "$PGUSER" -d postgres -c 'SELECT 1' >/dev/null 2>&1; then
     ready=1
     break
   fi
@@ -54,14 +58,14 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
-echo "▶ Bootstrap auth/extensions stubs"
-psql_docker_file supabase/ci-local-postgres-bootstrap.sql
+echo "▶ Auth schema compat (image drift)"
+psql_docker <<'SQL'
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS banned_until timestamptz;
+SQL
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
-# Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
 head -n "$SCHEMA_CORE_LINES" supabase/schema.sql | psql_docker -f -
 
-# Same order as scripts/supabase-apply-patches.sh (remote dev bootstrap).
 PATCH_FILES=(
   supabase/fix-rls-group-members-recursion.sql
   supabase/fix-is-group-member-anon-grants.sql
@@ -92,16 +96,12 @@ for f in "${migration_files_sorted[@]}"; do
   psql_docker_file "$f"
 done
 
-shopt -s nullglob
 files=(supabase/__tests__/*.test.sql)
 if [[ ${#files[@]} -eq 0 ]]; then
   echo "::error::no SQL tests found"
   exit 1
 fi
 
-# Skipped locally — run on development DB post-deploy (#180):
-# - activity_events: dev trigger parity (membership rejoin clears group_removed)
-# - get_group_pairwise_debts: RPC dropped in 20260617200000_drop_legacy_balance_rpcs
 LOCAL_SKIP=(
   activity_events.test.sql
   get_group_pairwise_debts.test.sql
