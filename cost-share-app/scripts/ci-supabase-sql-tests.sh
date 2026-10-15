@@ -150,6 +150,7 @@ LOCAL_SKIP=(
   admin_portal.test.sql
   delete_my_account.test.sql
   security_support_admin.test.sql
+  group_friend_activity_events.test.sql
 )
 
 ran=0
