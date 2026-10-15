@@ -34,6 +34,8 @@ export type AuthenticatedGateDeps<TGroup = unknown> = {
     isOnline: () => boolean;
     fetchGroups: () => Promise<TGroup[]>;
     seedGroups: (groups: TGroup[]) => void;
+    /** Deferred /i or /g invite waiting for redemption — skip forced create-group. */
+    hasPendingInvite?: () => boolean;
 };
 
 /**
@@ -51,6 +53,11 @@ export async function runAuthenticatedGate<TGroup = unknown>(
     deps: AuthenticatedGateDeps<TGroup>,
 ): Promise<AuthenticatedGateTarget> {
     const postOnboardingComplete = await deps.hasCompletedPostLoginOnboarding();
+
+    if (deps.hasPendingInvite?.()) {
+        if (!postOnboardingComplete) await deps.markPostLoginOnboardingComplete();
+        return 'main';
+    }
 
     // Groups already cached (persisted from a previous session) → straight to the
     // app; the navigator mounts with data, so no in-tab loading state shows.

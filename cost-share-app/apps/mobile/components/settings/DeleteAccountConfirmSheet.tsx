@@ -64,13 +64,13 @@ export function DeleteAccountConfirmSheet({ visible, expectedEmail, onClose, onC
                     <View className="items-center pt-2 pb-1">
                         <View className="w-10 h-1 bg-gray-300 rounded-full" />
                     </View>
-                    <Text className="text-xl font-bold text-gray-900 px-5 mt-2 mb-1">
+                    <Text className="text-xl font-bold text-gray-900 px-5 mt-2 mb-1 text-start">
                         {t('deleteAccount.confirmTitle')}
                     </Text>
-                    <Text className="text-sm text-gray-500 px-5 mb-1">
+                    <Text className="text-sm text-gray-500 px-5 mb-1 text-start">
                         {t('deleteAccount.typeEmailHint')}
                     </Text>
-                    <Text selectable className="text-sm font-medium text-gray-800 px-5 mb-3">
+                    <Text selectable className="text-sm font-medium text-gray-800 px-5 mb-3 text-start">
                         {expectedEmail}
                     </Text>
                     <TextInput

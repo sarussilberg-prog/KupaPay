@@ -23,8 +23,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa-pay.com",
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa-pay.com"
       }
     }
   },

@@ -10,8 +10,19 @@ INVOCATION_DIR="$PWD"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 WEB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-KUPAPAY_DEV_VERCEL_PROJECT_ID="prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"
-if [[ "${VERCEL_PROJECT_ID:-}" == "$KUPAPAY_DEV_VERCEL_PROJECT_ID" ]]; then
+# Vercel projects that should always use development Supabase defaults when env is unset.
+KUPAPAY_DEV_VERCEL_PROJECT_IDS=(
+  "prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"
+  "prj_ldRyqXhp9Gg0QAHCNzEBw3VIcWbc"
+)
+IS_DEV_VERCEL_PROJECT=false
+for id in "${KUPAPAY_DEV_VERCEL_PROJECT_IDS[@]}"; do
+  if [[ "${VERCEL_PROJECT_ID:-}" == "$id" ]]; then
+    IS_DEV_VERCEL_PROJECT=true
+    break
+  fi
+done
+if [[ "$IS_DEV_VERCEL_PROJECT" == true ]]; then
   DEFAULTS_FILE="$WEB_DIR/supabase-public.development.defaults"
 elif [[ "${VERCEL_ENV:-}" == "production" ]]; then
   DEFAULTS_FILE="$WEB_DIR/supabase-public.production.defaults"

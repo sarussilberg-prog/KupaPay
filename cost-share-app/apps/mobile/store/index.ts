@@ -28,6 +28,7 @@ interface AppState {
         | { target: 'groupDetail'; groupId: string }
         | { target: 'groupsList' }
         | { target: 'settleUpList'; groupId: string }
+        | { target: 'manageSubscription' }
         | null;
     setPendingNavigation: (
         nav: AppState['pendingNavigation'],

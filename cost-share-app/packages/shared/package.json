@@ -6,6 +6,7 @@
     "react-native": "./src/index.ts",
     "scripts": {
         "build": "tsc",
+        "typecheck": "tsc --noEmit",
         "dev": "tsc --watch",
         "clean": "rm -rf dist"
     },

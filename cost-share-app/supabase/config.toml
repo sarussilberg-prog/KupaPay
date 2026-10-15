@@ -21,3 +21,11 @@ verify_jwt = false
 # the x-webhook-secret header against the PUSH_WEBHOOK_SECRET function secret).
 [functions.send-push]
 verify_jwt = false
+
+# RevenueCat server notifications (Authorization header secret; no JWT).
+[functions.revenuecat-webhook]
+verify_jwt = false
+
+# Daily cron (x-webhook-secret) — server fallback for Pro trial end reminders.
+[functions.pro-trial-reminder-dispatch]
+verify_jwt = false

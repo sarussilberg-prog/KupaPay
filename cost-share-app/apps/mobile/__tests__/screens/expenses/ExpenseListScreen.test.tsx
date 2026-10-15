@@ -67,12 +67,15 @@ describe('ExpenseListScreen', () => {
     });
 
     it('navigates to ExpenseDetail when an expense is pressed', async () => {
+        mockFetchExpenses.mockResolvedValue([expense]);
         queryClient.setQueryData(queryKeys.groupExpenses('g1'), [expense]);
         const { findByTestId } = render(<ExpenseListScreen />);
         fireEvent.press(await findByTestId('expense-card-e1'));
-        expect(mockNavigate).toHaveBeenCalledWith('ExpenseDetail', {
-            expenseId: 'e1',
-            groupId: 'g1',
-        });
+        await waitFor(() =>
+            expect(mockNavigate).toHaveBeenCalledWith('ExpenseDetail', {
+                expenseId: 'e1',
+                groupId: 'g1',
+            }),
+        );
     });
 });

@@ -15,6 +15,7 @@ import {
     handleInviteLink,
 } from '../services/deepLinks.service';
 import { isAuthCallbackUrl } from '../services/auth.service';
+import { persistPendingInvite, clearPersistedPendingInvite } from '../lib/pendingInviteStorage';
 
 export function useInviteRedemption(): void {
     const incomingUrl = Linking.useURL();
@@ -31,9 +32,17 @@ export function useInviteRedemption(): void {
         const link = parseIncomingUrl(incomingUrl);
         if (link.kind === 'unknown') return;
 
+        if (link.kind === 'settleReminder') {
+            if (session) {
+                void handleInviteLink(link, navigation, queryClient);
+            }
+            return;
+        }
+
         if (!session) {
-            // After the unknown-check above, `link` is exactly `PendingInvite`.
-            setPendingInvite(link as { kind: 'friend' | 'group'; token: string });
+            const pending = { kind: link.kind, token: link.token };
+            setPendingInvite(pending);
+            void persistPendingInvite(pending);
             return;
         }
         void handleInviteLink(link, navigation, queryClient);
@@ -44,6 +53,7 @@ export function useInviteRedemption(): void {
         if (!session || !pendingInvite) return;
         void handleInviteLink(pendingInvite, navigation, queryClient).finally(() => {
             setPendingInvite(null);
+            void clearPersistedPendingInvite();
         });
         // Intentionally only re-run when session flips on or pendingInvite changes.
     }, [session, pendingInvite, navigation, queryClient, setPendingInvite]);

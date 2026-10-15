@@ -27,6 +27,10 @@ describe('notificationDataToPendingNavigation', () => {
         expect(notificationDataToPendingNavigation({ kind: 'group_removed', groupId: 'g9', refId: 'r' }))
             .toEqual({ target: 'groupsList' });
     });
+    it('routes pro trial reminder to subscription management', () => {
+        expect(notificationDataToPendingNavigation({ kind: 'pro_trial_reminder' }))
+            .toEqual({ target: 'manageSubscription' });
+    });
     it('returns null for unknown / malformed payloads', () => {
         expect(notificationDataToPendingNavigation({})).toBeNull();
         expect(notificationDataToPendingNavigation({ kind: 'expense_added', groupId: null, refId: 'r' })).toBeNull();

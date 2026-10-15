@@ -51,14 +51,25 @@ function resolveSentryAuthToken(appRoot) {
 // .xcode.env.local is gitignored and wiped by `prebuild --clean`, so re-inject the
 // Sentry auth token on every prebuild. The bundle phase sources this file, making
 // source-map upload work for local Release/Archive builds without manual setup.
-function injectSentryAuthToken(platformProjectRoot, appRoot) {
+function injectSentryBuildEnv(platformProjectRoot, appRoot) {
     const token = resolveSentryAuthToken(appRoot);
     if (!token) return; // CI/EAS provide it differently; nothing to inject locally.
+    const org = process.env.SENTRY_ORG?.trim() || 'kupay-hb';
+    const url = (process.env.SENTRY_URL?.trim() || 'https://de.sentry.io/').replace(/\/$/, '');
     const filePath = path.join(platformProjectRoot, '.xcode.env.local');
     let contents = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
-    if (/^export SENTRY_AUTH_TOKEN=/m.test(contents)) return; // already present
-    const sep = contents && !contents.endsWith('\n') ? '\n' : '';
-    fs.writeFileSync(filePath, `${contents}${sep}export SENTRY_AUTH_TOKEN=${token}\n`);
+    const lines = [
+        `export SENTRY_AUTH_TOKEN=${token}`,
+        `export SENTRY_ORG=${org}`,
+        `export SENTRY_URL=${url}/`,
+    ];
+    for (const line of lines) {
+        const key = line.split('=')[0];
+        if (new RegExp(`^${key}=`, 'm').test(contents)) continue;
+        const sep = contents && !contents.endsWith('\n') ? '\n' : '';
+        contents = `${contents}${sep}${line}\n`;
+    }
+    fs.writeFileSync(filePath, contents);
 }
 
 module.exports = function withReleaseNodeEnv(config) {
@@ -69,7 +80,7 @@ module.exports = function withReleaseNodeEnv(config) {
             const appRoot = cfg.modRequest.projectRoot;
             const xcodeEnv = path.join(platformProjectRoot, '.xcode.env');
             if (fs.existsSync(xcodeEnv)) appendBlock(xcodeEnv);
-            injectSentryAuthToken(platformProjectRoot, appRoot);
+            injectSentryBuildEnv(platformProjectRoot, appRoot);
             return cfg;
         },
     ]);

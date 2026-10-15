@@ -233,7 +233,9 @@ curl -sS https://kupa.pro/legal/privacy | head -40
 - Independent security review? → **No**.
 - Committed to Play Families Policy? → **No**.
 
-If you add PostHog or another analytics SDK later, this section MUST be updated **before** rolling out a build that contains it.
+**Product analytics (PostHog):** The mobile app ships `posthog-react-native` against the EU PostHog host (`https://eu.i.posthog.com`). Events are **explicit named funnel events only** (no session replay, no autocapture of text fields, no IDFA/ATT). User identity in analytics is the **internal Supabase user id** only — no email or other PII. Update **Data safety** if Google’s questionnaire asks about analytics/diagnostics separately from ads.
+
+If you add another analytics SDK or change PostHog behavior (autocapture, replay, advertising identifiers), update this section and the in-app privacy policy **before** rolling out a build that contains it.
 
 ---
 
