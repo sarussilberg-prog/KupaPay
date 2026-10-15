@@ -74,6 +74,9 @@ CREATE TABLE IF NOT EXISTS auth.refresh_tokens (
   token TEXT,
   revoked BOOLEAN DEFAULT FALSE
 );
+ALTER TABLE auth.refresh_tokens ADD COLUMN IF NOT EXISTS session_id UUID;
+ALTER TABLE auth.refresh_tokens ADD COLUMN IF NOT EXISTS token TEXT;
+ALTER TABLE auth.refresh_tokens ADD COLUMN IF NOT EXISTS revoked BOOLEAN DEFAULT FALSE;
 
 CREATE SCHEMA IF NOT EXISTS storage;
 
