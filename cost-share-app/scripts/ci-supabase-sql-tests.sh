@@ -1,48 +1,48 @@
 #!/usr/bin/env bash
 # SQL regression tests (Phase 0 Gate B).
-# CI: local Supabase stack (schema baseline + migrations), no remote secrets required.
+# CI: Postgres 17 container (schema baseline + patches + migrations), no remote secrets.
 # Each __tests__ file uses BEGIN/ROLLBACK — no persistent writes.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-if ! command -v supabase >/dev/null 2>&1; then
-  echo "::error::supabase CLI not found"
-  exit 1
-fi
-
 if ! command -v psql >/dev/null 2>&1; then
   echo "::error::psql not found"
   exit 1
 fi
 
-MIGRATIONS_DIR="$ROOT/supabase/migrations"
-MIGRATIONS_HOLD="$(mktemp -d)"
+if ! command -v docker >/dev/null 2>&1; then
+  echo "::error::docker not found"
+  exit 1
+fi
+
+PG_CONTAINER="kupapay-sql-ci-postgres"
+PG_IMAGE="postgres:17-alpine"
+PG_PORT=54322
 SCHEMA_CORE_LINES=1038
 
 cleanup() {
-  supabase stop --no-backup 2>/dev/null || true
-  if [[ -d "$MIGRATIONS_HOLD/migrations" ]]; then
-    rm -rf "$MIGRATIONS_DIR"
-    mv "$MIGRATIONS_HOLD/migrations" "$MIGRATIONS_DIR"
-  fi
-  rm -rf "$MIGRATIONS_HOLD"
+  docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 }
 trap cleanup EXIT
 
-# `supabase start` auto-applies migrations on a fresh DB; history assumes schema.sql
-# baseline first (see docs/PRO_V2_PLAN.md Gate B).
-mv "$MIGRATIONS_DIR" "$MIGRATIONS_HOLD/migrations"
-mkdir -p "$MIGRATIONS_DIR"
+echo "▶ Starting Postgres (${PG_IMAGE}) on port ${PG_PORT}"
+docker rm -f "$PG_CONTAINER" 2>/dev/null || true
+docker run -d --name "$PG_CONTAINER" \
+  -e POSTGRES_PASSWORD=postgres \
+  -p "${PG_PORT}:5432" \
+  "$PG_IMAGE" >/dev/null
 
-# Exclude services that run their own migrations before our baseline + patch bootstrap.
-supabase start -x studio,imgproxy,vector,logflare,storage,realtime,auth,edge-runtime,analytics,supavisor
+for _ in $(seq 1 60); do
+  if docker exec "$PG_CONTAINER" pg_isready -U postgres -q 2>/dev/null; then
+    break
+  fi
+  sleep 1
+done
+docker exec "$PG_CONTAINER" pg_isready -U postgres -q
 
-DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
-
-rm -rf "$MIGRATIONS_DIR"
-mv "$MIGRATIONS_HOLD/migrations" "$MIGRATIONS_DIR"
+DB_URL="postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/postgres"
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
@@ -70,7 +70,14 @@ for patch in "${PATCH_FILES[@]}"; do
 done
 
 echo "▶ Applying incremental migrations"
-supabase migration up --local
+shopt -s nullglob
+migration_files=(supabase/migrations/*.sql)
+IFS=$'\n' migration_files_sorted=($(printf '%s\n' "${migration_files[@]}" | sort))
+unset IFS
+for f in "${migration_files_sorted[@]}"; do
+  echo "▶ migration — $(basename "$f")"
+  psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
 
 shopt -s nullglob
 files=(supabase/__tests__/*.test.sql)
