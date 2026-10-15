@@ -61,6 +61,18 @@ fi
 echo "▶ Auth schema compat (image drift)"
 psql_docker <<'SQL'
 ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS banned_until timestamptz;
+
+CREATE TABLE IF NOT EXISTS auth.sessions (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS auth.refresh_tokens (
+  user_id TEXT NOT NULL,
+  session_id UUID,
+  token TEXT,
+  revoked BOOLEAN DEFAULT FALSE
+);
 SQL
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
