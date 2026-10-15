@@ -13,17 +13,12 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 PG_CONTAINER="kupapay-sql-ci-postgres"
-# Supabase-flavored Postgres (auth.*, extensions.*) — matches config.toml db major_version 17.
-PG_IMAGE="ghcr.io/supabase/postgres:17.6.1.136"
+PG_IMAGE="postgres:17-alpine"
 PG_PORT=54322
 SCHEMA_CORE_LINES=1038
 
 psql_docker() {
   docker exec -e PGPASSWORD=postgres -i "$PG_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
-}
-
-psql_docker_auth() {
-  docker exec -e PGPASSWORD=postgres -i "$PG_CONTAINER" psql -U supabase_auth_admin -d postgres -v ON_ERROR_STOP=1 "$@"
 }
 
 psql_docker_file() {
@@ -40,8 +35,6 @@ echo "▶ Starting Postgres (${PG_IMAGE}) on port ${PG_PORT}"
 docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 docker run -d --name "$PG_CONTAINER" \
   -e POSTGRES_PASSWORD=postgres \
-  -e JWT_SECRET=ci-local-jwt-secret-at-least-32-chars \
-  -e JWT_EXP=3600 \
   -p "${PG_PORT}:5432" \
   "$PG_IMAGE" >/dev/null
 
@@ -61,10 +54,8 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
-echo "▶ CI auth schema compat (Supabase Postgres image drift)"
-psql_docker <<'SQL'
-ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS banned_until timestamptz;
-SQL
+echo "▶ Bootstrap auth/extensions stubs"
+psql_docker_file supabase/ci-local-postgres-bootstrap.sql
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
@@ -77,7 +68,7 @@ PATCH_FILES=(
   supabase/get-user-dashboard.sql
   supabase/get-user-balance-summary.sql
   supabase/account-deletion-v2.sql
-  # account-deletion-v3-fixes.sql omitted — covered by 20260617140100_* migrations; auth.users DDL needs auth owner.
+  supabase/account-deletion-v3-fixes.sql
   supabase/fix-profiles-account-deactivation.sql
   supabase/fix-groups-select-creator.sql
   supabase/friends-system.sql

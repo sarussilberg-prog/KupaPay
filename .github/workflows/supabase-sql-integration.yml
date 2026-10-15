@@ -9,6 +9,7 @@ on:
       - 'cost-share-app/supabase/config.toml'
       - 'cost-share-app/supabase/schema.sql'
       - 'cost-share-app/scripts/ci-supabase-sql-tests.sh'
+      - 'cost-share-app/supabase/ci-local-postgres-bootstrap.sql'
       - '.github/workflows/supabase-sql-integration.yml'
 
 concurrency:
