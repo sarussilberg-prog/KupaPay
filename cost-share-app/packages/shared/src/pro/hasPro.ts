@@ -28,3 +28,8 @@ export function hasProFromTimestamps(
 export function shouldSkipAdGate(hasPro: boolean, proFeatureEnabled: boolean): boolean {
     return proFeatureEnabled && hasPro;
 }
+
+/** Pro-gated perk is usable (flag off → everyone; flag on → Pro / Trip Pass only). */
+export function isProPerkUnlocked(hasPro: boolean, proFeatureEnabled: boolean): boolean {
+    return !proFeatureEnabled || hasPro;
+}

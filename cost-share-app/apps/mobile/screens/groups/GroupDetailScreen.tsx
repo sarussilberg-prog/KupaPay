@@ -55,6 +55,8 @@ import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPass
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { GroupTripCurrencySection } from '../../components/balances/GroupTripCurrencySection';
+import { isProPerkUnlocked } from '@cost-share/shared';
 import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -331,7 +333,9 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [pendingExport, setPendingExport] = useState(false);
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
     const { data: proStatus } = useProStatusQuery(groupId);
-    const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
+    const hasPro = proStatus?.hasPro === true;
+    const exportProLocked = KUPAPAY_PRO_ENABLED && !hasPro;
+    const tripCurrencyUnlocked = isProPerkUnlocked(hasPro, KUPAPAY_PRO_ENABLED);
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -965,6 +969,24 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                         />
                         <UnassignedTripPassBanner groupId={groupId} />
                         <IncludedTripPassBanner groupId={groupId} />
+                        {(tripCurrencyUnlocked ||
+                            new Set(pairwiseDebts.map(d => d.currency)).size > 1) && (
+                            <GroupTripCurrencySection
+                                defaultCurrency={displayGroup.defaultCurrency}
+                                debts={pairwiseDebts}
+                                memberNames={Object.fromEntries(
+                                    Object.entries(memberMap).map(([id, m]) => [id, m.displayName]),
+                                )}
+                                enabled={tripCurrencyUnlocked}
+                                onUpgrade={() =>
+                                    navigation.navigate('Paywall', {
+                                        featureKey: 'trip_currency',
+                                        groupId,
+                                        showTripPass: true,
+                                    })
+                                }
+                            />
+                        )}
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                                 <AppIcon name="search" size={18} color={colors.gray500} />
