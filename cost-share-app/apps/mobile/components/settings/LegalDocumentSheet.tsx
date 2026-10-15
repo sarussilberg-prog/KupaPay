@@ -5,7 +5,14 @@ import Markdown from 'react-native-markdown-display';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { useLegalDocument } from '../../hooks/queries/useLegalDocument';
-import { APP_VERSION, isLanguage, isRtlLanguage, legalDocumentLocale, type LegalSlug } from '@cost-share/shared';
+import {
+    APP_VERSION,
+    isLanguage,
+    isRtlLanguage,
+    languageToIntlLocale,
+    legalDocumentLocale,
+    type LegalSlug,
+} from '@cost-share/shared';
 
 interface Props {
     visible: boolean;
@@ -31,7 +38,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
     if (!visible) return null;
 
     const formattedDate = query.data
-        ? new Intl.DateTimeFormat(isRtl ? 'he-IL' : 'en-US', {
+        ? new Intl.DateTimeFormat(languageToIntlLocale(docLocale === 'he' ? 'he' : 'en'), {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

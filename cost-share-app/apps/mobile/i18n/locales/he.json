@@ -1147,7 +1147,7 @@
         "summaryDescription": "{{from}} ישלם ל-{{to}} עבור {{count}} חובות ב-{{currency}}",
         "totalLabel": "סה\"כ",
         "rateDisclaimer": "שערי החליפין מתעדכנים כל יום",
-        "rateLabel": "@ {{rate}}",
+        "rateLabel": "בשער {{rate}}",
         "toastCreated": "המטבעות אוחדו",
         "toastDeleted": "האיחוד נמחק",
         "recordError": "לא ניתן לרשום את האיחוד",

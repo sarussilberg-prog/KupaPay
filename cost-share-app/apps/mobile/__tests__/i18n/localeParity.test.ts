@@ -3,7 +3,9 @@ import path from 'path';
 import {
     SUPPORTED_LANGUAGES,
     compareLocaleToBase,
+    findUntranslatedFromBase,
     flattenLocale,
+    isAllowlistedLocaleValue,
     isRtlLanguage,
     type Language,
 } from '@cost-share/shared';
@@ -37,4 +39,14 @@ describe('mobile locale files', () => {
             expect(placeholders).toEqual([]);
         },
     );
+
+    const nonEnglish = SUPPORTED_LANGUAGES.filter((l) => l !== BASE_LOCALE);
+
+    it.each(nonEnglish)('%s has no untranslated strings identical to English', (locale) => {
+        const flat = flattenLocale(loadLocale(locale));
+        const untranslated = findUntranslatedFromBase(baseFlat, flat, locale, (value, key) =>
+            isAllowlistedLocaleValue(value, key),
+        );
+        expect(untranslated).toEqual([]);
+    });
 });

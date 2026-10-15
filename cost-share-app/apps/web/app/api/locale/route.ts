@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { SUPPORTED_LANGUAGES, isLanguage } from '@cost-share/shared';
+import { isLanguage } from '@cost-share/shared';
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();

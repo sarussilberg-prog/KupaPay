@@ -97,14 +97,14 @@ export function findUntranslatedFromBase(
     baseLocale: FlatLocale,
     otherLocale: FlatLocale,
     localeCode: string,
-    isAllowed: (value: string) => boolean,
+    isAllowed: (value: string, key: string) => boolean,
 ): UntranslatedIssue[] {
     const issues: UntranslatedIssue[] = [];
     for (const key of Object.keys(baseLocale)) {
         const baseVal = baseLocale[key];
         const otherVal = otherLocale[key];
         if (otherVal === undefined) continue;
-        if (otherVal === baseVal && !isAllowed(baseVal)) {
+        if (otherVal === baseVal && !isAllowed(baseVal, key)) {
             issues.push({ kind: 'untranslated', locale: localeCode, key, value: baseVal });
         }
     }

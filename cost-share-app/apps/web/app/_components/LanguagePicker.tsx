@@ -6,11 +6,11 @@ import {
   type Language,
 } from '@cost-share/shared';
 
-interface Props {
+type Props = Readonly<{
   current: Language;
   label: string;
   className?: string;
-}
+}>;
 
 export default function LanguagePicker({ current, label, className }: Props) {
   return (
