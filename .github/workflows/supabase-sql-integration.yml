@@ -17,6 +17,7 @@ concurrency:
 jobs:
   sql-integration:
     name: Supabase SQL tests
+    environment: development
     runs-on: ubuntu-latest
     timeout-minutes: 25
     defaults:
