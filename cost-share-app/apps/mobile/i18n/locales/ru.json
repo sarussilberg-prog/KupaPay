@@ -386,7 +386,10 @@
             "typeExpense": "Расход",
             "typeMessage": "Сообщение",
             "typeSettlement": "Расчёт",
-            "footer": "Создано в KupaPay"
+            "footer": "Создано в KupaPay",
+            "exportCsv": "CSV (бесплатно)",
+            "exportPdf": "Отчёт PDF (Pro)",
+            "exportExcel": "Книга Excel (Pro)"
         },
         "expense": {
             "youLent": "Вы одолжили {{amount}}",
@@ -1108,7 +1111,8 @@
             "feature3": "Плавная работа без прерываний",
             "cta": "Перейти на Pro",
             "skipLink": "Продолжить без Pro"
-        }
+        },
+        "adUnavailableContinue": "Реклама на этом устройстве недоступна. Можно продолжить без просмотра."
     },
     "remind": {
         "sendReminderButton": "Отправить напоминание",
@@ -1180,5 +1184,76 @@
         "netDirectionTheyPayYou": "{{name}} платит вам",
         "netDirectionYouPayThem": "Вы платите: {{name}}",
         "netDirectionThirdParty": "{{from}} → {{to}}"
+    },
+    "pro": {
+        "badge": "Pro",
+        "paywall": {
+            "title": "KupaPay Pro",
+            "feature1": "Без рекламы",
+            "feature2": "Автоконвертация валют для поездок",
+            "feature3": "Аккуратный PDF-отчёт для каждой группы",
+            "planMonthly": "Ежемесячно",
+            "planYearly": "Ежегодно",
+            "planTripPass": "Trip Pass",
+            "yearlyIncludesTripPass": "Включает 1 Trip Pass для группы на время подписки",
+            "tripPassLine": "Trip Pass: Pro для всей группы, 30 дней, без продления — {{price}}",
+            "tripPassNoRenewal": "Разовая покупка. Открывает Pro для всех участников одной группы на 30 дней, затем автоматически завершается без продления.",
+            "renewalDisclosure": "Автопродление по {{price}}/{{period}}, пока не отмените. Отмена в настройках минимум за 24 ч до продления.",
+            "periodMonth": "месяц",
+            "periodYear": "год",
+            "subscribe": "Подписаться",
+            "subscribeAtPrice": "Подписаться — {{price}}",
+            "buyTripPass": "Купить Trip Pass — {{price}}",
+            "restore": "Восстановить покупки",
+            "manageSubscription": "Управление подпиской",
+            "storeNotConfigured": "Покупки недоступны в этой сборке.",
+            "purchaseSuccess": "Добро пожаловать в Pro!",
+            "purchaseError": "Не удалось завершить покупку.",
+            "restoreSuccess": "Покупки восстановлены.",
+            "restoreNone": "Активных покупок не найдено.",
+            "tripPassNeedsGroup": "Сначала откройте группу, чтобы купить для неё Trip Pass.",
+            "tryFreeTrialCta": "Попробовать 7 дней бесплатно",
+            "trialRenewalDisclosure": "Через 7 дней спишется {{price}}/{{period}}. Отмена в любой момент в настройках."
+        },
+        "settings": {
+            "sectionTitle": "KupaPay Pro",
+            "manageSubscription": "Управление подпиской",
+            "freeTrialUntil": "Бесплатный период до {{date}}"
+        },
+        "trialReminder": {
+            "title": "Пробный период KupaPay Pro скоро закончится",
+            "body": "Бесплатный период KupaPay Pro заканчивается через два дня. Не хотите продолжать? Отмените в настройках."
+        },
+        "includedTripPass": {
+            "title": "Trip Pass в подарок",
+            "body": "Годовой Pro включает один Trip Pass. Активируйте Pro для всех участников этой группы на 30 дней.",
+            "cta": "Использовать Trip Pass",
+            "redeemed": "Trip Pass активирован для этой группы.",
+            "inactiveSub": "Нужна активная подписка Pro.",
+            "noCredit": "Trip Pass недоступен.",
+            "error": "Не удалось активировать Trip Pass. Попробуйте снова."
+        },
+        "unassignedTripPass": {
+            "title": "Trip Pass готов к применению",
+            "body": "У вас {{count}} покупок Trip Pass без привязки к группе. Примените одну к этой группе на 30 дней Pro для всех.",
+            "cta": "Применить Trip Pass к группе",
+            "assigned": "Trip Pass применён к этой группе.",
+            "none": "Нет Trip Pass, ожидающих применения.",
+            "error": "Не удалось применить Trip Pass. Попробуйте снова."
+        },
+        "tripCurrency": {
+            "title": "Валюта поездки",
+            "lockedBody": "С Pro можно показать все балансы группы в одной валюте поездки.",
+            "upgrade": "Перейти на Pro",
+            "pickerLabel": "Суммы в {{currency}}",
+            "ratesMissing": "Курсы валют сейчас недоступны.",
+            "row": "{{from}} → {{to}}: {{amount}} {{currency}} (было {{original}})"
+        }
+    },
+    "updateRequired": {
+        "title": "Нужно обновление",
+        "body": "Эта версия KupaPay больше не поддерживается. Установите последнее обновление из магазина, чтобы продолжить.",
+        "versionLine": "Ваша версия: {{current}} · Требуется: {{required}} или новее",
+        "cta": "Открыть магазин"
     }
 }

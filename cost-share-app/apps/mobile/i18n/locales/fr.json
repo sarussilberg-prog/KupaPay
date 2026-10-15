@@ -386,7 +386,10 @@
             "typeExpense": "Dépense",
             "typeMessage": "Message de groupe",
             "typeSettlement": "Remboursement",
-            "footer": "Généré par KupaPay"
+            "footer": "Généré par KupaPay",
+            "exportCsv": "CSV (gratuit)",
+            "exportPdf": "Rapport PDF (Pro)",
+            "exportExcel": "Classeur Excel (Pro)"
         },
         "expense": {
             "youLent": "Vous avez prêté {{amount}}",
@@ -1084,7 +1087,8 @@
             "feature3": "Parcours fluides et ininterrompus",
             "cta": "Passer à Pro",
             "skipLink": "Continuer sans Pro"
-        }
+        },
+        "adUnavailableContinue": "Les publicités ne sont pas disponibles sur cet appareil. Vous pouvez continuer sans les regarder."
     },
     "remind": {
         "sendReminderButton": "Envoyer un rappel",
@@ -1154,5 +1158,76 @@
         "netDirectionTheyPayYou": "{{name}} vous paie",
         "netDirectionYouPayThem": "Vous payez {{name}}",
         "netDirectionThirdParty": "{{from}} paie {{to}}"
+    },
+    "pro": {
+        "badge": "Pro",
+        "paywall": {
+            "title": "KupaPay Pro",
+            "feature1": "Sans publicité",
+            "feature2": "Conversion automatique des devises pour les voyages",
+            "feature3": "Rapport PDF soigné pour chaque groupe",
+            "planMonthly": "Mensuel",
+            "planYearly": "Annuel",
+            "planTripPass": "Trip Pass",
+            "yearlyIncludesTripPass": "Inclut 1 Trip Pass pour un groupe pendant l’abonnement",
+            "tripPassLine": "Trip Pass : Pro pour tout le groupe, 30 jours, sans renouvellement — {{price}}",
+            "tripPassNoRenewal": "Achat unique. Débloque Pro pour tous les membres d’un groupe pendant 30 jours, puis se termine automatiquement sans renouvellement.",
+            "renewalDisclosure": "Renouvellement automatique à {{price}}/{{period}} jusqu’à annulation. Annulez dans Réglages au moins 24 h avant le renouvellement.",
+            "periodMonth": "mois",
+            "periodYear": "an",
+            "subscribe": "S’abonner",
+            "subscribeAtPrice": "S’abonner — {{price}}",
+            "buyTripPass": "Acheter Trip Pass — {{price}}",
+            "restore": "Restaurer les achats",
+            "manageSubscription": "Gérer l’abonnement",
+            "storeNotConfigured": "Les achats ne sont pas disponibles dans cette version.",
+            "purchaseSuccess": "Bienvenue dans Pro !",
+            "purchaseError": "L’achat n’a pas pu aboutir.",
+            "restoreSuccess": "Achats restaurés.",
+            "restoreNone": "Aucun achat actif trouvé.",
+            "tripPassNeedsGroup": "Ouvrez d’abord un groupe pour acheter un Trip Pass pour ce groupe.",
+            "tryFreeTrialCta": "Essai gratuit 7 jours",
+            "trialRenewalDisclosure": "Après 7 jours, {{price}}/{{period}} seront facturés. Annulation possible dans Réglages."
+        },
+        "settings": {
+            "sectionTitle": "KupaPay Pro",
+            "manageSubscription": "Gérer l’abonnement",
+            "freeTrialUntil": "Essai gratuit jusqu’au {{date}}"
+        },
+        "trialReminder": {
+            "title": "Fin prochaine de l’essai KupaPay Pro",
+            "body": "Votre essai gratuit KupaPay Pro se termine dans deux jours. Vous ne souhaitez pas continuer ? Annulez dans Réglages."
+        },
+        "includedTripPass": {
+            "title": "Trip Pass inclus",
+            "body": "Votre abonnement annuel Pro inclut un Trip Pass. Activez Pro pour tous les membres de ce groupe pendant 30 jours.",
+            "cta": "Utiliser le Trip Pass inclus",
+            "redeemed": "Trip Pass activé pour ce groupe.",
+            "inactiveSub": "Un abonnement Pro actif est requis.",
+            "noCredit": "Aucun Trip Pass disponible.",
+            "error": "Impossible d’activer le Trip Pass. Réessayez."
+        },
+        "unassignedTripPass": {
+            "title": "Trip Pass prêt à appliquer",
+            "body": "Vous avez {{count}} achat(s) Trip Pass non liés à un groupe. Appliquez-en un à ce groupe pour 30 jours de Pro pour tous.",
+            "cta": "Appliquer le Trip Pass à ce groupe",
+            "assigned": "Trip Pass appliqué à ce groupe.",
+            "none": "Aucun Trip Pass en attente d’application.",
+            "error": "Impossible d’appliquer le Trip Pass. Réessayez."
+        },
+        "tripCurrency": {
+            "title": "Vue devise du voyage",
+            "lockedBody": "Convertissez tous les soldes du groupe dans une devise de voyage avec Pro.",
+            "upgrade": "Passer à Pro",
+            "pickerLabel": "Montants en {{currency}}",
+            "ratesMissing": "Les taux de change sont indisponibles pour le moment.",
+            "row": "{{from}} → {{to}} : {{amount}} {{currency}} (était {{original}})"
+        }
+    },
+    "updateRequired": {
+        "title": "Mise à jour requise",
+        "body": "Cette version de KupaPay n’est plus prise en charge. Installez la dernière mise à jour depuis le store pour continuer.",
+        "versionLine": "Votre version : {{current}} · Requise : {{required}} ou plus récente",
+        "cta": "Ouvrir le store"
     }
 }

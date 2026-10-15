@@ -34,6 +34,8 @@ export const LOCALE_VALUE_ALLOWLIST_EXACT = new Set([
     'Airbnb',
     'Bit',
     'PayBox',
+    'Trip Pass',
+    'CSV',
 ]);
 
 /** If the entire string matches, allow (e.g. "KupaPay Pro"). */

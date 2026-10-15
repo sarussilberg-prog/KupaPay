@@ -398,7 +398,10 @@
             "typeExpense": "مصروف",
             "typeMessage": "رسالة",
             "typeSettlement": "تسوية",
-            "footer": "أُنشئ بواسطة KupaPay"
+            "footer": "أُنشئ بواسطة KupaPay",
+            "exportCsv": "CSV (مجاني)",
+            "exportPdf": "تقرير PDF (Pro)",
+            "exportExcel": "ملف Excel (Pro)"
         },
         "expense": {
             "youLent": "أقرضتَ {{amount}}",
@@ -1160,7 +1163,8 @@
             "feature3": "مسارات سلسة بلا انقطاع",
             "cta": "الترقية إلى Pro",
             "skipLink": "المتابعة بدون Pro"
-        }
+        },
+        "adUnavailableContinue": "الإعلانات غير متاحة على هذا الجهاز. يمكنك المتابعة دون مشاهدة."
     },
     "remind": {
         "sendReminderButton": "إرسال تذكير",
@@ -1252,5 +1256,76 @@
         "netDirectionTheyPayYou": "{{name}} يدفع لك",
         "netDirectionYouPayThem": "أنت تدفع لـ{{name}}",
         "netDirectionThirdParty": "{{from}} يدفع إلى {{to}}"
+    },
+    "pro": {
+        "badge": "Pro",
+        "paywall": {
+            "title": "KupaPay Pro",
+            "feature1": "بدون إعلانات",
+            "feature2": "تحويل تلقائي للعملات في الرحلات",
+            "feature3": "تقرير PDF منظم لكل مجموعة",
+            "planMonthly": "شهري",
+            "planYearly": "سنوي",
+            "planTripPass": "Trip Pass",
+            "yearlyIncludesTripPass": "يتضمن Trip Pass واحدًا لمجموعة طوال الاشتراك",
+            "tripPassLine": "Trip Pass: Pro للمجموعة بأكملها، 30 يومًا، بدون تجديد — {{price}}",
+            "tripPassNoRenewal": "شراء لمرة واحدة. يفعّل Pro لكل أعضاء مجموعة واحدة لمدة 30 يومًا، ثم ينتهي تلقائيًا دون تجديد.",
+            "renewalDisclosure": "يتجدد تلقائيًا بـ {{price}}/{{period}} حتى الإلغاء. ألغِ من الإعدادات قبل 24 ساعة على الأقل من التجديد.",
+            "periodMonth": "شهر",
+            "periodYear": "سنة",
+            "subscribe": "اشترك",
+            "subscribeAtPrice": "اشترك — {{price}}",
+            "buyTripPass": "شراء Trip Pass — {{price}}",
+            "restore": "استعادة المشتريات",
+            "manageSubscription": "إدارة الاشتراك",
+            "storeNotConfigured": "المشتريات غير متاحة في هذا الإصدار.",
+            "purchaseSuccess": "مرحبًا بك في Pro!",
+            "purchaseError": "تعذّر إتمام الشراء.",
+            "restoreSuccess": "تمت استعادة المشتريات.",
+            "restoreNone": "لم يُعثر على مشتريات نشطة.",
+            "tripPassNeedsGroup": "افتح مجموعة أولًا لشراء Trip Pass لها.",
+            "tryFreeTrialCta": "جرّب 7 أيام مجانًا",
+            "trialRenewalDisclosure": "بعد 7 أيام سيتم خصم {{price}}/{{period}}. يمكنك الإلغاء من الإعدادات."
+        },
+        "settings": {
+            "sectionTitle": "KupaPay Pro",
+            "manageSubscription": "إدارة الاشتراك",
+            "freeTrialUntil": "تجربة مجانية حتى {{date}}"
+        },
+        "trialReminder": {
+            "title": "تجربة KupaPay Pro تنتهي قريبًا",
+            "body": "تنتهي تجربة KupaPay Pro المجانية خلال يومين. لا ترغب في الاستمرار؟ يمكنك الإلغاء من الإعدادات."
+        },
+        "includedTripPass": {
+            "title": "Trip Pass مضمّن",
+            "body": "خطة Pro السنوية تتضمن Trip Pass واحدًا. فعّل Pro لكل أعضاء هذه المجموعة لمدة 30 يومًا.",
+            "cta": "استخدم Trip Pass المضمّن",
+            "redeemed": "تم تفعيل Trip Pass لهذه المجموعة.",
+            "inactiveSub": "يلزم اشتراك Pro نشط.",
+            "noCredit": "لا يوجد رصيد Trip Pass.",
+            "error": "تعذّر تفعيل Trip Pass. حاول مرة أخرى."
+        },
+        "unassignedTripPass": {
+            "title": "Trip Pass جاهز للتطبيق",
+            "body": "لديك {{count}} من مشتريات Trip Pass غير مرتبطة بمجموعة. طبّق واحدة على هذه المجموعة لـ 30 يومًا من Pro للجميع.",
+            "cta": "تطبيق Trip Pass على هذه المجموعة",
+            "assigned": "تم تطبيق Trip Pass على هذه المجموعة.",
+            "none": "لا يوجد Trip Pass بانتظار التطبيق.",
+            "error": "تعذّر تطبيق Trip Pass. حاول مرة أخرى."
+        },
+        "tripCurrency": {
+            "title": "عرض عملة الرحلة",
+            "lockedBody": "حوّل كل أرصدة المجموعة إلى عملة رحلة واحدة مع Pro.",
+            "upgrade": "الترقية إلى Pro",
+            "pickerLabel": "المبالغ بـ {{currency}}",
+            "ratesMissing": "أسعار الصرف غير متاحة حاليًا.",
+            "row": "{{from}} → {{to}}: {{amount}} {{currency}} (كان {{original}})"
+        }
+    },
+    "updateRequired": {
+        "title": "يلزم التحديث",
+        "body": "لم يعد هذا الإصدار من KupaPay مدعومًا. ثبّت آخر تحديث من المتجر للمتابعة.",
+        "versionLine": "إصدارك: {{current}} · المطلوب: {{required}} أو أحدث",
+        "cta": "فتح المتجر"
     }
 }
