@@ -32,18 +32,28 @@ echo "▶ Starting Postgres (${PG_IMAGE}) on port ${PG_PORT}"
 docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 docker run -d --name "$PG_CONTAINER" \
   -e POSTGRES_PASSWORD=postgres \
+  -e JWT_SECRET=ci-local-jwt-secret-at-least-32-chars \
+  -e JWT_EXP=3600 \
   -p "${PG_PORT}:5432" \
   "$PG_IMAGE" >/dev/null
 
-for _ in $(seq 1 60); do
-  if docker exec "$PG_CONTAINER" pg_isready -U postgres -q 2>/dev/null; then
+DB_URL="postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/postgres"
+
+ready=0
+for _ in $(seq 1 90); do
+  if psql "$DB_URL" -c 'SELECT 1' >/dev/null 2>&1; then
+    ready=1
     break
   fi
-  sleep 1
+  sleep 2
 done
-docker exec "$PG_CONTAINER" pg_isready -U postgres -q
-
-DB_URL="postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/postgres"
+if [[ "$ready" -ne 1 ]]; then
+  echo "::group::Postgres container logs"
+  docker logs "$PG_CONTAINER" 2>&1 | tail -80 || true
+  echo "::endgroup::"
+  echo "::error::Postgres did not accept connections on ${PG_PORT}"
+  exit 1
+fi
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
