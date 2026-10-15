@@ -21,7 +21,7 @@ interface GroupSpendingInsightsSheetProps {
     unlocked: boolean;
     onUpgrade: () => void;
     defaultCurrency: string;
-    expenses: ExpenseWithDelta[];
+    expenses: ExpenseWithSplits[];
     memberNames: Record<string, string>;
 }
 
