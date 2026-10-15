@@ -47,7 +47,13 @@ echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} line
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
 head -n "$SCHEMA_CORE_LINES" supabase/schema.sql | psql "$DB_URL" -v ON_ERROR_STOP=1 -f -
 
+# Same order as scripts/supabase-apply-patches.sh (remote dev bootstrap).
 PATCH_FILES=(
+  supabase/fix-rls-group-members-recursion.sql
+  supabase/fix-is-group-member-anon-grants.sql
+  supabase/get-user-dashboard.sql
+  supabase/fix-profiles-account-deactivation.sql
+  supabase/fix-groups-select-creator.sql
   supabase/friends-system.sql
   supabase/group-messages.sql
   supabase/invite-links.sql
