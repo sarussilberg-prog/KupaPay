@@ -47,6 +47,17 @@ echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} line
 # Tail of schema.sql defines archive/admin RPCs that depend on columns from migrations.
 head -n "$SCHEMA_CORE_LINES" supabase/schema.sql | psql "$DB_URL" -v ON_ERROR_STOP=1 -f -
 
+PATCH_FILES=(
+  supabase/friends-system.sql
+  supabase/group-messages.sql
+  supabase/invite-links.sql
+  supabase/legal-documents.sql
+)
+for patch in "${PATCH_FILES[@]}"; do
+  echo "▶ patch — $(basename "$patch")"
+  psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$patch"
+done
+
 echo "▶ Applying incremental migrations"
 supabase migration up --local
 
