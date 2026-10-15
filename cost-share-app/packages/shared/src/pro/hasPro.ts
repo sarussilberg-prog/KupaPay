@@ -28,3 +28,7 @@ export function hasProFromTimestamps(
 export function shouldSkipAdGate(hasPro: boolean, proFeatureEnabled: boolean): boolean {
     return proFeatureEnabled && hasPro;
 }
+
+export function isProPerkUnlocked(hasPro: boolean, proFeatureEnabled: boolean): boolean {
+    return !proFeatureEnabled || hasPro;
+}

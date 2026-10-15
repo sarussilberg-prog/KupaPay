@@ -1153,6 +1153,11 @@
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
+        },
+        "receiptScan": {
+            "scanCta": "Scan receipt (Pro)",
+            "scanCtaLocked": "Scan receipt (Pro) — upgrade",
+            "notConfigured": "Receipt photo saved. OCR is not configured on the server — fill in details manually."
         }
     },
     "remind": {

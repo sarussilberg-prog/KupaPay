@@ -114,6 +114,11 @@ import {
     uiToStoredSplitMode,
 } from '../../lib/expenseSplitForm';
 import { colors } from '../../theme';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { isProPerkUnlocked } from '@cost-share/shared';
+import { scanReceiptImage } from '../../services/receiptScan.service';
+import { showInfoToast } from '../../lib/appToast';
 
 function uiToUnequalMode(mode: UiSplitMode): UnequalSplitMode {
     return mode === 'percent' ? 'percent' : 'amount';
@@ -185,6 +190,11 @@ export function AddExpenseScreen() {
         : undefined;
     const queryClient = useQueryClient();
     const addExpense = useAddExpenseMutation(groupId);
+    const { data: proStatus } = useProStatusQuery(groupId || null);
+    const receiptScanUnlocked = isProPerkUnlocked(
+        proStatus?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
 
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
@@ -507,6 +517,58 @@ export function AddExpenseScreen() {
         );
     }, [selectedMemberIds, splitMode, unequalValues, parsedAmount]);
 
+    const applyReceiptDraft = useCallback(
+        (draft: {
+            amount: number | null;
+            currency: string | null;
+            expenseDate: string | null;
+            merchant: string | null;
+        }) => {
+            if (draft.merchant && !description.trim()) setDescription(draft.merchant);
+            if (draft.amount != null && !amount.trim()) setAmount(String(draft.amount));
+            if (draft.currency && !currency) setCurrency(draft.currency);
+            if (draft.expenseDate) {
+                const parsed = new Date(`${draft.expenseDate}T12:00:00`);
+                if (!Number.isNaN(parsed.getTime())) setDate(parsed);
+            }
+        },
+        [amount, currency, description],
+    );
+
+    const proScanReceipt = useCallback(async () => {
+        if (!receiptScanUnlocked) {
+            navigation.navigate('Paywall', {
+                featureKey: 'receipt_scan',
+                groupId,
+                showTripPass: true,
+            });
+            return;
+        }
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) {
+            platformAlert(
+                t('expenses.receiptPermissionTitle'),
+                t('expenses.receiptCameraPermissionMessage'),
+            );
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            quality: 0.5,
+        });
+        if (result.canceled || !result.assets[0]?.uri) return;
+        const uri = result.assets[0].uri;
+        setLocalReceiptUri(uri);
+        setReceiptRemoved(false);
+        const scan = await scanReceiptImage(uri);
+        if (scan.draft) {
+            applyReceiptDraft(scan.draft);
+        } else if (!scan.configured) {
+            showInfoToast('pro.receiptScan.notConfigured');
+        }
+    }, [applyReceiptDraft, groupId, navigation, receiptScanUnlocked, t]);
+
     const handleReceiptPress = useCallback(() => {
         const takePhoto = async () => {
             const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -549,10 +611,18 @@ export function AddExpenseScreen() {
             { text: t('expenses.takePhoto'), onPress: takePhoto },
             { text: t('expenses.chooseFromLibrary'), onPress: pickFromLibrary },
         ];
+        if (KUPAPAY_PRO_ENABLED) {
+            buttons.unshift({
+                text: receiptScanUnlocked
+                    ? t('pro.receiptScan.scanCta')
+                    : t('pro.receiptScan.scanCtaLocked'),
+                onPress: () => void proScanReceipt(),
+            });
+        }
         if (hasReceipt) buttons.push({ text: t('expenses.removeReceipt'), onPress: removeReceipt, style: 'destructive' });
         buttons.push({ text: t('common.cancel'), style: 'cancel' });
         platformAlert(t('expenses.receipt'), undefined, buttons, { cancelable: true });
-    }, [t, localReceiptUri, receiptUrl, receiptRemoved]);
+    }, [t, localReceiptUri, receiptUrl, receiptRemoved, proScanReceipt, receiptScanUnlocked]);
 
     const handleEditorDone = useCallback((draft: EditPayerSplitDraft) => {
         setPaidBy(draft.payerId);

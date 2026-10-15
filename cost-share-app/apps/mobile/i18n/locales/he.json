@@ -1171,6 +1171,11 @@
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
+        },
+        "receiptScan": {
+            "scanCta": "סריקת קבלה (Pro)",
+            "scanCtaLocked": "סריקת קבלה (Pro) — שדרוג",
+            "notConfigured": "תמונת הקבלה נשמרה. OCR לא מוגדר בשרת — מלא/י פרטים ידנית."
         }
     },
     "remind": {

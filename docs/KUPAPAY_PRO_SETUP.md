@@ -70,6 +70,10 @@ Paywall shows localized price/period from StoreKit via RevenueCat, auto-renew di
 
 When monthly/yearly products include a **7-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
 
+### Receipt OCR (Pro)
+
+See [RECEIPT_OCR.md](RECEIPT_OCR.md). Deploy `receipt-ocr`; optional `RECEIPT_OCR_API_URL` + `RECEIPT_OCR_API_KEY`.
+
 ### Trial reminder cron (server fallback)
 
 Deploy `pro-trial-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRET` as `send-push`):
