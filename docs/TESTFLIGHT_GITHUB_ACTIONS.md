@@ -34,7 +34,7 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 
 ## Version / build number
 
-Marketing version is unchanged. Before build, the workflow syncs EAS remote **iOS buildNumber** with the latest **VALID** build in App Store Connect (when possible), then `production` profile **`autoIncrement`** bumps for the new IPA. No git commits from this workflow.
+Marketing version is unchanged. Before build, `scripts/sync-eas-ios-build-number.mjs` reads the latest **VALID** ASC build `N`, sets EAS remote **iOS buildNumber** to `N` via Expo GraphQL (non-interactive; no deprecated `eas build:version:set -p ios N` positional form), then `production` **`autoIncrement`** produces build **`N + 1`** for the IPA. No git commits from this workflow.
 
 ## EAS environment (production)
 
