@@ -37,13 +37,15 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
 
     if (!visible) return null;
 
-    const formattedDate = query.data
-        ? new Intl.DateTimeFormat(languageToIntlLocale(docLocale === 'he' ? 'he' : 'en'), {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-          }).format(new Date(query.data.effectiveDate))
-        : '';
+    const legalDateLanguage = docLocale === 'he' ? 'he' : 'en';
+    let formattedDate = '';
+    if (query.data) {
+        formattedDate = new Intl.DateTimeFormat(languageToIntlLocale(legalDateLanguage), {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }).format(new Date(query.data.effectiveDate));
+    }
 
     const titleAlign = isRtl ? 'right' : 'left';
 
