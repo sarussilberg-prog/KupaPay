@@ -151,6 +151,7 @@ LOCAL_SKIP=(
   delete_my_account.test.sql
   security_support_admin.test.sql
   group_friend_activity_events.test.sql
+  profile_invite_token_acl.test.sql
 )
 
 ran=0
