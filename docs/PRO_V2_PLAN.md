@@ -1,7 +1,7 @@
 # KupaPay Pro v2 — implementation plan (architecture + quality gates)
 
 **Status:** Draft for owner approval — **no feature implementation until this plan is signed off.**  
-**Last updated:** 2026-10-15  
+**Last updated:** 2026-10-15 (review loops 1–5 applied to Part 1–2)  
 **Scope:** Five Pro v2 features behind `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED`, RevenueCat entitlement `pro`, and group Trip Pass (`group_passes`).  
 **Related:** [PRO_FEATURES_PROPOSAL.md](PRO_FEATURES_PROPOSAL.md), [KUPAPAY_PRO_SETUP.md](KUPAPAY_PRO_SETUP.md), [SSOT/SUPABASE_ENVIRONMENTS.md](SSOT/SUPABASE_ENVIRONMENTS.md)
 
@@ -12,6 +12,8 @@
 Pro v2 adds **trip tooling** (FX view, reminders, insights, budget, receipt OCR) without limiting free-tier splitting. Shipping money-adjacent features requires **quality gates first**: payment webhook hardening, migration safety, RLS/integration tests, staging discipline, E2E purchase smoke, monitoring, and release checklists. **Features are phased only after Phase 0 (gates) is complete.**
 
 Closed exploratory PRs (#128–#132) are superseded by this plan.
+
+This document was stress-tested in **five explicit review loops** (see [Appendix — Review loops 1–5](#appendix--review-loops-15)) against the live repo workflows and target industry practice for **reliability, security, efficiency, scalability, flakiness, and maintainability**.
 
 ---
 
@@ -218,27 +220,60 @@ Load-test analytics RPC on dev with seeded large group before prod.
 - No PII in push metadata beyond existing patterns.
 - Trip Pass: continue webhook idempotency (`revenuecat_webhook_events` pattern).
 
+### 1.9 Reliability, scalability & maintainability (architecture)
+
+| Topic | v2 target (industry-aligned) |
+|-------|------------------------------|
+| **Cron dispatch** | Idempotent daily runs; **batch groups** with `LIMIT`/cursor in RPC (avoid single long transaction); advisory lock or `FOR UPDATE SKIP LOCKED` so overlapping cron invocations do not double-send. |
+| **Pairwise debt SQL** | One internal `*_pairwise_debts_core(group_id)` function; cron, reminders, and member RPC call it — no copy-paste drift (Sonar CPD already excludes migrations; logic duplication still a bug source). |
+| **Budget trigger** | Fire on expense change but **debounce** via `pg_notify` + small worker or evaluate only when `amount/currency/is_deleted` change; document max trigger frequency under bulk import. |
+| **Analytics RPCs** | `SET LOCAL statement_timeout = '5s'` inside RPC; return partial error to client; add composite index `(group_id, currency, is_deleted, expense_date)` if explain plans require. |
+| **Pro status cache** | React Query `staleTime` 2–5 min for `get_my_pro_status`; invalidate on purchase, restore, foreground after paywall — reduces RPC load at scale. |
+| **FX cache** | Keep client 24h cache; document **staleness UX** (“Rates as of …”); optional single edge cache only if Open ER rate limits become measurable. |
+| **OCR** | Max image size (e.g. 2 MB base64); timeout 10s; **queue depth limit** per user/day in edge or DB counter; cold-start acceptable for Pro-only path. |
+| **Activity kinds** | Any new kind requires coordinated change: DB CHECK → `@cost-share/shared` `ActivityEventKind` → `send-push` render + prefs map → mobile activity card routing (checklist in Phase 0). |
+| **Observability** | Structured logs from edge handlers (`event_id`, `group_id`, counts); no raw receipt bytes in logs. |
+
 ---
 
 ## Part 2 — Quality gates (before real payments & Pro v2 users)
 
 **Goal:** No broad Pro v2 rollout until these gates are **defined, automated where possible, and green on `dev` for two consecutive release cycles.**
 
-### 2.1 Current CI/CD audit (as of 2026-10-15)
+### 2.1 Current CI/CD audit (as of 2026-10-15, verified against repo)
 
-| Workflow / check | Trigger | What it does | Gap for Pro v2 |
-|------------------|---------|--------------|----------------|
-| **CI / Lint** | PR → `dev`, `main`, `cursor/**` | `npm run lint` in monorepo | Does not lint Supabase SQL or Deno functions except RC webhook |
-| **CI / Typecheck** | PR | shared + mobile `tsc` | Web app partial; edge functions not in TS gate |
-| **CI / Mobile tests** | PR | Jest unit/component tests | No coverage threshold; no Detox/Maestro |
-| **CI / RevenueCat webhook** | PR | `deno test` in `revenuecat-webhook/` | Other edge functions (send-push, receipt-ocr, crons) **not** in CI |
-| **SonarCloud** | PR (GitHub integration) | Static analysis | Quality gate policy not documented in repo |
-| **Deploy staging** | Push `dev` + migration paths | `supabase db push` → **development** | No automated smoke after push |
-| **Deploy production** | Push `main` + migrations | `supabase-safe-migration-check.sh` then push → **production** | No dry-run against shadow DB; manual dispatch skips compat check |
-| **TestFlight iOS** | `workflow_dispatch` | Local EAS build + ASC upload | Manual; optional `pro_enabled` input; **no automated smoke checklist** |
-| **Vercel previews** | PR | Front-end deploy | Not gating mobile Pro flows |
+#### Workflow inventory
 
-**Branch protection (inferred):** `dev` requires Lint + Mobile tests (+ Sonar); auto-merge job on PRs to `dev`. **`main` merges manual** — appropriate for production.
+| Workflow file | Trigger | Concurrency | Secrets / env | Primary outcome |
+|---------------|---------|-------------|---------------|-----------------|
+| `ci.yml` | PR → `dev`, `main`, `cursor/**` | `cancel-in-progress: true` per PR | `GITHUB_TOKEN`, `ADMIN_PAT` (dev bump) | Lint, typecheck, Jest, RC Deno test; auto-merge to `dev` |
+| `deploy-staging.yml` | Push `dev` (migration paths) | Serialized staging deploy | `SUPABASE_DEV_DB_PASSWORD` | `supabase db push` → development project |
+| `deploy-production.yml` | Push `main` (migration paths) | Serialized prod deploy | GitHub Environment **Production**, `SUPABASE_PROD_DB_PASSWORD` | Safe-migration check → `db push` → production |
+| `testflight-ios.yml` | Manual only | Cancel in progress | ASC + Expo + RC iOS key | Local EAS iOS build + TestFlight submit |
+| `bump-version-main.yml` | Manual only | Serialized | `ADMIN_PAT` | Semver bump on `main` |
+
+**External (not in repo YAML):** SonarCloud analysis on PRs (`sonar-project.properties` excludes migration SQL from CPD); Vercel preview deployments (four projects observed on PRs — web/mobile variants).
+
+#### Job-level findings (reliability, security, efficiency)
+
+| Area | Current behavior | Gap / risk |
+|------|------------------|------------|
+| **Install efficiency** | `lint`, `typecheck`, and `test` are **separate jobs**, each runs full `npm ci` | ~3× install time and cache churn; slower feedback, higher Actions minutes |
+| **Lint scope** | `turbo run lint` — pipeline only defines `lint` for packages; web/mobile lint may be **no-op at root** if tasks empty | False confidence if Turbo runs 0 tasks; needs explicit per-workspace lint or unified job |
+| **Typecheck scope** | `shared` + `mobile` only | Web and **all** `supabase/functions/**` Deno TS not typechecked in CI |
+| **Deno coverage** | Only `revenuecat-webhook/` tested | `send-push`, trial/smart crons, future `receipt-ocr` untested → regression risk on payment/push paths |
+| **Auto-merge vs Sonar** | `auto-merge` `needs:` **does not include** SonarCloud | Comment in workflow mentions Sonar for `dev` pushes, but bot can enable auto-merge before Sonar finishes → **flaky gate** |
+| **Auto-merge vs typecheck** | Included in `needs` | Good |
+| **PR cancel-in-progress** | New push cancels in-flight CI | Saves minutes but causes **red herring** cancellations; re-run confusion |
+| **Migration deploy** | `supabase-ci-db-push.sh` does dry-run repair hint + push; documents past `migration repair` incident | No post-push **`supabase:verify`** or SQL smoke; no automatic rollback |
+| **Safe migration check** | Regex on **new** files only; skipped when `GITHUB_EVENT_BEFORE` empty (manual prod deploy) | Ops bypass path must be rare and logged |
+| **Production gate** | GitHub Environment `Production` on migrate job | Good; validate-migrations job has **no** environment (intentional — no prod secrets) |
+| **TestFlight** | `sync-eas-ios-build-number.mjs \|\| true` | Silent failure can produce **wrong build number** / upload flake |
+| **TestFlight deps** | `npm ci --ignore-scripts` | Faster but skips postinstall integrity hooks — supply-chain tradeoff |
+| **Fork PRs** | CI runs on `cursor/**` | Secrets not exposed to forks, but **untrusted code** runs in CI — limit permissions (already minimal for GITHUB_TOKEN) |
+| **Dev version bump** | `ADMIN_PAT` push bypasses required checks on `dev` | Documented tradeoff for version.json races; PAT rotation + audit required |
+
+**Branch protection (inferred):** `dev` — Lint + Mobile tests required; Sonar often reported on PRs but **not wired into auto-merge**. `main` — manual merge; migration deploy on push.
 
 ### 2.2 Proposed quality gate program
 
@@ -250,7 +285,12 @@ Load-test analytics RPC on dev with seeded large group before prod.
 | Mobile | Component tests for each Pro surface (locked vs unlocked, RTL smoke) |
 | Edge | Deno tests for every edge function handler (inject deps pattern like `pro-trial-reminder-dispatch`) |
 
-**CI change:** Add jobs `deno-test-edge-functions` (matrix: send-push, receipt-ocr, crons) and **coverage report** upload (Jest `--coverage` + minimum threshold — propose **70% lines** on `packages/shared` and `apps/mobile/lib`, ratchet up).
+**CI implementation (efficiency + reliability):**
+
+- **Single `setup` job:** one `npm ci`, upload `node_modules` + turbo cache artifact; downstream lint/typecheck/test **reuse** (or use Turborepo remote cache + `turbo run lint typecheck test --filter=...` in one job with parallel steps).
+- **`deno-test` matrix job** (parallel shards): `revenuecat-webhook`, `send-push`, `pro-trial-reminder-dispatch`, `pro-smart-reminder-dispatch`, `receipt-ocr` — each `deno test --allow-env`; fail fast within shard, not across unrelated functions.
+- **Coverage:** Jest `--coverage` with **70% line** floor on `packages/shared` and `apps/mobile/lib` (ratchet +5% per quarter); upload to Sonar or Codecov for trend only — **do not** block on coverage oscillation until baseline stable.
+- **Flake control:** Jest `--ci` with limited workers; retry **once** only for known timer flakes; ban `waitFor` without `timeout` in new tests.
 
 #### Gate B — Integration tests (Supabase local + RLS)
 
@@ -258,11 +298,12 @@ Load-test analytics RPC on dev with seeded large group before prod.
 
 **Target:**
 
-1. `supabase start` (or linked dev) in CI job on PR when `supabase/migrations/**` changes.
-2. Apply migrations + run SQL tests via `supabase db test` or psql runner script.
+1. **Path-filtered job** `supabase-integration` — runs only when `cost-share-app/supabase/migrations/**`, `functions/**`, or `__tests__/**` change (saves ~8–12 min on UI-only PRs).
+2. Use `supabase start` + `supabase db reset` locally in CI (pin CLI version to match `config.toml`); apply migrations + run all `supabase/__tests__/*.test.sql` via scripted psql or `supabase test db`.
 3. **RLS suites** for new Pro RPCs: non-member denied, member without Pro denied on setters, member with Pro allowed, service_role cron allowed.
+4. Post-deploy on **staging** (dev project): run same SQL suite + `npm run supabase:verify` against linked dev after `deploy-staging` (new job `needs: supabase-migrations`).
 
-**Acceptance:** Migration PR cannot merge without green SQL integration job.
+**Acceptance:** Migration PR cannot merge without green SQL integration job; staging deploy cannot complete without verify step green.
 
 #### Gate C — Payment webhook contract tests
 
@@ -285,7 +326,7 @@ Load-test analytics RPC on dev with seeded large group before prod.
 
 Detox alternative if team prefers JS driver — pick **one** tool to avoid duplication.
 
-**CI:** Nightly on `dev` (macOS runner or Maestro Cloud); not necessarily every PR due to cost.
+**CI:** Scheduled workflow `e2e-pro-sandbox.yml` — cron `0 4 * * *` on `dev` (Maestro Cloud or self-hosted macOS); **concurrency 1** to avoid ASC/RC rate limits; upload artifacts (video + logs). PRs: run **smoke subset** only when `apps/mobile/**` and label `e2e` present (cost control).
 
 #### Gate E — Migration safety
 
@@ -299,7 +340,9 @@ Detox alternative if team prefers JS driver — pick **one** tool to avoid dupli
 | **Dry-run report** | Post PR comment with tables/columns added, new RPCs, new activity kinds |
 | **Rollback plan** | Each Pro migration PR includes markdown rollback (drop trigger → drop RPC → drop columns) — forward-only preferred; document data loss |
 
-**Manual dispatch warning:** Document that `workflow_dispatch` skips “new files” detection when `GITHUB_EVENT_BEFORE` empty.
+**Manual dispatch warning:** Document that `workflow_dispatch` skips “new files” detection when `GITHUB_EVENT_BEFORE` empty — **require** explicit `MIGRATION_FILES` input or run full safe-check against all pending migrations when dispatching prod deploy.
+
+**Prod shadow DB (weekly):** Supabase **branch** or pg_dump schema-only from prod → ephemeral DB → apply `dev` migration delta → run SQL integration suite; store log artifact 30 days.
 
 #### Gate F — Staging environment
 
@@ -319,7 +362,7 @@ Detox alternative if team prefers JS driver — pick **one** tool to avoid dupli
 - Require PR review from owner for migration + payment touches.
 - Block force-push.
 
-**For `dev`:** Keep auto-merge but add SQL integration when migrations change.
+**For `dev`:** Auto-merge `needs` must include **SonarCloud** (quality gate passed) and `supabase-integration` when migration paths change; use `gh pr merge --auto` only after required checks (or switch to merge queue if GitHub plan allows).
 
 #### Gate H — Coverage & Sonar
 
@@ -363,6 +406,49 @@ Attach checklist to TestFlight workflow artifact or `docs/TESTFLIGHT_GITHUB_ACTI
 5. **Communicate:** In-app banner if widespread; App Store refund policy link.  
 6. **Post-mortem:** Update `KNOWN_ISSUES.md` + test fixture.
 
+### 2.3 Target CI/CD architecture (industry-standard end state)
+
+```mermaid
+flowchart LR
+  subgraph pr [Pull request]
+    PATH[path filters]
+    SETUP[npm ci once]
+    PARALLEL[lint + typecheck + test + deno matrix]
+    SQL[supabase integration]
+    SONAR[SonarCloud]
+  end
+  subgraph dev_branch [Merge to dev]
+    STG[deploy-staging migrations]
+    VERIFY[supabase verify + SQL smoke]
+  end
+  subgraph main_branch [Merge to main]
+    SAFE[safe-migration-check]
+    PROD[deploy-production]
+    SHADOW[weekly shadow apply]
+  end
+  subgraph release [Release]
+    TF[TestFlight manual + checklist]
+    E2E[nightly Maestro RC sandbox]
+  end
+  PATH --> SETUP --> PARALLEL
+  PARALLEL --> SQL
+  PARALLEL --> SONAR
+  SONAR --> dev_branch
+  STG --> VERIFY
+  SAFE --> PROD
+  PROD --> SHADOW
+  VERIFY --> TF
+  E2E --> TF
+```
+
+| Principle | Target |
+|-----------|--------|
+| **Speed** | Median PR feedback < 12 min (p95 < 20 min) via single install + path filters + parallel Deno matrix |
+| **Reliability** | No auto-merge until **all** required checks green; staging verify catches migration drift |
+| **Security** | Production deploy only via Environment; rotate `ADMIN_PAT`; separate webhook secrets per cron optional; Dependabot + `npm audit` advisory job |
+| **Cost** | E2E nightly not per-PR; Supabase CI only on DB paths; Vercel previews unchanged (advisory) |
+| **Maintainability** | `CODEOWNERS` for `supabase/migrations`, `supabase/functions`, `.github/workflows`; one `scripts/ci-deno-test-all.sh` entry point |
+
 ---
 
 ## Part 3 — Phased milestones (quality first)
@@ -371,13 +457,17 @@ Attach checklist to TestFlight workflow artifact or `docs/TESTFLIGHT_GITHUB_ACTI
 
 **Acceptance criteria:**
 
+- [ ] **CI efficiency:** Single-install workflow (or measured ≥40% reduction in total `npm ci` time vs baseline).
+- [ ] **Auto-merge integrity:** `dev` auto-merge waits for SonarCloud + typecheck + SQL job when applicable.
 - [ ] SQL integration tests run in CI on migration changes; all existing `supabase/__tests__` included.
-- [ ] Deno tests for `send-push`, `revenuecat-webhook`, and template for new edges documented.
-- [ ] Webhook contract test suite covers idempotency + Trip Pass.
-- [ ] Documented TestFlight smoke checklist executed once on `dev`.
-- [ ] Sentry release tracking wired for mobile production builds.
-- [ ] Owner sign-off on branch protections and Sonar gate.
-- [ ] Shadow migration dry-run procedure documented and executed once.
+- [ ] Deno matrix covers `send-push`, `revenuecat-webhook`, and template for all new Pro edge functions.
+- [ ] Webhook contract test suite covers idempotency + Trip Pass + invalid auth.
+- [ ] Staging deploy runs `supabase:verify` + SQL smoke post-push.
+- [ ] Documented TestFlight smoke checklist executed once on `dev`; remove `\|\| true` from build-number sync or fail loudly.
+- [ ] Sentry release tracking wired for mobile production builds; edge function error sampling enabled.
+- [ ] Owner sign-off on branch protections and Sonar quality gate policy (documented in SSOT).
+- [ ] Shadow migration dry-run executed once with logged artifact.
+- [ ] `CODEOWNERS` + activity-kind change checklist merged.
 
 **No Pro v2 feature code merges to `main` until Phase 0 sign-off.**
 
@@ -458,7 +548,10 @@ Attach checklist to TestFlight workflow artifact or `docs/TESTFLIGHT_GITHUB_ACTI
 | **OCR cost / abuse** | Bill shock | Pro gate, rate limits, optional provider |
 | **Analytics on large groups** | Slow screens | SQL aggregation, indexes, pagination |
 | **Migration on prod** | Old app breakage | safe-migration-check + shadow DB |
-| **Sonar / Vercel noise** | Blocked merges | Clarify required checks vs advisory |
+| **Sonar / Vercel noise** | Blocked merges | Sonar required on `dev`; Vercel advisory only |
+| **Auto-merge race** | Merge before Sonar/SQL | Fix `needs` graph + merge queue |
+| **CI cost / slow feedback** | Owner frustration | Path filters + single install |
+| **Cron duplicate sends** | Spam / trust | Advisory locks + idempotent RPC |
 | **Duplicate `isProPerkUnlocked` across PRs** | Merge conflicts | Single shared PR first in Phase 1 |
 
 ### Open questions (owner / Naveh)
@@ -472,7 +565,96 @@ Attach checklist to TestFlight workflow artifact or `docs/TESTFLIGHT_GITHUB_ACTI
 7. **Coverage threshold:** Agree on 70% vs 80% for gate enforcement.  
 8. **Maestro vs Detox:** Tool choice and cloud budget.  
 9. **Trip Pass pricing:** Still TBD in store — blocks marketing copy finalization.  
-10. **Phase 0 deadline:** Target sign-off date to start Phase 1 implementation?
+10. **Phase 0 deadline:** Target sign-off date to start Phase 1 implementation?  
+11. **Merge queue:** Enable GitHub merge queue on `dev` vs PAT auto-merge?  
+12. **Separate cron secrets:** Single `PUSH_WEBHOOK_SECRET` vs per-function rotation?
+
+---
+
+## Appendix — Review loops 1–5
+
+Each loop re-read **Part 1 (architecture)** and **Part 2 (CI/CD)** against the repo (`.github/workflows/*`, `scripts/supabase-*.sh`, `sonar-project.properties`) and updated the plan.
+
+### Review loop 1 — Reliability & flakiness
+
+**Findings**
+
+- Auto-merge does not wait for SonarCloud → merges can land with quality gate failing.
+- CI `cancel-in-progress: true` aborts runs on every push → noisy failures.
+- TestFlight build-number sync uses `|| true` → silent mis-versioning.
+- Migration deploy has no post-push schema verify → historical `migration repair` class of bugs can recur silently.
+- Budget trigger design could fire excessively on bulk expense edits.
+
+**Changes made**
+
+- Documented auto-merge / Sonar gap; Phase 0 requires fixing `needs` graph.
+- Added staging post-deploy `supabase:verify` + SQL smoke.
+- Phase 0: fail-loud build-number sync; cron RPC batching + advisory locks in §1.9.
+- Recommended merge queue or Sonar in `needs` for `dev`.
+
+### Review loop 2 — Security
+
+**Findings**
+
+- `ADMIN_PAT` bypasses branch protection for version bumps — high privilege.
+- Shared `PUSH_WEBHOOK_SECRET` across multiple crons — blast radius if leaked.
+- Production deploy correctly uses GitHub Environment; validate job stays secretless.
+- `cursor/**` PRs run CI on potentially untrusted code — keep minimal `permissions`.
+- OCR edge must enforce auth, size limits, and per-user quotas.
+
+**Changes made**
+
+- Gate J/K expanded; OCR security in §1.9; optional per-function cron secrets in open questions.
+- Phase 0: PAT rotation policy; Dependabot/advisory job in §2.3.
+- Webhook contract tests must include invalid auth (Gate C).
+
+### Review loop 3 — Efficiency, speed & cost
+
+**Findings**
+
+- Triple `npm ci` on every PR dominates wall-clock and Actions minutes.
+- Supabase local CI expensive — must be path-filtered.
+- Full E2E on every PR is cost-prohibitive; nightly + label-gated is standard.
+- Turbo lint may execute zero tasks — wasted job.
+- Four Vercel previews per PR add noise (not mobile Pro relevant).
+
+**Changes made**
+
+- Gate A: single-install / Turborepo pattern; Deno parallel matrix.
+- Gate B: path filters; Gate D: nightly + optional `e2e` label.
+- §2.3 SLO: median PR feedback < 12 min.
+- Audit table notes Turbo lint no-op risk — Phase 0 fix.
+
+### Review loop 4 — Scalability (architecture)
+
+**Findings**
+
+- Full-table cron scans over all groups will not scale.
+- Client-side analytics aggregation does not scale; SQL RPCs required.
+- Duplicate pairwise-debt SQL across RPCs is a maintenance and correctness hazard.
+- Pro status refetch on every screen focus could amplify RPC load.
+
+**Changes made**
+
+- §1.9: batched cron, shared debt core function, statement timeouts, Pro cache staleTime.
+- Analytics materialized view trigger only if load test fails (clearer escalation path).
+- Index recommendation documented.
+
+### Review loop 5 — Maintainability & industry alignment
+
+**Findings**
+
+- Edge functions lack unified test entry script — drift likely as Pro adds crons/OCR.
+- New activity kinds touch 4+ layers — easy to miss send-push or mobile routing.
+- Workflow inventory was incomplete in v1 draft (bump-version, concurrency, secrets).
+- Phase 0 acceptance criteria were not measurable.
+
+**Changes made**
+
+- Full workflow inventory table (§2.1).
+- §2.3 target diagram + `CODEOWNERS` + `ci-deno-test-all.sh`.
+- Activity-kind coordination checklist in §1.9.
+- Phase 0 criteria made measurable (CI time reduction, explicit checks).
 
 ---
 
