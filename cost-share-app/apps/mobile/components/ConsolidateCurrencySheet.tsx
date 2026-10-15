@@ -43,6 +43,7 @@ export interface ConsolidationSettleData {
 
 interface ConsolidateCurrencySheetProps {
     visible: boolean;
+    groupId: string;
     pair: ConsolidatePair | null;
     currentUserId: string;
     memberMap: Record<string, GroupMemberLite>;
@@ -60,6 +61,7 @@ function debtSign(debt: PairwiseDebt, refUserId: string): 1 | -1 {
 
 export function ConsolidateCurrencySheet({
     visible,
+    groupId,
     pair,
     currentUserId,
     memberMap,
@@ -244,6 +246,7 @@ export function ConsolidateCurrencySheet({
                     key={openSeq}
                     active={visible}
                     featureKey="consolidate_currency"
+                    groupId={groupId}
                     onCompleted={handleGateCompleted}
                 />
             )}

@@ -30,6 +30,7 @@
     "prebuild:clean": "npm run prebuild:clean -w @cost-share/mobile",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "typecheck": "npm run typecheck -w @cost-share/shared && npm run typecheck -w @cost-share/mobile",
     "clean": "turbo run clean",
     "mobile": "cd apps/mobile && npm start",
     "web": "cd apps/web && npm run dev",

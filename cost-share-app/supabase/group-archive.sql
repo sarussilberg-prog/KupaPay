@@ -211,7 +211,8 @@ CREATE TRIGGER clear_archive_on_settlement
 -- ---------------------------------------------------------------------------
 
 -- archive_group: insert a row only if the caller's net is zero across all
--- currencies the group uses. Throws 'has_balance' otherwise.
+-- currencies the group uses (canonical get_user_simplified_inputs, 0.01 tol).
+-- Throws 'has_balance' otherwise.
 CREATE OR REPLACE FUNCTION archive_group(p_group_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -220,6 +221,7 @@ SET search_path = public
 AS $$
 DECLARE
     v_user_id UUID := auth.uid();
+    v_payload JSONB;
     v_open_balance BOOLEAN;
 BEGIN
     IF v_user_id IS NULL THEN
@@ -230,48 +232,17 @@ BEGIN
         RAISE EXCEPTION 'not_a_member';
     END IF;
 
-    WITH
-    paid AS (
-        SELECT currency, SUM(amount) AS amount FROM expenses
-         WHERE group_id = p_group_id AND paid_by = v_user_id AND is_deleted = FALSE
-         GROUP BY currency
-    ),
-    owed AS (
-        SELECT e.currency, SUM(es.amount) AS amount
-          FROM expense_splits es
-          JOIN expenses e ON e.id = es.expense_id
-         WHERE e.group_id = p_group_id
-           AND es.user_id = v_user_id
-           AND e.is_deleted = FALSE
-         GROUP BY e.currency
-    ),
-    settled_in AS (
-        SELECT currency, SUM(amount) AS amount FROM settlements
-         WHERE group_id = p_group_id AND to_user_id = v_user_id AND deleted_at IS NULL
-         GROUP BY currency
-    ),
-    settled_out AS (
-        SELECT currency, SUM(amount) AS amount FROM settlements
-         WHERE group_id = p_group_id AND from_user_id = v_user_id AND deleted_at IS NULL
-         GROUP BY currency
-    ),
-    all_currencies AS (
-        SELECT currency FROM paid
-        UNION SELECT currency FROM owed
-        UNION SELECT currency FROM settled_in
-        UNION SELECT currency FROM settled_out
-    ),
-    per_currency AS (
-        SELECT ac.currency,
-            COALESCE(p.amount, 0) - COALESCE(o.amount, 0)
-              + COALESCE(si.amount, 0) - COALESCE(so.amount, 0) AS net
-        FROM all_currencies ac
-        LEFT JOIN paid p USING (currency)
-        LEFT JOIN owed o USING (currency)
-        LEFT JOIN settled_in si USING (currency)
-        LEFT JOIN settled_out so USING (currency)
+    v_payload := public.get_user_simplified_inputs(v_user_id);
+
+    SELECT EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(v_payload->'groups') g,
+             jsonb_array_elements(g->'currencies') c,
+             jsonb_array_elements(c->'nets') n
+        WHERE g->>'groupId' = p_group_id::text
+          AND n->>'userId' = v_user_id::text
+          AND ABS((n->>'net')::numeric) >= 0.01
     )
-    SELECT EXISTS (SELECT 1 FROM per_currency WHERE ABS(net) >= 0.01)
     INTO v_open_balance;
 
     IF v_open_balance THEN

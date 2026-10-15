@@ -42,7 +42,12 @@ describe('hydrateCurrentUserProfile', () => {
     beforeEach(() => {
         mockMaybeSingle.mockReset();
         mockRpc.mockReset();
-        mockRpc.mockResolvedValue({ data: false, error: null });  // default: non-admin
+        mockRpc.mockImplementation((fn: string) => {
+            if (fn === 'get_my_invite_token') {
+                return Promise.resolve({ data: 'invite123456', error: null });
+            }
+            return Promise.resolve({ data: false, error: null }); // is_app_admin
+        });
         mockClearLocalAuthSession.mockClear();
         mockSetCurrentUser.mockClear();
     });

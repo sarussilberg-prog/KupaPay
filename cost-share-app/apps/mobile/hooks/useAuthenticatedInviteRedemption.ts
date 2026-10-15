@@ -12,6 +12,7 @@ import {
     handleInviteLink,
 } from '../services/deepLinks.service';
 import { isAuthCallbackUrl } from '../services/auth.service';
+import { clearPersistedPendingInvite } from '../lib/pendingInviteStorage';
 
 type Options = {
     /** Called after a group invite is redeemed (user now has a group). */
@@ -44,6 +45,7 @@ export function useAuthenticatedInviteRedemption({ onGroupRedeemed }: Options = 
             })
             .finally(() => {
                 setPendingInvite(null);
+                void clearPersistedPendingInvite();
             });
     }, [session, pendingInvite, queryClient, setPendingInvite, onGroupRedeemed]);
 }

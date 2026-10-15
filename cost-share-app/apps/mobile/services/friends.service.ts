@@ -64,7 +64,7 @@ export async function fetchFriends(): Promise<User[]> {
 
     const { data: profiles, error: pErr } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, name, phone, avatar_url, default_currency, language, is_active, created_at, updated_at')
         .in('id', uniqueIds);
     if (pErr) {
         console.error('fetchFriends profile lookup failed:', pErr);
@@ -82,7 +82,10 @@ export async function fetchFriends(): Promise<User[]> {
 
 async function fetchProfilesByIds(ids: string[]): Promise<Map<string, User>> {
     if (ids.length === 0) return new Map();
-    const { data, error } = await supabase.from('profiles').select('*').in('id', ids);
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, name, phone, avatar_url, default_currency, language, is_active, created_at, updated_at')
+        .in('id', ids);
     if (error) {
         console.error('fetchProfilesByIds failed:', error);
         return new Map();

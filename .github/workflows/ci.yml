@@ -2,15 +2,15 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev, main]
+    branches: [dev, main, 'cursor/**']
 
 concurrency:
   group: ci-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  setup:
+    name: Install dependencies
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,10 +23,54 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - run: npm ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+          if-no-files-found: error
+          retention-days: 1
+
+  lint:
+    name: Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/turbo || npm ci
       - run: npm run lint
+
+  typecheck:
+    name: Typecheck
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/tsc || npm ci
+      - run: npm run typecheck
 
   test:
     name: Mobile tests
+    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,14 +80,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: cost-share-app/package-lock.json
-      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/jest || npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
+
+  revenuecat-webhook:
+    name: RevenueCat webhook (Deno)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app/supabase/functions/revenuecat-webhook
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: v2.x
+      - run: deno test --allow-env
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, test]
+    needs: [lint, typecheck, test, revenuecat-webhook]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest

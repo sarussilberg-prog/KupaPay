@@ -40,6 +40,7 @@ import { formatAmountDecimal } from '../lib/currencyDisplay';
 import { useAppLanguage, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { shadows } from '../theme/shadows';
+import { useExpenseReceiptDisplayUrl } from '../hooks/useExpenseReceiptDisplayUrl';
 
 const categoryIcon: Record<string, AppIconName> = {
     food: 'restaurant-outline',
@@ -708,6 +709,7 @@ function ExpenseHero({
     heroDate: string;
 }) {
     const { t } = useTranslation();
+    const receiptDisplayUrl = useExpenseReceiptDisplayUrl(expense.receiptUrl);
     const perspective = resolveExpenseFeedPerspective(expense, currentUserId);
     const flowCaption =
         splitMembers.length > 0
@@ -838,10 +840,10 @@ function ExpenseHero({
                 style={{ height: 196, position: 'relative' }}
                 testID="expense-detail-hero"
             >
-                {expense.receiptUrl ? (
+                {receiptDisplayUrl ? (
                     <>
                         <Image
-                            source={{ uri: expense.receiptUrl }}
+                            source={{ uri: receiptDisplayUrl }}
                             style={StyleSheet.absoluteFill}
                             resizeMode="cover"
                         />

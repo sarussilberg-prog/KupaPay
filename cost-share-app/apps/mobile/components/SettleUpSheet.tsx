@@ -680,10 +680,10 @@ const heroStyles = StyleSheet.create({
         flexGrow: 0,
         flexShrink: 0,
         flexBasis: 'auto',
-        display: 'inline-flex',
-        width: 'max-content',
+        display: 'inline-flex' as 'flex',
+        width: 'max-content' as `${number}%`,
         maxWidth: '100%',
-    } as const,
+    },
     amountText: {
         color: '#FFFFFF',
         fontSize: AMOUNT_FONT_SIZE,
@@ -698,15 +698,15 @@ const heroStyles = StyleSheet.create({
     },
     /** Web: pill chrome on the text itself so width tracks glyphs. */
     amountTextWeb: {
-        display: 'inline-block',
-        width: 'max-content',
+        display: 'inline-block' as 'flex',
+        width: 'max-content' as `${number}%`,
         maxWidth: '100%',
         paddingHorizontal: AMOUNT_BOX_PAD_X,
         paddingVertical: 4,
         borderRadius: 12,
         overflow: 'hidden',
         boxSizing: 'border-box',
-    } as const,
+    },
     /** Invisible editor — absolute so it cannot expand layout. */
     amountInputOverlayWeb: {
         position: 'absolute',
@@ -719,8 +719,7 @@ const heroStyles = StyleSheet.create({
         borderWidth: 0,
         backgroundColor: 'transparent',
         color: 'transparent',
-        caretColor: '#FFFFFF',
-        outlineStyle: 'none',
+        outlineStyle: 'none' as 'solid',
         fontSize: AMOUNT_FONT_SIZE,
         fontWeight: '700',
         fontVariant: ['tabular-nums'],
@@ -729,7 +728,7 @@ const heroStyles = StyleSheet.create({
         width: '100%',
         height: '100%',
         boxSizing: 'border-box',
-    } as const,
+    },
     amountBoxEditable: {
         backgroundColor: 'rgba(255,255,255,0.14)',
         borderWidth: 1,

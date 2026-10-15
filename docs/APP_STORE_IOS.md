@@ -100,6 +100,8 @@ eas build -p ios --profile production
 # Complete Apple login (sarussilberg@gmail.com) + 2FA when prompted.
 ```
 
+**Source maps (Sentry):** Production/TestFlight builds upload JS source maps when `SENTRY_AUTH_TOKEN` is available (GitHub Actions: see [TESTFLIGHT_GITHUB_ACTIONS.md](TESTFLIGHT_GITHUB_ACTIONS.md); EAS: project secret with the same name). Without a token, `app.config.ts` sets `SENTRY_DISABLE_AUTO_UPLOAD=true` and the build still succeeds.
+
 After the first interactive build, credentials persist on EAS and later builds can run non-interactively.
 
 > Env: production `EXPO_PUBLIC_*` vars are injected from the EAS "production" environment (synced via `bash scripts/eas-sync-secrets.sh .env.production`). The build log line "No environment variables with visibility Plain text/Sensitive found" is expected — the secret-visibility vars are still injected.
@@ -107,6 +109,10 @@ After the first interactive build, credentials persist on EAS and later builds c
 ---
 
 ## 3. Submit to TestFlight
+
+**CI (recommended for repeat uploads):** manual GitHub Actions workflow — see [TESTFLIGHT_GITHUB_ACTIONS.md](TESTFLIGHT_GITHUB_ACTIONS.md).
+
+**Local:**
 
 ```bash
 cd cost-share-app/apps/mobile

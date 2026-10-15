@@ -69,6 +69,7 @@ async function uploadImageToBucket(
     path: string,
     localUri: string,
     logLabel: string,
+    returnMode: 'publicUrl' | 'path' = 'publicUrl',
 ): Promise<string | null> {
     try {
         const { bytes, contentType } = await readLocalImageBytes(localUri);
@@ -82,6 +83,9 @@ async function uploadImageToBucket(
             return null;
         }
 
+        if (returnMode === 'path') {
+            return path;
+        }
         const { data } = supabase.storage.from(bucket).getPublicUrl(path);
         return `${data.publicUrl}?t=${Date.now()}`;
     } catch (err) {
@@ -129,5 +133,6 @@ export async function uploadExpenseReceipt(
         `${groupId}/${filename}`,
         localUri,
         'expense receipt',
+        'path',
     );
 }

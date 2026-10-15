@@ -6,7 +6,7 @@
 -- as part of a "convert all currencies" consolidation operation.
 -- ============================================
 
-CREATE TABLE consolidation_batches (
+CREATE TABLE IF NOT EXISTS consolidation_batches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
     paid_by_user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
@@ -16,16 +16,17 @@ CREATE TABLE consolidation_batches (
     deleted_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_consolidation_batches_group ON consolidation_batches(group_id);
-CREATE INDEX idx_consolidation_batches_paid_by ON consolidation_batches(paid_by_user_id);
-CREATE INDEX idx_consolidation_batches_active ON consolidation_batches(group_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_consolidation_batches_group ON consolidation_batches(group_id);
+CREATE INDEX IF NOT EXISTS idx_consolidation_batches_paid_by ON consolidation_batches(paid_by_user_id);
+CREATE INDEX IF NOT EXISTS idx_consolidation_batches_active ON consolidation_batches(group_id) WHERE deleted_at IS NULL;
 
 -- Add consolidation columns to settlements
 ALTER TABLE settlements
-    ADD COLUMN consolidation_batch_id UUID REFERENCES consolidation_batches(id) ON DELETE SET NULL,
-    ADD COLUMN exchange_rate DECIMAL(18, 8);
+    ADD COLUMN IF NOT EXISTS consolidation_batch_id UUID REFERENCES consolidation_batches(id) ON DELETE SET NULL;
+ALTER TABLE settlements
+    ADD COLUMN IF NOT EXISTS exchange_rate DECIMAL(18, 8);
 
-CREATE INDEX idx_settlements_batch ON settlements(consolidation_batch_id)
+CREATE INDEX IF NOT EXISTS idx_settlements_batch ON settlements(consolidation_batch_id)
     WHERE consolidation_batch_id IS NOT NULL;
 
 -- ============================================
@@ -131,6 +132,7 @@ GRANT EXECUTE ON FUNCTION delete_consolidation_batch TO authenticated;
 
 ALTER TABLE consolidation_batches ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Members can view active batches in their groups" ON consolidation_batches;
 CREATE POLICY "Members can view active batches in their groups"
     ON consolidation_batches FOR SELECT
     USING (
@@ -219,6 +221,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS after_consolidation_batch_insert ON consolidation_batches;
 CREATE TRIGGER after_consolidation_batch_insert
     AFTER INSERT ON consolidation_batches
     FOR EACH ROW EXECUTE FUNCTION handle_consolidation_batch_activity_event();

@@ -94,6 +94,7 @@ import {
     updateExpense,
 } from '../../services/expenses.service';
 import { uploadExpenseReceipt } from '../../services/storage.service';
+import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
 import { handleError } from '../../lib/handleError';
 import { resolveGroupMemberUsers } from '../../lib/groupMemberUsers';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
@@ -207,6 +208,9 @@ export function AddExpenseScreen() {
     const [localReceiptUri, setLocalReceiptUri] = useState<string | null>(null);
     const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
     const [receiptRemoved, setReceiptRemoved] = useState(false);
+    const persistedReceiptDisplayUrl = useExpenseReceiptDisplayUrl(
+        localReceiptUri || receiptRemoved ? null : receiptUrl,
+    );
     const [date, setDate] = useState<Date>(new Date());
     const [editorVisible, setEditorVisible] = useState(false);
     const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
@@ -1066,7 +1070,7 @@ export function AddExpenseScreen() {
                     />
                     {hasReceipt && (localReceiptUri || receiptUrl) ? (
                         <ReceiptThumbnail
-                            uri={localReceiptUri ?? receiptUrl ?? null}
+                            uri={localReceiptUri ?? persistedReceiptDisplayUrl ?? null}
                             onPress={handleReceiptPress}
                         />
                     ) : null}

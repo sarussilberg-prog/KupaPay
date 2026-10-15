@@ -40,8 +40,24 @@ import { useAppRealtime } from './hooks/useAppRealtime';
 import { useBootWatchdog } from './hooks/useBootWatchdog';
 import { colors } from './theme';
 import { RtlLayoutProvider } from './hooks/useRtlLayout';
+import {
+    captureProductEvent,
+    identifyProductUser,
+    isNewAccountSignup,
+    resetProductAnalyticsUser,
+} from './lib/productAnalytics';
+import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
+import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
+import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
+import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
+import { configureRewardedAdsSdk } from './lib/configureRewardedAdsSdk';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
+import { UpdateRequiredScreen } from './screens/UpdateRequiredScreen';
+import {
+    evaluateMinimumAppVersion,
+    type AppClientConfig,
+} from './services/appClientConfig.service';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
 
@@ -74,8 +90,10 @@ function WebFrame({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const appOpenedSentRef = React.useRef(false);
   const [isReady, setIsReady] = useState(false);
   const [preOnboardingDone, setPreOnboardingDone] = useState<boolean | null>(null);
+  const [forcedUpdateConfig, setForcedUpdateConfig] = useState<AppClientConfig | null>(null);
   const session = useAppStore((s) => s.session);
   const setSession = useAppStore((s) => s.setSession);
   const currentUser = useAppStore((s) => s.currentUser);
@@ -90,7 +108,55 @@ function App() {
   }, [currentUser]);
 
   useEffect(() => {
+    const user = session?.user;
+    if (!user?.id) return;
+    void identifyProductUser(user.id);
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (!isReady || !session || appOpenedSentRef.current) return;
+    appOpenedSentRef.current = true;
+    void captureProductEvent('app_open');
+  }, [isReady, session]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    void recordAppLaunchForStoreReview();
+  }, [isReady]);
+
+  const setPendingInvite = useAppStore((s) => s.setPendingInvite);
+
+  useEffect(() => {
+    if (session || !incomingUrl) return;
+    void capturePreAuthInvite(incomingUrl, setPendingInvite);
+  }, [incomingUrl, session, setPendingInvite]);
+
+  useEffect(() => {
+    if (session) return;
+    let cancelled = false;
+    void Linking.getInitialURL().then((url) => {
+      if (cancelled || !url) return;
+      void capturePreAuthInvite(url, setPendingInvite);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session, setPendingInvite]);
+
+  useEffect(() => {
     if (currentUserId) void syncPushRegistrationOnSignIn();
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    void import('./services/purchases.service').then(({ configurePurchasesForUser }) =>
+      configurePurchasesForUser(currentUserId),
+    );
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (currentUserId) return;
+    void import('./services/purchases.service').then(({ logOutPurchases }) => logOutPurchases());
   }, [currentUserId]);
 
   useEffect(() => {
@@ -163,8 +229,17 @@ function App() {
       };
 
       try {
-        configureNativeGoogleSignIn();
         await initializeLanguage();
+
+        const versionGate = await evaluateMinimumAppVersion();
+        if (!mounted) return;
+        if (versionGate.status === 'update_required') {
+          setForcedUpdateConfig(versionGate.config);
+          return;
+        }
+
+        configureNativeGoogleSignIn();
+        await configureRewardedAdsSdk();
         const preDone = await hasCompletedPreLoginOnboarding();
         if (mounted) setPreOnboardingDone(preDone);
 
@@ -180,6 +255,11 @@ function App() {
         if (!mounted) return;
 
         await restoreClient();
+
+        const persistedInvite = await loadPersistedPendingInvite();
+        if (persistedInvite) {
+            store.setPendingInvite(persistedInvite);
+        }
 
         // supabase-js only auths Realtime on SIGNED_IN / TOKEN_REFRESHED, not on
         // the INITIAL_SESSION a cold-start restore emits — so live updates
@@ -205,12 +285,18 @@ function App() {
           if (event === 'SIGNED_OUT') {
             useAppStore.getState().setSession(null);
             void clearPushRegistrationOnSignOut();
+            void resetProductAnalyticsUser();
             return;
           }
 
           if (!nextSession) return;
 
           if (event === 'SIGNED_IN') {
+            if (isNewAccountSignup(nextSession.user)) {
+              void captureProductEvent('signup', {
+                provider: nextSession.user.app_metadata?.provider ?? 'unknown',
+              });
+            }
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');
             }, 0);
@@ -271,6 +357,18 @@ function App() {
     return () => sub.remove();
   }, [guardSession]);
 
+  if (forcedUpdateConfig) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <UpdateRequiredScreen config={forcedUpdateConfig} />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
   if (!isReady) {
     return (
       <SafeAreaProvider>
@@ -326,10 +424,10 @@ function App() {
 
 function Root() {
   return (
-    <>
+    <PostHogAnalyticsProvider>
       <AppExitGuard />
       <App />
-    </>
+    </PostHogAnalyticsProvider>
   );
 }
 
