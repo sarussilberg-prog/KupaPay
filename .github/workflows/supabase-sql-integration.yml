@@ -32,5 +32,8 @@ jobs:
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Run SQL regression suite (local stack)
+      - name: Run SQL regression suite (development DB)
+        env:
+          SUPABASE_ENV: development
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
         run: bash scripts/ci-supabase-sql-tests.sh
