@@ -3,7 +3,7 @@
 // bounces invite links (/i/<token>, /g/<token>) to the marketing site.
 // See docs/superpowers/specs/2026-05-20-invites-and-sharing-design.md
 
-import { createClient } from 'supabase';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { handleWellKnown } from './well-known.ts';
 import { handleAccountDeletion, handleLegal } from './legal.ts';
 

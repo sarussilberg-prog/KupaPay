@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from 'supabase';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import type { ActivityRecord, ResolvedNames, PrefsRow, SendPushDeps } from './handler.ts';
 import { sendExpoPush } from './expo.ts';
 import { classifyDelivery, type ExistingDelivery } from './dedup.ts';

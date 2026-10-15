@@ -106,10 +106,25 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno test --allow-env
+      - name: Deploy bundle check (no import map)
+        run: deno check --no-config index.ts
+
+  deno-edge-bundle-check:
+    name: Deno edge bundle (all functions)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: v2.x
+      - run: bash scripts/ci-deno-check-edge-bundle.sh
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test, deno-edge-functions]
+    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
