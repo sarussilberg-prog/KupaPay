@@ -87,12 +87,19 @@ jobs:
       - run: test -x node_modules/.bin/jest || npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
-  revenuecat-webhook:
-    name: RevenueCat webhook (Deno)
+  deno-edge-functions:
+    name: Deno edge (${{ matrix.function }})
+    strategy:
+      fail-fast: true
+      matrix:
+        function:
+          - revenuecat-webhook
+          - send-push
+          - pro-trial-reminder-dispatch
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: cost-share-app/supabase/functions/revenuecat-webhook
+        working-directory: cost-share-app/supabase/functions/${{ matrix.function }}
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
@@ -102,7 +109,7 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test, revenuecat-webhook]
+    needs: [lint, typecheck, test, deno-edge-functions]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
