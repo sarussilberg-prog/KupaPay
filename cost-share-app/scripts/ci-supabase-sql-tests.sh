@@ -92,6 +92,14 @@ CREATE TABLE IF NOT EXISTS storage.objects (
   bucket_id TEXT REFERENCES storage.buckets (id),
   name TEXT
 );
+
+CREATE OR REPLACE FUNCTION storage.foldername(name TEXT)
+RETURNS TEXT[]
+LANGUAGE sql
+IMMUTABLE
+AS $$
+  SELECT string_to_array(NULLIF(trim(both '/' FROM name), ''), '/');
+$$;
 SQL
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
