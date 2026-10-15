@@ -1,4 +1,4 @@
-import { hasProFromTimestamps, shouldSkipAdGate } from '../hasPro';
+import { hasProFromTimestamps, isProPerkUnlocked, shouldSkipAdGate } from '../hasPro';
 
 describe('hasProFromTimestamps', () => {
     const now = new Date('2026-06-01T12:00:00.000Z');
@@ -37,5 +37,16 @@ describe('shouldSkipAdGate', () => {
         expect(shouldSkipAdGate(true, false)).toBe(false);
         expect(shouldSkipAdGate(false, true)).toBe(false);
         expect(shouldSkipAdGate(true, true)).toBe(true);
+    });
+});
+
+describe('isProPerkUnlocked', () => {
+    it('unlocks for everyone when Pro flag is off', () => {
+        expect(isProPerkUnlocked(false, false)).toBe(true);
+    });
+
+    it('requires Pro when flag is on', () => {
+        expect(isProPerkUnlocked(false, true)).toBe(false);
+        expect(isProPerkUnlocked(true, true)).toBe(true);
     });
 });

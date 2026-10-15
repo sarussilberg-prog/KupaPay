@@ -1171,6 +1171,20 @@
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
+        },
+        "smartReminder": {
+            "title": "תזכורות תשלום חכמות",
+            "lockedBody": "תזמון תזכורות עדינות לחברי הקבוצה ושיתוף ב-WhatsApp — עם Pro.",
+            "body": "תזכורת אוטומטית למי שעדיין חייב (התראה + באפליקציה). לכל אדם לכל היותר תזכורת אחת ב-3 ימים.",
+            "off": "כבוי",
+            "every3Days": "כל 3 ימים",
+            "every7Days": "שבועי",
+            "every14Days": "כל שבועיים",
+            "spamNote": "מניעת ספאם: לא יותר מתזכורת אחת ב-3 ימים לאדם.",
+            "whatsAppCta": "שתף תזכורת ב-WhatsApp",
+            "whatsAppIntro": "היי {{debtor}}, תזכורת ידידותית על {{amounts}} ב-{{group}} 🙏",
+            "saved": "לוח התזכורות עודכן",
+            "proRequired": "נדרש Pro או Trip Pass לתזכורות חכמות"
         }
     },
     "remind": {

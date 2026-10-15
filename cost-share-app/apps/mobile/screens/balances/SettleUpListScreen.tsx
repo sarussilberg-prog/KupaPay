@@ -55,6 +55,10 @@ import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import { getAvatarUrl, getAvatarUrlForMember, getDisplayName } from '../../lib/userDisplay';
 import { joinAmounts, owedDebts } from '../../lib/reminderMessage';
+import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { isProPerkUnlocked } from '@cost-share/shared';
+import { SmartPaymentReminderSection } from '../../components/pro/SmartPaymentReminderSection';
 
 interface SortedDebts {
     youInvolved: PairwiseDebt[];
@@ -87,6 +91,11 @@ export function SettleUpListScreen() {
     const group = groupsQuery.data?.find(g => g.id === groupId);
     const groupName = group?.name;
     const groupDefaultCurrency = group?.defaultCurrency ?? 'USD';
+    const { data: proStatus } = useProStatusQuery(groupId);
+    const smartReminderUnlocked = isProPerkUnlocked(
+        proStatus?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
 
     useLayoutEffect(() => {
         if (groupName) {
@@ -505,6 +514,12 @@ export function SettleUpListScreen() {
     const seenConvertInvolved = new Set<string>();
     const seenConvertOthers = new Set<string>();
 
+    const nameById = useMemo(() => {
+        const map: Record<string, string> = {};
+        for (const m of memberLites) map[m.userId] = m.displayName;
+        return map;
+    }, [memberLites]);
+
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']}>
             <FlatList
@@ -512,19 +527,29 @@ export function SettleUpListScreen() {
                 keyExtractor={item => item.pairKey}
                 contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
                 ListHeaderComponent={
-                    involvedGroups.length > 0 ? (
-                        <View className="mb-3">
-                            <Text className="px-1 text-[17px] font-bold text-gray-900">
-                                {t('settleUp.openDebts')}
-                            </Text>
-                            <Text className="mt-1 px-1 text-[14px] font-medium text-gray-600">
-                                {t('settleUp.whichDebt')}
-                            </Text>
-                            <Text className="mt-1 px-1 text-[12px] text-gray-400">
-                                {t('settleUp.tapHint')}
-                            </Text>
-                        </View>
-                    ) : null
+                    <>
+                        <SmartPaymentReminderSection
+                            groupId={groupId}
+                            groupName={groupName ?? ''}
+                            unlocked={smartReminderUnlocked}
+                            currentUserId={currentUserId}
+                            debts={debts}
+                            nameById={nameById}
+                        />
+                        {involvedGroups.length > 0 ? (
+                            <View className="mb-3">
+                                <Text className="px-1 text-[17px] font-bold text-gray-900">
+                                    {t('settleUp.openDebts')}
+                                </Text>
+                                <Text className="mt-1 px-1 text-[14px] font-medium text-gray-600">
+                                    {t('settleUp.whichDebt')}
+                                </Text>
+                                <Text className="mt-1 px-1 text-[12px] text-gray-400">
+                                    {t('settleUp.tapHint')}
+                                </Text>
+                            </View>
+                        ) : null}
+                    </>
                 }
                 renderItem={({ item }) =>
                     renderGroupOrRow(item, true, seenConvertInvolved)

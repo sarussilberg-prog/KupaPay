@@ -29,3 +29,7 @@ verify_jwt = false
 # Daily cron (x-webhook-secret) — server fallback for Pro trial end reminders.
 [functions.pro-trial-reminder-dispatch]
 verify_jwt = false
+
+# Daily cron (x-webhook-secret) — Pro smart payment reminder digests.
+[functions.pro-smart-reminder-dispatch]
+verify_jwt = false

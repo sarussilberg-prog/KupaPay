@@ -1153,6 +1153,20 @@
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
+        },
+        "smartReminder": {
+            "title": "Smart payment reminders",
+            "lockedBody": "Schedule gentle settle-up nudges for your group and share WhatsApp reminders with Pro.",
+            "body": "Automatically remind people who still owe (push + in-app). Each person gets at most one reminder every 3 days.",
+            "off": "Off",
+            "every3Days": "Every 3 days",
+            "every7Days": "Weekly",
+            "every14Days": "Every 2 weeks",
+            "spamNote": "Anti-spam: no one gets more than one automated reminder every 3 days.",
+            "whatsAppCta": "Share WhatsApp reminder",
+            "whatsAppIntro": "Hi {{debtor}}, friendly reminder about {{amounts}} in {{group}} 🙏",
+            "saved": "Reminder schedule updated",
+            "proRequired": "Pro or Trip Pass required for smart reminders"
         }
     },
     "remind": {

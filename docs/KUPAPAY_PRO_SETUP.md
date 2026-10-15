@@ -41,6 +41,18 @@ Supabase Edge Function secrets (dev + prod separately):
 - `REVENUECAT_WEBHOOK_SECRET` — shared with RevenueCat dashboard
 - `SUPABASE_SERVICE_ROLE_KEY` — already available to functions; used for `profiles.pro_until` and `group_passes` writes
 
+## Cron jobs (owner)
+
+Schedule daily `POST` with header `x-webhook-secret: <PUSH_WEBHOOK_SECRET>`:
+
+| Function | Purpose |
+|---|---|
+| `pro-trial-reminder-dispatch` | Free-trial ending push (2 days before) |
+| `pro-smart-reminder-dispatch` | Pro smart payment reminder digests |
+
+Example: Supabase Dashboard → Edge Functions → schedule, or external cron hitting  
+`https://<project-ref>.supabase.co/functions/v1/pro-smart-reminder-dispatch`.
+
 ## Database
 
 Migrations (apply after `20261010230000_privacy_admob_google_llc.sql` and security `20261011010000+`):
