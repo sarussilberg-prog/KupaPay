@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { expenseInMonthlyCycle, isProPerkUnlocked } from '@cost-share/shared';
-import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { expenseInMonthlyCycle } from '@cost-share/shared';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { useNavigation } from '@react-navigation/native';
 
@@ -23,8 +22,7 @@ type Props = {
 export function MonthlyBillsCycleSection({ groupId, cycleDay, expenses, currency }: Props) {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
-    const proQuery = useProStatusQuery();
-    const proUnlocked = isProPerkUnlocked(KUPAPAY_PRO_ENABLED, proQuery.data?.hasPro ?? false);
+    const { proPerkUnlocked: proUnlocked } = useProStatusQuery(groupId);
 
     const cycleExpenses = useMemo(
         () => expenses.filter(e => !e.isDeleted && expenseInMonthlyCycle(e.expenseDate, cycleDay)),

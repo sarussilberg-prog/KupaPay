@@ -23,7 +23,6 @@ import {
     GroupMemberLite,
     PairwiseDebt,
     calculateGroupTotalUnsettled,
-    isProPerkUnlocked,
 } from '@cost-share/shared';
 import { Text } from '../../components/AppText';
 import { AppIcon } from '../../components/AppIcon';
@@ -91,11 +90,7 @@ export function BalancesScreen() {
     const group = groupsQuery.data?.find(g => g.id === groupId);
     const groupName = group?.name;
     const defaultCurrency = group?.defaultCurrency ?? 'USD';
-    const proStatusQuery = useProStatusQuery(groupId);
-    const tripCurrencyUnlocked = isProPerkUnlocked(
-        proStatusQuery.data?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
+    const { proPerkUnlocked: tripCurrencyUnlocked } = useProStatusQuery(groupId);
 
     const openTripCurrencyPaywall = useCallback(() => {
         navigation.navigate('Paywall', { featureKey: 'trip_currency', groupId });
