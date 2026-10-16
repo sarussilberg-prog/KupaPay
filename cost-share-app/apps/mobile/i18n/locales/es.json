@@ -1263,6 +1263,13 @@
         "recurring": {
             "lockedBody": "Automatiza alquiler, suscripciones y otros gastos recurrentes con Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Rellenar desde texto",
+            "sheetTitle": "Texto del recibo",
+            "sheetBody": "Pega el texto del recibo. Sugerimos importe y moneda — tú confirmas.",
+            "placeholder": "Pega aquí…",
+            "apply": "Aplicar"
+        },
         "smartReminder": {
             "sheetTitle": "Recordatorios inteligentes",
             "enable": "Recordatorios automáticos de liquidación",

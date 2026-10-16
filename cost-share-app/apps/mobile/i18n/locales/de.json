@@ -1261,6 +1261,13 @@
         "recurring": {
             "lockedBody": "Automatisieren Sie Miete, Abos und andere wiederkehrende Ausgaben mit Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Aus Belegtext füllen",
+            "sheetTitle": "Belegtext",
+            "sheetBody": "Belegtext einfügen. Betrag und Währung werden vorgeschlagen — Sie bestätigen.",
+            "placeholder": "Text einfügen…",
+            "apply": "Übernehmen"
+        },
         "smartReminder": {
             "sheetTitle": "Intelligente Erinnerungen",
             "enable": "Automatische Ausgleichs-Erinnerungen",
