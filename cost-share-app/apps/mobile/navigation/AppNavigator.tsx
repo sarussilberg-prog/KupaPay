@@ -88,6 +88,7 @@ import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen'
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
 import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
+import { AdminPromoCodesScreen } from '../screens/admin/AdminPromoCodesScreen';
 import { PaywallScreen } from '../screens/pro/PaywallScreen';
 
 const Tab = createBottomTabNavigator();
@@ -447,6 +448,11 @@ export function AppNavigator() {
                 name="AdminMonetization"
                 component={AdminMonetizationScreen}
                 options={{ title: 'Monetization' }}
+            />
+            <RootStack.Screen
+                name="AdminPromoCodes"
+                component={AdminPromoCodesScreen}
+                options={{ title: t('admin.promoCodes.title') }}
             />
 
             <RootStack.Screen

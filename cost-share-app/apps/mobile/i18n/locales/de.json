@@ -805,6 +805,29 @@
             "resetOnboardingRow": "Onboarding zurücksetzen",
             "previewCreateGroupRow": "Vorschau des Bildschirms zur ersten Gruppe"
         },
+        "promoCodes": {
+            "title": "Promo-Codes",
+            "portalRow": "Promo-Codes",
+            "empty": "Noch keine Promo-Codes.",
+            "createCta": "Code erstellen",
+            "createTitle": "Neuer Promo-Code",
+            "codePlaceholder": "Code (z. B. SUMMER-2026)",
+            "durationPlaceholder": "Pro-Dauer (Tage)",
+            "maxUsesPlaceholder": "Max. Einlösungen (optional)",
+            "createConfirm": "Erstellen",
+            "createSuccess": "Promo-Code erstellt",
+            "createError": "Code konnte nicht erstellt werden",
+            "statusActive": "Aktiv",
+            "statusInactive": "Inaktiv",
+            "metaLine": "{{days}} Tage · {{uses}} / {{max}} Einlösungen",
+            "unlimited": "∞",
+            "deactivateCta": "Deaktivieren",
+            "deactivateTitle": "{{code}} deaktivieren?",
+            "deactivateMessage": "Nach der Deaktivierung kann der Code nicht mehr eingelöst werden.",
+            "deactivateConfirm": "Deaktivieren",
+            "deactivateSuccess": "Code deaktiviert",
+            "deactivateError": "Deaktivierung fehlgeschlagen"
+        },
         "proView": {
             "sectionTitle": "Pro-Ansichtsmodus",
             "description": "Free- oder Pro-Erfahrung nur für dein Konto testen (24 Std.). Ändert kein echtes Abo.",
@@ -1451,6 +1474,23 @@
             "trialFreePeriodBody": "{{trialDays}} Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
             "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
             "havePromoCode": "Code vorhanden?"
+        },
+        "promoCode": {
+            "sheetTitle": "Code einlösen",
+            "kupapayHint": "Gib deinen KupaPay-Promo-Code ein, um Pro freizuschalten.",
+            "inputPlaceholder": "KupaPay-Code",
+            "redeeming": "Wird eingelöst…",
+            "storeSection": "App Store oder Google Play",
+            "playRedeem": "Bei Google Play einlösen",
+            "success": "Pro mit deinem Code freigeschaltet.",
+            "errorInvalid": "Dieser Code ist ungültig.",
+            "errorInactive": "Dieser Code ist nicht mehr aktiv.",
+            "errorExpired": "Dieser Code ist abgelaufen.",
+            "errorMaxUses": "Dieser Code hat das Einlösungslimit erreicht.",
+            "errorAlreadyRedeemed": "Du hast diesen Code bereits eingelöst.",
+            "errorRateLimit": "Zu viele Versuche. Später erneut versuchen.",
+            "errorAuth": "Melde dich an, um einen Code einzulösen.",
+            "errorGeneric": "Code konnte nicht eingelöst werden. Bitte erneut versuchen."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

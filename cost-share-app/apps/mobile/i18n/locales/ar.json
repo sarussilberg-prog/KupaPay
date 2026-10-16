@@ -837,6 +837,29 @@
             "resetOnboardingRow": "إعادة ضبط شاشات التعريف",
             "previewCreateGroupRow": "معاينة شاشة المجموعة الأولى"
         },
+        "promoCodes": {
+            "title": "رموز الترويج",
+            "portalRow": "رموز الترويج",
+            "empty": "لا توجد رموز ترويج بعد.",
+            "createCta": "إنشاء رمز",
+            "createTitle": "رمز ترويج جديد",
+            "codePlaceholder": "الرمز (مثل SUMMER-2026)",
+            "durationPlaceholder": "مدة Pro (أيام)",
+            "maxUsesPlaceholder": "الحد الأقصى للاستخدام (اختياري)",
+            "createConfirm": "إنشاء",
+            "createSuccess": "تم إنشاء الرمز",
+            "createError": "تعذّر إنشاء الرمز",
+            "statusActive": "نشط",
+            "statusInactive": "غير نشط",
+            "metaLine": "{{days}} يوم · {{uses}} / {{max}} استخدام",
+            "unlimited": "∞",
+            "deactivateCta": "إلغاء التفعيل",
+            "deactivateTitle": "إلغاء تفعيل {{code}}؟",
+            "deactivateMessage": "لن يتمكن المستخدمون من استرداد هذا الرمز بعد الإلغاء.",
+            "deactivateConfirm": "إلغاء التفعيل",
+            "deactivateSuccess": "تم إلغاء تفعيل الرمز",
+            "deactivateError": "تعذّر إلغاء التفعيل"
+        },
         "proView": {
             "sectionTitle": "وضع عرض Pro",
             "description": "معاينة تجربة Free أو Pro لحسابك فقط (24 ساعة). لا يغيّر الاشتراك الحقيقي.",
@@ -1533,6 +1556,23 @@
             "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
             "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
             "havePromoCode": "لديك رمز؟"
+        },
+        "promoCode": {
+            "sheetTitle": "استرداد الرمز",
+            "kupapayHint": "أدخل رمز KupaPay لفتح Pro على حسابك.",
+            "inputPlaceholder": "رمز KupaPay",
+            "redeeming": "جارٍ الاسترداد…",
+            "storeSection": "App Store أو Google Play",
+            "playRedeem": "الاسترداد على Google Play",
+            "success": "تم فتح Pro برمز الترويج.",
+            "errorInvalid": "الرمز غير صالح.",
+            "errorInactive": "الرمز غير نشط.",
+            "errorExpired": "انتهت صلاحية الرمز.",
+            "errorMaxUses": "وصل الرمز إلى حد الاسترداد.",
+            "errorAlreadyRedeemed": "استخدمت هذا الرمز مسبقًا.",
+            "errorRateLimit": "محاولات كثيرة. حاول لاحقًا.",
+            "errorAuth": "سجّل الدخول لاسترداد رمز.",
+            "errorGeneric": "تعذّر استرداد الرمز. حاول مرة أخرى."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
