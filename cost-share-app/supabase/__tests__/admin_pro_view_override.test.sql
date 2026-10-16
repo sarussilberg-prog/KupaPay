@@ -27,7 +27,7 @@ BEGIN
     INSERT INTO public.group_members (group_id, user_id, is_active) VALUES (v_group, v_admin, TRUE);
 
     -- ---- Non-admin cannot set override --------------------------------
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
     v_caught := FALSE;
     BEGIN
         PERFORM public.set_my_admin_pro_view_mode('force_pro');
@@ -39,7 +39,7 @@ BEGIN
     END IF;
 
     -- ---- Admin force_pro without real entitlement ---------------------
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     SELECT public.set_my_admin_pro_view_mode('force_pro') INTO v_status;
     IF (v_status->>'hasPro')::BOOLEAN IS DISTINCT FROM TRUE THEN
         RAISE EXCEPTION 'Case 2 failed: force_pro should yield hasPro true';
@@ -52,7 +52,7 @@ BEGIN
     END IF;
 
     -- ---- Admin force_free masks real Pro (Alice) ----------------------
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
     IF public.has_pro(v_alice, NULL) IS NOT TRUE THEN
         RAISE EXCEPTION 'Case 3a failed: Alice should have real Pro';
     END IF;
@@ -65,7 +65,7 @@ BEGIN
     END IF;
     DELETE FROM public.admin_pro_view_overrides WHERE user_id = v_alice;
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     SELECT public.set_my_admin_pro_view_mode('force_free') INTO v_status;
     IF (v_status->>'hasPro')::BOOLEAN IS DISTINCT FROM FALSE THEN
         RAISE EXCEPTION 'Case 4 failed: force_free should yield hasPro false';
