@@ -41,3 +41,11 @@ verify_jwt = false
 # Daily cron (x-webhook-secret) — smart payment reminder batch.
 [functions.pro-smart-reminder-dispatch]
 verify_jwt = false
+
+# Hourly cron (#402) — free retention unsettled-balance nudges.
+[functions.retention-unsettled-nudge-dispatch]
+verify_jwt = false
+
+# Every 15m cron (#402) — deliver pushes deferred for quiet hours.
+[functions.flush-deferred-push]
+verify_jwt = false

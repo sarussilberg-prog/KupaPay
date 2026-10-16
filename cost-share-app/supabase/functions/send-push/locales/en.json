@@ -33,5 +33,6 @@
     "group_deleted": "Deleted by {actor}",
     "group_note_changed": "Note changed by {actor}",
     "settle_up_reminder": "Reminder from {actor}",
+    "unsettled_balance_nudge": "You still owe {actor} · {money}",
     "trip_budget_alert": "Trip budget update"
 }

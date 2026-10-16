@@ -984,6 +984,7 @@
             "noteChangedBy": "{{name}} cambió la nota · {{group}}",
             "friendRequestRejectedByThem": "{{name}} rechazó tu solicitud de amistad",
             "settleReminder": "{{name}} te envió un recordatorio para saldar cuentas en {{group}}",
+            "unsettledBalanceNudge": "Aún debes a {{name}} en {{group}}",
             "tripBudgetAlert": "Alerta de presupuesto del viaje en {{group}}"
         },
         "addedExpense": "añadió un gasto",
@@ -1227,6 +1228,17 @@
         "categoryMessages": "Chat del grupo",
         "categoryFriends": "Solicitudes de amistad",
         "categoryGroups": "Grupos",
+        "categoryReminders": "Recordatorios de saldo",
+        "quietHoursTitle": "Horas de silencio",
+        "quietHoursEnable": "Respetar horas de silencio",
+        "quietHoursSummary": "Sin push entre {{start}}:00 y {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "Como máximo {{count}} notificaciones push al día.",
+        "webFallback": {
+            "default": "Nueva actividad en KupaPay",
+            "expense_added": "Nuevo gasto en tu grupo",
+            "settlement_added": "Alguien saldó contigo",
+            "unsettled_balance_nudge": "Recordatorio: saldo pendiente"
+        },
         "systemDisabled": "Las notificaciones están desactivadas para esta aplicación",
         "openSettings": "Abrir ajustes",
         "systemDisabledHint": "Para cambiar estos ajustes, primero activa las notificaciones en los ajustes de tu dispositivo.",

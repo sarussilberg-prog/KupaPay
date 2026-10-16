@@ -983,6 +983,7 @@
             "noteChangedBy": "Note modifiée par {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} a refusé votre demande d'ami",
             "settleReminder": "{{name}} vous a envoyé un rappel pour régler vos comptes dans {{group}}",
+            "unsettledBalanceNudge": "Vous devez encore à {{name}} dans {{group}}",
             "tripBudgetAlert": "Alerte budget voyage dans {{group}}"
         },
         "addedExpense": "a ajouté une dépense",
@@ -1226,6 +1227,17 @@
         "categoryMessages": "Discussion de groupe",
         "categoryFriends": "Demandes d'ami",
         "categoryGroups": "Groupes",
+        "categoryReminders": "Rappels de solde",
+        "quietHoursTitle": "Heures calmes",
+        "quietHoursEnable": "Respecter les heures calmes",
+        "quietHoursSummary": "Pas de push entre {{start}}:00 et {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "Au maximum {{count}} notifications push par jour.",
+        "webFallback": {
+            "default": "Nouvelle activité dans KupaPay",
+            "expense_added": "Nouvelle dépense dans votre groupe",
+            "settlement_added": "Quelqu'un a réglé avec vous",
+            "unsettled_balance_nudge": "Rappel : solde ouvert à régler"
+        },
         "systemDisabled": "Les notifications sont désactivées pour cette application",
         "openSettings": "Ouvrir les réglages",
         "systemDisabledHint": "Pour modifier ces réglages, activez d'abord les notifications dans les réglages de votre appareil.",

@@ -983,6 +983,7 @@
             "noteChangedBy": "Note changed by {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} declined your friend request",
             "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}",
+            "unsettledBalanceNudge": "You still owe {{name}} in {{group}}",
             "tripBudgetAlert": "Trip budget alert in {{group}}"
         },
         "addedExpense": "added an expense",
@@ -1226,6 +1227,17 @@
         "categoryMessages": "Group chat",
         "categoryFriends": "Friend requests",
         "categoryGroups": "Groups",
+        "categoryReminders": "Balance reminders",
+        "quietHoursTitle": "Quiet hours",
+        "quietHoursEnable": "Respect quiet hours",
+        "quietHoursSummary": "No pushes between {{start}}:00 and {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "At most {{count}} push notifications per day.",
+        "webFallback": {
+            "default": "New activity in KupaPay",
+            "expense_added": "New expense in your group",
+            "settlement_added": "Someone settled up with you",
+            "unsettled_balance_nudge": "Reminder: open balance to settle"
+        },
         "systemDisabled": "Notifications are turned off for this app",
         "openSettings": "Open settings",
         "systemDisabledHint": "To update these settings, first turn on notifications in your device settings.",

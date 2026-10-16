@@ -107,6 +107,8 @@ export function resolveActivityTitle(
             });
         case 'settle_up_reminder':
             return t('activity.notifications.settleReminder', { name: actorName, group: groupName });
+        case 'unsettled_balance_nudge':
+            return t('activity.notifications.unsettledBalanceNudge', { name: actorName, group: groupName });
         case 'trip_budget_alert':
             return (
                 (event.metadata?.body as string | undefined)

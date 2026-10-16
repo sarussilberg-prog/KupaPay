@@ -1,8 +1,8 @@
 import type { ActivityEventKind } from '../types';
 
-export type PushPlatform = 'ios' | 'android';
+export type PushPlatform = 'ios' | 'android' | 'web';
 
-export type ActivityCategory = 'expenses' | 'settlements' | 'messages' | 'friends' | 'groups';
+export type ActivityCategory = 'expenses' | 'settlements' | 'messages' | 'friends' | 'groups' | 'reminders';
 
 export interface NotificationPreferences {
     pushEnabled: boolean;
@@ -11,6 +11,19 @@ export interface NotificationPreferences {
     messagesPush: boolean;
     friendsPush: boolean;
     groupsPush: boolean;
+    /** Automatic balance / settle-up nudges (#402). */
+    remindersPush: boolean;
+    quietHoursEnabled: boolean;
+    /** Local hour 0–23 when quiet period starts. */
+    quietHoursStart: number;
+    /** Local hour 0–23 when quiet period ends (exclusive). */
+    quietHoursEnd: number;
+    /** IANA timezone, e.g. Asia/Jerusalem. */
+    timezone: string;
+    /** Max push notifications per rolling 24h (server-enforced). */
+    dailyPushCap: number;
+    /** Days with an open balance before a retention nudge. */
+    unsettledNudgeAfterDays: number;
 }
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
@@ -20,6 +33,13 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
     messagesPush: true,
     friendsPush: true,
     groupsPush: true,
+    remindersPush: true,
+    quietHoursEnabled: true,
+    quietHoursStart: 22,
+    quietHoursEnd: 8,
+    timezone: 'UTC',
+    dailyPushCap: 8,
+    unsettledNudgeAfterDays: 7,
 };
 
 export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
@@ -35,6 +55,7 @@ export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
     group_deleted: 'groups',
     group_note_changed: 'groups',
     settle_up_reminder: 'settlements',
+    unsettled_balance_nudge: 'reminders',
     trip_budget_alert: 'groups',
 };
 
@@ -44,4 +65,5 @@ export const CATEGORY_TO_PREF_KEY: Record<ActivityCategory, keyof NotificationPr
     messages: 'messagesPush',
     friends: 'friendsPush',
     groups: 'groupsPush',
+    reminders: 'remindersPush',
 };

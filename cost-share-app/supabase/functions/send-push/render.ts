@@ -1,12 +1,19 @@
 import en from './locales/en.json' with { type: 'json' };
 import he from './locales/he.json' with { type: 'json' };
+import ar from './locales/ar.json' with { type: 'json' };
+import de from './locales/de.json' with { type: 'json' };
+import es from './locales/es.json' with { type: 'json' };
+import fr from './locales/fr.json' with { type: 'json' };
+import ru from './locales/ru.json' with { type: 'json' };
+import { normalizePushLang, type PushLang } from './pushPolicy.ts';
 
-export type Lang = 'he' | 'en';
+export type Lang = PushLang;
 
 export type ActivityKind =
     | 'expense_added' | 'settlement_added' | 'message_posted'
     | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed'
     | 'group_created' | 'group_deleted' | 'group_note_changed' | 'settle_up_reminder'
+    | 'unsettled_balance_nudge'
     | 'consolidation_batch_added' | 'trip_budget_alert';
 
 export interface RenderParams {
@@ -39,10 +46,19 @@ interface Messages {
     group_deleted: string;
     group_note_changed: string;
     settle_up_reminder: string;
+    unsettled_balance_nudge: string;
     trip_budget_alert: string;
 }
 
-const LOCALES: Record<Lang, Messages> = { en: en as Messages, he: he as Messages };
+const LOCALES: Record<Lang, Messages> = {
+    en: en as Messages,
+    he: he as Messages,
+    ar: ar as Messages,
+    de: de as Messages,
+    es: es as Messages,
+    fr: fr as Messages,
+    ru: ru as Messages,
+};
 
 const SYMBOLS: Record<string, string> = { ILS: '₪', USD: '$', EUR: '€', GBP: '£' };
 
@@ -62,16 +78,19 @@ function interpolate(template: string, vars: Record<string, string>): string {
     return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '');
 }
 
+export function resolveLang(code: string | null | undefined): Lang {
+    return normalizePushLang(code);
+}
+
 export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderParams): Rendered {
-    const t = LOCALES[lang];
+    const t = LOCALES[lang] ?? LOCALES.en;
     const money = formatMoney(p.amount, p.currency);
-    const vars = { actor: p.actorName, group: p.groupName, member: p.newMemberName ?? '' };
+    const vars = { actor: p.actorName, group: p.groupName, member: p.newMemberName ?? '', money };
     const variant: Variant = p.isDeleted ? 'deleted' : p.isEdited ? 'edited' : 'new';
 
     switch (kind) {
         case 'expense_added': {
             const phrase = interpolate(t.expense_added[variant], vars);
-            // amount is omitted on delete (the expense no longer exists)
             const parts = p.isDeleted ? [phrase, p.description] : [phrase, p.description, money];
             return { title: p.groupName, body: joinDot(parts) };
         }
@@ -111,13 +130,16 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
         case 'group_note_changed':
             return { title: p.groupName, body: interpolate(t.group_note_changed, vars) };
         case 'settle_up_reminder': {
-            // body comes from metadata.body (the custom message the sender wrote).
-            // Fall back to locale string if somehow absent.
             return {
                 title: p.groupName,
                 body: p.body ?? interpolate(t.settle_up_reminder, vars),
             };
         }
+        case 'unsettled_balance_nudge':
+            return {
+                title: p.groupName,
+                body: interpolate(t.unsettled_balance_nudge, vars),
+            };
         case 'trip_budget_alert':
             return {
                 title: p.groupName,
