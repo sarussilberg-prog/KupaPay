@@ -158,6 +158,8 @@ FROM indexed
 WHERE NOT has_index;
 
 -- Final row set consumed by ci-compare-db-lint-baseline.sh (lint_type|cache_key)
+\pset tuples_only on
+\pset footer off
 SELECT lint_type, cache_key FROM _db_lint_violations ORDER BY lint_type, cache_key;
 
 COMMIT;

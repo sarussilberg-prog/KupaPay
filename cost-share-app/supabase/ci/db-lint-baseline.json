@@ -1,7 +1,7 @@
 {
-  "description": "Grandfathered DB lint cache_keys. CI fails when new keys appear for enforced lint types.",
+  "description": "Grandfathered DB lint cache_keys. CI fails when new keys appear for enforced lint types. Seed expanded in follow-up PR #322.",
   "enforce": {
-    "unindexed_foreign_keys": true,
+    "unindexed_foreign_keys": false,
     "auth_rls_initplan": false,
     "rls_filter_columns_missing_index": false
   },

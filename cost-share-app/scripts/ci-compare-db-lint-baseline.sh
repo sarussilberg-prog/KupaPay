@@ -60,9 +60,14 @@ if [[ "${GENERATE_DB_LINT_BASELINE:-}" == "1" ]]; then
   exit 0
 fi
 
+valid_lint_re='^(unindexed_foreign_keys|auth_rls_initplan|rls_filter_columns_missing_index)$'
+
 fail=0
 while IFS='|' read -r lint_type cache_key; do
   [[ -z "$lint_type" ]] && continue
+  if ! [[ "$lint_type" =~ $valid_lint_re ]]; then
+    continue
+  fi
   enforced="$(jq -r --arg t "$lint_type" '.enforce[$t] // false' "$BASELINE_FILE")"
   if [[ "$enforced" != "true" ]]; then
     echo "::warning::DB lint ($lint_type): $cache_key (not enforced yet — see db-lint-baseline.json enforce)"
