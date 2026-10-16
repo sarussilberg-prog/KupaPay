@@ -80,8 +80,7 @@ BEGIN
         END IF;
     END;
 
-    -- #205 support rate limit (trigger must run; disabled while session_replication_role = replica)
-    SET LOCAL session_replication_role = DEFAULT;
+    -- #205 support rate limit (trigger is ENABLE ALWAYS so it runs under replica role in CI)
     PERFORM set_config('role', 'anon', TRUE);
     FOR i IN 1..5 LOOP
         INSERT INTO public.support_messages (name, email, message)

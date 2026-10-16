@@ -290,3 +290,5 @@ CREATE TRIGGER trg_support_message_rate_limit
     BEFORE INSERT ON public.support_messages
     FOR EACH ROW
     EXECUTE FUNCTION public.enforce_support_message_rate_limit();
+
+ALTER TABLE public.support_messages ENABLE ALWAYS TRIGGER trg_support_message_rate_limit;
