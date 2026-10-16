@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import http from 'node:http';
+import { serveExpoDist } from './serve-expo-dist.mjs';
 
 const mobileDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const repoRoot = path.join(mobileDir, '../../..');
@@ -36,25 +36,6 @@ function assertDist() {
   }
 }
 
-function serveDist(port) {
-  return new Promise((resolve, reject) => {
-    const server = http.createServer((req, res) => {
-      const urlPath = decodeURIComponent(new URL(req.url ?? '/', `http://127.0.0.1:${port}`).pathname);
-      const rel = urlPath === '/' ? '/index.html' : urlPath;
-      const file = path.join(distDir, rel);
-      if (!file.startsWith(distDir) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-        res.writeHead(404);
-        res.end('not found');
-        return;
-      }
-      res.writeHead(200);
-      fs.createReadStream(file).pipe(res);
-    });
-    server.on('error', reject);
-    server.listen(port, '127.0.0.1', () => resolve(server));
-  });
-}
-
 async function assertScreenshotValid(pngPath, minBytes = 80_000) {
   const stat = fs.statSync(pngPath);
   if (stat.size < minBytes) {
@@ -69,7 +50,7 @@ async function assertScreenshotValid(pngPath, minBytes = 80_000) {
 async function captureAll() {
   assertDist();
   const port = 4173;
-  const server = await serveDist(port);
+  const server = await serveExpoDist(distDir, port);
   const browser = await chromium.launch();
   const written = [];
 

@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import http from 'node:http';
+import { serveExpoDist } from './serve-expo-dist.mjs';
 import { createRequire } from 'node:module';
 
 const mobileDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -13,22 +13,7 @@ const { chromium } = require('@playwright/test');
 const distDir = path.join(mobileDir, 'dist');
 const port = 4173;
 
-const server = await new Promise((resolve, reject) => {
-  const s = http.createServer((req, res) => {
-    const urlPath = decodeURIComponent(new URL(req.url ?? '/', `http://127.0.0.1:${port}`).pathname);
-    const rel = urlPath === '/' ? '/index.html' : urlPath;
-    const file = path.join(distDir, rel);
-    if (!file.startsWith(distDir) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-      res.writeHead(404);
-      res.end('not found');
-      return;
-    }
-    res.writeHead(200);
-    fs.createReadStream(file).pipe(res);
-  });
-  s.on('error', reject);
-  s.listen(port, '127.0.0.1', () => resolve(s));
-});
+const server = await serveExpoDist(distDir, port);
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
