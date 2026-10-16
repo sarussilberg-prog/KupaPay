@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE, type Language } from '@cost-share/shared';
 export type { Language };
 
 /** Base locale for web marketing copy parity checks. */
-export const WEB_I18N_BASE_LOCALE = DEFAULT_LANGUAGE;
+export const WEB_I18N_BASE_LOCALE = 'en' as const;
 
 const translations = {
   he: {
@@ -202,11 +202,17 @@ const translations = {
 /** All locale packs registered in the web app (add a key here when adding a language). */
 export const webI18nTranslations = translations;
 
+export type WebI18nLocaleCode = keyof typeof webI18nTranslations;
+
 /** Derived from `webI18nTranslations` — not a hand-maintained list. */
-export const WEB_I18N_LOCALE_CODES = Object.keys(webI18nTranslations) as Language[];
+export const WEB_I18N_LOCALE_CODES = Object.keys(webI18nTranslations) as WebI18nLocaleCode[];
 
 export function getWebI18nBundles(): Record<string, unknown> {
     return { ...webI18nTranslations };
+}
+
+function isWebI18nLocale(locale: Language): locale is WebI18nLocaleCode {
+    return Object.prototype.hasOwnProperty.call(webI18nTranslations, locale);
 }
 
 export type Translations = {
@@ -230,6 +236,6 @@ export type Translations = {
 };
 
 export function getTranslations(locale: Language): Translations {
-  const pack = translations[locale as keyof typeof translations];
-  return (pack ?? translations[DEFAULT_LANGUAGE]) as Translations;
+  const pack = isWebI18nLocale(locale) ? webI18nTranslations[locale] : undefined;
+  return (pack ?? webI18nTranslations.en) as Translations;
 }
