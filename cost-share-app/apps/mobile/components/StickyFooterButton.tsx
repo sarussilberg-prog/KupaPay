@@ -3,9 +3,10 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppIcon, AppIconName } from './AppIcon';
+import { AppIconName } from './AppIcon';
+import { Button } from './Button';
 
 interface StickyFooterButtonProps {
     title: string;
@@ -34,19 +35,14 @@ export function StickyFooterButton({
             }}
             className="bg-white border-t border-gray-100"
         >
-            <TouchableOpacity
+            <Button
+                title={title}
                 onPress={onPress}
-                activeOpacity={0.85}
-                className="h-14 rounded-2xl bg-primary items-center justify-center flex-row"
+                variant="primary"
+                icon={icon}
+                className="h-14 rounded-2xl"
                 testID={testID}
-            >
-                {icon ? <AppIcon name={icon} size={22} color="#fff" /> : null}
-                <Text
-                    className={`text-base font-semibold text-white${icon ? ' ml-2' : ''}`}
-                >
-                    {title}
-                </Text>
-            </TouchableOpacity>
+            />
         </View>
     );
 }

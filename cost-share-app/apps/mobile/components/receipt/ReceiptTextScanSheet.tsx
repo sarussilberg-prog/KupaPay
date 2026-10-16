@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import { Button } from '../Button';
 import { useTranslation } from 'react-i18next';
 import type { ReceiptDraft } from '@cost-share/shared';
 import { BottomSheetShell } from '../BottomSheetShell';
@@ -47,13 +48,13 @@ export function ReceiptTextScanSheet({ visible, onClose, onApply }: ReceiptTextS
                     .join(' ')}
                 textAlignVertical="top"
             />
-            <Pressable
+            <Button
+                title={t('pro.receiptOcr.apply')}
                 onPress={handleApply}
                 disabled={text.trim().length === 0}
-                className="bg-primary rounded-xl py-3 items-center"
-            >
-                <Text className="text-white font-semibold">{t('pro.receiptOcr.apply')}</Text>
-            </Pressable>
+                variant="pro"
+                testID="receipt-text-apply"
+            />
         </BottomSheetShell>
     );
 }

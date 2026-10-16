@@ -14,6 +14,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { View, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { Button } from '../Button';
 import { useTranslation } from 'react-i18next';
 import { CenterDialogShell } from '../CenterDialogShell';
 import { Text } from '../AppText';
@@ -104,35 +105,29 @@ export function RemindFlowSheet({
 
             {step === 'options' && (
                 <View className="px-4 pb-6 pt-2 gap-3">
-                    <TouchableOpacity
+                    <Button
+                        title={t('remind.viaApp')}
                         onPress={() => {
                             setComposeMode('app');
                             setStep('compose');
                         }}
-                        activeOpacity={0.8}
-                        className="bg-primary rounded-2xl py-4 px-5 flex-row items-center justify-center gap-3"
+                        variant="primary"
+                        icon="notifications-outline"
+                        className="rounded-2xl px-5"
                         testID="remind-via-app-button"
-                    >
-                        <AppIcon name="notifications-outline" size={20} color="#fff" />
-                        <Text className="text-white font-semibold text-base text-center">
-                            {t('remind.viaApp')}
-                        </Text>
-                    </TouchableOpacity>
+                    />
 
-                    <TouchableOpacity
+                    <Button
+                        title={t('remind.viaShare')}
                         onPress={() => {
                             setComposeMode('share');
                             setStep('compose');
                         }}
-                        activeOpacity={0.7}
-                        className="border border-gray-200 rounded-2xl py-4 px-5 flex-row items-center justify-center gap-3"
+                        variant="outline"
+                        icon="share-outline"
+                        className="rounded-2xl px-5"
                         testID="remind-via-share-button"
-                    >
-                        <AppIcon name="share-outline" size={20} color="#6b7280" />
-                        <Text className="text-gray-700 font-medium text-base text-center">
-                            {t('remind.viaShare')}
-                        </Text>
-                    </TouchableOpacity>
+                    />
                 </View>
             )}
 

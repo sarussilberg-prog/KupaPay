@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import { Button } from '../Button';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetShell } from '../BottomSheetShell';
 import { Text } from '../AppText';
@@ -98,13 +99,15 @@ export function TripBudgetSheet({
                 >
                     <Text className="text-gray-700 text-center">{currency}</Text>
                 </Pressable>
-                <Pressable
+                <Button
+                    title={t('common.save')}
                     onPress={() => void handleSave()}
+                    loading={loading}
                     disabled={loading}
-                    className="bg-primary rounded-xl py-3 items-center mb-2"
-                >
-                    <Text className="text-white font-semibold">{t('common.save')}</Text>
-                </Pressable>
+                    variant="pro"
+                    className="mb-2"
+                    testID="trip-budget-save"
+                />
                 {initialAmount != null && (
                     <Pressable onPress={() => void handleClear()} disabled={loading} className="py-3 items-center">
                         <Text className="text-red-600 font-medium">{t('pro.tripBudget.clear')}</Text>

@@ -1183,8 +1183,12 @@
             "restoreNone": "לא נמצאו רכישות פעילות.",
             "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
             "tryFreeTrialCta": "נסו 7 ימים בחינם",
-            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}}. ניתן לבטל בכל עת בהגדרות.",
-            "euDigitalPurchaseAck": "אני מבקש/ת גישה מיידית ל-KupaPay Pro ומאשר/ת שאבד/ת את זכות הביטול בתוך 14 יום ברגע שהגישה מתחילה."
+            "trialFreePeriodHeading": "ניסיון חינם ל-7 ימים",
+            "trialFreePeriodBody": "כל יכולות Pro בחינם ל-7 ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
+            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
+            "euWithdrawalWaiverHeading": "גישה מיידית וויתור על 14 יום ביטול (EU)",
+            "euDigitalPurchaseAck": "אני מבקש/ת גישה מיידית ל-KupaPay Pro ומאשר/ת שאבד/ת את זכות הביטול בתוך 14 יום ברגע שהגישה מתחילה.",
+            "havePromoCode": "יש לכם קוד?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

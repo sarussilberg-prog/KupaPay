@@ -1275,8 +1275,12 @@
             "restoreNone": "Активных покупок не найдено.",
             "tripPassNeedsGroup": "Сначала откройте группу, чтобы купить для неё Trip Pass.",
             "tryFreeTrialCta": "Попробовать 7 дней бесплатно",
-            "trialRenewalDisclosure": "Через 7 дней спишется {{price}}/{{period}}. Отмена в любой момент в настройках.",
-            "euDigitalPurchaseAck": "Я запрашиваю немедленный доступ к KupaPay Pro и подтверждаю, что теряю 14-дневное право на отказ с момента начала доступа."
+            "trialFreePeriodHeading": "7 дней бесплатно",
+            "trialFreePeriodBody": "Все функции Pro бесплатно 7 дней. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
+            "trialRenewalDisclosure": "Через 7 дней спишется {{price}}/{{period}}, если не отменить в настройках.",
+            "euWithdrawalWaiverHeading": "Немедленный доступ и отказ от 14 дней (ЕС)",
+            "euDigitalPurchaseAck": "Я запрашиваю немедленный доступ к KupaPay Pro и подтверждаю, что теряю 14-дневное право на отказ с момента начала доступа.",
+            "havePromoCode": "Есть код?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
