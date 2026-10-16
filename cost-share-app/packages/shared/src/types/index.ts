@@ -99,6 +99,8 @@ export interface Expense {
      */
     splitMode?: ExpenseSplitMode;
     isDeleted: boolean;  // Soft delete flag
+    /** Public web preview token (/e/<token>) for sharing outside the group (#401). */
+    shareToken?: string;
     createdAt: Date;
     updatedAt: Date;
 }

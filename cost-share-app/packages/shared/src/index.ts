@@ -17,6 +17,7 @@ export * from './i18n/collectStaticI18nKeys';
 export * from './brand';
 export * from './deferredInvite';
 export * from './publicGroupWeb';
+export * from './publicExpenseShare';
 export * from './invites';
 export * from './types';
 export * from './schemas';

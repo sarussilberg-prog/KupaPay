@@ -26,14 +26,16 @@ export type InviteRedemptionResult =
 export type InviteLink =
     | { kind: 'friend'; token: string }
     | { kind: 'group'; token: string }
+    | { kind: 'expenseShare'; token: string }
     | { kind: 'settleReminder'; token: string }
     | { kind: 'unknown' };
 
 function inviteLinkFromPathname(pathname: string): InviteLink | null {
-    const m = pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
+    const m = pathname.match(/^\/(i|g|sr|e)\/([^/?#]+)\/?$/);
     if (!m || !INVITE_TOKEN_RE.test(m[2])) return null;
     if (m[1] === 'i') return { kind: 'friend', token: m[2] };
     if (m[1] === 'g') return { kind: 'group', token: m[2] };
+    if (m[1] === 'e') return { kind: 'expenseShare', token: m[2] };
     return { kind: 'settleReminder', token: m[2] };
 }
 
@@ -115,6 +117,18 @@ async function redeemInviteLink(
     navigation: NavigationProp<any> | null,
     queryClient: QueryClient,
 ): Promise<InviteRedemptionResult | null> {
+    if (link.kind === 'expenseShare') {
+        const { data, error } = await supabase.rpc('get_public_expense_share_page', {
+            p_token: link.token,
+        });
+        if (error || !(data as { ok?: boolean })?.ok) {
+            showAppToast({ type: 'error', titleKey: 'expenses.shareLinkInvalid' });
+            return null;
+        }
+        showInfoToast('expenses.shareLinkOpenApp');
+        return null;
+    }
+
     if (link.kind === 'settleReminder') {
         const { data, error } = await supabase.rpc('resolve_settle_reminder_link', { p_token: link.token });
         if (error) {
