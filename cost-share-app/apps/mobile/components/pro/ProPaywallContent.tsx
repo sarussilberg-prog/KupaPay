@@ -14,7 +14,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
-import { APP_WEB_ORIGIN, buildLegalPageUrl } from '@cost-share/shared';
+import { APP_WEB_ORIGIN, buildLegalPageUrl, paywallTitleKeyForVariant } from '@cost-share/shared';
+import { useGrowthExperimentFlags } from '../../hooks/useGrowthExperiment';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { Button } from '../Button';
@@ -79,6 +80,8 @@ export function ProPaywallContent({
     onPurchaseSuccess,
 }: Readonly<ProPaywallContentProps>) {
     const { t } = useTranslation();
+    const { paywallHeadlineVariant } = useGrowthExperimentFlags();
+    const paywallTitleKey = paywallTitleKeyForVariant(paywallHeadlineVariant);
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(true);
@@ -352,7 +355,7 @@ export function ProPaywallContent({
             ) : null}
 
             <Text className="text-2xl font-bold text-gray-900 text-center mb-6">
-                {t('pro.paywall.title')}
+                {t(paywallTitleKey)}
             </Text>
 
             <View className="gap-2 mb-6">

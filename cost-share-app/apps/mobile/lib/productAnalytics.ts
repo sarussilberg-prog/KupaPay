@@ -25,10 +25,15 @@ const FIRST_GROUP_FLAG = '@kupapay/analytics/first_group_sent';
 
 export type { ProductAnalyticsEvent };
 
+export type FeatureFlagValue = string | boolean | undefined;
+
 export interface ProductAnalyticsClient {
     capture: (event: string, properties?: Record<string, unknown>) => void;
     identify: (distinctId: string, properties?: Record<string, unknown>) => void;
     reset: () => void;
+    getFeatureFlag?: (key: string) => FeatureFlagValue;
+    onFeatureFlags?: (callback: () => void) => () => void;
+    reloadFeatureFlags?: () => void;
 }
 
 let boundClient: ProductAnalyticsClient | null = null;

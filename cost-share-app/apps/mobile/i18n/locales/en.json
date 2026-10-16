@@ -1363,6 +1363,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Split fairly, settle faster with Pro",
             "feature1": "No ads",
             "feature2": "Auto currency conversion for trips",
             "feature3": "Clean PDF report for every group",

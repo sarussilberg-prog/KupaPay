@@ -24,6 +24,7 @@ jest.mock('../../services/monetization.service', () => ({
 
 jest.mock('../../lib/productAnalytics', () => ({
     captureProductEvent: jest.fn(),
+    getProductAnalyticsClient: jest.fn(() => null),
 }));
 
 jest.mock('../../lib/paywallOfferingsLoad', () => ({

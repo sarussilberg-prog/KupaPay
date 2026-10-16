@@ -16,6 +16,9 @@ function PostHogClientBinder({ children }: { children: React.ReactNode }) {
             capture: (event, properties) => posthog.capture(event, properties as never),
             identify: (distinctId, properties) => posthog.identify(distinctId, properties as never),
             reset: () => posthog.reset(),
+            getFeatureFlag: (key) => posthog.getFeatureFlag(key) as string | boolean | undefined,
+            onFeatureFlags: (callback) => posthog.onFeatureFlags(callback),
+            reloadFeatureFlags: () => posthog.reloadFeatureFlags(),
         });
         return () => setProductAnalyticsClient(null);
     }, [posthog]);
@@ -51,6 +54,9 @@ function WebPostHogClientBinder({ children }: { children: React.ReactNode }) {
             capture: (event, properties) => webClient.capture(event, properties),
             identify: (distinctId, properties) => webClient.identify(distinctId, properties),
             reset: () => webClient.reset(),
+            getFeatureFlag: (key) => webClient.getFeatureFlag(key) as string | boolean | undefined,
+            onFeatureFlags: (callback) => webClient.onFeatureFlags(callback),
+            reloadFeatureFlags: () => webClient.reloadFeatureFlags(),
         });
         return () => setProductAnalyticsClient(null);
     }, [webClient]);

@@ -93,6 +93,9 @@ jobs:
       - name: Run SQL regression tests
         run: bash scripts/ci-supabase-sql-run-tests.sh
 
+      - name: RPC/table schema contract (generated types surface)
+        run: bash scripts/ci-supabase-types-contract.sh
+
       - name: Stress repeat (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch' && inputs.stress_runs != '1'
         env:
