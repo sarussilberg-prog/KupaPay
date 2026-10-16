@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ProUpgradeButton } from '../ProUpgradeButton';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetShell } from '../BottomSheetShell';
 import { Text } from '../AppText';
@@ -104,9 +105,11 @@ export function SpendingInsightsSheet({
                 {!unlocked ? (
                     <>
                         <Text className="text-gray-600 text-sm mb-4">{t('pro.spendingInsights.lockedBody')}</Text>
-                        <Pressable onPress={onUpgrade} className="bg-primary rounded-xl py-3 items-center">
-                            <Text className="text-white font-semibold">{t('pro.spendingInsights.upgrade')}</Text>
-                        </Pressable>
+                        <ProUpgradeButton
+                            title={t('pro.spendingInsights.upgrade')}
+                            onPress={onUpgrade}
+                            testID="spending-insights-upgrade"
+                        />
                     </>
                 ) : (
                     <>

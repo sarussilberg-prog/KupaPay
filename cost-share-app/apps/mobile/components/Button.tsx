@@ -1,15 +1,17 @@
 /**
  * Button Component
- * Reusable button with primary, secondary, and outline variants
+ * Reusable button with primary, secondary, pro, and outline variants
  * Uses NativeWind styling only, supports i18n
  */
 
 import { Text } from './AppText';
+import { AppIcon, type AppIconName } from './AppIcon';
 import React from 'react';
-import { TouchableOpacity, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, ActivityIndicator, View } from 'react-native';
 import { colors } from '../theme';
+import { centeredTextStyle } from '../hooks/useRtlLayout';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'pro';
 
 interface ButtonProps {
     title: string;
@@ -20,23 +22,29 @@ interface ButtonProps {
     fullWidth?: boolean;
     className?: string;
     testID?: string;
+    icon?: AppIconName;
+    iconColor?: string;
 }
 
 const variantClasses: Record<ButtonVariant, { container: string; text: string }> = {
     primary: {
-        container: 'bg-primary rounded-xl py-4 px-6',
+        container: 'bg-primary rounded-xl py-4 px-6 items-center justify-center',
+        text: 'text-white font-semibold text-base text-center',
+    },
+    pro: {
+        container: 'bg-primary rounded-xl py-3 px-6 items-center justify-center',
         text: 'text-white font-semibold text-base text-center',
     },
     secondary: {
-        container: 'bg-primary-extra-light rounded-xl py-4 px-6',
+        container: 'bg-primary-extra-light rounded-xl py-4 px-6 items-center justify-center',
         text: 'text-primary-dark font-semibold text-base text-center',
     },
     outline: {
-        container: 'border border-gray-300 rounded-xl py-4 px-6 bg-white',
+        container: 'border border-gray-300 rounded-xl py-4 px-6 bg-white items-center justify-center',
         text: 'text-gray-700 font-semibold text-base text-center',
     },
     danger: {
-        container: 'bg-red-500 rounded-xl py-4 px-6',
+        container: 'bg-red-500 rounded-xl py-4 px-6 items-center justify-center',
         text: 'text-white font-semibold text-base text-center',
     },
 };
@@ -50,6 +58,8 @@ export function Button({
     fullWidth = true,
     className = '',
     testID,
+    icon,
+    iconColor,
 }: ButtonProps) {
     const styles = variantClasses[variant];
     const isDisabled = disabled || loading;
@@ -69,7 +79,23 @@ export function Button({
                     color={variant === 'outline' || variant === 'secondary' ? colors.primary : colors.white}
                 />
             ) : (
-                <Text className={styles.text}>{title}</Text>
+                <View className="w-full flex-row items-center justify-center gap-2">
+                    {icon ? (
+                        <AppIcon
+                            name={icon}
+                            size={20}
+                            color={
+                                iconColor ??
+                                (variant === 'outline' || variant === 'secondary'
+                                    ? colors.primary
+                                    : colors.white)
+                            }
+                        />
+                    ) : null}
+                    <Text className={styles.text} style={centeredTextStyle}>
+                        {title}
+                    </Text>
+                </View>
             )}
         </TouchableOpacity>
     );

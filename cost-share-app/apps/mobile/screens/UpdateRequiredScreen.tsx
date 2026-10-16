@@ -1,5 +1,6 @@
 import React from 'react';
-import { Linking, Platform, Pressable, Text, View } from 'react-native';
+import { Linking, Platform, Text, View } from 'react-native';
+import { Button } from '../components/Button';
 import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '@cost-share/shared';
 import type { AppClientConfig } from '../services/appClientConfig.service';
@@ -35,13 +36,13 @@ export function UpdateRequiredScreen({ config }: Props) {
                     required: config.minSupportedVersion,
                 })}
             </Text>
-            <Pressable
+            <Button
+                title={t('updateRequired.cta')}
                 onPress={openStore}
-                className="bg-primary rounded-2xl py-4 px-8 w-full max-w-sm items-center"
-                accessibilityRole="button"
-            >
-                <Text className="text-white text-base font-semibold">{t('updateRequired.cta')}</Text>
-            </Pressable>
+                variant="primary"
+                className="rounded-2xl px-8 max-w-sm"
+                testID="update-required-cta"
+            />
         </View>
     );
 }

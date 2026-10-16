@@ -2,7 +2,7 @@
  * RevenueCat wrapper — no-ops when Pro flag off or platform keys missing.
  */
 
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import {
     REVENUECAT_ENTITLEMENT_PRO,
     REVENUECAT_PACKAGE_ANNUAL,
@@ -333,5 +333,26 @@ export async function openSubscriptionManagement(): Promise<void> {
         await Purchases.default.showManageSubscriptions();
     } catch {
         // Platform may not support — caller can fall back to store URL
+    }
+}
+
+const PLAY_REDEEM_URL = 'https://play.google.com/redeem';
+
+/** App Store / Play offer-code redemption (subscription promo codes). */
+export async function presentOfferCodeRedemption(): Promise<void> {
+    const Purchases = await getPurchases();
+    if (!Purchases) return;
+
+    if (Platform.OS === 'ios') {
+        try {
+            await Purchases.default.presentCodeRedemptionSheet();
+        } catch {
+            // User dismissed or OS version unsupported
+        }
+        return;
+    }
+
+    if (Platform.OS === 'android') {
+        await Linking.openURL(PLAY_REDEEM_URL);
     }
 }

@@ -42,7 +42,7 @@ describe('Button', () => {
         expect(touchable.props.disabled).toBe(true);
     });
 
-    it.each(['primary', 'secondary', 'outline', 'danger'] as const)(
+    it.each(['primary', 'secondary', 'outline', 'danger', 'pro'] as const)(
         'renders the %s variant',
         (variant) => {
             const { getByText } = render(

@@ -1257,8 +1257,12 @@
             "restoreNone": "Keine aktiven Käufe gefunden.",
             "tripPassNeedsGroup": "Öffne zuerst eine Gruppe, um einen Trip Pass dafür zu kaufen.",
             "tryFreeTrialCta": "7 Tage kostenlos testen",
-            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet. Jederzeit in den Einstellungen kündbar.",
-            "euDigitalPurchaseAck": "Ich verlange sofortigen Zugang zu KupaPay Pro und bestätige, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald der Zugang beginnt."
+            "trialFreePeriodHeading": "7 Tage kostenlos testen",
+            "trialFreePeriodBody": "7 Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
+            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
+            "euWithdrawalWaiverHeading": "Sofortiger Zugang & 14-Tage-Widerruf (EU)",
+            "euDigitalPurchaseAck": "Ich verlange sofortigen Zugang zu KupaPay Pro und bestätige, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald der Zugang beginnt.",
+            "havePromoCode": "Code vorhanden?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

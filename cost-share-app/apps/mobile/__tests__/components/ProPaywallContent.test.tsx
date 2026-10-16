@@ -30,6 +30,10 @@ jest.mock('../../lib/paywallOfferingsLoad', () => ({
     reportPaywallLoadFailed: jest.fn(),
 }));
 
+jest.mock('../../lib/euDigitalPurchaseAck', () => ({
+    requiresEuDigitalWithdrawalAck: jest.fn(() => true),
+}));
+
 jest.mock('../../services/purchases.service', () => ({
     isPurchasesConfigured: jest.fn(() => true),
     loadOfferingPackages: jest.fn(),
@@ -37,6 +41,7 @@ jest.mock('../../services/purchases.service', () => ({
     purchasePackage: jest.fn(),
     restorePurchases: jest.fn(),
     openSubscriptionManagement: jest.fn(),
+    presentOfferCodeRedemption: jest.fn(),
 }));
 
 import { fetchPaywallOfferings } from '../../lib/paywallOfferingsLoad';
@@ -48,6 +53,11 @@ const purchaseMock = purchasePackage as jest.MockedFunction<typeof purchasePacka
 const mockPackage = {
     identifier: 'annual',
     product: { identifier: 'kupapay_pro_yearly', priceString: '₪69.90' },
+} as const;
+
+const mockMonthly = {
+    identifier: 'monthly',
+    product: { identifier: 'kupapay_pro_monthly', priceString: '₪12.90' },
 } as const;
 
 describe('ProPaywallContent offerings load', () => {
@@ -67,6 +77,25 @@ describe('ProPaywallContent offerings load', () => {
         });
         expect(getByTestId('paywall-retry')).toBeTruthy();
         expect(queryByTestId('paywall-loading')).toBeNull();
+    });
+
+    it('shows localized store prices from RevenueCat packages', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
+
+        const { getByText, findByText } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
+        );
+
+        expect(await findByText('₪12.90')).toBeTruthy();
+        expect(getByText('₪69.90')).toBeTruthy();
     });
 
     it('blocks purchase until EU digital withdrawal acknowledgement', async () => {
