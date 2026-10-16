@@ -20,6 +20,7 @@ coverage/
 *.tsbuildinfo
 
 # Dev artifacts
+store/screenshots/raw/
 .dev-logs/
 supabase/.temp/
 .superpowers/

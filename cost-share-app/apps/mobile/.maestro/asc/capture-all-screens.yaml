@@ -1,0 +1,24 @@
+appId: com.kupapay.mobile
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: asc-demo-root
+    timeout: 120000
+- tapOn:
+    id: ${'asc-demo-locale-' + LOCALE}
+- tapOn:
+    id: asc-demo-nav-groups
+- takeScreenshot: ${LOCALE + '_groups'}
+- tapOn:
+    id: asc-demo-nav-balances
+- takeScreenshot: ${LOCALE + '_balances'}
+- tapOn:
+    id: asc-demo-nav-add-expense
+- takeScreenshot: ${LOCALE + '_add-expense'}
+- tapOn:
+    id: asc-demo-nav-simplified-debts
+- takeScreenshot: ${LOCALE + '_simplified-debts'}
+- tapOn:
+    id: asc-demo-nav-pro-currency
+- takeScreenshot: ${LOCALE + '_pro-currency'}

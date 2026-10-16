@@ -347,8 +347,8 @@
             "youOweCaption": "Vous devez",
             "owedToYou": "On vous doit {{amount}}",
             "owedToYouCaption": "On vous doit",
-            "moreCurrencies": "+{{count}} devises",
-            "moreCurrencies_one": "+{{count}} devise",
+            "moreCurrencies": "{{plusCount}} devises",
+            "moreCurrencies_one": "{{plusCount}} devise",
             "lastActivity": "Actif {{when}}",
             "balanceUnavailable": "Solde indisponible hors ligne"
         },
@@ -1288,8 +1288,6 @@
             "trialFreePeriodHeading": "Essai gratuit de {{trialDays}} jours",
             "trialFreePeriodBody": "Essayez toutes les fonctions Pro gratuitement pendant {{trialDays}} jours. Annulez dans Réglages avant la fin de l'essai si vous ne souhaitez pas continuer.",
             "trialRenewalDisclosure": "Après {{trialDays}} jours, {{price}}/{{period}} seront facturés sauf annulation dans Réglages.",
-            "euWithdrawalWaiverHeading": "Accès immédiat et renonciation 14 jours (UE)",
-            "euDigitalPurchaseAck": "Je demande un accès immédiat à KupaPay Pro et reconnais perdre mon droit de rétractation de 14 jours dès le début de l'accès.",
             "havePromoCode": "Vous avez un code ?"
         },
         "settings": {

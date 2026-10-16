@@ -51,6 +51,6 @@ Last updated: 2026-10-15. Scope: `cost-share-app` mobile (RevenueCat entitlement
 
 ## Free trial (App Store)
 
-- Products `kupapay_pro_monthly` / `kupapay_pro_yearly`: 7-day intro offer (App Store Connect).
+- Products `kupapay_pro_monthly` / `kupapay_pro_yearly`: 14-day intro offer (App Store Connect / Play base plan).
 - Paywall: eligibility via `checkTrialOrIntroductoryPriceEligibility`, localized CTA + Apple disclosure.
 - Reminder: local notification 2 days before trial end; server fallback `pro-trial-reminder-dispatch` (daily cron + `PUSH_WEBHOOK_SECRET`).

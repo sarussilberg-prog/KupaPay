@@ -1,0 +1,157 @@
+# Prepare KupaPay iOS App Store release (IAP metadata, screenshots, version).
+# Uses ASC API secrets — does NOT submit for review.
+name: ASC iOS release prep
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_screenshots:
+        description: Skip ASC screenshot upload (metadata/version only)
+        type: boolean
+        default: false
+      skip_iap:
+        description: Skip IAP metadata upload
+        type: boolean
+        default: false
+      skip_version:
+        description: Skip app version / What's New / build attach
+        type: boolean
+        default: false
+
+concurrency:
+  group: asc-ios-release-prep
+  cancel-in-progress: false
+
+jobs:
+  capture_screenshots:
+    name: Capture store screenshots (Playwright + Expo web)
+    if: inputs.skip_screenshots != true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app/apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci --ignore-scripts
+      - name: Install Playwright Chromium
+        working-directory: cost-share-app
+        run: npx playwright install chromium
+      - name: Export Expo web (screenshot capture mode)
+        env:
+          EXPO_PUBLIC_ASC_SCREENSHOT_DEMO: "true"
+          EXPO_PUBLIC_KUPAPAY_PRO_ENABLED: "true"
+          EXPO_PUBLIC_WEB_APP_URL: "https://kupa-pay.com"
+          EXPO_PUBLIC_SUPABASE_URL: "https://drxfbicunusmipdgbgdk.supabase.co"
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npx expo export --platform web
+      - name: Capture listing + IAP review PNGs
+        run: node scripts/playwright/capture-store-screenshots.mjs
+      - name: Assert screenshot artifacts exist
+        run: |
+          test -f ../../../store/screenshots/ios/en-US/6.9/groups.png
+          test -f ../../../store/asc/review-screenshots/paywall-en-US.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: |
+            store/screenshots/ios/
+            store/asc/review-screenshots/
+
+  asc_apply:
+    name: Apply metadata to App Store Connect
+    runs-on: ubuntu-latest
+    needs: [capture_screenshots]
+    if: |
+      always() &&
+      (needs.capture_screenshots.result == 'success' || needs.capture_screenshots.result == 'skipped')
+    defaults:
+      run:
+        working-directory: cost-share-app/apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download captured screenshots
+        if: inputs.skip_screenshots != true
+        uses: actions/download-artifact@v4
+        with:
+          name: store-screenshots
+          path: .
+      - name: Require screenshot artifacts (no placeholders)
+        if: inputs.skip_screenshots != true
+        run: |
+          missing=0
+          for f in \
+            store/screenshots/ios/en-US/6.9/groups.png \
+            store/asc/review-screenshots/paywall-en-US.png
+          do
+            if [ ! -f "$f" ]; then echo "::error::Missing $f"; missing=1; fi
+          done
+          exit "$missing"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci --ignore-scripts
+      - name: Write ASC API key
+        env:
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: bash scripts/ci-write-asc-key.sh
+      - name: Set subscription intro offers (14-day free trial)
+        if: inputs.skip_iap != true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+        run: node scripts/asc-set-subscription-intro-offers.mjs
+      - name: Verify IAP prices (ILS)
+        if: inputs.skip_iap != true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: node scripts/asc-verify-iap-prices.mjs
+      - name: Update IAP metadata & review screenshots
+        if: inputs.skip_iap != true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: node scripts/asc-update-iap-metadata.mjs
+      - name: Upload listing screenshots
+        if: inputs.skip_screenshots != true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: node scripts/asc-upload-screenshots.mjs
+      - name: Prepare app version & What's New
+        if: inputs.skip_version != true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: node scripts/asc-prepare-app-version.mjs
+      - name: ASC status report
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: node scripts/asc-report-status.mjs | tee asc-status-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: asc-status-report
+          path: cost-share-app/apps/mobile/asc-status-report.json

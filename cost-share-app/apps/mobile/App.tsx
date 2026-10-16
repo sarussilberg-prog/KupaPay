@@ -62,6 +62,8 @@ import {
 } from './services/appClientConfig.service';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
+import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
+import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
 
 function isGroupCardPreviewMode(): boolean {
@@ -379,6 +381,16 @@ function App() {
     });
     return () => sub.remove();
   }, [guardSession]);
+
+  if (isAscScreenshotDemo()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <AscStoreListingCaptureRoot />
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
 
   if (forcedUpdateConfig) {
     return (

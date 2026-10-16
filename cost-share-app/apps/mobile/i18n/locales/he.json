@@ -347,8 +347,8 @@
             "youOweCaption": "את/ה חייב/ת",
             "owedToYou": "מגיע לך {{amount}}",
             "owedToYouCaption": "מגיע לך",
-            "moreCurrencies": "+{{count}} מטבעות",
-            "moreCurrencies_one": "+מטבע {{count}}",
+            "moreCurrencies": "{{plusCount}} מטבעות",
+            "moreCurrencies_one": "{{plusCount}} מטבע",
             "lastActivity": "פעיל {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
@@ -1214,8 +1214,6 @@
             "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
             "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
             "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
-            "euWithdrawalWaiverHeading": "גישה מיידית וויתור על 14 יום ביטול (EU)",
-            "euDigitalPurchaseAck": "אני מבקש/ת גישה מיידית ל-KupaPay Pro ומאשר/ת שאבד/ת את זכות הביטול בתוך 14 יום ברגע שהגישה מתחילה.",
             "havePromoCode": "יש לכם קוד?"
         },
         "settings": {

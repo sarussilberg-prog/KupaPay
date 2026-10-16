@@ -16,6 +16,7 @@ jest.mock('expo-updates', () => ({
 }));
 
 jest.mock('react-native', () => ({
+    Platform: { OS: 'ios' },
     I18nManager: {
         allowRTL: jest.fn(),
         forceRTL: jest.fn(),

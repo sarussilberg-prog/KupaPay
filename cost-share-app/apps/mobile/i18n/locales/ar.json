@@ -359,8 +359,8 @@
             "youOweCaption": "أنت مدين",
             "owedToYou": "مستحق لك {{amount}}",
             "owedToYouCaption": "مستحق لك",
-            "moreCurrencies": "+{{count}} عملات",
-            "moreCurrencies_one": "+عملة {{count}}",
+            "moreCurrencies": "{{plusCount}} عملات",
+            "moreCurrencies_one": "{{plusCount}} عملة",
             "lastActivity": "نشط {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
@@ -1370,8 +1370,6 @@
             "trialFreePeriodHeading": "تجربة مجانية {{trialDays}} أيام",
             "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
             "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
-            "euWithdrawalWaiverHeading": "وصول فوري وإ waiver لـ 14 يوماً (EU)",
-            "euDigitalPurchaseAck": "أطلب وصولاً فورياً إلى KupaPay Pro وأقر بأنني أفقد حق الإلغاء خلال 14 يوماً بمجرد بدء الوصول.",
             "havePromoCode": "لديك رمز؟"
         },
         "settings": {

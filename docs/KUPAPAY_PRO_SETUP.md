@@ -79,9 +79,13 @@ Android paywall: **no EU withdrawal checkbox** (Play purchase flow). Trial copy 
 
 Paywall shows localized price/period from the store via RevenueCat (`priceString`), auto-renew disclosure, cancel instructions, Terms + Privacy links, **Restore Purchases**, and **Redeem offer code** (iOS App Store sheet; Android opens `https://play.google.com/redeem`). Settings includes **Manage subscription** (`showManageSubscriptions` / Play subscription center).
 
-When monthly/yearly products include a store free trial, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and post-trial price copy (**7 days** on iOS, **14 days** on Play). After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+When monthly/yearly products include a **14-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and post-trial price copy. Trial length in the UI is derived from the store intro offer (`package.product.introPrice`) when available, with **14 days** as the fallback. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
 
-On **iOS only**, EU/EEA/UK/CH consumers may need to acknowledge loss of the 14-day withdrawal right before purchase (`requiresEuDigitalWithdrawalAck`).
+Apple/Google are merchant of record; the app does **not** show an EU withdrawal waiver checkbox.
+
+### Google Play (manual)
+
+Configure the **base-plan free trial** on `kupapay_pro_monthly` and `kupapay_pro_yearly` to **14 days** in Play Console (Offers → free trial).
 
 ### Trial reminder cron (server fallback)
 
