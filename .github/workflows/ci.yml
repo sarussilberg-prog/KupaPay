@@ -511,12 +511,11 @@ jobs:
   auto-merge:
     name: Auto-merge to dev
     needs: [ci-gate, migration-versions]
+    # needs.* success is implicit when this job runs; base_ref matches legacy working condition (#403).
     if: >-
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft != true &&
-      github.event.pull_request.base.ref == 'dev' &&
-      needs.ci-gate.result == 'success' &&
-      needs.migration-versions.result == 'success'
+      github.event.pull_request.draft == false &&
+      github.base_ref == 'dev'
     runs-on: ubuntu-latest
     concurrency:
       group: dev-merge-and-bump
@@ -533,14 +532,17 @@ jobs:
         run: |
           set -euo pipefail
           for _ in $(seq 1 90); do
-            if gh pr checks "$PR_NUMBER" --repo "$REPO" 2>/dev/null | grep -E 'SonarCloud Code Analysis' | grep -q pass; then
-              echo "SonarCloud passed"
-              exit 0
-            fi
-            if gh pr checks "$PR_NUMBER" --repo "$REPO" 2>/dev/null | grep -E 'SonarCloud Code Analysis' | grep -q fail; then
-              echo "::error::SonarCloud quality gate failed"
-              exit 1
-            fi
+            conclusion="$(
+              gh api "repos/${REPO}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+                --jq '.check_runs[] | select(.name == "SonarCloud Code Analysis") | .conclusion' 2>/dev/null | head -1
+            )"
+            case "$conclusion" in
+              success) echo "SonarCloud passed"; exit 0 ;;
+              failure|cancelled|timed_out|action_required|stale)
+                echo "::error::SonarCloud quality gate failed ($conclusion)"
+                exit 1
+                ;;
+            esac
             sleep 10
           done
           echo "::error::Timed out waiting for SonarCloud"
