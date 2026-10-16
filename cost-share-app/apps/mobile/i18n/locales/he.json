@@ -1288,6 +1288,25 @@
         "primingEnable": "הפעל התראות",
         "primingLater": "לא עכשיו"
     },
+    "referral": {
+        "title": "הזמינו חברים — Pro במתנה",
+        "settingsRow": "תגמולי הפניה",
+        "body": "שתפו קישור הזמנה. כשחבר מצטרף לקבוצה ומוסיף הוצאה, תקבלו חודש Pro חינם.",
+        "shareCta": "שתף קישור",
+        "copyLink": "העתק קישור",
+        "linkCopied": "הקישור הועתק",
+        "capHint": "{{count}} מתוך {{cap}} חודשי Pro השנה",
+        "statusTitle": "ההפניות שלך",
+        "empty": "עדיין אין הפניות — שתפו את הקישור.",
+        "refresh": "רענון",
+        "disabled": "תגמולי הפניה לא זמינים בגרסה זו.",
+        "status": {
+            "pending": "ממתין להוצאה ראשונה בקבוצה",
+            "qualified": "זכאי — תגמול בדרך",
+            "rewarded": "חודש Pro ניתן",
+            "rejected": "לא ניתן לתגמל"
+        }
+    },
     "monetization": {
         "adGateTitle": "פתח את התכונה",
         "watchAdButton": "צפה בפרסומת קצרה",

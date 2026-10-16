@@ -1507,5 +1507,24 @@
         "body": "Diese Version von KupaPay wird nicht mehr unterstützt. Bitte installiere das neueste Update aus dem Store, um fortzufahren.",
         "versionLine": "Deine Version: {{current}} · Erforderlich: {{required}} oder neuer",
         "cta": "Store öffnen"
+    },
+    "referral": {
+        "title": "Freunde einladen, Pro erhalten",
+        "settingsRow": "Empfehlungsprämien",
+        "body": "Teile deinen Einladungslink. Wenn ein Freund einer Gruppe beitritt und eine Ausgabe hinzufügt, erhältst du einen Monat Pro gratis.",
+        "shareCta": "Link teilen",
+        "copyLink": "Link kopieren",
+        "linkCopied": "Link kopiert",
+        "capHint": "{{count}} von {{cap}} Gratis-Monaten dieses Jahr",
+        "statusTitle": "Deine Empfehlungen",
+        "empty": "Noch keine Empfehlungen — teile deinen Link.",
+        "refresh": "Aktualisieren",
+        "disabled": "Empfehlungsprämien sind in diesem Build nicht verfügbar.",
+        "status": {
+            "pending": "Wartet auf erste Gruppenausgabe",
+            "qualified": "Qualifiziert — Prämie ausstehend",
+            "rewarded": "Pro-Monat gewährt",
+            "rejected": "Prämie fehlgeschlagen"
+        }
     }
 }

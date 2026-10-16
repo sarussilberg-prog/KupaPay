@@ -209,6 +209,18 @@ export function SettingsScreen() {
                     />
                 </SettingsSection>
 
+                {KUPAPAY_PRO_ENABLED ? (
+                    <SettingsSection title={t('referral.title')}>
+                        <SettingsRow
+                            iconName="gift-outline"
+                            label={t('referral.settingsRow')}
+                            variant="chevron"
+                            onPress={() => navigation.navigate('ReferralProgram')}
+                            testID="settings-referral-row"
+                        />
+                    </SettingsSection>
+                ) : null}
+
                 {currentUser?.isAdmin ? (
                     <SettingsSection title={t('settings.adminPortal')}>
                         <SettingsRow

@@ -1507,5 +1507,24 @@
         "body": "Cette version de KupaPay n’est plus prise en charge. Installez la dernière mise à jour depuis le store pour continuer.",
         "versionLine": "Votre version : {{current}} · Requise : {{required}} ou plus récente",
         "cta": "Ouvrir le store"
+    },
+    "referral": {
+        "title": "Invitez des amis, gagnez Pro",
+        "settingsRow": "Récompenses de parrainage",
+        "body": "Partagez votre lien. Quand un ami rejoint un groupe et ajoute une dépense, vous recevez un mois Pro gratuit.",
+        "shareCta": "Partager le lien",
+        "copyLink": "Copier le lien",
+        "linkCopied": "Lien copié",
+        "capHint": "{{count}} sur {{cap}} mois gratuits cette année",
+        "statusTitle": "Vos parrainages",
+        "empty": "Aucun parrainage — partagez votre lien.",
+        "refresh": "Actualiser",
+        "disabled": "Les récompenses ne sont pas disponibles dans cette version.",
+        "status": {
+            "pending": "En attente de la première dépense de groupe",
+            "qualified": "Éligible — récompense en cours",
+            "rewarded": "Mois Pro accordé",
+            "rejected": "Récompense impossible"
+        }
     }
 }
