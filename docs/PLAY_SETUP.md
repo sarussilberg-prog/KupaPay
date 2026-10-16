@@ -1,58 +1,90 @@
 # Google Play setup — owner-only checklist (KupaPay Android)
 
-Step-by-step tasks **only the Play Console / Google Cloud / RevenueCat account owner** can complete. Agents and CI must **not** create paid developer accounts, merchant profiles, or production releases.
+Step-by-step tasks **only the Play Console / Google Cloud / RevenueCat account owner** can complete. Agents and CI must **not** spend money, create new signing keys, or ship to **Production** without your explicit approval.
 
-Package: `com.kupapay.mobile` · Mobile root: `cost-share-app/apps/mobile` · Listing copy: [`store/play/`](../store/play/) · CI: [PLAY_INTERNAL_GITHUB_ACTIONS.md](PLAY_INTERNAL_GITHUB_ACTIONS.md)
-
----
-
-## 1. Google Play developer account
-
-1. Open [Google Play Console](https://play.google.com/console).
-2. Pay the **one-time $25** developer registration fee (if no account exists).
-3. Complete **identity verification** and accept the Developer Distribution Agreement.
-4. **Do not** roll out to **Production** until legal, Data safety, and content rating are complete.
+Package: **`com.kupapay.mobile`** · Mobile root: `cost-share-app/apps/mobile` · Listing copy: [`store/play/`](../store/play/) · CI: [PLAY_INTERNAL_GITHUB_ACTIONS.md](PLAY_INTERNAL_GITHUB_ACTIONS.md)
 
 ---
 
-## 2. Payments profile & merchant
+## Current Play Console state (owner-confirmed)
+
+| Item | Status |
+|------|--------|
+| Developer account | **Exists** — Personal, **sarussilberg**, account id `7243079991536393959` (no new registration or $25 fee). |
+| Live app | **`com.kupapay.mobile`** — already on **Production** (last updated **26 Jul 2026**, ~13 installs). |
+| Legacy draft | **`com.kupay.mobile`** — old draft; **ignore** (do not publish or migrate). |
+| Payments profile | **Appears configured** — verify in Console; no need to create from scratch unless something is incomplete. |
+| API access | **Not linked yet** — no service account for `eas submit` / Play Developer API (priority below). |
+| Signing | Play App Signing + **existing upload key** on **EAS** — **must reuse**; never generate a new Android keystore for this app. |
+
+---
+
+## 1. Developer account (already done)
+
+1. Sign in to [Google Play Console](https://play.google.com/console) as **sarussilberg** (Personal account above).
+2. Keep identity / policy items current if Google prompts; **do not** register a second developer account for KupaPay.
+
+---
+
+## 2. Payments profile & merchant (verify)
 
 1. Play Console → **Settings → Developer account → Payments profile**.
-2. Link or create a **Google payments merchant** profile (required for paid apps/IAP).
-3. Complete tax and banking details for **Israel** (or your entity country).
-4. Enable **Google Play Billing** for the app (automatic when you create subscriptions/IAP).
+2. Confirm merchant status is active (tax, banking, country) so **subscriptions and IAP** can be sold.
+3. Google Pay at checkout is handled by **Play Billing** — no separate Google Pay API in the app.
 
-Google Pay at checkout is handled by Play Billing — no separate Google Pay API setup in the app.
+If anything is incomplete, finish it in Console only; agents do not configure merchant accounts.
 
 ---
 
-## 3. Create the app in Play Console
+## 3. App record — use existing `com.kupapay.mobile`
 
-1. **Create app** → name **KupaPay**, default language **Hebrew** or **English**, app / game = App, free with IAP.
-2. Note the package name must be **`com.kupapay.mobile`** (matches `app.json`).
-3. Complete mandatory **App content** sections using drafts in:
+**Do not create a new app.** Open the existing **KupaPay** production app (`com.kupapay.mobile`).
+
+1. **Ignore** the legacy draft **`com.kupay.mobile`**.
+2. Complete or refresh mandatory **App content** using drafts in:
    - [`store/play/DATA_SAFETY_ANSWERS.md`](../store/play/DATA_SAFETY_ANSWERS.md)
    - [`store/play/CONTENT_RATING_ANSWERS.md`](../store/play/CONTENT_RATING_ANSWERS.md)
-4. **Privacy policy URL:** `https://kupa-pay.com/legal/privacy` (production `legal_documents` must be published — see [PLAY_STORE_ANDROID.md](PLAY_STORE_ANDROID.md) §0.1).
-5. Upload listing text from `store/play/<locale>/` and graphics from `store/play/graphics/`.
+3. **Privacy policy URL:** `https://kupa-pay.com/legal/privacy` (production `legal_documents` published — [PLAY_STORE_ANDROID.md](PLAY_STORE_ANDROID.md) §0.1).
+4. Upload or update listing text from `store/play/<locale>/` and graphics from `store/play/graphics/`.
 
 ---
 
-## 4. Service account + API access (for EAS submit & automation)
+## 4. versionCode & signing (critical for live Production)
 
-1. Play Console → **Setup → API access** → link a Google Cloud project.
-2. Create a **service account** with **Release manager** (or Admin) on the Play Console user list.
-3. Download JSON key → store locally as `cost-share-app/apps/mobile/google-play-service-account.json` (**never commit**).
-4. Add GitHub repository secret **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`** (full JSON string) for [play-internal.yml](../.github/workflows/play-internal.yml).
-5. Add Expo secret **`EXPO_TOKEN`** ([Expo access tokens](https://expo.dev/accounts/saussilberg/settings/access-tokens)).
+The store already has production builds. Every new `.aab` must:
 
-After the **first** `.aab` upload, copy **App signing key** SHA-1 / SHA-256 from Play Console → Setup → App signing into Google Cloud OAuth (Android client) and Supabase (`KUPAPAY_ANDROID_RELEASE_SHA256`) — see [PLAY_STORE_ANDROID.md](PLAY_STORE_ANDROID.md) §3.3.
+1. Use **`versionCode` strictly greater** than the **current Production** release (Play Console → **Release → Production** → open latest release → note **Version code**).
+2. **Reuse EAS Android credentials** — same upload keystore EAS already uses for this project (`eas credentials -p android`). Do **not** run a fresh keystore generation or `expo prebuild` expecting a new signing identity.
+3. Repo uses EAS **`appVersionSource: remote`** + production profile **`autoIncrement`**. Before the first submit after a long pause, confirm remote counter is ahead of Play:
+   ```bash
+   cd cost-share-app/apps/mobile
+   eas build:version:get -p android
+   ```
+   If EAS remote `versionCode` ≤ Production in Console, bump remote (Expo docs: `eas build:version:set`) to **Production + 1** before building.
+
+Marketing **version name** comes from `packages/shared/version.json` via `app.config.ts`.
 
 ---
 
-## 5. In-app products (Play Console)
+## 5. Service account + API access (**next owner step**)
 
-Create products with these **exact IDs** (must match RevenueCat and the app):
+API access is **not** linked yet. Required for GitHub **Play Internal Android** workflow and optional product API automation.
+
+1. Play Console → **Setup → API access** → link a Google Cloud project (create or select).
+2. Create a **service account**; grant it **Release manager** (or Admin) under **Users and permissions**.
+3. Download JSON key → local `cost-share-app/apps/mobile/google-play-service-account.json` (**never commit**).
+4. GitHub secrets:
+   - **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`** (full JSON)
+   - **`EXPO_TOKEN`** ([Expo access tokens](https://expo.dev/accounts/saussilberg/settings/access-tokens))
+5. RevenueCat (§7) may use the same JSON once API access is active.
+
+**App Links / Google Sign-In:** If not already wired, copy **App signing key** SHA-1 / SHA-256 from **Setup → App signing** into Google Cloud OAuth (Android client) and Supabase `KUPAPAY_ANDROID_RELEASE_SHA256` — [PLAY_STORE_ANDROID.md](PLAY_STORE_ANDROID.md) §3.3.
+
+---
+
+## 6. In-app products (Play Console)
+
+Create or verify products with these **exact IDs** (must match RevenueCat and the app):
 
 | Product ID | Play type |
 |------------|-----------|
@@ -60,63 +92,69 @@ Create products with these **exact IDs** (must match RevenueCat and the app):
 | `kupapay_pro_yearly` | Subscription, base plan yearly |
 | `kupapay_trip_pass` | One-time product **or** prepaid / non-renewing subscription (30-day Trip Pass) |
 
-Set prices (VAT-inclusive) in Console. Optional: 7-day free trial on monthly/yearly in Play Console offers (mirrors App Store).
+Set prices (VAT-inclusive). Optional: 7-day free trial on monthly/yearly (mirrors App Store).
 
-**Automation (optional, after API access):** use [Google Play Developer API](https://developers.google.com/android-publisher) (`inappproducts`, `monetization.subscriptions`) — no agent should call this until the service account exists.
+**Automation (optional, after §5):** [Google Play Developer API](https://developers.google.com/android-publisher) — only after the service account is linked.
 
 ---
 
-## 6. RevenueCat (Google Play)
+## 7. RevenueCat (Google Play)
 
 Follow [KUPAPAY_PRO_SETUP.md](KUPAPAY_PRO_SETUP.md), Android-specific:
 
-1. RevenueCat project → **Apps** → add **Google Play** app (`com.kupapay.mobile`).
-2. Play Console → API access → link service account; in RevenueCat upload **Google Play service account JSON** (same or dedicated SA with financial permissions per RevenueCat docs).
-3. Map products to entitlement **`pro`** and offering **`default`** packages (`$rc_monthly`, `$rc_annual`, `trip_pass`).
-4. Copy **Android public SDK key** (`goog_…`) → GitHub secret **`EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`** and EAS env (`eas-sync-secrets.sh`).
-5. Webhook URL → Supabase `revenuecat-webhook` (same endpoint for iOS + Play events).
+1. RevenueCat → **Apps** → **Google Play** app `com.kupapay.mobile`.
+2. After §5, upload **Play service account JSON** in RevenueCat (per their Play integration docs).
+3. Map products to entitlement **`pro`** and offering **`default`** (`$rc_monthly`, `$rc_annual`, `trip_pass`).
+4. **`EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`** (`goog_…`) → GitHub secret + EAS env (`eas-sync-secrets.sh`).
+5. Webhook → Supabase `revenuecat-webhook` (iOS + Play, shared product ids).
 
 ---
 
-## 7. First internal release (no production)
+## 8. Releases — Internal testing first (CI default)
 
-**Option A — GitHub Actions (recommended):**
+**Production already exists** with real users (~13 installs). Agents and default CI still target **Internal testing** only (`eas.json` → `submit.production.android.track: internal`). **Do not** promote to Production from automation.
 
-1. Configure secrets above.
-2. **Actions → Play Internal Android → Run workflow** on `dev` or `main`, `pro_enabled` as needed.
-3. Workflow uses EAS **`autoIncrement`** for `versionCode` and submits to **internal** track only (`eas.json`).
+**Option A — GitHub Actions (recommended for pre-prod validation):**
+
+1. Complete §5 secrets.
+2. **Actions → Play Internal Android → Run workflow** (`pro_enabled` as needed).
+3. Confirm **`versionCode`** from §4 before/after build (`eas build:version:get -p android` in workflow logs).
 
 **Option B — local:**
 
 ```bash
 cd cost-share-app/apps/mobile
 npm run eas:build:android
-npm run eas:submit:android
+npm run eas:submit:android   # internal track unless you change profile deliberately
 ```
 
-4. Play Console → **Testing → Internal testing** → add tester Gmail addresses → share opt-in link.
-5. Run smoke tests in [PLAY_STORE_ANDROID.md §8](PLAY_STORE_ANDROID.md#8-on-device-smoke-test-after-internal-testing-install).
+4. **Testing → Internal testing** → testers → smoke tests [PLAY_STORE_ANDROID.md §8](PLAY_STORE_ANDROID.md#8-on-device-smoke-test-after-internal-testing-install).
+5. **Production promotion** is **owner-only**: Play Console → promote tested release when ready; never via cloud agent without explicit instruction.
 
 ---
 
-## 8. What stays out of scope for automation
+## 9. Out of scope for automation
 
-- Paying the $25 developer fee or completing identity verification.
-- Merchant / tax / banking setup.
-- Promoting to **Production** or **Open testing** without explicit owner approval.
-- Creating Play products before the app record exists (Console UI or API after §4).
+- Registering a new Play developer account or paying registration fees.
+- Creating **`com.kupapay.mobile`** or publishing **`com.kupay.mobile`**.
+- Generating a **new** Android upload/signing key (breaks updates to the live app).
+- Promoting releases to **Production** or increasing rollout % without owner approval.
+- Linking API access or downloading service account keys (owner credentials).
 
 ---
 
-## 9. Quick reference
+## 10. Quick reference
 
 | Item | Value |
 |------|--------|
-| Package | `com.kupapay.mobile` |
+| Developer account | Personal **sarussilberg**, id `7243079991536393959` |
+| Package (live) | `com.kupapay.mobile` (Production) |
+| Ignore | `com.kupay.mobile` (legacy draft) |
 | Entitlement (RevenueCat) | `pro` |
 | Subscription SKUs | `kupapay_pro_monthly`, `kupapay_pro_yearly` |
 | Trip Pass SKU | `kupapay_trip_pass` |
 | Android RC key env | `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` |
 | Pro master flag | `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED` |
 | AdMob Android app id | `ca-app-pub-8860544182475196~8155234876` |
-| Offer code redemption (Android) | Paywall → opens `https://play.google.com/redeem` |
+| Offer codes (Android) | Paywall → `https://play.google.com/redeem` |
+| versionCode | Must exceed current **Production**; EAS remote + `autoIncrement` |
