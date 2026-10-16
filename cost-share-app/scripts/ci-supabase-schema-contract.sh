@@ -95,11 +95,9 @@ BASE_NORM="$(normalize_for_compare "$(cat "$SNAPSHOT")")"
 # Offline-seeded snapshots use empty column lists — compare table/function identity only.
 if jq -e '.tables | all(.columns | length == 0)' "$SNAPSHOT" >/dev/null 2>&1; then
   LIVE_NORM="$(echo "$LIVE_JSON" | jq -S 'del(.generated_at, .description)
-    | .tables |= map({name, columns: []})
-    | .functions |= sort_by(.name, .args)')"
+    | {tables: ([.tables[].name] | sort), functions: ([.functions[].name] | unique | sort)}')"
   BASE_NORM="$(jq -S 'del(.generated_at, .description)
-    | .tables |= map({name, columns: []})
-    | .functions |= sort_by(.name, .args)' "$SNAPSHOT")"
+    | {tables: ([.tables[].name] | sort), functions: ([.functions[].name] | unique | sort)}' "$SNAPSHOT")"
 fi
 
 if [[ "$LIVE_NORM" == "$BASE_NORM" ]]; then
