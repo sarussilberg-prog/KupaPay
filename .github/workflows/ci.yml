@@ -165,6 +165,11 @@ jobs:
           REPO: ${{ github.repository }}
         run: gh pr merge "$PR_NUMBER" --squash --repo "$REPO" --auto
 
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
       # Version bump via a normal PR (GITHUB_TOKEN) — no ADMIN_PAT bypass of branch protection (#146, #213).
       - name: Bump patch version via follow-up PR
         if: "!startsWith(github.head_ref, 'chore/version-bump/')"
