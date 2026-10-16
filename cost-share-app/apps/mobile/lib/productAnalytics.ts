@@ -36,6 +36,7 @@ export type ProductAnalyticsEvent =
     | 'recurring_series_stopped'
     | 'trip_currency_viewed'
     | 'smart_reminder_configured'
+    | 'spending_insights_viewed'
     | 'trip_budget_configured'
     | 'trip_budget_viewed';
 

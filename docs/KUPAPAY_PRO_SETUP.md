@@ -108,3 +108,9 @@ Apply migration `20261016130000_smart_payment_reminders.sql` on dev before produ
 No cron: alerts run from the `expenses` trigger via `evaluate_trip_budget_alerts`. Pro members set budget with RPC `set_group_trip_budget`. Activity kind `trip_budget_alert` uses the existing `send-push` pipeline.
 
 Apply migration `20261016140000_trip_budget.sql` on dev before production.
+
+### Spending insights (Pro v2)
+
+RPCs `get_group_spending_by_category`, `get_group_spending_by_member`, and `get_group_spending_by_week` require `has_pro`. No cron.
+
+Apply migration `20261016150000_group_spending_insights.sql` on dev before production.

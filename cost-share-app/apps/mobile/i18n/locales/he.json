@@ -1200,6 +1200,15 @@
             "lockedBody": "Pro יכול לשלוח תזכורות לפי לוח זמנים (מינימום כל 3 ימים).",
             "intervalDays": "כל {{count}} ימים"
         },
+        "spendingInsights": {
+            "menuOption": "תובנות הוצאות",
+            "sheetTitle": "תובנות הוצאות",
+            "lockedBody": "סיכומים לפי קטגוריה, מי שילם ומגמות שבועיות.",
+            "upgrade": "שדרוג ל-Pro",
+            "empty": "אין עדיין הוצאות במטבע זה.",
+            "uncategorized": "ללא קטגוריה",
+            "tab": { "category": "קטגוריה", "member": "שילם", "week": "שבועי" }
+        },
         "tripBudget": {
             "title": "תקציב טיול",
             "lockedBody": "הגדרת תקרת הוצאות לטיול והתראות ב-80% וב-100%.",
