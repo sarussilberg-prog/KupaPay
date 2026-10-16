@@ -30,8 +30,6 @@ BEGIN
             RAISE;
         END IF;
     END;
-
-    SET LOCAL session_replication_role = replica;
 END;
 $outer$;
 
