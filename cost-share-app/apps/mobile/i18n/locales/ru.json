@@ -66,12 +66,9 @@
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
         "signInWithEmailMagicLink": "Продолжить с email",
         "emailMagicLinkStubHint": "Вход по ссылке на email скоро появится.",
-        "emailPlaceholder": "you@example.com",
+        "emailPlaceholder": "imya@example.com",
         "googleSignInSheetTitle": "Вход через Google",
-        "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна.",
-        "signInWithEmailMagicLink": "Продолжить с email",
-        "emailMagicLinkStubHint": "Вход по magic link скоро будет доступен.",
-        "emailPlaceholder": "you@example.com"
+        "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна."
     },
     "onboarding": {
         "skip": "Пропустить",

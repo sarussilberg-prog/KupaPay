@@ -68,10 +68,7 @@
         "emailMagicLinkStubHint": "Anmeldung per E-Mail-Link kommt demnächst.",
         "emailPlaceholder": "deine@email.de",
         "googleSignInSheetTitle": "Mit Google anmelden",
-        "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster.",
-        "signInWithEmailMagicLink": "Mit E-Mail fortfahren",
-        "emailMagicLinkStubHint": "Magic-Link-Anmeldung kommt demnächst.",
-        "emailPlaceholder": "you@example.com"
+        "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster."
     },
     "onboarding": {
         "skip": "Überspringen",

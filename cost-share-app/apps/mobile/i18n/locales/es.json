@@ -68,10 +68,7 @@
         "emailMagicLinkStubHint": "El inicio de sesión con enlace por correo llegará pronto.",
         "emailPlaceholder": "tu@ejemplo.com",
         "googleSignInSheetTitle": "Iniciar sesión con Google",
-        "googleSignInSheetHint": "Toca abajo: la selección de cuenta se abre sobre esta hoja.",
-        "signInWithEmailMagicLink": "Continuar con email",
-        "emailMagicLinkStubHint": "El inicio con enlace mágico llegará pronto.",
-        "emailPlaceholder": "you@example.com"
+        "googleSignInSheetHint": "Toca abajo: la selección de cuenta se abre sobre esta hoja."
     },
     "onboarding": {
         "skip": "Omitir",

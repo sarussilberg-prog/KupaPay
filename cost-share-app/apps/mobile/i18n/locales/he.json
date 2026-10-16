@@ -66,12 +66,9 @@
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
         "signInWithEmailMagicLink": "המשך עם אימייל",
         "emailMagicLinkStubHint": "כניסה בקישור לאימייל תגיע בקרוב.",
-        "emailPlaceholder": "you@example.com",
+        "emailPlaceholder": "name@example.com",
         "googleSignInSheetTitle": "התחברות עם Google",
-        "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה.",
-        "signInWithEmailMagicLink": "המשך עם אימייל",
-        "emailMagicLinkStubHint": "כניסה באימייל (קישור קסם) תגיע בקרוב.",
-        "emailPlaceholder": "you@example.com"
+        "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה."
     },
     "onboarding": {
         "skip": "דלג",
