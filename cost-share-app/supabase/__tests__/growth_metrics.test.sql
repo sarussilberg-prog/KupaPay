@@ -4,11 +4,11 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
-    v_admin CONSTANT UUID := '00000000-0000-0000-0000-00000000g001';
-    v_user  CONSTANT UUID := '00000000-0000-0000-0000-00000000g002';
-    v_u1    CONSTANT UUID := '00000000-0000-0000-0000-00000000g003';
-    v_u2    CONSTANT UUID := '00000000-0000-0000-0000-00000000g004';
-    v_group CONSTANT UUID := '00000000-0000-0000-0000-00000000g005';
+    v_admin CONSTANT UUID := '00000000-0000-0000-0000-00000000a701';
+    v_user  CONSTANT UUID := '00000000-0000-0000-0000-00000000a702';
+    v_u1    CONSTANT UUID := '00000000-0000-0000-0000-00000000a703';
+    v_u2    CONSTANT UUID := '00000000-0000-0000-0000-00000000a704';
+    v_group CONSTANT UUID := '00000000-0000-0000-0000-00000000a705';
     v_month TIMESTAMPTZ := date_trunc('month', NOW() AT TIME ZONE 'UTC');
     v_metrics JSONB;
     v_caught BOOLEAN;
@@ -27,7 +27,7 @@ BEGIN
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin);
 
-    INSERT INTO public.groups (id, name, created_by, currency)
+    INSERT INTO public.groups (id, name, created_by, default_currency)
     VALUES (v_group, 'Growth NS', v_u1, 'ILS');
 
     INSERT INTO public.group_members (group_id, user_id, is_active)
