@@ -1,21 +1,14 @@
 -- #404 Email lifecycle: welcome, activation nudges, 14-day win-back.
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 ALTER TABLE public.notification_preferences
     ADD COLUMN IF NOT EXISTS email_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     ADD COLUMN IF NOT EXISTS lifecycle_email_enabled BOOLEAN NOT NULL DEFAULT TRUE;
 
 ALTER TABLE public.profiles
-    ADD COLUMN IF NOT EXISTS email_unsubscribe_token TEXT;
-
-UPDATE public.profiles
-SET email_unsubscribe_token = encode(gen_random_bytes(18), 'hex')
-WHERE email_unsubscribe_token IS NULL;
-
-ALTER TABLE public.profiles
-    ALTER COLUMN email_unsubscribe_token SET NOT NULL;
-
-CREATE UNIQUE INDEX IF NOT EXISTS profiles_email_unsubscribe_token_key
-    ON public.profiles (email_unsubscribe_token);
+    ADD COLUMN IF NOT EXISTS email_unsubscribe_token TEXT
+    DEFAULT encode(gen_random_bytes(18), 'hex');
 
 CREATE OR REPLACE FUNCTION public.default_email_unsubscribe_token()
 RETURNS TRIGGER
@@ -34,6 +27,19 @@ DROP TRIGGER IF EXISTS trg_default_email_unsubscribe_token ON public.profiles;
 CREATE TRIGGER trg_default_email_unsubscribe_token
     BEFORE INSERT ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.default_email_unsubscribe_token();
+
+UPDATE public.profiles
+SET email_unsubscribe_token = encode(gen_random_bytes(18), 'hex')
+WHERE email_unsubscribe_token IS NULL;
+
+ALTER TABLE public.profiles
+    ALTER COLUMN email_unsubscribe_token SET NOT NULL;
+
+ALTER TABLE public.profiles
+    ALTER COLUMN email_unsubscribe_token DROP DEFAULT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_email_unsubscribe_token_key
+    ON public.profiles (email_unsubscribe_token);
 
 CREATE TABLE IF NOT EXISTS public.email_lifecycle_deliveries (
     user_id     UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
