@@ -693,6 +693,21 @@
             "resetOnboardingRow": "Restablecer la introducción",
             "previewCreateGroupRow": "Vista previa de la pantalla del primer grupo"
         },
+        "proView": {
+            "sectionTitle": "Modo de vista Pro",
+            "description": "Vista previa de Free o Pro solo para tu cuenta (24 h). No cambia la suscripción real.",
+            "loading": "Cargando estado Pro…",
+            "expires": "La anulación expira {{when}}",
+            "setFailed": "No se pudo actualizar el modo de vista Pro",
+            "bannerPro": "Vista admin: Pro",
+            "bannerFree": "Vista admin: Free",
+            "bannerResetHint": "Toca para restablecer al modo auténtico",
+            "mode": {
+                "real": "Auténtico",
+                "force_pro": "Forzar Pro",
+                "force_free": "Forzar Free"
+            }
+        },
         "onboarding": {
             "resetTitle": "¿Restablecer la introducción?",
             "resetMessage": "Se borrarán los indicadores y se abrirá la pantalla del primer grupo. Para restablecer la introducción previa al inicio de sesión, cierra sesión y reinicia la aplicación.",

@@ -701,12 +701,12 @@
             "expires": "העקיפה תפוג {{when}}",
             "setFailed": "לא ניתן לעדכן את מצב תצוגת Pro",
             "bannerPro": "תצוגת מנהל: Pro",
-            "bannerFree": "תצוגת מנהל: Free",
-            "bannerResetHint": "הקש לאיפוס ל-Real",
+            "bannerFree": "תצוגת מנהל: חינם",
+            "bannerResetHint": "הקש לאיפוס למצב אמיתי",
             "mode": {
-                "real": "Real",
-                "force_pro": "Force Pro",
-                "force_free": "Force Free"
+                "real": "אמיתי",
+                "force_pro": "כפיית Pro",
+                "force_free": "כפיית חינם"
             }
         },
         "onboarding": {

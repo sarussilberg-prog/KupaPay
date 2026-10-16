@@ -724,6 +724,21 @@
             "resetOnboardingRow": "إعادة ضبط شاشات التعريف",
             "previewCreateGroupRow": "معاينة شاشة المجموعة الأولى"
         },
+        "proView": {
+            "sectionTitle": "وضع عرض Pro",
+            "description": "معاينة تجربة Free أو Pro لحسابك فقط (24 ساعة). لا يغيّر الاشتراك الحقيقي.",
+            "loading": "جارٍ تحميل حالة Pro…",
+            "expires": "ينتهي التجاوز {{when}}",
+            "setFailed": "تعذّر تحديث وضع عرض Pro",
+            "bannerPro": "عرض المشرف: Pro",
+            "bannerFree": "عرض المشرف: مجاني",
+            "bannerResetHint": "اضغط لإعادة الوضع الحقيقي",
+            "mode": {
+                "real": "حقيقي",
+                "force_pro": "إجبار Pro",
+                "force_free": "إجبار مجاني"
+            }
+        },
         "onboarding": {
             "resetTitle": "إعادة ضبط شاشات التعريف؟",
             "resetMessage": "ستُمسح العلامات وتُفتح شاشة المجموعة الأولى. يتطلب ضبط شاشات ما قبل تسجيل الدخول تسجيل الخروج وإعادة تشغيل التطبيق.",

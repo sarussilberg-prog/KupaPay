@@ -692,6 +692,21 @@
             "resetOnboardingRow": "Réinitialiser l'accueil",
             "previewCreateGroupRow": "Aperçu de l'écran du premier groupe"
         },
+        "proView": {
+            "sectionTitle": "Mode d'affichage Pro",
+            "description": "Aperçu Free ou Pro pour votre compte uniquement (24 h). Ne modifie pas l'abonnement réel.",
+            "loading": "Chargement du statut Pro…",
+            "expires": "La dérogation expire {{when}}",
+            "setFailed": "Impossible de mettre à jour le mode d'affichage Pro",
+            "bannerPro": "Vue admin : Pro",
+            "bannerFree": "Vue admin : Free",
+            "bannerResetHint": "Appuyez pour revenir au mode réel",
+            "mode": {
+                "real": "Réel",
+                "force_pro": "Forcer Pro",
+                "force_free": "Forcer Free"
+            }
+        },
         "onboarding": {
             "resetTitle": "Réinitialiser l'accueil ?",
             "resetMessage": "Les indicateurs seront effacés et l'écran du premier groupe s'ouvrira. Pour l'accueil avant connexion, il faut se déconnecter et redémarrer l'application.",
