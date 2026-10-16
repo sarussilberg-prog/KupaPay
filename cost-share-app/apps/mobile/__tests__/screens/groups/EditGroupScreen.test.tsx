@@ -39,6 +39,20 @@ jest.mock('../../../services/settlements.service', () => ({
     fetchGroupPairwiseDebts: jest.fn().mockResolvedValue([]),
 }));
 
+jest.mock('../../../hooks/useSimplifiedDebts', () => ({
+    useSimplifiedDebts: () => ({
+        data: {
+            byGroupCurrency: new Map(),
+            transfers: [],
+            userTransfers: [],
+            groupRollups: new Map(),
+            friendBalances: new Map(),
+            unbalanced: [],
+        },
+        isLoading: false,
+    }),
+}));
+
 jest.mock('../../../components/AddMembersSheet', () => ({
     AddMembersSheet: () => null,
 }));
