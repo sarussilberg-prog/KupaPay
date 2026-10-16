@@ -47,7 +47,7 @@ Job **`CI gate`** is the single pass/fail summary for branch protection. Recomme
 - **SonarCloud Code Analysis** (polled before auto-merge)
 - Or keep individual job names if branch protection already lists them.
 
-Auto-merge to `dev` runs when **CI gate** and **Supabase migration guard** succeed, SonarCloud is green, and the branch is **up to date with `origin/dev`**.
+Auto-merge to `dev` runs when **CI gate** and **Supabase migration guard** succeed and SonarCloud is green. If the PR is behind **`origin/dev`**, CI calls **`gh pr update-branch`** (merge commit) and re-runs checks instead of failing silently at merge time. The **Auto-merge** job enables **GitHub native squash auto-merge** (`gh pr merge --auto`); dev prerelease bumps run on **`push` to `dev`** via [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) with `[skip ci]`.
 
 ### Migration safety (incident prevention)
 
