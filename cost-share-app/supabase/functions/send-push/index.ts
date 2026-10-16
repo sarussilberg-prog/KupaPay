@@ -8,6 +8,7 @@ import { processActivityEvent, type ActivityRecord } from './handler.ts';
 import { makeSupabaseDeps } from './deps.ts';
 import { jsonResponse, preflight } from './cors.ts';
 import { fetchVerifiedActivityRecord } from './verifyRecord.ts';
+import { verifyCronWebhookSecret } from '../cron-webhook/auth.ts';
 
 const PUSH_WEBHOOK_SECRET = Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
     if (req.method !== 'POST') {
         return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
     }
-    if (!PUSH_WEBHOOK_SECRET || req.headers.get('x-webhook-secret') !== PUSH_WEBHOOK_SECRET) {
+    if (!verifyCronWebhookSecret(req.headers.get('x-webhook-secret'), PUSH_WEBHOOK_SECRET)) {
         return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
     }
 
