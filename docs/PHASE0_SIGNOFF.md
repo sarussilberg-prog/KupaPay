@@ -6,7 +6,7 @@ Epic: [#136](https://github.com/sarussilberg-prog/KupaPay/issues/136)
 |------|-------|-----|--------|
 | A — single npm ci | #139 | #134 | Merged |
 | A — Deno matrix | #140 | #170 | Merged |
-| C — webhook contracts | #141 | #169 | Merged |
+| C — webhook contracts | #141 | #169 + follow-up | Fixture + SQL entitlement contract tests |
 | G — Sonar before auto-merge | #137 | #171 | Merged |
 | B — SQL tests in CI | #138 | #172 + follow-up | Quarantine manifest + full inventory in CI |
 | B — staging verify | #142 | #180 | Open |

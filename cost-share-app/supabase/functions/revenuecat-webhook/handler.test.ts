@@ -5,10 +5,16 @@ import {
     proUntilFromEvent,
     tripPassUntilFromEvent,
     verifyAuthorization,
+    type RevenueCatWebhookBody,
     type WebhookEnv,
     PRODUCT_PRO_MONTHLY,
     PRODUCT_TRIP_PASS,
 } from './handler.ts';
+import cancellationFixture from './fixtures/cancellation_pro.json' with { type: 'json' };
+import expirationFixture from './fixtures/expiration_pro.json' with { type: 'json' };
+import initialPurchaseFixture from './fixtures/initial_purchase_pro.json' with { type: 'json' };
+import renewalFixture from './fixtures/renewal_pro.json' with { type: 'json' };
+import trialFixture from './fixtures/trial_initial_purchase.json' with { type: 'json' };
 
 const env: WebhookEnv = {
     SUPABASE_URL: 'https://example.supabase.co',
@@ -271,6 +277,63 @@ Deno.test('applyWebhookEvent duplicate event is ignored', async () => {
             env,
         );
         assertEquals(outcome, { ok: true, action: 'ignored', duplicate: true });
+    } finally {
+        restore();
+    }
+});
+
+const CONTRACT_FIXTURES: { name: string; body: RevenueCatWebhookBody }[] = [
+    { name: 'initial_purchase_pro.json', body: initialPurchaseFixture as RevenueCatWebhookBody },
+    { name: 'renewal_pro.json', body: renewalFixture as RevenueCatWebhookBody },
+    { name: 'trial_initial_purchase.json', body: trialFixture as RevenueCatWebhookBody },
+    { name: 'cancellation_pro.json', body: cancellationFixture as RevenueCatWebhookBody },
+    { name: 'expiration_pro.json', body: expirationFixture as RevenueCatWebhookBody },
+];
+
+for (const fixture of CONTRACT_FIXTURES) {
+    Deno.test(`contract fixture ${fixture.name} maps to RevenueCat RPC payload`, async () => {
+        const body = fixture.body;
+        const captured: { body?: Record<string, unknown> } = {};
+        const restore = mockRpcFetch(parsed => {
+            captured.body = parsed;
+            return { status: 200, json: { duplicate: false, action: 'individual' } };
+        });
+        try {
+            const outcome = await applyWebhookEvent(body, env);
+            assertEquals(outcome.ok, true);
+            assertEquals(captured.body?.p_event_id, body.event.id);
+            assertEquals(captured.body?.p_user_id, body.event.app_user_id);
+            assertEquals(captured.body?.p_event_type, body.event.type);
+            const revoke = body.event.type === 'CANCELLATION' || body.event.type === 'EXPIRATION';
+            assertEquals(captured.body?.p_is_revoke, revoke);
+            if (revoke) {
+                assertEquals(captured.body?.p_is_trip_pass, false);
+            }
+        } finally {
+            restore();
+        }
+    });
+}
+
+Deno.test('handleRequest accepts fixture body with shared secret', async () => {
+    const body = initialPurchaseFixture as RevenueCatWebhookBody;
+    const restore = mockRpcFetch(() => ({
+        status: 200,
+        json: { duplicate: false, action: 'individual' },
+    }));
+    try {
+        const res = await handleRequest(
+            new Request('https://example.com/webhook', {
+                method: 'POST',
+                headers: { authorization: 'Bearer secret', 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+            }),
+            env,
+        );
+        assertEquals(res.status, 200);
+        const json = (await res.json()) as { ok?: boolean; action?: string };
+        assertEquals(json.ok, true);
+        assertEquals(json.action, 'individual');
     } finally {
         restore();
     }
