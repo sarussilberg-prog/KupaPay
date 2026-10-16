@@ -589,7 +589,14 @@
         "memberCount_two": "شخصان",
         "memberCount_few": "{{count}} أشخاص",
         "memberCount_many": "{{count}} شخصًا",
-        "memberCount_other": "{{count}} شخص"
+        "memberCount_other": "{{count}} شخص",
+        "monthlyBills": {
+            "title": "فواتير هذا الشهر",
+            "summary": "{{count}} مصروفات · {{total}} {{currency}} في الدورة",
+            "cycleDay": "تبدأ الدورة في يوم {{day}} من كل شهر",
+            "automationPro": "أتمتة الفواتير المتكررة مع Pro",
+            "automationActive": "أتمتة Pro متاحة لهذه المجموعة"
+        }
     },
     "expenses": {
         "title": "المصروفات",

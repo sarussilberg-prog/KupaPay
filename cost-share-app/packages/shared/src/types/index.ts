@@ -59,6 +59,9 @@ export interface Group {
     isActive: boolean;  // Soft delete flag
     /** Last expense, settlement, or message activity (auto-maintained in DB). */
     lastActivityAt?: Date;
+    /** Monthly roommates/bills cycle view (#407). */
+    monthlyBillsMode?: boolean;
+    billingCycleDay?: number;
     createdAt: Date;
     updatedAt: Date;
 }

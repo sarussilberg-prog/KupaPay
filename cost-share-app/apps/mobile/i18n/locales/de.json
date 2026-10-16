@@ -563,7 +563,14 @@
         "memberCount_one": "{{count}} Person",
         "memberCount_other": "{{count}} Personen",
         "memberCount_two": "{{count}} Personen",
-        "memberCount_many": "{{count}} Personen"
+        "memberCount_many": "{{count}} Personen",
+        "monthlyBills": {
+            "title": "Rechnungen dieses Monats",
+            "summary": "{{count}} Ausgaben · {{total}} {{currency}} im Zyklus",
+            "cycleDay": "Zyklus beginnt am {{day}}. des Monats",
+            "automationPro": "Wiederkehrende Rechnungen mit Pro automatisieren",
+            "automationActive": "Pro-Automatisierung für diese Gruppe verfügbar"
+        }
     },
     "expenses": {
         "title": "Ausgaben",

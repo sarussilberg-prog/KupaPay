@@ -563,7 +563,14 @@
         "memberCount_one": "{{count}} personne",
         "memberCount_other": "{{count}} personnes",
         "memberCount_two": "{{count}} personnes",
-        "memberCount_many": "{{count}} personnes"
+        "memberCount_many": "{{count}} personnes",
+        "monthlyBills": {
+            "title": "Factures du mois",
+            "summary": "{{count}} dépenses · {{total}} {{currency}} ce cycle",
+            "cycleDay": "Le cycle commence le {{day}} de chaque mois",
+            "automationPro": "Automatiser les factures récurrentes avec Pro",
+            "automationActive": "Automatisation Pro disponible pour ce groupe"
+        }
     },
     "expenses": {
         "title": "Dépenses",

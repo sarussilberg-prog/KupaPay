@@ -58,6 +58,7 @@ import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
 import { TripBudgetSection } from '../../components/budget/TripBudgetSection';
+import { MonthlyBillsCycleSection } from '../../components/groups/MonthlyBillsCycleSection';
 import { shareGroupBalanceLink, shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -1014,6 +1015,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                                 })
                             }
                         />
+                        {displayGroup.monthlyBillsMode ? (
+                            <MonthlyBillsCycleSection
+                                groupId={groupId}
+                                cycleDay={displayGroup.billingCycleDay ?? 1}
+                                expenses={groupExpenses}
+                                currency={displayGroup.defaultCurrency}
+                            />
+                        ) : null}
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                                 <AppIcon name="search" size={18} color={colors.gray500} />

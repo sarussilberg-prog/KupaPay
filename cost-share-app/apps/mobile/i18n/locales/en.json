@@ -442,6 +442,13 @@
             "saveError": "Couldn't save",
             "titleFor": "Group note for"
         },
+        "monthlyBills": {
+            "title": "This month's bills",
+            "summary": "{{count}} expenses · {{total}} {{currency}} this cycle",
+            "cycleDay": "Cycle starts on day {{day}} of each month",
+            "automationPro": "Automate recurring bills with Pro",
+            "automationActive": "Pro recurring automation available for this group"
+        },
         "share": {
             "menuTitle": "Share group",
             "inviteOption": "Invite a friend to join",
