@@ -775,7 +775,11 @@
             "noStack": "Kein Stacktrace verfügbar"
         },
         "monetization": {
-            "portalRow": "Monetarisierungsanalyse"
+            "portalRow": "Monetarisierungsanalyse",
+            "allTimeFunnel": "Gesamter Trichter",
+            "byPlatform": "Nach Plattform",
+            "last7Days": "Letzte 7 Tage",
+            "noData": "In diesem Zeitraum noch keine Ereignisse"
         },
         "supportMessages": {
             "title": "Support-Nachrichten",
@@ -792,7 +796,12 @@
             "activeGroups": "Aktive Gruppen",
             "archivedGroups": "Archivierte Gruppen",
             "archiveFootnote": "Archiviert = seit über 2 Monaten inaktiv mit Saldo null (App-weit). Manuelle Archivierung durch einzelne Nutzer ist nicht enthalten.",
-            "loadError": "Kennzahlen konnten nicht geladen werden. Zum Aktualisieren nach unten ziehen oder später erneut versuchen."
+            "loadError": "Zum Aktualisieren nach unten ziehen oder später erneut versuchen.",
+            "loadErrorTitle": "Kennzahlen konnten nicht geladen werden",
+            "notAdminTitle": "Admin-Zugriff erforderlich",
+            "notAdminBody": "Dein Konto steht nicht auf der Admin-Liste der App, daher sind Monetarisierungs-Kennzahlen ausgeblendet.",
+            "analyticsUnavailableTitle": "Analyse nicht konfiguriert",
+            "analyticsUnavailableBody": "Die Monetarisierungs-Kennzahlen-Funktion fehlt oder hat auf diesem Supabase-Projekt keine Berechtigung. Wende die neuesten Migrationen auf dev an und aktualisiere."
         }
     },
     "profile": {

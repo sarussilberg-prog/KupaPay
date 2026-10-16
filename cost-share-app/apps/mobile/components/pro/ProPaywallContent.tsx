@@ -19,6 +19,7 @@ import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { Button } from '../Button';
 import { PriceSkeleton } from '../PriceSkeleton';
+import { IconLabel } from '../ui/IconLabel';
 import { colors } from '../../theme';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
 import { requiresEuDigitalWithdrawalAck } from '../../lib/euDigitalPurchaseAck';
@@ -356,12 +357,15 @@ export function ProPaywallContent({
 
             <View className="gap-2 mb-6">
                 {[1, 2, 3].map(i => (
-                    <View key={i} className="flex-row items-start gap-2">
-                        <AppIcon name="checkmark-circle" size={20} color={colors.success.DEFAULT} />
-                        <Text className="flex-1 text-gray-800 text-base">
-                            {t(`pro.paywall.feature${i}` as 'pro.paywall.feature1')}
-                        </Text>
-                    </View>
+                    <IconLabel
+                        key={i}
+                        iconName="checkmark-circle"
+                        iconSize={20}
+                        iconColor={colors.success.DEFAULT}
+                        label={t(`pro.paywall.feature${i}` as 'pro.paywall.feature1')}
+                        labelClassName="text-gray-800 text-base"
+                        align="start"
+                    />
                 ))}
             </View>
 

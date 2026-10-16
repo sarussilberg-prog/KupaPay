@@ -775,7 +775,11 @@
             "noStack": "No stack trace available"
         },
         "monetization": {
-            "portalRow": "Monetization Analytics"
+            "portalRow": "Monetization Analytics",
+            "allTimeFunnel": "All-time funnel",
+            "byPlatform": "By platform",
+            "last7Days": "Last 7 days",
+            "noData": "No events in this period yet"
         },
         "supportMessages": {
             "title": "Support Messages",
@@ -792,7 +796,12 @@
             "activeGroups": "Active groups",
             "archivedGroups": "Archived groups",
             "archiveFootnote": "Archived = inactive 2+ months with zero balances (app-wide). Per-user manual archive is not included.",
-            "loadError": "Could not load metrics. Pull to refresh or try again later."
+            "loadErrorTitle": "Could not load metrics",
+            "loadError": "Pull to refresh or try again later.",
+            "notAdminTitle": "Admin access required",
+            "notAdminBody": "Your account is not in the app admin list, so monetization analytics are hidden.",
+            "analyticsUnavailableTitle": "Analytics not configured",
+            "analyticsUnavailableBody": "The monetization metrics database function is missing or not granted on this Supabase project. Apply the latest migrations to dev, then refresh."
         }
     },
     "profile": {

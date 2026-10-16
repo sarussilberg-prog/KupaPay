@@ -775,7 +775,11 @@
             "noStack": "Aucune trace d'appels disponible"
         },
         "monetization": {
-            "portalRow": "Analyses de monétisation"
+            "portalRow": "Analyses de monétisation",
+            "allTimeFunnel": "Entonnoir global",
+            "byPlatform": "Par plateforme",
+            "last7Days": "7 derniers jours",
+            "noData": "Aucun événement sur cette période pour l'instant"
         },
         "supportMessages": {
             "title": "Messages d'assistance",
@@ -792,7 +796,12 @@
             "activeGroups": "Groupes actifs",
             "archivedGroups": "Groupes archivés",
             "archiveFootnote": "Archivé = inactif depuis plus de 2 mois avec des soldes à zéro (toute l'application). L'archivage manuel par utilisateur n'est pas inclus.",
-            "loadError": "Impossible de charger les statistiques. Tirez pour actualiser ou réessayez plus tard."
+            "loadError": "Tirez pour actualiser ou réessayez plus tard.",
+            "loadErrorTitle": "Impossible de charger les statistiques",
+            "notAdminTitle": "Accès administrateur requis",
+            "notAdminBody": "Votre compte ne figure pas dans la liste des administrateurs de l'app ; les analyses de monétisation sont masquées.",
+            "analyticsUnavailableTitle": "Analyses non configurées",
+            "analyticsUnavailableBody": "La fonction de métriques de monétisation est absente ou non autorisée sur ce projet Supabase. Appliquez les dernières migrations sur dev, puis actualisez."
         }
     },
     "profile": {
