@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { CONTENT_SECURITY_POLICY } from '../../packages/shared/src/security/contentSecurityPolicy';
 import versionJson from '../../packages/shared/version.json';
 
 const appVersion = (versionJson as { version: string }).version;
@@ -39,18 +40,8 @@ const securityHeaders = [
     value: 'camera=(), microphone=(), geolocation=(), payment=()',
   },
   {
-    key: 'Content-Security-Policy-Report-Only',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https:",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join('; '),
+    key: 'Content-Security-Policy',
+    value: CONTENT_SECURITY_POLICY,
   },
 ];
 
