@@ -511,11 +511,14 @@ jobs:
   auto-merge:
     name: Auto-merge to dev
     needs: [ci-gate, migration-versions]
-    # needs.* success is implicit when this job runs; base_ref matches legacy working condition (#403).
+    # ci-gate uses if: always(); dependents must too or GitHub skips this job (#403).
     if: >-
+      always() &&
+      needs.ci-gate.result == 'success' &&
+      needs.migration-versions.result == 'success' &&
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false &&
-      github.base_ref == 'dev'
+      github.event.pull_request.draft != true &&
+      github.event.pull_request.base.ref == 'dev'
     runs-on: ubuntu-latest
     concurrency:
       group: dev-merge-and-bump
