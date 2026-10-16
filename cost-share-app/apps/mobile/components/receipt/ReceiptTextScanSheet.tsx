@@ -16,7 +16,7 @@ interface ReceiptTextScanSheetProps {
 
 export function ReceiptTextScanSheet({ visible, onClose, onApply }: ReceiptTextScanSheetProps) {
     const { t } = useTranslation();
-    const { isRtl } = useRtlLayout();
+    const isRtl = useRtlLayout();
     const [text, setText] = useState('');
 
     const handleApply = () => {
