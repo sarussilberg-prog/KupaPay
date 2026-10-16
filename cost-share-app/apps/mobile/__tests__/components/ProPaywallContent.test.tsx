@@ -81,6 +81,35 @@ describe('ProPaywallContent offerings load', () => {
         expect(queryByTestId('paywall-loading')).toBeNull();
     });
 
+    it('shows ILS fallback prices when RevenueCat omits priceString', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: {
+                    identifier: 'monthly',
+                    product: { identifier: 'kupapay_pro_monthly', priceString: '' },
+                },
+                annual: {
+                    identifier: 'annual',
+                    product: { identifier: 'kupapay_pro_yearly', priceString: '' },
+                },
+                tripPass: {
+                    identifier: 'trip_pass',
+                    product: { identifier: 'kupapay_trip_pass', priceString: '' },
+                },
+            },
+            introEligibility: {},
+        });
+
+        const { findByText, getByText } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass />,
+        );
+
+        expect(await findByText('₪12.90')).toBeTruthy();
+        expect(getByText('₪69.90')).toBeTruthy();
+        expect(getByText('₪19.90')).toBeTruthy();
+    });
+
     it('shows localized store prices from RevenueCat packages', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
