@@ -209,8 +209,8 @@ BEGIN
     END IF;
 
     -- ── inactive (self-deleted) caller: no financial reads (#331) ──
-    PERFORM public.test_set_authenticated(v_member);
-    PERFORM public.delete_my_account();
+    PERFORM set_config('role', 'service_role', TRUE);
+    UPDATE public.profiles SET is_active = FALSE, deleted_at = NOW() WHERE id = v_member;
     PERFORM public.test_set_authenticated(v_member);
     SELECT COUNT(*) INTO v_seen FROM public.expenses WHERE group_id = v_group;
     IF v_seen <> 0 THEN
