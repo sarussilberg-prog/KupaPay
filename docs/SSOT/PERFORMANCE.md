@@ -87,7 +87,7 @@ Run locally: `cd cost-share-app && npm run size:ci`.
 | `development` / previews | **1.0** |
 
 - **Mobile:** `EXPO_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/mobile/lib/sentry.ts`](../../cost-share-app/apps/mobile/lib/sentry.ts)
-- **Next.js site:** `NEXT_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/web/instrumentation-client.ts`](../../cost-share-app/apps/web/instrumentation-client.ts)
+- **Next.js site:** `NEXT_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/web/lib/sentryInit.ts`](../../cost-share-app/apps/web/lib/sentryInit.ts) (client + server). Source maps: Vercel env `SENTRY_AUTH_TOKEN` + `SENTRY_PROJECT=kupapay-web` during `next build` ([`next.config.ts`](../../cost-share-app/apps/web/next.config.ts)).
 
 Error `sampleRate` remains **1.0** (errors are not subsampled).
 
