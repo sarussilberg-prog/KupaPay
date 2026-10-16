@@ -1,5 +1,8 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
-import { parseReceiptDraftFromText, type ReceiptDraft } from './parse.ts';
+import {
+    parseReceiptDraftFromText,
+    type ReceiptDraft,
+} from '../../../packages/shared/src/receiptOcr/parseReceiptDraftFromText.ts';
 
 export interface ReceiptOcrEnv {
     SUPABASE_URL: string;
