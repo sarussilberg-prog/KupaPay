@@ -1,15 +1,22 @@
 import React, { useMemo } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { expenseInMonthlyCycle, isProPerkUnlocked, type ExpenseWithDelta } from '@cost-share/shared';
+import { expenseInMonthlyCycle, isProPerkUnlocked } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { useNavigation } from '@react-navigation/native';
 
+type CycleExpenseRow = {
+    amount: number;
+    currency: string;
+    isDeleted: boolean;
+    expenseDate: Date;
+};
+
 type Props = {
     groupId: string;
     cycleDay: number;
-    expenses: ExpenseWithDelta[];
+    expenses: CycleExpenseRow[];
     currency: string;
 };
 

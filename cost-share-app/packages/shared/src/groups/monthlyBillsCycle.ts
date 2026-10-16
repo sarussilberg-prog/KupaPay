@@ -28,9 +28,13 @@ export function monthlyCycleBounds(reference: Date, cycleDay: number): { start: 
     return { start, end };
 }
 
-export function expenseInMonthlyCycle(expenseDateIso: string, cycleDay: number, reference = new Date()): boolean {
+export function expenseInMonthlyCycle(
+    expenseDate: string | Date,
+    cycleDay: number,
+    reference = new Date(),
+): boolean {
     const { start, end } = monthlyCycleBounds(reference, cycleDay);
-    const d = new Date(expenseDateIso);
+    const d = expenseDate instanceof Date ? expenseDate : new Date(expenseDate);
     if (Number.isNaN(d.getTime())) return false;
     return d >= start && d < end;
 }
