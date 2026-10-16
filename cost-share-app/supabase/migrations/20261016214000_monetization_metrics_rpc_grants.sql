@@ -48,22 +48,24 @@ BEGIN
         GROUP BY platform
     ) t;
 
-    SELECT COALESCE(jsonb_agg(
-        jsonb_build_object(
-            'date',                    TO_CHAR(day, 'YYYY-MM-DD'),
-            'ad_gate_shown',           COUNT(*) FILTER (WHERE event_type = 'ad_gate_shown'),
-            'ad_gate_watch_completed', COUNT(*) FILTER (WHERE event_type = 'ad_gate_watch_completed'),
-            'remind_sent',             COUNT(*) FILTER (WHERE event_type = 'remind_sent')
-        )
-        ORDER BY day
-    ), '[]'::JSONB)
+    SELECT COALESCE(jsonb_agg(daily.row ORDER BY daily.day), '[]'::JSONB)
     INTO v_daily
     FROM (
-        SELECT DATE_TRUNC('day', created_at) AS day, event_type
-        FROM monetization_events
-        WHERE created_at >= NOW() - INTERVAL '7 days'
-    ) t
-    GROUP BY day;
+        SELECT
+            day,
+            jsonb_build_object(
+                'date',                    TO_CHAR(day, 'YYYY-MM-DD'),
+                'ad_gate_shown',           COUNT(*) FILTER (WHERE event_type = 'ad_gate_shown'),
+                'ad_gate_watch_completed', COUNT(*) FILTER (WHERE event_type = 'ad_gate_watch_completed'),
+                'remind_sent',             COUNT(*) FILTER (WHERE event_type = 'remind_sent')
+            ) AS row
+        FROM (
+            SELECT DATE_TRUNC('day', created_at) AS day, event_type
+            FROM monetization_events
+            WHERE created_at >= NOW() - INTERVAL '7 days'
+        ) t
+        GROUP BY day
+    ) daily;
 
     RETURN jsonb_build_object(
         'funnel',      v_funnel,
