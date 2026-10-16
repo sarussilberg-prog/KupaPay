@@ -349,7 +349,7 @@
             "owedToYouCaption": "Вам должны",
             "moreCurrencies": "{{plusCount}} валют",
             "moreCurrencies_one": "{{plusCount}} валюта",
-            "lastActivity": "Активность {{when}}",
+            "updatedAgo": "Обновлено {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
         "bigCreateCta": "Создать группу",

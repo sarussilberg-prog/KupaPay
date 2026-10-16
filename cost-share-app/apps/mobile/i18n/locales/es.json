@@ -349,7 +349,7 @@
             "owedToYouCaption": "Te deben",
             "moreCurrencies": "{{plusCount}} monedas",
             "moreCurrencies_one": "{{plusCount}} moneda",
-            "lastActivity": "Activo {{when}}",
+            "updatedAgo": "Actualizado {{when}}",
             "balanceUnavailable": "Saldo no disponible sin conexión"
         },
         "bigCreateCta": "Crear un grupo",

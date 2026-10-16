@@ -11,9 +11,7 @@ import {
     buildGroupCardPreviewRollups,
 } from '../../dev/groupCardPreviewData';
 import { GroupCard } from '../../components/GroupCard';
-import { Text } from '../../components/AppText';
 import { changeLanguage, initializeLanguage } from '../../i18n';
-import { useAppStore } from '../../store';
 
 function readLangFromUrl(): Language {
     if (typeof globalThis.location === 'undefined') return 'en';
@@ -24,7 +22,6 @@ function readLangFromUrl(): Language {
 
 export function GroupCardListPreviewScreen() {
     const [ready, setReady] = useState(false);
-    const language = useAppStore(s => s.language);
 
     useEffect(() => {
         void (async () => {
@@ -45,13 +42,6 @@ export function GroupCardListPreviewScreen() {
     return (
         <View testID="group-card-preview-root" style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
             <View testID="group-card-preview-frame" style={{ flex: 1, paddingTop: 12 }}>
-                <Text
-                    className="text-xs text-gray-500 px-4 pb-2"
-                    style={{ textAlign: 'center' }}
-                    testID="group-card-preview-lang"
-                >
-                    {`GroupCard preview · ${language}`}
-                </Text>
                 <NavigationContainer>
                     <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24 }}>
                         {groups.map(group => (
