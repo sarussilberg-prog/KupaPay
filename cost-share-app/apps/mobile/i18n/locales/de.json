@@ -1219,7 +1219,8 @@
             "restoreNone": "Keine aktiven Käufe gefunden.",
             "tripPassNeedsGroup": "Öffne zuerst eine Gruppe, um einen Trip Pass dafür zu kaufen.",
             "tryFreeTrialCta": "7 Tage kostenlos testen",
-            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet. Jederzeit in den Einstellungen kündbar."
+            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet. Jederzeit in den Einstellungen kündbar.",
+            "euDigitalPurchaseAck": "Ich verlange sofortigen Zugang zu KupaPay Pro und bestätige, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald der Zugang beginnt."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1253,10 +1254,17 @@
             "upgrade": "Auf Pro upgraden",
             "pickerLabel": "Beträge in {{currency}}",
             "ratesMissing": "Wechselkurse sind derzeit nicht verfügbar.",
+            "ratesAsOf": "Kurse vom {{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (war {{original}})"
         },
         "recurring": {
             "lockedBody": "Automatisieren Sie Miete, Abos und andere wiederkehrende Ausgaben mit Pro."
+        },
+        "smartReminder": {
+            "sheetTitle": "Intelligente Erinnerungen",
+            "enable": "Automatische Ausgleichs-Erinnerungen",
+            "lockedBody": "Pro sendet Erinnerungen nach Ihrem Intervall (mindestens alle 3 Tage).",
+            "intervalDays": "Alle {{count}} Tage"
         }
     },
     "updateRequired": {

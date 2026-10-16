@@ -1152,7 +1152,8 @@
             "restoreNone": "לא נמצאו רכישות פעילות.",
             "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
             "tryFreeTrialCta": "נסו 7 ימים בחינם",
-            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}}. ניתן לבטל בכל עת בהגדרות."
+            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}}. ניתן לבטל בכל עת בהגדרות.",
+            "euDigitalPurchaseAck": "אני מבקש/ת גישה מיידית ל-KupaPay Pro ומאשר/ת שאבד/ת את זכות הביטול בתוך 14 יום ברגע שהגישה מתחילה."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1186,10 +1187,17 @@
             "upgrade": "שדרוג ל-Pro",
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
+            "ratesAsOf": "שערים נכון ל-{{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
         },
         "recurring": {
             "lockedBody": "אוטומציה לשכירות, מנויים והוצאות חוזרות — עם Pro."
+        },
+        "smartReminder": {
+            "sheetTitle": "תזכורות חכמות",
+            "enable": "תזכורות אוטומטיות לסגירת חובות",
+            "lockedBody": "Pro יכול לשלוח תזכורות לפי לוח זמנים (מינימום כל 3 ימים).",
+            "intervalDays": "כל {{count}} ימים"
         }
     },
     "remind": {

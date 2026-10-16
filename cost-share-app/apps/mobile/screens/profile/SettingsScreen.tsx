@@ -4,7 +4,7 @@ import { View, ScrollView, Linking, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as StoreReview from 'expo-store-review';
-import { APP_VERSION, APP_WEB_ORIGIN, Language } from '@cost-share/shared';
+import { APP_VERSION, APP_WEB_ORIGIN, buildLegalPageUrl, Language } from '@cost-share/shared';
 import { useAppStore } from '../../store';
 import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
@@ -135,7 +135,7 @@ export function SettingsScreen() {
 
     const openLegal = useCallback(
         async (slug: 'terms' | 'privacy') => {
-            await Linking.openURL(`${WEB_ORIGIN}/${slug}?lang=${language}`);
+            await Linking.openURL(buildLegalPageUrl(WEB_ORIGIN, slug, language));
         },
         [language],
     );

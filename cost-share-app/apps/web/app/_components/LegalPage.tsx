@@ -12,6 +12,7 @@ import {
   legalDocumentLocale,
   type LegalSlug,
 } from '@cost-share/shared';
+import { loadStaticLegalDocument } from '@/lib/legalContent';
 
 // Legal pages are public — use a plain anon client with no session/cookie handling.
 // The legal_documents table has anon-readable RLS for published rows.
@@ -32,16 +33,29 @@ interface Props {
 export default async function LegalPage({ slug, langOverride }: Props) {
   const locale = await getLocale(langOverride);
   const t = getTranslations(locale);
-  const supabase = createAnonClient();
   const docLocale = legalDocumentLocale(locale);
+  const staticDoc = loadStaticLegalDocument(slug, locale);
 
-  const { data } = await supabase
-    .from('legal_documents')
-    .select('title, content_md, effective_date')
-    .eq('slug', slug)
-    .eq('locale', docLocale)
-    .eq('is_published', true)
-    .maybeSingle();
+  let data: { title: string; content_md: string; effective_date: string | null } | null =
+    staticDoc
+      ? {
+            title: staticDoc.title,
+            content_md: staticDoc.content_md,
+            effective_date: staticDoc.effective_date,
+        }
+      : null;
+
+  if (!data) {
+    const supabase = createAnonClient();
+    const { data: remote } = await supabase
+      .from('legal_documents')
+      .select('title, content_md, effective_date')
+      .eq('slug', slug)
+      .eq('locale', docLocale)
+      .eq('is_published', true)
+      .maybeSingle();
+    data = remote;
+  }
 
   const isRtl = isRtlLanguage(locale);
   const dir = isRtl ? ('rtl' as const) : ('ltr' as const);
