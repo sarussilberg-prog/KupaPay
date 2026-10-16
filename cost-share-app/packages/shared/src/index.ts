@@ -39,4 +39,5 @@ export * from './legal/staticLegalDocument';
 export * from './legal/legalParity';
 export { LEGAL_ENGLISH_PREVAILS_NOTE } from './legal/legalEnglishPrevailsNote';
 export * from './analytics/productAnalyticsEvents';
+export * from './analytics/marketingAttribution';
 export * from './activation';

@@ -53,6 +53,10 @@ import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider'
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
 import { recoverDeferredInviteAttribution } from './lib/recoverDeferredInviteAttribution';
+import {
+    applyStoredMarketingAttributionToPostHog,
+    bootstrapMarketingAttribution,
+} from './lib/marketingAttribution';
 import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
 import { configureRewardedAdsSdk } from './lib/configureRewardedAdsSdk';
 import { WebAlertHost } from './components/WebAlertHost';
@@ -123,6 +127,7 @@ function App() {
     const user = session?.user;
     if (!user?.id) return;
     void identifyProductUser(user.id);
+    void applyStoredMarketingAttributionToPostHog(user.id);
   }, [session?.user?.id]);
 
   useEffect(() => {
@@ -307,6 +312,7 @@ function App() {
         }
 
         setupSupabaseAuthAutoRefresh();
+        void bootstrapMarketingAttribution();
 
         // Register after hydrateAuthSession so we are the only boot-time listener and
         // do not clear the store on a premature null before AsyncStorage is read.
