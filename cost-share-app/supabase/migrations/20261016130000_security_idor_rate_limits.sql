@@ -266,6 +266,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.enforce_support_message_rate_limit()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
