@@ -63,25 +63,27 @@ describe('GroupCard', () => {
     });
 
     it('renders localized owed chip when primary.net > 0', () => {
-        const { getByText } = render(
+        const { getByText, getByTestId } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'EUR', net: 42.5 })}
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/groups\.card\.owedToYou/)).toBeTruthy();
+        expect(getByText('groups.card.owedToYouCaption')).toBeTruthy();
+        expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
     it('renders localized owe chip when primary.net < 0', () => {
-        const { getByText } = render(
+        const { getByText, getByTestId } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'ILS', net: -761.5 })}
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/groups\.card\.youOwe/)).toBeTruthy();
+        expect(getByText('groups.card.youOweCaption')).toBeTruthy();
+        expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
     it('shows localized multi-currency affordance', () => {

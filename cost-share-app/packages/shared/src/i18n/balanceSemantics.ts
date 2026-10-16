@@ -17,8 +17,8 @@ export function balanceChipLabelKey(
     if (tone === 'settled') {
         return groupHasOpenDebts ? 'groups.card.youSettled' : 'groups.card.settled';
     }
-    if (tone === 'owed') return 'groups.card.owedToYou';
-    if (tone === 'owe') return 'groups.card.youOwe';
+    if (tone === 'owed') return 'groups.card.owedToYouCaption';
+    if (tone === 'owe') return 'groups.card.youOweCaption';
     return 'groups.card.balanceUnavailable';
 }
 
