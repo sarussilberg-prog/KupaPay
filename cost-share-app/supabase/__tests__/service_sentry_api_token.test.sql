@@ -4,7 +4,7 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
-    v_user CONSTANT UUID := '00000000-0000-0000-0000-00000017210001';
+    v_user CONSTANT UUID := '00000000-0000-4000-8000-000172100001';
     v_token TEXT;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES (v_user, 'sentry1721@test.local');
