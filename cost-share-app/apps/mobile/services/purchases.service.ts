@@ -260,7 +260,7 @@ export async function purchasePackage(
                 !isTripPassPkg &&
                 (periodType === 'TRIAL' || periodType === 'INTRO')
             ) {
-                await captureProductEvent('trial_started', {
+                await captureProductEvent('trial_start', {
                     package_id: pkg.identifier,
                     feature_key: opts.featureKey,
                 });

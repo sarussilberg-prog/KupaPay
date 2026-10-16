@@ -1,0 +1,30 @@
+-- PostHog HogQL templates (#422). Paste into Insights → SQL or duplicate into a dashboard.
+-- Project: EU host https://eu.i.posthog.com
+
+-- MAU (unique users with any product touchpoint)
+-- Insight type: Trends → unique users, interval month
+-- Event: app_open (or signup)
+-- Breakdown: properties.platform, properties.locale
+
+-- DAU / WAU: same as MAU with interval day / week
+
+-- North-star groups (current calendar month) from expense_added events
+SELECT count() AS north_star_groups
+FROM (
+    SELECT
+        properties.group_id AS group_id,
+        uniqExact(distinct_id) AS authors
+    FROM events
+    WHERE event = 'expense_added'
+      AND timestamp >= toStartOfMonth(now())
+      AND properties.group_id IS NOT NULL
+    GROUP BY group_id
+    HAVING authors >= 2
+)
+
+-- Activation funnel (build as Funnel insight in UI)
+-- Step 1: signup
+-- Step 2: group_created
+-- Step 3: expense_added
+-- Conversion window: 14 days
+-- Breakdown: properties.platform

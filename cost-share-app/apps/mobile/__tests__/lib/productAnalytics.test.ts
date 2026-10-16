@@ -70,7 +70,13 @@ describe('productAnalytics', () => {
         expect(mockClient.identify).toHaveBeenCalledWith('user-1', {});
         expect(mockClient.capture).toHaveBeenCalledWith(
             'expense_added',
-            expect.objectContaining({ group_id: 'g1', $lib: 'kupapay-mobile' }),
+            expect.objectContaining({
+                group_id: 'g1',
+                platform: expect.stringMatching(/^(ios|android|web)$/),
+                app_version: expect.any(String),
+                locale: expect.any(String),
+                $lib: expect.stringMatching(/^kupapay-/),
+            }),
         );
     });
 
