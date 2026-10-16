@@ -97,6 +97,7 @@ jobs:
           - revenuecat-webhook
           - send-push
           - pro-trial-reminder-dispatch
+          - storage-cleanup-dispatch
     runs-on: ubuntu-latest
     defaults:
       run:

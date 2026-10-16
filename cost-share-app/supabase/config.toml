@@ -29,3 +29,7 @@ verify_jwt = false
 # Daily cron (x-webhook-secret) — server fallback for Pro trial end reminders.
 [functions.pro-trial-reminder-dispatch]
 verify_jwt = false
+
+# Hourly cron (x-webhook-secret) — deletes orphaned profile avatars / receipt objects.
+[functions.storage-cleanup-dispatch]
+verify_jwt = false
