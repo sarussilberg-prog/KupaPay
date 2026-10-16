@@ -77,7 +77,12 @@ export function GroupsListScreen() {
     const isInitialLoading =
         groupsQuery.data === undefined && groupsQuery.fetchStatus === 'fetching';
 
-    const { data: simplified } = useSimplifiedDebts();
+    const {
+        data: simplified,
+        isLoading: simplifiedLoading,
+        isFetching: simplifiedFetching,
+        isError: simplifiedError,
+    } = useSimplifiedDebts();
     const { data: unreadByGroup } = useGroupUnreadCounts();
     const balanceNetsByGroup = useMemo(() => {
         const out: Record<string, { net: number }> = {};
@@ -203,10 +208,10 @@ export function GroupsListScreen() {
 
     type FilteredRow = (typeof activeRows)[number];
 
-    // No balance dataset at all (e.g. offline before it was ever cached) →
-    // tell each card its balance is unknown so it shows a neutral placeholder
-    // instead of a false "Settled".
-    const balanceUnknown = simplified === undefined;
+    // No balance dataset yet (initial load / refetch) → neutral placeholder, not "Settled".
+    // When the RPC failed but we have persisted data, `simplified` stays defined.
+    const balanceUnknown =
+        simplified === undefined && (simplifiedLoading || simplifiedFetching) && !simplifiedError;
 
     const renderGroupRow = useCallback(
         (item: FilteredRow) => (
