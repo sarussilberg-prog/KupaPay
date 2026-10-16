@@ -14,6 +14,13 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text as RNText, TextInput,
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import type { GroupMemberLite, PairwiseDebt, PaymentMethod } from '@cost-share/shared';
+import {
+    isIsraeliPaymentAppAvailable,
+    openPaymentApp,
+    type IsraeliPaymentApp,
+} from '../lib/israeliPaymentLinks';
+import { PaymentAppLogo } from './settleUp/PaymentAppLogo';
+import { handleError } from '../lib/handleError';
 import { Text } from './AppText';
 import { Button } from './Button';
 import { MemberAvatar } from './MemberAvatar';
@@ -330,6 +337,8 @@ export function SettleUpSheet({
                         onSelect={setPaymentMethod}
                         isRtl={isRtl}
                     />
+
+                    <PaymentAppsSection isRtl={isRtl} />
                 </ScrollView>
 
                 <SettleUpBottomDock
@@ -860,6 +869,61 @@ function PaymentMethodSection({ selected, onSelect, isRtl }: PaymentMethodSectio
         <View className="px-4 pt-4 self-stretch">
             <SectionLabel isRtl={isRtl} title={t('settleUp.methodType')} />
             <MethodTiles selected={selected} onSelect={onSelect} t={t} isRtl={isRtl} />
+        </View>
+    );
+}
+
+const PAYMENT_APP_TILES: readonly IsraeliPaymentApp[] = ['bit', 'paybox'];
+
+function PaymentAppsSection({ isRtl }: { isRtl: boolean }) {
+    const { t } = useTranslation();
+
+    if (!isIsraeliPaymentAppAvailable()) {
+        return null;
+    }
+
+    const openApp = (app: IsraeliPaymentApp) => {
+        void openPaymentApp(app).catch((err) => {
+            handleError(err, {
+                toast: {
+                    titleKey: 'settleUp.paymentAppErrorTitle',
+                    messageKey: 'settleUp.paymentAppOpenFailed',
+                },
+                tags: { service: 'settleUp', op: 'openPaymentApp', app },
+            });
+        });
+    };
+
+    return (
+        <View className="px-4 pt-2 pb-2 self-stretch">
+            <SectionLabel
+                isRtl={isRtl}
+                title={t('settleUp.paymentApps')}
+                subtitle={t('settleUp.paymentAppsSubtitle')}
+            />
+            <View style={[rtlRowStyle(isRtl), { gap: 16, paddingTop: 4 }]}>
+                {PAYMENT_APP_TILES.map((app) => (
+                    <Pressable
+                        key={app}
+                        onPress={() => openApp(app)}
+                        testID={`payment-app-tile-${app}`}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('settleUp.openPaymentApp', {
+                            app: t(`settleUp.paymentAppLabels.${app}`),
+                        })}
+                        style={{ alignItems: 'center', width: 72 }}
+                    >
+                        <PaymentAppLogo app={app} size={52} />
+                        <Text
+                            className="text-[10px] font-semibold text-gray-600 mt-1"
+                            style={{ textAlign: 'center' }}
+                            numberOfLines={1}
+                        >
+                            {t(`settleUp.paymentAppLabels.${app}`)}
+                        </Text>
+                    </Pressable>
+                ))}
+            </View>
         </View>
     );
 }

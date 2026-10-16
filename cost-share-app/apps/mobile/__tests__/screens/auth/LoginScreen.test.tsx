@@ -143,11 +143,17 @@ describe('LoginScreen', () => {
         expect(useAppStore.getState().pendingDeactivationNotice).toBe(false);
     });
 
-    it('shows deleted-account dialog when persisted notice is consumed on mount', async () => {
+    it('shows deleted-account dialog when persisted notice is consumed on mount (web)', async () => {
+        const { Platform } = require('react-native');
+        const originalOs = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+
         mockConsumeNotice.mockResolvedValueOnce(true);
 
         const { findByText } = render(<LoginScreen />);
 
         expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: originalOs });
     });
 });
