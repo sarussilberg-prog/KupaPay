@@ -17,7 +17,7 @@
     },
     "sql_integration_tests": {
       "min_test_files": 71,
-      "max_quarantined": 9
+      "max_quarantined": 0
     },
     "web_unit_tests": {
       "min_test_files": 1
