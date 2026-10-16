@@ -349,7 +349,7 @@
             "owedToYouCaption": "On vous doit",
             "moreCurrencies": "{{plusCount}} devises",
             "moreCurrencies_one": "{{plusCount}} devise",
-            "lastActivity": "Actif {{when}}",
+            "updatedAgo": "Mis à jour {{when}}",
             "balanceUnavailable": "Solde indisponible hors ligne"
         },
         "bigCreateCta": "Créer un groupe",

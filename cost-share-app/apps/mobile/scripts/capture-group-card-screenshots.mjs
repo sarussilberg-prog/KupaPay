@@ -14,7 +14,7 @@ import { chromium } from 'playwright';
 const outDir =
     process.env.SCREENSHOT_OUT ?? '/opt/cursor/artifacts/screenshots/groups-list-balance';
 const baseUrl = process.env.EXPO_WEB_URL ?? 'http://127.0.0.1:8081';
-const locales = ['en', 'he', 'ar', 'ru'];
+const locales = (process.env.SCREENSHOT_LOCALES ?? 'en,he,ar,ru').split(',');
 
 mkdirSync(outDir, { recursive: true });
 
@@ -27,12 +27,8 @@ for (const lang of locales) {
     const url = `${baseUrl}/?devGroupCardPreview=1&lang=${lang}`;
     await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
     await page.waitForSelector('[data-testid="group-card-preview-root"]', { timeout: 120_000 });
+    await page.waitForSelector('[data-testid="group-card-meta"]', { timeout: 120_000 });
     await page.waitForSelector('[data-testid="balance-chip-amount"]', { timeout: 120_000 });
-    await page.waitForFunction(
-        () => !document.body?.innerText?.includes('Loading'),
-        undefined,
-        { timeout: 120_000 },
-    );
     await page.waitForTimeout(600);
     const frame = page.locator('[data-testid="group-card-preview-frame"]');
     await frame.screenshot({

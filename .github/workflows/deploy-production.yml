@@ -8,11 +8,6 @@
 name: Deploy production — Supabase migrations
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'cost-share-app/supabase/migrations/**'
-      - 'cost-share-app/supabase/config.toml'
   workflow_dispatch:
     inputs:
       prod_migration_repair:
@@ -50,8 +45,38 @@ jobs:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
         run: bash scripts/supabase-safe-migration-check.sh
 
+  probe:
+    name: Read-only prod migration probe
+    if: github.event.inputs.prod_migration_repair == 'probe_only'
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Run Step 1 probes (docs/PROD_MIGRATION_REPAIR.md), read-only
+        env:
+          SUPABASE_ENV: production
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+        run: |
+          DB_URL="$(bash scripts/supabase-migration-db-url.sh)"
+          echo "::add-mask::$DB_URL"
+          PGOPTIONS='-c default_transaction_read_only=on' psql "$DB_URL" -v ON_ERROR_STOP=0 -X <<'SQL'
+          SELECT version, name FROM supabase_migrations.schema_migrations
+            WHERE version >= '20261016120000' AND version <= '20261016122000' ORDER BY version;
+          SELECT max(version) AS latest_version, count(*) AS total FROM supabase_migrations.schema_migrations;
+          SELECT pg_get_function_result('public.archive_group(uuid)'::regprocedure) AS archive_group_returns;
+          SELECT to_regclass('public.recurring_expense_series') IS NOT NULL AS recurring_table;
+          SELECT jobname, schedule FROM cron.job WHERE jobname = 'pro-trial-reminder-dispatch-daily';
+          SQL
+
   supabase-migrations:
     name: Push migrations to production
+    if: github.event.inputs.prod_migration_repair != 'probe_only'
     needs: [validate-migrations]
     runs-on: ubuntu-latest
     environment: Production

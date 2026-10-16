@@ -361,7 +361,7 @@
             "owedToYouCaption": "مستحق لك",
             "moreCurrencies": "{{plusCount}} عملات",
             "moreCurrencies_one": "{{plusCount}} عملة",
-            "lastActivity": "نشط {{when}}",
+            "updatedAgo": "تم التحديث {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
         "bigCreateCta": "إنشاء مجموعة",

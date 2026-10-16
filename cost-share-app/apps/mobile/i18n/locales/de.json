@@ -349,7 +349,7 @@
             "owedToYouCaption": "Dir zustehend",
             "moreCurrencies": "{{plusCount}} Währungen",
             "moreCurrencies_one": "{{plusCount}} Währung",
-            "lastActivity": "Aktiv {{when}}",
+            "updatedAgo": "Aktualisiert {{when}}",
             "balanceUnavailable": "Saldo offline nicht verfügbar"
         },
         "bigCreateCta": "Gruppe erstellen",
