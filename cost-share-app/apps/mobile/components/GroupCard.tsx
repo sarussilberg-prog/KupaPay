@@ -3,7 +3,7 @@
  */
 
 import { Text } from './AppText';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     View,
     TouchableOpacity,
@@ -15,13 +15,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
-import { formatRelativeTimeShort, GroupRollup, GroupWithMembers } from '@cost-share/shared';
+import { GroupRollup, GroupWithMembers } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
 import { GroupAvatar } from './GroupAvatar';
 import { BalanceChip } from './BalanceChip';
 import { HighlightedText } from './HighlightedText';
 import { UnreadBadge } from './UnreadBadge';
 import { IconLabel } from './primitives/IconLabel';
+import { GroupCardMetaLine } from './GroupCardMetaLine';
 import { ListRow } from './primitives/ListRow';
 import { colors } from '../theme';
 import { shareGroupInvite } from '../services/invite.service';
@@ -36,7 +37,6 @@ import { useAppStore } from '../store';
 import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
-import { toDate } from '../lib/dateUtils';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -72,11 +72,6 @@ function GroupCardBase({
     const isArchived = group.isArchivedByMe || group.isAutoArchived;
     const isFavorite = favoriteGroupId === group.id;
     const hasOpenBalance = groupHasOpenDebts === true;
-
-    const lastActivityWhen = useMemo(() => {
-        const when = group.lastActivityAt ?? group.updatedAt;
-        return formatRelativeTimeShort(toDate(when), Date.now(), i18n.language);
-    }, [group.lastActivityAt, group.updatedAt, i18n.language]);
 
     const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -184,32 +179,50 @@ function GroupCardBase({
     }, [navigation, group.id]);
 
     const cardClass = isArchived
-        ? 'bg-slate-50 rounded-2xl px-3.5 py-3.5 mb-2.5 border border-dashed border-gray-300'
-        : 'bg-white rounded-2xl px-3.5 py-3.5 mb-2.5 border border-gray-100';
+        ? 'bg-slate-50 rounded-2xl px-4 py-3 mb-3 border border-dashed border-gray-300'
+        : 'bg-white rounded-2xl px-4 py-3 mb-3 border border-gray-100';
+
+    const cardShadow =
+        isArchived || Platform.OS === 'web'
+            ? Platform.OS === 'web' && !isArchived
+                ? ({ boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)' } as const)
+                : undefined
+            : Platform.select({
+                  ios: {
+                      shadowColor: '#0f172a',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.06,
+                      shadowRadius: 6,
+                  },
+                  android: { elevation: 2 },
+              });
 
     return (
         <>
-            <View className={cardClass} style={[rtlRowStyle(isRtl), { alignItems: 'stretch' }]}>
+            <View
+                className={cardClass}
+                style={[rtlRowStyle(isRtl), { alignItems: 'stretch' }, cardShadow]}
+            >
                 <ListRow
                     onPress={() => onPress(group.id)}
                     testID={`group-card-${group.id}`}
-                    style={{ flex: 1, alignItems: 'center', gap: 12 }}
+                    style={{ flex: 1, alignItems: 'center', gap: 14 }}
                 >
                     <GroupAvatar
                         imageUrl={group.imageUrl}
                         groupType={group.groupType}
                         name={group.name}
-                        size="md"
+                        size="sm"
                     />
 
-                    <View className="flex-1 self-stretch" style={{ minWidth: 0, gap: 4 }}>
+                    <View className="flex-1 self-stretch" style={{ minWidth: 0, gap: 6 }}>
                         <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
                             <View style={{ flexShrink: 1, minWidth: 0 }}>
                                 <HighlightedText
                                     className={
                                         isArchived
-                                            ? 'text-base font-semibold text-gray-600'
-                                            : 'text-base font-semibold text-gray-900'
+                                            ? 'text-[17px] font-semibold text-gray-600 leading-5'
+                                            : 'text-[17px] font-semibold text-gray-900 leading-5'
                                     }
                                     text={group.name}
                                     query={searchQuery}
@@ -232,20 +245,11 @@ function GroupCardBase({
                             )}
                         </View>
 
-                        <IconLabel
-                            icon="people-outline"
-                            label={
-                                memberCount > 0
-                                    ? t('groups.memberCount', { count: memberCount })
-                                    : t(`groups.types.${group.groupType}`)
-                            }
+                        <GroupCardMetaLine
+                            group={group}
+                            memberCount={memberCount}
+                            language={i18n.language}
                         />
-                        {lastActivityWhen ? (
-                            <IconLabel
-                                icon="time-outline"
-                                label={t('groups.card.lastActivity', { when: lastActivityWhen })}
-                            />
-                        ) : null}
                         {hasMatches && (
                             <IconLabel
                                 label={t('groups.card.matchedMembers', {
@@ -271,9 +275,9 @@ function GroupCardBase({
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
                     testID={`group-card-menu-${group.id}`}
-                    style={{ marginStart: 2, padding: 4, alignSelf: 'center' }}
+                    style={{ marginStart: 4, padding: 6, alignSelf: 'center' }}
                 >
-                    <AppIcon name="ellipsis-vertical" size={18} color={colors.gray400} />
+                    <AppIcon name="ellipsis-vertical" size={16} color={colors.gray400} />
                 </TouchableOpacity>
             </View>
 

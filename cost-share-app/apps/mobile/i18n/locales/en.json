@@ -349,7 +349,7 @@
             "owedToYouCaption": "Owed to you",
             "moreCurrencies": "{{plusCount}} currencies",
             "moreCurrencies_one": "{{plusCount}} currency",
-            "lastActivity": "Active {{when}}",
+            "updatedAgo": "Updated {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },
         "bigCreateCta": "Create a group",

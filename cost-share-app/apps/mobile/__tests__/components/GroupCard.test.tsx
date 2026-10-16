@@ -44,11 +44,12 @@ describe('GroupCard', () => {
         expect(getByText(/groups\.memberCount/)).toBeTruthy();
     });
 
-    it('renders last activity subtitle when timestamp exists', () => {
-        const { getByText } = render(
+    it('renders meta line when timestamp exists', () => {
+        const { getByTestId, getByText } = render(
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
-        expect(getByText(/groups\.card\.lastActivity/)).toBeTruthy();
+        expect(getByTestId('group-card-meta')).toBeTruthy();
+        expect(getByText(/groups\.card\.updatedAgo/)).toBeTruthy();
     });
 
     it('renders a settled chip when no rollup is provided', () => {
