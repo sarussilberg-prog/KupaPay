@@ -1181,6 +1181,8 @@
             "restore": "Restaurer les achats",
             "manageSubscription": "Gérer l’abonnement",
             "storeNotConfigured": "Les achats ne sont pas disponibles dans cette version.",
+            "loadFailed": "Impossible de charger les tarifs d’abonnement. Vérifiez votre connexion ou réessayez dans un instant.",
+            "retry": "Réessayer",
             "purchaseSuccess": "Bienvenue dans Pro !",
             "purchaseError": "L’achat n’a pas pu aboutir.",
             "restoreSuccess": "Achats restaurés.",

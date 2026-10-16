@@ -1191,6 +1191,8 @@
             "restore": "Restaurar compras",
             "manageSubscription": "Gestionar suscripción",
             "storeNotConfigured": "Las compras no están disponibles en esta compilación.",
+            "loadFailed": "No pudimos cargar los precios de suscripción. Comprueba tu conexión o inténtalo de nuevo en un momento.",
+            "retry": "Reintentar",
             "purchaseSuccess": "¡Bienvenido a Pro!",
             "purchaseError": "No se pudo completar la compra.",
             "restoreSuccess": "Compras restauradas.",

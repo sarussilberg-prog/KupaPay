@@ -29,6 +29,11 @@ import {
     type IntroEligibilityMap,
 } from '../../services/purchases.service';
 import { planShowsFreeTrial } from '../../lib/proTrialPaywall';
+import {
+    fetchPaywallOfferings,
+    reportPaywallLoadFailed,
+    type PaywallLoadFailureReason,
+} from '../../lib/paywallOfferingsLoad';
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
@@ -75,30 +80,52 @@ export function ProPaywallContent({
         null,
     );
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
+    const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
+    const [loadAttempt, setLoadAttempt] = useState(0);
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
         void captureProductEvent('paywall_viewed', { feature_key: featureKey, group_id: groupId ?? null });
     }, [featureKey, groupId]);
 
+    const loadOfferings = useCallback(async () => {
+        if (!isPurchasesConfigured()) {
+            setLoading(false);
+            setPackages(null);
+            setIntroEligibility(null);
+            setLoadFailedReason(null);
+            return;
+        }
+        setLoading(true);
+        setLoadFailedReason(null);
+        const result = await fetchPaywallOfferings({
+            loadPackages: loadOfferingPackages,
+            checkEligibility: checkIntroductoryPriceEligibility,
+        });
+        if (result.status === 'ready') {
+            setPackages(result.packages);
+            setIntroEligibility(result.introEligibility);
+            setLoadFailedReason(null);
+        } else {
+            setPackages(null);
+            setIntroEligibility(null);
+            setLoadFailedReason(result.reason);
+            await reportPaywallLoadFailed({
+                featureKey,
+                groupId,
+                reason: result.reason,
+                detail: result.detail,
+            });
+        }
+        setLoading(false);
+    }, [featureKey, groupId]);
+
     useEffect(() => {
-        let cancelled = false;
-        void (async () => {
-            setLoading(true);
-            const pkgs = isPurchasesConfigured() ? await loadOfferingPackages() : null;
-            const eligibility =
-                pkgs && isPurchasesConfigured()
-                    ? await checkIntroductoryPriceEligibility(pkgs)
-                    : {};
-            if (!cancelled) {
-                setPackages(pkgs);
-                setIntroEligibility(eligibility);
-                setLoading(false);
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
+        void loadOfferings();
+    }, [loadOfferings, loadAttempt]);
+
+    const retryLoad = useCallback(() => {
+        setLoadAttempt(n => n + 1);
     }, []);
 
     const selectedPackage = useMemo((): PurchasesPackageLike | null => {
@@ -163,6 +190,9 @@ export function ProPaywallContent({
         planShowsFreeTrial(subscriptionPlanKey, packages, introEligibility);
 
     const disclosureText = useMemo(() => {
+        if (loadFailedReason) {
+            return '';
+        }
         if (selected === 'trip_pass') {
             return t('pro.paywall.tripPassNoRenewal');
         }
@@ -172,7 +202,7 @@ export function ProPaywallContent({
             return t('pro.paywall.trialRenewalDisclosure', { price, period });
         }
         return t('pro.paywall.renewalDisclosure', { price, period });
-    }, [selected, selectedPackage, showFreeTrial, t]);
+    }, [loadFailedReason, selected, selectedPackage, showFreeTrial, t]);
 
     const purchaseCta = useMemo(() => {
         if (!selectedPackage) return t('pro.paywall.subscribe');
@@ -188,13 +218,29 @@ export function ProPaywallContent({
 
     const planPickerSection = useMemo(() => {
         if (loading) {
-            return <ActivityIndicator className="my-8" />;
+            return <ActivityIndicator className="my-8" testID="paywall-loading" />;
         }
         if (!storeConfigured) {
             return (
                 <Text className="text-center text-gray-500 mb-6">
                     {t('pro.paywall.storeNotConfigured')}
                 </Text>
+            );
+        }
+        if (loadFailedReason) {
+            return (
+                <View className="mb-6 items-center gap-3">
+                    <Text className="text-center text-gray-700 leading-5" testID="paywall-load-error">
+                        {t('pro.paywall.loadFailed')}
+                    </Text>
+                    <Pressable
+                        onPress={retryLoad}
+                        className="rounded-xl border border-primary px-5 py-2"
+                        testID="paywall-retry"
+                    >
+                        <Text className="text-primary font-semibold">{t('pro.paywall.retry')}</Text>
+                    </Pressable>
+                </View>
             );
         }
         return (
@@ -233,7 +279,7 @@ export function ProPaywallContent({
                 ) : null}
             </>
         );
-    }, [loading, packages, selected, showTripPass, storeConfigured, t, tripPassPrice]);
+    }, [loadFailedReason, loading, packages, retryLoad, selected, showTripPass, storeConfigured, t, tripPassPrice]);
 
     return (
         <ScrollView
@@ -274,7 +320,7 @@ export function ProPaywallContent({
 
             <Pressable
                 onPress={handlePurchase}
-                disabled={busy || !storeConfigured || !selectedPackage}
+                disabled={busy || !storeConfigured || !selectedPackage || loading || !!loadFailedReason}
                 className="bg-primary rounded-2xl py-4 items-center mb-3"
                 testID="paywall-purchase-btn"
             >

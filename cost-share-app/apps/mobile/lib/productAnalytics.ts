@@ -22,6 +22,7 @@ export type ProductAnalyticsEvent =
     | 'expense_added'
     | 'settle_up'
     | 'paywall_viewed'
+    | 'paywall_load_failed'
     | 'trial_started'
     | 'purchase_completed'
     | 'purchase_failed'
