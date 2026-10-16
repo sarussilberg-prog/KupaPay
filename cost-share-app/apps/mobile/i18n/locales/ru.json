@@ -1306,8 +1306,6 @@
             "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
             "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
             "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
-            "euWithdrawalWaiverHeading": "Немедленный доступ и отказ от 14 дней (ЕС)",
-            "euDigitalPurchaseAck": "Я запрашиваю немедленный доступ к KupaPay Pro и подтверждаю, что теряю 14-дневное право на отказ с момента начала доступа.",
             "havePromoCode": "Есть код?"
         },
         "settings": {

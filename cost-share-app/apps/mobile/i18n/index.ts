@@ -153,6 +153,12 @@ async function resolveStartupLanguage(): Promise<SupportedLanguage> {
  * Initialize language from AsyncStorage on app start
  * Loads saved language preference and applies RTL settings
  */
+/** Screenshot / Playwright capture — skip AsyncStorage + native RTL reload. */
+export async function initializeLanguageForCapture(language: SupportedLanguage): Promise<void> {
+    await ensureI18nReady(language);
+    useAppStore.getState().setLanguage(language);
+}
+
 export const initializeLanguage = async (): Promise<void> => {
     try {
         const language = await resolveStartupLanguage();

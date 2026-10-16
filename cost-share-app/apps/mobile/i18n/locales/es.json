@@ -1290,8 +1290,6 @@
             "trialFreePeriodHeading": "Prueba gratis de {{trialDays}} días",
             "trialFreePeriodBody": "Prueba todas las funciones Pro gratis durante {{trialDays}} días. Cancela en Ajustes antes de que termine la prueba si no quieres continuar.",
             "trialRenewalDisclosure": "Tras {{trialDays}} días se cobrará {{price}}/{{period}} salvo que canceles en Ajustes.",
-            "euWithdrawalWaiverHeading": "Acceso inmediato y desistimiento de 14 días (UE)",
-            "euDigitalPurchaseAck": "Solicito acceso inmediato a KupaPay Pro y reconozco que pierdo mi derecho de desistimiento de 14 días cuando comience el acceso.",
             "havePromoCode": "¿Tienes un código?"
         },
         "settings": {

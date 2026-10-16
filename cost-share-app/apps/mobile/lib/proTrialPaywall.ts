@@ -11,6 +11,32 @@ export type IntroEligibilityEntry = { status: number };
 
 export type IntroEligibilityMap = Record<string, IntroEligibilityEntry | undefined>;
 
+export const DEFAULT_INTRO_FREE_TRIAL_DAYS = 14;
+
+/** RevenueCat / StoreKit period units on introPrice. */
+const INTRO_PERIOD_DAYS: Record<string, number> = {
+    DAY: 1,
+    WEEK: 7,
+    MONTH: 30,
+    YEAR: 365,
+};
+
+export function introFreeTrialDaysFromIntroPrice(
+    introPrice: PurchasesPackageLike['product']['introPrice'],
+): number | null {
+    if (!introPrice || introPrice.price !== 0) return null;
+    const unitDays = INTRO_PERIOD_DAYS[introPrice.periodUnit.toUpperCase()];
+    if (!unitDays) return null;
+    const units = introPrice.periodNumberOfUnits;
+    if (!Number.isFinite(units) || units <= 0) return null;
+    return unitDays * units;
+}
+
+export function introFreeTrialDaysForPackage(pkg: PurchasesPackageLike | null): number {
+    const fromStore = introFreeTrialDaysFromIntroPrice(pkg?.product.introPrice ?? null);
+    return fromStore ?? DEFAULT_INTRO_FREE_TRIAL_DAYS;
+}
+
 export function packageHasIntroFreeTrial(pkg: PurchasesPackageLike | null): boolean {
     if (!pkg?.product.introPrice) return false;
     return pkg.product.introPrice.price === 0;

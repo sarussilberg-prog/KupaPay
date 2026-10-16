@@ -1,0 +1,13 @@
+appId: com.kupapay.mobile
+---
+- evalScript: |
+    const screens = ['groups','balances','add-expense','simplified-debts','pro-currency'];
+    const idx = parseInt(SCREEN_INDEX || '0', 10);
+    output.screen = screens[idx] || screens[0];
+- tapOn:
+    id: asc-demo-nav-${output.screen}
+- extendedWaitUntil:
+    visible:
+      id: asc-demo-screen-${output.screen}
+    timeout: 30000
+- takeScreenshot: ${LOCALE}_${output.screen}

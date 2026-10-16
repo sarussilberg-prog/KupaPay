@@ -1,0 +1,54 @@
+{
+  "screens": ["groups", "balances", "add-expense", "simplified-debts", "pro-currency"],
+  "captions": {
+    "en-US": {
+      "groups": "All your shared groups in one place",
+      "balances": "See who owes whom at a glance",
+      "add-expense": "Add expenses in seconds",
+      "simplified-debts": "Fewer transfers with smart settle-up",
+      "pro-currency": "Pro: automatic trip currency conversion"
+    },
+    "he": {
+      "groups": "כל הקבוצות שלכם במקום אחד",
+      "balances": "מי חייב למי — בצורה ברורה",
+      "add-expense": "הוספת הוצאה בשניות",
+      "simplified-debts": "פחות העברות עם סגירה חכמה",
+      "pro-currency": "Pro: המרת מטבע אוטומטית לטיול"
+    },
+    "ru": {
+      "groups": "Все группы в одном месте",
+      "balances": "Кто кому должен — наглядно",
+      "add-expense": "Добавляйте траты за секунды",
+      "simplified-debts": "Меньше переводов при расчёте",
+      "pro-currency": "Pro: автоматическая валюта поездки"
+    },
+    "ar-SA": {
+      "groups": "كل مجموعاتك في مكان واحد",
+      "balances": "من يدين لمن — بوضوح",
+      "add-expense": "أضف مصروفات في ثوانٍ",
+      "simplified-debts": "تحويلات أقل مع تسوية ذكية",
+      "pro-currency": "Pro: تحويل عملات الرحلة تلقائيًا"
+    },
+    "fr-FR": {
+      "groups": "Tous vos groupes au même endroit",
+      "balances": "Qui doit quoi — en un coup d'œil",
+      "add-expense": "Ajoutez une dépense en secondes",
+      "simplified-debts": "Moins de virements, règlement malin",
+      "pro-currency": "Pro : devises de voyage automatiques"
+    },
+    "es-ES": {
+      "groups": "Todos tus grupos en un solo lugar",
+      "balances": "Quién debe a quién — de un vistazo",
+      "add-expense": "Añade gastos en segundos",
+      "simplified-debts": "Menos transferencias, liquidación inteligente",
+      "pro-currency": "Pro: conversión automática de divisas"
+    },
+    "de-DE": {
+      "groups": "Alle Gruppen an einem Ort",
+      "balances": "Wer schuldet wem — auf einen Blick",
+      "add-expense": "Ausgaben in Sekunden erfassen",
+      "simplified-debts": "Weniger Überweisungen beim Ausgleich",
+      "pro-currency": "Pro: automatische Reise-Währung"
+    }
+  }
+}

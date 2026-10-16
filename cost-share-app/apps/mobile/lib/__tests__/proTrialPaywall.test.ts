@@ -1,5 +1,8 @@
 import {
+    DEFAULT_INTRO_FREE_TRIAL_DAYS,
     INTRO_ELIGIBILITY_ELIGIBLE,
+    introFreeTrialDaysForPackage,
+    introFreeTrialDaysFromIntroPrice,
     isProductIntroEligible,
     packageHasIntroFreeTrial,
     planShowsFreeTrial,
@@ -11,7 +14,7 @@ const pkgWithTrial = {
     product: {
         identifier: 'kupapay_pro_monthly',
         priceString: '₪12.90',
-        introPrice: { price: 0, priceString: '₪0.00', periodNumberOfUnits: 1, periodUnit: 'WEEK' },
+        introPrice: { price: 0, priceString: '₪0.00', periodNumberOfUnits: 2, periodUnit: 'WEEK' },
     },
 };
 
@@ -22,6 +25,27 @@ const pkgNoTrial = {
         priceString: '₪69.90',
     },
 };
+
+describe('introFreeTrialDaysFromIntroPrice', () => {
+    it('converts store intro periods to days', () => {
+        expect(
+            introFreeTrialDaysFromIntroPrice({
+                price: 0,
+                priceString: '₪0.00',
+                periodNumberOfUnits: 2,
+                periodUnit: 'WEEK',
+            }),
+        ).toBe(14);
+        expect(introFreeTrialDaysFromIntroPrice(null)).toBeNull();
+    });
+});
+
+describe('introFreeTrialDaysForPackage', () => {
+    it('uses intro price when present and default otherwise', () => {
+        expect(introFreeTrialDaysForPackage(pkgWithTrial)).toBe(14);
+        expect(introFreeTrialDaysForPackage(pkgNoTrial)).toBe(DEFAULT_INTRO_FREE_TRIAL_DAYS);
+    });
+});
 
 describe('packageHasIntroFreeTrial', () => {
     it('detects zero-price intro', () => {

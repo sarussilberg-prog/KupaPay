@@ -22,11 +22,6 @@ import { PriceSkeleton } from '../PriceSkeleton';
 import { IconLabel } from '../ui/IconLabel';
 import { colors } from '../../theme';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
-import { requiresEuDigitalWithdrawalAck } from '../../lib/euDigitalPurchaseAck';
-import {
-    paywallRequiresEuDigitalWithdrawalAck,
-    proTrialLengthDays,
-} from '../../lib/proSubscriptionStorePolicy';
 import {
     checkIntroductoryPriceEligibility,
     isPurchasesConfigured,
@@ -37,7 +32,7 @@ import {
     restorePurchases,
     type IntroEligibilityMap,
 } from '../../services/purchases.service';
-import { planShowsFreeTrial } from '../../lib/proTrialPaywall';
+import { introFreeTrialDaysForPackage, planShowsFreeTrial } from '../../lib/proTrialPaywall';
 import {
     fetchPaywallOfferings,
     reportPaywallLoadFailed,
@@ -92,13 +87,6 @@ export function ProPaywallContent({
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
-    const [euDigitalAck, setEuDigitalAck] = useState(false);
-
-    const trialDays = proTrialLengthDays();
-    const euWithdrawalRequired = useMemo(
-        () => paywallRequiresEuDigitalWithdrawalAck() && requiresEuDigitalWithdrawalAck(),
-        [],
-    );
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -213,6 +201,11 @@ export function ProPaywallContent({
 
     const pricesReady = !loading && !loadFailedReason && storeConfigured;
 
+    const trialDays = useMemo(() => {
+        if (!showFreeTrial || !selectedPackage) return null;
+        return introFreeTrialDaysForPackage(selectedPackage);
+    }, [selectedPackage, showFreeTrial]);
+
     const disclosureText = useMemo(() => {
         if (!pricesReady || !selectedPackage) {
             return '';
@@ -223,7 +216,7 @@ export function ProPaywallContent({
         const price = selectedPrice;
         if (!price) return '';
         const period = t(subscriptionPeriodKey(selectedPackage));
-        if (showFreeTrial) {
+        if (showFreeTrial && trialDays != null) {
             return t('pro.paywall.trialRenewalDisclosure', { price, period, trialDays });
         }
         return t('pro.paywall.renewalDisclosure', { price, period });
@@ -246,7 +239,7 @@ export function ProPaywallContent({
         if (selected === 'trip_pass') {
             return price ? t('pro.paywall.buyTripPass', { price }) : t('pro.paywall.subscribe');
         }
-        if (showFreeTrial) {
+        if (showFreeTrial && trialDays != null) {
             return t('pro.paywall.tryFreeTrialCta', { trialDays });
         }
         return price ? t('pro.paywall.subscribeAtPrice', { price }) : t('pro.paywall.subscribe');
@@ -257,8 +250,7 @@ export function ProPaywallContent({
         !storeConfigured ||
         !selectedPackage ||
         loading ||
-        !!loadFailedReason ||
-        (euWithdrawalRequired && !euDigitalAck);
+        !!loadFailedReason;
 
     const planPickerSection = useMemo(() => {
         if (loading) {
@@ -371,7 +363,7 @@ export function ProPaywallContent({
 
             {planPickerSection}
 
-            {showFreeTrial && pricesReady ? (
+            {showFreeTrial && pricesReady && trialDays != null ? (
                 <View className="mb-4 px-1">
                     <Text className="text-sm font-semibold text-gray-800 mb-1">
                         {t('pro.paywall.trialFreePeriodHeading', { trialDays })}
@@ -379,32 +371,6 @@ export function ProPaywallContent({
                     <Text className="text-xs text-gray-600 leading-5">
                         {t('pro.paywall.trialFreePeriodBody', { trialDays })}
                     </Text>
-                </View>
-            ) : null}
-
-            {euWithdrawalRequired ? (
-                <View className="mb-4 px-1">
-                    <Text className="text-sm font-semibold text-gray-800 mb-2">
-                        {t('pro.paywall.euWithdrawalWaiverHeading')}
-                    </Text>
-                    <Pressable
-                        onPress={() => setEuDigitalAck(v => !v)}
-                        className="flex-row items-start gap-3"
-                        testID="paywall-eu-withdrawal-ack"
-                        accessibilityRole="checkbox"
-                        accessibilityState={{ checked: euDigitalAck }}
-                    >
-                        <View
-                            className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${euDigitalAck ? 'bg-primary border-primary' : 'border-gray-400 bg-white'}`}
-                        >
-                            {euDigitalAck ? (
-                                <AppIcon name="checkmark" size={14} color="#fff" />
-                            ) : null}
-                        </View>
-                        <Text className="flex-1 text-xs text-gray-600 leading-5">
-                            {t('pro.paywall.euDigitalPurchaseAck')}
-                        </Text>
-                    </Pressable>
                 </View>
             ) : null}
 

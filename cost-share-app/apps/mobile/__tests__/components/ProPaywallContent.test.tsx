@@ -31,10 +31,6 @@ jest.mock('../../lib/paywallOfferingsLoad', () => ({
     reportPaywallLoadFailed: jest.fn(),
 }));
 
-jest.mock('../../lib/euDigitalPurchaseAck', () => ({
-    requiresEuDigitalWithdrawalAck: jest.fn(() => true),
-}));
-
 jest.mock('../../services/purchases.service', () => ({
     isPurchasesConfigured: jest.fn(() => true),
     loadOfferingPackages: jest.fn(),
@@ -53,7 +49,11 @@ const purchaseMock = purchasePackage as jest.MockedFunction<typeof purchasePacka
 
 const mockPackage = {
     identifier: 'annual',
-    product: { identifier: 'kupapay_pro_yearly', priceString: '₪69.90' },
+    product: {
+        identifier: 'kupapay_pro_yearly',
+        priceString: '₪69.90',
+        introPrice: { price: 0, priceString: '₪0.00', periodNumberOfUnits: 2, periodUnit: 'WEEK' },
+    },
 } as const;
 
 const mockMonthly = {
@@ -99,9 +99,9 @@ describe('ProPaywallContent offerings load', () => {
         expect(getByText('₪69.90')).toBeTruthy();
     });
 
-    it('does not show EU withdrawal ack on Android (Play Billing)', async () => {
+    it('never shows EU withdrawal acknowledgement', async () => {
         const os = Platform.OS;
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'android' });
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
 
         fetchMock.mockResolvedValue({
             status: 'ready',
@@ -110,7 +110,9 @@ describe('ProPaywallContent offerings load', () => {
                 annual: mockPackage,
                 tripPass: null,
             },
-            introEligibility: {},
+            introEligibility: {
+                kupapay_pro_yearly: { status: 2 },
+            },
         });
         purchaseMock.mockResolvedValue({ ok: true });
 
@@ -119,42 +121,11 @@ describe('ProPaywallContent offerings load', () => {
         );
 
         await waitFor(() => {
+            expect(queryByTestId('paywall-loading')).toBeNull();
             expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
         });
         expect(queryByTestId('paywall-eu-withdrawal-ack')).toBeNull();
 
-        fireEvent.press(getByTestId('paywall-purchase-btn'));
-        await waitFor(() => {
-            expect(purchaseMock).toHaveBeenCalled();
-        });
-
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
-    });
-
-    it('blocks purchase until EU digital withdrawal acknowledgement on iOS', async () => {
-        const os = Platform.OS;
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
-        fetchMock.mockResolvedValue({
-            status: 'ready',
-            packages: {
-                monthly: { ...mockPackage, identifier: 'monthly' },
-                annual: mockPackage,
-                tripPass: null,
-            },
-            introEligibility: {},
-        });
-        purchaseMock.mockResolvedValue({ ok: true });
-
-        const { getByTestId } = render(<ProPaywallContent featureKey="export_pdf" showTripPass={false} />);
-
-        await waitFor(() => {
-            expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
-        });
-
-        fireEvent.press(getByTestId('paywall-purchase-btn'));
-        expect(purchaseMock).not.toHaveBeenCalled();
-
-        fireEvent.press(getByTestId('paywall-eu-withdrawal-ack'));
         fireEvent.press(getByTestId('paywall-purchase-btn'));
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
