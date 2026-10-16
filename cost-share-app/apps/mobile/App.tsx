@@ -401,8 +401,8 @@ function App() {
             ) : (
               <LoginScreen />
             )}
+            <Toast config={toastConfig} topOffset={56} />
           </WebFrame>
-          <Toast config={toastConfig} topOffset={56} />
         </RtlLayoutProvider>
       </SafeAreaProvider>
     );
@@ -414,8 +414,8 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             <AuthenticatedAppGate />
+            <Toast config={toastConfig} topOffset={56} />
           </WebFrame>
-          <Toast config={toastConfig} topOffset={56} />
         </RtlLayoutProvider>
       </SafeAreaProvider>
     </QueryClientProvider>
