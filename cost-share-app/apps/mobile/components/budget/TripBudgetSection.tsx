@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { ExpenseWithDelta } from '@cost-share/shared';
+type BudgetExpenseRow = {
+    amount: number;
+    currency: string;
+    isDeleted: boolean;
+};
 import { Text } from '../AppText';
 import { fetchGroupTripBudget, type TripBudgetSettings } from '../../services/tripBudget.service';
 import { TripBudgetSheet } from './TripBudgetSheet';
@@ -10,12 +14,12 @@ import { captureProductEvent } from '../../lib/productAnalytics';
 interface TripBudgetSectionProps {
     groupId: string;
     defaultCurrency: string;
-    expenses: ExpenseWithDelta[];
+    expenses: BudgetExpenseRow[];
     unlocked: boolean;
     onUpgrade: () => void;
 }
 
-function sumExpensesInCurrency(expenses: ExpenseWithDelta[], currency: string): number {
+function sumExpensesInCurrency(expenses: BudgetExpenseRow[], currency: string): number {
     return expenses
         .filter(e => !e.isDeleted && e.currency === currency)
         .reduce((acc, e) => acc + e.amount, 0);

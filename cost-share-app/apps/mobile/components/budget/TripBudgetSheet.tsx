@@ -28,7 +28,7 @@ export function TripBudgetSheet({
     onSaved,
 }: TripBudgetSheetProps) {
     const { t } = useTranslation();
-    const { isRtl } = useRtlLayout();
+    const isRtl = useRtlLayout();
     const [amountText, setAmountText] = useState('');
     const [currency, setCurrency] = useState(defaultCurrency);
     const [pickerOpen, setPickerOpen] = useState(false);
@@ -113,8 +113,8 @@ export function TripBudgetSheet({
             </BottomSheetShell>
             <CurrencyPicker
                 visible={pickerOpen}
-                selected={currency}
-                onSelect={c => {
+                value={currency}
+                onChange={c => {
                     setCurrency(c);
                     setPickerOpen(false);
                 }}
