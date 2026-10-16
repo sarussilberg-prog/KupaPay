@@ -332,6 +332,17 @@ jobs:
       - uses: actions/checkout@v4
       - run: bash scripts/ci-no-merge-conflicts.sh
 
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   expo-mobile-config:
     name: Expo mobile config
     needs: [ci-paths, setup]
@@ -374,6 +385,12 @@ jobs:
       - name: Lint migration filenames
         working-directory: cost-share-app
         run: bash scripts/supabase-lint-migration-filenames.sh
+      - name: Migration chain (order + newer than base)
+        working-directory: cost-share-app
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: bash scripts/supabase-migration-chain-check.sh
       - name: Unique prefixes (PR tree)
         working-directory: cost-share-app
         run: bash scripts/supabase-unique-migration-versions.sh
@@ -473,6 +490,7 @@ jobs:
         legal-locale-parity,
         deno-edge-gate,
         no-merge-conflicts,
+        secret-scan,
         expo-mobile-config,
         migration-versions,
         ci-performance,
@@ -504,6 +522,7 @@ jobs:
           check ci-paths "${{ needs.ci-paths.result }}"
           check migration-versions "${{ needs.migration-versions.result }}"
           check no-merge-conflicts "${{ needs.no-merge-conflicts.result }}"
+          check secret-scan "${{ needs.secret-scan.result }}"
           check deno-edge-gate "${{ needs.deno-edge-gate.result }}"
 
           if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "dev" ]]; then

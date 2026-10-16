@@ -1,0 +1,11 @@
+title = "KupaPay gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Supabase publishable keys in documented defaults (public by design)"
+paths = [
+  '''cost-share-app/apps/web/supabase-public\.development\.defaults''',
+  '''cost-share-app/apps/web/supabase-public\.production\.defaults''',
+]
