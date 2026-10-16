@@ -1152,7 +1152,7 @@
         "warningBullet1": "Du kannst dich nicht mehr anmelden.",
         "warningBullet2": "Dein Name und dein Verlauf bleiben für Freunde sichtbar, mit denen du Gruppen geteilt hast.",
         "warningBullet3": "Offene Salden bleiben offen – gleiche sie zuerst aus, wenn du das nicht möchtest.",
-        "warningBullet4": "Diese Aktion kann nicht rückgängig gemacht werden. Schreibe uns an {{email}}, um dein Konto wiederherzustellen.",
+        "warningBullet4": "Du kannst innerhalb von 30 Tagen durch erneutes Anmelden wiederherstellen. Danach ist die Löschung endgültig.",
         "continueBtn": "Weiter",
         "confirmTitle": "Gib zur Bestätigung deine E-Mail-Adresse ein",
         "typeEmailHint": "Gib zur Bestätigung der Löschung Folgendes ein:",
@@ -1165,7 +1165,14 @@
         "openBalancesWarningBody": "Freunde sehen diese Beträge als Schulden gegenüber „Gelöschter Nutzer“.",
         "openBalancesCta": "Jetzt ausgleichen",
         "reSignupBlockedTitle": "Konto gelöscht",
-        "reSignupBlocked": "Dieses Konto wurde gelöscht. Kontaktiere {{email}}, um es wiederherzustellen."
+        "reSignupBlocked": "Dieses Konto wurde gelöscht. Kontaktiere {{email}}, um es wiederherzustellen.",
+        "restoreTitle": "Konto wiederherstellen?",
+        "restoreMessage": "Dieses Konto wurde kürzlich gelöscht. Du kannst es jetzt mit Gruppen und Salden wiederherstellen.",
+        "restoreBtn": "Konto wiederherstellen",
+        "restoredToast": "Konto wiederhergestellt",
+        "restoreFailed": "Wiederherstellung fehlgeschlagen. Melde dich erneut an oder kontaktiere den Support.",
+        "restoreReauthRequired": "Aus Sicherheitsgründen: erneut anmelden, dann Wiederherstellen.",
+        "restoreWindowExpired": "Das Wiederherstellungsfenster ist abgelaufen. Kontaktiere den Support."
     },
     "consolidation": {
         "convertButton": "Währung umrechnen",

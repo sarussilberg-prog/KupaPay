@@ -1152,7 +1152,7 @@
         "warningBullet1": "Vous ne pourrez plus vous connecter.",
         "warningBullet2": "Votre nom et votre historique restent visibles pour les amis avec qui vous partagiez des groupes.",
         "warningBullet3": "Les soldes en cours restent ouverts — réglez-les d'abord si vous ne souhaitez pas qu'ils le restent.",
-        "warningBullet4": "Cette action est irréversible. Contactez-nous à {{email}} pour restaurer le compte.",
+        "warningBullet4": "Vous pouvez restaurer sous 30 jours en vous reconnectant. Ensuite, la suppression est définitive.",
         "continueBtn": "Continuer",
         "confirmTitle": "Saisissez votre e-mail pour confirmer",
         "typeEmailHint": "Pour confirmer la suppression, saisissez :",
@@ -1165,7 +1165,14 @@
         "openBalancesWarningBody": "Vos amis verront ces montants dus à « Utilisateur supprimé ».",
         "openBalancesCta": "Régler maintenant",
         "reSignupBlockedTitle": "Compte supprimé",
-        "reSignupBlocked": "Ce compte a été supprimé. Contactez {{email}} pour le restaurer."
+        "reSignupBlocked": "Ce compte a été supprimé. Contactez {{email}} pour le restaurer.",
+        "restoreTitle": "Restaurer votre compte ?",
+        "restoreMessage": "Ce compte a été supprimé récemment. Vous pouvez le restaurer avec vos groupes et soldes.",
+        "restoreBtn": "Restaurer le compte",
+        "restoredToast": "Compte restauré",
+        "restoreFailed": "Échec de la restauration. Reconnectez-vous ou contactez le support.",
+        "restoreReauthRequired": "Pour la sécurité, reconnectez-vous puis appuyez sur Restaurer.",
+        "restoreWindowExpired": "Le délai de restauration est expiré. Contactez le support."
     },
     "consolidation": {
         "convertButton": "Convertir la devise",
