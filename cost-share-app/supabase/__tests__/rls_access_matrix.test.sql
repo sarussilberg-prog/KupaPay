@@ -13,6 +13,7 @@ DECLARE
     v_exp     CONSTANT UUID := '00000000-0000-0000-0000-000000a00120';
     v_rows    INT;
     v_seen    INT;
+    v_state   JSONB;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_owner, 'rls-owner@test.local'),
@@ -206,6 +207,27 @@ BEGIN
     IF v_rows <> 1 THEN
         RAISE EXCEPTION 'matrix[settlements INSERT party]: expected 1 row, got %', v_rows;
     END IF;
+
+    -- ── inactive (self-deleted) caller: no financial reads (#331) ──
+    UPDATE public.profiles SET is_active = FALSE, deleted_at = NOW() WHERE id = v_member;
+    PERFORM public.test_set_authenticated(v_member);
+    SELECT COUNT(*) INTO v_seen FROM public.expenses WHERE group_id = v_group;
+    IF v_seen <> 0 THEN
+        RAISE EXCEPTION 'matrix[expenses SELECT inactive member]: expected 0 rows, got %', v_seen;
+    END IF;
+    BEGIN
+        PERFORM public.get_user_simplified_inputs(v_member);
+        RAISE EXCEPTION 'matrix[get_user_simplified_inputs inactive]: must be denied';
+    EXCEPTION WHEN OTHERS THEN
+        IF SQLERRM NOT LIKE '%inactive_account%' AND SQLERRM NOT LIKE '%42501%' THEN
+            RAISE;
+        END IF;
+    END;
+    SELECT public.get_my_account_deletion_state() INTO v_state;
+    IF (v_state->>'isDeleted')::boolean IS DISTINCT FROM TRUE THEN
+        RAISE EXCEPTION 'matrix[deletion state inactive]: isDeleted expected TRUE';
+    END IF;
+    UPDATE public.profiles SET is_active = TRUE, deleted_at = NULL WHERE id = v_member;
 
     RAISE NOTICE 'rls_access_matrix.test.sql — all matrix checks passed';
 END;
