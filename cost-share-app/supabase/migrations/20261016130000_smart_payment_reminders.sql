@@ -98,7 +98,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public._get_group_pairwise_debts_core(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public._get_group_pairwise_debts_core(UUID) FROM PUBLIC; -- safe-breaking: internal helper for new reminders RPC
 
 CREATE OR REPLACE FUNCTION public.set_group_smart_reminder(
     p_group_id UUID,
@@ -147,7 +147,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.set_group_smart_reminder(UUID, BOOLEAN, INT) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.set_group_smart_reminder(UUID, BOOLEAN, INT) FROM PUBLIC, anon; -- safe-breaking: new Pro reminders RPC
 GRANT EXECUTE ON FUNCTION public.set_group_smart_reminder(UUID, BOOLEAN, INT) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.run_smart_payment_reminders(p_limit INT DEFAULT 50)
@@ -234,7 +234,7 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.run_smart_payment_reminders(INT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.run_smart_payment_reminders(INT) FROM PUBLIC, anon, authenticated; -- safe-breaking: cron-only RPC
 GRANT EXECUTE ON FUNCTION public.run_smart_payment_reminders(INT) TO service_role;
 
 -- Deduplicate pairwise debt SQL: member RPC delegates to core.
