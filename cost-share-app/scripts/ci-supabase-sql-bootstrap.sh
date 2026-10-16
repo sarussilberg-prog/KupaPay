@@ -53,6 +53,24 @@ IMMUTABLE
 AS $$
   SELECT string_to_array(NULLIF(trim(both '/' FROM name), ''), '/');
 $$;
+
+-- Account-deletion lifecycle tests read banned_until as authenticated (matches hosted Auth API).
+GRANT SELECT (id, email, banned_until) ON auth.users TO authenticated;
+GRANT DELETE ON auth.sessions TO supabase_admin;
+GRANT DELETE ON auth.refresh_tokens TO supabase_admin;
+
+CREATE OR REPLACE FUNCTION auth.jwt()
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SET search_path = auth, public
+AS $$
+  SELECT COALESCE(
+    NULLIF(current_setting('request.jwt.claims', true), '')::jsonb,
+    jsonb_build_object('sub', NULLIF(current_setting('request.jwt.claim.sub', true), ''))
+  );
+$$;
+
 SQL
 
 echo "▶ Loading baseline schema.sql (core DDL, first ${SCHEMA_CORE_LINES} lines)"
@@ -112,6 +130,10 @@ BEGIN
   PERFORM set_config('role', 'authenticated', TRUE);
 END;
 $$;
+
+GRANT service_role TO supabase_admin;
+GRANT EXECUTE ON FUNCTION public.hard_purge_expired_deleted_accounts(INT) TO supabase_admin;
+GRANT EXECUTE ON FUNCTION public.restore_deleted_account(UUID, TEXT, TEXT) TO supabase_admin;
 SQL
 
 echo "✅ SQL CI bootstrap complete"

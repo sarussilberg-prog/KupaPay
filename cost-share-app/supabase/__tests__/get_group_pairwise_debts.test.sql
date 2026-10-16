@@ -1,5 +1,5 @@
 -- ============================================================================
--- SQL regression tests for public.get_group_pairwise_debts(p_group_id UUID)
+-- SQL regression tests for public._get_group_pairwise_debts_core(p_group_id UUID)
 --
 -- The whole script runs in a single transaction with ROLLBACK at the end, so
 -- it leaves no data behind. Each assertion uses RAISE EXCEPTION on failure
@@ -81,9 +81,9 @@ BEGIN
     INSERT INTO public.expense_splits (expense_id, user_id, amount)
     VALUES (v_exp, v_alice, 15), (v_exp, v_bob, 15);
 
-    SELECT COUNT(*) INTO v_rows FROM public.get_group_pairwise_debts(v_group);
+    SELECT COUNT(*) INTO v_rows FROM public._get_group_pairwise_debts_core(v_group);
     SELECT from_user_id, to_user_id, amount INTO v_from, v_to, v_amount
-    FROM public.get_group_pairwise_debts(v_group) LIMIT 1;
+    FROM public._get_group_pairwise_debts_core(v_group) LIMIT 1;
     IF v_rows <> 1 OR v_from <> v_bob OR v_to <> v_alice OR v_amount <> 15 THEN
         RAISE EXCEPTION 'CASE 1 FAILED: rows=% from=% to=% amount=%', v_rows, v_from, v_to, v_amount;
     END IF;
@@ -91,8 +91,8 @@ BEGIN
     -- ---- CASE 2: Bob settles $10 of $15 → row remains, amount=5 ---------
     INSERT INTO public.settlements (group_id, from_user_id, to_user_id, amount, currency, settlement_date, created_by)
     VALUES (v_group, v_bob, v_alice, 10, 'USD', CURRENT_DATE, v_bob);
-    SELECT COUNT(*) INTO v_rows FROM public.get_group_pairwise_debts(v_group);
-    SELECT amount INTO v_amount FROM public.get_group_pairwise_debts(v_group) LIMIT 1;
+    SELECT COUNT(*) INTO v_rows FROM public._get_group_pairwise_debts_core(v_group);
+    SELECT amount INTO v_amount FROM public._get_group_pairwise_debts_core(v_group) LIMIT 1;
     IF v_rows <> 1 OR v_amount <> 5 THEN
         RAISE EXCEPTION 'CASE 2 FAILED: rows=% amount=%', v_rows, v_amount;
     END IF;
@@ -100,7 +100,7 @@ BEGIN
     -- ---- CASE 3: Bob settles remaining $5 → 0 rows ----------------------
     INSERT INTO public.settlements (group_id, from_user_id, to_user_id, amount, currency, settlement_date, created_by)
     VALUES (v_group, v_bob, v_alice, 5, 'USD', CURRENT_DATE, v_bob);
-    SELECT COUNT(*) INTO v_rows FROM public.get_group_pairwise_debts(v_group);
+    SELECT COUNT(*) INTO v_rows FROM public._get_group_pairwise_debts_core(v_group);
     IF v_rows <> 0 THEN
         RAISE EXCEPTION 'CASE 3 FAILED: rows=%', v_rows;
     END IF;
@@ -109,7 +109,7 @@ BEGIN
     INSERT INTO public.settlements (group_id, from_user_id, to_user_id, amount, currency, settlement_date, created_by)
     VALUES (v_group, v_bob, v_alice, 3, 'USD', CURRENT_DATE, v_bob);
     SELECT amount, from_user_id, to_user_id INTO v_amount, v_from, v_to
-    FROM public.get_group_pairwise_debts(v_group) LIMIT 1;
+    FROM public._get_group_pairwise_debts_core(v_group) LIMIT 1;
     IF v_from <> v_alice OR v_to <> v_bob OR v_amount <> 3 THEN
         RAISE EXCEPTION 'CASE 4 FAILED: from=% to=% amount=%', v_from, v_to, v_amount;
     END IF;
@@ -121,12 +121,12 @@ BEGIN
     INSERT INTO public.expense_splits (expense_id, user_id, amount)
     VALUES (v_exp, v_alice, 20), (v_exp, v_carol, 20);
 
-    SELECT COUNT(*) INTO v_rows FROM public.get_group_pairwise_debts(v_group);
+    SELECT COUNT(*) INTO v_rows FROM public._get_group_pairwise_debts_core(v_group);
     IF v_rows <> 2 THEN
         RAISE EXCEPTION 'CASE 5 FAILED: expected 2 rows (USD + EUR), got %', v_rows;
     END IF;
     SELECT COUNT(*), MIN(amount) INTO v_eur_ct, v_eur
-    FROM public.get_group_pairwise_debts(v_group) WHERE currency = 'EUR';
+    FROM public._get_group_pairwise_debts_core(v_group) WHERE currency = 'EUR';
     IF v_eur_ct <> 1 OR v_eur <> 20 THEN
         RAISE EXCEPTION 'CASE 5 EUR FAILED: count=% amount=%', v_eur_ct, v_eur;
     END IF;
@@ -138,7 +138,7 @@ BEGIN
     INSERT INTO public.expense_splits (expense_id, user_id, amount)
     VALUES (v_exp, v_alice, 50), (v_exp, v_carol, 50);
     SELECT COUNT(*) INTO v_eur_ct
-    FROM public.get_group_pairwise_debts(v_group) WHERE currency = 'EUR' AND amount = 20;
+    FROM public._get_group_pairwise_debts_core(v_group) WHERE currency = 'EUR' AND amount = 20;
     IF v_eur_ct <> 1 THEN
         RAISE EXCEPTION 'CASE 6 FAILED: soft-deleted expense changed totals; count=%', v_eur_ct;
     END IF;
@@ -146,7 +146,7 @@ BEGIN
     -- ---- CASE 7: Soft-deleted settlement (deleted_at IS NOT NULL) -------
     INSERT INTO public.settlements (group_id, from_user_id, to_user_id, amount, currency, settlement_date, created_by, deleted_at)
     VALUES (v_group, v_alice, v_carol, 20, 'EUR', CURRENT_DATE, v_alice, NOW());
-    SELECT amount INTO v_eur FROM public.get_group_pairwise_debts(v_group) WHERE currency = 'EUR';
+    SELECT amount INTO v_eur FROM public._get_group_pairwise_debts_core(v_group) WHERE currency = 'EUR';
     IF v_eur <> 20 THEN
         RAISE EXCEPTION 'CASE 7 FAILED: soft-deleted settlement changed totals; eur=%', v_eur;
     END IF;
