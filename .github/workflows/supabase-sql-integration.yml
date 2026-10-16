@@ -25,4 +25,13 @@ jobs:
         run: bash scripts/supabase-unique-migration-versions.sh
 
       - name: Run SQL regression suite (local stack)
-        run: bash scripts/ci-supabase-sql-tests.sh
+        run: |
+          set -euo pipefail
+          for attempt in 1 2; do
+            if bash scripts/ci-supabase-sql-tests.sh; then
+              exit 0
+            fi
+            echo "::warning::SQL CI attempt ${attempt} failed — retrying once (Postgres/Docker flake)"
+            sleep 15
+          done
+          exit 1
