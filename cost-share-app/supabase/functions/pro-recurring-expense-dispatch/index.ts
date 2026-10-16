@@ -1,21 +1,17 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import {
+    assertCronPost,
+    createServiceSupabase,
+    cronWebhookSecret,
+    jsonInternalError,
+    jsonOk,
+} from '../cron-webhook/auth.ts';
 import { dispatchRecurringExpenses } from './handler.ts';
 
-const PUSH_WEBHOOK_SECRET = Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-
 Deno.serve(async (req) => {
-    if (req.method !== 'POST') {
-        return new Response(JSON.stringify({ ok: false, error: 'method_not_allowed' }), { status: 405 });
-    }
-    if (!PUSH_WEBHOOK_SECRET || req.headers.get('x-webhook-secret') !== PUSH_WEBHOOK_SECRET) {
-        return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401 });
-    }
+    const denied = assertCronPost(req, cronWebhookSecret());
+    if (denied) return denied;
 
-    const sb = createClient(SUPABASE_URL, SERVICE_ROLE, {
-        auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const sb = createServiceSupabase();
 
     try {
         const result = await dispatchRecurringExpenses({
@@ -24,16 +20,11 @@ Deno.serve(async (req) => {
                     p_limit: limit,
                 });
                 if (error) throw error;
-                const row = (data ?? {}) as { created?: number; skipped?: boolean };
-                return row;
+                return (data ?? {}) as { created?: number; skipped?: boolean };
             },
         });
-        return new Response(JSON.stringify(result), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        return jsonOk(result);
     } catch (e) {
-        console.error('pro-recurring-expense-dispatch failed', e);
-        return new Response(JSON.stringify({ ok: false, error: 'internal' }), { status: 500 });
+        return jsonInternalError('pro-recurring-expense-dispatch failed', e);
     }
 });

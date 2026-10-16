@@ -1261,6 +1261,12 @@
         },
         "recurring": {
             "lockedBody": "Automatiza alquiler, suscripciones y otros gastos recurrentes con Pro."
+        },
+        "smartReminder": {
+            "sheetTitle": "Recordatorios inteligentes",
+            "enable": "Recordatorios automáticos de liquidación",
+            "lockedBody": "Pro envía recordatorios según tu intervalo (mínimo cada 3 días).",
+            "intervalDays": "Cada {{count}} días"
         }
     },
     "updateRequired": {
