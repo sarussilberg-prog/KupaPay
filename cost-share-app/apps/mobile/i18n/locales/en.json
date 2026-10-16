@@ -556,7 +556,21 @@
                 "amountUnder": "{{currency}} {{value}} short of {{currency}} {{total}}",
                 "amountOver": "{{currency}} {{value}} over {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} of {{total}} · {{currency}} {{each}} ea."
+            "splitMeta": "{{selected}} of {{total}} · {{currency}} {{each}} ea.",
+            "recurring": {
+                "label": "Recurring",
+                "sheetTitle": "Repeat",
+                "seriesBadge": "Recurring",
+                "stopSeries": "Stop recurring",
+                "stopConfirmTitle": "Stop recurring expenses?",
+                "stopConfirmBody": "Past expenses stay in the group. No new repeats will be created.",
+                "stopped": "Recurring series stopped",
+                "frequency": {
+                    "weekly": "Weekly",
+                    "monthly": "Monthly",
+                    "yearly": "Yearly"
+                }
+            }
         }
     },
     "balances": {
@@ -1155,6 +1169,9 @@
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "Automate rent, subscriptions, and other repeating expenses with Pro."
         }
     },
     "remind": {

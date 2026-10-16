@@ -49,6 +49,7 @@ import {
 } from '../../components/expenseV2/EditPayerSplitSheet';
 import { SplitBreakdownAccordion } from '../../components/expenseV2/SplitBreakdownAccordion';
 import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
+import { RecurringFrequencySheet } from '../../components/expenseV2/RecurringFrequencySheet';
 import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
 import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
 
@@ -102,7 +103,11 @@ import {
     DEFAULT_CURRENCY,
     ExpenseCategory,
     ExpenseSplitInput,
+    isProPerkUnlocked,
+    type RecurringFrequency,
 } from '@cost-share/shared';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import {
     UnequalSplitMode,
     areSplitsEqual,
@@ -185,6 +190,11 @@ export function AddExpenseScreen() {
         : undefined;
     const queryClient = useQueryClient();
     const addExpense = useAddExpenseMutation(groupId);
+    const proStatusQuery = useProStatusQuery(groupId);
+    const recurringUnlocked = isProPerkUnlocked(
+        proStatusQuery.data?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
 
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
@@ -224,6 +234,9 @@ export function AddExpenseScreen() {
         return Math.min(280, charCount * 34 + 20);
     }, [amount]);
     const [datePickerVisible, setDatePickerVisible] = useState(false);
+    const [recurringEnabled, setRecurringEnabled] = useState(false);
+    const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('monthly');
+    const [recurringSheetVisible, setRecurringSheetVisible] = useState(false);
     const [groupPickerVisible, setGroupPickerVisible] = useState(false);
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
@@ -554,6 +567,24 @@ export function AddExpenseScreen() {
         platformAlert(t('expenses.receipt'), undefined, buttons, { cancelable: true });
     }, [t, localReceiptUri, receiptUrl, receiptRemoved]);
 
+    const handleRecurringPress = useCallback(() => {
+        if (isEditMode) return;
+        if (!recurringUnlocked && KUPAPAY_PRO_ENABLED) {
+            navigation.navigate('Paywall', {
+                featureKey: 'recurring_expenses',
+                groupId,
+            });
+            return;
+        }
+        if (!recurringUnlocked) return;
+        if (!recurringEnabled) {
+            setRecurringEnabled(true);
+            setRecurringSheetVisible(true);
+            return;
+        }
+        setRecurringSheetVisible(true);
+    }, [isEditMode, recurringUnlocked, navigation, groupId, recurringEnabled]);
+
     const handleEditorDone = useCallback((draft: EditPayerSplitDraft) => {
         setPaidBy(draft.payerId);
         setSplitMode(draft.splitMode);
@@ -602,6 +633,9 @@ export function AddExpenseScreen() {
                 splits,
                 splitMode: storedSplitMode,
                 ...(uploadedReceiptUrl ? { receiptUrl: uploadedReceiptUrl } : {}),
+                ...(recurringEnabled && recurringUnlocked
+                    ? { recurringFrequency }
+                    : {}),
             });
             stopLoading();
             // Land on the new expense's group with GroupsList underneath so
@@ -696,6 +730,9 @@ export function AddExpenseScreen() {
         t,
         addExpense,
         queryClient,
+        recurringEnabled,
+        recurringUnlocked,
+        recurringFrequency,
     ]);
 
     const runShake = useCallback((anim: Animated.Value) => {
@@ -760,6 +797,9 @@ export function AddExpenseScreen() {
             ? t('expenses.v2.receipt')
             : t('expenses.v2.receipt')
         : t('expenses.v2.receipt');
+    const recurringLabel = recurringEnabled
+        ? t(`expenses.v2.recurring.frequency.${recurringFrequency}`)
+        : t('expenses.v2.recurring.label');
     const dateLabel = isSameDay(date, new Date())
         ? t('expenses.v2.today')
         : formatShortDate(date);
@@ -1068,6 +1108,15 @@ export function AddExpenseScreen() {
                         onPress={handleReceiptPress}
                         testID="meta-receipt"
                     />
+                    {!isEditMode ? (
+                        <QuietIconPill
+                            icon="repeat-outline"
+                            label={recurringLabel}
+                            active={recurringEnabled && recurringUnlocked}
+                            onPress={handleRecurringPress}
+                            testID="meta-recurring"
+                        />
+                    ) : null}
                     {hasReceipt && (localReceiptUri || receiptUrl) ? (
                         <ReceiptThumbnail
                             uri={localReceiptUri ?? persistedReceiptDisplayUrl ?? null}
@@ -1106,6 +1155,13 @@ export function AddExpenseScreen() {
                     setDate(next);
                     setDatePickerVisible(false);
                 }}
+            />
+
+            <RecurringFrequencySheet
+                visible={recurringSheetVisible}
+                value={recurringFrequency}
+                onSelect={setRecurringFrequency}
+                onClose={() => setRecurringSheetVisible(false)}
             />
 
             {/* Group picker — reused favorite-group sheet with an expense title.

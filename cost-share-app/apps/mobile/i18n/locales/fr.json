@@ -556,7 +556,21 @@
                 "amountUnder": "Il manque {{currency}} {{value}} pour atteindre {{currency}} {{total}}",
                 "amountOver": "{{currency}} {{value}} de plus que {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} sur {{total}} · {{currency}} {{each}} chacun"
+            "splitMeta": "{{selected}} sur {{total}} · {{currency}} {{each}} chacun",
+            "recurring": {
+                "label": "Récurrent",
+                "sheetTitle": "Répétition",
+                "seriesBadge": "Récurrent",
+                "stopSeries": "Arrêter la répétition",
+                "stopConfirmTitle": "Arrêter les dépenses récurrentes ?",
+                "stopConfirmBody": "Les dépenses passées restent. Aucune nouvelle répétition ne sera créée.",
+                "stopped": "Série récurrente arrêtée",
+                "frequency": {
+                    "weekly": "Hebdomadaire",
+                    "monthly": "Mensuel",
+                    "yearly": "Annuel"
+                }
+            }
         }
     },
     "balances": {
@@ -1224,6 +1238,9 @@
             "pickerLabel": "Montants en {{currency}}",
             "ratesMissing": "Les taux de change sont indisponibles pour le moment.",
             "row": "{{from}} → {{to}} : {{amount}} {{currency}} (était {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "Automatisez le loyer, les abonnements et autres dépenses récurrentes avec Pro."
         }
     },
     "updateRequired": {

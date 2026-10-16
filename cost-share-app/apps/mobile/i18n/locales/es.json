@@ -563,7 +563,21 @@
                 "amountUnder": "Faltan {{currency}} {{value}} para {{currency}} {{total}}",
                 "amountOver": "{{currency}} {{value}} por encima de {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} de {{total}} · {{currency}} {{each}} c/u"
+            "splitMeta": "{{selected}} de {{total}} · {{currency}} {{each}} c/u",
+            "recurring": {
+                "label": "Recurrente",
+                "sheetTitle": "Repetir",
+                "seriesBadge": "Recurrente",
+                "stopSeries": "Detener repetición",
+                "stopConfirmTitle": "¿Detener gastos recurrentes?",
+                "stopConfirmBody": "Los gastos pasados se mantienen. No se crearán nuevas repeticiones.",
+                "stopped": "Serie recurrente detenida",
+                "frequency": {
+                    "weekly": "Semanal",
+                    "monthly": "Mensual",
+                    "yearly": "Anual"
+                }
+            }
         }
     },
     "balances": {
@@ -1234,6 +1248,9 @@
             "pickerLabel": "Importes en {{currency}}",
             "ratesMissing": "Los tipos de cambio no están disponibles ahora.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (antes {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "Automatiza alquiler, suscripciones y otros gastos recurrentes con Pro."
         }
     },
     "updateRequired": {
