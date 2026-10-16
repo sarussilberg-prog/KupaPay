@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import versionJson from '../packages/shared/version.json';
+import versionJson from '../../packages/shared/version.json';
 
 const appVersion = (versionJson as { version: string }).version;
 const vercelSha = (process.env.VERCEL_GIT_COMMIT_SHA ?? '').trim();
