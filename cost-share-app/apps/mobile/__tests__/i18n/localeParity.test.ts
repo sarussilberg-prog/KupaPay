@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import {
+    APP_I18N_LOCALE_CODES,
     compareLocaleToBase,
     findUntranslatedFromBase,
     flattenLocale,
@@ -19,10 +20,11 @@ import {
     WEB_I18N_LOCALE_CODES,
 } from '../../../web/lib/i18n';
 
-const LOCALES_DIR = path.join(__dirname, '../../i18n/locales');
+const MOBILE_LOCALES_DIR = path.join(__dirname, '../../i18n/locales');
+const WEB_LOCALES_DIR = path.join(__dirname, '../../../web/locales');
 
-function loadLocaleFile(code: string): unknown {
-    const file = path.join(LOCALES_DIR, `${code}.json`);
+function loadLocaleFile(dir: string, code: string): unknown {
+    const file = path.join(dir, `${code}.json`);
     expect(fs.existsSync(file)).toBe(true);
     return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
@@ -49,9 +51,9 @@ describe('i18n locale parity (config-driven)', () => {
         expect(MOBILE_I18N_LOCALE_CODES.length).toBe(7);
     });
 
-    it('web locale codes come from webI18nTranslations registry', () => {
-        expect(WEB_I18N_LOCALE_CODES.length).toBeGreaterThanOrEqual(2);
-        expect(WEB_I18N_LOCALE_CODES).toContain(WEB_I18N_BASE_LOCALE);
+    it('mobile and web locale registries match APP_I18N_LOCALE_CODES', () => {
+        expect([...MOBILE_I18N_LOCALE_CODES].sort()).toEqual([...APP_I18N_LOCALE_CODES].sort());
+        expect([...WEB_I18N_LOCALE_CODES].sort()).toEqual([...APP_I18N_LOCALE_CODES].sort());
     });
 
     it('mobile: every configured locale matches en keys (no missing/empty/placeholder drift)', () => {
@@ -88,8 +90,8 @@ describe('mobile locale files (legacy checks)', () => {
         expect(isRtlLanguage('en')).toBe(false);
     });
 
-    const baseFlat = flattenLocale(loadLocaleFile(MOBILE_I18N_BASE_LOCALE));
-    const heFlat = flattenLocale(loadLocaleFile('he'));
+    const baseFlat = flattenLocale(loadLocaleFile(MOBILE_LOCALES_DIR, MOBILE_I18N_BASE_LOCALE));
+    const heFlat = flattenLocale(loadLocaleFile(MOBILE_LOCALES_DIR, 'he'));
 
     it('English includes Hebrew _two/_many plural keys (KI-013)', () => {
         const pluralSuffix = /_(two|many)$/;
@@ -102,7 +104,7 @@ describe('mobile locale files (legacy checks)', () => {
     it.each(MOBILE_I18N_LOCALE_CODES.filter(l => l !== MOBILE_I18N_BASE_LOCALE))(
         '%s has all base keys and matching interpolation placeholders',
         locale => {
-            const flat = flattenLocale(loadLocaleFile(locale));
+            const flat = flattenLocale(loadLocaleFile(MOBILE_LOCALES_DIR, locale));
             const issues = compareLocaleToBase(baseFlat, flat, locale, { allowExtraKeys: true });
             const missing = issues.filter(i => i.kind === 'missing_key');
             const placeholders = issues.filter(i => i.kind === 'placeholder_mismatch');
@@ -116,7 +118,36 @@ describe('mobile locale files (legacy checks)', () => {
     it.each(MOBILE_I18N_LOCALE_CODES.filter(l => l !== MOBILE_I18N_BASE_LOCALE))(
         '%s has no untranslated strings identical to English',
         locale => {
-            const flat = flattenLocale(loadLocaleFile(locale));
+            const flat = flattenLocale(loadLocaleFile(MOBILE_LOCALES_DIR, locale));
+            const untranslated = findUntranslatedFromBase(baseFlat, flat, locale, (value, key) =>
+                isAllowlistedLocaleValue(value, key),
+            );
+            expect(untranslated).toEqual([]);
+        },
+    );
+});
+
+describe('web locale files', () => {
+    const baseFlat = flattenLocale(loadLocaleFile(WEB_LOCALES_DIR, WEB_I18N_BASE_LOCALE));
+
+    it.each(WEB_I18N_LOCALE_CODES.filter(l => l !== WEB_I18N_BASE_LOCALE))(
+        '%s has all base keys and matching interpolation placeholders',
+        locale => {
+            const flat = flattenLocale(loadLocaleFile(WEB_LOCALES_DIR, locale));
+            const issues = compareLocaleToBase(baseFlat, flat, locale, { allowExtraKeys: true });
+            const missing = issues.filter(i => i.kind === 'missing_key');
+            const placeholders = issues.filter(i => i.kind === 'placeholder_mismatch');
+            const empty = issues.filter(i => i.kind === 'empty_value');
+            expect(missing).toEqual([]);
+            expect(placeholders).toEqual([]);
+            expect(empty).toEqual([]);
+        },
+    );
+
+    it.each(WEB_I18N_LOCALE_CODES.filter(l => l !== WEB_I18N_BASE_LOCALE))(
+        '%s has no untranslated strings identical to English',
+        locale => {
+            const flat = flattenLocale(loadLocaleFile(WEB_LOCALES_DIR, locale));
             const untranslated = findUntranslatedFromBase(baseFlat, flat, locale, (value, key) =>
                 isAllowlistedLocaleValue(value, key),
             );

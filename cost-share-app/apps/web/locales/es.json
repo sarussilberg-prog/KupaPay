@@ -1,0 +1,102 @@
+{
+  "header": {
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "hello": "Hola"
+  },
+  "locale": {
+    "toggle": "English",
+    "chooseLanguage": "Idioma"
+  },
+  "hero": {
+    "headline": "Divide gastos con amigos, sin complicaciones",
+    "subheadline": "KupaPay simplifica las deudas automáticamente — menos transferencias, menos estrés",
+    "ctaDownloadIos": "Descargar para iPhone",
+    "ctaDownloadAndroid": "Descargar para Android",
+    "ctaSignIn": "Entrar al sitio"
+  },
+  "features": {
+    "title": "¿Por qué KupaPay?",
+    "items": [
+      {
+        "icon": "simplify",
+        "title": "Simplificación automática de deudas",
+        "description": "Tu grupo hizo 20 pagos — KupaPay calcula que solo necesitas transferir una vez"
+      },
+      {
+        "icon": "realtime",
+        "title": "Actualizaciones en tiempo real",
+        "description": "Cada gasto se actualiza al instante para todos los miembros del grupo"
+      },
+      {
+        "icon": "groups",
+        "title": "Grupos flexibles",
+        "description": "Crea grupos para viajes, alquiler, cenas — los que quieras"
+      },
+      {
+        "icon": "offline",
+        "title": "Funciona sin conexión",
+        "description": "Añade y consulta gastos sin internet — todo se sincroniza al volver a la red"
+      },
+      {
+        "icon": "security",
+        "title": "Privacidad y seguridad",
+        "description": "Tus datos están protegidos y seguros"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Cómo funciona",
+    "steps": [
+      {
+        "title": "Crea un grupo",
+        "description": "Invita amigos en 2 segundos"
+      },
+      {
+        "title": "Añade gastos",
+        "description": "Quién pagó, cuánto y por quién"
+      },
+      {
+        "title": "Obtén el desglose",
+        "description": "KupaPay muestra exactamente quién debe qué a quién"
+      }
+    ]
+  },
+  "faq": {
+    "title": "FAQ",
+    "items": [
+      {
+        "question": "¿En qué se diferencia KupaPay de otras apps?",
+        "answer": "KupaPay usa un algoritmo de simplificación de deudas que reduce el número de transferencias entre amigos. En lugar de 10 transferencias, quizá solo necesites 3."
+      },
+      {
+        "question": "¿Es gratis?",
+        "answer": "Sí, KupaPay es completamente gratis."
+      },
+      {
+        "question": "¿Cómo funciona la simplificación de deudas?",
+        "answer": "La app calcula el saldo neto de cada miembro y encuentra el número mínimo de transferencias para saldar todas las deudas."
+      },
+      {
+        "question": "¿Puedo eliminar un grupo?",
+        "answer": "Sí, puedes cerrar o eliminar un grupo en cualquier momento desde la configuración del grupo."
+      },
+      {
+        "question": "¿Mis datos están seguros?",
+        "answer": "Sí. Los datos se almacenan en Supabase con cifrado completo y autenticación en dos pasos."
+      }
+    ]
+  },
+  "footer": {
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "contact": "Contacto",
+    "copyright": "© 2026 KupaPay"
+  },
+  "legal": {
+    "notFound": "Documento no encontrado.",
+    "backHome": "Volver al inicio",
+    "effectiveDate": "Vigente desde ",
+    "appVersion": "Versión de la app "
+  }
+}
