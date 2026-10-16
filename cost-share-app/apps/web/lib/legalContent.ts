@@ -27,8 +27,8 @@ export function loadStaticLegalDocument(
     const raw = fs.readFileSync(file, 'utf8');
     return {
         title: legalDocumentTitle(slug, docLocale),
-        content_md: applyLegalPlaceholders(raw),
-        effective_date: applyLegalPlaceholders('[DATE]'),
+        content_md: applyLegalPlaceholders(raw, docLocale),
+        effective_date: applyLegalPlaceholders('[DATE]', docLocale),
         source: 'static',
     };
 }
