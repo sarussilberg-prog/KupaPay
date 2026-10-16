@@ -2,12 +2,14 @@
 -- Fails with RAISE EXCEPTION when violations exceed db-lint-baseline.json.
 \set ON_ERROR_STOP on
 
+BEGIN;
+
 CREATE TEMP TABLE IF NOT EXISTS _db_lint_violations (
   lint_type TEXT NOT NULL,
   cache_key TEXT NOT NULL,
   detail TEXT NOT NULL,
   PRIMARY KEY (lint_type, cache_key)
-) ON COMMIT DROP;
+);
 
 TRUNCATE _db_lint_violations;
 
@@ -157,3 +159,5 @@ WHERE NOT has_index;
 
 -- Final row set consumed by ci-compare-db-lint-baseline.sh (lint_type|cache_key)
 SELECT lint_type, cache_key FROM _db_lint_violations ORDER BY lint_type, cache_key;
+
+COMMIT;

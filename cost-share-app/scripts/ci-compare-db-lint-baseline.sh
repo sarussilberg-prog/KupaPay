@@ -21,7 +21,10 @@ psql_docker_file() {
 }
 
 echo "▶ DB lints (performance + security)"
-EXPORT="$(psql_docker_file "$LINT_SQL" || true)"
+if ! EXPORT="$(psql_docker_file "$LINT_SQL")"; then
+  echo "::error::DB lint SQL failed"
+  exit 1
+fi
 
 if [[ -z "${EXPORT//[$'\n ']/}" ]]; then
   echo "✅ No DB lint violations"

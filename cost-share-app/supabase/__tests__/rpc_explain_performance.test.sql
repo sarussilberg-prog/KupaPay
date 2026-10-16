@@ -38,7 +38,7 @@ BEGIN
     -- ~600 expenses across groups (above seq-scan threshold)
     FOR v_i IN 1..600 LOOP
         v_group := ('00000000-0000-0000-0000-0000007777' || lpad(((v_i % 5) + 1)::text, 2, '0'))::uuid;
-        v_expense_id := ('00000000-0000-0000-0000-0000007780' || lpad(v_i::text, 4, '0'))::uuid;
+        v_expense_id := ('77770000-0000-4000-8000-' || lpad(to_hex(v_i), 12, '0'))::uuid;
         INSERT INTO public.expenses (
             id, group_id, paid_by, amount, currency, description, is_deleted, created_by, expense_date
         ) VALUES (
