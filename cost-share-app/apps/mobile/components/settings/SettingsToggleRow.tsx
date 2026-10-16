@@ -3,6 +3,8 @@ import { View, Switch } from 'react-native';
 import { Text } from '../AppText';
 import { AppIcon, AppIconName } from '../AppIcon';
 import { colors } from '../../theme';
+import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { settingsRowContainerStyle } from './settingsRowLayout';
 
 interface Props {
     iconName: AppIconName;
@@ -14,13 +16,22 @@ interface Props {
 }
 
 export function SettingsToggleRow({ iconName, label, value, onValueChange, disabled, testID }: Props) {
+    const isRtl = useRtlLayout();
+
     return (
         <View
-            className="flex-row items-center bg-white px-4 py-3.5 min-h-[52px]"
-            style={disabled ? { opacity: 0.45 } : undefined}
+            className="bg-white px-4 py-3.5 min-h-[52px]"
+            style={[
+                settingsRowContainerStyle(isRtl),
+                disabled ? { opacity: 0.45 } : undefined,
+            ]}
         >
             <AppIcon name={iconName} size={22} color={colors.gray500} />
-            <Text className="flex-1 ms-3 text-base text-gray-900">{label}</Text>
+            <Text
+                className={`flex-1 min-w-0 text-base text-gray-900 ${rtlTextClassName(isRtl, 'text-base text-gray-900')}`}
+            >
+                {label}
+            </Text>
             <Switch
                 value={value}
                 onValueChange={onValueChange}
