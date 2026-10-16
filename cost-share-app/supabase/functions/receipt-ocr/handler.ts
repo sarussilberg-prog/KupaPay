@@ -110,14 +110,6 @@ export async function handleReceiptOcr(
         return { ok: false, error: 'pro_required', code: 'pro_required' };
     }
 
-    if (!env.SUPABASE_SERVICE_ROLE_KEY) {
-        return { ok: false, error: 'misconfigured', code: 'misconfigured' };
-    }
-    const quota = await consumeReceiptOcrQuota(serviceClient(env), userId);
-    if (!quota.ok) {
-        return { ok: false, error: 'rate_limited', code: 'rate_limited' };
-    }
-
     let text = (req.text ?? '').trim();
     let source: 'text' | 'vendor' | 'heuristic' = 'text';
 
@@ -137,6 +129,14 @@ export async function handleReceiptOcr(
     }
     if (text.length > MAX_TEXT_LEN) {
         return { ok: false, error: 'text_too_long', code: 'text_too_long' };
+    }
+
+    if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+        return { ok: false, error: 'misconfigured', code: 'misconfigured' };
+    }
+    const quota = await consumeReceiptOcrQuota(serviceClient(env), userId);
+    if (!quota.ok) {
+        return { ok: false, error: 'rate_limited', code: 'rate_limited' };
     }
 
     const draft = parseReceiptDraftFromText(text);

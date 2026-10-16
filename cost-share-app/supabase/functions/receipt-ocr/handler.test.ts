@@ -45,6 +45,13 @@ Deno.test('consumeReceiptOcrQuota calls consume_receipt_ocr_quota_for_user', asy
     assertEquals(rpcArgs, { p_user_id: 'user-123' });
 });
 
+Deno.test('handleReceiptOcr validates payload before consumeReceiptOcrQuota (#350)', () => {
+    const src = Deno.readTextFileSync(new URL('./handler.ts', import.meta.url));
+    const textRequired = src.indexOf("code: 'text_required'");
+    const quota = src.indexOf('consumeReceiptOcrQuota(');
+    assertEquals(textRequired > 0 && quota > textRequired, true);
+});
+
 Deno.test('consumeReceiptOcrQuota surfaces quota_exceeded when RPC returns false', async () => {
     const mockClient = {
         rpc() {
