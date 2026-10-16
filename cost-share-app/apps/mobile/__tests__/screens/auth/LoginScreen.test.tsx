@@ -155,6 +155,22 @@ describe('LoginScreen', () => {
         expect(queryByTestId('login-email-magic-link-stub')).toBeNull();
     });
 
+    it('does not show deleted-account dialog on web cold start when no persisted notice', async () => {
+        const { Platform } = require('react-native');
+        const originalOs = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+
+        mockConsumeNotice.mockResolvedValueOnce(false);
+
+        const { queryByText } = render(<LoginScreen />);
+
+        await waitFor(() => {
+            expect(queryByText('deleteAccount.deactivatedTitle')).toBeNull();
+        });
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: originalOs });
+    });
+
     it('shows deleted-account dialog when persisted notice is consumed on mount (web)', async () => {
         const { Platform } = require('react-native');
         const originalOs = Platform.OS;
