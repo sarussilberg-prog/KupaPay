@@ -8,6 +8,11 @@ on:
       - 'cost-share-app/supabase/migrations/**'
       - 'cost-share-app/supabase/config.toml'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Plan only (drift check + db push --dry-run, no apply)
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-staging-supabase
@@ -37,7 +42,16 @@ jobs:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
         run: bash scripts/supabase-destructive-migration-check.sh
 
+      - name: Plan migrations (dry-run)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+        env:
+          SUPABASE_ENV: development
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
+          DRY_RUN: '1'
+        run: bash scripts/supabase-ci-db-push.sh
+
       - name: Apply pending migrations
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         env:
           SUPABASE_ENV: development
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
@@ -46,6 +60,7 @@ jobs:
   verify-staging-db:
     name: Verify development DB (post-migrate)
     needs: supabase-migrations
+    if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
     runs-on: ubuntu-latest
     defaults:
       run:

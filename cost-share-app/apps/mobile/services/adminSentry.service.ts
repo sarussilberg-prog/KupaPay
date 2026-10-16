@@ -3,7 +3,7 @@
  *
  * The Edge Function re-verifies is_app_admin() per call, so failures can mean
  * (1) the caller is not actually admin, (2) the Sentry token is misconfigured,
- * or (3) Sentry is down. UI surfaces these as a generic retry-able state.
+ * or (3) Sentry is down. UI surfaces structured reasons via AdminSentryProxyError.
  */
 import { supabase } from '../lib/supabase';
 
@@ -50,6 +50,55 @@ interface ProxyResponse<T> {
     data?: T;
     error?: string;
     status?: number;
+    detail?: string;
+    missing?: string[];
+}
+
+export class AdminSentryProxyError extends Error {
+    readonly code: string;
+    readonly httpStatus?: number;
+    readonly detail?: string;
+    readonly missing?: string[];
+
+    constructor(payload: {
+        code: string;
+        httpStatus?: number;
+        detail?: string;
+        missing?: string[];
+    }) {
+        super(payload.code);
+        this.name = 'AdminSentryProxyError';
+        this.code = payload.code;
+        this.httpStatus = payload.httpStatus;
+        this.detail = payload.detail;
+        this.missing = payload.missing;
+    }
+}
+
+async function readProxyErrorBody(error: unknown): Promise<Partial<ProxyResponse<unknown>> | null> {
+    const err = error as { context?: Response };
+    const response = err?.context;
+    if (!response || typeof response.json !== 'function') return null;
+    try {
+        const body = (await response.json()) as Partial<ProxyResponse<unknown>>;
+        return body && typeof body === 'object' ? body : null;
+    } catch {
+        return null;
+    }
+}
+
+function toProxyError(
+    body: Partial<ProxyResponse<unknown>> | null,
+    fallbackMessage: string,
+    httpStatus?: number,
+): AdminSentryProxyError {
+    const code = body?.error ?? 'invoke_failed';
+    return new AdminSentryProxyError({
+        code,
+        httpStatus: body?.status ?? httpStatus,
+        detail: body?.detail ?? (code === 'invoke_failed' ? fallbackMessage : undefined),
+        missing: body?.missing,
+    });
 }
 
 async function invokeProxy<T>(body: Record<string, unknown>): Promise<T> {
@@ -57,9 +106,12 @@ async function invokeProxy<T>(body: Record<string, unknown>): Promise<T> {
         'admin-sentry-proxy',
         { body },
     );
-    if (error) throw error;
+    if (error) {
+        const parsed = await readProxyErrorBody(error);
+        throw toProxyError(parsed, error.message);
+    }
     if (!data || data.ok === false) {
-        throw new Error(data?.error ?? 'admin_sentry_proxy_failed');
+        throw toProxyError(data ?? null, data?.error ?? 'admin_sentry_proxy_failed', data?.status);
     }
     return data.data as T;
 }
