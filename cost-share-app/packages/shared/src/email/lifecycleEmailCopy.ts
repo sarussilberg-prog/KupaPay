@@ -1,5 +1,7 @@
-import type { Language } from '../i18n/languages';
-import type { EmailLifecycleTemplateId } from './lifecycleTemplates';
+import type { EmailLifecycleTemplateId } from './lifecycleTemplates.ts';
+
+/** Mirror {@link ../i18n/languages#Language} — inlined so Deno edge bundles resolve without Node-style imports. */
+type Language = 'en' | 'he' | 'ru' | 'ar' | 'fr' | 'es' | 'de';
 
 export type LifecycleEmailCopy = { subject: string; preview: string; bodyHtml: string };
 

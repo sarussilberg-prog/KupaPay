@@ -1,4 +1,5 @@
-import { APP_WEB_ORIGIN } from '../brand';
+/** Default origin — keep in sync with {@link ../brand#APP_WEB_ORIGIN}. */
+const DEFAULT_WEB_ORIGIN = 'https://kupa-pay.com';
 
 export function renderTransactionalEmailHtml(input: {
     bodyHtml: string;
@@ -20,12 +21,12 @@ ${bodyHtml}
 </html>`;
 }
 
-export function buildEmailUnsubscribeUrl(token: string, webOrigin = APP_WEB_ORIGIN): string {
+export function buildEmailUnsubscribeUrl(token: string, webOrigin = DEFAULT_WEB_ORIGIN): string {
     const base = webOrigin.replace(/\/$/, '');
     return `${base}/email/unsubscribe?token=${encodeURIComponent(token)}`;
 }
 
-export function buildEmailPreferencesUrl(webOrigin = APP_WEB_ORIGIN): string {
+export function buildEmailPreferencesUrl(webOrigin = DEFAULT_WEB_ORIGIN): string {
     const base = webOrigin.replace(/\/$/, '');
     return `${base}/settings/notifications`;
 }
