@@ -2,11 +2,7 @@
  * Mobile i18n locale registry — single source for resource bundles and configured codes.
  */
 
-import {
-    DEFAULT_LANGUAGE,
-    SUPPORTED_LANGUAGES,
-    type Language,
-} from '@cost-share/shared';
+import { assertAppLocaleRegistry, DEFAULT_LANGUAGE, type Language } from '@cost-share/shared';
 import en from './locales/en.json';
 import he from './locales/he.json';
 import ru from './locales/ru.json';
@@ -32,9 +28,7 @@ export type MobileI18nLocaleCode = keyof typeof mobileI18nResources;
 /** Derived from `mobileI18nResources` — not a hand-maintained list. */
 export const MOBILE_I18N_LOCALE_CODES = Object.keys(mobileI18nResources) as MobileI18nLocaleCode[];
 
-if (MOBILE_I18N_LOCALE_CODES.length !== SUPPORTED_LANGUAGES.length) {
-    throw new Error('Mobile i18n resources must match SUPPORTED_LANGUAGES in @cost-share/shared');
-}
+assertAppLocaleRegistry(MOBILE_I18N_LOCALE_CODES, 'mobile');
 
 export function getMobileI18nBundles(): Record<string, unknown> {
     const out: Record<string, unknown> = {};
