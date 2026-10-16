@@ -24,7 +24,7 @@ import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
 import { useGroupUnreadCounts } from '../../hooks/queries/useGroupUnreadCounts';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
-import { prefetchAddExpensePrerequisitesForGroup } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
+import { prefetchAddExpensePrerequisitesBatched } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { useNetworkStatus } from '../../lib/networkStatus';
 import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
@@ -134,9 +134,7 @@ export function GroupsListScreen() {
     // an optimistic insert.
     const groupIdsKey = groups.map(g => g.id).join(',');
     useEffect(() => {
-        for (const g of groups) {
-            prefetchAddExpensePrerequisitesForGroup(g.id);
-        }
+        prefetchAddExpensePrerequisitesBatched(groups.map(g => g.id));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [groupIdsKey]);
 

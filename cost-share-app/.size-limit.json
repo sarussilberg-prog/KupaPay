@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Expo web export (entry chunk)",
+    "path": "apps/mobile/dist/_expo/static/js/web/index-*.js",
+    "limit": "2800 KB",
+    "gzip": true
+  },
+  {
+    "name": "Next.js landing (first load JS)",
+    "path": "apps/web/.next/static/chunks/main-app-*.js",
+    "limit": "180 KB",
+    "gzip": true
+  }
+]

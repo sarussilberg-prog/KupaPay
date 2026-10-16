@@ -1,4 +1,5 @@
 import './lib/sentry';
+import { finishAppBootSpan } from './lib/appBootPerformance';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -332,6 +333,7 @@ function App() {
         }
         setupSupabaseAuthAutoRefresh();
       } finally {
+        finishAppBootSpan();
         if (mounted) setIsReady(true);
       }
     };
