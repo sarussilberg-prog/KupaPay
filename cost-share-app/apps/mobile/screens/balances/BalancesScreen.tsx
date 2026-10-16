@@ -23,6 +23,7 @@ import {
     GroupMemberLite,
     PairwiseDebt,
     calculateGroupTotalUnsettled,
+    isProPerkUnlocked,
 } from '@cost-share/shared';
 import { Text } from '../../components/AppText';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
@@ -31,6 +32,9 @@ import { GroupTotalsCard } from '../../components/balances/GroupTotalsCard';
 import { MemberContributionRow } from '../../components/balances/MemberContributionRow';
 import { MemberContributionDialog } from '../../components/balances/MemberContributionDialog';
 import { SimplifiedDebtsSection } from '../../components/balances/SimplifiedDebtsSection';
+import { GroupTripCurrencySection } from '../../components/balances/GroupTripCurrencySection';
+import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import {
@@ -85,6 +89,15 @@ export function BalancesScreen() {
     const group = groupsQuery.data?.find(g => g.id === groupId);
     const groupName = group?.name;
     const defaultCurrency = group?.defaultCurrency ?? 'USD';
+    const proStatusQuery = useProStatusQuery(groupId);
+    const tripCurrencyUnlocked = isProPerkUnlocked(
+        proStatusQuery.data?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
+
+    const openTripCurrencyPaywall = useCallback(() => {
+        navigation.navigate('Paywall', { featureKey: 'trip_currency', groupId });
+    }, [navigation, groupId]);
 
     useLayoutEffect(() => {
         if (groupName) {
@@ -341,6 +354,16 @@ export function BalancesScreen() {
                         defaultCurrency={defaultCurrency}
                     />
                 </View>
+
+                {KUPAPAY_PRO_ENABLED || tripCurrencyUnlocked ? (
+                    <GroupTripCurrencySection
+                        defaultCurrency={defaultCurrency}
+                        debts={pairwiseDebts}
+                        memberNames={nameById}
+                        enabled={tripCurrencyUnlocked}
+                        onUpgrade={openTripCurrencyPaywall}
+                    />
+                ) : null}
 
                 <View className="px-4 pt-4">
                     <Text className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-2">

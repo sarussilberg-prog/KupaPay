@@ -2,7 +2,7 @@
  * Pro perk: view all group pairwise debts converted into one trip currency.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { PairwiseDebt } from '@cost-share/shared';
@@ -10,6 +10,7 @@ import { Text } from '../AppText';
 import { CurrencyPicker } from '../CurrencyPicker';
 import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
 import { convertDebtsToTripCurrency } from '../../lib/tripCurrencyConversion';
+import { captureProductEvent } from '../../lib/productAnalytics';
 
 interface GroupTripCurrencySectionProps {
     defaultCurrency: string;
@@ -47,6 +48,14 @@ export function GroupTripCurrencySection({
         [debts, targetCurrency, rates?.rates],
     );
 
+    useEffect(() => {
+        if (!enabled || currencies.length <= 1) return;
+        void captureProductEvent('trip_currency_viewed', {
+            target_currency: targetCurrency,
+            debt_currencies: currencies.length,
+        });
+    }, [enabled, currencies.length, targetCurrency]);
+
     if (!enabled) {
         return (
             <View className="mx-4 mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-100">
@@ -72,6 +81,11 @@ export function GroupTripCurrencySection({
                     {t('pro.tripCurrency.pickerLabel', { currency: targetCurrency })}
                 </Text>
             </TouchableOpacity>
+            {rates?.date ? (
+                <Text className="text-gray-400 text-xs mb-2 text-center">
+                    {t('pro.tripCurrency.ratesAsOf', { date: rates.date })}
+                </Text>
+            ) : null}
             {converted.length === 0 ? (
                 <Text className="text-gray-500 text-sm">{t('pro.tripCurrency.ratesMissing')}</Text>
             ) : (

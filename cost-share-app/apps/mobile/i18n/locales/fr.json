@@ -1253,6 +1253,7 @@
             "upgrade": "Passer à Pro",
             "pickerLabel": "Montants en {{currency}}",
             "ratesMissing": "Les taux de change sont indisponibles pour le moment.",
+            "ratesAsOf": "Taux au {{date}}",
             "row": "{{from}} → {{to}} : {{amount}} {{currency}} (était {{original}})"
         },
         "recurring": {

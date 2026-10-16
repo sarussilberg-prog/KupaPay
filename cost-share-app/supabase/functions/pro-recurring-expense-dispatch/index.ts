@@ -1,4 +1,4 @@
-import { createClient } from 'supabase';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { dispatchRecurringExpenses } from './handler.ts';
 
 const PUSH_WEBHOOK_SECRET = Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';

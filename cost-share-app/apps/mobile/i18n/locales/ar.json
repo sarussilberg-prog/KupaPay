@@ -1335,6 +1335,7 @@
             "upgrade": "الترقية إلى Pro",
             "pickerLabel": "المبالغ بـ {{currency}}",
             "ratesMissing": "أسعار الصرف غير متاحة حاليًا.",
+            "ratesAsOf": "أسعار الصرف بتاريخ {{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (كان {{original}})"
         },
         "recurring": {
