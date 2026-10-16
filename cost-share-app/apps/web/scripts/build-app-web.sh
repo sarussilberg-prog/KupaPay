@@ -61,8 +61,11 @@ export EXPO_PUBLIC_SENTRY_DSN="${EXPO_PUBLIC_SENTRY_DSN:-https://0687aa5ff4ed935
 export EXPO_PUBLIC_SENTRY_ENVIRONMENT="${EXPO_PUBLIC_SENTRY_ENVIRONMENT:-development}"
 export EXPO_PUBLIC_GIT_COMMIT_SHA="${EXPO_PUBLIC_GIT_COMMIT_SHA:-${VERCEL_GIT_COMMIT_SHA:-}}"
 
-if [[ "$IS_DEV_VERCEL_PROJECT" == true || "${VERCEL_ENV:-}" != "production" ]]; then
+# #376 — Email OTP only on dev Vercel projects (never prod project previews).
+if [[ "$IS_DEV_VERCEL_PROJECT" == true ]]; then
   export EXPO_PUBLIC_ENABLE_EMAIL_AUTH=true
+elif [[ -n "${VERCEL:-}" ]]; then
+  unset EXPO_PUBLIC_ENABLE_EMAIL_AUTH
 fi
 
 if [[ -z "$EXPO_PUBLIC_SUPABASE_URL" || -z "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ]]; then
