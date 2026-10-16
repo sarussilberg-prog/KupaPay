@@ -22,7 +22,6 @@ const DEFAULT_T_OPTS: Record<string, unknown> = {
     name: 'Noa',
     email: 'x@y.z',
     seconds: 30,
-    plusCount: 2,
     plus: '+1',
     currency: 'ILS',
     groupName: 'Test',

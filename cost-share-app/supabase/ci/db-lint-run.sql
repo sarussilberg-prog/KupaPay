@@ -157,6 +157,44 @@ SELECT
 FROM indexed
 WHERE NOT has_index;
 
+-- public base tables must have RLS enabled (PostgREST exposure).
+INSERT INTO _db_lint_violations (lint_type, cache_key, detail)
+SELECT
+    'public_tables_without_rls',
+    format('public_table_no_rls_%s', c.relname),
+    format('Table public.%I exists but row level security is disabled.', c.relname)
+FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE n.nspname = 'public'
+  AND c.relkind = 'r'
+  AND NOT c.relrowsecurity;
+
+-- SECURITY DEFINER functions must pin search_path (search_path injection).
+INSERT INTO _db_lint_violations (lint_type, cache_key, detail)
+SELECT
+    'security_definer_missing_search_path',
+    format(
+        'definer_no_search_path_%s_%s_%s',
+        n.nspname,
+        p.proname,
+        md5(pg_get_function_identity_arguments(p.oid))
+    ),
+    format(
+        'Function %I.%I(%s) is SECURITY DEFINER but has no SET search_path.',
+        n.nspname,
+        p.proname,
+        pg_get_function_identity_arguments(p.oid)
+    )
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE p.prosecdef
+  AND n.nspname IN ('public', 'app_private')
+  AND NOT EXISTS (
+        SELECT 1
+        FROM unnest(COALESCE(p.proconfig, ARRAY[]::text[])) AS cfg(opt)
+        WHERE opt LIKE 'search_path=%'
+    );
+
 -- Final row set consumed by ci-compare-db-lint-baseline.sh (lint_type|cache_key)
 \pset tuples_only on
 \pset footer off

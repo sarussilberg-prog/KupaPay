@@ -40,14 +40,43 @@ PRs targeting **`main`** always run the **full** suite (no path skipping).
 
 ### Required aggregate check
 
-Job **`CI gate`** is the single pass/fail summary for branch protection. Recommended required checks:
-
-- **CI gate**
-- **Supabase migration guard**
-- **SonarCloud Code Analysis** (polled before auto-merge)
-- Or keep individual job names if branch protection already lists them.
+Job **`CI gate`** is the single pass/fail summary for branch protection.
 
 Auto-merge to `dev` runs when **CI gate** and **Supabase migration guard** succeed and SonarCloud is green. If the PR is behind **`origin/dev`**, CI calls **`gh pr update-branch`** (merge commit) and re-runs checks instead of failing silently at merge time. The **Auto-merge** job enables **GitHub native squash auto-merge** (`gh pr merge --auto`); dev prerelease bumps run on **`push` to `dev`** via [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) with `[skip ci]`.
+
+### Branch protection proposal (GitHub UI — not applied by CI)
+
+Apply manually under **Settings → Branches**. Use the **exact** check names GitHub shows on a green PR (copy from the checks dropdown).
+
+#### `main` (release PRs — human merge)
+
+| Required status check | Workflow / job |
+|----------------------|----------------|
+| **CI gate** | [`ci.yml`](../.github/workflows/ci.yml) aggregate |
+| **Supabase migration guard** | [`ci.yml`](../.github/workflows/ci.yml) |
+| **Secret scan (gitleaks)** | [`ci.yml`](../.github/workflows/ci.yml) |
+| **SonarCloud Code Analysis** | SonarCloud (external) |
+
+Recommended repo rules (not enforced in YAML): require **1 approving review**, **dismiss stale reviews**, **require conversation resolution**, **block force-push**, **require linear history optional**.
+
+PRs to **`main`** always run the **full** CI matrix (no path skipping). Optional: enable **merge queue** on `main` with the same required checks.
+
+#### `dev` (bot auto-merge)
+
+| Required status check | Notes |
+|----------------------|--------|
+| **CI gate** | Path-scoped jobs roll up here |
+| **Supabase migration guard** | Also polled before auto-merge |
+| **Secret scan (gitleaks)** | Full-repo history scan |
+| **PR hygiene (scope + title)** | [`pr-hygiene.yml`](../.github/workflows/pr-hygiene.yml) — `cursor/*` PRs only |
+| **SonarCloud Code Analysis** | Waited on in **Auto-merge to dev** |
+
+Individual job names (only if you prefer granular protection instead of **CI gate**): **CI path plan**, **Install dependencies**, **Lint**, **Typecheck**, **Mobile tests**, **Coverage ratchet**, **Legal locale parity**, **Deno edge gate**, **No merge conflict markers**, **Expo mobile config**, **CI performance**, **Supabase SQL integration**, **Deno edge bundle (all functions)**, **Branch up to date with dev**.
+
+#### Security & supply chain (both branches)
+
+- **Secret scan (gitleaks)** — [`gitleaks/gitleaks-action`](https://github.com/gitleaks/gitleaks-action), config [`.gitleaks.toml`](../.gitleaks.toml)
+- **npm audit** — `npm run audit:ci` inside **Install dependencies**
 
 ### Migration safety (incident prevention)
 
@@ -56,11 +85,17 @@ Duplicate `YYYYMMDDHHMMSS` prefixes broke staging when two PRs merged with the s
 **Layers:**
 
 1. **Filename lint** — [`supabase-lint-migration-filenames.sh`](../cost-share-app/scripts/supabase-lint-migration-filenames.sh)
-2. **PR tree uniqueness** — [`supabase-unique-migration-versions.sh`](../cost-share-app/scripts/supabase-unique-migration-versions.sh)
-3. **Merge simulation** — [`supabase-unique-migration-versions-at-merge.sh`](../cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh): latest **`origin/dev`** + **`origin/main`**, worktree merge, re-run lint + uniqueness
-4. **Pre-merge recheck** — auto-merge job before `gh pr merge`
-5. **Branch freshness** — **Branch up to date with dev**
-6. **Merge queue** — `merge_group` re-runs CI on queued commits
+2. **Migration chain** — [`supabase-migration-chain-check.sh`](../cost-share-app/scripts/supabase-migration-chain-check.sh): unique prefixes, strict order, new files newer than base branch max
+3. **PR tree uniqueness** — [`supabase-unique-migration-versions.sh`](../cost-share-app/scripts/supabase-unique-migration-versions.sh)
+4. **Merge simulation** — [`supabase-unique-migration-versions-at-merge.sh`](../cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh): latest **`origin/dev`** + **`origin/main`**, worktree merge, re-run lint + uniqueness
+5. **Destructive SQL guard** — [`supabase-destructive-migration-check.sh`](../cost-share-app/scripts/supabase-destructive-migration-check.sh) (PR + staging deploy)
+6. **Remote precheck** — [`supabase-remote-migration-precheck.sh`](../cost-share-app/scripts/supabase-remote-migration-precheck.sh) before `db push` ([#479](https://github.com/sarussilberg-prog/KupaPay/pull/479))
+7. **Drift check** — [`supabase-migration-drift-check.sh`](../cost-share-app/scripts/supabase-migration-drift-check.sh): remote `schema_migrations` vs repo before deploy
+8. **Deploy dry-run** — `workflow_dispatch` `dry_run` on [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) / [`deploy-production.yml`](../.github/workflows/deploy-production.yml) sets `DRY_RUN=1` on [`supabase-ci-db-push.sh`](../cost-share-app/scripts/supabase-ci-db-push.sh)
+9. **Schema contract** — [`ci-supabase-types-contract.sh`](../cost-share-app/scripts/ci-supabase-types-contract.sh) after SQL CI bootstrap (RPC/table surface vs snapshot)
+10. **Pre-merge recheck** — auto-merge job before `gh pr merge`
+11. **Branch freshness** — **Branch up to date with dev**
+12. **Merge queue** — `merge_group` re-runs CI on queued commits
 
 Reserved prefixes: [docs/SSOT/SUPABASE_MIGRATION_VERSIONS.md](SSOT/SUPABASE_MIGRATION_VERSIONS.md).
 

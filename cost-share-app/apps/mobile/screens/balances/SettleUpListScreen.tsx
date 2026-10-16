@@ -543,7 +543,7 @@ export function SettleUpListScreen() {
     const seenConvertOthers = new Set<string>();
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']}>
+        <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']} testID="settle-up-list-screen">
             <FlatList
                 data={involvedGroups}
                 keyExtractor={item => item.pairKey}
