@@ -3,7 +3,7 @@
 // renders + sends an Expo push for the inserted activity_events row.
 // See docs/superpowers/specs/2026-06-11-push-notifications-design.md
 
-import { createClient } from 'supabase';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { processActivityEvent, type ActivityRecord } from './handler.ts';
 import { makeSupabaseDeps } from './deps.ts';
 import { jsonResponse, preflight } from './cors.ts';
