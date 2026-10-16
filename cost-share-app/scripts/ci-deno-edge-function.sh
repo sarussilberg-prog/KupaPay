@@ -22,7 +22,7 @@ echo "▶ deno lint — $FN"
 )
 
 echo "▶ deno test — $FN"
-(cd "$DIR" && deno test --allow-env)
+(cd "$DIR" && deno test --allow-env --allow-read)
 
 echo "▶ deno check (deploy bundle) — $FN"
 (cd "$DIR" && deno check --no-config index.ts)

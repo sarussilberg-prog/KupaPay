@@ -123,7 +123,11 @@ jobs:
         run: |
           set -euo pipefail
           functions="$(bash cost-share-app/scripts/ci-deno-matrix-plan.sh)"
-          echo "functions=${functions}" >> "$GITHUB_OUTPUT"
+          {
+            echo 'functions<<EOF'
+            echo "$functions"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
           echo "Planned Deno matrix: ${functions}"
 
   deno-edge-functions:
