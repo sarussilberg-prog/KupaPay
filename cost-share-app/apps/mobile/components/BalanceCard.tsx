@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { MemberAvatar } from './MemberAvatar';
 import { AppIcon } from './AppIcon';
 import { colors } from '../theme';
+import { formatMoney } from '@cost-share/shared';
 
 interface BalanceCardProps {
     userName: string;
@@ -20,7 +21,7 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ userName, avatarUrl, balance, currency }: BalanceCardProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const isPositive = balance > 0;
     const isNegative = balance < 0;
@@ -67,7 +68,7 @@ export function BalanceCard({ userName, avatarUrl, balance, currency }: BalanceC
                     />
                 ) : (
                     <Text className={`text-base font-bold ${getBalanceColorClass()}`}>
-                        {`${isNegative ? '-' : '+'}${currency} ${Math.abs(balance).toFixed(2)}`}
+                        {formatMoney(balance, currency, { language: i18n.language })}
                     </Text>
                 )}
             </View>

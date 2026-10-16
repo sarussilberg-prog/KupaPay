@@ -46,7 +46,7 @@ export function FriendCrossGroupSettleSheet({
     onClose,
     onCompleted,
 }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { data: simplified } = useSimplifiedDebts();
     const [step, setStep] = useState<Step>('pick-currency');
     const [targetCurrency, setTargetCurrency] = useState(defaultCurrency);
@@ -254,6 +254,7 @@ export function FriendCrossGroupSettleSheet({
                                     {formatCurrencyAmount(
                                         preview.netAmountInTarget,
                                         preview.targetCurrency,
+                                        i18n.language,
                                     )}
                                 </Text>
                                 <Text className="text-sm text-slate-600">
@@ -273,6 +274,7 @@ export function FriendCrossGroupSettleSheet({
                                         {formatCurrencyAmount(
                                             Math.abs(line.netAmount),
                                             line.currency,
+                                            i18n.language,
                                         )}
                                     </Text>
                                 </View>

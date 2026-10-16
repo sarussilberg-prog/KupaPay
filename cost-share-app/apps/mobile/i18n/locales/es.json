@@ -332,6 +332,11 @@
             "matchedMembers": "incluye a {{names}}",
             "settled": "Saldado",
             "youSettled": "Estás al día",
+            "youOwe": "Debes {{amount}}",
+            "owedToYou": "Te deben {{amount}}",
+            "moreCurrencies": "+{{count}} monedas",
+            "moreCurrencies_one": "+{{count}} moneda",
+            "lastActivity": "Activo {{when}}",
             "balanceUnavailable": "Saldo no disponible sin conexión"
         },
         "bigCreateCta": "Crear un grupo",

@@ -332,6 +332,11 @@
             "matchedMembers": "כולל {{names}}",
             "settled": "מסודר",
             "youSettled": "את/ה מסודר/ת",
+            "youOwe": "את/ה חייב/ת {{amount}}",
+            "owedToYou": "מגיע לך {{amount}}",
+            "moreCurrencies": "+{{count}} מטבעות",
+            "moreCurrencies_one": "+מטבע {{count}}",
+            "lastActivity": "פעיל {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
         "bigCreateCta": "פתח קופה",

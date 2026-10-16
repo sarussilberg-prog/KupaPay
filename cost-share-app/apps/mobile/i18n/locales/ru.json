@@ -332,6 +332,11 @@
             "matchedMembers": "в т. ч. {{names}}",
             "settled": "Всё рассчитано",
             "youSettled": "Вы в расчёте",
+            "youOwe": "Вы должны {{amount}}",
+            "owedToYou": "Вам должны {{amount}}",
+            "moreCurrencies": "+{{count}} валют",
+            "moreCurrencies_one": "+{{count}} валюта",
+            "lastActivity": "Активность {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
         "bigCreateCta": "Создать группу",

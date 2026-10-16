@@ -344,6 +344,11 @@
             "matchedMembers": "بما في ذلك {{names}}",
             "settled": "مسوّى",
             "youSettled": "حسابك مسوّى",
+            "youOwe": "أنت مدين {{amount}}",
+            "owedToYou": "مستحق لك {{amount}}",
+            "moreCurrencies": "+{{count}} عملات",
+            "moreCurrencies_one": "+عملة {{count}}",
+            "lastActivity": "نشط {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
         "bigCreateCta": "إنشاء مجموعة",

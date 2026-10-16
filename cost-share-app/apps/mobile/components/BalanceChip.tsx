@@ -1,108 +1,120 @@
 /**
- * BalanceChip — small pill summarising a single group's net balance for the user.
- * Variants by sign: positive = owed (green), negative = owe (red), zero/undefined = settled (gray).
- *
- * Consumes a `GroupRollup` from the canonical simplifier output. The primary
- * entry (largest |net|) is rendered as the chip; when `others` is non-empty we
- * append a small "+N" suffix so the row signals more currencies exist without
- * growing taller.
+ * BalanceChip — localized net balance for one group (list / cards).
  */
 
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { GroupRollup } from '@cost-share/shared';
+import {
+    GroupRollup,
+    balanceChipLabelKey,
+    classifyUserNetBalance,
+    countNonZeroCurrencyOthers,
+    formatMoney,
+} from '@cost-share/shared';
 
 interface BalanceChipProps {
     rollup?: GroupRollup;
-    /** Currency to use in the "settled" / no-data state. Usually the group's default currency. */
     defaultCurrency: string;
-    /**
-     * True when the group has at least one open debt among other members (not
-     * involving the current user). Lets the settled chip distinguish
-     * "You are settled" (others still owe) from "Settled" (whole group clear).
-     */
     groupHasOpenDebts?: boolean;
-    /**
-     * True when the balance dataset itself is unavailable (e.g. offline with no
-     * cached balances). We then show a neutral placeholder instead of claiming
-     * "Settled" — never report a balance we don't actually have.
-     */
     balanceUnknown?: boolean;
+    onPressExtraCurrencies?: () => void;
 }
 
-function formatAmount(amount: number, currency: string): string {
-    return `${currency} ${Math.abs(amount).toFixed(2)}`;
-}
+const toneStyles = {
+    settled: {
+        container: 'rounded-2xl bg-gray-100 px-2.5 py-1.5 max-w-[148px]',
+        label: 'text-[10px] font-medium text-gray-500',
+        amount: 'text-xs font-semibold text-gray-500',
+    },
+    owe: {
+        container: 'rounded-2xl bg-red-50 px-2.5 py-1.5 max-w-[148px]',
+        label: 'text-[10px] font-medium text-red-600/90',
+        amount: 'text-xs font-semibold text-red-600',
+    },
+    owed: {
+        container: 'rounded-2xl bg-green-50 px-2.5 py-1.5 max-w-[148px]',
+        label: 'text-[10px] font-medium text-green-700/90',
+        amount: 'text-xs font-semibold text-green-700',
+    },
+    unknown: {
+        container: 'rounded-2xl bg-gray-100 px-2.5 py-1.5',
+        label: 'text-[10px] font-medium text-gray-400',
+        amount: 'text-xs font-medium text-gray-400',
+    },
+} as const;
 
 export function BalanceChip({
     rollup,
     defaultCurrency,
     groupHasOpenDebts,
     balanceUnknown,
+    onPressExtraCurrencies,
 }: BalanceChipProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const primary = rollup?.primary;
-    const extraCount = (rollup?.others ?? []).filter(
-        o => Math.abs(o.net) >= 0.01,
-    ).length;
+    const extraCount = countNonZeroCurrencyOthers(rollup?.others);
     const hasRealBalance = primary && Math.abs(primary.net) >= 0.01;
 
-    // No real balance to show AND the dataset is unavailable → neutral
-    // placeholder. We don't have the data, so we don't claim "settled".
     if (!hasRealBalance && balanceUnknown) {
         return (
             <View
-                className="rounded-full bg-gray-100 px-2.5 py-1"
+                className={toneStyles.unknown.container}
                 testID="balance-chip-unknown"
                 accessibilityLabel={t('groups.card.balanceUnavailable')}
             >
-                <Text className="text-xs font-medium text-gray-400">—</Text>
+                <Text className={toneStyles.unknown.amount}>—</Text>
             </View>
         );
     }
 
-    if (!primary || Math.abs(primary.net) < 0.01) {
-        const label = groupHasOpenDebts
-            ? t('groups.card.youSettled')
-            : t('groups.card.settled');
+    const tone: keyof typeof toneStyles = hasRealBalance
+        ? classifyUserNetBalance(primary!.net)
+        : 'settled';
+    const styles = toneStyles[tone === 'unknown' ? 'settled' : tone];
+    const labelKey = balanceChipLabelKey(tone, groupHasOpenDebts);
+
+    if (tone === 'settled' || tone === 'unknown') {
         return (
-            <View className="rounded-full bg-gray-100 px-2.5 py-1 max-w-[140px]">
-                <Text
-                    className="text-xs font-medium text-gray-500"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                >
-                    {label}
+            <View className={styles.container} testID="balance-chip-settled">
+                <Text className={styles.label} numberOfLines={2}>
+                    {t(labelKey)}
                 </Text>
             </View>
         );
     }
 
-    const isOwed = primary.net > 0;
-    const containerClass = isOwed
-        ? 'rounded-full bg-green-50 px-2.5 py-1 max-w-[140px] flex-row items-center'
-        : 'rounded-full bg-red-50 px-2.5 py-1 max-w-[140px] flex-row items-center';
-    const textClass = isOwed
-        ? 'text-xs font-semibold text-green-600'
-        : 'text-xs font-semibold text-red-500';
-    const prefix = isOwed ? '+' : '−';
+    const currency = primary?.currency || defaultCurrency;
+    const amountText = formatMoney(primary!.net, currency, {
+        language: i18n.language,
+        absolute: true,
+    });
+
+    const extraLabel =
+        extraCount > 0
+            ? t('groups.card.moreCurrencies', { count: extraCount })
+            : null;
 
     return (
-        <View className={containerClass}>
-            <Text className={textClass} numberOfLines={1} ellipsizeMode="tail">
-                {`${prefix}${formatAmount(primary.net, primary.currency || defaultCurrency)}`}
+        <View className={`${styles.container} items-end`} testID="balance-chip-active">
+            <Text className={styles.amount} numberOfLines={2}>
+                {t(labelKey, { amount: amountText })}
             </Text>
-            {extraCount > 0 && (
-                <Text
-                    className={`ml-1 text-[10px] font-semibold ${
-                        isOwed ? 'text-green-600/70' : 'text-red-500/70'
-                    }`}
-                    testID="balance-chip-others"
-                >
-                    {`+${extraCount}`}
-                </Text>
-            )}
+            {extraLabel ? (
+                onPressExtraCurrencies ? (
+                    <TouchableOpacity
+                        onPress={onPressExtraCurrencies}
+                        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                        testID="balance-chip-others"
+                    >
+                        <Text className={`${styles.label} underline mt-0.5`}>{extraLabel}</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <Text className={`${styles.label} mt-0.5`} testID="balance-chip-others">
+                        {extraLabel}
+                    </Text>
+                )
+            ) : null}
         </View>
     );
 }
