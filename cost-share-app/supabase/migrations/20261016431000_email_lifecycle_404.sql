@@ -35,8 +35,7 @@ WHERE email_unsubscribe_token IS NULL;
 ALTER TABLE public.profiles
     ALTER COLUMN email_unsubscribe_token SET NOT NULL;
 
-ALTER TABLE public.profiles
-    ALTER COLUMN email_unsubscribe_token DROP DEFAULT;
+-- Keep DEFAULT so SQL tests using session_replication_role=replica (triggers off) still get tokens.
 
 CREATE UNIQUE INDEX IF NOT EXISTS profiles_email_unsubscribe_token_key
     ON public.profiles (email_unsubscribe_token);
