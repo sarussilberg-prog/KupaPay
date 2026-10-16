@@ -1178,6 +1178,17 @@
             "error": "Не удалось привязать имя"
         }
     },
+    "shareSummary": {
+        "title": "Поделиться сводкой группы",
+        "share": "Поделиться изображением",
+        "hideAmounts": "Скрыть суммы",
+        "hiddenAmount": "•••",
+        "allSettled": "Все рассчитались ✓",
+        "balancesSnapshot": "Снимок балансов",
+        "debtLine": "{{from}} → {{to}}",
+        "watermark": "Делите расходы на {{url}}",
+        "fallback": "Наша группа «{{groupName}}» в KupaPay"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "Вы должны",

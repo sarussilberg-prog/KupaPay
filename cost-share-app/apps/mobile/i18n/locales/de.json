@@ -1162,6 +1162,17 @@
             "error": "Name konnte nicht verknüpft werden"
         }
     },
+    "shareSummary": {
+        "title": "Gruppenübersicht teilen",
+        "share": "Bild teilen",
+        "hideAmounts": "Beträge ausblenden",
+        "hiddenAmount": "•••",
+        "allSettled": "Alles ausgeglichen ✓",
+        "balancesSnapshot": "Salden-Übersicht",
+        "debtLine": "{{from}} → {{to}}",
+        "watermark": "Ausgaben teilen auf {{url}}",
+        "fallback": "Schau dir unsere Gruppe \"{{groupName}}\" auf KupaPay an"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "Du schuldest",

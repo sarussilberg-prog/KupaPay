@@ -1163,6 +1163,17 @@
             "error": "No se pudo vincular ese nombre"
         }
     },
+    "shareSummary": {
+        "title": "Compartir resumen del grupo",
+        "share": "Compartir imagen",
+        "hideAmounts": "Ocultar importes",
+        "hiddenAmount": "•••",
+        "allSettled": "Todo saldado ✓",
+        "balancesSnapshot": "Instantánea de saldos",
+        "debtLine": "{{from}} → {{to}}",
+        "watermark": "Divide gastos en {{url}}",
+        "fallback": "Mira nuestro grupo \"{{groupName}}\" en KupaPay"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "Debes",
