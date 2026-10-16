@@ -29,51 +29,55 @@ postgres_container_running() {
   docker inspect -f '{{.State.Running}}' "$PG_CONTAINER" 2>/dev/null | grep -q '^true$'
 }
 
-# Supabase Postgres accepts connections before init scripts finish (auth/graphql missing).
+# Supabase Postgres accepts connections before init scripts finish; the entrypoint also
+# stops and restarts Postgres once after first-boot init ("database system is shutting down").
 wait_for_supabase_postgres_ready() {
-  local max_attempts="${1:-120}"
-  local attempt=0
-  while (( attempt++ < max_attempts )); do
+  local max_wait_secs="${1:-480}"
+  local elapsed=0
+  local stable_hits=0
+  local last_note=0
+  while (( elapsed < max_wait_secs )); do
     if ! postgres_container_running; then
+      stable_hits=0
       sleep 2
+      elapsed=$((elapsed + 2))
       continue
     fi
     if ! docker exec "$PG_CONTAINER" pg_isready -U "$PGUSER" -d postgres -q 2>/dev/null; then
+      stable_hits=0
       sleep 2
+      elapsed=$((elapsed + 2))
       continue
     fi
-    local status
-    status="$(
+    local auth_ready
+    auth_ready="$(
       docker exec -e PGPASSWORD=postgres "$PG_CONTAINER" \
-        psql -U "$PGUSER" -d postgres -v ON_ERROR_STOP=1 -tA <<'SQL' 2>/dev/null || true
-SELECT CASE
-  WHEN pg_is_in_recovery() THEN 'recovery'
-  WHEN NOT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'auth') THEN 'no_auth'
-  WHEN NOT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'graphql') THEN 'no_graphql'
-  WHEN NOT EXISTS (
-    SELECT 1
-    FROM pg_proc p
-    JOIN pg_namespace n ON n.oid = p.pronamespace
-    WHERE n.nspname = 'graphql' AND p.proname = 'increment_schema_version'
-  ) THEN 'no_graphql_fn'
-  ELSE 'ready'
-END;
-SQL
+        psql -U "$PGUSER" -d postgres -tA -c \
+        "SELECT 1 FROM information_schema.schemata WHERE schema_name = 'auth'" 2>/dev/null || true
     )"
-    status="${status//$'\r'/}"
-    if [[ "$status" == "ready" ]]; then
-      echo "✅ Postgres ready (${PG_IMAGE}, attempt ${attempt})"
-      return 0
+    auth_ready="${auth_ready//$'\r'/}"
+    if [[ "$auth_ready" == "1" ]]; then
+      stable_hits=$((stable_hits + 1))
+      if (( stable_hits >= 2 )); then
+        echo "✅ Postgres ready (${PG_IMAGE}, ${elapsed}s)"
+        return 0
+      fi
+      sleep 5
+      elapsed=$((elapsed + 5))
+      continue
     fi
-    if (( attempt % 15 == 0 )); then
-      echo "… waiting for Supabase Postgres init (${status}, attempt ${attempt}/${max_attempts})"
-    fi
+    stable_hits=0
     sleep 2
+    elapsed=$((elapsed + 2))
+    if (( elapsed - last_note >= 30 )); then
+      last_note=$elapsed
+      echo "… waiting for Supabase Postgres init (${elapsed}s / ${max_wait_secs}s)"
+    fi
   done
   echo "::group::Postgres container logs (readiness timeout)"
   docker logs "$PG_CONTAINER" 2>&1 | tail -120 || true
   echo "::endgroup::"
-  echo "::error::Postgres did not become ready (auth/graphql/init)"
+  echo "::error::Postgres did not become ready (auth schema / first-boot init)"
   return 1
 }
 
