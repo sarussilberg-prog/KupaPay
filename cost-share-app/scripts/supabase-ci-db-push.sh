@@ -61,8 +61,18 @@ push_pending() {
   return "$code"
 }
 
+echo "▶ Migration drift check (remote history vs repo) ..."
+bash scripts/supabase-migration-drift-check.sh
+
 echo "▶ Remote migration precheck ..."
 bash scripts/supabase-remote-migration-precheck.sh
+
+if [[ "${DRY_RUN:-}" == "1" ]]; then
+  echo "▶ Dry-run only (DRY_RUN=1) — no migrations applied"
+  revert_remote_only || true
+  supabase db push --db-url "$DB_URL" --dry-run
+  exit 0
+fi
 
 echo "▶ Pushing pending migrations ..."
 push_pending
