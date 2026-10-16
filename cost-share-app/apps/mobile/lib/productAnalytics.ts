@@ -1,9 +1,8 @@
 /**
- * Product analytics (PostHog via posthog-react-native). No-ops when unset or client unbound.
+ * Product analytics (PostHog). No-ops when unset or client unbound.
  *
  * Privacy: internal user id only (no email/PII), no session replay, no IDFA/ATT,
- * explicit events only (see ProductAnalyticsEvent). Aligns with rewarded-ads compliance
- * (non-personalized / no cross-app ad tracking) in rewardedAdsCompliance.ts.
+ * explicit events only (see ProductAnalyticsEvent). Aligns with rewarded-ads compliance.
  *
  * Env: EXPO_PUBLIC_POSTHOG_KEY (legacy EXPO_PUBLIC_POSTHOG_API_KEY), EXPO_PUBLIC_POSTHOG_HOST.
  */
@@ -12,41 +11,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     ACTIVATION_ANALYTICS_EVENTS,
     ACTIVATION_ANALYTICS_STORAGE_KEYS,
+    buildProductAnalyticsProperties,
     secondsSinceSignup,
+    type ProductAnalyticsEvent,
+    type ProductAnalyticsPropertyValue,
 } from '@cost-share/shared';
 import { getCurrentUserId } from './auth';
 import { isPostHogConfigured } from './posthogEnv';
+import { getProductAnalyticsContext } from './productAnalyticsContext';
 import { supabase } from './supabase';
 
 const FIRST_GROUP_FLAG = '@kupapay/analytics/first_group_sent';
 
-export type ProductAnalyticsEvent =
-    | 'app_open'
-    | 'signup'
-    | 'signup_completed'
-    | 'group_created'
-    | 'expense_added'
-    | 'first_expense_added'
-    | 'settle_up'
-    | 'paywall_viewed'
-    | 'paywall_load_failed'
-    | 'trial_started'
-    | 'purchase_completed'
-    | 'purchase_failed'
-    | 'purchase_started'
-    | 'restore'
-    | 'invite_sent'
-    | 'invite_accepted'
-    | 'second_group_member_joined'
-    | 'review_prompt_shown'
-    | 'recurring_series_created'
-    | 'recurring_series_stopped'
-    | 'trip_currency_viewed'
-    | 'smart_reminder_configured'
-    | 'spending_insights_viewed'
-    | 'trip_budget_configured'
-    | 'trip_budget_viewed'
-    | 'receipt_scan_applied';
+export type { ProductAnalyticsEvent };
 
 export interface ProductAnalyticsClient {
     capture: (event: string, properties?: Record<string, unknown>) => void;
@@ -103,7 +80,7 @@ export async function resetProductAnalyticsUser(): Promise<void> {
 
 export async function captureProductEvent(
     event: ProductAnalyticsEvent,
-    properties?: Record<string, string | number | boolean | null>,
+    properties?: Record<string, ProductAnalyticsPropertyValue>,
 ): Promise<void> {
     if (!canCapture()) return;
     try {
@@ -111,10 +88,8 @@ export async function captureProductEvent(
         if (uid) {
             boundClient!.identify(uid, {});
         }
-        boundClient!.capture(event, {
-            ...properties,
-            $lib: 'kupapay-mobile',
-        });
+        const payload = buildProductAnalyticsProperties(getProductAnalyticsContext(), properties);
+        boundClient!.capture(event, payload);
     } catch {
         // ignore
     }
@@ -134,7 +109,7 @@ export async function trackSignupCompleted(
             ACTIVATION_ANALYTICS_STORAGE_KEYS.signupCompletedAt,
             String(atMs),
         );
-        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.signupCompleted as ProductAnalyticsEvent, {
+        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.signupCompleted, {
             ...properties,
             signup_completed_at_ms: atMs,
         });
@@ -168,14 +143,11 @@ export async function trackFirstExpenseAdded(
         const signupAt = await readSignupCompletedAtMs();
         const seconds =
             signupAt != null ? secondsSinceSignup(signupAt) : null;
-        await captureProductEvent(
-            ACTIVATION_ANALYTICS_EVENTS.firstExpenseAdded as ProductAnalyticsEvent,
-            {
-                group_id: groupId,
-                ...(seconds != null ? { seconds_since_signup: seconds } : {}),
-                ...extra,
-            },
-        );
+        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.firstExpenseAdded, {
+            group_id: groupId,
+            ...(seconds != null ? { seconds_since_signup: seconds } : {}),
+            ...extra,
+        });
         await AsyncStorage.setItem(ACTIVATION_ANALYTICS_STORAGE_KEYS.firstExpenseSent, '1');
     } catch {
         // ignore
@@ -187,7 +159,7 @@ export async function trackFirstGroupCreated(groupId: string): Promise<void> {
     try {
         const sent = await AsyncStorage.getItem(FIRST_GROUP_FLAG);
         if (sent === '1') return;
-        await captureProductEvent('group_created', { group_id: groupId });
+        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.groupCreated, { group_id: groupId });
         await AsyncStorage.setItem(FIRST_GROUP_FLAG, '1');
     } catch {
         // ignore

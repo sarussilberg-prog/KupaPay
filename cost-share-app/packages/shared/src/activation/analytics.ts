@@ -1,8 +1,13 @@
+import {
+    PRODUCT_ANALYTICS_ACTIVATION_EVENT_NAMES,
+    PRODUCT_ANALYTICS_FUNNEL_EVENTS,
+} from '../analytics/productAnalyticsEvents';
+
 /** PostHog funnel for activation onboarding (issue #392). */
 export const ACTIVATION_ANALYTICS_EVENTS = {
-    signupCompleted: 'signup_completed',
-    groupCreated: 'group_created',
-    firstExpenseAdded: 'first_expense_added',
+    signupCompleted: PRODUCT_ANALYTICS_ACTIVATION_EVENT_NAMES.signupCompleted,
+    groupCreated: 'group_created' satisfies (typeof PRODUCT_ANALYTICS_FUNNEL_EVENTS)[number],
+    firstExpenseAdded: PRODUCT_ANALYTICS_ACTIVATION_EVENT_NAMES.firstExpenseAdded,
 } as const;
 
 export type ActivationAnalyticsEventName =

@@ -2,7 +2,11 @@
 
 Supabase records **`schema_migrations.version`** as the **14-digit timestamp prefix** of each filename (`YYYYMMDDHHMMSS_name.sql`). Two files must not share the same prefix.
 
-CI runs `cost-share-app/scripts/supabase-unique-migration-versions.sh` on every PR.
+CI runs on every PR (see [docs/CI_CD.md](../CI_CD.md)):
+
+- `supabase-lint-migration-filenames.sh` — naming rules
+- `supabase-unique-migration-versions.sh` — duplicates on the PR branch
+- `supabase-unique-migration-versions-at-merge.sh` — merge simulation against latest `origin/dev` / `origin/main` + pre-merge recheck in auto-merge
 
 ## Reserved / planned (avoid collisions)
 

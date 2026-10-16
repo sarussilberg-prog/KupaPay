@@ -4,6 +4,7 @@ export type VersionJson = {
     version: string;
     marketingVersion?: string;
     lastTestFlightInternalVersion?: string;
+    lastPlayInternalVersion?: string;
 };
 
 const data = versionData as VersionJson;

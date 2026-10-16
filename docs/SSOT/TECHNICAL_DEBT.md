@@ -57,7 +57,8 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 
 ### 2. Product analytics (PostHog / Amplitude / similar)
 - **Status (2026-10-15):** **Shipped (Phase 1)** — `posthog-react-native` + `productAnalytics.ts` wrapper (EU host, no replay/autocapture/PII); funnel events through paywall/purchases/invites. Privacy policy (`20261010210000`+).
-- **Revisit when:** PostHog dashboards for install → signup → group → expense → invite → settle → Pro trial/purchase.
+- **Status (2026-10-16):** Funnel taxonomy + cross-platform context tags (#421); north-star SQL + HogQL templates (#422). See [POSTHOG_EVENT_TAXONOMY.md](./POSTHOG_EVENT_TAXONOMY.md).
+- **Revisit when:** PostHog UI dashboards manually duplicated from HogQL templates if not yet created in EU project.
 
 ### 3. CI: TypeScript strict gate + workspace `tsc` in `ci.yml`
 - **Status (2026-10-11):** **Done** — KI-015 resolved; `npm run typecheck` in CI (see security stack PR).
