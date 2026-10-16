@@ -21,8 +21,8 @@ if echo "$MSG" | grep -qiE '\[(skip ci|ci skip)\]'; then
 fi
 
 KUPAPAY_DEV_VERCEL_PROJECT_IDS=(
-  "prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"
   "prj_ldRyqXhp9Gg0QAHCNzEBw3VIcWbc"
+  "prj_wa5noNsRFK5797IRthACeREIa8jR"
 )
 
 is_dev_project=false
