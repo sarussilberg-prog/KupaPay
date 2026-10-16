@@ -2,11 +2,15 @@
 
 When a user deleted their account and contacts support to come back, restore the **same** `user_id` so friendships, groups, expenses, and balances stay linked.
 
-## Prerequisites
+## Self-service (mobile, within 30 days)
 
-- Run `account-deletion-v3-fixes.sql` on the project (includes `restore_deleted_account()`).
+Users who deleted their account can **sign in again with the same provider** during the grace window. The app offers **Restore account** (`restore_my_account` RPC). That path requires a **fresh sign-in** (JWT issued within the last 15 minutes) and only reactivates `auth.uid()` — no cross-user restore.
+
+## Support / admin restore
+
 - Confirm the requester owns the email (they must write from the same address that was deleted).
-- Use Supabase **SQL Editor** (service role) — this RPC is not exposed to the mobile app.
+- Admins use the in-app admin portal (`admin_restore_deleted_account`) or Supabase **SQL Editor** (`restore_deleted_account` as `service_role`).
+- Recovery email is stored on `account_deletions_audit.recovery_email` until restore or hard purge (auth.users email is scrubbed on delete).
 
 ## Steps
 
