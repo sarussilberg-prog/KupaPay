@@ -766,7 +766,11 @@
             "noStack": "אין מחסנית קריאה"
         },
         "monetization": {
-            "portalRow": "ניתוח הכנסות"
+            "portalRow": "ניתוח הכנסות",
+            "allTimeFunnel": "משפך מצטבר",
+            "byPlatform": "לפי פלטפורמה",
+            "last7Days": "7 ימים אחרונים",
+            "noData": "אין אירועים בתקופה זו עדיין"
         },
         "supportMessages": {
             "title": "הודעות תמיכה",
@@ -783,7 +787,12 @@
             "activeGroups": "קבוצות פעילות",
             "archivedGroups": "קבוצות בארכיון",
             "archiveFootnote": "ארכיון = ללא פעילות במשך חודשיים ויתרות אפס (לכל המשתמשים). ארכיון ידני אישי לא נספר כאן.",
-            "loadError": "לא ניתן לטעון נתונים. נסו שוב מאוחר יותר."
+            "loadError": "משוך לרענון או נסה שוב מאוחר יותר.",
+            "loadErrorTitle": "לא ניתן לטעון נתונים",
+            "notAdminTitle": "נדרשות הרשאות מנהל",
+            "notAdminBody": "החשבון שלך לא ברשימת מנהלי האפליקציה.",
+            "analyticsUnavailableTitle": "אנליטיקת מונטיזציה לא מוגדרת",
+            "analyticsUnavailableBody": "פונקציית המדדים חסרה או ללא הרשאה בפרויקט Supabase. יש להחיל מיגרציות ולרענן."
         }
     },
     "profile": {

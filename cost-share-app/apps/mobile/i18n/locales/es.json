@@ -765,7 +765,11 @@
             "noStack": "No hay traza de pila disponible"
         },
         "monetization": {
-            "portalRow": "Analíticas de monetización"
+            "portalRow": "Analíticas de monetización",
+            "allTimeFunnel": "Embudo histórico",
+            "byPlatform": "Por plataforma",
+            "last7Days": "Últimos 7 días",
+            "noData": "Aún no hay eventos en este periodo"
         },
         "supportMessages": {
             "title": "Mensajes de ayuda",
@@ -782,7 +786,12 @@
             "activeGroups": "Grupos activos",
             "archivedGroups": "Grupos archivados",
             "archiveFootnote": "Archivados = inactivos durante 2 meses o más y con saldos en cero (en toda la app). No incluye el archivo manual de cada usuario.",
-            "loadError": "No se pudieron cargar las métricas. Desliza hacia abajo para actualizar o inténtalo más tarde."
+            "loadError": "Desliza hacia abajo para actualizar o inténtalo más tarde.",
+            "loadErrorTitle": "No se pudieron cargar las métricas",
+            "notAdminTitle": "Se requiere acceso de administrador",
+            "notAdminBody": "Tu cuenta no está en la lista de administradores de la app, por lo que las analíticas de monetización están ocultas.",
+            "analyticsUnavailableTitle": "Analíticas no configuradas",
+            "analyticsUnavailableBody": "Falta la función de métricas de monetización o no tiene permisos en este proyecto de Supabase. Aplica las migraciones más recientes en dev y actualiza."
         }
     },
     "profile": {

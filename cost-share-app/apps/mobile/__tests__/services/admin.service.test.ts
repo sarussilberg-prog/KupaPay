@@ -3,7 +3,13 @@ jest.mock('../../lib/supabase', () => ({
     supabase: { rpc: (...a: any[]) => mockRpc(...a) },
 }));
 
-import { listDeletedAccounts, restoreDeletedAccount, fetchAdminPlatformMetrics } from '../../services/admin.service';
+import {
+    listDeletedAccounts,
+    restoreDeletedAccount,
+    fetchAdminPlatformMetrics,
+    fetchAdminMonetizationMetrics,
+    AdminMonetizationMetricsError,
+} from '../../services/admin.service';
 
 beforeEach(() => {
     mockRpc.mockReset();
@@ -92,5 +98,35 @@ describe('fetchAdminPlatformMetrics', () => {
     it('returns null on RPC error', async () => {
         mockRpc.mockResolvedValue({ data: null, error: { message: 'not_authorized' } });
         expect(await fetchAdminPlatformMetrics()).toBeNull();
+    });
+});
+
+describe('fetchAdminMonetizationMetrics', () => {
+    it('returns parsed metrics on success', async () => {
+        mockRpc.mockResolvedValue({
+            data: {
+                funnel: { ad_gate_shown: 2, ad_gate_watch_tapped: 1, ad_gate_watch_completed: 1, ad_gate_pro_tapped: 0, remind_sent: 0 },
+                by_feature: {},
+                by_platform: { ios: 2 },
+                daily: [],
+            },
+            error: null,
+        });
+        const m = await fetchAdminMonetizationMetrics();
+        expect(mockRpc).toHaveBeenCalledWith('get_monetization_metrics');
+        expect(m.funnel.ad_gate_shown).toBe(2);
+    });
+
+    it('throws analytics_unavailable when RPC is missing', async () => {
+        mockRpc.mockResolvedValue({ data: null, error: { code: 'PGRST202', message: 'Could not find the function' } });
+        await expect(fetchAdminMonetizationMetrics()).rejects.toMatchObject({
+            code: 'analytics_unavailable',
+        });
+    });
+
+    it('throws not_admin when RPC rejects admin', async () => {
+        mockRpc.mockResolvedValue({ data: null, error: { message: 'not_admin' } });
+        await expect(fetchAdminMonetizationMetrics()).rejects.toBeInstanceOf(AdminMonetizationMetricsError);
+        await expect(fetchAdminMonetizationMetrics()).rejects.toMatchObject({ code: 'not_admin' });
     });
 });
