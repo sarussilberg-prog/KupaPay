@@ -64,6 +64,9 @@
             "balances": "יתרות"
         },
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
+        "signInWithEmailMagicLink": "המשך עם אימייל",
+        "emailMagicLinkStubHint": "כניסה בקישור לאימייל תגיע בקרוב.",
+        "emailPlaceholder": "name@example.com",
         "googleSignInSheetTitle": "התחברות עם Google",
         "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה."
     },
@@ -1225,7 +1228,11 @@
             "upgrade": "שדרוג ל-Pro",
             "empty": "אין עדיין הוצאות במטבע זה.",
             "uncategorized": "ללא קטגוריה",
-            "tab": { "category": "קטגוריה", "member": "שילם", "week": "שבועי" }
+            "tab": {
+                "category": "קטגוריה",
+                "member": "שילם",
+                "week": "שבועי"
+            }
         },
         "tripBudget": {
             "title": "תקציב טיול",

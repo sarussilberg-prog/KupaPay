@@ -64,6 +64,9 @@
             "balances": "Salden"
         },
         "signInError": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+        "signInWithEmailMagicLink": "Mit E-Mail fortfahren",
+        "emailMagicLinkStubHint": "Anmeldung per E-Mail-Link kommt demnächst.",
+        "emailPlaceholder": "deine@email.de",
         "googleSignInSheetTitle": "Mit Google anmelden",
         "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster."
     },
@@ -1292,7 +1295,11 @@
             "upgrade": "Pro freischalten",
             "empty": "Noch keine Ausgaben in dieser Währung.",
             "uncategorized": "Ohne Kategorie",
-            "tab": { "category": "Kategorie", "member": "Bezahlt von", "week": "Wochen" }
+            "tab": {
+                "category": "Kategorie",
+                "member": "Bezahlt von",
+                "week": "Wochen"
+            }
         },
         "tripBudget": {
             "title": "Reisebudget",

@@ -65,7 +65,10 @@
         },
         "signInError": "Sign in failed. Please try again.",
         "googleSignInSheetTitle": "Sign in with Google",
-        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet."
+        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet.",
+        "signInWithEmailMagicLink": "Continue with email",
+        "emailMagicLinkStubHint": "Email magic link sign-in is coming soon.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "Skip",
