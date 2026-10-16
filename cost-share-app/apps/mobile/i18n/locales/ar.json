@@ -734,6 +734,17 @@
         "deleteAccount": "حذف الحساب",
         "adminPortal": "بوابة المشرف"
     },
+    "appReview": {
+        "prePromptTitle": "هل تستمتع بـ KupaPay؟",
+        "prePromptMessage": "سؤال سريع — تقييمك يساعد الأصدقاء على اكتشاف تقسيم نفقات عادل.",
+        "happyCta": "نعم، أعجبني",
+        "unhappyCta": "يمكن أن يتحسّن",
+        "notNow": "ليس الآن",
+        "webTitle": "كيف تجربة KupaPay لديك؟",
+        "webMessage": "ما زلنا نطوّر نسخة الويب. ملاحظاتك تصل مباشرة إلى الفريق.",
+        "webFeedbackCta": "إرسال ملاحظات",
+        "webStoreHint": "للتقييم في App Store أو Google Play، استخدم KupaPay على هاتفك."
+    },
     "admin": {
         "portal": {
             "title": "بوابة المشرف",

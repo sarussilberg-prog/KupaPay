@@ -702,6 +702,17 @@
         "deleteAccount": "Delete account",
         "adminPortal": "Admin Portal"
     },
+    "appReview": {
+        "prePromptTitle": "Enjoying KupaPay?",
+        "prePromptMessage": "Quick check-in — your rating helps more friends discover fair split expenses.",
+        "happyCta": "Yes, I love it",
+        "unhappyCta": "Could be better",
+        "notNow": "Not now",
+        "webTitle": "How is KupaPay working for you?",
+        "webMessage": "We are still polishing the web experience. Your feedback goes straight to the team.",
+        "webFeedbackCta": "Share feedback",
+        "webStoreHint": "For App Store or Google Play ratings, use KupaPay on your phone."
+    },
     "admin": {
         "portal": {
             "title": "Admin Portal",

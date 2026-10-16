@@ -19,6 +19,7 @@ import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
 import { useAppStore } from '../store';
 import { AdminProViewBanner } from './admin/AdminProViewBanner';
+import { AppReviewPromptHost } from './appReview/AppReviewPromptHost';
 import { View } from 'react-native';
 
 /**
@@ -103,6 +104,7 @@ export function AuthenticatedAppGate() {
                 <View style={{ flex: 1 }}>
                     <AppNavigator />
                 </View>
+                <AppReviewPromptHost />
             </View>
         </NavigationContainer>
     );

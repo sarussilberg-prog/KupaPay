@@ -3,7 +3,7 @@ import { persist, type PersistStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SuperJSON from 'superjson';
 import { Session } from '@supabase/supabase-js';
-import { User, PendingInvite } from '@cost-share/shared';
+import { User, PendingInvite, type AppReviewTrigger } from '@cost-share/shared';
 
 interface AppState {
     // Auth state
@@ -29,10 +29,15 @@ interface AppState {
         | { target: 'groupsList' }
         | { target: 'settleUpList'; groupId: string }
         | { target: 'manageSubscription' }
+        | { target: 'contactUs' }
         | null;
     setPendingNavigation: (
         nav: AppState['pendingNavigation'],
     ) => void;
+
+    /** In-app review pre-prompt after a positive moment (settle-up / 3rd expense). */
+    pendingAppReview: { trigger: AppReviewTrigger } | null;
+    setPendingAppReview: (value: AppState['pendingAppReview']) => void;
 
     // Deactivation notice — set when assertProfileActive detects a deactivated
     // (deleted) profile during sign-in. LoginScreen watches this flag and shows
@@ -81,6 +86,9 @@ export const useAppStore = create<AppState>()(
 
             pendingNavigation: null,
             setPendingNavigation: (nav) => set({ pendingNavigation: nav }),
+
+            pendingAppReview: null,
+            setPendingAppReview: (value) => set({ pendingAppReview: value }),
 
             // Deactivation notice flag
             pendingDeactivationNotice: false,

@@ -702,6 +702,17 @@
         "deleteAccount": "Konto löschen",
         "adminPortal": "Admin-Portal"
     },
+    "appReview": {
+        "prePromptTitle": "Gefällt dir KupaPay?",
+        "prePromptMessage": "Kurze Frage — deine Bewertung hilft Freunden, faire Ausgabenaufteilung zu entdecken.",
+        "happyCta": "Ja, ich bin begeistert",
+        "unhappyCta": "Könnte besser sein",
+        "notNow": "Nicht jetzt",
+        "webTitle": "Wie läuft KupaPay für dich?",
+        "webMessage": "Wir verbessern noch die Web-Version. Dein Feedback geht direkt ans Team.",
+        "webFeedbackCta": "Feedback senden",
+        "webStoreHint": "Für App-Store- oder Play-Store-Bewertungen nutze KupaPay auf dem Handy."
+    },
     "admin": {
         "portal": {
             "title": "Admin-Portal",
