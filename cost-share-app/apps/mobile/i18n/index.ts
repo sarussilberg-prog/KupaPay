@@ -11,7 +11,7 @@
 
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { DevSettings, I18nManager } from 'react-native';
+import { DevSettings, I18nManager, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import * as Updates from 'expo-updates';
@@ -102,6 +102,13 @@ async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
 
 async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
     const desiredRTL = RTL_LANGUAGES.has(language);
+    if (Platform.OS === 'web') {
+        I18nManager.allowRTL(true);
+        I18nManager.forceRTL(desiredRTL);
+        await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
+        return;
+    }
+
     if (I18nManager.isRTL === desiredRTL) {
         await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
         return;
