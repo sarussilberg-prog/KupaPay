@@ -1191,6 +1191,13 @@
         "recurring": {
             "lockedBody": "Automate rent, subscriptions, and other repeating expenses with Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Fill from receipt text",
+            "sheetTitle": "Receipt text",
+            "sheetBody": "Paste text from a receipt email or OCR app. We suggest amount, currency, and merchant — you confirm before saving.",
+            "placeholder": "Paste receipt text here…",
+            "apply": "Apply to form"
+        },
         "smartReminder": {
             "sheetTitle": "Smart reminders",
             "enable": "Automatic settle-up reminders",

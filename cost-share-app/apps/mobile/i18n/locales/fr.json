@@ -1260,6 +1260,13 @@
         "recurring": {
             "lockedBody": "Automatisez le loyer, les abonnements et autres dépenses récurrentes avec Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Remplir depuis le texte",
+            "sheetTitle": "Texte du reçu",
+            "sheetBody": "Collez le texte du reçu. Montant et devise suggérés — vous confirmez.",
+            "placeholder": "Collez ici…",
+            "apply": "Appliquer"
+        },
         "smartReminder": {
             "sheetTitle": "Rappels intelligents",
             "enable": "Rappels automatiques de règlement",

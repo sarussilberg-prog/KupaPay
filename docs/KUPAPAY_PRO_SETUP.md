@@ -102,3 +102,7 @@ Deploy `pro-smart-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261016130000_smart_payment_reminders.sql` on dev before production.
+
+### Receipt OCR (Pro v2, heuristic)
+
+Deploy `receipt-ocr` (user JWT). Default: **no paid OCR** — paste text + shared heuristic. Optional vendor via `RECEIPT_OCR_API_URL`. See [RECEIPT_OCR.md](RECEIPT_OCR.md).
