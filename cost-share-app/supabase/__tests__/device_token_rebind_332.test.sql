@@ -41,10 +41,10 @@ BEGIN
         RAISE EXCEPTION 'Case 2 failed: token owner should remain A (got %)', v_owner;
     END IF;
 
-    UPDATE public.device_tokens
-        SET disabled_at = NOW(), disabled_reason = 'test'
-        WHERE token = v_tok;
+    PERFORM public.test_set_authenticated(v_a);
+    PERFORM public.unregister_device_token(v_tok);
 
+    PERFORM public.test_set_authenticated(v_b);
     PERFORM public.register_device_token(v_tok, 'android');
     SELECT user_id INTO v_owner FROM public.device_tokens WHERE token = v_tok;
     IF v_owner <> v_b THEN
