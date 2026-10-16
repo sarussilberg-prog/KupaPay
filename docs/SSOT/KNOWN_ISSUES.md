@@ -54,7 +54,7 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 
 | ID | Status | Area | Issue | Notes / fix direction |
 |----|--------|------|-------|------------------------|
-| KI-010 | open | mobile | **No automated tests for onboarding gate** | Coverage exists for `onboardingStorage`, `platformAlert`, `platformShare`; missing tests for `AuthenticatedAppGate`, `OnboardingPreAuthFlow`, `OnboardingCreateGroupScreen`, skip/create/error paths. |
+| KI-010 | partial | mobile | **Onboarding gate test coverage** | **Done on dev (#104):** `AuthenticatedAppGate.test.tsx`, `authenticatedGateResolve.test.ts`, post-login paths. Still missing: `OnboardingPreAuthFlow`, `OnboardingCreateGroupScreen`, skip/error UX paths. |
 | KI-011 | open | web | **Toast renders outside phone frame when authenticated** | In `App.tsx`, logged-in path places `Toast` outside `WebFrame`; logged-out path keeps it inside. Success/error toasts may span full browser width. |
 | KI-035 | open | mobile | **Phone OTP login not enabled (SMS cost)** | Supabase MFA Phone add-on (~$75/mo/project) + per-SMS provider fees (Twilio ~$0.0075 US). Research: [AUTH_PHONE_SMS_COST.md](../AUTH_PHONE_SMS_COST.md). Email **OTP** is implemented behind `EXPO_PUBLIC_ENABLE_EMAIL_AUTH` — see [AUTH_EMAIL_OTP.md](../AUTH_EMAIL_OTP.md). |
 | KI-012 | open | web | **`WebAlertHost` backdrop dismiss ignores Cancel** | Tapping outside modal calls `dismiss()` without `cancel` button `onPress`. Affects 3+ button alerts (e.g. receipt picker in `AddExpenseScreen`). File: `components/WebAlertHost.tsx`. |
@@ -129,3 +129,4 @@ Use alongside automated tests before store / production cutover:
 | 2026-06-02 | Retracted KI-007 (Android `/android` folder is gitignored — EAS overrides), KI-016 (pluralized keys not missing), KI-027 (no email/password auth in app), and KI-029 (OAuth log already `__DEV__`-guarded). |
 | 2026-06-02 | Added KI-030 (`get_group_messages` 3-vs-2-param dev/prod drift; lockdown migration handles via DO block). |
 | 2026-10-11 | Security/CI pass: resolved KI-015, KI-019, KI-031, KI-032; partial KI-014; added KI-033–034. |
+| 2026-10-16 | Infra/test board pass: KI-010 partial — AuthenticatedAppGate + post-login paths on dev (#104). |
