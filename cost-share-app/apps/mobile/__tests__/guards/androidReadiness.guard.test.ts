@@ -55,6 +55,6 @@ describe('Android Play readiness (Expo config guard)', () => {
         expect(eas.submit.production.android.track).toBe('internal');
 
         const appConfigSrc = fs.readFileSync(APP_CONFIG, 'utf8');
-        expect(appConfigSrc).toContain('versionJson.version');
+        expect(appConfigSrc).toContain('marketingVersionFromJson()');
     });
 });
