@@ -674,6 +674,7 @@
         "legal": "Legal",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy",
+        "privacyAndAccount": "Privacy & Account",
         "account": "Account",
         "logout": "Log out",
         "version": "Version {{version}}",

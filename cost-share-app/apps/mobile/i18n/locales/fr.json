@@ -674,6 +674,7 @@
         "legal": "Mentions légales",
         "terms": "Conditions d'utilisation",
         "privacy": "Politique de confidentialité",
+        "privacyAndAccount": "Confidentialité et compte",
         "account": "Compte",
         "logout": "Se déconnecter",
         "version": "Version : {{version}}",

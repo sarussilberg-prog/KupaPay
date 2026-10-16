@@ -256,11 +256,10 @@ export function SettingsScreen() {
 
                 <SettingsSection title={t('settings.legal')}>
                     <SettingsRow iconName="document-text-outline" label={t('settings.terms')} variant="chevron" onPress={() => openLegal('terms')} />
-                    <SettingsRow iconName="shield-outline" label={t('settings.privacy')} variant="chevron" onPress={() => openLegal('privacy')} />
                 </SettingsSection>
 
-                <SettingsSection title={t('settings.account')}>
-                    <SettingsRow iconName="log-out-outline" label={t('settings.logout')} variant="danger" onPress={() => setShowLogout(true)} />
+                <SettingsSection title={t('settings.privacyAndAccount')}>
+                    <SettingsRow iconName="shield-outline" label={t('settings.privacy')} variant="chevron" onPress={() => openLegal('privacy')} />
                     <SettingsRow
                         iconName="trash-outline"
                         label={t('settings.deleteAccount')}
@@ -275,6 +274,10 @@ export function SettingsScreen() {
                             setShowDeleteWarning(true);
                         }}
                     />
+                </SettingsSection>
+
+                <SettingsSection title={t('settings.account')}>
+                    <SettingsRow iconName="log-out-outline" label={t('settings.logout')} variant="danger" onPress={() => setShowLogout(true)} />
                 </SettingsSection>
 
                 <Text className="text-center text-xs text-gray-400 mb-8">
