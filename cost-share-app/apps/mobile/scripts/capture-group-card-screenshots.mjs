@@ -27,8 +27,9 @@ for (const lang of locales) {
     const url = `${baseUrl}/?devGroupCardPreview=1&lang=${lang}`;
     await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
     await page.waitForSelector('[data-testid="group-card-preview-root"]', { timeout: 120_000 });
+    await page.waitForSelector('[data-testid="group-card-preview-lang"]', { timeout: 60_000 });
     await page.waitForSelector('[data-testid="balance-chip-amount"]', { timeout: 60_000 });
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
     const frame = page.locator('[data-testid="group-card-preview-frame"]');
     await frame.screenshot({
         path: join(outDir, `${lang}-group-card-list.png`),

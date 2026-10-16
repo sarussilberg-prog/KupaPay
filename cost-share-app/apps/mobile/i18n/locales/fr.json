@@ -347,8 +347,8 @@
             "youOweCaption": "Vous devez",
             "owedToYou": "On vous doit {{amount}}",
             "owedToYouCaption": "On vous doit",
-            "moreCurrencies": "+{{count}} devises",
-            "moreCurrencies_one": "+{{count}} devise",
+            "moreCurrencies": "{{plusCount}} devises",
+            "moreCurrencies_one": "{{plusCount}} devise",
             "lastActivity": "Actif {{when}}",
             "balanceUnavailable": "Solde indisponible hors ligne"
         },

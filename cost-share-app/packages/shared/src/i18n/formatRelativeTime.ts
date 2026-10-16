@@ -22,13 +22,13 @@ function resolveIntlLocale(language?: Language | string): string {
 /** Pick the coarsest unit that still reads naturally for activity timestamps. */
 export function pickRelativeTimeUnit(deltaMs: number): { value: number; unit: RelativeTimeUnit } {
     const abs = Math.abs(deltaMs);
-    if (abs < MS.minute) return { value: -Math.round(deltaMs / MS.second), unit: 'second' };
-    if (abs < MS.hour) return { value: -Math.round(deltaMs / MS.minute), unit: 'minute' };
-    if (abs < MS.day) return { value: -Math.round(deltaMs / MS.hour), unit: 'hour' };
-    if (abs < MS.week) return { value: -Math.round(deltaMs / MS.day), unit: 'day' };
-    if (abs < MS.month) return { value: -Math.round(deltaMs / MS.week), unit: 'week' };
-    if (abs < MS.year) return { value: -Math.round(deltaMs / MS.month), unit: 'month' };
-    return { value: -Math.round(deltaMs / MS.year), unit: 'year' };
+    if (abs < MS.minute) return { value: Math.round(deltaMs / MS.second), unit: 'second' };
+    if (abs < MS.hour) return { value: Math.round(deltaMs / MS.minute), unit: 'minute' };
+    if (abs < MS.day) return { value: Math.round(deltaMs / MS.hour), unit: 'hour' };
+    if (abs < MS.week) return { value: Math.round(deltaMs / MS.day), unit: 'day' };
+    if (abs < MS.month) return { value: Math.round(deltaMs / MS.week), unit: 'week' };
+    if (abs < MS.year) return { value: Math.round(deltaMs / MS.month), unit: 'month' };
+    return { value: Math.round(deltaMs / MS.year), unit: 'year' };
 }
 
 /**

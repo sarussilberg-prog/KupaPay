@@ -41,12 +41,15 @@ export function GroupCardListPreviewScreen() {
     return (
         <View testID="group-card-preview-root" style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
             <View testID="group-card-preview-frame" style={{ flex: 1, paddingTop: 12 }}>
-                <Text
-                    className="text-xs text-gray-500 px-4 pb-2"
-                    style={{ textAlign: 'center' }}
-                >
-                    {ready ? `GroupCard preview · ${language}` : 'Loading…'}
-                </Text>
+                {ready ? (
+                    <Text
+                        className="text-xs text-gray-500 px-4 pb-2"
+                        style={{ textAlign: 'center' }}
+                        testID="group-card-preview-lang"
+                    >
+                        {`GroupCard preview · ${language}`}
+                    </Text>
+                ) : null}
                 <NavigationContainer>
                     <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24 }}>
                         {groups.map(group => (

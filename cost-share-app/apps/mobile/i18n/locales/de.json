@@ -347,8 +347,8 @@
             "youOweCaption": "Du schuldest",
             "owedToYou": "Dir stehen {{amount}} zu",
             "owedToYouCaption": "Dir zustehend",
-            "moreCurrencies": "+{{count}} Währungen",
-            "moreCurrencies_one": "+{{count}} Währung",
+            "moreCurrencies": "{{plusCount}} Währungen",
+            "moreCurrencies_one": "{{plusCount}} Währung",
             "lastActivity": "Aktiv {{when}}",
             "balanceUnavailable": "Saldo offline nicht verfügbar"
         },

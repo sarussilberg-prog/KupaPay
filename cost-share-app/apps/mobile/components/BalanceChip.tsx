@@ -11,6 +11,7 @@ import {
     classifyUserNetBalance,
     countNonZeroCurrencyOthers,
     formatMoney,
+    wrapLtrForBidi,
 } from '@cost-share/shared';
 import { Text } from './AppText';
 import { useRtlLayout } from '../hooks/useRtlLayout';
@@ -147,7 +148,10 @@ export function BalanceChip({
 
     const extraLabel =
         extraCount > 0
-            ? t('groups.card.moreCurrencies', { count: extraCount })
+            ? t('groups.card.moreCurrencies', {
+                  count: extraCount,
+                  plusCount: wrapLtrForBidi(`+${extraCount}`),
+              })
             : null;
 
     return (

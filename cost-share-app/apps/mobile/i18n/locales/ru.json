@@ -347,8 +347,8 @@
             "youOweCaption": "Вы должны",
             "owedToYou": "Вам должны {{amount}}",
             "owedToYouCaption": "Вам должны",
-            "moreCurrencies": "+{{count}} валют",
-            "moreCurrencies_one": "+{{count}} валюта",
+            "moreCurrencies": "{{plusCount}} валют",
+            "moreCurrencies_one": "{{plusCount}} валюта",
             "lastActivity": "Активность {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
