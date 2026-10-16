@@ -87,7 +87,10 @@ export function sortGroups(
             case 'nameDesc':
                 return collator(b.name, a.name);
             case 'recentAsc':
-                return toEpochMs(a.updatedAt) - toEpochMs(b.updatedAt);
+                return (
+                    toEpochMs(a.lastActivityAt ?? a.updatedAt) -
+                    toEpochMs(b.lastActivityAt ?? b.updatedAt)
+                );
             case 'balanceDesc': {
                 const na = groupBalances[a.id]?.net ?? 0;
                 const nb = groupBalances[b.id]?.net ?? 0;
@@ -100,7 +103,10 @@ export function sortGroups(
             }
             case 'recentDesc':
             default:
-                return toEpochMs(b.updatedAt) - toEpochMs(a.updatedAt);
+                return (
+                    toEpochMs(b.lastActivityAt ?? b.updatedAt) -
+                    toEpochMs(a.lastActivityAt ?? a.updatedAt)
+                );
         }
     });
 }

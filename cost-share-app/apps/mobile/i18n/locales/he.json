@@ -64,6 +64,20 @@
             "balances": "יתרות"
         },
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
+        "signInWithEmail": "המשך עם אימייל",
+        "emailPlaceholder": "name@example.com",
+        "emailOtpSendCode": "שלח קוד",
+        "emailOtpVerify": "אמת והיכנס",
+        "emailOtpSentTo": "שלחנו קוד בן 6 ספרות ל-{{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "שלח קוד שוב",
+        "emailOtpResendIn": "שליחה חוזרת בעוד {{seconds}} שנ'",
+        "emailOtpChangeEmail": "שנה אימייל",
+        "emailOtpInvalidEmail": "הזן כתובת אימייל תקינה.",
+        "emailOtpInvalidCode": "הקוד לא תקין או שפג תוקפו. נסה שוב או שלח מחדש.",
+        "emailOtpRateLimited": "יותר מדי ניסיונות. המתן דקה ונסה שוב.",
+        "emailOtpSendError": "לא ניתן לשלוח את הקוד. נסה שוב.",
+        "emailOtpVerifyError": "לא ניתן לאמת את הקוד. נסה שוב.",
         "googleSignInSheetTitle": "התחברות עם Google",
         "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה."
     },
@@ -329,6 +343,13 @@
             "matchedMembers": "כולל {{names}}",
             "settled": "מסודר",
             "youSettled": "את/ה מסודר/ת",
+            "youOwe": "את/ה חייב/ת {{amount}}",
+            "youOweCaption": "את/ה חייב/ת",
+            "owedToYou": "מגיע לך {{amount}}",
+            "owedToYouCaption": "מגיע לך",
+            "moreCurrencies": "{{plusCount}} מטבעות",
+            "moreCurrencies_one": "{{plusCount}} מטבע",
+            "updatedAgo": "עודכן {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
         "bigCreateCta": "פתח קופה",
@@ -673,6 +694,7 @@
         "legal": "משפטי",
         "terms": "תנאי שירות",
         "privacy": "מדיניות פרטיות",
+        "privacyAndAccount": "פרטיות וחשבון",
         "account": "חשבון",
         "logout": "התנתק",
         "version": "גרסה {{version}}",
@@ -689,6 +711,21 @@
             "deletedUsersRow": "משתמשים שנמחקו",
             "resetOnboardingRow": "איפוס אונבורדינג",
             "previewCreateGroupRow": "תצוגה מקדימה — יצירת קופה ראשונה"
+        },
+        "proView": {
+            "sectionTitle": "מצב תצוגת Pro",
+            "description": "תצוגה מקדימה של חוויית Free או Pro לחשבון שלך בלבד (24 שעות). לא משנה מנוי אמיתי.",
+            "loading": "טוען סטטוס Pro…",
+            "expires": "העקיפה תפוג {{when}}",
+            "setFailed": "לא ניתן לעדכן את מצב תצוגת Pro",
+            "bannerPro": "תצוגת מנהל: Pro",
+            "bannerFree": "תצוגת מנהל: חינם",
+            "bannerResetHint": "הקש לאיפוס למצב אמיתי",
+            "mode": {
+                "real": "אמיתי",
+                "force_pro": "כפיית Pro",
+                "force_free": "כפיית חינם"
+            }
         },
         "onboarding": {
             "resetTitle": "לאפס את האונבורדינג?",
@@ -747,7 +784,11 @@
             "noStack": "אין מחסנית קריאה"
         },
         "monetization": {
-            "portalRow": "ניתוח הכנסות"
+            "portalRow": "ניתוח הכנסות",
+            "allTimeFunnel": "משפך מצטבר",
+            "byPlatform": "לפי פלטפורמה",
+            "last7Days": "7 ימים אחרונים",
+            "noData": "אין אירועים בתקופה זו עדיין"
         },
         "supportMessages": {
             "title": "הודעות תמיכה",
@@ -764,7 +805,12 @@
             "activeGroups": "קבוצות פעילות",
             "archivedGroups": "קבוצות בארכיון",
             "archiveFootnote": "ארכיון = ללא פעילות במשך חודשיים ויתרות אפס (לכל המשתמשים). ארכיון ידני אישי לא נספר כאן.",
-            "loadError": "לא ניתן לטעון נתונים. נסו שוב מאוחר יותר."
+            "loadError": "משוך לרענון או נסה שוב מאוחר יותר.",
+            "loadErrorTitle": "לא ניתן לטעון נתונים",
+            "notAdminTitle": "נדרשות הרשאות מנהל",
+            "notAdminBody": "החשבון שלך לא ברשימת מנהלי האפליקציה.",
+            "analyticsUnavailableTitle": "אנליטיקת מונטיזציה לא מוגדרת",
+            "analyticsUnavailableBody": "פונקציית המדדים חסרה או ללא הרשאה בפרויקט Supabase. יש להחיל מיגרציות ולרענן."
         }
     },
     "profile": {
@@ -873,7 +919,8 @@
             "noteChangedByYou": "הפתק שונה על ידך · {{group}}",
             "noteChangedBy": "הפתק שונה על ידי {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך",
-            "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}"
+            "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}",
+            "tripBudgetAlert": "התראת תקציב טיול ב-{{group}}"
         },
         "addedExpense": "הוסיף הוצאה",
         "settledPayment": "ביצע תשלום",
@@ -900,6 +947,7 @@
         "currency": "מטבע",
         "amount": "סכום",
         "submit": "רשום תשלום",
+        "paidInCurrency": "התשלום נרשם ב-{{currency}} (החובות עשויים להיות במטבעות אחרים)",
         "warnPartial": "תשלום חלקי — {{remaining}} עדיין יישארו חוב",
         "warnOverpay": "מעבר לסכום — {{flipAmount}} יהיו חוב בכיוון ההפוך",
         "edit": "ערוך תשלום",
@@ -1037,6 +1085,16 @@
         "noFriendsYet": "אין קופות משותפות",
         "friendBreakdownTitle": "פירוט לפי קופה",
         "friendBreakdownEmpty": "אין קופות משותפות עם החבר הזה.",
+        "friendCrossNetLabel": "נטו בכל הקופות",
+        "friendSettleOneCurrency": "סגירה במטבע אחד",
+        "friendSettleAll": "סגירה מלאה עם {{name}}",
+        "friendCrossSettlePickTitle": "בחר מטבע לסגירה",
+        "friendCrossSettleConfirmTitle": "אישור סגירה בין קופות",
+        "friendCrossSettleConfirmButton": "רשום תשלומים",
+        "friendCrossSettleNetLabel": "נטו במטבע שנבחר",
+        "friendCrossSettleYouPay": "אתה משלם ל-{{name}}",
+        "friendCrossSettleTheyPay": "{{name}} משלם/ת לך",
+        "friendCrossSettleGroupsHint": "ירשמו תשלומים ב-{{count}} קופות",
         "friendMoreCurrencies": "עוד {{count}}"
     },
     "legal": {
@@ -1142,6 +1200,7 @@
             "subscribeAtPrice": "הצטרפות — {{price}}",
             "buyTripPass": "רכישת Trip Pass — {{price}}",
             "restore": "שחזור רכישות",
+            "redeemOfferCode": "מימוש קוד הטבה",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
             "loadFailed": "לא הצלחנו לטעון מחירי מנוי. בדקו את החיבור או נסו שוב בעוד רגע.",
@@ -1151,9 +1210,11 @@
             "restoreSuccess": "הרכישות שוחזרו.",
             "restoreNone": "לא נמצאו רכישות פעילות.",
             "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
-            "tryFreeTrialCta": "נסו 7 ימים בחינם",
-            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}}. ניתן לבטל בכל עת בהגדרות.",
-            "euDigitalPurchaseAck": "אני מבקש/ת גישה מיידית ל-KupaPay Pro ומאשר/ת שאבד/ת את זכות הביטול בתוך 14 יום ברגע שהגישה מתחילה."
+            "tryFreeTrialCta": "נסו {{trialDays}} ימים בחינם",
+            "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
+            "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
+            "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
+            "havePromoCode": "יש לכם קוד?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1193,11 +1254,44 @@
         "recurring": {
             "lockedBody": "אוטומציה לשכירות, מנויים והוצאות חוזרות — עם Pro."
         },
+        "receiptOcr": {
+            "menuOption": "מילוי מטקסט קבלה",
+            "sheetTitle": "טקסט קבלה",
+            "sheetBody": "הדביקו טקסט מהקבלה או מאפליקציית OCR. תוכלו לאשר לפני שמירה.",
+            "placeholder": "הדביקו כאן…",
+            "apply": "החלה על הטופס"
+        },
         "smartReminder": {
             "sheetTitle": "תזכורות חכמות",
             "enable": "תזכורות אוטומטיות לסגירת חובות",
             "lockedBody": "Pro יכול לשלוח תזכורות לפי לוח זמנים (מינימום כל 3 ימים).",
             "intervalDays": "כל {{count}} ימים"
+        },
+        "spendingInsights": {
+            "menuOption": "תובנות הוצאות",
+            "sheetTitle": "תובנות הוצאות",
+            "lockedBody": "סיכומים לפי קטגוריה, מי שילם ומגמות שבועיות.",
+            "upgrade": "שדרוג ל-Pro",
+            "empty": "אין עדיין הוצאות במטבע זה.",
+            "uncategorized": "ללא קטגוריה",
+            "tab": {
+                "category": "קטגוריה",
+                "member": "שילם",
+                "week": "שבועי"
+            }
+        },
+        "tripBudget": {
+            "title": "תקציב טיול",
+            "lockedBody": "הגדרת תקרת הוצאות לטיול והתראות ב-80% וב-100%.",
+            "upgrade": "שדרוג ל-Pro",
+            "set": "הגדרת תקציב",
+            "edit": "עריכה",
+            "clear": "הסרת תקציב",
+            "emptyHint": "עדיין אין תקציב — הקשו «הגדרת תקציב».",
+            "progress": "{{spent}} מתוך {{budget}} {{currency}} · {{percent}}%",
+            "sheetTitle": "תקציב טיול",
+            "sheetBody": "הסכום כולל רק הוצאות במטבע התקציב.",
+            "amountPlaceholder": "סכום תקציב"
         }
     },
     "remind": {
@@ -1217,7 +1311,7 @@
         "warningBullet1": "לא ניתן יהיה להתחבר יותר.",
         "warningBullet2": "השם וההיסטוריה שלך ימשיכו להופיע לחברים בקופות המשותפות.",
         "warningBullet3": "יתרות פתוחות יישארו פתוחות — סלקו אותן קודם אם אינכם רוצים שיישארו.",
-        "warningBullet4": "פעולה זו אינה הפיכה. פנו אלינו ב-{{email}} לשחזור.",
+        "warningBullet4": "ניתן לשחזר תוך 30 יום על ידי התחברות מחדש. לאחר מכן המחיקה סופית.",
         "continueBtn": "המשך",
         "confirmTitle": "כתוב את האימייל שלך לאישור",
         "typeEmailHint": "כדי לאשר את המחיקה, הקלידו:",
@@ -1225,7 +1319,14 @@
         "deletedToast": "החשבון נמחק",
         "deleteFailed": "מחיקת החשבון נכשלה. נסה שוב.",
         "deactivatedTitle": "החשבון לא פעיל",
-        "deactivatedMessage": "החשבון הזה נמחק. לא ניתן להתחבר עד לפנייה אלינו ב-{{email}}.",
+        "deactivatedMessage": "החשבון נמחק וחלון השחזור של 30 יום הסתיים. פנו אלינו ב-{{email}} לעזרה.",
+        "restoreTitle": "לשחזר את החשבון?",
+        "restoreMessage": "החשבון נמחק לאחרונה. אפשר לשחזר אותו עכשיו עם הקופות והיתרות.",
+        "restoreBtn": "שחזור חשבון",
+        "restoredToast": "החשבון שוחזר",
+        "restoreFailed": "שחזור החשבון נכשל. התחברו שוב ונסו, או פנו לתמיכה.",
+        "restoreReauthRequired": "מטעמי אבטחה, התחברו שוב ואז לחצו על שחזור.",
+        "restoreWindowExpired": "חלון השחזור הסתיים. פנו לתמיכה לשחזור החשבון.",
         "openBalancesWarningTitle": "יש לך יתרות פתוחות",
         "openBalancesWarningBody": "החברים יראו אותן רשומות מול 'משתמש שנמחק'.",
         "openBalancesCta": "סלק עכשיו",

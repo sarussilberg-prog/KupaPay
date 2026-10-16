@@ -89,29 +89,35 @@ describe('exitGroupToGroupsList', () => {
 
 describe('createTabPopToTopListener', () => {
     function buildNav(opts: {
-        focused: boolean;
+        /** Tab route key that is currently selected in the tab bar. */
+        activeTabKey: string;
+        /** Tab this listener is attached to (defaults to Groups). */
+        listenerTabKey?: string;
         nestedState?: {
             key?: string;
             index?: number;
             routes: Array<{ name: string; key?: string }>;
         };
     }) {
-        const routeKey = 'tab-groups';
+        const routeKey = opts.listenerTabKey ?? 'tab-groups';
         const dispatch = jest.fn();
         const navigate = jest.fn();
         const navigation = {
-            isFocused: () => opts.focused,
             dispatch,
             navigate,
             getState: () => ({
                 routes: [
+                    {
+                        key: 'tab-profile',
+                        name: 'Profile',
+                    },
                     {
                         key: routeKey,
                         name: 'Groups',
                         state: opts.nestedState,
                     },
                 ],
-                index: 0,
+                index: opts.activeTabKey === routeKey ? 1 : 0,
             }),
         };
         const route = { key: routeKey, name: 'Groups' };
@@ -120,7 +126,7 @@ describe('createTabPopToTopListener', () => {
 
     it('dispatches popToTop with nested stack target when focused and nested', () => {
         const { navigation, route, dispatch, navigate } = buildNav({
-            focused: true,
+            activeTabKey: 'tab-groups',
             nestedState: {
                 key: 'groups-stack-key',
                 index: 1,
@@ -144,7 +150,7 @@ describe('createTabPopToTopListener', () => {
 
     it('resets tab to initial when nested state has no key', () => {
         const { navigation, route, dispatch } = buildNav({
-            focused: true,
+            activeTabKey: 'tab-groups',
             nestedState: {
                 index: 1,
                 routes: [{ name: 'GroupsList' }, { name: 'GroupDetail' }],
@@ -174,7 +180,7 @@ describe('createTabPopToTopListener', () => {
 
     it('resets orphan GroupDetail stack (no GroupsList under) to GroupsList', () => {
         const { navigation, route, dispatch } = buildNav({
-            focused: true,
+            activeTabKey: 'tab-groups',
             nestedState: {
                 key: 'groups-stack-key',
                 index: 0,
@@ -207,7 +213,7 @@ describe('createTabPopToTopListener', () => {
 
     it('is a no-op at root', () => {
         const { navigation, route, dispatch, navigate } = buildNav({
-            focused: true,
+            activeTabKey: 'tab-groups',
             nestedState: {
                 key: 'groups-stack-key',
                 index: 0,
@@ -226,9 +232,9 @@ describe('createTabPopToTopListener', () => {
         expect(navigate).not.toHaveBeenCalled();
     });
 
-    it('does not dispatch when tab is unfocused', () => {
+    it('does not dispatch when another tab is active (switching to this tab)', () => {
         const { navigation, route, dispatch } = buildNav({
-            focused: false,
+            activeTabKey: 'tab-profile',
             nestedState: {
                 key: 'groups-stack-key',
                 index: 1,
@@ -239,7 +245,35 @@ describe('createTabPopToTopListener', () => {
             navigation: navigation as never,
             route: route as never,
         });
-        listeners.tabPress({ preventDefault: jest.fn() });
+        const preventDefault = jest.fn();
+        listeners.tabPress({ preventDefault });
+        expect(preventDefault).not.toHaveBeenCalled();
+        expect(dispatch).not.toHaveBeenCalled();
+    });
+
+    it('Activity listener does not preventDefault while Groups tab is selected', () => {
+        const activityKey = 'tab-activity';
+        const dispatch = jest.fn();
+        const navigation = {
+            dispatch,
+            navigate: jest.fn(),
+            getState: () => ({
+                routes: [
+                    { key: 'tab-profile', name: 'Profile' },
+                    { key: activityKey, name: 'Activity', state: { index: 0, routes: [{ name: 'ActivityFeed' }] } },
+                    { key: 'tab-groups', name: 'Groups' },
+                ],
+                index: 2,
+            }),
+        };
+        const route = { key: activityKey, name: 'Activity' };
+        const listeners = createTabPopToTopListener('ActivityFeed')({
+            navigation: navigation as never,
+            route: route as never,
+        });
+        const preventDefault = jest.fn();
+        listeners.tabPress({ preventDefault });
+        expect(preventDefault).not.toHaveBeenCalled();
         expect(dispatch).not.toHaveBeenCalled();
     });
 });

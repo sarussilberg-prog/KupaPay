@@ -1,0 +1,11 @@
+KupaPay facilita repartir gastos — viajes, compañeros de piso, eventos.
+
+• Grupos e invitaciones
+• Gastos con reparto igual, ponderado o multi-moneda
+• Pantalla de saldos
+• Liquidación con Bit y PayBox
+• Interfaz en hebreo (RTL), inglés y más idiomas
+• KupaPay Pro (opcional): sin anuncios, PDF, Trip Pass de grupo
+
+Soporte: sarussilberg@gmail.com
+Privacidad: https://kupa-pay.com/legal/privacy

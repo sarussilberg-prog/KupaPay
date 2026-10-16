@@ -64,6 +64,20 @@
             "balances": "Балансы"
         },
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
+        "signInWithEmail": "Продолжить с email",
+        "emailPlaceholder": "imya@example.com",
+        "emailOtpSendCode": "Отправить код",
+        "emailOtpVerify": "Подтвердить и войти",
+        "emailOtpSentTo": "Мы отправили 6-значный код на {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Отправить код снова",
+        "emailOtpResendIn": "Повтор через {{seconds}} с",
+        "emailOtpChangeEmail": "Изменить email",
+        "emailOtpInvalidEmail": "Введите корректный адрес email.",
+        "emailOtpInvalidCode": "Код неверный или просрочен. Попробуйте снова или запросите новый.",
+        "emailOtpRateLimited": "Слишком много попыток. Подождите минуту и попробуйте снова.",
+        "emailOtpSendError": "Не удалось отправить код. Попробуйте снова.",
+        "emailOtpVerifyError": "Не удалось проверить код. Попробуйте снова.",
         "googleSignInSheetTitle": "Вход через Google",
         "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна."
     },
@@ -329,6 +343,13 @@
             "matchedMembers": "в т. ч. {{names}}",
             "settled": "Всё рассчитано",
             "youSettled": "Вы в расчёте",
+            "youOwe": "Вы должны {{amount}}",
+            "youOweCaption": "Вы должны",
+            "owedToYou": "Вам должны {{amount}}",
+            "owedToYouCaption": "Вам должны",
+            "moreCurrencies": "{{plusCount}} валют",
+            "moreCurrencies_one": "{{plusCount}} валюта",
+            "updatedAgo": "Обновлено {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
         "bigCreateCta": "Создать группу",
@@ -681,6 +702,7 @@
         "legal": "Правовая информация",
         "terms": "Условия использования",
         "privacy": "Политика конфиденциальности",
+        "privacyAndAccount": "Конфиденциальность и аккаунт",
         "account": "Аккаунт",
         "logout": "Выйти",
         "version": "Версия {{version}}",
@@ -697,6 +719,21 @@
             "deletedUsersRow": "Удалённые пользователи",
             "resetOnboardingRow": "Сбросить онбординг",
             "previewCreateGroupRow": "Предпросмотр экрана первой группы"
+        },
+        "proView": {
+            "sectionTitle": "Режим просмотра Pro",
+            "description": "Предпросмотр Free или Pro только для вашего аккаунта (24 ч). Не меняет реальную подписку.",
+            "loading": "Загрузка статуса Pro…",
+            "expires": "Переопределение истекает {{when}}",
+            "setFailed": "Не удалось обновить режим просмотра Pro",
+            "bannerPro": "Режим админа: Pro",
+            "bannerFree": "Режим админа: Free",
+            "bannerResetHint": "Нажмите, чтобы вернуть «Как есть»",
+            "mode": {
+                "real": "Как есть",
+                "force_pro": "Принудительно Pro",
+                "force_free": "Принудительно Free"
+            }
         },
         "onboarding": {
             "resetTitle": "Сбросить онбординг?",
@@ -761,7 +798,11 @@
             "noStack": "Трассировка стека недоступна"
         },
         "monetization": {
-            "portalRow": "Аналитика монетизации"
+            "portalRow": "Аналитика монетизации",
+            "allTimeFunnel": "Воронка за всё время",
+            "byPlatform": "По платформе",
+            "last7Days": "Последние 7 дней",
+            "noData": "За этот период событий пока нет"
         },
         "supportMessages": {
             "title": "Обращения в поддержку",
@@ -778,7 +819,12 @@
             "activeGroups": "Активные группы",
             "archivedGroups": "Архивные группы",
             "archiveFootnote": "Архивные = неактивные 2+ месяца и с нулевыми балансами (по всему приложению). Группы, которые пользователи архивировали вручную, не учитываются.",
-            "loadError": "Не удалось загрузить метрики. Потяните вниз, чтобы обновить, или повторите позже."
+            "loadError": "Потяните вниз для обновления или повторите позже.",
+            "loadErrorTitle": "Не удалось загрузить метрики",
+            "notAdminTitle": "Требуются права администратора",
+            "notAdminBody": "Ваш аккаунт не входит в список администраторов приложения, поэтому аналитика монетизации недоступна.",
+            "analyticsUnavailableTitle": "Аналитика не настроена",
+            "analyticsUnavailableBody": "Функция метрик монетизации отсутствует или не выдана в этом проекте Supabase. Примените последние миграции на dev и обновите экран."
         }
     },
     "profile": {
@@ -887,7 +933,8 @@
             "noteChangedByYou": "Вы изменили заметку · {{group}}",
             "noteChangedBy": "{{name}} изменил(а) заметку · {{group}}",
             "friendRequestRejectedByThem": "{{name}} отклонил(а) ваш запрос в друзья",
-            "settleReminder": "{{name}} напоминает вам о расчёте в группе {{group}}"
+            "settleReminder": "{{name}} напоминает вам о расчёте в группе {{group}}",
+            "tripBudgetAlert": "Оповещение о бюджете поездки в {{group}}"
         },
         "addedExpense": "добавил(а) расход",
         "settledPayment": "записал(а) платёж",
@@ -914,6 +961,7 @@
         "currency": "Валюта",
         "amount": "Сумма",
         "submit": "Записать платёж",
+        "paidInCurrency": "Платёж записан в {{currency}} (долги могут быть в других валютах)",
         "warnPartial": "Частичный платёж — останется долг {{remaining}}",
         "warnOverpay": "Сумма больше долга — получателю придётся вернуть {{flipAmount}}",
         "edit": "Изменить платёж",
@@ -1051,6 +1099,16 @@
         "noFriendsYet": "Общих групп пока нет",
         "friendBreakdownTitle": "Разбивка по группам",
         "friendBreakdownEmpty": "Общих групп с этим другом нет.",
+        "friendCrossNetLabel": "Итого по всем группам",
+        "friendSettleOneCurrency": "Закрыть в одной валюте",
+        "friendSettleAll": "Закрыть всё с {{name}}",
+        "friendCrossSettlePickTitle": "Выберите валюту расчёта",
+        "friendCrossSettleConfirmTitle": "Подтвердить расчёт между группами",
+        "friendCrossSettleConfirmButton": "Записать платежи",
+        "friendCrossSettleNetLabel": "Итого в выбранной валюте",
+        "friendCrossSettleYouPay": "Вы платите {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} платит вам",
+        "friendCrossSettleGroupsHint": "Будет записано платежей в {{count}} группе(ах)",
         "friendMoreCurrencies": "ещё +{{count}}"
     },
     "legal": {
@@ -1153,7 +1211,7 @@
         "warningBullet1": "Вы больше не сможете войти в аккаунт.",
         "warningBullet2": "Ваше имя и история останутся видны друзьям, с которыми у вас были общие группы.",
         "warningBullet3": "Непогашенные долги останутся — если не хотите их сохранять, сначала рассчитайтесь.",
-        "warningBullet4": "Это действие необратимо. Чтобы восстановить аккаунт, напишите нам: {{email}}.",
+        "warningBullet4": "В течение 30 дней можно восстановить аккаунт, войдя снова. После этого удаление окончательное.",
         "continueBtn": "Продолжить",
         "confirmTitle": "Введите адрес эл. почты для подтверждения",
         "typeEmailHint": "Чтобы подтвердить удаление, введите:",
@@ -1166,7 +1224,14 @@
         "openBalancesWarningBody": "Друзья будут видеть эти долги за пользователем «Удалённый пользователь».",
         "openBalancesCta": "Рассчитаться сейчас",
         "reSignupBlockedTitle": "Аккаунт удалён",
-        "reSignupBlocked": "Этот аккаунт был удалён. Чтобы восстановить его, напишите на {{email}}."
+        "reSignupBlocked": "Этот аккаунт был удалён. Чтобы восстановить его, напишите на {{email}}.",
+        "restoreTitle": "Восстановить аккаунт?",
+        "restoreMessage": "Аккаунт недавно удалён. Вы можете восстановить его вместе с группами и балансами.",
+        "restoreBtn": "Восстановить аккаунт",
+        "restoredToast": "Аккаунт восстановлен",
+        "restoreFailed": "Не удалось восстановить. Войдите снова или обратитесь в поддержку.",
+        "restoreReauthRequired": "Для безопасности войдите снова и нажмите «Восстановить».",
+        "restoreWindowExpired": "Срок восстановления истёк. Обратитесь в поддержку."
     },
     "consolidation": {
         "convertButton": "Конвертировать валюту",
@@ -1227,6 +1292,7 @@
             "subscribeAtPrice": "Подписаться — {{price}}",
             "buyTripPass": "Купить Trip Pass — {{price}}",
             "restore": "Восстановить покупки",
+            "redeemOfferCode": "Активировать промокод",
             "manageSubscription": "Управление подпиской",
             "storeNotConfigured": "Покупки недоступны в этой сборке.",
             "loadFailed": "Не удалось загрузить цены подписки. Проверьте подключение или повторите попытку чуть позже.",
@@ -1236,9 +1302,11 @@
             "restoreSuccess": "Покупки восстановлены.",
             "restoreNone": "Активных покупок не найдено.",
             "tripPassNeedsGroup": "Сначала откройте группу, чтобы купить для неё Trip Pass.",
-            "tryFreeTrialCta": "Попробовать 7 дней бесплатно",
-            "trialRenewalDisclosure": "Через 7 дней спишется {{price}}/{{period}}. Отмена в любой момент в настройках.",
-            "euDigitalPurchaseAck": "Я запрашиваю немедленный доступ к KupaPay Pro и подтверждаю, что теряю 14-дневное право на отказ с момента начала доступа."
+            "tryFreeTrialCta": "Попробовать {{trialDays}} дн. бесплатно",
+            "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
+            "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
+            "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
+            "havePromoCode": "Есть код?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1278,11 +1346,44 @@
         "recurring": {
             "lockedBody": "Автоматизируйте аренду, подписки и другие повторяющиеся расходы с Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Заполнить из текста чека",
+            "sheetTitle": "Текст чека",
+            "sheetBody": "Вставьте текст чека. Мы предложим сумму и валюту — вы подтверждаете.",
+            "placeholder": "Вставьте текст…",
+            "apply": "Применить"
+        },
         "smartReminder": {
             "sheetTitle": "Умные напоминания",
             "enable": "Автонапоминания о расчётах",
             "lockedBody": "Pro отправляет напоминания по расписанию (минимум раз в 3 дня).",
             "intervalDays": "Каждые {{count}} дн."
+        },
+        "spendingInsights": {
+            "menuOption": "Аналитика расходов",
+            "sheetTitle": "Аналитика расходов",
+            "lockedBody": "Суммы по категориям, плательщикам и неделям.",
+            "upgrade": "Перейти на Pro",
+            "empty": "Пока нет расходов в этой валюте.",
+            "uncategorized": "Без категории",
+            "tab": {
+                "category": "Категория",
+                "member": "Оплатил",
+                "week": "Недели"
+            }
+        },
+        "tripBudget": {
+            "title": "Бюджет поездки",
+            "lockedBody": "Лимит расходов и оповещения при 80% и 100%.",
+            "upgrade": "Перейти на Pro",
+            "set": "Задать бюджет",
+            "edit": "Изменить",
+            "clear": "Удалить бюджет",
+            "emptyHint": "Бюджет не задан — нажмите «Задать бюджет».",
+            "progress": "{{spent}} из {{budget}} {{currency}} · {{percent}}%",
+            "sheetTitle": "Бюджет поездки",
+            "sheetBody": "Учитываются только расходы в валюте бюджета.",
+            "amountPlaceholder": "Сумма бюджета"
         }
     },
     "updateRequired": {

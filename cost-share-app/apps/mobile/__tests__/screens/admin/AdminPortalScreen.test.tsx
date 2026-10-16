@@ -27,6 +27,10 @@ jest.mock('../../../lib/onboardingStorage', () => ({
     clearOnboardingFlags: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../../../components/admin/AdminProViewModeControl', () => ({
+    AdminProViewModeControl: () => null,
+}));
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { showSuccessMessage } from '../../../lib/appToast';

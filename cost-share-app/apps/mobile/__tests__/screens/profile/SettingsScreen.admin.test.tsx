@@ -13,11 +13,23 @@ jest.mock('../../../store', () => {
 
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
+    useFocusEffect: (effect: () => void) => {
+        effect();
+    },
+}));
+
+jest.mock('../../../services/users.service', () => ({
+    refreshCurrentUserAdminFlag: jest.fn().mockResolvedValue(undefined),
+    updateUser: jest.fn(),
 }));
 
 jest.mock('../../../services/account.service', () => ({
     deleteMyAccount: jest.fn(),
     getMyOpenBalances: jest.fn().mockResolvedValue(null),
+}));
+
+jest.mock('../../../components/admin/AdminProViewModeControl', () => ({
+    AdminProViewModeControl: () => null,
 }));
 
 import React from 'react';

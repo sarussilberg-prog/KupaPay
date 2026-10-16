@@ -22,12 +22,32 @@ jest.mock('../../services/users.service', () => ({
     hydrateCurrentUserProfile: (...args: unknown[]) => mockHydrateProfile(...args),
 }));
 
-const fakeSession = { user: { id: 'u1' } } as unknown as Session;
+const mockResolveGate = jest.fn();
+jest.mock('../../lib/accountDeletionGate', () => ({
+    resolveAccountDeletionGate: (...args: unknown[]) => mockResolveGate(...args),
+}));
+
+const mockSetCurrentUser = jest.fn();
+let mockCurrentUser: { id: string } | null = null;
+
+jest.mock('../../store', () => ({
+    useAppStore: {
+        getState: () => ({
+            currentUser: mockCurrentUser,
+            setCurrentUser: mockSetCurrentUser,
+        }),
+    },
+}));
+
+const fakeSession = {
+    user: { id: 'u1', email: 'nave@example.com', user_metadata: { full_name: 'Nave' } },
+} as unknown as Session;
 
 function makeDeps() {
     return {
         setSession: jest.fn(),
         setPendingDeactivationNotice: jest.fn(),
+        setPendingAccountRestore: jest.fn(),
     };
 }
 
@@ -36,7 +56,11 @@ describe('acceptSessionIfAllowed', () => {
         mockAssertProfileActive.mockReset();
         mockHydrateProfile.mockReset();
         mockClearStaleAuthSession.mockClear();
-        mockSignalDeactivated.mockClear();
+        mockSignalDeactivated.mockReset();
+        mockSetCurrentUser.mockReset();
+        mockCurrentUser = null;
+        mockResolveGate.mockReset();
+        mockResolveGate.mockResolvedValue('deleted');
     });
 
     it('rejects a null session by calling setSession(null)', async () => {
@@ -85,12 +109,33 @@ describe('acceptSessionIfAllowed', () => {
         expect(mockSignalDeactivated).not.toHaveBeenCalled();
     });
 
+    it('sets a provisional currentUser when hydration did not populate the store', async () => {
+        mockAssertProfileActive.mockResolvedValue('active');
+        mockHydrateProfile.mockResolvedValue('unknown');
+        const deps = makeDeps();
+        await acceptSessionIfAllowed(fakeSession, 'hydration', deps);
+        expect(mockSetCurrentUser).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'u1', name: 'Nave', email: 'nave@example.com' }),
+        );
+        expect(deps.setSession).toHaveBeenCalledWith(fakeSession);
+    });
+
     it('rejects a session when hydration returns deactivated (fresh)', async () => {
         mockAssertProfileActive.mockResolvedValue('active');
         mockHydrateProfile.mockResolvedValue('deactivated');
         const deps = makeDeps();
         await acceptSessionIfAllowed(fakeSession, 'fresh', deps);
         expect(mockSignalDeactivated).toHaveBeenCalled();
+        expect(deps.setSession).toHaveBeenCalledWith(null);
+    });
+
+    it('offers restore when deactivated within grace (fresh) without clearing Supabase session', async () => {
+        mockAssertProfileActive.mockResolvedValue('deactivated');
+        mockResolveGate.mockResolvedValue('restorable');
+        const deps = makeDeps();
+        await acceptSessionIfAllowed(fakeSession, 'fresh', deps);
+        expect(deps.setPendingAccountRestore).toHaveBeenCalledWith(true);
+        expect(mockClearStaleAuthSession).not.toHaveBeenCalled();
         expect(deps.setSession).toHaveBeenCalledWith(null);
     });
 });

@@ -1,7 +1,5 @@
 /**
  * GroupCard — list row for a group on the GroupsListScreen.
- * Trailing ⋮ opens the full group menu (same actions as GroupDetail).
- * Menu button is a SIBLING of the card press target so web/native both work.
  */
 
 import { Text } from './AppText';
@@ -23,6 +21,9 @@ import { GroupAvatar } from './GroupAvatar';
 import { BalanceChip } from './BalanceChip';
 import { HighlightedText } from './HighlightedText';
 import { UnreadBadge } from './UnreadBadge';
+import { IconLabel } from './primitives/IconLabel';
+import { GroupCardMetaLine } from './GroupCardMetaLine';
+import { ListRow } from './primitives/ListRow';
 import { colors } from '../theme';
 import { shareGroupInvite } from '../services/invite.service';
 import {
@@ -58,7 +59,7 @@ function GroupCardBase({
     unreadCount,
     onPress,
 }: GroupCardProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const favoriteGroupId = useAppStore(s => s.favoriteGroupId);
@@ -173,35 +174,55 @@ function GroupCardBase({
         ]);
     }, [closeMenu, t, group.id]);
 
+    const openBalances = useCallback(() => {
+        navigation.navigate('Balances', { groupId: group.id });
+    }, [navigation, group.id]);
+
     const cardClass = isArchived
-        ? 'bg-slate-50 rounded-2xl p-5 mb-3 border border-dashed border-gray-300'
-        : 'bg-white rounded-2xl p-5 mb-3 border border-gray-100';
+        ? 'bg-slate-50 rounded-2xl px-4 py-3 mb-3 border border-dashed border-gray-300'
+        : 'bg-white rounded-2xl px-4 py-3 mb-3 border border-gray-100';
+
+    const cardShadow =
+        isArchived || Platform.OS === 'web'
+            ? Platform.OS === 'web' && !isArchived
+                ? ({ boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)' } as const)
+                : undefined
+            : Platform.select({
+                  ios: {
+                      shadowColor: '#0f172a',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.06,
+                      shadowRadius: 6,
+                  },
+                  android: { elevation: 2 },
+              });
 
     return (
         <>
-            <View className={cardClass} style={[rtlRowStyle(isRtl), { alignItems: 'center' }]}>
-                <TouchableOpacity
+            <View
+                className={cardClass}
+                style={[rtlRowStyle(isRtl), { alignItems: 'stretch' }, cardShadow]}
+            >
+                <ListRow
                     onPress={() => onPress(group.id)}
-                    activeOpacity={0.7}
-                    style={{ flex: 1, flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', minWidth: 0 }}
                     testID={`group-card-${group.id}`}
+                    style={{ flex: 1, alignItems: 'center', gap: 14 }}
                 >
-                    <View className="mr-4">
-                        <GroupAvatar
-                            imageUrl={group.imageUrl}
-                            groupType={group.groupType}
-                            size="md"
-                        />
-                    </View>
+                    <GroupAvatar
+                        imageUrl={group.imageUrl}
+                        groupType={group.groupType}
+                        name={group.name}
+                        size="sm"
+                    />
 
-                    <View className="flex-1 mr-2 self-stretch" style={{ minWidth: 0 }}>
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center' }]}>
+                    <View className="flex-1 self-stretch" style={{ minWidth: 0, gap: 6 }}>
+                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
                             <View style={{ flexShrink: 1, minWidth: 0 }}>
                                 <HighlightedText
                                     className={
                                         isArchived
-                                            ? 'text-lg font-semibold text-gray-600'
-                                            : 'text-lg font-semibold text-gray-900'
+                                            ? 'text-[17px] font-semibold text-gray-600 leading-5'
+                                            : 'text-[17px] font-semibold text-gray-900 leading-5'
                                     }
                                     text={group.name}
                                     query={searchQuery}
@@ -209,45 +230,33 @@ function GroupCardBase({
                                 />
                             </View>
                             {!isArchived && (unreadCount ?? 0) > 0 && (
-                                <UnreadBadge
-                                    count={unreadCount ?? 0}
-                                    style={{ marginStart: 8, marginEnd: 4 }}
-                                />
+                                <UnreadBadge count={unreadCount ?? 0} />
                             )}
                             {isArchived && (
                                 <View
-                                    className="px-2 py-1 rounded-md bg-gray-200"
-                                    style={{ marginStart: 'auto', marginEnd: 4 }}
+                                    className="px-2 py-0.5 rounded-md bg-gray-200"
+                                    style={{ marginStart: 'auto' }}
                                     testID="group-archived-badge"
                                 >
-                                    <Text
-                                        className="text-gray-600 font-medium"
-                                        style={{ fontSize: 12, letterSpacing: 0.5 }}
-                                    >
+                                    <Text className="text-gray-600 font-medium" style={{ fontSize: 11 }}>
                                         {t('groups.archive.badge')}
                                     </Text>
                                 </View>
                             )}
                         </View>
-                        <Text
-                            className={`text-sm mt-1 ${isArchived ? 'text-gray-500' : 'text-gray-400'}`}
-                            numberOfLines={1}
-                        >
-                            {t(`groups.types.${group.groupType}`)}
-                            {memberCount > 0
-                                ? ` · ${t('groups.memberCount', { count: memberCount })}`
-                                : ''}
-                        </Text>
+
+                        <GroupCardMetaLine
+                            group={group}
+                            memberCount={memberCount}
+                            language={i18n.language}
+                        />
                         {hasMatches && (
-                            <Text
-                                className="text-sm text-gray-500 mt-0.5"
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                            >
-                                {t('groups.card.matchedMembers', {
+                            <IconLabel
+                                label={t('groups.card.matchedMembers', {
                                     names: (matchedMemberNames ?? []).join(', '),
                                 })}
-                            </Text>
+                                tone="default"
+                            />
                         )}
                     </View>
 
@@ -256,18 +265,19 @@ function GroupCardBase({
                         defaultCurrency={group.defaultCurrency}
                         groupHasOpenDebts={groupHasOpenDebts}
                         balanceUnknown={balanceUnknown}
+                        onPressExtraCurrencies={openBalances}
                     />
-                </TouchableOpacity>
+                </ListRow>
 
                 <TouchableOpacity
                     onPress={() => setMenuOpen(true)}
-                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
                     testID={`group-card-menu-${group.id}`}
-                    style={{ marginStart: 4, padding: 6 }}
+                    style={{ marginStart: 4, padding: 6, alignSelf: 'center' }}
                 >
-                    <AppIcon name="ellipsis-vertical" size={20} color={colors.gray400} />
+                    <AppIcon name="ellipsis-vertical" size={16} color={colors.gray400} />
                 </TouchableOpacity>
             </View>
 

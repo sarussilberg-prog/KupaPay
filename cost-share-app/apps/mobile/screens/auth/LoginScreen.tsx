@@ -13,6 +13,10 @@ import { AppIcon } from '../../components/AppIcon';
 import { AppLogoAnimated } from '../../components/AppLogoAnimated';
 import { AppBrandTitle } from '../../components/AppBrandTitle';
 import { DeletedAccountNoticeDialog } from '../../components/DeletedAccountNoticeDialog';
+import { RestoreAccountDialog } from '../../components/RestoreAccountDialog';
+import { restoreMyAccount } from '../../services/account.service';
+import { hydrateCurrentUserProfile } from '../../services/users.service';
+import { supabase } from '../../lib/supabase';
 import { LoginFeatureChips } from '../../components/auth/LoginFeatureChips';
 import { LoginGoogleButton } from '../../components/auth/LoginGoogleButton';
 import { LoginAppleButton } from '../../components/auth/LoginAppleButton';
@@ -32,6 +36,9 @@ import {
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
 import { APP_VERSION } from '@cost-share/shared';
+import { EMAIL_AUTH_ENABLED } from '../../lib/featureFlags';
+import { LoginEmailOtpAuth } from '../../components/auth/LoginEmailOtpAuth';
+import type { AuthError } from '../../services/auth.service';
 
 export function LoginScreen() {
     const { t } = useTranslation();
@@ -39,12 +46,17 @@ export function LoginScreen() {
     const changeAppLanguage = useChangeAppLanguage();
     const pendingDeactivationNotice = useAppStore((state) => state.pendingDeactivationNotice);
     const setPendingDeactivationNotice = useAppStore((state) => state.setPendingDeactivationNotice);
+    const pendingAccountRestore = useAppStore((state) => state.pendingAccountRestore);
+    const setPendingAccountRestore = useAppStore((state) => state.setPendingAccountRestore);
+    const setSession = useAppStore((state) => state.setSession);
     const [loadingProvider, setLoadingProvider] = useState<'apple' | 'google' | null>(null);
     const isAppleLoading = loadingProvider === 'apple';
     const isGoogleLoading = loadingProvider === 'google';
     const isAnyLoading = loadingProvider !== null;
     const [languagePickerVisible, setLanguagePickerVisible] = useState(false);
     const [deletedNoticeVisible, setDeletedNoticeVisible] = useState(false);
+    const [restoreDialogVisible, setRestoreDialogVisible] = useState(false);
+    const [restoreLoading, setRestoreLoading] = useState(false);
 
     const supportEmail = getSupportEmail();
     const deletedNoticeMessage = t('deleteAccount.deactivatedMessage', { email: supportEmail });
@@ -65,9 +77,11 @@ export function LoginScreen() {
                 return;
             }
 
-            const persisted = await consumeDeactivationNoticePending();
-            if (!cancelled && persisted) {
-                showDeletedAccountNotice();
+            if (Platform.OS === 'web') {
+                const persisted = await consumeDeactivationNoticePending();
+                if (!cancelled && persisted) {
+                    showDeletedAccountNotice();
+                }
             }
         })();
 
@@ -75,6 +89,12 @@ export function LoginScreen() {
             cancelled = true;
         };
     }, [pendingDeactivationNotice, setPendingDeactivationNotice, showDeletedAccountNotice]);
+
+    useEffect(() => {
+        if (pendingAccountRestore) {
+            setRestoreDialogVisible(true);
+        }
+    }, [pendingAccountRestore]);
 
     const handleLanguageChange = useCallback(
         async (lang: import('@cost-share/shared').Language) => {
@@ -91,6 +111,11 @@ export function LoginScreen() {
             if (error) {
                 // account_deleted is expected business state (user previously deleted their account),
                 // shown via a dedicated dialog — not a bug, so no Sentry capture.
+                if (error.code === 'account_restorable') {
+                    setPendingAccountRestore(true);
+                    setRestoreDialogVisible(true);
+                    return;
+                }
                 if (error.code === 'account_deleted') {
                     showDeletedAccountNotice();
                     return;
@@ -111,11 +136,73 @@ export function LoginScreen() {
         }
     };
 
+    const handleRestoreAccount = async () => {
+        setRestoreLoading(true);
+        try {
+            const result = await restoreMyAccount();
+            if (!result.ok) {
+                handleError(new Error(result.error ?? 'restore failed'), {
+                    toast: { titleKey: result.error ?? 'deleteAccount.restoreFailed' },
+                    tags: { service: 'account', op: 'restoreFromLogin' },
+                });
+                return;
+            }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                handleError(new Error('no session after restore'), {
+                    toast: { titleKey: 'deleteAccount.restoreFailed' },
+                    tags: { service: 'account', op: 'restoreFromLogin' },
+                });
+                return;
+            }
+            const hydration = await hydrateCurrentUserProfile(session.user.id);
+            if (hydration === 'deactivated') {
+                handleError(new Error('still deactivated'), {
+                    toast: { titleKey: 'deleteAccount.restoreFailed' },
+                    tags: { service: 'account', op: 'restoreFromLogin' },
+                });
+                return;
+            }
+            setPendingAccountRestore(false);
+            setRestoreDialogVisible(false);
+            setSession(session);
+            showAppToast({ type: 'success', titleKey: 'deleteAccount.restoredToast' });
+        } finally {
+            setRestoreLoading(false);
+        }
+    };
+
+    const handleEmailAuthResult = useCallback(
+        ({ error }: { error: AuthError | null }) => {
+            if (!error) return;
+            if (error.code === 'account_restorable') {
+                setPendingAccountRestore(true);
+                setRestoreDialogVisible(true);
+                return;
+            }
+            if (error.code === 'account_deleted') {
+                showDeletedAccountNotice();
+                return;
+            }
+            handleError(error, {
+                toast: { titleKey: 'auth.signInError', message: error.message },
+                tags: { service: 'auth', op: 'signInWithEmailOtp' },
+                extra: { errorCode: error.code },
+            });
+        },
+        [setPendingAccountRestore, showDeletedAccountNotice],
+    );
+
     const handleAppleSignIn = async () => {
         setLoadingProvider('apple');
         try {
             const { error } = await signInWithApple();
             if (error) {
+                if (error.code === 'account_restorable') {
+                    setPendingAccountRestore(true);
+                    setRestoreDialogVisible(true);
+                    return;
+                }
                 if (error.code === 'account_deleted') {
                     showDeletedAccountNotice();
                     return;
@@ -208,11 +295,32 @@ export function LoginScreen() {
                             />
                         </>
                     )}
+                    {EMAIL_AUTH_ENABLED ? (
+                        <LoginEmailOtpAuth
+                            disabled={isAnyLoading}
+                            onAuthResult={handleEmailAuthResult}
+                        />
+                    ) : null}
                     <Text className="text-[11px] text-gray-300 text-center mt-4">
                         v{APP_VERSION}
                     </Text>
                 </View>
             </SafeAreaView>
+
+            <RestoreAccountDialog
+                visible={restoreDialogVisible}
+                title={t('deleteAccount.restoreTitle')}
+                message={t('deleteAccount.restoreMessage')}
+                restoreLabel={t('deleteAccount.restoreBtn')}
+                cancelLabel={t('common.close')}
+                loading={restoreLoading}
+                onRestore={() => void handleRestoreAccount()}
+                onCancel={() => {
+                    setRestoreDialogVisible(false);
+                    setPendingAccountRestore(false);
+                    void supabase.auth.signOut();
+                }}
+            />
 
             <DeletedAccountNoticeDialog
                 visible={deletedNoticeVisible}
@@ -220,7 +328,10 @@ export function LoginScreen() {
                 message={deletedNoticeMessage}
                 closeLabel={t('common.close')}
                 contactLabel={t('common.openMail')}
-                onClose={() => setDeletedNoticeVisible(false)}
+                onClose={() => {
+                    setDeletedNoticeVisible(false);
+                    void clearDeactivationNoticePending();
+                }}
                 onContact={() => {
                     void openSupportContact().catch(() => {
                         platformAlert(t('common.error'), supportEmail);

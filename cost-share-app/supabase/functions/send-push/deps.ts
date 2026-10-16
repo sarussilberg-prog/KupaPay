@@ -43,7 +43,7 @@ export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): Se
         },
         async markFailed(eventId, error) {
             await sb.rpc('increment_push_attempt', { p_event_id: eventId, p_error: error })
-                .then(({ error: e }) => { if (e) console.error('markFailed', e); });
+                .then(({ error: rpcErr }) => { if (rpcErr) console.error('markFailed', rpcErr); });
         },
         async loadPreferences(userId): Promise<PrefsRow | null> {
             const { data } = await sb.from('notification_preferences')

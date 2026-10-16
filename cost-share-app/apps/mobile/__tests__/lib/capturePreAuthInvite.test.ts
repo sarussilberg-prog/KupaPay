@@ -1,20 +1,21 @@
 import { inviteLinkFromUrl } from '../../lib/capturePreAuthInvite';
 
 describe('inviteLinkFromUrl', () => {
-    it('parses group invite HTTPS URLs', () => {
-        expect(
-            inviteLinkFromUrl('https://kupa-pay.com/g/AbCdEfGhIj'),
-        ).toEqual({ kind: 'group', token: 'AbCdEfGhIj' });
+    it.each([
+        ['https://kupa-pay.com/g/AbCdEfGhIjKl', { kind: 'group', token: 'AbCdEfGhIjKl' }],
+        [
+            'com.kupapay.mobile://invite/i/AbCdEfGhIjKl',
+            { kind: 'friend', token: 'AbCdEfGhIjKl' },
+        ],
+    ] as const)('parses %s', (url, expected) => {
+        expect(inviteLinkFromUrl(url)).toEqual(expected);
     });
 
-    it('parses friend invite custom scheme URLs', () => {
-        expect(
-            inviteLinkFromUrl('com.kupapay.mobile://invite/i/AbCdEfGhIj'),
-        ).toEqual({ kind: 'friend', token: 'AbCdEfGhIj' });
-    });
-
-    it('ignores auth callbacks and unknown paths', () => {
-        expect(inviteLinkFromUrl('com.kupapay.mobile://auth/callback#x')).toBeNull();
-        expect(inviteLinkFromUrl('https://kupa-pay.com/privacy')).toBeNull();
+    it.each([
+        'https://kupa-pay.com/g/AbCdEfGhIj',
+        'com.kupapay.mobile://auth/callback#x',
+        'https://kupa-pay.com/privacy',
+    ])('ignores %s', (url) => {
+        expect(inviteLinkFromUrl(url)).toBeNull();
     });
 });

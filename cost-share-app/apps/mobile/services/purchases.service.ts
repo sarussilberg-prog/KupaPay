@@ -2,7 +2,8 @@
  * RevenueCat wrapper — no-ops when Pro flag off or platform keys missing.
  */
 
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
+import { googlePlayOfferRedeemUrl, offerRedemptionTarget } from '../lib/storeOfferRedemption';
 import {
     REVENUECAT_ENTITLEMENT_PRO,
     REVENUECAT_PACKAGE_ANNUAL,
@@ -39,6 +40,8 @@ type PurchasesPackage = import('react-native-purchases').PurchasesPackage;
 let purchasesMod: PurchasesModule | null = null;
 let configured = false;
 let customerInfoListenerAttached = false;
+let configurePromise: Promise<void> | null = null;
+let configuredForUserId: string | null = null;
 
 function platformApiKey(): string | null {
     const key =
@@ -61,7 +64,7 @@ async function getPurchases(): Promise<PurchasesModule | null> {
     return purchasesMod;
 }
 
-export async function configurePurchasesForUser(userId: string): Promise<void> {
+async function configurePurchasesForUserInner(userId: string): Promise<void> {
     const Purchases = await getPurchases();
     const apiKey = platformApiKey();
     if (!Purchases || !apiKey) return;
@@ -90,6 +93,32 @@ export async function configurePurchasesForUser(userId: string): Promise<void> {
     });
 }
 
+export async function configurePurchasesForUser(userId: string): Promise<void> {
+    if (configurePromise && configuredForUserId === userId) {
+        await configurePromise;
+        return;
+    }
+    configuredForUserId = userId;
+    configurePromise = configurePurchasesForUserInner(userId).catch(err => {
+        configurePromise = null;
+        configuredForUserId = null;
+        throw err;
+    });
+    await configurePromise;
+}
+
+/** Await SDK configure+logIn before getOfferings/getCustomerInfo (avoids RC singleton crash). */
+export async function waitForPurchasesReady(): Promise<boolean> {
+    if (!isPurchasesConfigured()) return false;
+    if (!configurePromise) return configured;
+    try {
+        await configurePromise;
+        return configured;
+    } catch {
+        return false;
+    }
+}
+
 export async function logOutPurchases(): Promise<void> {
     const Purchases = await getPurchases();
     if (!Purchases || !configured) return;
@@ -97,6 +126,9 @@ export async function logOutPurchases(): Promise<void> {
         await Purchases.default.logOut();
     } catch {
         // ignore
+    } finally {
+        configurePromise = null;
+        configuredForUserId = null;
     }
 }
 
@@ -120,7 +152,7 @@ export async function fetchProSubscriptionUiState(): Promise<ProSubscriptionUiSt
         manageSubscriptionsAvailable: false,
     };
     const Purchases = await getPurchases();
-    if (!Purchases) return empty;
+    if (!Purchases || !(await waitForPurchasesReady())) return empty;
 
     try {
         const info = await Purchases.default.getCustomerInfo();
@@ -142,7 +174,7 @@ export async function fetchProSubscriptionUiState(): Promise<ProSubscriptionUiSt
 export async function loadOfferingPackages(): Promise<PaywallPackages> {
     const empty: PaywallPackages = { monthly: null, annual: null, tripPass: null };
     const Purchases = await getPurchases();
-    if (!Purchases) return empty;
+    if (!Purchases || !(await waitForPurchasesReady())) return empty;
 
     const offeringId =
         process.env.EXPO_PUBLIC_REVENUECAT_OFFERING_ID?.trim() || 'default';
@@ -302,5 +334,28 @@ export async function openSubscriptionManagement(): Promise<void> {
         await Purchases.default.showManageSubscriptions();
     } catch {
         // Platform may not support — caller can fall back to store URL
+    }
+}
+
+/** App Store / Play offer-code redemption (subscription promo codes). */
+export async function presentOfferCodeRedemption(): Promise<void> {
+    const target = offerRedemptionTarget();
+    if (!target) return;
+
+    const Purchases = await getPurchases();
+    if (target === 'ios_sheet' && Purchases) {
+        const sheet = Purchases.default.presentCodeRedemptionSheet;
+        if (typeof sheet === 'function') {
+            try {
+                await sheet.call(Purchases.default);
+                return;
+            } catch {
+                // User dismissed or OS version unsupported
+            }
+        }
+    }
+
+    if (target === 'android_play_redeem') {
+        await Linking.openURL(googlePlayOfferRedeemUrl());
     }
 }

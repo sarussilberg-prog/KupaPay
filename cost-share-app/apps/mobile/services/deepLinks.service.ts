@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+import { INVITE_TOKEN_RE } from '../lib/inviteToken';
 
 export type InviteRedemptionResult =
     | { kind: 'friend' }
@@ -27,8 +28,13 @@ export type InviteLink =
     | { kind: 'settleReminder'; token: string }
     | { kind: 'unknown' };
 
-/** Matches legacy 10-char tokens and new 14-char tokens from generate_invite_token(). */
-const TOKEN_RE = /^[A-Za-z0-9_-]{10,14}$/;
+function inviteLinkFromPathname(pathname: string): InviteLink | null {
+    const m = pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
+    if (!m || !INVITE_TOKEN_RE.test(m[2])) return null;
+    if (m[1] === 'i') return { kind: 'friend', token: m[2] };
+    if (m[1] === 'g') return { kind: 'group', token: m[2] };
+    return { kind: 'settleReminder', token: m[2] };
+}
 
 export function parseIncomingUrl(rawUrl: string): InviteLink {
     if (!rawUrl) return { kind: 'unknown' };
@@ -40,24 +46,14 @@ export function parseIncomingUrl(rawUrl: string): InviteLink {
         return { kind: 'unknown' };
     }
 
-    // https://<APP_WEB_HOST>/i/<token> | /g/<token> | /sr/<token>
     if (parsed.protocol === 'https:' && parsed.hostname === APP_WEB_HOST) {
-        const m = parsed.pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
-        if (m && TOKEN_RE.test(m[2])) {
-            if (m[1] === 'i') return { kind: 'friend', token: m[2] };
-            if (m[1] === 'g') return { kind: 'group', token: m[2] };
-            return { kind: 'settleReminder', token: m[2] };
-        }
+        const link = inviteLinkFromPathname(parsed.pathname);
+        if (link) return link;
     }
 
-    // com.kupapay.mobile://invite/i/<token> | /g/<token> | /sr/<token>
     if (parsed.protocol === 'com.kupapay.mobile:' && parsed.hostname === 'invite') {
-        const m = parsed.pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
-        if (m && TOKEN_RE.test(m[2])) {
-            if (m[1] === 'i') return { kind: 'friend', token: m[2] };
-            if (m[1] === 'g') return { kind: 'group', token: m[2] };
-            return { kind: 'settleReminder', token: m[2] };
-        }
+        const link = inviteLinkFromPathname(parsed.pathname);
+        if (link) return link;
     }
 
     return { kind: 'unknown' };

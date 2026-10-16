@@ -1,38 +1,86 @@
 /**
- * BalanceChip — small pill summarising a single group's net balance for the user.
- * Variants by sign: positive = owed (green), negative = owe (red), zero/undefined = settled (gray).
- *
- * Consumes a `GroupRollup` from the canonical simplifier output. The primary
- * entry (largest |net|) is rendered as the chip; when `others` is non-empty we
- * append a small "+N" suffix so the row signals more currencies exist without
- * growing taller.
+ * BalanceChip — localized net balance for one group (list / cards).
  */
 
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity, type ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { GroupRollup } from '@cost-share/shared';
+import {
+    GroupRollup,
+    balanceChipLabelKey,
+    classifyUserNetBalance,
+    countNonZeroCurrencyOthers,
+    formatMoney,
+    wrapLtrForBidi,
+} from '@cost-share/shared';
+import { Text } from './AppText';
+import { useRtlLayout } from '../hooks/useRtlLayout';
 
 interface BalanceChipProps {
     rollup?: GroupRollup;
-    /** Currency to use in the "settled" / no-data state. Usually the group's default currency. */
     defaultCurrency: string;
-    /**
-     * True when the group has at least one open debt among other members (not
-     * involving the current user). Lets the settled chip distinguish
-     * "You are settled" (others still owe) from "Settled" (whole group clear).
-     */
     groupHasOpenDebts?: boolean;
-    /**
-     * True when the balance dataset itself is unavailable (e.g. offline with no
-     * cached balances). We then show a neutral placeholder instead of claiming
-     * "Settled" — never report a balance we don't actually have.
-     */
     balanceUnknown?: boolean;
+    onPressExtraCurrencies?: () => void;
 }
 
-function formatAmount(amount: number, currency: string): string {
-    return `${currency} ${Math.abs(amount).toFixed(2)}`;
+const toneStyles = {
+    settled: {
+        container: 'rounded-xl bg-gray-100/90 px-3 py-2 border border-gray-200/60',
+        label: 'text-[11px] font-medium text-gray-500 leading-tight',
+        amount: 'text-sm font-semibold text-gray-600 leading-tight',
+    },
+    owe: {
+        container: 'rounded-xl bg-red-50 px-3 py-2 border border-red-100',
+        label: 'text-[11px] font-medium text-red-700/90 leading-tight',
+        amount: 'text-sm font-bold text-red-600 leading-tight',
+    },
+    owed: {
+        container: 'rounded-xl bg-emerald-50 px-3 py-2 border border-emerald-100',
+        label: 'text-[11px] font-medium text-emerald-800/90 leading-tight',
+        amount: 'text-sm font-bold text-emerald-700 leading-tight',
+    },
+    unknown: {
+        container: 'rounded-xl bg-gray-100 px-3 py-2 border border-gray-200/60',
+        label: 'text-[11px] font-medium text-gray-400 leading-tight',
+        amount: 'text-sm font-medium text-gray-400 leading-tight',
+    },
+} as const;
+
+/** Trailing column: align copy toward the card center so RTL/LTR chips stay inside the card. */
+function chipColumnAlign(isRtl: boolean): ViewStyle['alignItems'] {
+    return isRtl ? 'flex-start' : 'flex-end';
+}
+
+function chipTextAlign(isRtl: boolean): 'left' | 'right' {
+    return isRtl ? 'left' : 'right';
+}
+
+function ChipText({
+    className,
+    children,
+    textAlign,
+    numberOfLines = 1,
+    testID,
+    writingDirection,
+}: {
+    className: string;
+    children: React.ReactNode;
+    textAlign: 'left' | 'right';
+    numberOfLines?: number;
+    testID?: string;
+    writingDirection?: 'ltr' | 'rtl';
+}) {
+    return (
+        <Text
+            className={className}
+            numberOfLines={numberOfLines}
+            testID={testID}
+            style={{ textAlign, width: '100%', writingDirection }}
+        >
+            {children}
+        </Text>
+    );
 }
 
 export function BalanceChip({
@@ -40,69 +88,110 @@ export function BalanceChip({
     defaultCurrency,
     groupHasOpenDebts,
     balanceUnknown,
+    onPressExtraCurrencies,
 }: BalanceChipProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isRtl = useRtlLayout();
     const primary = rollup?.primary;
-    const extraCount = (rollup?.others ?? []).filter(
-        o => Math.abs(o.net) >= 0.01,
-    ).length;
+    const extraCount = countNonZeroCurrencyOthers(rollup?.others);
     const hasRealBalance = primary && Math.abs(primary.net) >= 0.01;
 
-    // No real balance to show AND the dataset is unavailable → neutral
-    // placeholder. We don't have the data, so we don't claim "settled".
+    const columnStyle = useMemo<ViewStyle>(
+        () => ({
+            flexShrink: 0,
+            maxWidth: 132,
+            minWidth: 92,
+            alignItems: chipColumnAlign(isRtl),
+            alignSelf: 'center',
+            gap: 2,
+        }),
+        [isRtl],
+    );
+
+    const textAlign = chipTextAlign(isRtl);
+
     if (!hasRealBalance && balanceUnknown) {
         return (
             <View
-                className="rounded-full bg-gray-100 px-2.5 py-1"
+                className={toneStyles.unknown.container}
+                style={columnStyle}
                 testID="balance-chip-unknown"
                 accessibilityLabel={t('groups.card.balanceUnavailable')}
             >
-                <Text className="text-xs font-medium text-gray-400">—</Text>
+                <ChipText className={toneStyles.unknown.amount} textAlign={textAlign}>
+                    —
+                </ChipText>
             </View>
         );
     }
 
-    if (!primary || Math.abs(primary.net) < 0.01) {
-        const label = groupHasOpenDebts
-            ? t('groups.card.youSettled')
-            : t('groups.card.settled');
+    const tone: keyof typeof toneStyles = hasRealBalance
+        ? classifyUserNetBalance(primary!.net)
+        : 'settled';
+    const styles = toneStyles[tone === 'unknown' ? 'settled' : tone];
+    const captionKey = balanceChipLabelKey(tone, groupHasOpenDebts);
+
+    if (tone === 'settled' || tone === 'unknown') {
         return (
-            <View className="rounded-full bg-gray-100 px-2.5 py-1 max-w-[140px]">
-                <Text
-                    className="text-xs font-medium text-gray-500"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                >
-                    {label}
-                </Text>
+            <View className={styles.container} style={columnStyle} testID="balance-chip-settled">
+                <ChipText className={styles.label} textAlign={textAlign} numberOfLines={2}>
+                    {t(captionKey)}
+                </ChipText>
             </View>
         );
     }
 
-    const isOwed = primary.net > 0;
-    const containerClass = isOwed
-        ? 'rounded-full bg-green-50 px-2.5 py-1 max-w-[140px] flex-row items-center'
-        : 'rounded-full bg-red-50 px-2.5 py-1 max-w-[140px] flex-row items-center';
-    const textClass = isOwed
-        ? 'text-xs font-semibold text-green-600'
-        : 'text-xs font-semibold text-red-500';
-    const prefix = isOwed ? '+' : '−';
+    const currency = primary?.currency || defaultCurrency;
+    const amountText = formatMoney(primary!.net, currency, {
+        language: i18n.language,
+        absolute: true,
+    });
+
+    const extraLabel =
+        extraCount > 0
+            ? t('groups.card.moreCurrencies', {
+                  count: extraCount,
+                  plusCount: wrapLtrForBidi(`+${extraCount}`),
+              })
+            : null;
 
     return (
-        <View className={containerClass}>
-            <Text className={textClass} numberOfLines={1} ellipsizeMode="tail">
-                {`${prefix}${formatAmount(primary.net, primary.currency || defaultCurrency)}`}
-            </Text>
-            {extraCount > 0 && (
-                <Text
-                    className={`ml-1 text-[10px] font-semibold ${
-                        isOwed ? 'text-green-600/70' : 'text-red-500/70'
-                    }`}
-                    testID="balance-chip-others"
-                >
-                    {`+${extraCount}`}
-                </Text>
-            )}
+        <View className={styles.container} style={columnStyle} testID="balance-chip-active">
+            <ChipText className={styles.label} textAlign={textAlign} numberOfLines={2}>
+                {t(captionKey)}
+            </ChipText>
+            <ChipText
+                className={styles.amount}
+                textAlign={textAlign}
+                testID="balance-chip-amount"
+                writingDirection="ltr"
+            >
+                {amountText}
+            </ChipText>
+            {extraLabel ? (
+                onPressExtraCurrencies ? (
+                    <TouchableOpacity
+                        onPress={onPressExtraCurrencies}
+                        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                        testID="balance-chip-others"
+                    >
+                        <ChipText
+                            className={`${styles.label} underline mt-0.5`}
+                            textAlign={textAlign}
+                        >
+                            {extraLabel}
+                        </ChipText>
+                    </TouchableOpacity>
+                ) : (
+                    <ChipText
+                        className={`${styles.label} mt-0.5`}
+                        textAlign={textAlign}
+                        testID="balance-chip-others"
+                    >
+                        {extraLabel}
+                    </ChipText>
+                )
+            ) : null}
         </View>
     );
 }

@@ -4,7 +4,8 @@ import { View, ScrollView, Linking, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as StoreReview from 'expo-store-review';
-import { APP_VERSION, APP_WEB_ORIGIN, buildLegalPageUrl, Language } from '@cost-share/shared';
+import { APP_WEB_ORIGIN, buildLegalPageUrl, Language } from '@cost-share/shared';
+import { AppBuildInfoFooter } from '../../components/settings/AppBuildInfoFooter';
 import { useAppStore } from '../../store';
 import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
@@ -20,7 +21,8 @@ import { CurrencyPicker } from '../../components/CurrencyPicker';
 import { showAppToast, showSuccessMessage } from '../../lib/appToast';
 import { handleError } from '../../lib/handleError';
 import { deleteMyAccount, getMyOpenBalances, type OpenBalancesSummary } from '../../services/account.service';
-import { useNavigation } from '@react-navigation/native';
+import { refreshCurrentUserAdminFlag } from '../../services/users.service';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { DeleteAccountWarningSheet } from '../../components/settings/DeleteAccountWarningSheet';
 import { DeleteAccountConfirmSheet } from '../../components/settings/DeleteAccountConfirmSheet';
 import currencyCodes from 'currency-codes';
@@ -29,6 +31,7 @@ import { InviteLinkBlock } from '../../components/InviteLinkBlock';
 import { useSystemNotificationsDenied } from '../../hooks/useSystemNotificationsDenied';
 import { NotificationsDisabledHint } from '../../components/settings/NotificationsDisabledHint';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { AdminProViewModeControl } from '../../components/admin/AdminProViewModeControl';
 import {
     fetchProSubscriptionUiState,
     isPurchasesConfigured,
@@ -61,6 +64,12 @@ export function SettingsScreen() {
         isInFreeTrial: boolean;
         trialEndsAt: string | null;
     }>({ isInFreeTrial: false, trialEndsAt: null });
+
+    useFocusEffect(
+        useCallback(() => {
+            void refreshCurrentUserAdminFlag();
+        }, []),
+    );
 
     useEffect(() => {
         if (!KUPAPAY_PRO_ENABLED || !isPurchasesConfigured()) return;
@@ -209,6 +218,7 @@ export function SettingsScreen() {
                             onPress={() => navigation.navigate('AdminPortal')}
                             testID="settings-admin-portal"
                         />
+                        <AdminProViewModeControl testIDPrefix="settings-pro-view" />
                     </SettingsSection>
                 ) : null}
 
@@ -249,11 +259,10 @@ export function SettingsScreen() {
 
                 <SettingsSection title={t('settings.legal')}>
                     <SettingsRow iconName="document-text-outline" label={t('settings.terms')} variant="chevron" onPress={() => openLegal('terms')} />
-                    <SettingsRow iconName="shield-outline" label={t('settings.privacy')} variant="chevron" onPress={() => openLegal('privacy')} />
                 </SettingsSection>
 
-                <SettingsSection title={t('settings.account')}>
-                    <SettingsRow iconName="log-out-outline" label={t('settings.logout')} variant="danger" onPress={() => setShowLogout(true)} />
+                <SettingsSection title={t('settings.privacyAndAccount')}>
+                    <SettingsRow iconName="shield-outline" label={t('settings.privacy')} variant="chevron" onPress={() => openLegal('privacy')} />
                     <SettingsRow
                         iconName="trash-outline"
                         label={t('settings.deleteAccount')}
@@ -270,9 +279,11 @@ export function SettingsScreen() {
                     />
                 </SettingsSection>
 
-                <Text className="text-center text-xs text-gray-400 mb-8">
-                    {t('settings.version', { version: APP_VERSION })}
-                </Text>
+                <SettingsSection title={t('settings.account')}>
+                    <SettingsRow iconName="log-out-outline" label={t('settings.logout')} variant="danger" onPress={() => setShowLogout(true)} />
+                </SettingsSection>
+
+                <AppBuildInfoFooter />
             </View>
 
             <ConfirmDialog

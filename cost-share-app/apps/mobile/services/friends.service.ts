@@ -4,7 +4,7 @@
  * Writes go through SECURITY DEFINER RPCs.
  */
 
-import { User, profileFromRow } from '@cost-share/shared';
+import { User, profileFromRow, PROFILE_SELECT_COLUMNS } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 
@@ -64,7 +64,7 @@ export async function fetchFriends(): Promise<User[]> {
 
     const { data: profiles, error: pErr } = await supabase
         .from('profiles')
-        .select('id, email, name, phone, avatar_url, default_currency, language, is_active, created_at, updated_at')
+        .select(PROFILE_SELECT_COLUMNS)
         .in('id', uniqueIds);
     if (pErr) {
         console.error('fetchFriends profile lookup failed:', pErr);
@@ -84,7 +84,7 @@ async function fetchProfilesByIds(ids: string[]): Promise<Map<string, User>> {
     if (ids.length === 0) return new Map();
     const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, name, phone, avatar_url, default_currency, language, is_active, created_at, updated_at')
+        .select(PROFILE_SELECT_COLUMNS)
         .in('id', ids);
     if (error) {
         console.error('fetchProfilesByIds failed:', error);

@@ -18,6 +18,8 @@ import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
 import { useAppStore } from '../store';
+import { AdminProViewBanner } from './admin/AdminProViewBanner';
+import { View } from 'react-native';
 
 /**
  * Hard ceiling on how long resolveGate will wait for fetchGroups before
@@ -96,7 +98,12 @@ export function AuthenticatedAppGate() {
             ref={rootNavigationRef}
             onReady={() => navigationIntegration.registerNavigationContainer(rootNavigationRef)}
         >
-            <AppNavigator />
+            <View style={{ flex: 1 }}>
+                <AdminProViewBanner />
+                <View style={{ flex: 1 }}>
+                    <AppNavigator />
+                </View>
+            </View>
         </NavigationContainer>
     );
 }

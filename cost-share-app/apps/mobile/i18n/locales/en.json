@@ -65,7 +65,21 @@
         },
         "signInError": "Sign in failed. Please try again.",
         "googleSignInSheetTitle": "Sign in with Google",
-        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet."
+        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet.",
+        "signInWithEmail": "Continue with email",
+        "emailPlaceholder": "you@example.com",
+        "emailOtpSendCode": "Send code",
+        "emailOtpVerify": "Verify and sign in",
+        "emailOtpSentTo": "We sent a 6-digit code to {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Resend code",
+        "emailOtpResendIn": "Resend in {{seconds}}s",
+        "emailOtpChangeEmail": "Change email",
+        "emailOtpInvalidEmail": "Enter a valid email address.",
+        "emailOtpInvalidCode": "That code is invalid or expired. Try again or resend.",
+        "emailOtpRateLimited": "Too many attempts. Wait a minute and try again.",
+        "emailOtpSendError": "Could not send the code. Please try again.",
+        "emailOtpVerifyError": "Could not verify the code. Please try again."
     },
     "onboarding": {
         "skip": "Skip",
@@ -329,6 +343,13 @@
             "matchedMembers": "incl. {{names}}",
             "settled": "Settled",
             "youSettled": "You are settled",
+            "youOwe": "You owe {{amount}}",
+            "youOweCaption": "You owe",
+            "owedToYou": "Owed to you {{amount}}",
+            "owedToYouCaption": "Owed to you",
+            "moreCurrencies": "{{plusCount}} currencies",
+            "moreCurrencies_one": "{{plusCount}} currency",
+            "updatedAgo": "Updated {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },
         "bigCreateCta": "Create a group",
@@ -671,6 +692,7 @@
         "legal": "Legal",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy",
+        "privacyAndAccount": "Privacy & Account",
         "account": "Account",
         "logout": "Log out",
         "version": "Version {{version}}",
@@ -687,6 +709,21 @@
             "deletedUsersRow": "Deleted users",
             "resetOnboardingRow": "Reset onboarding",
             "previewCreateGroupRow": "Preview first-group screen"
+        },
+        "proView": {
+            "sectionTitle": "Pro view mode",
+            "description": "Preview Free or Pro UX for your account only (24h). Does not change real subscriptions.",
+            "loading": "Loading Pro status…",
+            "expires": "Override expires {{when}}",
+            "setFailed": "Could not update Pro view mode",
+            "bannerPro": "Admin view: Pro",
+            "bannerFree": "Admin view: Free",
+            "bannerResetHint": "Tap to reset to Real",
+            "mode": {
+                "real": "Real",
+                "force_pro": "Force Pro",
+                "force_free": "Force Free"
+            }
         },
         "onboarding": {
             "resetTitle": "Reset onboarding?",
@@ -745,7 +782,11 @@
             "noStack": "No stack trace available"
         },
         "monetization": {
-            "portalRow": "Monetization Analytics"
+            "portalRow": "Monetization Analytics",
+            "allTimeFunnel": "All-time funnel",
+            "byPlatform": "By platform",
+            "last7Days": "Last 7 days",
+            "noData": "No events in this period yet"
         },
         "supportMessages": {
             "title": "Support Messages",
@@ -762,7 +803,12 @@
             "activeGroups": "Active groups",
             "archivedGroups": "Archived groups",
             "archiveFootnote": "Archived = inactive 2+ months with zero balances (app-wide). Per-user manual archive is not included.",
-            "loadError": "Could not load metrics. Pull to refresh or try again later."
+            "loadErrorTitle": "Could not load metrics",
+            "loadError": "Pull to refresh or try again later.",
+            "notAdminTitle": "Admin access required",
+            "notAdminBody": "Your account is not in the app admin list, so monetization analytics are hidden.",
+            "analyticsUnavailableTitle": "Analytics not configured",
+            "analyticsUnavailableBody": "The monetization metrics database function is missing or not granted on this Supabase project. Apply the latest migrations to dev, then refresh."
         }
     },
     "profile": {
@@ -871,7 +917,8 @@
             "noteChangedByYou": "Note changed by you · {{group}}",
             "noteChangedBy": "Note changed by {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} declined your friend request",
-            "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}"
+            "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}",
+            "tripBudgetAlert": "Trip budget alert in {{group}}"
         },
         "addedExpense": "added an expense",
         "settledPayment": "settled a payment",
@@ -898,6 +945,7 @@
         "currency": "Currency",
         "amount": "Amount",
         "submit": "Record payment",
+        "paidInCurrency": "Payment recorded in {{currency}} (debts may be in other currencies)",
         "warnPartial": "Partial payment — {{remaining}} will still be owed",
         "warnOverpay": "More than owed — {{flipAmount}} will be owed back",
         "edit": "Edit payment",
@@ -1035,7 +1083,17 @@
         "noFriendsYet": "No shared groups yet",
         "friendBreakdownTitle": "Per-group breakdown",
         "friendBreakdownEmpty": "No shared groups with this friend.",
-        "friendMoreCurrencies": "+{{count}} more"
+        "friendMoreCurrencies": "+{{count}} more",
+        "friendCrossNetLabel": "Net across groups",
+        "friendSettleOneCurrency": "Settle in one currency",
+        "friendSettleAll": "Settle all with {{name}}",
+        "friendCrossSettlePickTitle": "Choose settlement currency",
+        "friendCrossSettleConfirmTitle": "Confirm cross-group settle",
+        "friendCrossSettleConfirmButton": "Record settlements",
+        "friendCrossSettleNetLabel": "Net in chosen currency",
+        "friendCrossSettleYouPay": "You pay {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} pays you",
+        "friendCrossSettleGroupsHint": "Will record payments in {{count}} group(s)"
     },
     "legal": {
         "termsTitle": "Terms of Service",
@@ -1140,6 +1198,7 @@
             "subscribeAtPrice": "Subscribe — {{price}}",
             "buyTripPass": "Buy Trip Pass — {{price}}",
             "restore": "Restore Purchases",
+            "redeemOfferCode": "Redeem offer code",
             "manageSubscription": "Manage subscription",
             "storeNotConfigured": "Purchases are not available in this build.",
             "loadFailed": "We couldn't load subscription prices. Check your connection or try again in a moment.",
@@ -1149,9 +1208,11 @@
             "restoreSuccess": "Purchases restored.",
             "restoreNone": "No active purchases found.",
             "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group.",
-            "tryFreeTrialCta": "Try 7 days free",
-            "trialRenewalDisclosure": "After 7 days, you'll be charged {{price}}/{{period}}. Cancel anytime in Settings.",
-            "euDigitalPurchaseAck": "I request immediate access to KupaPay Pro and acknowledge that I lose my 14-day right of withdrawal once access begins."
+            "tryFreeTrialCta": "Try {{trialDays}} days free",
+            "trialFreePeriodHeading": "{{trialDays}}-day free trial",
+            "trialFreePeriodBody": "Try every Pro feature free for {{trialDays}} days. Cancel in Settings before the trial ends if you don't want to continue.",
+            "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
+            "havePromoCode": "Have a code?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1191,11 +1252,44 @@
         "recurring": {
             "lockedBody": "Automate rent, subscriptions, and other repeating expenses with Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Fill from receipt text",
+            "sheetTitle": "Receipt text",
+            "sheetBody": "Paste text from a receipt email or OCR app. We suggest amount, currency, and merchant — you confirm before saving.",
+            "placeholder": "Paste receipt text here…",
+            "apply": "Apply to form"
+        },
         "smartReminder": {
             "sheetTitle": "Smart reminders",
             "enable": "Automatic settle-up reminders",
             "lockedBody": "Pro can nudge members to settle on a schedule you choose (minimum every 3 days).",
             "intervalDays": "Every {{count}} days"
+        },
+        "spendingInsights": {
+            "menuOption": "Spending insights",
+            "sheetTitle": "Spending insights",
+            "lockedBody": "See totals by category, who paid, and weekly trends for this group.",
+            "upgrade": "Upgrade to Pro",
+            "empty": "No expenses in this currency yet.",
+            "uncategorized": "Uncategorized",
+            "tab": {
+                "category": "Category",
+                "member": "Paid by",
+                "week": "Weekly"
+            }
+        },
+        "tripBudget": {
+            "title": "Trip budget",
+            "lockedBody": "Set a spending cap for this trip and get alerts at 80% and 100%.",
+            "upgrade": "Upgrade to Pro",
+            "set": "Set budget",
+            "edit": "Edit",
+            "clear": "Remove budget",
+            "emptyHint": "No budget yet — tap Set budget to add one.",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "sheetTitle": "Trip budget",
+            "sheetBody": "Totals include expenses in the budget currency only.",
+            "amountPlaceholder": "Budget amount"
         }
     },
     "remind": {
@@ -1215,7 +1309,7 @@
         "warningBullet1": "You will no longer be able to sign in.",
         "warningBullet2": "Your name and history remain visible to friends you shared groups with.",
         "warningBullet3": "Open balances stay open — settle them first if you don't want them to remain.",
-        "warningBullet4": "This action is irreversible. Contact us at {{email}} to restore.",
+        "warningBullet4": "You can restore within 30 days by signing in again. After that, deletion is permanent.",
         "continueBtn": "Continue",
         "confirmTitle": "Type your email to confirm",
         "typeEmailHint": "To confirm deletion, type:",
@@ -1223,7 +1317,14 @@
         "deletedToast": "Account deleted",
         "deleteFailed": "Could not delete account. Please try again.",
         "deactivatedTitle": "Account deactivated",
-        "deactivatedMessage": "This account was deleted. You can't sign back in until you contact us at {{email}}.",
+        "deactivatedMessage": "This account was deleted and the 30-day restore window has ended. Contact us at {{email}} if you need help.",
+        "restoreTitle": "Restore your account?",
+        "restoreMessage": "This account was deleted recently. You can restore it now with your groups and balances intact.",
+        "restoreBtn": "Restore account",
+        "restoredToast": "Account restored",
+        "restoreFailed": "Could not restore account. Sign in again and retry, or contact support.",
+        "restoreReauthRequired": "For security, sign in again, then tap Restore.",
+        "restoreWindowExpired": "The restore window has ended. Contact support to recover your account.",
         "openBalancesWarningTitle": "You have open balances",
         "openBalancesWarningBody": "Friends will see these owed against 'Deleted user'.",
         "openBalancesCta": "Settle up now",

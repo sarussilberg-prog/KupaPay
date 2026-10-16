@@ -1,7 +1,25 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-export function cronWebhookSecret(): string {
-    return Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';
+export function cronWebhookSecret(envVar = 'CRON_DISPATCH_WEBHOOK_SECRET'): string {
+    return Deno.env.get(envVar) ?? '';
+}
+
+function timingSafeEqualString(provided: string, expected: string): boolean {
+    const enc = new TextEncoder();
+    const a = enc.encode(provided);
+    const b = enc.encode(expected);
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+    return diff === 0;
+}
+
+export function verifyCronWebhookSecret(
+    headerValue: string | null,
+    secret: string,
+): boolean {
+    if (!secret || !headerValue) return false;
+    return timingSafeEqualString(headerValue, secret);
 }
 
 export function assertCronPost(req: Request, secret: string): Response | null {
@@ -10,7 +28,7 @@ export function assertCronPost(req: Request, secret: string): Response | null {
             status: 405,
         });
     }
-    if (!secret || req.headers.get('x-webhook-secret') !== secret) {
+    if (!verifyCronWebhookSecret(req.headers.get('x-webhook-secret'), secret)) {
         return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401 });
     }
     return null;

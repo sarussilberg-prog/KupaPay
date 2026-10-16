@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Switch } from 'react-native';
-import { Text } from '../AppText';
-import { AppIcon, AppIconName } from '../AppIcon';
+import { Switch } from 'react-native';
+import { AppIconName } from '../AppIcon';
 import { colors } from '../../theme';
+import { IconLabel } from '../ui/IconLabel';
+import { ListRow } from '../ui/ListRow';
 
 interface Props {
     iconName: AppIconName;
@@ -15,19 +16,15 @@ interface Props {
 
 export function SettingsToggleRow({ iconName, label, value, onValueChange, disabled, testID }: Props) {
     return (
-        <View
-            className="flex-row items-center bg-white px-4 py-3.5 min-h-[52px]"
-            style={disabled ? { opacity: 0.45 } : undefined}
-        >
-            <AppIcon name={iconName} size={22} color={colors.gray500} />
-            <Text className="flex-1 ms-3 text-base text-gray-900">{label}</Text>
+        <ListRow testID={testID} disabled={disabled}>
+            <IconLabel iconName={iconName} iconColor={colors.gray500} label={label} />
             <Switch
                 value={value}
                 onValueChange={onValueChange}
                 disabled={disabled}
-                testID={testID}
+                testID={testID ? `${testID}-switch` : undefined}
                 trackColor={{ true: colors.primary, false: colors.gray300 }}
             />
-        </View>
+        </ListRow>
     );
 }

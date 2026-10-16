@@ -20,6 +20,8 @@ jobs:
   testflight:
     name: Build & submit to TestFlight
     runs-on: macos-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: cost-share-app/apps/mobile
@@ -59,10 +61,7 @@ jobs:
         env:
           EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
         run: |
-<<<<<<< HEAD
           set -euo pipefail
-=======
->>>>>>> origin/main
           if [ -z "${EXPO_PUBLIC_REVENUECAT_IOS_KEY:-}" ]; then
             echo "::error::EXPO_PUBLIC_REVENUECAT_IOS_KEY is required when pro_enabled=true (GitHub Actions secret appl_…)"
             exit 1
@@ -93,3 +92,15 @@ jobs:
           bash scripts/eas-submit-testflight.sh ./build-kupapay.ipa
           EXPECTED="$(eas build:version:get -p ios 2>/dev/null | grep -oE '[0-9]+$' || jq -r '.expo.ios.buildNumber' app.json)"
           node scripts/asc-poll-build.mjs "$EXPECTED"
+          NOTES="$(node scripts/changelog-testflight-notes.mjs)"
+          node scripts/asc-set-testflight-notes.mjs "$EXPECTED" "$NOTES"
+          node scripts/record-testflight-version.mjs
+      - name: Commit TestFlight changelog baseline
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cost-share-app/packages/shared/version.json
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m "chore: record TestFlight changelog baseline [skip ci]"
+          git push origin "${{ github.ref_name }}"

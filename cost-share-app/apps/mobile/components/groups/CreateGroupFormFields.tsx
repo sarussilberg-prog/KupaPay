@@ -112,7 +112,9 @@ export function CreateGroupFormFields({
                 />
             </GroupFormSection>
 
-            <GroupTypeSelector value={groupType} onChange={onGroupTypeChange} />
+            <View className="mt-1">
+                <GroupTypeSelector value={groupType} onChange={onGroupTypeChange} />
+            </View>
 
             <GroupFormSection title={t('groups.createForm.sectionSettings')}>
                 <CurrencyPicker
@@ -126,7 +128,7 @@ export function CreateGroupFormFields({
                 title={t('groups.members.title')}
                 testID="group-form-members-section"
             >
-                <Text className="text-sm text-gray-500 mb-3 leading-relaxed">
+                <Text className="text-sm text-gray-500 mb-4 leading-relaxed">
                     {t(membersHintKey)}
                 </Text>
                 <ScrollView

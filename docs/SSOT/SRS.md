@@ -112,6 +112,7 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 | ID | Status | Requirement | Acceptance criteria |
 |----|--------|-------------|---------------------|
 | REQ-ADMIN-01 | ⬜ | App admin platform metrics | Admin portal shows registered user count and active vs auto-archived group counts from `admin_get_platform_metrics()`; non-admins get `not_authorized` |
+| REQ-ADMIN-02 | ⬜ | Admin Pro view override | App admins can set their own Pro view mode (Real / Force Pro / Force Free) via `set_my_admin_pro_view_mode`; `has_pro` / `get_my_pro_status` honor override for that admin only; default 24h expiry; non-admins cannot set |
 
 ---
 

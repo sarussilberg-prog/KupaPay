@@ -1,0 +1,111 @@
+# Manual Google Play Internal upload: EAS cloud Android AAB (production profile) + internal track submit.
+# Does not promote to production review.
+#
+# Secrets: EXPO_TOKEN, GOOGLE_PLAY_SERVICE_ACCOUNT_JSON (eas-play-submit@kupa-496716.iam.gserviceaccount.com)
+# See docs/PLAY_INTERNAL_GITHUB_ACTIONS.md
+name: Play Internal Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      pro_enabled:
+        description: Enable KupaPay Pro (RevenueCat) for this Play internal build
+        type: boolean
+        default: true
+
+concurrency:
+  group: play-internal-android
+  cancel-in-progress: true
+
+jobs:
+  play-internal:
+    name: Build AAB & submit to Play internal
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app/apps/mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preflight secrets (skip gracefully when unset)
+        id: preflight
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXPO_TOKEN:-}" ] || [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Play internal build/submit — set repository secrets EXPO_TOKEN and GOOGLE_PLAY_SERVICE_ACCOUNT_JSON to enable this workflow."
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          echo "Play internal secrets present (GOOGLE_PLAY_SERVICE_ACCOUNT_JSON → eas submit)."
+
+      - name: Verify Play service account identity
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          PLAY_SUBMIT_SERVICE_ACCOUNT_EMAIL: eas-play-submit@kupa-496716.iam.gserviceaccount.com
+        run: bash scripts/ci-verify-google-play-service-account.sh
+
+      - uses: actions/setup-node@v4
+        if: steps.preflight.outputs.ready == 'true'
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.ready == 'true'
+        working-directory: cost-share-app
+        run: npm ci --ignore-scripts
+
+      - name: Install EAS CLI
+        if: steps.preflight.outputs.ready == 'true'
+        run: npm install -g eas-cli@24.12.1 --ignore-scripts
+
+      - name: Write Google Play service account key
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: bash scripts/ci-write-google-play-key.sh
+
+      - name: Require RevenueCat Android key when Pro enabled
+        if: steps.preflight.outputs.ready == 'true' && inputs.pro_enabled == true
+        env:
+          EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXPO_PUBLIC_REVENUECAT_ANDROID_KEY:-}" ]; then
+            echo "::error::EXPO_PUBLIC_REVENUECAT_ANDROID_KEY is required when pro_enabled=true (GitHub Actions secret goog_…)"
+            exit 1
+          fi
+          echo "RevenueCat Android key present (${#EXPO_PUBLIC_REVENUECAT_ANDROID_KEY} chars)"
+
+      - name: Build Android AAB on EAS & submit to Play internal
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_KUPAPAY_PRO_ENABLED: ${{ inputs.pro_enabled == true && 'true' || 'false' }}
+          EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY }}
+          EXPO_PUBLIC_ADMOB_IOS_APP_ID: ca-app-pub-8860544182475196~4183153126
+          EXPO_PUBLIC_ADMOB_ANDROID_APP_ID: ca-app-pub-8860544182475196~8155234876
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+        run: |
+          set -euo pipefail
+          eas build \
+            --platform android \
+            --profile production \
+            --non-interactive \
+            --wait
+          bash scripts/eas-submit-play-internal.sh
+          EXPECTED="$(eas build:version:get -p android 2>/dev/null | grep -oE '[0-9]+$' || true)"
+          if [ -z "$EXPECTED" ]; then
+            echo "::error::Could not read EAS remote Android versionCode after build"
+            exit 1
+          fi
+          echo "EAS remote Android versionCode: $EXPECTED"

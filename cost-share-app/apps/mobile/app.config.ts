@@ -1,6 +1,26 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import versionJson from '../../packages/shared/version.json';
-import { ADMOB_ANDROID_APP_ID, ADMOB_IOS_APP_ID } from './lib/admobConfig';
+
+function marketingVersionFromJson(): string {
+    const raw = versionJson as { version: string; marketingVersion?: string };
+    const explicit = raw.marketingVersion?.trim();
+    if (explicit) return explicit;
+    const m = /^(\d+\.\d+\.\d+)(?:-dev\.\d+)?$/.exec(raw.version.trim());
+    return m ? m[1] : raw.version.trim();
+}
+
+function resolveGitCommitSha(): string {
+    const sha =
+        process.env.EAS_BUILD_GIT_COMMIT_HASH ??
+        process.env.VERCEL_GIT_COMMIT_SHA ??
+        process.env.EXPO_PUBLIC_GIT_COMMIT_SHA ??
+        '';
+    return sha.trim().slice(0, 7);
+}
+
+import admobAppIds from './lib/admob-app-ids.json';
+
+const { ADMOB_ANDROID_APP_ID, ADMOB_IOS_APP_ID } = admobAppIds;
 
 const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
 const DEFAULT_POSTHOG_KEY = 'phc_umvGfkx4Qoa272QiFeNs9WKe2j6C8HQSJfMpUjkaqmhp';
@@ -67,7 +87,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
     const merged = {
         ...config,
-        version: versionJson.version,
+        version: marketingVersionFromJson(),
+        extra: {
+            ...(config.extra ?? {}),
+            gitCommitSha: resolveGitCommitSha(),
+        },
     } as ExpoConfig;
 
     return withAdMobPlugin(merged);

@@ -32,6 +32,7 @@ function getNetBalanceDisplay(
     net: number | null,
     currency: string,
     isLoading: boolean,
+    language: string,
 ): BalanceDisplay {
     if (isLoading) {
         return { text: '…', tone: 'loading', labelKey: 'dashboard.netBalance' };
@@ -41,20 +42,20 @@ function getNetBalanceDisplay(
     }
     if (Math.abs(net) < 0.01) {
         return {
-            text: formatCurrencyAmount(0, currency),
+            text: formatCurrencyAmount(0, currency, language),
             tone: 'neutral',
             labelKey: 'dashboard.netBalance',
         };
     }
     if (net > 0) {
         return {
-            text: formatCurrencyAmount(net, currency),
+            text: formatCurrencyAmount(net, currency, language),
             tone: 'owed',
             labelKey: 'dashboard.netOwedToYou',
         };
     }
     return {
-        text: formatCurrencyAmount(Math.abs(net), currency),
+        text: formatCurrencyAmount(Math.abs(net), currency, language),
         tone: 'owe',
         labelKey: 'dashboard.netYouOwe',
     };
@@ -106,11 +107,13 @@ function CurrencyBreakdownRow({
     owed,
     owedToUser,
     isLast,
+    language,
 }: {
     currency: string;
     owed: number;
     owedToUser: number;
     isLast: boolean;
+    language: string;
 }) {
     const isRtl = useRtlLayout();
     const hasOwe = owed >= 0.01;
@@ -127,26 +130,26 @@ function CurrencyBreakdownRow({
                     <AmountChip
                         tone="owe"
                         testID={`breakdown-owe-${currency}`}
-                        label={`-${formatCurrencyAmount(owed, currency)}`}
+                        label={`-${formatCurrencyAmount(owed, currency, language)}`}
                     />
                 ) : (
                     <AmountChip
                         tone="neutral"
                         testID={`breakdown-owe-zero-${currency}`}
-                        label={formatCurrencyAmount(0, currency)}
+                        label={formatCurrencyAmount(0, currency, language)}
                     />
                 )}
                 {hasOwed ? (
                     <AmountChip
                         tone="owed"
                         testID={`breakdown-owed-${currency}`}
-                        label={`+${formatCurrencyAmount(owedToUser, currency)}`}
+                        label={`+${formatCurrencyAmount(owedToUser, currency, language)}`}
                     />
                 ) : (
                     <AmountChip
                         tone="neutral"
                         testID={`breakdown-owed-zero-${currency}`}
-                        label={formatCurrencyAmount(0, currency)}
+                        label={formatCurrencyAmount(0, currency, language)}
                     />
                 )}
             </View>
@@ -155,14 +158,19 @@ function CurrencyBreakdownRow({
 }
 
 export function BalanceHeroCard({ summary, conversion }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const multiNative = summary.totalOwed === null || summary.totalOwedToUser === null;
     const showBreakdownDefault = multiNative && !conversion?.isConverted;
     const [expanded, setExpanded] = useState(showBreakdownDefault);
     const isLoading = conversion?.isLoading ?? false;
 
     const net = computeNetBalance(summary.totalOwed, summary.totalOwedToUser);
-    const netDisplay = getNetBalanceDisplay(net, summary.defaultCurrency, isLoading);
+    const netDisplay = getNetBalanceDisplay(
+        net,
+        summary.defaultCurrency,
+        isLoading,
+        i18n.language,
+    );
 
     const conversionFootnote = conversion?.isConverted && conversion.ratesDate
         ? t('dashboard.convertedFootnote', {
@@ -231,6 +239,7 @@ export function BalanceHeroCard({ summary, conversion }: Props) {
                             owed={row.owed}
                             owedToUser={row.owedToUser}
                             isLast={index === summary.byCurrency.length - 1}
+                            language={i18n.language}
                         />
                     ))}
                 </View>

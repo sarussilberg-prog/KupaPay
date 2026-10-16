@@ -89,7 +89,7 @@ export function GroupFormSection({
     return (
         <View
             testID={testID}
-            className="mb-4 rounded-2xl bg-white border border-slate-200/80 px-4 py-4"
+            className="rounded-2xl bg-white border border-slate-200/70 px-4 py-4"
             style={styles.sectionShadow}
         >
             {title ? (
@@ -136,20 +136,28 @@ const styles = StyleSheet.create({
     scroll: { flex: 1 },
     scrollContent: {
         paddingHorizontal: 16,
-        paddingTop: 4,
-        paddingBottom: 16,
+        paddingTop: 8,
+        paddingBottom: 20,
+        gap: 14,
     },
     footerBar: {
         paddingTop: FOOTER_PADDING_TOP,
         paddingHorizontal: 16,
         alignItems: 'center',
         backgroundColor: '#F8FAFC',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: 'rgba(15, 23, 42, 0.08)',
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.07,
+        shadowRadius: 14,
+        elevation: 10,
     },
     sectionShadow: {
         shadowColor: '#0F172A',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.04,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
         elevation: 2,
     },
 });

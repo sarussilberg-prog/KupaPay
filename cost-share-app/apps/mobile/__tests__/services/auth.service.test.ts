@@ -49,10 +49,28 @@ jest.mock('../../lib/authSessionLifecycle', () => ({
     clearStaleAuthSession: (...args: unknown[]) => mockClearStaleAuthSession(...args),
 }));
 
+const mockSignalDeactivatedAccount = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('../../lib/signalDeactivatedAccount', () => ({
+    signalDeactivatedAccount: (...args: unknown[]) => mockSignalDeactivatedAccount(...args),
+}));
+
+const mockSetPendingAccountRestore = jest.fn();
+
 jest.mock('../../store', () => ({
     useAppStore: {
-        getState: () => ({ setSession: mockSetSession }),
+        getState: () => ({
+            setSession: mockSetSession,
+            setPendingAccountRestore: mockSetPendingAccountRestore,
+            setPendingDeactivationNotice: jest.fn(),
+        }),
     },
+}));
+
+const mockResolveAccountDeletionGate = jest.fn().mockResolvedValue('active');
+
+jest.mock('../../lib/accountDeletionGate', () => ({
+    resolveAccountDeletionGate: (...args: unknown[]) => mockResolveAccountDeletionGate(...args),
 }));
 
 const mockAssertProfileActiveWithTimeout = jest.fn().mockResolvedValue('active');
@@ -120,6 +138,7 @@ describe('auth.service', () => {
         mockClearStaleAuthSession.mockResolvedValue(undefined);
         mockAssertProfileActiveWithTimeout.mockResolvedValue('active');
         mockIsAuthSessionAllowed.mockResolvedValue(true);
+        mockResolveAccountDeletionGate.mockResolvedValue('active');
         mockIsNativeGoogleSignInEnabled.mockReturnValue(false);
         await signOut();
     });
@@ -209,12 +228,12 @@ describe('auth.service', () => {
         });
 
         it('returns account_deleted when the profile is deactivated after OAuth exchange', async () => {
-            mockIsAuthSessionAllowed.mockResolvedValueOnce(false);
+            mockResolveAccountDeletionGate.mockResolvedValueOnce('deleted');
 
             const { error } = await handleAuthRedirectUrl('com.kupapay.mobile://auth/callback?code=deleted-user');
 
             expect(error?.code).toBe('account_deleted');
-            expect(mockIsAuthSessionAllowed).toHaveBeenCalled();
+            expect(mockResolveAccountDeletionGate).toHaveBeenCalled();
         });
     });
 
@@ -363,7 +382,7 @@ describe('auth.service', () => {
 
         it('returns account_deleted when the profile is deactivated after token exchange', async () => {
             mockSignInWithGoogleNative.mockResolvedValue({ type: 'success', idToken: 'g-id-token' });
-            mockIsAuthSessionAllowed.mockResolvedValueOnce(false);
+            mockResolveAccountDeletionGate.mockResolvedValueOnce('deleted');
 
             const result = await signInWithGoogle();
 
@@ -431,7 +450,7 @@ describe('auth.service', () => {
 
         it('returns account_deleted when the profile is deactivated', async () => {
             mockAppleSignInAsync.mockResolvedValue({ identityToken: 'apple-id-token', fullName: null });
-            mockIsAuthSessionAllowed.mockResolvedValueOnce(false);
+            mockResolveAccountDeletionGate.mockResolvedValueOnce('deleted');
 
             const result = await signInWithApple();
 

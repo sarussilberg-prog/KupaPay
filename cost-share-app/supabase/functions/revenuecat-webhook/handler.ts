@@ -1,5 +1,6 @@
 /**
  * RevenueCat webhook → Supabase entitlement writes (idempotent via handle_revenuecat_webhook RPC).
+ * Store-agnostic: App Store and Google Play events share product ids (`kupapay_pro_*`, `kupapay_trip_pass`).
  * @see docs/KUPAPAY_PRO_SETUP.md
  */
 
@@ -18,6 +19,8 @@ export interface RevenueCatEvent {
     type: string;
     id: string;
     app_user_id: string;
+    /** APP_STORE | PLAY_STORE | etc. — not used for entitlement logic (product ids are shared). */
+    store?: string;
     product_id?: string;
     transaction_id?: string;
     entitlement_ids?: string[];
@@ -52,11 +55,27 @@ function parseUuid(value: string | null): string | null {
     return uuid.test(value) ? value : null;
 }
 
+function timingSafeEqualString(provided: string, expected: string): boolean {
+    const enc = new TextEncoder();
+    const a = enc.encode(provided);
+    const b = enc.encode(expected);
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+    return diff === 0;
+}
+
 export function verifyAuthorization(req: Request, secret: string): boolean {
     if (!secret) return false;
     const auth = req.headers.get('authorization') ?? '';
-    if (auth === secret) return true;
-    if (auth === `Bearer ${secret}`) return true;
+    if (auth.length > 0 && timingSafeEqualString(auth, secret)) return true;
+    const bearerPrefix = 'Bearer ';
+    if (
+        auth.length > bearerPrefix.length &&
+        auth.slice(0, bearerPrefix.length).toLowerCase() === bearerPrefix.toLowerCase()
+    ) {
+        return timingSafeEqualString(auth.slice(bearerPrefix.length).trim(), secret);
+    }
     return false;
 }
 
@@ -104,6 +123,11 @@ export async function applyWebhookEvent(
         return { ok: false, status: 400, error: 'missing_event' };
     }
 
+    const userId = parseUuid(event.app_user_id);
+    if (!userId) {
+        return { ok: false, status: 400, error: 'invalid_app_user_id' };
+    }
+
     const type = event.type ?? '';
     const grantTypes = new Set([
         'INITIAL_PURCHASE',
@@ -136,7 +160,7 @@ export async function applyWebhookEvent(
         },
         body: JSON.stringify({
             p_event_id: event.id,
-            p_user_id: event.app_user_id,
+            p_user_id: userId,
             p_event_type: type,
             p_product_id: event.product_id ?? null,
             p_pro_until: isRevoke || isGrantSub ? (proUntil ?? new Date(0).toISOString()) : null,

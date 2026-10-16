@@ -36,7 +36,7 @@ trap cleanup EXIT
 echo "▶ Starting Postgres (${PG_IMAGE})"
 docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 docker run -d --name "$PG_CONTAINER" \
-  --shm-size=256mb \
+  --shm-size=1gb \
   -e POSTGRES_PASSWORD=postgres \
   -e JWT_SECRET=ci-local-jwt-secret-at-least-32-chars \
   -e JWT_EXP=3600 \
@@ -138,6 +138,32 @@ for f in "${migration_files_sorted[@]}"; do
   psql_docker_file "$f"
 done
 
+echo "▶ DB lints (Splinter-style, baseline-gated)"
+bash scripts/ci-compare-db-lint-baseline.sh "$PG_CONTAINER" "$PGUSER"
+
+echo "▶ SQL test auth helpers"
+psql_docker <<'SQL'
+CREATE OR REPLACE FUNCTION public.test_set_jwt_sub(p_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub', p_user_id::text, TRUE);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', p_user_id::text)::text, TRUE);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.test_set_authenticated(p_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM public.test_set_jwt_sub(p_user_id);
+  PERFORM set_config('role', 'authenticated', TRUE);
+END;
+$$;
+SQL
+
 files=(supabase/__tests__/*.test.sql)
 if [[ ${#files[@]} -eq 0 ]]; then
   echo "::error::no SQL tests found"
@@ -149,6 +175,7 @@ LOCAL_SKIP=(
   get_group_pairwise_debts.test.sql
   admin_portal.test.sql
   delete_my_account.test.sql
+  account_deletion_lifecycle.test.sql
   security_support_admin.test.sql
   group_friend_activity_events.test.sql
   profile_invite_token_acl.test.sql

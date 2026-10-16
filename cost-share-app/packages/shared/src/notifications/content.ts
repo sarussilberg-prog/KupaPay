@@ -35,6 +35,7 @@ export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
     group_deleted: 'groups',
     group_note_changed: 'groups',
     settle_up_reminder: 'settlements',
+    trip_budget_alert: 'groups',
 };
 
 export const CATEGORY_TO_PREF_KEY: Record<ActivityCategory, keyof NotificationPreferences> = {

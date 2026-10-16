@@ -8,7 +8,7 @@ import {
 import { dispatchSmartPaymentReminders } from './handler.ts';
 
 Deno.serve(async (req) => {
-    const denied = assertCronPost(req, cronWebhookSecret());
+    const denied = assertCronPost(req, cronWebhookSecret('PRO_SMART_REMINDER_WEBHOOK_SECRET'));
     if (denied) return denied;
 
     const sb = createServiceSupabase();

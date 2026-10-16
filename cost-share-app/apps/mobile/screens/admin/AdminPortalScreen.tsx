@@ -8,6 +8,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { SettingsSection } from '../../components/settings/SettingsSection';
 import { SettingsRow } from '../../components/settings/SettingsRow';
 import { AdminMetricsPanel } from '../../components/admin/AdminMetricsPanel';
+import { AdminProViewModeControl } from '../../components/admin/AdminProViewModeControl';
 import { useAdminPlatformMetricsQuery } from '../../hooks/queries/useAdminPlatformMetricsQuery';
 
 export function AdminPortalScreen() {
@@ -45,6 +46,9 @@ export function AdminPortalScreen() {
                     isLoading={metricsQuery.isLoading}
                     isError={metricsQuery.isError}
                 />
+                <SettingsSection title={t('admin.proView.sectionTitle')}>
+                    <AdminProViewModeControl testIDPrefix="admin-portal-pro-view" />
+                </SettingsSection>
                 <SettingsSection title={t('admin.portal.sectionLabel')}>
                     <SettingsRow
                         iconName="trash-outline"

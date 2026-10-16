@@ -64,6 +64,20 @@
             "balances": "الأرصدة"
         },
         "signInError": "فشل تسجيل الدخول. يُرجى المحاولة مرة أخرى.",
+        "signInWithEmail": "المتابعة بالبريد الإلكتروني",
+        "emailPlaceholder": "name@example.com",
+        "emailOtpSendCode": "إرسال الرمز",
+        "emailOtpVerify": "تحقق وسجّل الدخول",
+        "emailOtpSentTo": "أرسلنا رمزًا من 6 أرقام إلى {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "إعادة إرسال الرمز",
+        "emailOtpResendIn": "إعادة الإرسال خلال {{seconds}} ث",
+        "emailOtpChangeEmail": "تغيير البريد",
+        "emailOtpInvalidEmail": "أدخل بريدًا إلكترونيًا صالحًا.",
+        "emailOtpInvalidCode": "الرمز غير صالح أو منتهٍ. حاول مرة أخرى أو أعد الإرسال.",
+        "emailOtpRateLimited": "محاولات كثيرة. انتظر دقيقة ثم حاول مرة أخرى.",
+        "emailOtpSendError": "تعذّر إرسال الرمز. حاول مرة أخرى.",
+        "emailOtpVerifyError": "تعذّر التحقق من الرمز. حاول مرة أخرى.",
         "googleSignInSheetTitle": "تسجيل الدخول باستخدام Google",
         "googleSignInSheetHint": "اضغط أدناه — ستظهر شاشة اختيار الحساب فوق هذه النافذة."
     },
@@ -341,6 +355,13 @@
             "matchedMembers": "بما في ذلك {{names}}",
             "settled": "مسوّى",
             "youSettled": "حسابك مسوّى",
+            "youOwe": "أنت مدين {{amount}}",
+            "youOweCaption": "أنت مدين",
+            "owedToYou": "مستحق لك {{amount}}",
+            "owedToYouCaption": "مستحق لك",
+            "moreCurrencies": "{{plusCount}} عملات",
+            "moreCurrencies_one": "{{plusCount}} عملة",
+            "updatedAgo": "تم التحديث {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
         "bigCreateCta": "إنشاء مجموعة",
@@ -703,6 +724,7 @@
         "legal": "القانونية",
         "terms": "شروط الخدمة",
         "privacy": "سياسة الخصوصية",
+        "privacyAndAccount": "الخصوصية والحساب",
         "account": "الحساب",
         "logout": "تسجيل الخروج",
         "version": "الإصدار {{version}}",
@@ -719,6 +741,21 @@
             "deletedUsersRow": "المستخدمون المحذوفون",
             "resetOnboardingRow": "إعادة ضبط شاشات التعريف",
             "previewCreateGroupRow": "معاينة شاشة المجموعة الأولى"
+        },
+        "proView": {
+            "sectionTitle": "وضع عرض Pro",
+            "description": "معاينة تجربة Free أو Pro لحسابك فقط (24 ساعة). لا يغيّر الاشتراك الحقيقي.",
+            "loading": "جارٍ تحميل حالة Pro…",
+            "expires": "ينتهي التجاوز {{when}}",
+            "setFailed": "تعذّر تحديث وضع عرض Pro",
+            "bannerPro": "عرض المشرف: Pro",
+            "bannerFree": "عرض المشرف: مجاني",
+            "bannerResetHint": "اضغط لإعادة الوضع الحقيقي",
+            "mode": {
+                "real": "حقيقي",
+                "force_pro": "إجبار Pro",
+                "force_free": "إجبار مجاني"
+            }
         },
         "onboarding": {
             "resetTitle": "إعادة ضبط شاشات التعريف؟",
@@ -787,7 +824,11 @@
             "noStack": "لا يتوفر تتبّع للمكدّس"
         },
         "monetization": {
-            "portalRow": "تحليلات تحقيق الدخل"
+            "portalRow": "تحليلات تحقيق الدخل",
+            "allTimeFunnel": "مسار التحويل الكامل",
+            "byPlatform": "حسب المنصة",
+            "last7Days": "آخر 7 أيام",
+            "noData": "لا توجد أحداث في هذه الفترة بعد"
         },
         "supportMessages": {
             "title": "رسائل الدعم",
@@ -804,7 +845,12 @@
             "activeGroups": "المجموعات النشطة",
             "archivedGroups": "المجموعات المؤرشفة",
             "archiveFootnote": "المؤرشفة = غير نشطة لمدة شهرين أو أكثر وأرصدتها صفرية (على مستوى التطبيق). لا تشمل الأرشفة اليدوية لكل مستخدم.",
-            "loadError": "تعذّر تحميل المقاييس. اسحب للتحديث أو حاول لاحقًا."
+            "loadError": "اسحب للتحديث أو حاول لاحقًا.",
+            "loadErrorTitle": "تعذّر تحميل المقاييس",
+            "notAdminTitle": "مطلوب صلاحيات المسؤول",
+            "notAdminBody": "حسابك ليس في قائمة مسؤولي التطبيق.",
+            "analyticsUnavailableTitle": "التحليلات غير مهيأة",
+            "analyticsUnavailableBody": "دالة المقاييس مفقودة أو بلا صلاحيات على مشروع Supabase. طبّق أحدث migrations ثم حدّث."
         }
     },
     "profile": {
@@ -913,7 +959,8 @@
             "noteChangedByYou": "عدّلتَ الملاحظة · {{group}}",
             "noteChangedBy": "عدّل {{name}} الملاحظة · {{group}}",
             "friendRequestRejectedByThem": "رفض {{name}} طلب صداقتك",
-            "settleReminder": "أرسل لك {{name}} تذكيرًا بتسوية الحساب في {{group}}"
+            "settleReminder": "أرسل لك {{name}} تذكيرًا بتسوية الحساب في {{group}}",
+            "tripBudgetAlert": "تنبيه ميزانية الرحلة في {{group}}"
         },
         "addedExpense": "أضاف مصروفًا",
         "settledPayment": "سوّى دفعة",
@@ -940,6 +987,7 @@
         "currency": "العملة",
         "amount": "المبلغ",
         "submit": "تسجيل الدفعة",
+        "paidInCurrency": "تم تسجيل الدفع بـ {{currency}} (قد تكون الديون بعملات أخرى)",
         "warnPartial": "دفعة جزئية — سيبقى {{remaining}} مستحقًا",
         "warnOverpay": "أكثر من المستحق — سيصبح {{flipAmount}} مستحقًا في الاتجاه المعاكس",
         "edit": "تعديل الدفعة",
@@ -1089,6 +1137,16 @@
         "noFriendsYet": "لا توجد مجموعات مشتركة بعد",
         "friendBreakdownTitle": "التفاصيل حسب المجموعة",
         "friendBreakdownEmpty": "لا توجد مجموعات مشتركة مع هذا الصديق.",
+        "friendCrossNetLabel": "الصافي عبر المجموعات",
+        "friendSettleOneCurrency": "تسوية بعملة واحدة",
+        "friendSettleAll": "تسوية الكل مع {{name}}",
+        "friendCrossSettlePickTitle": "اختر عملة التسوية",
+        "friendCrossSettleConfirmTitle": "تأكيد التسوية عبر المجموعات",
+        "friendCrossSettleConfirmButton": "تسجيل المدفوعات",
+        "friendCrossSettleNetLabel": "الصافي بالعملة المختارة",
+        "friendCrossSettleYouPay": "أنت تدفع لـ {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} يدفع لك",
+        "friendCrossSettleGroupsHint": "سيتم تسجيل مدفوعات في {{count}} مجموعة/مجموعات",
         "friendMoreCurrencies": "+{{count}} أخرى",
         "friendMoreCurrencies_zero": "+{{count}} أخرى",
         "friendMoreCurrencies_one": "+{{count}} أخرى",
@@ -1197,7 +1255,7 @@
         "warningBullet1": "لن تتمكن من تسجيل الدخول بعد الآن.",
         "warningBullet2": "سيظل اسمك وسجلك ظاهرين للأصدقاء الذين تشاركت معهم مجموعات.",
         "warningBullet3": "تبقى الأرصدة المفتوحة مفتوحة — سوِّها أولًا إذا كنت لا تريد بقاءها.",
-        "warningBullet4": "هذا الإجراء لا رجعة فيه. تواصل معنا عبر {{email}} للاستعادة.",
+        "warningBullet4": "يمكنك الاستعادة خلال 30 يومًا بتسجيل الدخول مجددًا. بعد ذلك يصبح الحذف نهائيًا.",
         "continueBtn": "متابعة",
         "confirmTitle": "اكتب بريدك الإلكتروني للتأكيد",
         "typeEmailHint": "لتأكيد الحذف، اكتب:",
@@ -1210,7 +1268,14 @@
         "openBalancesWarningBody": "سيرى أصدقاؤك هذه المبالغ مستحقة لـ«مستخدم محذوف».",
         "openBalancesCta": "سوِّ الحسابات الآن",
         "reSignupBlockedTitle": "تم حذف الحساب",
-        "reSignupBlocked": "تم حذف هذا الحساب. تواصل مع {{email}} لاستعادته."
+        "reSignupBlocked": "تم حذف هذا الحساب. تواصل مع {{email}} لاستعادته.",
+        "restoreTitle": "استعادة الحساب؟",
+        "restoreMessage": "تم حذف هذا الحساب مؤخرًا. يمكنك استعادته مع مجموعاتك وأرصدتك.",
+        "restoreBtn": "استعادة الحساب",
+        "restoredToast": "تمت استعادة الحساب",
+        "restoreFailed": "تعذرت الاستعادة. سجّل الدخول مجددًا أو تواصل مع الدعم.",
+        "restoreReauthRequired": "للأمان، سجّل الدخول مجددًا ثم اضغط استعادة.",
+        "restoreWindowExpired": "انتهت مهلة الاستعادة. تواصل مع الدعم."
     },
     "consolidation": {
         "convertButton": "تحويل العملة",
@@ -1291,6 +1356,7 @@
             "subscribeAtPrice": "اشترك — {{price}}",
             "buyTripPass": "شراء Trip Pass — {{price}}",
             "restore": "استعادة المشتريات",
+            "redeemOfferCode": "استرداد رمز العرض",
             "manageSubscription": "إدارة الاشتراك",
             "storeNotConfigured": "المشتريات غير متاحة في هذا الإصدار.",
             "loadFailed": "تعذّر تحميل أسعار الاشتراك. تحقق من الاتصال أو حاول مرة أخرى بعد قليل.",
@@ -1300,9 +1366,11 @@
             "restoreSuccess": "تمت استعادة المشتريات.",
             "restoreNone": "لم يُعثر على مشتريات نشطة.",
             "tripPassNeedsGroup": "افتح مجموعة أولًا لشراء Trip Pass لها.",
-            "tryFreeTrialCta": "جرّب 7 أيام مجانًا",
-            "trialRenewalDisclosure": "بعد 7 أيام سيتم خصم {{price}}/{{period}}. يمكنك الإلغاء من الإعدادات.",
-            "euDigitalPurchaseAck": "أطلب وصولاً فورياً إلى KupaPay Pro وأقر بأنني أفقد حق الإلغاء خلال 14 يوماً بمجرد بدء الوصول."
+            "tryFreeTrialCta": "جرّب {{trialDays}} أيام مجانًا",
+            "trialFreePeriodHeading": "تجربة مجانية {{trialDays}} أيام",
+            "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
+            "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
+            "havePromoCode": "لديك رمز؟"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1342,11 +1410,44 @@
         "recurring": {
             "lockedBody": "أتمتة الإيجار والاشتراكات والمصروفات المتكررة الأخرى مع Pro."
         },
+        "receiptOcr": {
+            "menuOption": "ملء من نص الإيصال",
+            "sheetTitle": "نص الإيصال",
+            "sheetBody": "الصق نص الإيصال. نقترح المبلغ والعملة — أنت تؤكد.",
+            "placeholder": "الصق النص…",
+            "apply": "تطبيق"
+        },
         "smartReminder": {
             "sheetTitle": "تذكيرات ذكية",
             "enable": "تذكيرات تلقائية للتسوية",
             "lockedBody": "Pro يرسل تذكيرات حسب الجدول (3 أيام كحد أدنى).",
             "intervalDays": "كل {{count}} أيام"
+        },
+        "spendingInsights": {
+            "menuOption": "رؤى الإنفاق",
+            "sheetTitle": "رؤى الإنفاق",
+            "lockedBody": "مجاميع حسب الفئة والدافع والأسابيع.",
+            "upgrade": "الترقية إلى Pro",
+            "empty": "لا مصروفات بهذه العملة بعد.",
+            "uncategorized": "بدون فئة",
+            "tab": {
+                "category": "فئة",
+                "member": "دفع",
+                "week": "أسبوعي"
+            }
+        },
+        "tripBudget": {
+            "title": "ميزانية الرحلة",
+            "lockedBody": "حدّ للإنفاق مع تنبيهات عند 80% و100%.",
+            "upgrade": "الترقية إلى Pro",
+            "set": "تعيين الميزانية",
+            "edit": "تعديل",
+            "clear": "إزالة الميزانية",
+            "emptyHint": "لا توجد ميزانية بعد — اضغط «تعيين الميزانية».",
+            "progress": "{{spent}} من {{budget}} {{currency}} · {{percent}}%",
+            "sheetTitle": "ميزانية الرحلة",
+            "sheetBody": "المجموع يشمل المصروفات بعملة الميزانية فقط.",
+            "amountPlaceholder": "مبلغ الميزانية"
         }
     },
     "updateRequired": {

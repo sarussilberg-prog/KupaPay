@@ -21,6 +21,20 @@ export {
 } from './friendBalanceDisplay';
 
 export {
+    buildFriendCrossGroupSettlePreview,
+    computeFriendCrossGroupCurrencyLines,
+    computeFriendCrossGroupNet,
+    convertAmountViaBase,
+    friendPairTransfers,
+    shouldShowPaidInCurrencyNote,
+    transfersBetweenUsers,
+    type FriendCrossGroupNetResult,
+    type FriendCrossGroupSettlePreview,
+    type FriendCurrencyNetLine,
+    type FriendGroupSettlePlan,
+} from './friendCrossGroupSettle';
+
+export {
     collectGroupFxCurrencies,
     collectGroupListFxBases,
     resolveGroupBalanceDisplay,

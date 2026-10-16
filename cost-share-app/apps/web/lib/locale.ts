@@ -1,8 +1,7 @@
 import { cookies, headers } from 'next/headers';
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, isLanguage, type Language } from '@cost-share/shared';
+import { DEFAULT_LANGUAGE, isLanguage, type Language } from '@cost-share/shared';
 
 const LOCALE_COOKIE = 'locale';
-const SUPPORTED: Language[] = [...SUPPORTED_LANGUAGES];
 const DEFAULT: Language = DEFAULT_LANGUAGE;
 
 // Normalize a raw value (cookie, query param, header tag) to a supported

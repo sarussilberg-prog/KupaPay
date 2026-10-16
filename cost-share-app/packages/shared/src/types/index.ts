@@ -51,6 +51,8 @@ export interface Group {
     inviteToken: string;  // 10-char URL-safe slug; used with APP_WEB_ORIGIN + /g/<token>
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
+    /** Last expense, settlement, or message activity (auto-maintained in DB). */
+    lastActivityAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -275,7 +277,8 @@ export type ActivityEventKind =
     | 'group_created'
     | 'group_deleted'
     | 'group_note_changed'
-    | 'settle_up_reminder';
+    | 'settle_up_reminder'
+    | 'trip_budget_alert';
 
 /**
  * ActivityEvent — one row of the per-user activity feed.

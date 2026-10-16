@@ -11,42 +11,22 @@
 
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { DevSettings, I18nManager } from 'react-native';
+import { DevSettings, I18nManager, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import * as Updates from 'expo-updates';
 import {
     DEFAULT_LANGUAGE,
     RTL_LANGUAGES,
-    SUPPORTED_LANGUAGES,
     type Language,
     isLanguage,
 } from '@cost-share/shared';
-import en from './locales/en.json';
-import he from './locales/he.json';
-import ru from './locales/ru.json';
-import ar from './locales/ar.json';
-import fr from './locales/fr.json';
-import es from './locales/es.json';
-import de from './locales/de.json';
+import { mobileI18nResources, type MobileI18nLocaleCode } from './localeConfig';
 import { useAppStore } from '../store';
 
 type SupportedLanguage = Language;
 
-const resources: Record<SupportedLanguage, { translation: object }> = {
-    en: { translation: en },
-    he: { translation: he },
-    ru: { translation: ru },
-    ar: { translation: ar },
-    fr: { translation: fr },
-    es: { translation: es },
-    de: { translation: de },
-};
-
-const RESOURCE_LANGUAGES = Object.keys(resources) as SupportedLanguage[];
-if (RESOURCE_LANGUAGES.length !== SUPPORTED_LANGUAGES.length) {
-    throw new Error('Mobile i18n resources must match SUPPORTED_LANGUAGES in @cost-share/shared');
-}
+const resources = mobileI18nResources;
 
 // Java's `Locale.getLanguage()` returns deprecated ISO 639-1 codes for backwards
 // compatibility — Hebrew is "iw" (not "he"), Indonesian is "in" (not "id"), Yiddish
@@ -122,6 +102,13 @@ async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
 
 async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
     const desiredRTL = RTL_LANGUAGES.has(language);
+    if (Platform.OS === 'web') {
+        I18nManager.allowRTL(true);
+        I18nManager.forceRTL(desiredRTL);
+        await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
+        return;
+    }
+
     if (I18nManager.isRTL === desiredRTL) {
         await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
         return;
@@ -166,6 +153,12 @@ async function resolveStartupLanguage(): Promise<SupportedLanguage> {
  * Initialize language from AsyncStorage on app start
  * Loads saved language preference and applies RTL settings
  */
+/** Screenshot / Playwright capture — skip AsyncStorage + native RTL reload. */
+export async function initializeLanguageForCapture(language: SupportedLanguage): Promise<void> {
+    await ensureI18nReady(language);
+    useAppStore.getState().setLanguage(language);
+}
+
 export const initializeLanguage = async (): Promise<void> => {
     try {
         const language = await resolveStartupLanguage();

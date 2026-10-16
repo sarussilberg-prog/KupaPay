@@ -1,0 +1,140 @@
+-- #297 — Expense UPDATE RLS + update_expense_with_splits (member checks aligned with #288).
+
+DROP POLICY IF EXISTS "Users can update group expenses" ON public.expenses;
+CREATE POLICY "Users can update group expenses" ON public.expenses
+    FOR UPDATE
+    USING (
+        public.is_caller_active()
+        AND public.is_group_member(group_id)
+    )
+    WITH CHECK (
+        public.is_caller_active()
+        AND public.is_group_member(group_id)
+        AND EXISTS (
+            SELECT 1 FROM public.group_members gm
+            WHERE gm.group_id = group_id
+              AND gm.user_id = paid_by
+              AND gm.is_active = TRUE
+        )
+    );
+
+CREATE OR REPLACE FUNCTION public.update_expense_with_splits(
+    p_expense_id    uuid,
+    p_expense_patch jsonb DEFAULT NULL,
+    p_splits        jsonb DEFAULT NULL
+)
+RETURNS public.expenses
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_uid       uuid := auth.uid();
+    v_existing  public.expenses;
+    v_amount    numeric;
+    v_total     numeric;
+    v_expense   public.expenses;
+    v_paid_by   uuid;
+    v_bad       uuid;
+BEGIN
+    IF v_uid IS NULL THEN
+        RAISE EXCEPTION 'not authenticated';
+    END IF;
+    IF NOT public.is_caller_active() THEN
+        RAISE EXCEPTION 'inactive account';
+    END IF;
+
+    SELECT * INTO v_existing
+      FROM public.expenses
+     WHERE id = p_expense_id
+       AND is_deleted = false
+     FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'expense not found';
+    END IF;
+
+    IF NOT public.is_group_member(v_existing.group_id) THEN
+        RAISE EXCEPTION 'not a member of group';
+    END IF;
+
+    v_amount := v_existing.amount;
+    IF p_expense_patch IS NOT NULL AND p_expense_patch ? 'amount' THEN
+        v_amount := (p_expense_patch->>'amount')::numeric;
+    END IF;
+
+    IF v_amount IS NULL OR v_amount <= 0 THEN
+        RAISE EXCEPTION 'invalid amount';
+    END IF;
+
+    v_paid_by := v_existing.paid_by;
+    IF p_expense_patch IS NOT NULL AND p_expense_patch ? 'paid_by' THEN
+        v_paid_by := (p_expense_patch->>'paid_by')::uuid;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM public.group_members gm
+        WHERE gm.group_id = v_existing.group_id
+          AND gm.user_id = v_paid_by
+          AND gm.is_active = TRUE
+    ) THEN
+        RAISE EXCEPTION 'payer_not_group_member';
+    END IF;
+
+    IF p_splits IS NOT NULL THEN
+        IF jsonb_typeof(p_splits) <> 'array' OR jsonb_array_length(p_splits) = 0 THEN
+            RAISE EXCEPTION 'splits required';
+        END IF;
+
+        SELECT (s->>'user_id')::uuid INTO v_bad
+        FROM jsonb_array_elements(p_splits) AS s
+        WHERE NOT EXISTS (
+            SELECT 1 FROM public.group_members gm
+            WHERE gm.group_id = v_existing.group_id
+              AND gm.user_id = (s->>'user_id')::uuid
+              AND gm.is_active = TRUE
+        )
+        LIMIT 1;
+        IF v_bad IS NOT NULL THEN
+            RAISE EXCEPTION 'split_user_not_group_member';
+        END IF;
+
+        SELECT COALESCE(SUM((s->>'amount')::numeric), 0)
+          INTO v_total
+          FROM jsonb_array_elements(p_splits) AS s;
+
+        IF abs(v_total - v_amount) > 0.01 THEN
+            RAISE EXCEPTION 'splits (%) do not sum to amount (%)', v_total, v_amount;
+        END IF;
+    END IF;
+
+    UPDATE public.expenses e
+       SET description  = COALESCE(p_expense_patch->>'description', e.description),
+           amount       = v_amount,
+           currency     = COALESCE(p_expense_patch->>'currency', e.currency),
+           category     = CASE
+                              WHEN p_expense_patch ? 'category' THEN p_expense_patch->>'category'
+                              ELSE e.category
+                          END,
+           expense_date = COALESCE((p_expense_patch->>'expense_date')::date, e.expense_date),
+           receipt_url  = CASE
+                              WHEN p_expense_patch ? 'receipt_url' THEN p_expense_patch->>'receipt_url'
+                              ELSE e.receipt_url
+                          END,
+           paid_by      = v_paid_by,
+           split_mode   = COALESCE(p_expense_patch->>'split_mode', e.split_mode),
+           updated_at   = now()
+     WHERE e.id = p_expense_id
+     RETURNING * INTO v_expense;
+
+    IF p_splits IS NOT NULL THEN
+        DELETE FROM public.expense_splits WHERE expense_id = p_expense_id;
+
+        INSERT INTO public.expense_splits (expense_id, user_id, amount)
+        SELECT p_expense_id, (s->>'user_id')::uuid, (s->>'amount')::numeric
+          FROM jsonb_array_elements(p_splits) AS s;
+    END IF;
+
+    RETURN v_expense;
+END;
+$$;

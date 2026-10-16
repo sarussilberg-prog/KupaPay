@@ -23,7 +23,7 @@ export const queryKeys = {
     groupContributions: (groupId: string) => ['group-contributions', groupId] as const,
     groupSimplifiedDebtsByCurrency: (groupId: string) =>
         ['group-simplified-debts-by-currency', groupId] as const,
-    legalDocument: (slug: 'terms' | 'privacy', locale: 'en' | 'he') =>
+    legalDocument: (slug: 'terms' | 'privacy', locale: import('@cost-share/shared').Language) =>
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
     adminMonetizationMetrics: ['admin', 'monetization-metrics'] as const,

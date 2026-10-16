@@ -48,7 +48,7 @@ jobs:
               major) new="$((major + 1)).0.0" ;;
               *) echo "No bump selected"; exit 0 ;;
             esac
-            jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
+            jq -c --arg v "$new" '.version = $v | .marketingVersion = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
             git add "$VERSION_FILE"
             git commit -m "chore: bump version ${current} → ${new}"
             if git push origin HEAD:main; then

@@ -8,12 +8,22 @@
 name: Deploy production — Supabase migrations
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'cost-share-app/supabase/migrations/**'
-      - 'cost-share-app/supabase/config.toml'
   workflow_dispatch:
+    inputs:
+      prod_migration_repair:
+        description: >-
+          Pre-push history repair for prod duplicate 20261016120000
+          (see docs/PROD_MIGRATION_REPAIR.md). Use only after SQL probes confirm state.
+        required: true
+        default: none
+        type: choice
+        options:
+          - none
+          - probe_only
+          - path_b_pro_trial_applied
+          - path_b_recurring_applied
+          - path_b_pro_trial_and_recurring_applied
+          - path_c_revert_20261016120000
 
 concurrency:
   group: deploy-production-supabase
@@ -36,8 +46,46 @@ jobs:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
         run: bash scripts/supabase-safe-migration-check.sh
 
+  probe:
+    name: Read-only prod migration probe
+    if: github.event.inputs.prod_migration_repair == 'probe_only'
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Run Step 1 probes (docs/PROD_MIGRATION_REPAIR.md), read-only
+        env:
+          SUPABASE_ENV: production
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+        run: |
+          DB_URL="$(bash scripts/supabase-migration-db-url.sh)"
+          echo "::add-mask::$DB_URL"
+          PGOPTIONS='-c default_transaction_read_only=on' psql "$DB_URL" -v ON_ERROR_STOP=0 -X <<'SQL'
+          SELECT version, name FROM supabase_migrations.schema_migrations
+            WHERE version >= '20261016120000' AND version <= '20261016122000' ORDER BY version;
+          SELECT max(version) AS latest_version, count(*) AS total FROM supabase_migrations.schema_migrations;
+          SELECT pg_get_function_result('public.archive_group(uuid)'::regprocedure) AS archive_group_returns;
+          SELECT to_regclass('public.recurring_expense_series') IS NOT NULL AS recurring_table;
+          SELECT jobname, schedule FROM cron.job WHERE jobname = 'pro-trial-reminder-dispatch-daily';
+          SELECT version, count(*) FROM supabase_migrations.schema_migrations GROUP BY version HAVING count(*) > 1;
+          SELECT version, name FROM supabase_migrations.schema_migrations WHERE version >= '20261016300000' ORDER BY version;
+          SELECT r AS role, has_function_privilege(r, 'public.handle_revenuecat_webhook(text,uuid,text,text,timestamptz,timestamptz,uuid,boolean,boolean,boolean)', 'EXECUTE') AS can_exec
+            FROM unnest(ARRAY['anon','authenticated','service_role']) r;
+          SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='profiles' ORDER BY policyname;
+          SELECT has_table_privilege('authenticated','public.profiles','SELECT') AS auth_profiles_select;
+          SELECT count(*) AS vault_storage_cleanup_url FROM vault.secrets WHERE name = 'storage_cleanup_dispatch_url';
+          SELECT name FROM vault.secrets ORDER BY name;
+          SQL
+
   supabase-migrations:
     name: Push migrations to production
+    if: github.event.inputs.prod_migration_repair != 'probe_only'
     needs: [validate-migrations]
     runs-on: ubuntu-latest
     environment: Production
@@ -50,6 +98,14 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      - name: Optional prod migration history repair (explicit)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.prod_migration_repair != 'none'
+        env:
+          SUPABASE_ENV: production
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+          PROD_MIGRATION_REPAIR_MODE: ${{ github.event.inputs.prod_migration_repair }}
+        run: bash scripts/supabase-prod-migration-repair.sh
 
       - name: Apply pending migrations
         env:

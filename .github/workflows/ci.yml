@@ -23,6 +23,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - run: npm ci
+      - run: npm run audit:ci
       - uses: actions/upload-artifact@v4
         with:
           name: npm-node-modules
@@ -87,6 +88,25 @@ jobs:
       - run: test -x node_modules/.bin/jest || npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
+  legal-locale-parity:
+    name: Legal locale parity
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/jest || npm ci --ignore-scripts
+      - run: bash scripts/ci-legal-locale-parity.sh
+
   deno-edge-functions:
     name: Deno edge (${{ matrix.function }})
     strategy:
@@ -96,6 +116,7 @@ jobs:
           - revenuecat-webhook
           - send-push
           - pro-trial-reminder-dispatch
+          - storage-cleanup-dispatch
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -108,6 +129,50 @@ jobs:
       - run: deno test --allow-env
       - name: Deploy bundle check (no import map)
         run: deno check --no-config index.ts
+
+  no-merge-conflicts:
+    name: No merge conflict markers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/ci-no-merge-conflicts.sh
+
+  expo-mobile-config:
+    name: Expo mobile config
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/expo || npm ci --ignore-scripts
+      - run: bash scripts/ci-expo-mobile-config.sh
+
+  migration-versions:
+    name: Supabase migration version uniqueness
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/supabase-unique-migration-versions.sh
+
+  ci-performance:
+    name: CI performance
+    uses: ./.github/workflows/ci-performance.yml
+
+  supabase-sql-integration:
+    name: Supabase SQL integration
+    uses: ./.github/workflows/supabase-sql-integration.yml
 
   deno-edge-bundle-check:
     name: Deno edge bundle (all functions)
@@ -124,7 +189,20 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check]
+    needs:
+      [
+        lint,
+        typecheck,
+        test,
+        legal-locale-parity,
+        deno-edge-functions,
+        deno-edge-bundle-check,
+        migration-versions,
+        no-merge-conflicts,
+        expo-mobile-config,
+        ci-performance,
+        supabase-sql-integration,
+      ]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
@@ -165,44 +243,29 @@ jobs:
           REPO: ${{ github.repository }}
         run: gh pr merge "$PR_NUMBER" --squash --repo "$REPO" --auto
 
-      - name: Check out dev (post-merge)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: dev
           fetch-depth: 0
-          token: ${{ secrets.ADMIN_PAT }}
 
-      # Patch-bump the App Version SSOT on every merge to dev (except version-bump
-      # commits themselves, to prevent recursion). Commits the bump directly to dev:
-      # dev requires status checks (Lint, Mobile tests, SonarCloud) before any push,
-      # including direct ones, so pushing with GITHUB_TOKEN gets rejected (GH006) —
-      # a fresh bump commit has no checks recorded against it. An admin PAT bypasses
-      # required status checks (enforce_admins is false). CI only runs on
-      # pull_request (not push), so there is no recursion. Mirrors the direct-commit
-      # approach used by bump-version-main.yml — no gh pr create, which the repo's
-      # "Allow GitHub Actions to create and approve pull requests" setting blocks.
-      - name: Bump patch version on dev
-        if: "!startsWith(github.head_ref, 'chore/version-bump/')"
+      - name: Bump dev prerelease + changelog
+        if: >-
+          !startsWith(github.head_ref, 'chore/version-bump/') &&
+          !startsWith(github.head_ref, 'chore/dev-version/')
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          for attempt in 1 2 3; do
-            git fetch origin dev
-            git reset --hard origin/dev
-            current=$(jq -r '.version' "$VERSION_FILE")
-            IFS='.' read -r major minor patch <<< "$current"
-            new="${major}.${minor}.$((patch + 1))"
-            jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
-            git add "$VERSION_FILE"
-            git commit -m "chore: bump version ${current} → ${new}"
-            if git push origin HEAD:dev; then
-              echo "✅ Bumped ${current} → ${new}"
-              exit 0
-            fi
-            echo "dev moved during bump; retrying (${attempt}/3)"
-          done
-          echo "::error::failed to bump version after 3 attempts"
-          exit 1
+          git fetch origin dev
+          git checkout dev
+          git pull origin dev
+
+          node cost-share-app/scripts/bump-dev-prerelease.mjs
+          git add cost-share-app/packages/shared/version.json CHANGELOG.md
+          git commit -m "chore: bump dev prerelease [skip ci]"
+          git push origin dev
+          echo "✅ Dev prerelease bumped (push skipped CI/Vercel via [skip ci])"

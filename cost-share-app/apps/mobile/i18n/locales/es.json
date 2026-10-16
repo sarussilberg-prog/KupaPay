@@ -64,6 +64,20 @@
             "balances": "Saldos"
         },
         "signInError": "No se pudo iniciar sesión. Inténtalo de nuevo.",
+        "signInWithEmail": "Continuar con correo",
+        "emailPlaceholder": "tu@ejemplo.com",
+        "emailOtpSendCode": "Enviar código",
+        "emailOtpVerify": "Verificar e iniciar sesión",
+        "emailOtpSentTo": "Enviamos un código de 6 dígitos a {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Reenviar código",
+        "emailOtpResendIn": "Reenviar en {{seconds}} s",
+        "emailOtpChangeEmail": "Cambiar correo",
+        "emailOtpInvalidEmail": "Introduce un correo válido.",
+        "emailOtpInvalidCode": "El código no es válido o expiró. Inténtalo de nuevo o reenvía.",
+        "emailOtpRateLimited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
+        "emailOtpSendError": "No se pudo enviar el código. Inténtalo de nuevo.",
+        "emailOtpVerifyError": "No se pudo verificar el código. Inténtalo de nuevo.",
         "googleSignInSheetTitle": "Iniciar sesión con Google",
         "googleSignInSheetHint": "Toca abajo: la selección de cuenta se abre sobre esta hoja."
     },
@@ -329,6 +343,13 @@
             "matchedMembers": "incluye a {{names}}",
             "settled": "Saldado",
             "youSettled": "Estás al día",
+            "youOwe": "Debes {{amount}}",
+            "youOweCaption": "Debes",
+            "owedToYou": "Te deben {{amount}}",
+            "owedToYouCaption": "Te deben",
+            "moreCurrencies": "{{plusCount}} monedas",
+            "moreCurrencies_one": "{{plusCount}} moneda",
+            "updatedAgo": "Actualizado {{when}}",
             "balanceUnavailable": "Saldo no disponible sin conexión"
         },
         "bigCreateCta": "Crear un grupo",
@@ -672,6 +693,7 @@
         "legal": "Aviso legal",
         "terms": "Términos del servicio",
         "privacy": "Política de privacidad",
+        "privacyAndAccount": "Privacidad y cuenta",
         "account": "Cuenta",
         "logout": "Cerrar sesión",
         "version": "Versión {{version}}",
@@ -688,6 +710,21 @@
             "deletedUsersRow": "Usuarios eliminados",
             "resetOnboardingRow": "Restablecer la introducción",
             "previewCreateGroupRow": "Vista previa de la pantalla del primer grupo"
+        },
+        "proView": {
+            "sectionTitle": "Modo de vista Pro",
+            "description": "Vista previa de Free o Pro solo para tu cuenta (24 h). No cambia la suscripción real.",
+            "loading": "Cargando estado Pro…",
+            "expires": "La anulación expira {{when}}",
+            "setFailed": "No se pudo actualizar el modo de vista Pro",
+            "bannerPro": "Vista admin: Pro",
+            "bannerFree": "Vista admin: Free",
+            "bannerResetHint": "Toca para restablecer al modo auténtico",
+            "mode": {
+                "real": "Auténtico",
+                "force_pro": "Forzar Pro",
+                "force_free": "Forzar Free"
+            }
         },
         "onboarding": {
             "resetTitle": "¿Restablecer la introducción?",
@@ -746,7 +783,11 @@
             "noStack": "No hay traza de pila disponible"
         },
         "monetization": {
-            "portalRow": "Analíticas de monetización"
+            "portalRow": "Analíticas de monetización",
+            "allTimeFunnel": "Embudo histórico",
+            "byPlatform": "Por plataforma",
+            "last7Days": "Últimos 7 días",
+            "noData": "Aún no hay eventos en este periodo"
         },
         "supportMessages": {
             "title": "Mensajes de ayuda",
@@ -763,7 +804,12 @@
             "activeGroups": "Grupos activos",
             "archivedGroups": "Grupos archivados",
             "archiveFootnote": "Archivados = inactivos durante 2 meses o más y con saldos en cero (en toda la app). No incluye el archivo manual de cada usuario.",
-            "loadError": "No se pudieron cargar las métricas. Desliza hacia abajo para actualizar o inténtalo más tarde."
+            "loadError": "Desliza hacia abajo para actualizar o inténtalo más tarde.",
+            "loadErrorTitle": "No se pudieron cargar las métricas",
+            "notAdminTitle": "Se requiere acceso de administrador",
+            "notAdminBody": "Tu cuenta no está en la lista de administradores de la app, por lo que las analíticas de monetización están ocultas.",
+            "analyticsUnavailableTitle": "Analíticas no configuradas",
+            "analyticsUnavailableBody": "Falta la función de métricas de monetización o no tiene permisos en este proyecto de Supabase. Aplica las migraciones más recientes en dev y actualiza."
         }
     },
     "profile": {
@@ -872,7 +918,8 @@
             "noteChangedByYou": "Cambiaste la nota · {{group}}",
             "noteChangedBy": "{{name}} cambió la nota · {{group}}",
             "friendRequestRejectedByThem": "{{name}} rechazó tu solicitud de amistad",
-            "settleReminder": "{{name}} te envió un recordatorio para saldar cuentas en {{group}}"
+            "settleReminder": "{{name}} te envió un recordatorio para saldar cuentas en {{group}}",
+            "tripBudgetAlert": "Alerta de presupuesto del viaje en {{group}}"
         },
         "addedExpense": "añadió un gasto",
         "settledPayment": "realizó un pago",
@@ -899,6 +946,7 @@
         "currency": "Moneda",
         "amount": "Importe",
         "submit": "Registrar pago",
+        "paidInCurrency": "Pago registrado en {{currency}} (las deudas pueden ser en otras monedas)",
         "warnPartial": "Pago parcial: aún quedarán {{remaining}} por pagar",
         "warnOverpay": "Es más de lo que se debe: se te deberán {{flipAmount}}",
         "edit": "Editar pago",
@@ -1036,6 +1084,16 @@
         "noFriendsYet": "Aún no hay grupos compartidos",
         "friendBreakdownTitle": "Desglose por grupo",
         "friendBreakdownEmpty": "No hay grupos compartidos con este amigo.",
+        "friendCrossNetLabel": "Neto entre grupos",
+        "friendSettleOneCurrency": "Liquidar en una moneda",
+        "friendSettleAll": "Liquidar todo con {{name}}",
+        "friendCrossSettlePickTitle": "Elige moneda de liquidación",
+        "friendCrossSettleConfirmTitle": "Confirmar liquidación entre grupos",
+        "friendCrossSettleConfirmButton": "Registrar pagos",
+        "friendCrossSettleNetLabel": "Neto en la moneda elegida",
+        "friendCrossSettleYouPay": "Pagas a {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} te paga",
+        "friendCrossSettleGroupsHint": "Registrará pagos en {{count}} grupo(s)",
         "friendMoreCurrencies": "+{{count}} más"
     },
     "legal": {
@@ -1138,7 +1196,7 @@
         "warningBullet1": "Ya no podrás iniciar sesión.",
         "warningBullet2": "Tu nombre y tu historial seguirán visibles para los amigos con quienes compartiste grupos.",
         "warningBullet3": "Los saldos pendientes seguirán abiertos: sáldalos antes si no quieres que permanezcan.",
-        "warningBullet4": "Esta acción es irreversible. Escríbenos a {{email}} para restaurarla.",
+        "warningBullet4": "Puedes restaurar en 30 días iniciando sesión de nuevo. Después, la eliminación es permanente.",
         "continueBtn": "Continuar",
         "confirmTitle": "Escribe tu correo para confirmar",
         "typeEmailHint": "Para confirmar la eliminación, escribe:",
@@ -1151,7 +1209,14 @@
         "openBalancesWarningBody": "Tus amigos verán estas deudas a nombre de 'Usuario eliminado'.",
         "openBalancesCta": "Saldar cuentas ahora",
         "reSignupBlockedTitle": "Cuenta eliminada",
-        "reSignupBlocked": "Esta cuenta se eliminó. Escribe a {{email}} para restaurarla."
+        "reSignupBlocked": "Esta cuenta se eliminó. Escribe a {{email}} para restaurarla.",
+        "restoreTitle": "¿Restaurar tu cuenta?",
+        "restoreMessage": "Esta cuenta se eliminó recientemente. Puedes restaurarla ahora con tus grupos y saldos.",
+        "restoreBtn": "Restaurar cuenta",
+        "restoredToast": "Cuenta restaurada",
+        "restoreFailed": "No se pudo restaurar. Inicia sesión de nuevo o contacta soporte.",
+        "restoreReauthRequired": "Por seguridad, inicia sesión de nuevo y pulsa Restaurar.",
+        "restoreWindowExpired": "El plazo de restauración terminó. Contacta soporte."
     },
     "consolidation": {
         "convertButton": "Convertir moneda",
@@ -1211,6 +1276,7 @@
             "subscribeAtPrice": "Suscribirse — {{price}}",
             "buyTripPass": "Comprar Trip Pass — {{price}}",
             "restore": "Restaurar compras",
+            "redeemOfferCode": "Canjear código promocional",
             "manageSubscription": "Gestionar suscripción",
             "storeNotConfigured": "Las compras no están disponibles en esta compilación.",
             "loadFailed": "No pudimos cargar los precios de suscripción. Comprueba tu conexión o inténtalo de nuevo en un momento.",
@@ -1220,9 +1286,11 @@
             "restoreSuccess": "Compras restauradas.",
             "restoreNone": "No se encontraron compras activas.",
             "tripPassNeedsGroup": "Abre un grupo primero para comprar un Trip Pass para ese grupo.",
-            "tryFreeTrialCta": "Probar 7 días gratis",
-            "trialRenewalDisclosure": "Tras 7 días se cobrará {{price}}/{{period}}. Cancela cuando quieras en Ajustes.",
-            "euDigitalPurchaseAck": "Solicito acceso inmediato a KupaPay Pro y reconozco que pierdo mi derecho de desistimiento de 14 días cuando comience el acceso."
+            "tryFreeTrialCta": "Probar {{trialDays}} días gratis",
+            "trialFreePeriodHeading": "Prueba gratis de {{trialDays}} días",
+            "trialFreePeriodBody": "Prueba todas las funciones Pro gratis durante {{trialDays}} días. Cancela en Ajustes antes de que termine la prueba si no quieres continuar.",
+            "trialRenewalDisclosure": "Tras {{trialDays}} días se cobrará {{price}}/{{period}} salvo que canceles en Ajustes.",
+            "havePromoCode": "¿Tienes un código?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1262,11 +1330,44 @@
         "recurring": {
             "lockedBody": "Automatiza alquiler, suscripciones y otros gastos recurrentes con Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Rellenar desde texto",
+            "sheetTitle": "Texto del recibo",
+            "sheetBody": "Pega el texto del recibo. Sugerimos importe y moneda — tú confirmas.",
+            "placeholder": "Pega aquí…",
+            "apply": "Aplicar"
+        },
         "smartReminder": {
             "sheetTitle": "Recordatorios inteligentes",
             "enable": "Recordatorios automáticos de liquidación",
             "lockedBody": "Pro envía recordatorios según tu intervalo (mínimo cada 3 días).",
             "intervalDays": "Cada {{count}} días"
+        },
+        "spendingInsights": {
+            "menuOption": "Resumen de gastos",
+            "sheetTitle": "Resumen de gastos",
+            "lockedBody": "Totales por categoría, pagador y semana.",
+            "upgrade": "Mejorar a Pro",
+            "empty": "Sin gastos en esta moneda.",
+            "uncategorized": "Sin categoría",
+            "tab": {
+                "category": "Categoría",
+                "member": "Pagó",
+                "week": "Semanal"
+            }
+        },
+        "tripBudget": {
+            "title": "Presupuesto del viaje",
+            "lockedBody": "Tope de gasto y alertas al 80 % y 100 %.",
+            "upgrade": "Mejorar a Pro",
+            "set": "Definir presupuesto",
+            "edit": "Editar",
+            "clear": "Quitar presupuesto",
+            "emptyHint": "Sin presupuesto — pulsa «Definir presupuesto».",
+            "progress": "{{spent}} de {{budget}} {{currency}} · {{percent}} %",
+            "sheetTitle": "Presupuesto del viaje",
+            "sheetBody": "Solo cuenta gastos en la moneda del presupuesto.",
+            "amountPlaceholder": "Importe del presupuesto"
         }
     },
     "updateRequired": {

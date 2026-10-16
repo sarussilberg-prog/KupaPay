@@ -14,6 +14,8 @@ export const onboardingColors = {
     greenInk: '#047857',
     greenSoft: '#E6F5EE',
     white: '#FFFFFF',
+    /** Taglines and secondary copy on dark hero backgrounds. */
+    whiteSoft: 'rgba(255,255,255,0.78)',
 } as const;
 
 export type OnboardingHeroVariant =

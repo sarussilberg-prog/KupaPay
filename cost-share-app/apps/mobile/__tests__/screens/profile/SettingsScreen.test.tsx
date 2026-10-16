@@ -22,6 +22,7 @@ jest.mock('../../../services/account.service', () => ({
 }));
 jest.mock('../../../services/users.service', () => ({
     updateUser: jest.fn(),
+    refreshCurrentUserAdminFlag: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('expo-clipboard', () => ({
@@ -36,8 +37,8 @@ jest.mock('../../../lib/openMailto', () => ({
 
 const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
-    ...jest.requireActual('@react-navigation/native'),
     useNavigation: () => ({ navigate: mockNavigate }),
+    useFocusEffect: jest.fn(),
 }));
 
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';
@@ -85,6 +86,7 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         expect(getByText('settings.general')).toBeTruthy();
         expect(getByText('settings.support')).toBeTruthy();
         expect(getByText('settings.legal')).toBeTruthy();
+        expect(getByText('settings.privacyAndAccount')).toBeTruthy();
         expect(getByText('settings.account')).toBeTruthy();
     });
 
@@ -94,13 +96,13 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         expect(mockNavigate).toHaveBeenCalledWith('ContactUs');
     });
 
-    it('renders version footer', () => {
-        const { getByText, queryByText } = render(<SettingsScreen />);
-        expect(getByText('settings.version')).toBeTruthy();
-        expect(queryByText(/\{\{version\}\}/)).toBeNull();
+    it('renders build info footer', () => {
+        const { getByText } = render(<SettingsScreen />);
+        expect(getByText(/Version /)).toBeTruthy();
+        expect(getByText(/Environment /)).toBeTruthy();
     });
 
-    it('renders Delete account row in Account section', () => {
+    it('renders Delete account row in Privacy & Account section', () => {
         const { getByText } = render(<SettingsScreen />);
         expect(getByText('settings.deleteAccount')).toBeTruthy();
     });

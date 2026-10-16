@@ -6,6 +6,13 @@ jest.mock('../../../services/auth.service', () => ({
     signInWithApple: jest.fn(),
 }));
 
+jest.mock('../../../lib/featureFlags', () => ({
+    EMAIL_AUTH_ENABLED: false,
+    SHOW_KUPAPAY_PRO_UPSELL: false,
+    KUPAPAY_PRO_ENABLED: false,
+    isProUpsellSurfaceEnabled: () => false,
+}));
+
 jest.mock('../../../hooks/useChangeAppLanguage', () => ({
     useChangeAppLanguage: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
 }));
@@ -143,11 +150,38 @@ describe('LoginScreen', () => {
         expect(useAppStore.getState().pendingDeactivationNotice).toBe(false);
     });
 
-    it('shows deleted-account dialog when persisted notice is consumed on mount', async () => {
+    it('hides email OTP auth when EMAIL_AUTH_ENABLED is false', () => {
+        const { queryByTestId } = render(<LoginScreen />);
+        expect(queryByTestId('login-email-otp-auth')).toBeNull();
+    });
+
+    it('does not show deleted-account dialog on web cold start when no persisted notice', async () => {
+        const { Platform } = require('react-native');
+        const originalOs = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+
+        mockConsumeNotice.mockResolvedValueOnce(false);
+
+        const { queryByText } = render(<LoginScreen />);
+
+        await waitFor(() => {
+            expect(queryByText('deleteAccount.deactivatedTitle')).toBeNull();
+        });
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: originalOs });
+    });
+
+    it('shows deleted-account dialog when persisted notice is consumed on mount (web)', async () => {
+        const { Platform } = require('react-native');
+        const originalOs = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+
         mockConsumeNotice.mockResolvedValueOnce(true);
 
         const { findByText } = render(<LoginScreen />);
 
         expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: originalOs });
     });
 });

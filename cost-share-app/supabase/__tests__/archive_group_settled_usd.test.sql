@@ -26,6 +26,8 @@ DECLARE
     v_group_rows INT;
     v_legacy_payer_net NUMERIC;
 BEGIN
+    INSERT INTO auth.users (id, email) VALUES (v_payer, 'arch-usd-p@test.local');
+
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_payer, 'Payer', 'USD', TRUE, 'tt_arc_p'),
         (v_borrow, 'Borrow', 'USD', TRUE, 'tt_arc_b');
@@ -66,6 +68,8 @@ BEGIN
         RAISE EXCEPTION 'Sanity failed: legacy formula should show open balance, got %', v_legacy_payer_net;
     END IF;
 
+    PERFORM public.test_set_authenticated(v_payer);
+
     v_payload := public.get_user_simplified_inputs(v_payer);
     SELECT COUNT(*) INTO v_group_rows
       FROM jsonb_array_elements(v_payload->'groups') g
@@ -75,8 +79,7 @@ BEGIN
         RAISE EXCEPTION 'Canonical inputs: payer should be settled (group omitted), got % rows', v_group_rows;
     END IF;
 
-    PERFORM set_config('request.jwt.claim.sub', v_payer::text, true);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_payer::text)::text, true);
+    PERFORM public.test_set_jwt_sub(v_payer);
 
     PERFORM public.archive_group(v_group);
 
@@ -87,8 +90,7 @@ BEGIN
         RAISE EXCEPTION 'archive_group did not insert archive row for payer';
     END IF;
 
-    PERFORM set_config('request.jwt.claim.sub', v_borrow::text, true);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_borrow::text)::text, true);
+    PERFORM public.test_set_jwt_sub(v_borrow);
     PERFORM public.archive_group(v_group);
 
     RAISE NOTICE 'archive_group_settled_usd.test.sql — all cases passed';

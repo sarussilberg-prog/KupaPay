@@ -50,8 +50,45 @@ function placeholdersForParity(key: string, value: string): string[] {
 
 export type LocaleParityIssue =
     | { kind: 'missing_key'; locale: string; key: string }
+    | { kind: 'empty_value'; locale: string; key: string }
     | { kind: 'extra_key'; locale: string; key: string }
     | { kind: 'placeholder_mismatch'; locale: string; key: string; base: string[]; other: string[] };
+
+export type LocaleParityAppConfig = {
+    appLabel: string;
+    baseLocale: string;
+    /** Locale code → nested translation object (same shape as i18n JSON). */
+    bundles: Record<string, unknown>;
+    allowExtraKeys?: boolean;
+};
+
+export function listConfiguredLocaleCodes(config: LocaleParityAppConfig): string[] {
+    return Object.keys(config.bundles).sort((a, b) => a.localeCompare(b));
+}
+
+export function runLocaleParityForApp(config: LocaleParityAppConfig): LocaleParityIssue[] {
+    const baseFlat = flattenLocale(config.bundles[config.baseLocale]);
+    const issues: LocaleParityIssue[] = [];
+
+    for (const key of Object.keys(baseFlat)) {
+        const baseVal = baseFlat[key];
+        if (typeof baseVal === 'string' && baseVal.trim() === '') {
+            issues.push({ kind: 'empty_value', locale: config.baseLocale, key });
+        }
+    }
+
+    for (const locale of listConfiguredLocaleCodes(config)) {
+        if (locale === config.baseLocale) continue;
+        const flat = flattenLocale(config.bundles[locale]);
+        issues.push(
+            ...compareLocaleToBase(baseFlat, flat, locale, {
+                allowExtraKeys: config.allowExtraKeys ?? true,
+            }),
+        );
+    }
+
+    return issues;
+}
 
 export function compareLocaleToBase(
     baseLocale: FlatLocale,
@@ -65,6 +102,11 @@ export function compareLocaleToBase(
     for (const key of Object.keys(baseLocale)) {
         if (!(key in otherLocale)) {
             issues.push({ kind: 'missing_key', locale: localeCode, key });
+            continue;
+        }
+        const otherVal = otherLocale[key] ?? '';
+        if (otherVal.trim() === '') {
+            issues.push({ kind: 'empty_value', locale: localeCode, key });
             continue;
         }
         const basePh = placeholdersForParity(key, baseLocale[key] ?? '');

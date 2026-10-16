@@ -11,6 +11,17 @@
         "simulator": false
       }
     },
+    "asc-screenshots": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_ASC_SCREENSHOT_DEMO": "true",
+        "EXPO_PUBLIC_KUPAPAY_PRO_ENABLED": "true",
+        "EXPO_PUBLIC_WEB_APP_URL": "https://kupa-pay.com"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "ios": {

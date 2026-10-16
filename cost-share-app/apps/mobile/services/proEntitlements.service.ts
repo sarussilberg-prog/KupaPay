@@ -1,28 +1,41 @@
 import { hasProFromTimestamps, type ProStatusTimestamps } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 
+export type AdminProViewMode = 'real' | 'force_pro' | 'force_free';
+
 export interface MyProStatus extends ProStatusTimestamps {
     hasPro: boolean;
     includedTripPassCredits: number;
     unassignedTripPassCount: number;
+    adminProViewMode: AdminProViewMode;
+    adminProViewExpiresAt: string | null;
 }
 
-function parseStatusRow(data: Record<string, unknown> | null): MyProStatus {
+/** @internal Exported for unit tests. */
+export function parseProStatusRpcRow(data: Record<string, unknown> | null): MyProStatus {
     const individual = (data?.individualProUntil ?? data?.individual_pro_until) as string | null;
     const groupPass = (data?.groupPassUntil ?? data?.group_pass_until) as string | null;
     const creditsRaw = data?.includedTripPassCredits ?? data?.included_trip_pass_credits;
     const unassignedRaw = data?.unassignedTripPassCount ?? data?.unassigned_trip_pass_count;
+    const modeRaw = data?.adminProViewMode ?? data?.admin_pro_view_mode;
+    const expiresRaw = data?.adminProViewExpiresAt ?? data?.admin_pro_view_expires_at;
+    const adminMode: AdminProViewMode =
+        modeRaw === 'force_pro' || modeRaw === 'force_free' ? modeRaw : 'real';
+
     const status: MyProStatus = {
         individualProUntil: individual ?? null,
         groupPassUntil: groupPass ?? null,
         includedTripPassCredits: typeof creditsRaw === 'number' ? creditsRaw : 0,
         unassignedTripPassCount: typeof unassignedRaw === 'number' ? unassignedRaw : 0,
+        adminProViewMode: adminMode,
+        adminProViewExpiresAt: typeof expiresRaw === 'string' ? expiresRaw : null,
         hasPro: false,
     };
-    status.hasPro =
-        data?.hasPro === true ||
-        data?.has_pro === true ||
-        hasProFromTimestamps(status);
+    if (typeof data?.hasPro === 'boolean' || typeof data?.has_pro === 'boolean') {
+        status.hasPro = data?.hasPro === true || data?.has_pro === true;
+    } else {
+        status.hasPro = hasProFromTimestamps(status);
+    }
     return status;
 }
 
@@ -37,10 +50,12 @@ export async function fetchMyProStatus(groupId?: string | null): Promise<MyProSt
             groupPassUntil: null,
             includedTripPassCredits: 0,
             unassignedTripPassCount: 0,
+            adminProViewMode: 'real',
+            adminProViewExpiresAt: null,
         };
     }
     if (typeof data === 'object') {
-        return parseStatusRow(data as Record<string, unknown>);
+        return parseProStatusRpcRow(data as Record<string, unknown>);
     }
     return {
         hasPro: false,
@@ -48,7 +63,23 @@ export async function fetchMyProStatus(groupId?: string | null): Promise<MyProSt
         groupPassUntil: null,
         includedTripPassCredits: 0,
         unassignedTripPassCount: 0,
+        adminProViewMode: 'real',
+        adminProViewExpiresAt: null,
     };
+}
+
+export async function setMyAdminProViewMode(
+    mode: AdminProViewMode,
+    durationHours = 24,
+): Promise<MyProStatus> {
+    const { data, error } = await supabase.rpc('set_my_admin_pro_view_mode', {
+        p_mode: mode,
+        p_duration_hours: durationHours,
+    });
+    if (error || data == null || typeof data !== 'object') {
+        throw error ?? new Error('set_my_admin_pro_view_mode failed');
+    }
+    return parseProStatusRpcRow(data as Record<string, unknown>);
 }
 
 export type RedeemIncludedTripPassError =

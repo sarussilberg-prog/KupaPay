@@ -83,13 +83,13 @@ export function OnboardingWelcomeScreen({ onStart, onExistingAccount }: Props) {
 
             <Animated.View
                 entering={onboardingMotion.fadeUp(220)}
-                style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 24) + 20 }]}
+                style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 28) + 24 }]}
             >
                 <Animated.View entering={onboardingMotion.fadeDown(280)}>
                     <Text style={styles.wordmark}>{t('onboarding.welcome.brand')}</Text>
                     <Text
-                        className={rtlTextClassName(isRtl, 'text-[17px] font-medium leading-snug mt-3.5')}
-                        style={{ color: 'rgba(255,255,255,0.78)', maxWidth: 280 }}
+                        className={rtlTextClassName(isRtl, 'text-[18px] font-medium leading-6 mt-4')}
+                        style={{ color: onboardingColors.whiteSoft, maxWidth: 300 }}
                     >
                         {t('onboarding.welcome.tagline')}
                     </Text>
@@ -149,20 +149,20 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         paddingHorizontal: 28,
-        paddingTop: 24,
+        paddingTop: 28,
         zIndex: 3,
-        gap: 20,
+        gap: 24,
     },
     wordmark: {
-        fontSize: 56,
+        fontSize: 54,
         fontWeight: '900',
-        color: '#fff',
-        letterSpacing: -0.5,
-        lineHeight: 56,
+        color: onboardingColors.white,
+        letterSpacing: -0.8,
+        lineHeight: 58,
     },
     ctas: {
-        gap: 10,
-        marginTop: 8,
+        gap: 12,
+        marginTop: 4,
     },
     primaryBtn: {
         height: 54,

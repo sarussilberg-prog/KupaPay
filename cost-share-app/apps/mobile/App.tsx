@@ -1,4 +1,5 @@
 import './lib/sentry';
+import { finishAppBootSpan } from './lib/appBootPerformance';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,6 +30,7 @@ import { configureNativeGoogleSignIn } from './lib/googleSignInNative';
 import { supabase } from './lib/supabase';
 import { assertProfileActiveWithTimeout } from './lib/auth';
 import { signalDeactivatedAccount } from './lib/signalDeactivatedAccount';
+import { clearDeactivationNoticePending } from './lib/deactivationNoticeStorage';
 import { acceptSessionIfAllowed as acceptSessionIfAllowedImpl } from './lib/acceptSessionIfAllowed';
 import { queryClient } from './lib/queryClient';
 import { restoreClient } from './lib/persistQueryClient';
@@ -60,6 +62,14 @@ import {
 } from './services/appClientConfig.service';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
+import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
+import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
+import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
+
+function isGroupCardPreviewMode(): boolean {
+  if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
+  return new URLSearchParams(globalThis.location.search).get('devGroupCardPreview') === '1';
+}
 
 // Benign when a persisted session was revoked server-side (global sign-out, token rotation, etc.).
 LogBox.ignoreLogs([/Invalid Refresh Token/i, /Refresh Token Not Found/i]);
@@ -171,6 +181,11 @@ function App() {
 
   const processOAuthCallbackUrl = useCallback(async (url: string) => {
     const { error } = await handleAuthRedirectUrl(url);
+    if (error?.code === 'account_restorable') {
+      useAppStore.getState().setPendingAccountRestore(true);
+      useAppStore.getState().setSession(null);
+      return error;
+    }
     if (error?.code === 'account_deleted') {
       await rejectDeactivatedSession();
     }
@@ -217,12 +232,18 @@ function App() {
         acceptSessionIfAllowedImpl(nextSession, mode, {
           setSession: store.setSession,
           setPendingDeactivationNotice: store.setPendingDeactivationNotice,
+          setPendingAccountRestore: store.setPendingAccountRestore,
         });
 
       const processOAuth = async (url: string) => {
         const { error } = await handleAuthRedirectUrl(url);
+        if (error?.code === 'account_restorable') {
+          store.setPendingAccountRestore(true);
+          store.setSession(null);
+          return;
+        }
         if (error?.code === 'account_deleted') {
-          void signalDeactivatedAccount(store.setPendingDeactivationNotice);
+          await signalDeactivatedAccount(store.setPendingDeactivationNotice);
           await clearStaleAuthSession();
           store.setSession(null);
         }
@@ -273,6 +294,9 @@ function App() {
           await acceptSession(hydratedSession, 'hydration');
         } else {
           store.setSession(null);
+          // Drop persisted flags so a cold start never shows the deleted-account
+          // dialog without a fresh sign-in attempt.
+          await clearDeactivationNoticePending();
         }
 
         setupSupabaseAuthAutoRefresh();
@@ -317,6 +341,7 @@ function App() {
         }
         setupSupabaseAuthAutoRefresh();
       } finally {
+        finishAppBootSpan();
         if (mounted) setIsReady(true);
       }
     };
@@ -357,12 +382,34 @@ function App() {
     return () => sub.remove();
   }, [guardSession]);
 
+  if (isAscScreenshotDemo()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <AscStoreListingCaptureRoot />
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
   if (forcedUpdateConfig) {
     return (
       <SafeAreaProvider>
         <RtlLayoutProvider>
           <WebFrame>
             <UpdateRequiredScreen config={forcedUpdateConfig} />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isGroupCardPreviewMode()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <GroupCardListPreviewScreen />
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>

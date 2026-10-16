@@ -19,8 +19,7 @@ import {
     removeGroupMember,
     updateGroup,
 } from '../../services/groups.service';
-import { fetchSimplifiedInputs } from '../../services/simplifiedDebts.service';
-import { deriveSimplifiedDebts } from '@cost-share/shared';
+import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { fetchGroupUsers } from '../../services/users.service';
 import { uploadGroupImage } from '../../services/storage.service';
 import { getCurrentUserId } from '../../lib/auth';
@@ -74,29 +73,30 @@ export function CreateGroupScreen() {
         void getCurrentUserId().then(setCurrentUserId);
     }, []);
 
-    const currentUserIdFromStore = useAppStore(s => s.currentUser?.id ?? '');
+    const { data: simplifiedDebts } = useSimplifiedDebts();
+
     const loadMembers = useCallback(async () => {
         if (!groupId) return;
-        // fetchSimplifiedInputs now throws on RPC error; the unsettled-member
-        // pre-selection is a non-essential hint, so fall back to an empty
-        // payload instead of letting it break member loading.
-        const [users, payload] = await Promise.all([
-            fetchGroupUsers(groupId),
-            fetchSimplifiedInputs().catch(() => ({ groups: [] })),
-        ]);
+        const users = await fetchGroupUsers(groupId);
         setMembers(users);
-        const simplified = currentUserIdFromStore
-            ? deriveSimplifiedDebts(payload, currentUserIdFromStore)
-            : null;
+    }, [groupId]);
+
+    // Reuse the shared simplified-debts query (useSimplifiedDebts) instead of a
+    // second fetchSimplifiedInputs on edit load.
+    useEffect(() => {
+        if (!groupId || !simplifiedDebts) {
+            setUnsettledMemberIds(new Set());
+            return;
+        }
         const unsettled = new Set<string>();
-        simplified?.byGroupCurrency.get(groupId)?.forEach(transfers => {
+        simplifiedDebts.byGroupCurrency.get(groupId)?.forEach(transfers => {
             transfers.forEach(t => {
                 unsettled.add(t.fromUserId);
                 unsettled.add(t.toUserId);
             });
         });
         setUnsettledMemberIds(unsettled);
-    }, [groupId, currentUserIdFromStore]);
+    }, [groupId, simplifiedDebts]);
 
     useEffect(() => {
         if (!isEdit || !groupId) return;

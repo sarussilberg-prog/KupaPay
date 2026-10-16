@@ -53,8 +53,11 @@ import {
 import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
 import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
+import { isProPerkUnlocked } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
+import { TripBudgetSection } from '../../components/budget/TripBudgetSection';
 import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -108,7 +111,7 @@ import {
     type FocusSessionState,
     type GroupDetailFocusFeedItem,
 } from '../../lib/groupDetailFocus';
-import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import { getAvatarUrl, getDisplayName, getDisplayNameForMember } from '../../lib/userDisplay';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import {
     useDeleteSettlementMutation,
@@ -118,6 +121,8 @@ import {
 import { useGroupConsolidationBatchesQuery, useDeleteConsolidationBatchMutation } from '../../hooks/queries/useConsolidationQueries';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
+import { IconLabel } from '../../components/ui/IconLabel';
+import { ListRow } from '../../components/ui/ListRow';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
 import { showInfoToast, showSuccessMessage } from '../../lib/appToast';
@@ -325,6 +330,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         settlements: Settlement[];
     } | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [insightsOpen, setInsightsOpen] = useState(false);
     const [membersSheetOpen, setMembersSheetOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -332,6 +338,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
     const { data: proStatus } = useProStatusQuery(groupId);
     const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
+    const insightsUnlocked = isProPerkUnlocked(
+        proStatus?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
+    const tripBudgetUnlocked = isProPerkUnlocked(
+        proStatus?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -418,6 +432,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         });
         return map;
     }, [memberLites, feedParticipants]);
+
+    const memberNameById = useMemo(() => {
+        const map: Record<string, string> = {};
+        memberLites.forEach(m => {
+            map[m.userId] = getDisplayNameForMember(m, t);
+        });
+        return map;
+    }, [memberLites, t]);
 
     const loadAll = useCallback(
         async (options?: { force?: boolean }) => {
@@ -965,6 +987,18 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                         />
                         <UnassignedTripPassBanner groupId={groupId} />
                         <IncludedTripPassBanner groupId={groupId} />
+                        <TripBudgetSection
+                            groupId={groupId}
+                            defaultCurrency={displayGroup.defaultCurrency}
+                            expenses={groupExpenses}
+                            unlocked={tripBudgetUnlocked}
+                            onUpgrade={() =>
+                                navigation.navigate('Paywall', {
+                                    featureKey: 'trip_budget',
+                                    groupId,
+                                })
+                            }
+                        />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                                 <AppIcon name="search" size={18} color={colors.gray500} />
@@ -1049,16 +1083,20 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             <Text className="text-sm text-gray-500 text-center mb-4">
                                 {t('groups.emptyFeed.message')}
                             </Text>
-                            <TouchableOpacity
+                            <ListRow
                                 onPress={() => setAddMembersOpen(true)}
-                                className="h-11 rounded-xl border border-primary px-5 items-center justify-center flex-row"
+                                className="h-11 rounded-xl border border-primary px-5 items-center justify-center min-h-0 bg-transparent"
                                 testID="empty-feed-add-members"
                             >
-                                <AppIcon name="person-add-outline" size={18} color={colors.primary} />
-                                <Text className="text-sm font-semibold text-primary-dark ml-2">
-                                    {t('groups.emptyFeed.addMembers')}
-                                </Text>
-                            </TouchableOpacity>
+                                <IconLabel
+                                    density="compact"
+                                    iconName="person-add-outline"
+                                    iconColor={colors.primary}
+                                    label={t('groups.emptyFeed.addMembers')}
+                                    labelClassName="text-sm font-semibold text-primary-dark"
+                                    flex={false}
+                                />
+                            </ListRow>
                             <TouchableOpacity
                                 onPress={() => { void shareGroupInvite(groupId); }}
                                 className="mt-4 self-center"
@@ -1251,6 +1289,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             testID="group-menu-export"
                         />
                         <DetailMenuRow
+                            label={t('pro.spendingInsights.menuOption')}
+                            onPress={() => {
+                                setMenuOpen(false);
+                                setInsightsOpen(true);
+                            }}
+                            testID="group-menu-insights"
+                        />
+                        <DetailMenuRow
                             label={
                                 isArchivedByMe
                                     ? t('groups.archive.unarchiveCta')
@@ -1272,6 +1318,22 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                     </View>
                 </Pressable>
             </Modal>
+
+            <SpendingInsightsSheet
+                visible={insightsOpen}
+                groupId={groupId}
+                defaultCurrency={displayGroup?.defaultCurrency ?? 'USD'}
+                memberNames={memberNameById}
+                unlocked={insightsUnlocked}
+                onClose={() => setInsightsOpen(false)}
+                onUpgrade={() => {
+                    setInsightsOpen(false);
+                    navigation.navigate('Paywall', {
+                        featureKey: 'spending_insights',
+                        groupId,
+                    });
+                }}
+            />
 
             <GroupExportSheet
                 visible={exportSheetOpen}

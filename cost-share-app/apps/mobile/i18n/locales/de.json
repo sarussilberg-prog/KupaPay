@@ -64,6 +64,20 @@
             "balances": "Salden"
         },
         "signInError": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+        "signInWithEmail": "Mit E-Mail fortfahren",
+        "emailPlaceholder": "deine@email.de",
+        "emailOtpSendCode": "Code senden",
+        "emailOtpVerify": "Bestätigen und anmelden",
+        "emailOtpSentTo": "Wir haben einen 6-stelligen Code an {{email}} gesendet",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Code erneut senden",
+        "emailOtpResendIn": "Erneut senden in {{seconds}} s",
+        "emailOtpChangeEmail": "E-Mail ändern",
+        "emailOtpInvalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "emailOtpInvalidCode": "Code ungültig oder abgelaufen. Erneut versuchen oder Code neu senden.",
+        "emailOtpRateLimited": "Zu viele Versuche. Warte eine Minute und versuche es erneut.",
+        "emailOtpSendError": "Code konnte nicht gesendet werden. Bitte erneut versuchen.",
+        "emailOtpVerifyError": "Code konnte nicht bestätigt werden. Bitte erneut versuchen.",
         "googleSignInSheetTitle": "Mit Google anmelden",
         "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster."
     },
@@ -329,6 +343,13 @@
             "matchedMembers": "inkl. {{names}}",
             "settled": "Ausgeglichen",
             "youSettled": "Du bist ausgeglichen",
+            "youOwe": "Du schuldest {{amount}}",
+            "youOweCaption": "Du schuldest",
+            "owedToYou": "Dir stehen {{amount}} zu",
+            "owedToYouCaption": "Dir zustehend",
+            "moreCurrencies": "{{plusCount}} Währungen",
+            "moreCurrencies_one": "{{plusCount}} Währung",
+            "updatedAgo": "Aktualisiert {{when}}",
             "balanceUnavailable": "Saldo offline nicht verfügbar"
         },
         "bigCreateCta": "Gruppe erstellen",
@@ -671,6 +692,7 @@
         "legal": "Rechtliches",
         "terms": "Nutzungsbedingungen",
         "privacy": "Datenschutzerklärung",
+        "privacyAndAccount": "Datenschutz & Konto",
         "account": "Konto",
         "logout": "Abmelden",
         "version": "App-Version {{version}}",
@@ -687,6 +709,21 @@
             "deletedUsersRow": "Gelöschte Nutzer",
             "resetOnboardingRow": "Onboarding zurücksetzen",
             "previewCreateGroupRow": "Vorschau des Bildschirms zur ersten Gruppe"
+        },
+        "proView": {
+            "sectionTitle": "Pro-Ansichtsmodus",
+            "description": "Free- oder Pro-Erfahrung nur für dein Konto testen (24 Std.). Ändert kein echtes Abo.",
+            "loading": "Pro-Status wird geladen…",
+            "expires": "Überschreibung endet {{when}}",
+            "setFailed": "Pro-Ansichtsmodus konnte nicht aktualisiert werden",
+            "bannerPro": "Admin-Ansicht: Pro",
+            "bannerFree": "Admin-Ansicht: Free",
+            "bannerResetHint": "Tippen, um auf „Echt“ zurückzusetzen",
+            "mode": {
+                "real": "Echt",
+                "force_pro": "Pro erzwingen",
+                "force_free": "Free erzwingen"
+            }
         },
         "onboarding": {
             "resetTitle": "Onboarding zurücksetzen?",
@@ -745,7 +782,11 @@
             "noStack": "Kein Stacktrace verfügbar"
         },
         "monetization": {
-            "portalRow": "Monetarisierungsanalyse"
+            "portalRow": "Monetarisierungsanalyse",
+            "allTimeFunnel": "Gesamter Trichter",
+            "byPlatform": "Nach Plattform",
+            "last7Days": "Letzte 7 Tage",
+            "noData": "In diesem Zeitraum noch keine Ereignisse"
         },
         "supportMessages": {
             "title": "Support-Nachrichten",
@@ -762,7 +803,12 @@
             "activeGroups": "Aktive Gruppen",
             "archivedGroups": "Archivierte Gruppen",
             "archiveFootnote": "Archiviert = seit über 2 Monaten inaktiv mit Saldo null (App-weit). Manuelle Archivierung durch einzelne Nutzer ist nicht enthalten.",
-            "loadError": "Kennzahlen konnten nicht geladen werden. Zum Aktualisieren nach unten ziehen oder später erneut versuchen."
+            "loadError": "Zum Aktualisieren nach unten ziehen oder später erneut versuchen.",
+            "loadErrorTitle": "Kennzahlen konnten nicht geladen werden",
+            "notAdminTitle": "Admin-Zugriff erforderlich",
+            "notAdminBody": "Dein Konto steht nicht auf der Admin-Liste der App, daher sind Monetarisierungs-Kennzahlen ausgeblendet.",
+            "analyticsUnavailableTitle": "Analyse nicht konfiguriert",
+            "analyticsUnavailableBody": "Die Monetarisierungs-Kennzahlen-Funktion fehlt oder hat auf diesem Supabase-Projekt keine Berechtigung. Wende die neuesten Migrationen auf dev an und aktualisiere."
         }
     },
     "profile": {
@@ -871,7 +917,8 @@
             "noteChangedByYou": "Notiz von dir geändert · {{group}}",
             "noteChangedBy": "Notiz von {{name}} geändert · {{group}}",
             "friendRequestRejectedByThem": "{{name}} hat deine Freundschaftsanfrage abgelehnt",
-            "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet"
+            "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet",
+            "tripBudgetAlert": "Reisebudget-Hinweis in {{group}}"
         },
         "addedExpense": "hat eine Ausgabe hinzugefügt",
         "settledPayment": "hat eine Zahlung ausgeglichen",
@@ -898,6 +945,7 @@
         "currency": "Währung",
         "amount": "Betrag",
         "submit": "Zahlung erfassen",
+        "paidInCurrency": "Zahlung in {{currency}} erfasst (Schulden können in anderen Währungen sein)",
         "warnPartial": "Teilzahlung – {{remaining}} bleiben offen",
         "warnOverpay": "Mehr als geschuldet – {{flipAmount}} werden zurückgeschuldet",
         "edit": "Zahlung bearbeiten",
@@ -1035,6 +1083,16 @@
         "noFriendsYet": "Noch keine gemeinsamen Gruppen",
         "friendBreakdownTitle": "Aufschlüsselung nach Gruppe",
         "friendBreakdownEmpty": "Keine gemeinsamen Gruppen mit diesem Freund.",
+        "friendCrossNetLabel": "Netto über alle Gruppen",
+        "friendSettleOneCurrency": "In einer Währung ausgleichen",
+        "friendSettleAll": "Alles mit {{name}} ausgleichen",
+        "friendCrossSettlePickTitle": "Ausgleichswährung wählen",
+        "friendCrossSettleConfirmTitle": "Gruppenübergreifenden Ausgleich bestätigen",
+        "friendCrossSettleConfirmButton": "Zahlungen erfassen",
+        "friendCrossSettleNetLabel": "Netto in gewählter Währung",
+        "friendCrossSettleYouPay": "Du zahlst an {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} zahlt dir",
+        "friendCrossSettleGroupsHint": "Erfasst Zahlungen in {{count}} Gruppe(n)",
         "friendMoreCurrencies": "+{{count}} weitere"
     },
     "legal": {
@@ -1137,7 +1195,7 @@
         "warningBullet1": "Du kannst dich nicht mehr anmelden.",
         "warningBullet2": "Dein Name und dein Verlauf bleiben für Freunde sichtbar, mit denen du Gruppen geteilt hast.",
         "warningBullet3": "Offene Salden bleiben offen – gleiche sie zuerst aus, wenn du das nicht möchtest.",
-        "warningBullet4": "Diese Aktion kann nicht rückgängig gemacht werden. Schreibe uns an {{email}}, um dein Konto wiederherzustellen.",
+        "warningBullet4": "Du kannst innerhalb von 30 Tagen durch erneutes Anmelden wiederherstellen. Danach ist die Löschung endgültig.",
         "continueBtn": "Weiter",
         "confirmTitle": "Gib zur Bestätigung deine E-Mail-Adresse ein",
         "typeEmailHint": "Gib zur Bestätigung der Löschung Folgendes ein:",
@@ -1150,7 +1208,14 @@
         "openBalancesWarningBody": "Freunde sehen diese Beträge als Schulden gegenüber „Gelöschter Nutzer“.",
         "openBalancesCta": "Jetzt ausgleichen",
         "reSignupBlockedTitle": "Konto gelöscht",
-        "reSignupBlocked": "Dieses Konto wurde gelöscht. Kontaktiere {{email}}, um es wiederherzustellen."
+        "reSignupBlocked": "Dieses Konto wurde gelöscht. Kontaktiere {{email}}, um es wiederherzustellen.",
+        "restoreTitle": "Konto wiederherstellen?",
+        "restoreMessage": "Dieses Konto wurde kürzlich gelöscht. Du kannst es jetzt mit Gruppen und Salden wiederherstellen.",
+        "restoreBtn": "Konto wiederherstellen",
+        "restoredToast": "Konto wiederhergestellt",
+        "restoreFailed": "Wiederherstellung fehlgeschlagen. Melde dich erneut an oder kontaktiere den Support.",
+        "restoreReauthRequired": "Aus Sicherheitsgründen: erneut anmelden, dann Wiederherstellen.",
+        "restoreWindowExpired": "Das Wiederherstellungsfenster ist abgelaufen. Kontaktiere den Support."
     },
     "consolidation": {
         "convertButton": "Währung umrechnen",
@@ -1209,6 +1274,7 @@
             "subscribeAtPrice": "Abonnieren — {{price}}",
             "buyTripPass": "Trip Pass kaufen — {{price}}",
             "restore": "Käufe wiederherstellen",
+            "redeemOfferCode": "Angebotscode einlösen",
             "manageSubscription": "Abo verwalten",
             "storeNotConfigured": "Käufe sind in diesem Build nicht verfügbar.",
             "loadFailed": "Abopreise konnten nicht geladen werden. Prüfe deine Verbindung oder versuche es gleich erneut.",
@@ -1218,9 +1284,11 @@
             "restoreSuccess": "Käufe wiederhergestellt.",
             "restoreNone": "Keine aktiven Käufe gefunden.",
             "tripPassNeedsGroup": "Öffne zuerst eine Gruppe, um einen Trip Pass dafür zu kaufen.",
-            "tryFreeTrialCta": "7 Tage kostenlos testen",
-            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet. Jederzeit in den Einstellungen kündbar.",
-            "euDigitalPurchaseAck": "Ich verlange sofortigen Zugang zu KupaPay Pro und bestätige, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald der Zugang beginnt."
+            "tryFreeTrialCta": "{{trialDays}} Tage kostenlos testen",
+            "trialFreePeriodHeading": "{{trialDays}} Tage kostenlos testen",
+            "trialFreePeriodBody": "{{trialDays}} Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
+            "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
+            "havePromoCode": "Code vorhanden?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
@@ -1260,11 +1328,44 @@
         "recurring": {
             "lockedBody": "Automatisieren Sie Miete, Abos und andere wiederkehrende Ausgaben mit Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Aus Belegtext füllen",
+            "sheetTitle": "Belegtext",
+            "sheetBody": "Belegtext einfügen. Betrag und Währung werden vorgeschlagen — Sie bestätigen.",
+            "placeholder": "Text einfügen…",
+            "apply": "Übernehmen"
+        },
         "smartReminder": {
             "sheetTitle": "Intelligente Erinnerungen",
             "enable": "Automatische Ausgleichs-Erinnerungen",
             "lockedBody": "Pro sendet Erinnerungen nach Ihrem Intervall (mindestens alle 3 Tage).",
             "intervalDays": "Alle {{count}} Tage"
+        },
+        "spendingInsights": {
+            "menuOption": "Ausgaben-Insights",
+            "sheetTitle": "Ausgaben-Insights",
+            "lockedBody": "Summen nach Kategorie, Zahler und Woche.",
+            "upgrade": "Pro freischalten",
+            "empty": "Noch keine Ausgaben in dieser Währung.",
+            "uncategorized": "Ohne Kategorie",
+            "tab": {
+                "category": "Kategorie",
+                "member": "Bezahlt von",
+                "week": "Wochen"
+            }
+        },
+        "tripBudget": {
+            "title": "Reisebudget",
+            "lockedBody": "Ausgabenlimit mit Hinweisen bei 80 % und 100 %.",
+            "upgrade": "Pro freischalten",
+            "set": "Budget festlegen",
+            "edit": "Bearbeiten",
+            "clear": "Budget entfernen",
+            "emptyHint": "Noch kein Budget — tippe auf «Budget festlegen».",
+            "progress": "{{spent}} von {{budget}} {{currency}} · {{percent}} %",
+            "sheetTitle": "Reisebudget",
+            "sheetBody": "Nur Ausgaben in der Budgetwährung zählen.",
+            "amountPlaceholder": "Budgetbetrag"
         }
     },
     "updateRequired": {

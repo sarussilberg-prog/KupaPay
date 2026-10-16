@@ -7,6 +7,7 @@ FUNCTIONS=(
   revenuecat-webhook
   send-push
   pro-trial-reminder-dispatch
+  storage-cleanup-dispatch
 )
 
 for fn in "${FUNCTIONS[@]}"; do

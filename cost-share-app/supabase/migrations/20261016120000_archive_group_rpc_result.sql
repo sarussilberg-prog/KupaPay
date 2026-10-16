@@ -1,4 +1,6 @@
+-- Version 20261016120000 (sole holder — pro_trial/recurring renamed on dev to 20261016120500 / 20261016121500).
 -- archive_group: return structured { ok, error_code } instead of raising English exceptions (KI-017).
+-- Idempotent re-apply: DROP IF EXISTS + CREATE OR REPLACE.
 
 DROP FUNCTION IF EXISTS public.archive_group(UUID); -- safe-breaking: mobile ships JSONB archive_group before prod deploy
 

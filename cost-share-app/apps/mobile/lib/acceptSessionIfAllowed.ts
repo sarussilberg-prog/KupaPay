@@ -5,16 +5,19 @@ import { clearStaleAuthSession } from './authSessionLifecycle';
 import { signalDeactivatedAccount } from './signalDeactivatedAccount';
 import { wipePersistedCache } from './persistQueryClient';
 import { hydrateCurrentUserProfile } from '../services/users.service';
+import { resolveAccountDeletionGate } from './accountDeletionGate';
 import { useAppStore } from '../store';
+import { provisionalUserFromSession } from './provisionalUserFromSession';
 
 export type SessionAcceptMode = 'fresh' | 'hydration';
 
 export interface AcceptSessionDeps {
     setSession: (session: Session | null) => void;
     setPendingDeactivationNotice: (value: boolean) => void;
+    setPendingAccountRestore: (value: boolean) => void;
 }
 
-const HYDRATE_PROFILE_TIMEOUT_MS = 4000;
+const HYDRATE_PROFILE_TIMEOUT_MS = 8000;
 
 function hydrateProfileWithTimeout(
     userId: string,
@@ -50,7 +53,7 @@ export async function acceptSessionIfAllowed(
     mode: SessionAcceptMode,
     deps: AcceptSessionDeps,
 ): Promise<void> {
-    const { setSession, setPendingDeactivationNotice } = deps;
+    const { setSession, setPendingDeactivationNotice, setPendingAccountRestore } = deps;
 
     if (!nextSession) {
         setSession(null);
@@ -60,6 +63,14 @@ export async function acceptSessionIfAllowed(
     const status = await assertProfileActiveWithTimeout();
 
     if (status === 'deactivated' || (status === 'unknown' && mode === 'fresh')) {
+        if (mode === 'fresh' && status === 'deactivated') {
+            const gate = await resolveAccountDeletionGate('deactivated');
+            if (gate === 'restorable') {
+                setPendingAccountRestore(true);
+                setSession(null);
+                return;
+            }
+        }
         void signalDeactivatedAccount(setPendingDeactivationNotice);
         await clearStaleAuthSession();
         setSession(null);
@@ -102,6 +113,12 @@ export async function acceptSessionIfAllowed(
         // deactivation so a deleted account can't get in.
         const hydration = await hydrateProfileWithTimeout(nextSession.user.id);
         if (hydration === 'deactivated') {
+            const gate = await resolveAccountDeletionGate('deactivated');
+            if (gate === 'restorable') {
+                setPendingAccountRestore(true);
+                setSession(null);
+                return;
+            }
             void signalDeactivatedAccount(setPendingDeactivationNotice);
             await clearStaleAuthSession();
             setSession(null);
@@ -115,5 +132,10 @@ export async function acceptSessionIfAllowed(
     if (mode === 'fresh') {
         await wipePersistedCache();
     }
+
+    if (!useAppStore.getState().currentUser) {
+        useAppStore.getState().setCurrentUser(provisionalUserFromSession(nextSession));
+    }
+
     setSession(nextSession);
 }

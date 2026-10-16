@@ -21,6 +21,8 @@ import {
 } from '@cost-share/shared';
 import { Text } from '../../components/AppText';
 import { AppIcon } from '../../components/AppIcon';
+import { IconLabel } from '../../components/ui/IconLabel';
+import { ListRow } from '../../components/ui/ListRow';
 import { MemberAvatar } from '../../components/MemberAvatar';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
@@ -563,22 +565,19 @@ export function SettleUpListScreen() {
                     <>
                         {others.length > 0 ? (
                             <View className={involvedGroups.length > 0 ? 'mt-2' : 'mt-4'}>
-                                <TouchableOpacity
+                                <ListRow
                                     onPress={() => setOthersExpanded(v => !v)}
-                                    activeOpacity={0.7}
-                                    accessibilityRole="button"
-                                    className="flex-row items-center px-3 py-2.5 rounded-2xl bg-slate-100/70 border border-gray-200"
+                                    className="px-3 py-2.5 rounded-2xl bg-slate-100/70 border border-gray-200 min-h-0"
                                     testID="settle-others-toggle"
                                 >
-                                    <AppIcon
-                                        name={othersExpanded ? 'chevron-up' : 'chevron-down'}
-                                        size={16}
-                                        color={colors.gray500}
+                                    <IconLabel
+                                        density="compact"
+                                        iconName={othersExpanded ? 'chevron-up' : 'chevron-down'}
+                                        iconColor={colors.gray500}
+                                        label={t('settleUp.othersToggle', { count: others.length })}
+                                        labelClassName="text-[13px] font-medium text-gray-600"
                                     />
-                                    <Text className="ml-2 flex-1 text-[13px] font-medium text-gray-600">
-                                        {t('settleUp.othersToggle', { count: others.length })}
-                                    </Text>
-                                </TouchableOpacity>
+                                </ListRow>
                                 {othersExpanded && (
                                     <View className="mt-2">
                                         {othersGroups.map(group =>
@@ -589,37 +588,35 @@ export function SettleUpListScreen() {
                             </View>
                         ) : null}
                         {memberLites.filter(m => m.isActive).length >= 2 ? (
-                            <TouchableOpacity
+                            <ListRow
                                 onPress={() => setRecordingPayment(true)}
-                                activeOpacity={0.7}
-                                accessibilityRole="button"
-                                className="mt-3 flex-row items-center justify-center px-3 py-3 rounded-2xl bg-white border border-dashed border-primary-dark"
+                                className="mt-3 px-3 py-3 rounded-2xl bg-white border border-dashed border-primary-dark min-h-0 justify-center"
                                 testID="settle-record-payment-cta"
                             >
-                                <AppIcon
-                                    name="add-circle-outline"
-                                    size={18}
-                                    color={colors.primaryDark}
+                                <IconLabel
+                                    density="compact"
+                                    iconName="add-circle-outline"
+                                    iconColor={colors.primaryDark}
+                                    label={t('settleUp.recordPaymentCta')}
+                                    labelClassName="text-[14px] font-semibold text-primary-dark"
+                                    flex={false}
                                 />
-                                <Text className="ml-2 text-[14px] font-semibold text-primary-dark">
-                                    {t('settleUp.recordPaymentCta')}
-                                </Text>
-                            </TouchableOpacity>
+                            </ListRow>
                         ) : null}
                         {sortedDisplaySettlements.length > 0 ? (
                             <View className="mt-8 mb-4">
                                 <View className="flex-row items-center mb-3 px-1">
                                     <View className="flex-1 h-px bg-gray-300" />
-                                    <View className="flex-row items-center mx-3">
-                                        <AppIcon
-                                            name="time-outline"
-                                            size={14}
-                                            color={colors.gray500}
-                                        />
-                                        <Text className="ml-1.5 text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                                            {t('balances.settlementHistory')}
-                                        </Text>
-                                    </View>
+                                    <IconLabel
+                                        density="compact"
+                                        iconName="time-outline"
+                                        iconSize={14}
+                                        iconColor={colors.gray500}
+                                        label={t('balances.settlementHistory')}
+                                        labelClassName="text-[11px] font-semibold text-gray-500 uppercase tracking-widest"
+                                        flex={false}
+                                        style={{ marginHorizontal: 12 }}
+                                    />
                                     <View className="flex-1 h-px bg-gray-300" />
                                 </View>
                                 <View className="rounded-2xl bg-slate-100/70 border border-gray-200 overflow-hidden">

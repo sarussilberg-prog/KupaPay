@@ -140,6 +140,18 @@ const CONSOLIDATION: ActivityCardVariant = {
     titleLines: 3,
 };
 
+const TRIP_BUDGET_ALERT: ActivityCardVariant = {
+    iconName: 'wallet-outline',
+    iconColor: '#b45309',
+    iconBgColor: '#fffbeb',
+    backgroundColor: '#ffffff',
+    borderColor: '#fde68a',
+    amountTone: 'muted',
+    showAmount: false,
+    showGroupLine: true,
+    titleLines: 3,
+};
+
 const SETTLE_REMINDER: ActivityCardVariant = {
     iconName: 'alarm-outline',
     iconColor: '#b45309',
@@ -183,6 +195,8 @@ export function getActivityCardVariant(
             return MESSAGE;
         case 'settle_up_reminder':
             return SETTLE_REMINDER;
+        case 'trip_budget_alert':
+            return TRIP_BUDGET_ALERT;
     }
 }
 

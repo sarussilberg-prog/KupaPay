@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { hydrateCurrentUserProfile } from '../../services/users.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { deriveBalanceSummary, FriendBalanceSummary } from '@cost-share/shared';
 import { useAppStore } from '../../store';
@@ -21,6 +22,8 @@ import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { queryKeys } from '../../hooks/queries/keys';
 import { AppIcon } from '../../components/AppIcon';
+import { IconLabel } from '../../components/ui/IconLabel';
+import { ListRow } from '../../components/ui/ListRow';
 import { EmptyState } from '../../components/EmptyState';
 import { ProfileHeaderRow } from '../../components/dashboard/ProfileHeaderRow';
 import { BalanceHeroCard } from '../../components/dashboard/BalanceHeroCard';
@@ -124,17 +127,18 @@ const ProfileDashboardBody = React.memo(function ProfileDashboardBody({
 
     return (
         <>
-            <TouchableOpacity
+            <ListRow
                 onPress={onNavigateFriends}
-                activeOpacity={0.7}
-                className="mx-4 mb-4 px-4 py-3 bg-white rounded-xl border border-slate-200/80 flex-row items-center"
+                className="mx-4 mb-4 px-4 py-3 bg-white rounded-xl border border-slate-200/80 min-h-0"
                 style={shadows.sm}
                 testID="profile-friends-row"
             >
-                <AppIcon name="people-outline" size={22} color={colors.primary} />
-                <Text className="flex-1 ml-3 text-sm font-semibold text-gray-800">
-                    {t('friends.title')}
-                </Text>
+                <IconLabel
+                    iconName="people-outline"
+                    iconColor={colors.primary}
+                    label={t('friends.title')}
+                    labelClassName="text-sm font-semibold text-gray-800"
+                />
                 {pendingCount > 0 && (
                     <View
                         className="bg-primary rounded-full px-2 mr-2"
@@ -156,7 +160,7 @@ const ProfileDashboardBody = React.memo(function ProfileDashboardBody({
                     size={18}
                     color={colors.gray400}
                 />
-            </TouchableOpacity>
+            </ListRow>
 
             {balanceSummary ? (
                 <BalanceHeroCard
@@ -189,6 +193,15 @@ export function ProfileScreen() {
     const navigation = useNavigation<any>();
     const queryClient = useQueryClient();
     const currentUser = useAppStore((s) => s.currentUser);
+    const sessionUserId = useAppStore((s) => s.session?.user?.id);
+
+    useFocusEffect(
+        useCallback(() => {
+            const userId = sessionUserId;
+            if (!userId || currentUser?.id === userId) return;
+            void hydrateCurrentUserProfile(userId);
+        }, [sessionUserId, currentUser?.id]),
+    );
 
     const [isManualRefreshing, setIsManualRefreshing] = useState(false);
     const { data: simplified, isLoading: isLoadingSimplified } = useSimplifiedDebts();
@@ -458,6 +471,7 @@ export function ProfileScreen() {
                     visible
                     friend={selectedFriend}
                     currentUserId={currentUserId}
+                    defaultCurrency={baseCurrency}
                     onClose={handleCloseFriendSheet}
                     onSelectGroup={handleSelectGroup}
                 />

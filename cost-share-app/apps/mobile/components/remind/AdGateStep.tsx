@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
+import { Button } from '../Button';
+import { ProUpgradeButton } from '../ProUpgradeButton';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { shouldSkipAdGate } from '@cost-share/shared';
@@ -101,16 +103,13 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
                 <Text className="text-gray-700 text-base text-center leading-6">
                     {t('monetization.adUnavailableContinue')}
                 </Text>
-                <TouchableOpacity
+                <Button
+                    title={t('monetization.continueBtn')}
                     onPress={onCompleted}
-                    activeOpacity={0.8}
-                    className="bg-primary rounded-2xl py-4 items-center"
+                    variant="primary"
+                    className="rounded-2xl"
                     testID="ad-gate-continue-without-ad"
-                >
-                    <Text className="text-white font-semibold text-base text-center">
-                        {t('monetization.continueBtn')}
-                    </Text>
-                </TouchableOpacity>
+                />
             </View>
         );
     }
@@ -135,48 +134,39 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
                 <Text className="text-gray-700 text-base text-center leading-6">
                     {t('monetization.goProWorkingOnIt')}
                 </Text>
-                <TouchableOpacity
+                <Button
+                    title={loading ? t('monetization.loadingAd') : t('monetization.continueBtn')}
                     onPress={() => show()}
+                    loading={loading}
                     disabled={loading}
-                    activeOpacity={0.8}
-                    className="bg-primary rounded-2xl py-4 items-center flex-row justify-center gap-2"
+                    variant="primary"
+                    className="rounded-2xl"
                     testID="ad-gate-pro-continue-button"
-                >
-                    {loading && <ActivityIndicator color="#fff" size="small" />}
-                    <Text className="text-white font-semibold text-base text-center">
-                        {loading ? t('monetization.loadingAd') : t('monetization.continueBtn')}
-                    </Text>
-                </TouchableOpacity>
+                />
             </View>
         );
     }
 
     return (
         <View className="px-4 pb-6 pt-2 gap-3">
-            <TouchableOpacity
+            <Button
+                title={loading ? t('monetization.loadingAd') : t('monetization.watchAdButton')}
                 onPress={() => show()}
+                loading={loading}
                 disabled={loading}
-                activeOpacity={0.8}
-                className="bg-primary rounded-2xl py-4 items-center flex-row justify-center gap-2"
+                variant="primary"
+                className="rounded-2xl"
                 testID="ad-gate-watch-button"
-            >
-                {loading && <ActivityIndicator color="#fff" size="small" />}
-                <Text className="text-white font-semibold text-base">
-                    {loading ? t('monetization.loadingAd') : t('monetization.watchAdButton')}
-                </Text>
-            </TouchableOpacity>
+            />
 
             {isProUpsellSurfaceEnabled() && (
-                <TouchableOpacity
+                <ProUpgradeButton
+                    title={t('monetization.goProButton')}
                     onPress={handleGoPro}
-                    activeOpacity={0.7}
-                    className="border border-gray-200 rounded-2xl py-4 flex-row items-center justify-center"
+                    appearance="outline"
+                    className="rounded-2xl py-4"
                     testID="ad-gate-pro-button"
-                >
-                    <Text className="text-gray-700 font-medium text-base text-center">
-                        {t('monetization.goProButton')}
-                    </Text>
-                </TouchableOpacity>
+                />
             )}
         </View>
     );

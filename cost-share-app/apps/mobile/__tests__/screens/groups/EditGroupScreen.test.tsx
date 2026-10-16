@@ -39,6 +39,15 @@ jest.mock('../../../services/settlements.service', () => ({
     fetchGroupPairwiseDebts: jest.fn().mockResolvedValue([]),
 }));
 
+jest.mock('../../../hooks/useSimplifiedDebts');
+
+jest.mock('../../../lib/platformAlert', () => ({
+    platformAlert: jest.fn((_title: string, _msg: unknown, buttons: any[]) => {
+        const destructive = (buttons ?? []).find((b) => b.style === 'destructive');
+        destructive?.onPress?.();
+    }),
+}));
+
 jest.mock('../../../components/AddMembersSheet', () => ({
     AddMembersSheet: () => null,
 }));

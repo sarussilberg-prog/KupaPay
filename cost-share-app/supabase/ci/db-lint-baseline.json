@@ -1,0 +1,52 @@
+{
+  "description": "Grandfathered DB lint cache_keys from SQL CI on dev (2026-10-16). RLS lint types are enforced; unindexed FKs are tracked but not gated yet.",
+  "enforce": {
+    "unindexed_foreign_keys": false,
+    "auth_rls_initplan": true,
+    "rls_filter_columns_missing_index": true
+  },
+  "unindexed_foreign_keys": [
+    "unindexed_foreign_keys_public_activity_events_activity_events_actor_user_id_fkey",
+    "unindexed_foreign_keys_public_activity_events_activity_events_group_id_fkey",
+    "unindexed_foreign_keys_public_activity_group_last_seen_activity_group_last_seen_group_id_fkey",
+    "unindexed_foreign_keys_public_app_admins_app_admins_granted_by_fkey",
+    "unindexed_foreign_keys_public_consolidation_batches_consolidation_batches_paid_to_user_id_fkey",
+    "unindexed_foreign_keys_public_friend_blocks_friend_blocks_blocked_user_id_fkey",
+    "unindexed_foreign_keys_public_group_members_group_members_added_by_fkey",
+    "unindexed_foreign_keys_public_group_messages_group_messages_user_id_fkey",
+    "unindexed_foreign_keys_public_group_passes_group_passes_purchased_by_fkey",
+    "unindexed_foreign_keys_public_group_smart_reminder_recipient_state_group_smart_reminder_recipient_state_debtor_user_id_fkey",
+    "unindexed_foreign_keys_public_groups_groups_smart_reminder_set_by_fkey",
+    "unindexed_foreign_keys_public_groups_groups_trip_budget_set_by_fkey",
+    "unindexed_foreign_keys_public_monetization_events_monetization_events_user_id_fkey",
+    "unindexed_foreign_keys_public_push_deliveries_push_deliveries_recipient_user_id_fkey",
+    "unindexed_foreign_keys_public_recurring_expense_occurrences_recurring_expense_occurrences_expense_id_fkey",
+    "unindexed_foreign_keys_public_recurring_expense_series_recurring_expense_series_created_by_fkey",
+    "unindexed_foreign_keys_public_recurring_expense_series_recurring_expense_series_paid_by_fkey",
+    "unindexed_foreign_keys_public_settlements_settlements_created_by_fkey",
+    "unindexed_foreign_keys_public_trip_pass_purchase_intents_trip_pass_purchase_intents_group_id_fkey"
+  ],
+  "auth_rls_initplan": [],
+  "rls_filter_columns_missing_index": [
+    "rls_col_index_public_consolidation_batches_user_id",
+    "rls_col_index_public_expense_splits_created_by",
+    "rls_col_index_public_expense_splits_group_id",
+    "rls_col_index_public_expenses_user_id",
+    "rls_col_index_public_friend_requests_user_id",
+    "rls_col_index_public_group_messages_user_id",
+    "rls_col_index_public_group_passes_user_id",
+    "rls_col_index_public_group_smart_reminder_recipient_state_user_id",
+    "rls_col_index_public_profiles_group_id",
+    "rls_col_index_public_profiles_user_id",
+    "rls_col_index_public_monetization_events_user_id",
+    "rls_col_index_public_profiles_group_id",
+    "rls_col_index_public_profiles_user_id",
+    "rls_col_index_public_recurring_expense_occurrences_group_id",
+    "rls_col_index_public_recurring_expense_occurrences_user_id",
+    "rls_col_index_public_recurring_expense_series_user_id",
+    "rls_col_index_public_settlements_created_by",
+    "rls_col_index_public_settlements_user_id",
+    "rls_col_index_public_profiles_group_id",
+    "rls_col_index_public_profiles_user_id"
+  ]
+}

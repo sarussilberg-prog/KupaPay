@@ -64,11 +64,28 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
 # EXPO_PUBLIC_REVENUECAT_OFFERING_ID=default
 ```
 
+## Google Play — subscriptions & trial
+
+Configure in Play Console (see [`store/play/SUBSCRIPTION_OFFERS.md`](../store/play/SUBSCRIPTION_OFFERS.md)):
+
+| Product | Free trial on base plan |
+|---------|-------------------------|
+| `kupapay_pro_monthly` | **14 days** |
+| `kupapay_pro_yearly` | **14 days** |
+
+Android paywall: **no EU withdrawal checkbox** (Play purchase flow). Trial copy uses **14 days** on Android; iOS remains **7 days** when configured in App Store Connect.
+
 ## Apple Guideline 3.1.2
 
-Paywall shows localized price/period from StoreKit via RevenueCat, auto-renew disclosure, cancel instructions, Terms + Privacy links, and Restore Purchases. Settings includes **Manage subscription** (opens platform subscription management).
+Paywall shows localized price/period from the store via RevenueCat (`priceString`), auto-renew disclosure, cancel instructions, Terms + Privacy links, **Restore Purchases**, and **Redeem offer code** (iOS App Store sheet; Android opens `https://play.google.com/redeem`). Settings includes **Manage subscription** (`showManageSubscriptions` / Play subscription center).
 
-When monthly/yearly products include a **7-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+When monthly/yearly products include a **14-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and post-trial price copy. Trial length in the UI is derived from the store intro offer (`package.product.introPrice`) when available, with **14 days** as the fallback. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+
+Apple/Google are merchant of record; the app does **not** show an EU withdrawal waiver checkbox.
+
+### Google Play (manual)
+
+Configure the **base-plan free trial** on `kupapay_pro_monthly` and `kupapay_pro_yearly` to **14 days** in Play Console (Offers → free trial).
 
 ### Trial reminder cron (server fallback)
 
@@ -102,3 +119,19 @@ Deploy `pro-smart-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261016130000_smart_payment_reminders.sql` on dev before production.
+
+### Trip budget alerts (Pro v2)
+
+No cron: alerts run from the `expenses` trigger via `evaluate_trip_budget_alerts`. Pro members set budget with RPC `set_group_trip_budget`. Activity kind `trip_budget_alert` uses the existing `send-push` pipeline.
+
+Apply migration `20261016140000_trip_budget.sql` on dev before production.
+
+### Spending insights (Pro v2)
+
+RPCs `get_group_spending_by_category`, `get_group_spending_by_member`, and `get_group_spending_by_week` require `has_pro`. No cron.
+
+Apply migration `20261016150000_group_spending_insights.sql` on dev before production.
+
+### Receipt OCR (Pro v2, heuristic)
+
+Deploy `receipt-ocr` (user JWT). Default: **no paid OCR** — paste text + shared heuristic. Optional vendor via `RECEIPT_OCR_API_URL`. See [RECEIPT_OCR.md](RECEIPT_OCR.md).

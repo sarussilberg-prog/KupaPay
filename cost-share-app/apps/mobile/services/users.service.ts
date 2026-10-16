@@ -2,8 +2,7 @@
  * Users Service — Supabase direct (profiles table)
  */
 
-import { User, UpdateProfileDto } from '@cost-share/shared';
-import { profileFromRow } from '@cost-share/shared';
+import { User, UpdateProfileDto, profileFromRow, PROFILE_SELECT_COLUMNS } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { clearLocalAuthSession } from './auth.service';
@@ -11,8 +10,14 @@ import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { HEBREW_APP_DEFAULT_CURRENCY } from '../lib/appDefaultCurrency';
-
 export type ProfileHydrationResult = 'active' | 'deactivated' | 'unknown';
+
+/** Client read path for app_admins — profiles table does not expose admin flag. */
+export async function fetchIsAppAdmin(): Promise<boolean> {
+    const { data, error } = await supabase.rpc('is_app_admin');
+    if (error) return false;
+    return data === true;
+}
 
 /**
  * Load profiles.default_currency (and other fields) after auth.
@@ -24,7 +29,7 @@ export type ProfileHydrationResult = 'active' | 'deactivated' | 'unknown';
 export async function hydrateCurrentUserProfile(userId: string): Promise<ProfileHydrationResult> {
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_SELECT_COLUMNS)
         .eq('id', userId)
         .maybeSingle();
 
@@ -43,8 +48,8 @@ export async function hydrateCurrentUserProfile(userId: string): Promise<Profile
 
     // Resolve the caller's admin status via the SECURITY DEFINER RPC.
     // app_admins is RLS-locked; this RPC is the only client-facing read path.
-    const { data: isAdminFlag } = await supabase.rpc('is_app_admin');
-    let user = { ...profile, isAdmin: isAdminFlag === true };
+    const isAdminFlag = await fetchIsAppAdmin();
+    let user = { ...profile, isAdmin: isAdminFlag };
 
     const appLanguage = useAppStore.getState().language;
     if (appLanguage === 'he' && user.language === 'en') {
@@ -53,7 +58,7 @@ export async function hydrateCurrentUserProfile(userId: string): Promise<Profile
             patch.defaultCurrency = HEBREW_APP_DEFAULT_CURRENCY;
         }
         const synced = await updateUser(userId, patch);
-        if (synced) user = { ...synced, isAdmin: isAdminFlag === true };
+        if (synced) user = { ...synced, isAdmin: isAdminFlag };
     }
 
     useAppStore.getState().setCurrentUser(user);
@@ -63,7 +68,7 @@ export async function hydrateCurrentUserProfile(userId: string): Promise<Profile
 export async function fetchUsers(): Promise<User[]> {
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_SELECT_COLUMNS)
         .order('created_at', { ascending: true });
     if (error) {
         console.error('Failed to fetch users:', error);
@@ -89,7 +94,7 @@ export async function fetchGroupUsers(groupId: string): Promise<User[]> {
 
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_SELECT_COLUMNS)
         .in('id', userIds)
         .order('created_at', { ascending: true });
     if (error) {
@@ -112,7 +117,7 @@ export async function updateUser(id: string, dto: UpdateProfileDto): Promise<Use
         .from('profiles')
         .update(patch)
         .eq('id', id)
-        .select()
+        .select(PROFILE_SELECT_COLUMNS)
         .maybeSingle();
 
     if (error || !data) return null;
@@ -123,9 +128,20 @@ export async function updateUser(id: string, dto: UpdateProfileDto): Promise<Use
         user.inviteToken = currentUser.inviteToken;
     }
     if (currentUser && currentUser.id === id) {
-        useAppStore.getState().setCurrentUser(user);
+        const isAdmin = await fetchIsAppAdmin();
+        useAppStore.getState().setCurrentUser({ ...user, isAdmin });
         void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
         void queryClient.invalidateQueries({ queryKey: ['exchangeRates'] });
     }
     return user;
+}
+
+/** Refresh admin flag from DB (e.g. Settings open with stale persisted currentUser). */
+export async function refreshCurrentUserAdminFlag(): Promise<void> {
+    const currentUser = useAppStore.getState().currentUser;
+    if (!currentUser) return;
+    const isAdmin = await fetchIsAppAdmin();
+    if (currentUser.isAdmin !== isAdmin) {
+        useAppStore.getState().setCurrentUser({ ...currentUser, isAdmin });
+    }
 }
