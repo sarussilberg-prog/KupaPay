@@ -234,7 +234,7 @@ function App() {
           return;
         }
         if (error?.code === 'account_deleted') {
-          void signalDeactivatedAccount(store.setPendingDeactivationNotice);
+          await signalDeactivatedAccount(store.setPendingDeactivationNotice);
           await clearStaleAuthSession();
           store.setSession(null);
         }
@@ -285,11 +285,9 @@ function App() {
           await acceptSession(hydratedSession, 'hydration');
         } else {
           store.setSession(null);
-          // Drop legacy native persisted flags so a cold start never shows the
-          // deleted-account dialog without a fresh sign-in attempt.
-          if (Platform.OS !== 'web') {
-            await clearDeactivationNoticePending();
-          }
+          // Drop persisted flags so a cold start never shows the deleted-account
+          // dialog without a fresh sign-in attempt.
+          await clearDeactivationNoticePending();
         }
 
         setupSupabaseAuthAutoRefresh();

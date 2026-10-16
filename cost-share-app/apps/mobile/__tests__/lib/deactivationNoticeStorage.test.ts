@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import {
     clearDeactivationNoticePending,
     consumeDeactivationNoticePending,
@@ -5,6 +6,7 @@ import {
 } from '../../lib/deactivationNoticeStorage';
 
 const mockStore = new Map<string, string>();
+const mockSessionStore = new Map<string, string>();
 
 jest.mock('../../lib/authStorage', () => ({
     authStorage: {
@@ -21,8 +23,15 @@ jest.mock('../../lib/authStorage', () => ({
 }));
 
 describe('deactivationNoticeStorage', () => {
+    const originalOs = Platform.OS;
+
     beforeEach(() => {
         mockStore.clear();
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+    });
+
+    afterAll(() => {
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: originalOs });
     });
 
     it('marks and consumes the pending notice once', async () => {
@@ -35,5 +44,30 @@ describe('deactivationNoticeStorage', () => {
         await markDeactivationNoticePending();
         await clearDeactivationNoticePending();
         await expect(consumeDeactivationNoticePending()).resolves.toBe(false);
+    });
+
+    it('on web uses sessionStorage instead of authStorage', async () => {
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+
+        const session = {
+            getItem: (key: string) => mockSessionStore.get(key) ?? null,
+            setItem: (key: string, value: string) => {
+                mockSessionStore.set(key, value);
+            },
+            removeItem: (key: string) => {
+                mockSessionStore.delete(key);
+            },
+        };
+        Object.defineProperty(globalThis, 'sessionStorage', {
+            configurable: true,
+            value: session,
+        });
+
+        mockSessionStore.clear();
+        mockStore.clear();
+
+        await markDeactivationNoticePending();
+        expect(mockSessionStore.size).toBe(1);
+        expect(mockStore.size).toBe(0);
     });
 });
