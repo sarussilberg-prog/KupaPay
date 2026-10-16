@@ -47,6 +47,7 @@ import {
     identifyProductUser,
     isNewAccountSignup,
     resetProductAnalyticsUser,
+    trackSignupCompleted,
 } from './lib/productAnalytics';
 import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
@@ -317,9 +318,9 @@ function App() {
 
           if (event === 'SIGNED_IN') {
             if (isNewAccountSignup(nextSession.user)) {
-              void captureProductEvent('signup', {
-                provider: nextSession.user.app_metadata?.provider ?? 'unknown',
-              });
+              const provider = nextSession.user.app_metadata?.provider ?? 'unknown';
+              void captureProductEvent('signup', { provider });
+              void trackSignupCompleted({ provider });
             }
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');

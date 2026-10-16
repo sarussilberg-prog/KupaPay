@@ -183,6 +183,64 @@
                     "summarySuffix": "miembros"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Tres pasos — menos de un minuto hasta tu primer gasto.",
+            "skipConfirm": "Omitir",
+            "header": {
+                "create": "Elige una plantilla",
+                "expense": "Primer gasto",
+                "invite": "Invita a tu grupo"
+            },
+            "steps": {
+                "create": "Grupo",
+                "expense": "Gasto",
+                "invite": "Invitar"
+            },
+            "fields": {
+                "groupName": "Nombre del grupo"
+            },
+            "templates": {
+                "label": "¿Qué están repartiendo?",
+                "trip": {
+                    "label": "Viaje",
+                    "defaultName": "Viaje de fin de semana",
+                    "defaultExpense": "Gasolina o transporte"
+                },
+                "roommates": {
+                    "label": "Compañeros de piso",
+                    "defaultName": "Nuestro piso",
+                    "defaultExpense": "Compra o suministros"
+                },
+                "event": {
+                    "label": "Evento",
+                    "defaultName": "Cena en grupo",
+                    "defaultExpense": "Comida y bebida"
+                },
+                "couple": {
+                    "label": "Pareja",
+                    "defaultName": "Los dos",
+                    "defaultExpense": "Cena fuera"
+                }
+            },
+            "expense": {
+                "hint": "Anota algo que ya pagaste — puedes editarlo después.",
+                "amountRequired": "Introduce un importe mayor que cero"
+            },
+            "invite": {
+                "title": "Trae a más gente",
+                "body": "Comparte un enlace para que tus amigos se unan al grupo y repartan la próxima cuenta."
+            },
+            "skipExpenseTitle": "¿Omitir el primer gasto?",
+            "skipExpenseMessage": "Añadir un gasto ahora es la forma más rápida de ver saldos. Siempre puedes añadir gastos desde el grupo.",
+            "cta": {
+                "createGroup": "Continuar",
+                "addExpense": "Añadir gasto",
+                "skipExpense": "Omitir por ahora",
+                "shareInvite": "Compartir enlace de invitación",
+                "shareInviteWeb": "Compartir o copiar enlace",
+                "done": "Ir a mi grupo"
+            }
         }
     },
     "groups": {
