@@ -1,6 +1,8 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import versionJson from '../../packages/shared/version.json';
-import { ADMOB_ANDROID_APP_ID, ADMOB_IOS_APP_ID } from './lib/admobConfig';
+
+// Expo evaluates app.config with Node require(); extensionless `./lib/admobConfig` fails at config time.
+const { ADMOB_ANDROID_APP_ID, ADMOB_IOS_APP_ID } = require('./lib/admobConfig.ts') as typeof import('./lib/admobConfig');
 
 const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
 const DEFAULT_POSTHOG_KEY = 'phc_umvGfkx4Qoa272QiFeNs9WKe2j6C8HQSJfMpUjkaqmhp';

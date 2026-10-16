@@ -117,6 +117,25 @@ jobs:
       - uses: actions/checkout@v4
       - run: bash scripts/ci-no-merge-conflicts.sh
 
+  expo-mobile-config:
+    name: Expo mobile config
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/expo || npm ci --ignore-scripts
+      - run: bash scripts/ci-expo-mobile-config.sh
+
   migration-versions:
     name: Supabase migration version uniqueness
     runs-on: ubuntu-latest
@@ -142,7 +161,7 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check, migration-versions, no-merge-conflicts]
+    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check, migration-versions, no-merge-conflicts, expo-mobile-config]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
