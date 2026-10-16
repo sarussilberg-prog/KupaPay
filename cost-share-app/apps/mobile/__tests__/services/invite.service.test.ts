@@ -15,17 +15,31 @@ jest.mock('../../i18n', () => ({
 
 import {
     buildInviteUrl,
+    buildSettleReminderUrl,
     buildFriendInviteMessage,
     buildGroupInviteMessage,
 } from '../../services/invite.service';
 
 describe('invite.service', () => {
     describe('buildInviteUrl', () => {
+        const prevWeb = process.env.EXPO_PUBLIC_WEB_APP_URL;
+
+        afterEach(() => {
+            if (prevWeb === undefined) delete process.env.EXPO_PUBLIC_WEB_APP_URL;
+            else process.env.EXPO_PUBLIC_WEB_APP_URL = prevWeb;
+        });
+
         it('builds friend URL from token', () => {
             expect(buildInviteUrl('friend', 'AbCd123_-9')).toBe('https://kupa-pay.com/i/AbCd123_-9');
         });
         it('builds group URL from token', () => {
             expect(buildInviteUrl('group', 'XyZ4567890')).toBe('https://kupa-pay.com/g/XyZ4567890');
+        });
+
+        it('uses kupa-pay.com even when EXPO_PUBLIC_WEB_APP_URL is a dev/preview host', () => {
+            process.env.EXPO_PUBLIC_WEB_APP_URL = 'https://kupa-s1lb.vercel.app';
+            expect(buildInviteUrl('group', 'Tok1234567')).toBe('https://kupa-pay.com/g/Tok1234567');
+            expect(buildSettleReminderUrl('Tok1234567')).toBe('https://kupa-pay.com/sr/Tok1234567');
         });
     });
 
