@@ -10,3 +10,4 @@ BEGIN
     PERFORM public.run_referral_reward_dispatch(1);
     RAISE NOTICE 'referral_program_400.test.sql — passed';
 END $$;
+ROLLBACK;
