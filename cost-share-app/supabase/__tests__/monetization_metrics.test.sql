@@ -4,8 +4,8 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
-    v_admin CONSTANT UUID := '00000000-0000-0000-0000-0000000mon001';
-    v_user  CONSTANT UUID := '00000000-0000-0000-0000-0000000mon002';
+    v_admin CONSTANT UUID := '00000000-0000-0000-0000-00000000a001';
+    v_user  CONSTANT UUID := '00000000-0000-0000-0000-00000000a002';
     v_metrics JSONB;
     v_caught BOOLEAN;
 BEGIN
