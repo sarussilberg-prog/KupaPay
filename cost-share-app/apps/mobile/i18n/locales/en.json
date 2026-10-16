@@ -343,6 +343,11 @@
             "matchedMembers": "incl. {{names}}",
             "settled": "Settled",
             "youSettled": "You are settled",
+            "youOwe": "You owe {{amount}}",
+            "owedToYou": "Owed to you {{amount}}",
+            "moreCurrencies": "+{{count}} currencies",
+            "moreCurrencies_one": "+{{count}} currency",
+            "lastActivity": "Active {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },
         "bigCreateCta": "Create a group",

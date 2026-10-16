@@ -15,7 +15,7 @@ describe('BalanceCard', () => {
             <BalanceCard userName="Bob" balance={20} currency="USD" />
         );
         expect(getByText('balances.getsBack')).toBeTruthy();
-        expect(getByText(/\+USD 20\.00/)).toBeTruthy();
+        expect(getByText(/\$20/)).toBeTruthy();
     });
 
     it('shows negative balance with owes status', () => {
@@ -23,7 +23,7 @@ describe('BalanceCard', () => {
             <BalanceCard userName="Bob" balance={-15} currency="USD" />
         );
         expect(getByText('balances.owes')).toBeTruthy();
-        expect(getByText(/-USD 15\.00/)).toBeTruthy();
+        expect(getByText(/-\$15|−\$15/)).toBeTruthy();
     });
 
     it('shows settled status for zero balance', () => {

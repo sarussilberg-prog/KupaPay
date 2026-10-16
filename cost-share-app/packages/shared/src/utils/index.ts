@@ -9,16 +9,7 @@
  * - Math utilities for expense calculations
  */
 
-/**
- * Format currency amount
- * @param amount - The amount to format
- * @param currency - Currency code (e.g., 'USD', 'ILS')
- * @returns Formatted currency string
- */
-export function formatCurrency(amount: number, currency: string): string {
-    // Placeholder implementation
-    return `${currency} ${amount.toFixed(2)}`;
-}
+export { formatCurrency, formatMoney } from '../i18n/formatMoney';
 
 /**
  * Calculate split amount per person

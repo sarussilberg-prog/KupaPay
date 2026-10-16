@@ -343,6 +343,11 @@
             "matchedMembers": "dont {{names}}",
             "settled": "Réglé",
             "youSettled": "Vous êtes à jour",
+            "youOwe": "Vous devez {{amount}}",
+            "owedToYou": "On vous doit {{amount}}",
+            "moreCurrencies": "+{{count}} devises",
+            "moreCurrencies_one": "+{{count}} devise",
+            "lastActivity": "Actif {{when}}",
             "balanceUnavailable": "Solde indisponible hors ligne"
         },
         "bigCreateCta": "Créer un groupe",

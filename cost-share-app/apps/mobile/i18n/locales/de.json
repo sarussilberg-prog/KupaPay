@@ -343,6 +343,11 @@
             "matchedMembers": "inkl. {{names}}",
             "settled": "Ausgeglichen",
             "youSettled": "Du bist ausgeglichen",
+            "youOwe": "Du schuldest {{amount}}",
+            "owedToYou": "Dir stehen {{amount}} zu",
+            "moreCurrencies": "+{{count}} Währungen",
+            "moreCurrencies_one": "+{{count}} Währung",
+            "lastActivity": "Aktiv {{when}}",
             "balanceUnavailable": "Saldo offline nicht verfügbar"
         },
         "bigCreateCta": "Gruppe erstellen",

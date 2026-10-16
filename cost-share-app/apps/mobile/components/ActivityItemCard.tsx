@@ -141,7 +141,7 @@ export function ActivityItemCard({
     onPress,
     testID,
 }: ActivityItemCardProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const variant = getActivityCardVariant(event.kind, friendRequestStatus);
     const md = event.metadata ?? {};
@@ -152,7 +152,9 @@ export function ActivityItemCard({
     const currency = typeof md.currency === 'string' ? md.currency
         : (typeof md.payment_currency === 'string' ? md.payment_currency : '');
     const showAmount = variant.showAmount && amount > 0 && Boolean(currency);
-    const amountText = showAmount ? formatCurrencyAmount(amount, currency) : null;
+    const amountText = showAmount
+        ? formatCurrencyAmount(amount, currency, i18n.language)
+        : null;
 
     // Viewer net for amount color. The feed row belongs to event.userId (the
     // viewer). Expenses carry the viewer's signed net directly in metadata

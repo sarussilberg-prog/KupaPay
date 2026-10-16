@@ -68,7 +68,7 @@ export function FriendGroupBalancesSheet({
     onClose,
     onSelectGroup,
 }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const { data: simplified } = useSimplifiedDebts();
     const sharedGroupIds = useMemo(() => friend?.sharedGroupIds ?? [], [friend]);
@@ -213,6 +213,7 @@ export function FriendGroupBalancesSheet({
                                     {formatCurrencyAmount(
                                         Math.abs(weightedDisplay.netBalance),
                                         weightedDisplay.currency,
+                                        i18n.language,
                                     )}
                                 </Text>
                                 {weightedDisplay.conversionFailed ? (
@@ -234,6 +235,7 @@ export function FriendGroupBalancesSheet({
                                                     {formatCurrencyAmount(
                                                         Math.abs(line.netAmount),
                                                         line.currency,
+                                                        i18n.language,
                                                     )}
                                                 </Text>
                                             </View>
@@ -308,6 +310,7 @@ export function FriendGroupBalancesSheet({
                                                             {formatCurrencyAmount(
                                                                 Math.abs(line.netAmount),
                                                                 line.currency,
+                                                                i18n.language,
                                                             )}
                                                         </Text>
                                                     );
