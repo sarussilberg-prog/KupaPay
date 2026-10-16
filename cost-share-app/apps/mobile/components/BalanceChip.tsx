@@ -55,6 +55,33 @@ function chipTextAlign(isRtl: boolean): 'left' | 'right' {
     return isRtl ? 'left' : 'right';
 }
 
+function ChipText({
+    className,
+    children,
+    textAlign,
+    numberOfLines = 1,
+    testID,
+    writingDirection,
+}: {
+    className: string;
+    children: React.ReactNode;
+    textAlign: 'left' | 'right';
+    numberOfLines?: number;
+    testID?: string;
+    writingDirection?: 'ltr' | 'rtl';
+}) {
+    return (
+        <Text
+            className={className}
+            numberOfLines={numberOfLines}
+            testID={testID}
+            style={{ textAlign, width: '100%', writingDirection }}
+        >
+            {children}
+        </Text>
+    );
+}
+
 export function BalanceChip({
     rollup,
     defaultCurrency,
@@ -89,9 +116,9 @@ export function BalanceChip({
                 testID="balance-chip-unknown"
                 accessibilityLabel={t('groups.card.balanceUnavailable')}
             >
-                <Text className={toneStyles.unknown.amount} style={{ textAlign, width: '100%' }}>
+                <ChipText className={toneStyles.unknown.amount} textAlign={textAlign}>
                     —
-                </Text>
+                </ChipText>
             </View>
         );
     }
@@ -105,13 +132,9 @@ export function BalanceChip({
     if (tone === 'settled' || tone === 'unknown') {
         return (
             <View className={styles.container} style={columnStyle} testID="balance-chip-settled">
-                <Text
-                    className={styles.label}
-                    numberOfLines={2}
-                    style={{ textAlign, width: '100%' }}
-                >
+                <ChipText className={styles.label} textAlign={textAlign} numberOfLines={2}>
                     {t(captionKey)}
-                </Text>
+                </ChipText>
             </View>
         );
     }
@@ -129,21 +152,17 @@ export function BalanceChip({
 
     return (
         <View className={styles.container} style={columnStyle} testID="balance-chip-active">
-            <Text
-                className={styles.label}
-                numberOfLines={2}
-                style={{ textAlign, width: '100%' }}
-            >
+            <ChipText className={styles.label} textAlign={textAlign} numberOfLines={2}>
                 {t(captionKey)}
-            </Text>
-            <Text
+            </ChipText>
+            <ChipText
                 className={styles.amount}
-                numberOfLines={1}
+                textAlign={textAlign}
                 testID="balance-chip-amount"
-                style={{ textAlign, width: '100%', writingDirection: 'ltr' }}
+                writingDirection="ltr"
             >
                 {amountText}
-            </Text>
+            </ChipText>
             {extraLabel ? (
                 onPressExtraCurrencies ? (
                     <TouchableOpacity
@@ -151,23 +170,21 @@ export function BalanceChip({
                         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                         testID="balance-chip-others"
                     >
-                        <Text
+                        <ChipText
                             className={`${styles.label} underline mt-0.5`}
-                            numberOfLines={1}
-                            style={{ textAlign, width: '100%' }}
+                            textAlign={textAlign}
                         >
                             {extraLabel}
-                        </Text>
+                        </ChipText>
                     </TouchableOpacity>
                 ) : (
-                    <Text
+                    <ChipText
                         className={`${styles.label} mt-0.5`}
+                        textAlign={textAlign}
                         testID="balance-chip-others"
-                        numberOfLines={1}
-                        style={{ textAlign, width: '100%' }}
                     >
                         {extraLabel}
-                    </Text>
+                    </ChipText>
                 )
             ) : null}
         </View>

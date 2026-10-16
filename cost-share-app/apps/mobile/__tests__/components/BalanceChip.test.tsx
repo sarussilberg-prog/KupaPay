@@ -1,12 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import type { GroupRollup } from '@cost-share/shared';
 import { BalanceChip } from '../../components/BalanceChip';
-
-const rollupOf = (
-    primary: { currency: string; net: number },
-    others: { currency: string; net: number }[] = [],
-): GroupRollup => ({ groupId: 'g1', primary, others });
+import { rollupOf } from '../../testUtils/groupRollup';
 
 describe('BalanceChip', () => {
     it('shows Settled label when rollup is undefined', () => {

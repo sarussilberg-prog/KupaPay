@@ -1,16 +1,12 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { GroupCard } from '../../components/GroupCard';
-import type { GroupRollup, GroupWithMembers } from '@cost-share/shared';
+import type { GroupWithMembers } from '@cost-share/shared';
+import { rollupOf } from '../../testUtils/groupRollup';
 
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
 }));
-
-const rollupOf = (
-    primary: { currency: string; net: number },
-    others: { currency: string; net: number }[] = [],
-): GroupRollup => ({ groupId: 'g1', primary, others });
 
 const baseGroup: GroupWithMembers = {
     id: 'g1',
