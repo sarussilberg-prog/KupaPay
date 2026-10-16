@@ -80,11 +80,14 @@ export async function handleReceiptOcr(
         return { ok: false, error: 'not_group_member', code: 'not_group_member' };
     }
 
-    const { data: hasPro, error: proErr } = await client.rpc('has_pro', {
-        p_user_id: userId,
+    const { data: proStatus, error: proErr } = await client.rpc('get_my_pro_status', {
         p_group_id: req.groupId,
     });
-    if (proErr || hasPro !== true) {
+    const hasPro =
+        proStatus &&
+        typeof proStatus === 'object' &&
+        (proStatus as { hasPro?: boolean }).hasPro === true;
+    if (proErr || !hasPro) {
         return { ok: false, error: 'pro_required', code: 'pro_required' };
     }
 
