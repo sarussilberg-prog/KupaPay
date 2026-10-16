@@ -1,3 +1,4 @@
+BEGIN;
 DO $$
 BEGIN
     IF NOT EXISTS (

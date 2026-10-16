@@ -13,10 +13,16 @@ DECLARE
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_a, 'sec-inv-a@test.local'),
-        (v_b, 'sec-inv-b@test.local');
+        (v_b, 'sec-inv-b@test.local'),
+        (v_out, 'sec-inv-out@test.local');
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Sec A', 'USD', TRUE, 'secInvA1234567'),
-        (v_b, 'Sec B', 'USD', TRUE, 'secInvB1234567');
+        (v_b, 'Sec B', 'USD', TRUE, 'secInvB1234567'),
+        (v_out, 'Out', 'USD', TRUE, 'secInvOut12345');
+
+    DELETE FROM public.referral_rewards;
+    DELETE FROM public.email_lifecycle_deliveries;
+    DELETE FROM public.weekly_digest_deliveries;
 
     INSERT INTO public.email_lifecycle_deliveries (user_id, template)
         VALUES (v_a, 'welcome');
@@ -65,7 +71,7 @@ BEGIN
         END;
     END LOOP;
 
-    PERFORM public.test_set_authenticated(v_b);
+    PERFORM public.test_set_authenticated(v_out);
     SELECT COUNT(*) INTO v_seen FROM public.email_lifecycle_deliveries;
     IF v_seen <> 0 THEN
         RAISE EXCEPTION 'cross-user email_lifecycle_deliveries: expected 0, got %', v_seen;
@@ -74,7 +80,7 @@ BEGIN
     IF v_seen <> 0 THEN
         RAISE EXCEPTION 'cross-user weekly_digest_deliveries: expected 0, got %', v_seen;
     END IF;
-    SELECT COUNT(*) INTO v_seen FROM public.referral_rewards WHERE referrer_id = v_a;
+    SELECT COUNT(*) INTO v_seen FROM public.referral_rewards;
     IF v_seen <> 0 THEN
         RAISE EXCEPTION 'cross-user referral_rewards: expected 0, got %', v_seen;
     END IF;
