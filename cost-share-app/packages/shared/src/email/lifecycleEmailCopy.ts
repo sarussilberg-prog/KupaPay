@@ -1,5 +1,5 @@
 import lifecycleCopyJson from '../../content/email/lifecycleCopy.json';
-import type { EmailLifecycleTemplateId } from './lifecycleTemplates.ts';
+import type { EmailLifecycleTemplateId } from './lifecycleTemplates';
 
 /** Mirror {@link ../i18n/languages#Language} — inlined for Deno edge bundles. */
 type Language = 'en' | 'he' | 'ru' | 'ar' | 'fr' | 'es' | 'de';

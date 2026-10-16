@@ -1,5 +1,7 @@
-import { lifecycleEmailCopy } from '../../../packages/shared/src/email/lifecycleEmailCopy.ts';
-import { isEmailLifecycleTemplateId } from '../../../packages/shared/src/email/lifecycleTemplates.ts';
+import {
+    isEmailLifecycleTemplateId,
+    lifecycleEmailCopy,
+} from '../_shared/lifecycleEmailCopy.ts';
 import {
     buildEmailPreferencesUrl,
     buildEmailUnsubscribeUrl,
