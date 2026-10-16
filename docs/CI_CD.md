@@ -100,6 +100,14 @@ Squash merge via `gh pr merge --auto` after checks + SonarCloud, then dev prerel
 |-----------|----------|----------|
 | Supabase | [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | Migrations → development DB + smoke |
 | Web | Vercel | [`vercel-should-build.sh`](../cost-share-app/apps/web/scripts/vercel-should-build.sh) — path-based skip; dev vs prod by project ID |
+
+**Vercel ignored build step (SSOT):** Do not maintain branch/path skip logic in the Vercel dashboard. Set **Ignored Build Step** to the same command as [`apps/web/vercel.json`](../cost-share-app/apps/web/vercel.json) `ignoreCommand` (project root = `cost-share-app/apps/web`):
+
+```bash
+bash scripts/vercel-should-build.sh web
+```
+
+Production (`kupa-pay` / marketing project): builds only when `VERCEL_GIT_COMMIT_REF=main`. Dev projects (`prj_ldRyqXhp9Gg0QAHCNzEBw3VIcWbc`, `prj_wa5noNsRFK5797IRthACeREIa8jR`): only `dev`. Exit **0** = skip, **1** = build.
 | iOS + Android | [`mobile-staging-nightly.yml`](../.github/workflows/mobile-staging-nightly.yml) | **02:00 Asia/Jerusalem** — at most **one iOS + one Android** per day if mobile/shared changed since last successful build. Baseline is stored in the repo Actions variable **`MOBILE_CD_BASELINE`** (JSON); [`mobile-cd-baseline.json`](../cost-share-app/apps/mobile/mobile-cd-baseline.json) is a read-only fallback for local/plan when the variable is unset. Failed baseline updates do not fail the workflow. |
 | iOS | [`testflight-ios.yml`](../.github/workflows/testflight-ios.yml) | Manual **workflow_dispatch**; TestFlight “What to Test” from [`CHANGELOG.md`](../CHANGELOG.md) since last build |
 | Android | [`play-internal.yml`](../.github/workflows/play-internal.yml) | Manual **workflow_dispatch**; release notes in job summary since last Play internal build |
