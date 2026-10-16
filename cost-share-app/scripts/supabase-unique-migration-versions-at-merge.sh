@@ -77,6 +77,8 @@ git worktree add -f "$WORKTREE" "origin/${BASE_REF}" >/dev/null
 
 (
   cd "$WORKTREE"
+  git config user.email "github-actions[bot]@users.noreply.github.com"
+  git config user.name "github-actions[bot]"
   git merge --no-edit "$PR_HEAD" >/dev/null
 )
 MERGED_MIGRATIONS="$WORKTREE/cost-share-app/supabase/migrations"
