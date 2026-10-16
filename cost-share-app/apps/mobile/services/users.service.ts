@@ -11,6 +11,7 @@ import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { HEBREW_APP_DEFAULT_CURRENCY } from '../lib/appDefaultCurrency';
+import { PROFILE_SELECT_COLUMNS } from '../lib/profileColumns';
 
 export type ProfileHydrationResult = 'active' | 'deactivated' | 'unknown';
 
@@ -31,7 +32,7 @@ export async function fetchIsAppAdmin(): Promise<boolean> {
 export async function hydrateCurrentUserProfile(userId: string): Promise<ProfileHydrationResult> {
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_SELECT_COLUMNS)
         .eq('id', userId)
         .maybeSingle();
 
@@ -70,7 +71,7 @@ export async function hydrateCurrentUserProfile(userId: string): Promise<Profile
 export async function fetchUsers(): Promise<User[]> {
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_SELECT_COLUMNS)
         .order('created_at', { ascending: true });
     if (error) {
         console.error('Failed to fetch users:', error);
@@ -96,7 +97,7 @@ export async function fetchGroupUsers(groupId: string): Promise<User[]> {
 
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_SELECT_COLUMNS)
         .in('id', userIds)
         .order('created_at', { ascending: true });
     if (error) {

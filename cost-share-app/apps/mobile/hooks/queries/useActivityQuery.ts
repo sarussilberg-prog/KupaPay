@@ -5,8 +5,9 @@ import {
     ACTIVITY_PAGE_SIZE,
 } from '../../services/activity.service';
 import { queryClient } from '../../lib/queryClient';
-import { useAppStore } from '../../store';
 import { queryKeys } from './keys';
+import { useAuthUserId } from '../useAuthUserId';
+import { useAppStore } from '../../store';
 
 const ACTIVITY_STALE_MS = 60_000;
 
@@ -26,7 +27,7 @@ function buildActivityQueryOptions() {
 }
 
 export function useActivityQuery() {
-    const currentUserId = useAppStore(state => state.currentUser?.id);
+    const currentUserId = useAuthUserId();
     return useInfiniteQuery({
         ...buildActivityQueryOptions(),
         enabled: Boolean(currentUserId),
@@ -34,7 +35,8 @@ export function useActivityQuery() {
 }
 
 export function prefetchActivityFeed(): Promise<void> {
-    const currentUserId = useAppStore.getState().currentUser?.id;
+    const store = useAppStore.getState();
+    const currentUserId = store.currentUser?.id ?? store.session?.user?.id;
     if (!currentUserId) return Promise.resolve();
     const options = buildActivityQueryOptions();
     const existing = queryClient.getQueryState(options.queryKey);

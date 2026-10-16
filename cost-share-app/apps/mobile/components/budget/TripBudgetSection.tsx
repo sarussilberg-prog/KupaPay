@@ -71,8 +71,11 @@ export function TripBudgetSection({
             <View className="mx-4 mb-3 p-4 rounded-2xl bg-amber-50 border border-amber-100">
                 <Text className="text-gray-800 font-semibold mb-1">{t('pro.tripBudget.title')}</Text>
                 <Text className="text-gray-600 text-sm mb-3">{t('pro.tripBudget.lockedBody')}</Text>
-                <TouchableOpacity onPress={onUpgrade} className="bg-primary rounded-xl py-3 items-center">
-                    <Text className="text-white font-semibold">{t('pro.tripBudget.upgrade')}</Text>
+                <TouchableOpacity
+                    onPress={onUpgrade}
+                    className="bg-primary rounded-xl py-3 items-center justify-center"
+                >
+                    <Text className="text-white font-semibold text-center">{t('pro.tripBudget.upgrade')}</Text>
                 </TouchableOpacity>
             </View>
         );

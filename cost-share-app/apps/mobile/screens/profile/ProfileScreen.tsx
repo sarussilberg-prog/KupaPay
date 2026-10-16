@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { hydrateCurrentUserProfile } from '../../services/users.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { deriveBalanceSummary, FriendBalanceSummary } from '@cost-share/shared';
 import { useAppStore } from '../../store';
@@ -189,6 +190,15 @@ export function ProfileScreen() {
     const navigation = useNavigation<any>();
     const queryClient = useQueryClient();
     const currentUser = useAppStore((s) => s.currentUser);
+    const sessionUserId = useAppStore((s) => s.session?.user?.id);
+
+    useFocusEffect(
+        useCallback(() => {
+            const userId = sessionUserId;
+            if (!userId || currentUser?.id === userId) return;
+            void hydrateCurrentUserProfile(userId);
+        }, [sessionUserId, currentUser?.id]),
+    );
 
     const [isManualRefreshing, setIsManualRefreshing] = useState(false);
     const { data: simplified, isLoading: isLoadingSimplified } = useSimplifiedDebts();

@@ -13,8 +13,9 @@ import { INCOMING_REQUESTS_STALE_MS } from './useFriendsQueries';
 let warmupInFlight: Promise<void> | null = null;
 
 export function prefetchProfileWarmup(): void {
-    const { currentUser } = useAppStore.getState();
-    if (!currentUser?.id) return;
+    const store = useAppStore.getState();
+    const userId = store.currentUser?.id ?? store.session?.user?.id;
+    if (!userId) return;
     if (warmupInFlight) return;
 
     warmupInFlight = Promise.all([
