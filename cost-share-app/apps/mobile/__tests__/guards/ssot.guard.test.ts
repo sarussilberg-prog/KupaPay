@@ -138,18 +138,21 @@ describe('App version — single source of truth', () => {
     }
   });
 
-  it('the version-bump automation targets the shared version.json (dev folded into ci.yml, main in its own workflow)', () => {
-    const ci = read(resolve(REPO_ROOT, '.github/workflows/ci.yml'));
+  it('the version-bump automation targets the shared version.json (dev on push, main manual workflow)', () => {
+    const devBump = read(resolve(REPO_ROOT, '.github/workflows/bump-dev-prerelease.yml'));
     const main = read(resolve(REPO_ROOT, '.github/workflows/bump-version-main.yml'));
-    for (const text of [ci, main]) {
+    for (const text of [devBump, main]) {
       expect(text).toContain('cost-share-app/packages/shared/version.json');
       expect(text).not.toContain('cost-share-app/apps/mobile/version.json');
     }
+    expect(devBump).toMatch(/^\s*push:\s*$/m);
+    expect(devBump).toContain('branches: [dev]');
     expect(main).toContain('workflow_dispatch');
     expect(main).not.toMatch(/^\s*push:\s*$/m);
   });
 
-  it('the old push-triggered dev bump workflow is gone (folded into the ci.yml auto-merge job)', () => {
+  it('legacy bump-version-dev.yml is not used (replaced by bump-dev-prerelease.yml)', () => {
     expect(existsSync(resolve(REPO_ROOT, '.github/workflows/bump-version-dev.yml'))).toBe(false);
+    expect(existsSync(resolve(REPO_ROOT, '.github/workflows/bump-dev-prerelease.yml'))).toBe(true);
   });
 });
