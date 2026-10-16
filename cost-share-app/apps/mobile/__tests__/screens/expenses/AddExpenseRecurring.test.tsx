@@ -24,10 +24,11 @@ jest.mock('../../../lib/featureFlags', () => ({
 }));
 
 const proStatusMock = {
-    data: { hasPro: false },
+    data: { hasPro: false, adminProViewMode: 'real' as const },
     hasPro: false,
     proPerkUnlocked: false,
     isLoading: false,
+    adminProViewMode: 'real' as const,
 };
 
 jest.mock('../../../hooks/queries/useProStatusQuery', () => ({
