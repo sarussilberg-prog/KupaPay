@@ -9,6 +9,7 @@
 | `graphics/phone/*.png` | Phone screenshots (1080×1920); replace with real captures |
 | `DATA_SAFETY_ANSWERS.md` | Data safety form draft |
 | `CONTENT_RATING_ANSWERS.md` | IARC questionnaire draft |
+| `SUBSCRIPTION_OFFERS.md` | Play base-plan **14-day** free trial; no Android EU waiver |
 
 Locales: `en`, `he`, `ru`, `ar`, `fr`, `es`, `de`.
 
