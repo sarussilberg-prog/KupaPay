@@ -3,6 +3,7 @@ import { fireEvent } from '@testing-library/react-native';
 import { renderWithQuery } from '../../helpers/renderWithQuery';
 import { AddExpenseScreen } from '../../../screens/expenses/AddExpenseScreen';
 import { useAppStore } from '../../../store';
+import type { MyProStatus } from '../../../services/proEntitlements.service';
 
 const mockNavigate = jest.fn();
 
@@ -23,8 +24,20 @@ jest.mock('../../../lib/featureFlags', () => ({
     isProUpsellSurfaceEnabled: () => true,
 }));
 
+const proStatusMock: {
+    data: Partial<MyProStatus> | undefined;
+    hasPro: boolean;
+    proPerkUnlocked: boolean;
+    isLoading: boolean;
+} = {
+    data: { hasPro: false },
+    hasPro: false,
+    proPerkUnlocked: false,
+    isLoading: false,
+};
+
 jest.mock('../../../hooks/queries/useProStatusQuery', () => ({
-    useProStatusQuery: () => ({ data: { hasPro: false }, isLoading: false }),
+    useProStatusQuery: () => proStatusMock,
 }));
 
 jest.mock('../../../services/expenses.service', () => ({
@@ -58,6 +71,10 @@ jest.mock('../../../hooks/queries/useGroupsQuery', () => ({
 describe('AddExpenseScreen recurring Pro gate', () => {
     beforeEach(() => {
         mockNavigate.mockClear();
+        proStatusMock.data = { hasPro: false };
+        proStatusMock.hasPro = false;
+        proStatusMock.proPerkUnlocked = false;
+        proStatusMock.isLoading = false;
         useAppStore.setState({
             currentUser: {
                 id: 'u1',
@@ -80,6 +97,18 @@ describe('AddExpenseScreen recurring Pro gate', () => {
         expect(mockNavigate).toHaveBeenCalledWith(
             'Paywall',
             expect.objectContaining({ featureKey: 'recurring_expenses' }),
+        );
+    });
+
+    it('does not open paywall when admin force_pro override is active', () => {
+        proStatusMock.data = { hasPro: false, adminProViewMode: 'force_pro' };
+        proStatusMock.hasPro = true;
+        proStatusMock.proPerkUnlocked = true;
+        const { getByTestId } = renderWithQuery(<AddExpenseScreen />);
+        fireEvent.press(getByTestId('meta-recurring'));
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            'Paywall',
+            expect.anything(),
         );
     });
 });

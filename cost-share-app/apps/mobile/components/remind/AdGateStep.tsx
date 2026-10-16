@@ -35,8 +35,8 @@ const PRO_PROMO_EVERY_N = 4;
 export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateStepProps) {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
-    const { data: proStatus } = useProStatusQuery(groupId);
-    const skipAds = shouldSkipAdGate(proStatus?.hasPro === true, KUPAPAY_PRO_ENABLED);
+    const { hasPro } = useProStatusQuery(groupId);
+    const skipAds = shouldSkipAdGate(hasPro, KUPAPAY_PRO_ENABLED);
     const { show, earned, loading, unavailable } = useRewardedAd(featureKey);
     const [proMessageShown, setProMessageShown] = useState(false);
 

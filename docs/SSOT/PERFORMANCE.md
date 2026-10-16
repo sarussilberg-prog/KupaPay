@@ -12,7 +12,7 @@
 | Supabase SQL + DB lints + RPC EXPLAIN | [supabase-sql-integration.yml](../../.github/workflows/supabase-sql-integration.yml) | Splinter-style lints (baseline-gated), hot-path RPC timing / plan guards |
 | Mobile Supabase budgets | [ci-performance.yml](../../.github/workflows/ci-performance.yml) | Mocked per-screen Supabase call counts |
 | Bundle size | `ci-performance` → `scripts/ci-bundle-size.sh` | `size-limit` on Expo web export + Next.js chunks |
-| Lighthouse (optional) | `ci-performance` job `lighthouse-next` | Local `next start` + LHCI (`continue-on-error: true`) |
+| Lighthouse (Next.js) | `ci-performance` job `lighthouse-next` | Local `next start` + LHCI; **performance score ≥ 0.85 required** |
 
 No Vercel deploys are required for these jobs.
 
@@ -62,7 +62,18 @@ Run locally: `cd cost-share-app && npm run size:ci`.
 
 ### Lighthouse
 
-`scripts/ci-lighthouse-next.sh` serves the built Next app on `127.0.0.1:3000` and runs LHCI with performance/accessibility warn thresholds (0.85 / 0.9). Job is informational (`continue-on-error: true`).
+`scripts/ci-lighthouse-next.sh` serves the built Next app on `127.0.0.1:3000` and runs LHCI with **performance error** at 0.85 and accessibility warn at 0.9.
+
+### Next.js caching
+
+- Marketing routes use `export const revalidate = 300` on `[locale]/page.tsx`.
+- `next.config.ts` sets `experimental.staleTimes` for router cache (dev/preview friendly, fewer origin hits on Vercel free tier).
+
+### Edge function cold starts
+
+- Keep Deno entrypoints thin: lazy-import heavy modules inside the handler, not at top level.
+- Cron/dispatch functions share `_shared/` helpers; avoid pulling the full Supabase client into invite-landing-sized handlers.
+- CI **Deno edge bundle** job (`ci-deno-check-edge-bundle.sh`) guards bundle size regressions that correlate with cold-start latency.
 
 ---
 
