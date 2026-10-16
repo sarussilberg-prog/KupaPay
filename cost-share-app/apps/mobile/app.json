@@ -44,6 +44,7 @@
       "appleTeamId": "HVW3H3DLRB"
     },
     "android": {
+      "jsEngine": "hermes",
       "package": "com.kupapay.mobile",
       "googleServicesFile": "./google-services.json",
       "label": "KupaPay",
