@@ -20,6 +20,7 @@ import { createExpense } from '../../services/expenses.service';
 import { markPostLoginOnboardingComplete } from '../../lib/onboardingStorage';
 import { GroupInviteSharePanel } from '../../components/invite/GroupInviteSharePanel';
 import { captureProductEvent, trackFirstExpenseAdded } from '../../lib/productAnalytics';
+import { useGrowthExperimentFlags } from '../../hooks/useGrowthExperiment';
 import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { CreateGroupFormShell } from '../../components/groups/CreateGroupFormShell';
 import { CreateGroupFloatingButton } from '../../components/groups/CreateGroupFloatingButton';
@@ -54,8 +55,9 @@ export function ActivationOnboardingScreen({ onDone, previewMode = false }: Prop
     const currentUser = useAppStore((s) => s.currentUser);
     const { isLoading, startLoading, stopLoading } = useLoading();
 
+    const { defaultActivationTemplate } = useGrowthExperimentFlags();
     const [step, setStep] = useState<ActivationOnboardingStep>('create');
-    const [templateId, setTemplateId] = useState<ActivationTemplateId>('trip');
+    const [templateId, setTemplateId] = useState<ActivationTemplateId>(defaultActivationTemplate);
     const template = useMemo(() => getActivationTemplate(templateId), [templateId]);
 
     const [name, setName] = useState('');
@@ -81,10 +83,10 @@ export function ActivationOnboardingScreen({ onDone, previewMode = false }: Prop
     );
 
     useEffect(() => {
-        applyTemplateDefaults('trip');
+        applyTemplateDefaults(defaultActivationTemplate);
         // Seed defaults once on mount only — re-running would reset the user's template pick.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [defaultActivationTemplate]);
 
     const finish = useCallback(async () => {
         if (!previewMode) {
