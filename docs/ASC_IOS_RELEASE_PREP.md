@@ -6,10 +6,11 @@ Uses the same secrets as [TestFlight iOS](TESTFLIGHT_GITHUB_ACTIONS.md): `ASC_AP
 
 ## What it does
 
-1. **IAP metadata** — `store/asc/iap-metadata.json` → `scripts/asc-update-iap-metadata.mjs` (localizations, review notes, paywall review screenshot).
-2. **Prices** — `scripts/asc-verify-iap-prices.mjs` checks ILS amounts against `expectedPriceILS`.
-3. **Screenshots** — Maestro + simulator when possible; repo assets under `store/screenshots/ios/<locale>/{6.9,6.5,ipad}/`. Source captions: `store/asc/screenshot-captions.json`.
-4. **Version** — `store/asc/whats-new.json` (SSOT `packages/shared/version.json`) → create/prepare version, attach latest **VALID** build, fill What's New.
+1. **Intro offers** — `scripts/asc-set-subscription-intro-offers.mjs` sets **TWO_WEEKS** `FREE_TRIAL` on monthly/yearly for all subscription territories.
+2. **IAP metadata** — `store/asc/iap-metadata.json` → `scripts/asc-update-iap-metadata.mjs` (localizations, review notes, paywall review screenshot).
+3. **Prices** — `scripts/asc-verify-iap-prices.mjs` checks ILS amounts against `expectedPriceILS`.
+4. **Screenshots** — Maestro + simulator when possible; repo assets under `store/screenshots/ios/<locale>/{6.9,6.5,ipad}/`. Source captions: `store/asc/screenshot-captions.json`.
+5. **Version** — `store/asc/whats-new.json` (SSOT `packages/shared/version.json`) → create/prepare version, attach latest **VALID** build, fill What's New.
 
 ## Local commands
 
@@ -19,7 +20,7 @@ From `cost-share-app/apps/mobile` (after `npm ci` at `cost-share-app`):
 bash scripts/ci-write-asc-key.sh   # needs ASC_API_KEY_P8 in env
 export ASC_API_KEY_ID=… ASC_API_KEY_ISSUER_ID=… ASC_API_KEY_PATH=./asc-api-key.p8
 
-node scripts/generate-iap-review-screenshot.mjs
+node scripts/asc-set-subscription-intro-offers.mjs
 node scripts/asc-update-iap-metadata.mjs
 node scripts/asc-upload-screenshots.mjs
 node scripts/asc-prepare-app-version.mjs

@@ -47,7 +47,11 @@ const purchaseMock = purchasePackage as jest.MockedFunction<typeof purchasePacka
 
 const mockPackage = {
     identifier: 'annual',
-    product: { identifier: 'kupapay_pro_yearly', priceString: '₪69.90' },
+    product: {
+        identifier: 'kupapay_pro_yearly',
+        priceString: '₪69.90',
+        introPrice: { price: 0, priceString: '₪0.00', periodNumberOfUnits: 2, periodUnit: 'WEEK' },
+    },
 } as const;
 
 describe('ProPaywallContent offerings load', () => {
@@ -69,28 +73,33 @@ describe('ProPaywallContent offerings load', () => {
         expect(queryByTestId('paywall-loading')).toBeNull();
     });
 
-    it('blocks purchase until EU digital withdrawal acknowledgement', async () => {
+    it('allows purchase without EU withdrawal acknowledgement', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
             packages: {
-                monthly: { ...mockPackage, identifier: 'monthly' },
+                monthly: {
+                    ...mockPackage,
+                    identifier: 'monthly',
+                    product: { ...mockPackage.product, identifier: 'kupapay_pro_monthly' },
+                },
                 annual: mockPackage,
                 tripPass: null,
             },
-            introEligibility: {},
+            introEligibility: {
+                kupapay_pro_yearly: { status: 2 },
+            },
         });
         purchaseMock.mockResolvedValue({ ok: true });
 
-        const { getByTestId } = render(<ProPaywallContent featureKey="export_pdf" showTripPass={false} />);
+        const { getByTestId, queryByTestId } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
+        );
 
         await waitFor(() => {
+            expect(queryByTestId('paywall-loading')).toBeNull();
             expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
         });
 
-        fireEvent.press(getByTestId('paywall-purchase-btn'));
-        expect(purchaseMock).not.toHaveBeenCalled();
-
-        fireEvent.press(getByTestId('paywall-eu-withdrawal-ack'));
         fireEvent.press(getByTestId('paywall-purchase-btn'));
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();

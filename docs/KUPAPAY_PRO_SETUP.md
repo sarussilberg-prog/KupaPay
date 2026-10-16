@@ -68,7 +68,11 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
 
 Paywall shows localized price/period from StoreKit via RevenueCat, auto-renew disclosure, cancel instructions, Terms + Privacy links, and Restore Purchases. Settings includes **Manage subscription** (opens platform subscription management).
 
-When monthly/yearly products include a **7-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+When monthly/yearly products include a **14-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. Trial length in the UI is derived from the store intro offer (`package.product.introPrice`) when available, with **14 days** as the fallback. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+
+### Google Play (manual)
+
+Configure the **base-plan free trial** on `kupapay_pro_monthly` and `kupapay_pro_yearly` to **14 days** in Play Console (Offers → free trial). Apple/Google are merchant of record; the app does not show an EU withdrawal waiver checkbox.
 
 ### Trial reminder cron (server fallback)
 

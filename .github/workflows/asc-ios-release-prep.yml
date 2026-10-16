@@ -105,6 +105,13 @@ jobs:
         env:
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
         run: bash scripts/ci-write-asc-key.sh
+      - name: Set subscription intro offers (14-day free trial)
+        if: inputs.skip_iap != true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+        run: node scripts/asc-set-subscription-intro-offers.mjs
       - name: Verify IAP prices (ILS)
         if: inputs.skip_iap != true
         env:

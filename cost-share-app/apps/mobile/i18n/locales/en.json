@@ -1180,9 +1180,8 @@
             "restoreSuccess": "Purchases restored.",
             "restoreNone": "No active purchases found.",
             "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group.",
-            "tryFreeTrialCta": "Try 7 days free",
-            "trialRenewalDisclosure": "After 7 days, you'll be charged {{price}}/{{period}}. Cancel anytime in Settings.",
-            "euDigitalPurchaseAck": "I request immediate access to KupaPay Pro and acknowledge that I lose my 14-day right of withdrawal once access begins."
+            "tryFreeTrialCta": "Try {{days}} days free",
+            "trialRenewalDisclosure": "After {{days}} days, you'll be charged {{price}}/{{period}}. Cancel anytime in Settings."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

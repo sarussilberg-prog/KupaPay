@@ -31,14 +31,24 @@ export async function waitForPurchasesReady(): Promise<boolean> {
 export async function logOutPurchases(): Promise<void> {}
 
 function capturePackages(): PaywallPackages {
-    const mk = (id: string, price: string): PurchasesPackageLike => ({
+    const introTwoWeeks = {
+        price: 0,
+        priceString: '₪0.00',
+        periodNumberOfUnits: 2,
+        periodUnit: 'WEEK',
+    };
+    const mk = (id: string, price: string, withTrial: boolean): PurchasesPackageLike => ({
         identifier: id,
-        product: { identifier: id, priceString: price },
+        product: {
+            identifier: id,
+            priceString: price,
+            introPrice: withTrial ? introTwoWeeks : undefined,
+        },
     });
     return {
-        monthly: mk('kupapay_pro_monthly', '₪12.90'),
-        annual: mk('kupapay_pro_yearly', '₪69.90'),
-        tripPass: mk('kupapay_trip_pass', '₪19.90'),
+        monthly: mk('kupapay_pro_monthly', '₪12.90', true),
+        annual: mk('kupapay_pro_yearly', '₪69.90', true),
+        tripPass: mk('kupapay_trip_pass', '₪19.90', false),
     };
 }
 

@@ -1256,9 +1256,8 @@
             "restoreSuccess": "Käufe wiederhergestellt.",
             "restoreNone": "Keine aktiven Käufe gefunden.",
             "tripPassNeedsGroup": "Öffne zuerst eine Gruppe, um einen Trip Pass dafür zu kaufen.",
-            "tryFreeTrialCta": "7 Tage kostenlos testen",
-            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet. Jederzeit in den Einstellungen kündbar.",
-            "euDigitalPurchaseAck": "Ich verlange sofortigen Zugang zu KupaPay Pro und bestätige, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald der Zugang beginnt."
+            "tryFreeTrialCta": "{{days}} Tage kostenlos testen",
+            "trialRenewalDisclosure": "Nach {{days}} Tagen werden {{price}}/{{period}} berechnet. Jederzeit in den Einstellungen kündbar."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

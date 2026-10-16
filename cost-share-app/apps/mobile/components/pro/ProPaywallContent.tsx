@@ -28,7 +28,7 @@ import {
     restorePurchases,
     type IntroEligibilityMap,
 } from '../../services/purchases.service';
-import { planShowsFreeTrial } from '../../lib/proTrialPaywall';
+import { introFreeTrialDaysForPackage, planShowsFreeTrial } from '../../lib/proTrialPaywall';
 import {
     fetchPaywallOfferings,
     reportPaywallLoadFailed,
@@ -82,8 +82,6 @@ export function ProPaywallContent({
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
-    const [euDigitalAck, setEuDigitalAck] = useState(false);
-
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
         void captureProductEvent('paywall_viewed', { feature_key: featureKey, group_id: groupId ?? null });
@@ -190,6 +188,11 @@ export function ProPaywallContent({
         subscriptionPlanKey != null &&
         planShowsFreeTrial(subscriptionPlanKey, packages, introEligibility);
 
+    const trialDays = useMemo(() => {
+        if (!showFreeTrial || !selectedPackage) return null;
+        return introFreeTrialDaysForPackage(selectedPackage);
+    }, [selectedPackage, showFreeTrial]);
+
     const disclosureText = useMemo(() => {
         if (loadFailedReason) {
             return '';
@@ -199,11 +202,11 @@ export function ProPaywallContent({
         }
         const price = priceLabel(selectedPackage);
         const period = t(subscriptionPeriodKey(selectedPackage));
-        if (showFreeTrial) {
-            return t('pro.paywall.trialRenewalDisclosure', { price, period });
+        if (showFreeTrial && trialDays != null) {
+            return t('pro.paywall.trialRenewalDisclosure', { price, period, days: trialDays });
         }
         return t('pro.paywall.renewalDisclosure', { price, period });
-    }, [loadFailedReason, selected, selectedPackage, showFreeTrial, t]);
+    }, [loadFailedReason, selected, selectedPackage, showFreeTrial, t, trialDays]);
 
     const purchaseCta = useMemo(() => {
         if (!selectedPackage) return t('pro.paywall.subscribe');
@@ -211,11 +214,11 @@ export function ProPaywallContent({
         if (selected === 'trip_pass') {
             return t('pro.paywall.buyTripPass', { price });
         }
-        if (showFreeTrial) {
-            return t('pro.paywall.tryFreeTrialCta');
+        if (showFreeTrial && trialDays != null) {
+            return t('pro.paywall.tryFreeTrialCta', { days: trialDays });
         }
         return t('pro.paywall.subscribeAtPrice', { price });
-    }, [selected, selectedPackage, showFreeTrial, t]);
+    }, [selected, selectedPackage, showFreeTrial, t, trialDays]);
 
     const planPickerSection = useMemo(() => {
         if (loading) {
@@ -320,33 +323,13 @@ export function ProPaywallContent({
             {planPickerSection}
 
             <Pressable
-                onPress={() => setEuDigitalAck(v => !v)}
-                className="flex-row items-start gap-3 mb-4 px-1"
-                testID="paywall-eu-withdrawal-ack"
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: euDigitalAck }}
-            >
-                <View
-                    className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${euDigitalAck ? 'bg-primary border-primary' : 'border-gray-400 bg-white'}`}
-                >
-                    {euDigitalAck ? (
-                        <AppIcon name="checkmark" size={14} color="#fff" />
-                    ) : null}
-                </View>
-                <Text className="flex-1 text-xs text-gray-600 leading-5">
-                    {t('pro.paywall.euDigitalPurchaseAck')}
-                </Text>
-            </Pressable>
-
-            <Pressable
                 onPress={handlePurchase}
                 disabled={
                     busy ||
                     !storeConfigured ||
                     !selectedPackage ||
                     loading ||
-                    !!loadFailedReason ||
-                    !euDigitalAck
+                    !!loadFailedReason
                 }
                 className="bg-primary rounded-2xl py-4 items-center mb-3"
                 testID="paywall-purchase-btn"
