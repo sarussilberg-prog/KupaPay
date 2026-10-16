@@ -1428,6 +1428,13 @@
             "title": "La prueba de KupaPay Pro termina pronto",
             "body": "Tu prueba gratis de KupaPay Pro termina en dos días. ¿No quieres continuar? Cancela en Ajustes."
         },
+        "trialLifecycle": {
+            "day1": { "title": "Bienvenido a Pro" },
+            "day10": { "title": "Quedan 4 días de prueba" },
+            "day13": { "title": "Pro se renueva mañana" },
+            "disclosure": "El pago comienza después de la prueba salvo que canceles en Ajustes → Gestionar suscripción (App Store / Google Play).",
+            "manage": "Gestionar suscripción"
+        },
         "includedTripPass": {
             "title": "Trip Pass incluido",
             "body": "Tu plan anual Pro incluye un Trip Pass. Activa Pro para todos los miembros de este grupo durante 30 días.",

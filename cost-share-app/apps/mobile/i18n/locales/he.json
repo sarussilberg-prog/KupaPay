@@ -1352,6 +1352,13 @@
             "title": "ניסיון KupaPay Pro מסתיים בקרוב",
             "body": "הניסיון החינמי שלך ב-KupaPay Pro מסתיים בעוד יומיים. לא רוצה להמשיך? אפשר לבטל בהגדרות."
         },
+        "trialLifecycle": {
+            "day1": { "title": "ברוכים הבאים ל-Pro" },
+            "day10": { "title": "נותרו 4 ימים בניסיון" },
+            "day13": { "title": "Pro מתחדש מחר" },
+            "disclosure": "החיוב מתחיל אחרי הניסיון אלא אם תבטל/י בהגדרות → ניהול מנוי (App Store / Google Play).",
+            "manage": "ניהול מנוי"
+        },
         "includedTripPass": {
             "title": "Trip Pass מהמנוי השנתי",
             "body": "למנוי Pro השנתי שלך כלול Trip Pass אחד. הפעל/י Pro לכל חברי הקבוצה למשך 30 יום.",
