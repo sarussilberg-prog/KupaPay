@@ -24,6 +24,7 @@ const SecureStore = jest.requireMock('expo-secure-store') as {
 describe('pendingInviteStorage (native SecureStore)', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        SecureStore.deleteItemAsync.mockResolvedValue(undefined);
     });
 
     it('persists valid group invite JSON', async () => {

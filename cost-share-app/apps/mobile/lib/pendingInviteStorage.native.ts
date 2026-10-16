@@ -28,5 +28,9 @@ export async function loadPersistedPendingInvite(): Promise<PendingInvite | null
 }
 
 export async function clearPersistedPendingInvite(): Promise<void> {
-    await SecureStore.deleteItemAsync(PENDING_INVITE_STORAGE_KEY).catch(() => undefined);
+    try {
+        await SecureStore.deleteItemAsync(PENDING_INVITE_STORAGE_KEY);
+    } catch {
+        // Key missing or secure store unavailable — treat as cleared.
+    }
 }
