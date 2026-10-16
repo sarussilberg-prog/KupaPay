@@ -34,6 +34,10 @@ export function buildGroupInviteMessage(
     return i18n.t('invite.group.shareMessage', { inviterName, groupName, url });
 }
 
+export function buildGroupBalanceShareMessage(groupName: string, url: string): string {
+    return i18n.t('groups.share.balanceLinkMessage', { groupName, url });
+}
+
 type GroupInviteContext = {
     groupId: string;
     group: GroupWithMembers;
@@ -75,6 +79,17 @@ export async function shareGroupInvite(groupId: string): Promise<void> {
     const { message } = resolveGroupInviteContext(groupId);
     await openShare(message);
     void captureProductEvent('invite_sent', { kind: 'group', channel: 'share_sheet', group_id: groupId });
+}
+
+export async function shareGroupBalanceLink(groupId: string): Promise<void> {
+    const { group, url } = resolveGroupInviteContext(groupId);
+    const message = buildGroupBalanceShareMessage(group.name, url);
+    await openShare(message);
+    void captureProductEvent('invite_sent', {
+        kind: 'group',
+        channel: 'public_balance_link',
+        group_id: groupId,
+    });
 }
 
 export async function shareGroupInviteViaWhatsApp(groupId: string): Promise<void> {
