@@ -7,10 +7,10 @@ const FULLWIDTH_PLUS = '\uFF0B';
 export function stripPositiveAmountPlusPrefix(formatted: string): string {
     if (!formatted) return formatted;
     return formatted
-        .replaceAll(`${ASCII_PLUS} `, '')
-        .replaceAll(ASCII_PLUS, '')
-        .replaceAll(`${FULLWIDTH_PLUS} `, '')
-        .replaceAll(FULLWIDTH_PLUS, '');
+        .split(`${ASCII_PLUS} `).join('')
+        .split(ASCII_PLUS).join('')
+        .split(`${FULLWIDTH_PLUS} `).join('')
+        .split(FULLWIDTH_PLUS).join('');
 }
 
 export type FormatGroupsListAmountOptions = Pick<FormatMoneyOptions, 'language' | 'bidiIsolate'>;
