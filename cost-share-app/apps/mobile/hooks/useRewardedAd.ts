@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Platform } from 'react-native';
 import { logMonetizationEvent } from '../services/monetization.service';
 import {
+    ADMOB_REWARDED_ANDROID_UNIT_ID,
+    ADMOB_REWARDED_IOS_UNIT_ID,
+} from '../lib/admobConfig';
+import {
     isRewardedAdsAllowedInRegion,
     REWARDED_AD_REQUEST_OPTIONS,
 } from '../lib/rewardedAdsCompliance';
@@ -28,9 +32,8 @@ if (IS_NATIVE) {
     }
 }
 
-const PROD_UNIT_ID = Platform.OS === 'ios'
-    ? 'ca-app-pub-8860544182475196/9666348435'
-    : 'ca-app-pub-8860544182475196/2901559727';
+const PROD_UNIT_ID =
+    Platform.OS === 'ios' ? ADMOB_REWARDED_IOS_UNIT_ID : ADMOB_REWARDED_ANDROID_UNIT_ID;
 
 const AD_UNIT_ID = __DEV__ && TestIds ? TestIds.REWARDED : PROD_UNIT_ID;
 

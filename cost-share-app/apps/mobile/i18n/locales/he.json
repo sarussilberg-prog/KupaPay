@@ -1130,6 +1130,8 @@
             "restore": "שחזור רכישות",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
+            "loadFailed": "לא הצלחנו לטעון מחירי מנוי. בדקו את החיבור או נסו שוב בעוד רגע.",
+            "retry": "נסו שוב",
             "purchaseSuccess": "ברוכים הבאים ל-Pro!",
             "purchaseError": "לא ניתן להשלים את הרכישה.",
             "restoreSuccess": "הרכישות שוחזרו.",

@@ -1181,6 +1181,8 @@
             "restore": "Käufe wiederherstellen",
             "manageSubscription": "Abo verwalten",
             "storeNotConfigured": "Käufe sind in diesem Build nicht verfügbar.",
+            "loadFailed": "Abopreise konnten nicht geladen werden. Prüfe deine Verbindung oder versuche es gleich erneut.",
+            "retry": "Erneut versuchen",
             "purchaseSuccess": "Willkommen bei Pro!",
             "purchaseError": "Kauf konnte nicht abgeschlossen werden.",
             "restoreSuccess": "Käufe wiederhergestellt.",
