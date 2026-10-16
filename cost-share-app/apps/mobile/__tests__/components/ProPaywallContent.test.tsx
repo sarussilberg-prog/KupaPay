@@ -81,6 +81,22 @@ describe('ProPaywallContent offerings load', () => {
         expect(queryByTestId('paywall-loading')).toBeNull();
     });
 
+    it('renders Trip Pass as third plan picker when showTripPass is default', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
+
+        const { findByTestId } = render(<ProPaywallContent featureKey="export_pdf" />);
+
+        expect(await findByTestId('paywall-pick-trip-pass')).toBeTruthy();
+    });
+
     it('shows ILS fallback prices when RevenueCat omits priceString', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
