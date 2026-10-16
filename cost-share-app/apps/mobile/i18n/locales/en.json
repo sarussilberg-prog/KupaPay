@@ -66,9 +66,20 @@
         "signInError": "Sign in failed. Please try again.",
         "googleSignInSheetTitle": "Sign in with Google",
         "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet.",
-        "signInWithEmailMagicLink": "Continue with email",
-        "emailMagicLinkStubHint": "Email magic link sign-in is coming soon.",
-        "emailPlaceholder": "you@example.com"
+        "signInWithEmail": "Continue with email",
+        "emailPlaceholder": "you@example.com",
+        "emailOtpSendCode": "Send code",
+        "emailOtpVerify": "Verify and sign in",
+        "emailOtpSentTo": "We sent a 6-digit code to {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Resend code",
+        "emailOtpResendIn": "Resend in {{seconds}}s",
+        "emailOtpChangeEmail": "Change email",
+        "emailOtpInvalidEmail": "Enter a valid email address.",
+        "emailOtpInvalidCode": "That code is invalid or expired. Try again or resend.",
+        "emailOtpRateLimited": "Too many attempts. Wait a minute and try again.",
+        "emailOtpSendError": "Could not send the code. Please try again.",
+        "emailOtpVerifyError": "Could not verify the code. Please try again."
     },
     "onboarding": {
         "skip": "Skip",
@@ -764,7 +775,11 @@
             "noStack": "No stack trace available"
         },
         "monetization": {
-            "portalRow": "Monetization Analytics"
+            "portalRow": "Monetization Analytics",
+            "allTimeFunnel": "All-time funnel",
+            "byPlatform": "By platform",
+            "last7Days": "Last 7 days",
+            "noData": "No events in this period yet"
         },
         "supportMessages": {
             "title": "Support Messages",
@@ -781,7 +796,12 @@
             "activeGroups": "Active groups",
             "archivedGroups": "Archived groups",
             "archiveFootnote": "Archived = inactive 2+ months with zero balances (app-wide). Per-user manual archive is not included.",
-            "loadError": "Could not load metrics. Pull to refresh or try again later."
+            "loadErrorTitle": "Could not load metrics",
+            "loadError": "Pull to refresh or try again later.",
+            "notAdminTitle": "Admin access required",
+            "notAdminBody": "Your account is not in the app admin list, so monetization analytics are hidden.",
+            "analyticsUnavailableTitle": "Analytics not configured",
+            "analyticsUnavailableBody": "The monetization metrics database function is missing or not granted on this Supabase project. Apply the latest migrations to dev, then refresh."
         }
     },
     "profile": {
@@ -1181,10 +1201,10 @@
             "restoreSuccess": "Purchases restored.",
             "restoreNone": "No active purchases found.",
             "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group.",
-            "tryFreeTrialCta": "Try 7 days free",
-            "trialFreePeriodHeading": "7-day free trial",
-            "trialFreePeriodBody": "Try every Pro feature free for 7 days. Cancel in Settings before the trial ends if you don't want to continue.",
-            "trialRenewalDisclosure": "After 7 days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
+            "tryFreeTrialCta": "Try {{trialDays}} days free",
+            "trialFreePeriodHeading": "{{trialDays}}-day free trial",
+            "trialFreePeriodBody": "Try every Pro feature free for {{trialDays}} days. Cancel in Settings before the trial ends if you don't want to continue.",
+            "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
             "euWithdrawalWaiverHeading": "Immediate access & 14-day withdrawal (EU)",
             "euDigitalPurchaseAck": "I request immediate access to KupaPay Pro and acknowledge that I lose my 14-day right of withdrawal once access begins.",
             "havePromoCode": "Have a code?"

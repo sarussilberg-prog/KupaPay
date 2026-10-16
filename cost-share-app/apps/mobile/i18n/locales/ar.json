@@ -64,9 +64,20 @@
             "balances": "الأرصدة"
         },
         "signInError": "فشل تسجيل الدخول. يُرجى المحاولة مرة أخرى.",
-        "signInWithEmailMagicLink": "المتابعة بالبريد الإلكتروني",
-        "emailMagicLinkStubHint": "تسجيل الدخول برابط البريد قادم قريبًا.",
+        "signInWithEmail": "المتابعة بالبريد الإلكتروني",
         "emailPlaceholder": "name@example.com",
+        "emailOtpSendCode": "إرسال الرمز",
+        "emailOtpVerify": "تحقق وسجّل الدخول",
+        "emailOtpSentTo": "أرسلنا رمزًا من 6 أرقام إلى {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "إعادة إرسال الرمز",
+        "emailOtpResendIn": "إعادة الإرسال خلال {{seconds}} ث",
+        "emailOtpChangeEmail": "تغيير البريد",
+        "emailOtpInvalidEmail": "أدخل بريدًا إلكترونيًا صالحًا.",
+        "emailOtpInvalidCode": "الرمز غير صالح أو منتهٍ. حاول مرة أخرى أو أعد الإرسال.",
+        "emailOtpRateLimited": "محاولات كثيرة. انتظر دقيقة ثم حاول مرة أخرى.",
+        "emailOtpSendError": "تعذّر إرسال الرمز. حاول مرة أخرى.",
+        "emailOtpVerifyError": "تعذّر التحقق من الرمز. حاول مرة أخرى.",
         "googleSignInSheetTitle": "تسجيل الدخول باستخدام Google",
         "googleSignInSheetHint": "اضغط أدناه — ستظهر شاشة اختيار الحساب فوق هذه النافذة."
     },
@@ -806,7 +817,11 @@
             "noStack": "لا يتوفر تتبّع للمكدّس"
         },
         "monetization": {
-            "portalRow": "تحليلات تحقيق الدخل"
+            "portalRow": "تحليلات تحقيق الدخل",
+            "allTimeFunnel": "مسار التحويل الكامل",
+            "byPlatform": "حسب المنصة",
+            "last7Days": "آخر 7 أيام",
+            "noData": "لا توجد أحداث في هذه الفترة بعد"
         },
         "supportMessages": {
             "title": "رسائل الدعم",
@@ -823,7 +838,12 @@
             "activeGroups": "المجموعات النشطة",
             "archivedGroups": "المجموعات المؤرشفة",
             "archiveFootnote": "المؤرشفة = غير نشطة لمدة شهرين أو أكثر وأرصدتها صفرية (على مستوى التطبيق). لا تشمل الأرشفة اليدوية لكل مستخدم.",
-            "loadError": "تعذّر تحميل المقاييس. اسحب للتحديث أو حاول لاحقًا."
+            "loadError": "اسحب للتحديث أو حاول لاحقًا.",
+            "loadErrorTitle": "تعذّر تحميل المقاييس",
+            "notAdminTitle": "مطلوب صلاحيات المسؤول",
+            "notAdminBody": "حسابك ليس في قائمة مسؤولي التطبيق.",
+            "analyticsUnavailableTitle": "التحليلات غير مهيأة",
+            "analyticsUnavailableBody": "دالة المقاييس مفقودة أو بلا صلاحيات على مشروع Supabase. طبّق أحدث migrations ثم حدّث."
         }
     },
     "profile": {
@@ -1339,10 +1359,10 @@
             "restoreSuccess": "تمت استعادة المشتريات.",
             "restoreNone": "لم يُعثر على مشتريات نشطة.",
             "tripPassNeedsGroup": "افتح مجموعة أولًا لشراء Trip Pass لها.",
-            "tryFreeTrialCta": "جرّب 7 أيام مجانًا",
-            "trialFreePeriodHeading": "تجربة مجانية 7 أيام",
-            "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة 7 أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
-            "trialRenewalDisclosure": "بعد 7 أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
+            "tryFreeTrialCta": "جرّب {{trialDays}} أيام مجانًا",
+            "trialFreePeriodHeading": "تجربة مجانية {{trialDays}} أيام",
+            "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
+            "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
             "euWithdrawalWaiverHeading": "وصول فوري وإ waiver لـ 14 يوماً (EU)",
             "euDigitalPurchaseAck": "أطلب وصولاً فورياً إلى KupaPay Pro وأقر بأنني أفقد حق الإلغاء خلال 14 يوماً بمجرد بدء الوصول.",
             "havePromoCode": "لديك رمز؟"

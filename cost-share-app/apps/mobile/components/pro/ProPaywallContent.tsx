@@ -19,9 +19,14 @@ import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { Button } from '../Button';
 import { PriceSkeleton } from '../PriceSkeleton';
+import { IconLabel } from '../ui/IconLabel';
 import { colors } from '../../theme';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
 import { requiresEuDigitalWithdrawalAck } from '../../lib/euDigitalPurchaseAck';
+import {
+    paywallRequiresEuDigitalWithdrawalAck,
+    proTrialLengthDays,
+} from '../../lib/proSubscriptionStorePolicy';
 import {
     checkIntroductoryPriceEligibility,
     isPurchasesConfigured,
@@ -89,7 +94,11 @@ export function ProPaywallContent({
     const [loadAttempt, setLoadAttempt] = useState(0);
     const [euDigitalAck, setEuDigitalAck] = useState(false);
 
-    const euWithdrawalRequired = useMemo(() => requiresEuDigitalWithdrawalAck(), []);
+    const trialDays = proTrialLengthDays();
+    const euWithdrawalRequired = useMemo(
+        () => paywallRequiresEuDigitalWithdrawalAck() && requiresEuDigitalWithdrawalAck(),
+        [],
+    );
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -215,7 +224,7 @@ export function ProPaywallContent({
         if (!price) return '';
         const period = t(subscriptionPeriodKey(selectedPackage));
         if (showFreeTrial) {
-            return t('pro.paywall.trialRenewalDisclosure', { price, period });
+            return t('pro.paywall.trialRenewalDisclosure', { price, period, trialDays });
         }
         return t('pro.paywall.renewalDisclosure', { price, period });
     }, [
@@ -228,6 +237,7 @@ export function ProPaywallContent({
         showFreeTrial,
         storeConfigured,
         t,
+        trialDays,
     ]);
 
     const purchaseCta = useMemo(() => {
@@ -237,10 +247,10 @@ export function ProPaywallContent({
             return price ? t('pro.paywall.buyTripPass', { price }) : t('pro.paywall.subscribe');
         }
         if (showFreeTrial) {
-            return t('pro.paywall.tryFreeTrialCta');
+            return t('pro.paywall.tryFreeTrialCta', { trialDays });
         }
         return price ? t('pro.paywall.subscribeAtPrice', { price }) : t('pro.paywall.subscribe');
-    }, [selected, selectedPackage, selectedPrice, showFreeTrial, t]);
+    }, [selected, selectedPackage, selectedPrice, showFreeTrial, t, trialDays]);
 
     const purchaseDisabled =
         busy ||
@@ -347,12 +357,15 @@ export function ProPaywallContent({
 
             <View className="gap-2 mb-6">
                 {[1, 2, 3].map(i => (
-                    <View key={i} className="flex-row items-start gap-2">
-                        <AppIcon name="checkmark-circle" size={20} color={colors.success.DEFAULT} />
-                        <Text className="flex-1 text-gray-800 text-base">
-                            {t(`pro.paywall.feature${i}` as 'pro.paywall.feature1')}
-                        </Text>
-                    </View>
+                    <IconLabel
+                        key={i}
+                        iconName="checkmark-circle"
+                        iconSize={20}
+                        iconColor={colors.success.DEFAULT}
+                        label={t(`pro.paywall.feature${i}` as 'pro.paywall.feature1')}
+                        labelClassName="text-gray-800 text-base"
+                        align="start"
+                    />
                 ))}
             </View>
 
@@ -361,10 +374,10 @@ export function ProPaywallContent({
             {showFreeTrial && pricesReady ? (
                 <View className="mb-4 px-1">
                     <Text className="text-sm font-semibold text-gray-800 mb-1">
-                        {t('pro.paywall.trialFreePeriodHeading')}
+                        {t('pro.paywall.trialFreePeriodHeading', { trialDays })}
                     </Text>
                     <Text className="text-xs text-gray-600 leading-5">
-                        {t('pro.paywall.trialFreePeriodBody')}
+                        {t('pro.paywall.trialFreePeriodBody', { trialDays })}
                     </Text>
                 </View>
             ) : null}

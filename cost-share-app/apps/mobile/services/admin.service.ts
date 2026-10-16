@@ -134,11 +134,50 @@ export interface MonetizationMetrics {
     daily: Array<{ date: string; ad_gate_shown: number; ad_gate_watch_completed: number; remind_sent: number }>;
 }
 
-export async function fetchAdminMonetizationMetrics(): Promise<MonetizationMetrics | null> {
+export type AdminMonetizationMetricsFailure =
+    | 'not_admin'
+    | 'analytics_unavailable'
+    | 'unknown';
+
+export class AdminMonetizationMetricsError extends Error {
+    readonly code: AdminMonetizationMetricsFailure;
+
+    constructor(code: AdminMonetizationMetricsFailure, message?: string) {
+        super(message ?? code);
+        this.name = 'AdminMonetizationMetricsError';
+        this.code = code;
+    }
+}
+
+function classifyMonetizationRpcError(error: { message?: string; code?: string; details?: string }): AdminMonetizationMetricsFailure {
+    const msg = `${error.message ?? ''} ${error.details ?? ''}`.toLowerCase();
+    if (msg.includes('not_admin')) return 'not_admin';
+    if (
+        error.code === 'PGRST202' ||
+        error.code === '42883' ||
+        msg.includes('could not find the function') ||
+        msg.includes('function') && msg.includes('does not exist')
+    ) {
+        return 'analytics_unavailable';
+    }
+    if (
+        error.code === '42501' ||
+        msg.includes('permission denied') ||
+        msg.includes('insufficient_privilege')
+    ) {
+        return 'analytics_unavailable';
+    }
+    return 'unknown';
+}
+
+export async function fetchAdminMonetizationMetrics(): Promise<MonetizationMetrics> {
     const { data, error } = await supabase.rpc('get_monetization_metrics');
-    if (error || !data) {
-        if (error) console.warn('fetchAdminMonetizationMetrics: RPC failed', error);
-        return null;
+    if (error) {
+        console.warn('fetchAdminMonetizationMetrics: RPC failed', error);
+        throw new AdminMonetizationMetricsError(classifyMonetizationRpcError(error), error.message);
+    }
+    if (!data) {
+        throw new AdminMonetizationMetricsError('unknown', 'empty_response');
     }
     return data as MonetizationMetrics;
 }
