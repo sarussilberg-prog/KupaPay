@@ -227,7 +227,9 @@ BEGIN
     IF (v_state->>'isDeleted')::boolean IS DISTINCT FROM TRUE THEN
         RAISE EXCEPTION 'matrix[deletion state inactive]: isDeleted expected TRUE';
     END IF;
+    SET LOCAL session_replication_role = replica;
     UPDATE public.profiles SET is_active = TRUE, deleted_at = NULL WHERE id = v_member;
+    SET LOCAL session_replication_role = origin;
 
     RAISE NOTICE 'rls_access_matrix.test.sql — all matrix checks passed';
 END;
