@@ -1,6 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "bash scripts/vercel-should-build.sh",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "dev": true,
+      "*": false
+    }
+  },
+  "ignoreCommand": "bash scripts/vercel-should-build.sh web",
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm install --include=optional",
   "buildCommand": "bash scripts/build-web-next.sh",
