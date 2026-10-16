@@ -12,6 +12,8 @@ export * from './i18n/formatRelativeTime';
 export * from './i18n/appLocales';
 export * from './i18n/localeParity';
 export * from './i18n/localeAllowlist';
+export * from './i18n/listMetaLabel';
+export * from './i18n/collectStaticI18nKeys';
 export * from './brand';
 export * from './types';
 export * from './schemas';
