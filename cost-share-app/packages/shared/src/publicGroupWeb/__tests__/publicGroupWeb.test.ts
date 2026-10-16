@@ -43,7 +43,7 @@ describe('public group web page', () => {
             locale: 'he',
             token: 'AbCdEfGhIjKlMn',
             wire: sampleWire,
-            canonicalPath: '/g/AbCdEfGhIjKlMn',
+            canonicalPath: '/b/AbCdEfGhIjKlMn',
         });
         expect(html).toContain('noindex');
         expect(html).toContain('og:title');
@@ -58,7 +58,7 @@ describe('public group web page', () => {
                 locale,
                 token: 'AbCdEfGhIjKlMn',
                 wire: sampleWire,
-                canonicalPath: '/g/AbCdEfGhIjKlMn',
+                canonicalPath: '/b/AbCdEfGhIjKlMn',
             });
             expect(html).toContain(`lang="${locale}"`);
         }
@@ -66,7 +66,7 @@ describe('public group web page', () => {
             locale: 'en',
             token: 'AbCdEfGhIjKlMn',
             wire: sampleWire,
-            canonicalPath: '/g/AbCdEfGhIjKlMn',
+            canonicalPath: '/b/AbCdEfGhIjKlMn',
         });
         expect(en).toContain('Add an expense on the web');
     });

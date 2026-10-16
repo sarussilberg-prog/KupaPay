@@ -6,11 +6,12 @@
 
 import {
     buildInviteUrl,
+    buildPublicGroupBalanceUrl,
     buildSettleReminderUrl,
     buildWhatsAppShareUrl,
     type GroupWithMembers,
 } from '@cost-share/shared';
-export { buildInviteUrl, buildSettleReminderUrl };
+export { buildInviteUrl, buildPublicGroupBalanceUrl, buildSettleReminderUrl };
 import * as Clipboard from 'expo-clipboard';
 import { Linking } from 'react-native';
 import i18n from '../i18n';
@@ -81,15 +82,43 @@ export async function shareGroupInvite(groupId: string): Promise<void> {
     void captureProductEvent('invite_sent', { kind: 'group', channel: 'share_sheet', group_id: groupId });
 }
 
-export async function shareGroupBalanceLink(groupId: string): Promise<void> {
-    const { group, url } = resolveGroupInviteContext(groupId);
+function resolveGroupBalanceShareContext(groupId: string): {
+    group: GroupWithMembers;
+    url: string;
+    message: string;
+} {
+    const user = useAppStore.getState().currentUser;
+    const groups = queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? [];
+    const group = groups.find(g => g.id === groupId);
+    if (!user) throw new Error('not_authenticated');
+    if (!group?.publicBalanceToken) throw new Error('group_public_balance_token_unavailable');
+    const url = buildPublicGroupBalanceUrl(group.publicBalanceToken);
     const message = buildGroupBalanceShareMessage(group.name, url);
+    return { group, url, message };
+}
+
+export async function shareGroupBalanceLink(groupId: string): Promise<void> {
+    const { message } = resolveGroupBalanceShareContext(groupId);
     await openShare(message);
     void captureProductEvent('invite_sent', {
         kind: 'group',
         channel: 'public_balance_link',
         group_id: groupId,
     });
+}
+
+export async function rotateGroupPublicBalanceLink(groupId: string): Promise<string> {
+    const { data, error } = await supabase.rpc('rotate_group_public_balance', {
+        p_group_id: groupId,
+    });
+    if (error) throw error;
+    const newToken = data as string;
+    queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
+        (prev ?? []).map((g) =>
+            g.id === groupId ? { ...g, publicBalanceToken: newToken } : g,
+        ),
+    );
+    return newToken;
 }
 
 export async function shareGroupInviteViaWhatsApp(groupId: string): Promise<void> {

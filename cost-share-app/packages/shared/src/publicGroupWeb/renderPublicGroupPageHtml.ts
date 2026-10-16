@@ -44,7 +44,6 @@ export function renderPublicGroupPageHtml(options: RenderPublicGroupPageHtmlOpti
     const copy = publicGroupPageCopyFor(options.locale);
     const dir = publicGroupPageDir(options.locale);
     const canonical = `${APP_WEB_ORIGIN}${options.canonicalPath}`;
-    const deeplink = `com.kupapay.mobile://invite/g/${encodeURIComponent(options.token)}`;
     const loginUrl = `${APP_WEB_ORIGIN}/login`;
     const title = `${view.groupName} — ${copy.pageTitle}`;
 
@@ -149,7 +148,7 @@ export function renderPublicGroupPageHtml(options: RenderPublicGroupPageHtmlOpti
     <p class="hint">${escapeHtml(copy.joinHint)}</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="${escapeHtml(loginUrl)}">${escapeHtml(copy.addExpenseWeb)}</a>
-      <a class="btn btn-secondary" href="${escapeHtml(deeplink)}">${escapeHtml(copy.openApp)}</a>
+      <a class="btn btn-secondary" href="${APP_STORE_LISTING_URL}">${escapeHtml(copy.openApp)}</a>
     </div>
     <div class="stores" style="margin-top:12px;">
       <a class="btn btn-secondary" href="${APP_STORE_LISTING_URL}">${escapeHtml(copy.getApp)} — App Store</a>

@@ -3,7 +3,7 @@ import { join } from 'path';
 import { renderPublicGroupPageHtml, SUPPORTED_LANGUAGES } from '@cost-share/shared';
 import type { PublicGroupBalancePageWire } from '@cost-share/shared';
 
-const ROUTE_PATH = join(__dirname, '../../../web/app/g/[token]/route.ts');
+const ROUTE_PATH = join(__dirname, '../../../web/app/b/[token]/route.ts');
 
 const wire: PublicGroupBalancePageWire = {
     ok: true,
@@ -13,7 +13,7 @@ const wire: PublicGroupBalancePageWire = {
     recent_expenses: [],
 };
 
-describe('public group page HTML (/g/<token>)', () => {
+describe('public group page HTML (/b/<token>)', () => {
     it('web route delegates to publicGroupPageHtml', () => {
         const src = readFileSync(ROUTE_PATH, 'utf8');
         expect(src).toContain('publicGroupPageHtml');
@@ -26,7 +26,7 @@ describe('public group page HTML (/g/<token>)', () => {
                 locale,
                 token: 'AbCdEfGhIjKlMn',
                 wire,
-                canonicalPath: '/g/AbCdEfGhIjKlMn',
+                canonicalPath: '/b/AbCdEfGhIjKlMn',
             });
             expect(html).toContain('og:image');
             expect(html).toContain('robots');

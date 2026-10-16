@@ -1,13 +1,11 @@
-// Public group balance page: https://kupa-pay.com/g/<invite-token>
-import { publicGroupPageHtml } from '@/app/_lib/publicGroupPageHtml';
+// Group invite landing: https://kupa-pay.com/g/<invite-token>
+import { inviteLandingHtml } from '@/app/_lib/inviteLandingHtml';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request, ctx: { params: Promise<{ token: string }> }): Promise<Response> {
-    const { token } = await ctx.params;
+export async function GET(req: Request): Promise<Response> {
     const url = new URL(req.url);
-    const html = await publicGroupPageHtml(
-        token,
+    const html = inviteLandingHtml(
         req.headers.get('accept-language'),
         url.searchParams.get('lang'),
         url.pathname,
@@ -16,7 +14,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ token: string }
         headers: {
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'no-store',
-            'X-Robots-Tag': 'noindex, nofollow',
         },
     });
 }
