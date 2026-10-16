@@ -12,8 +12,36 @@ import type { NextConfig } from 'next';
 // stays out of the client bundle. When unset, no proxy is configured.
 const APP_PROXY_ORIGIN = (process.env.APP_PROXY_ORIGIN ?? '').replace(/\/+$/, '');
 
+const securityHeaders = [
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(), payment=()',
+  },
+  {
+    key: 'Content-Security-Policy-Report-Only',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' https:",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; '),
+  },
+];
+
 const nextConfig: NextConfig = {
   transpilePackages: ['@cost-share/shared'],
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders }];
+  },
   async rewrites() {
     if (!APP_PROXY_ORIGIN) return [];
     return {
