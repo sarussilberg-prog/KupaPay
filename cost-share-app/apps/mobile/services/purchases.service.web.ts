@@ -7,8 +7,19 @@ import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPack
 
 export type { PaywallPackages, PurchasesPackageLike };
 
-export function isPurchasesConfigured(): boolean {
+function captureMode(): boolean {
+    if (process.env.EXPO_PUBLIC_ASC_SCREENSHOT_DEMO === 'true') return true;
+    if (typeof globalThis.location !== 'undefined') {
+        const p = new URLSearchParams(globalThis.location.search);
+        return p.get('capture') === '1' || p.has('screen');
+    }
     return false;
+}
+
+const CAPTURE = captureMode();
+
+export function isPurchasesConfigured(): boolean {
+    return CAPTURE;
 }
 
 export async function configurePurchasesForUser(_userId: string): Promise<void> {}
@@ -19,13 +30,32 @@ export async function waitForPurchasesReady(): Promise<boolean> {
 
 export async function logOutPurchases(): Promise<void> {}
 
+function capturePackages(): PaywallPackages {
+    const mk = (id: string, price: string): PurchasesPackageLike => ({
+        identifier: id,
+        product: { identifier: id, priceString: price },
+    });
+    return {
+        monthly: mk('kupapay_pro_monthly', '₪12.90'),
+        annual: mk('kupapay_pro_yearly', '₪69.90'),
+        tripPass: mk('kupapay_trip_pass', '₪19.90'),
+    };
+}
+
 export async function loadOfferingPackages(): Promise<PaywallPackages> {
+    if (CAPTURE) return capturePackages();
     return { monthly: null, annual: null, tripPass: null };
 }
 
 export async function checkIntroductoryPriceEligibility(): Promise<
     Record<string, { status: number }>
 > {
+    if (CAPTURE) {
+        return {
+            kupapay_pro_monthly: { status: 2 },
+            kupapay_pro_yearly: { status: 2 },
+        };
+    }
     return {};
 }
 

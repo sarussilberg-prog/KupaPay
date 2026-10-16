@@ -26,4 +26,6 @@ node scripts/asc-prepare-app-version.mjs
 node scripts/asc-report-status.mjs
 ```
 
-Screenshot demo build: EAS profile `asc-screenshots` (`EXPO_PUBLIC_ASC_SCREENSHOT_DEMO=true`).
+**Screenshots:** `npx expo export --platform web` then `node scripts/playwright/capture-store-screenshots.mjs` (real UI via `?capture=1&screen=…&locale=…`). CI never uploads fallback/placeholder PNGs — the job fails if captures are missing.
+
+Optional native path: EAS profile `asc-screenshots` + Maestro (no fallback).
