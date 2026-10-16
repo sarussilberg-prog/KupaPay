@@ -1,16 +1,18 @@
 import { findOfferingPackage } from '../revenueCatOfferingPackages';
 import { STORE_PRODUCT_TRIP_PASS } from '../proConstants';
+import type { PurchasesPackageLike } from '../purchasesPackage.types';
+
+function pkg(id: string, productId: string): PurchasesPackageLike {
+    return {
+        identifier: id,
+        product: { identifier: productId, priceString: '₪0' },
+    };
+}
 
 describe('findOfferingPackage', () => {
     const packages = [
-        {
-            identifier: '$rc_monthly',
-            product: { identifier: 'kupapay_pro_monthly' },
-        },
-        {
-            identifier: 'kupapay_trip_pass',
-            product: { identifier: STORE_PRODUCT_TRIP_PASS },
-        },
+        pkg('$rc_monthly', 'kupapay_pro_monthly'),
+        pkg('kupapay_trip_pass', STORE_PRODUCT_TRIP_PASS),
     ];
 
     it('finds by RevenueCat package identifier', () => {
