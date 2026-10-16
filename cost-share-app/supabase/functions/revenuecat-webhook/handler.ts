@@ -52,11 +52,27 @@ function parseUuid(value: string | null): string | null {
     return uuid.test(value) ? value : null;
 }
 
+function timingSafeEqualString(provided: string, expected: string): boolean {
+    const enc = new TextEncoder();
+    const a = enc.encode(provided);
+    const b = enc.encode(expected);
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+    return diff === 0;
+}
+
 export function verifyAuthorization(req: Request, secret: string): boolean {
     if (!secret) return false;
     const auth = req.headers.get('authorization') ?? '';
-    if (auth === secret) return true;
-    if (auth === `Bearer ${secret}`) return true;
+    if (auth.length > 0 && timingSafeEqualString(auth, secret)) return true;
+    const bearerPrefix = 'Bearer ';
+    if (
+        auth.length > bearerPrefix.length &&
+        auth.slice(0, bearerPrefix.length).toLowerCase() === bearerPrefix.toLowerCase()
+    ) {
+        return timingSafeEqualString(auth.slice(bearerPrefix.length).trim(), secret);
+    }
     return false;
 }
 

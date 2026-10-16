@@ -26,6 +26,8 @@ DECLARE
     v_b_net NUMERIC;
     v_payload JSONB;
 BEGIN
+    INSERT INTO auth.users (id, email) VALUES (v_a, 'si-rem-a@test.local');
+
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Ari', 'ILS', TRUE, 'tt_rem_a'),
         (v_b, 'Bar', 'ILS', TRUE, 'tt_rem_b');
@@ -46,6 +48,8 @@ BEGIN
 
     -- Expected after self-heal: A absorbs the 10 remainder → A owes 20 total,
     -- paid 30 → net +10; B net -10; sum 0.
+
+    PERFORM public.test_set_authenticated(v_a);
 
     v_payload := public.get_user_simplified_inputs(v_a);
 

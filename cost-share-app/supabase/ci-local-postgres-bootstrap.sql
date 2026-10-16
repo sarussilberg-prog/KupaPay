@@ -52,6 +52,27 @@ AS $$
   SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid;
 $$;
 
+-- SQL regression tests: set Supabase-like JWT + authenticated role for RPC auth checks.
+CREATE OR REPLACE FUNCTION public.test_set_jwt_sub(p_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub', p_user_id::text, TRUE);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', p_user_id::text)::text, TRUE);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.test_set_authenticated(p_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM public.test_set_jwt_sub(p_user_id);
+  PERFORM set_config('role', 'authenticated', TRUE);
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION extensions.digest(data TEXT, type TEXT)
 RETURNS bytea
 LANGUAGE sql
