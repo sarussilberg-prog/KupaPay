@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-export function cronWebhookSecret(): string {
-    return Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';
+export function cronWebhookSecret(envVar = 'CRON_DISPATCH_WEBHOOK_SECRET'): string {
+    return Deno.env.get(envVar) ?? '';
 }
 
 export function assertCronPost(req: Request, secret: string): Response | null {
