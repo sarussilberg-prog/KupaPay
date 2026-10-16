@@ -105,6 +105,12 @@ if [[ "$LIVE_NORM" == "$BASE_NORM" ]]; then
   exit 0
 fi
 
-echo "::error::Schema contract drift — update $SNAPSHOT (GENERATE_SCHEMA_CONTRACT_SNAPSHOT=1 after bootstrap)"
+live_tables="$(echo "$LIVE_NORM" | jq -c '.tables')"
+base_tables="$(echo "$BASE_NORM" | jq -c '.tables')"
+live_funcs="$(echo "$LIVE_NORM" | jq -c '.functions')"
+base_funcs="$(echo "$BASE_NORM" | jq -c '.functions')"
+
+echo "::error::Schema contract drift — update $SNAPSHOT (bash scripts/build-schema-contract-snapshot-offline.sh or GENERATE_SCHEMA_CONTRACT_SNAPSHOT=1)"
+echo "  tables live=${#live_tables} base=${#base_tables} | functions live=$(echo "$LIVE_NORM" | jq '.functions|length') base=$(echo "$BASE_NORM" | jq '.functions|length')"
 diff -u <(echo "$BASE_NORM" | jq .) <(echo "$LIVE_NORM" | jq .) || true
 exit 1

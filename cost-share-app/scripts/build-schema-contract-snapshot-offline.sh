@@ -31,19 +31,18 @@ collect_sql() {
 TMP="$(mktemp)"
 collect_sql > "$TMP"
 
-TABLES_JSON="$(rg -o 'CREATE TABLE (IF NOT EXISTS )?public\.([a-z0-9_]+)' "$TMP" -r '$2' | sort -u | jq -R . | jq -s 'map({name: ., columns: []})')"
+TABLES_JSON="$(
+  rg -NIo 'CREATE TABLE (IF NOT EXISTS )?public\.([a-z0-9_]+)' "$TMP" -r '$2' | sort -u \
+    | jq -R . | jq -s 'map({name: ., columns: []})'
+)"
 
 FUNCS_JSON="$(
-  rg -o 'CREATE OR REPLACE FUNCTION public\.([a-z0-9_]+)\(([^)]*)\)' "$TMP" \
-    | while read -r line; do
-        name="$(sed -n 's/.*public\.\([a-z0-9_]*\)(.*/\1/p' <<<"$line")"
-        args="$(sed -n 's/.*(\(.*\)).*/\1/p' <<<"$line" | tr '[:space:]' ' ' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr 'A-Z' 'a-z')"
-        jq -n --arg n "$name" --arg a "$args" '{name:$n,args:$a}'
-      done | jq -s 'unique_by(.name + "|" + .args) | sort_by(.name,.args)'
+  rg -NIo 'FUNCTION public\.([a-z0-9_]+)\(' "$TMP" -r '$1' | sort -u \
+    | jq -R . | jq -s 'map({name: ., args: ""})'
 )"
 
 jq -n \
-  --arg desc "Offline seed (table/function names). CI exports full columns from Postgres and must match when GENERATE_SCHEMA_CONTRACT_SNAPSHOT=1 refresh is committed." \
+  --arg desc "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres." \
   --arg generated "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --argjson tables "$TABLES_JSON" \
   --argjson functions "$FUNCS_JSON" \
@@ -51,4 +50,4 @@ jq -n \
   > supabase/ci/schema-contract.snapshot.json
 
 rm -f "$TMP"
-echo "✅ Wrote supabase/ci/schema-contract.snapshot.json"
+echo "✅ Wrote supabase/ci/schema-contract.snapshot.json ($(jq '.tables|length' supabase/ci/schema-contract.snapshot.json) tables, $(jq '.functions|length' supabase/ci/schema-contract.snapshot.json) functions)"

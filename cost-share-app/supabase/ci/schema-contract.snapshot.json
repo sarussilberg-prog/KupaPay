@@ -1,6 +1,6 @@
 {
-  "description": "Offline seed (table/function names). CI exports full columns from Postgres and must match when GENERATE_SCHEMA_CONTRACT_SNAPSHOT=1 refresh is committed.",
-  "generated_at": "2026-10-16T21:40:53Z",
+  "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
+  "generated_at": "2026-10-16T21:52:02Z",
   "tables": [
     {
       "name": "admin_pro_view_overrides",
@@ -77,32 +77,20 @@
   ],
   "functions": [
     {
-      "name": "_attribute_referral",
-      "args": "p_referrer uuid, p_referee uuid"
-    },
-    {
-      "name": "_get_group_pairwise_debts_core",
-      "args": "p_group_id uuid"
-    },
-    {
-      "name": "_profile_last_active_at",
-      "args": "p_user_id uuid"
-    },
-    {
-      "name": "_weekly_digest_stats",
-      "args": "p_user_id uuid"
-    },
-    {
       "name": "accept_friend_request",
-      "args": "p_request_id uuid"
+      "args": ""
     },
     {
       "name": "account_deletion_grace_interval",
       "args": ""
     },
     {
+      "name": "add_guest_group_member",
+      "args": ""
+    },
+    {
       "name": "admin_active_pro_view_mode",
-      "args": "p_user_id uuid"
+      "args": ""
     },
     {
       "name": "admin_get_platform_metrics",
@@ -118,15 +106,27 @@
     },
     {
       "name": "admin_restore_deleted_account",
-      "args": "p_user_id uuid"
+      "args": ""
+    },
+    {
+      "name": "admin_update_support_message_status",
+      "args": ""
+    },
+    {
+      "name": "_advance_recurring_next_date",
+      "args": ""
     },
     {
       "name": "archive_group",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "assign_purchased_trip_pass",
-      "args": "p_group_id uuid"
+      "args": ""
+    },
+    {
+      "name": "_attribute_referral",
+      "args": ""
     },
     {
       "name": "auto_friend_on_group_member_insert",
@@ -137,23 +137,55 @@
       "args": ""
     },
     {
+      "name": "bump_group_last_activity",
+      "args": ""
+    },
+    {
       "name": "check_email_not_deleted",
       "args": ""
     },
     {
+      "name": "claim_guest_group_member",
+      "args": ""
+    },
+    {
+      "name": "clear_archive_for_expense",
+      "args": ""
+    },
+    {
+      "name": "clear_archive_for_expense_split",
+      "args": ""
+    },
+    {
+      "name": "clear_archive_for_settlement",
+      "args": ""
+    },
+    {
       "name": "consume_receipt_ocr_quota",
-      "args": "p_max int default 60"
+      "args": ""
     },
     {
       "name": "consume_receipt_ocr_quota_for_user",
-      "args": "p_user_id uuid"
+      "args": ""
     },
     {
       "name": "count_push_sent_last_24h",
-      "args": "p_user_id uuid"
+      "args": ""
     },
     {
       "name": "create_demo_group",
+      "args": ""
+    },
+    {
+      "name": "create_expense_with_splits",
+      "args": ""
+    },
+    {
+      "name": "create_group_message",
+      "args": ""
+    },
+    {
+      "name": "create_recurring_expense_series",
       "args": ""
     },
     {
@@ -174,14 +206,34 @@
     },
     {
       "name": "delete_consolidation_batch",
-      "args": "p_batch_id uuid"
+      "args": ""
     },
     {
       "name": "delete_group_message",
-      "args": "p_message_id uuid"
+      "args": ""
     },
     {
       "name": "delete_my_account",
+      "args": ""
+    },
+    {
+      "name": "emit_expense_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_friend_request_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_group_membership_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_message_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_settlement_activity_events",
       "args": ""
     },
     {
@@ -194,14 +246,22 @@
     },
     {
       "name": "evaluate_trip_budget_alerts",
-      "args": "p_group_id uuid"
+      "args": ""
+    },
+    {
+      "name": "expense_receipt_object_path_for_user",
+      "args": ""
     },
     {
       "name": "generate_due_recurring_expenses",
-      "args": "p_limit int default 100"
+      "args": ""
     },
     {
       "name": "generate_invite_token",
+      "args": ""
+    },
+    {
+      "name": "get_activity_unread_count",
       "args": ""
     },
     {
@@ -209,8 +269,28 @@
       "args": ""
     },
     {
+      "name": "get_group_messages",
+      "args": ""
+    },
+    {
       "name": "get_group_pairwise_debts",
-      "args": "p_group_id uuid"
+      "args": ""
+    },
+    {
+      "name": "_get_group_pairwise_debts_core",
+      "args": ""
+    },
+    {
+      "name": "get_group_spending_by_category",
+      "args": ""
+    },
+    {
+      "name": "get_group_spending_by_member",
+      "args": ""
+    },
+    {
+      "name": "get_group_spending_by_week",
+      "args": ""
     },
     {
       "name": "get_growth_metrics",
@@ -234,7 +314,7 @@
     },
     {
       "name": "get_my_pro_status",
-      "args": "p_group_id uuid default null"
+      "args": ""
     },
     {
       "name": "get_my_referral_status",
@@ -242,27 +322,39 @@
     },
     {
       "name": "get_public_expense_share_page",
-      "args": "p_token text"
+      "args": ""
     },
     {
       "name": "get_public_group_balance_page",
-      "args": "p_token text"
+      "args": ""
     },
     {
       "name": "get_recurring_series_for_expense",
-      "args": "p_expense_id uuid"
+      "args": ""
+    },
+    {
+      "name": "get_user_balance_summary",
+      "args": ""
+    },
+    {
+      "name": "get_user_dashboard",
+      "args": ""
+    },
+    {
+      "name": "get_user_groups_archive_state",
+      "args": ""
     },
     {
       "name": "get_user_simplified_inputs",
-      "args": "p_user_id uuid"
+      "args": ""
     },
     {
       "name": "grant_included_trip_pass_credit",
-      "args": "p_user_id uuid"
+      "args": ""
     },
     {
       "name": "group_is_auto_archived",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "guard_groups_is_active_deactivate",
@@ -277,12 +369,28 @@
       "args": ""
     },
     {
+      "name": "handle_new_user",
+      "args": ""
+    },
+    {
+      "name": "handle_revenuecat_webhook",
+      "args": ""
+    },
+    {
       "name": "hard_purge_expired_deleted_accounts",
-      "args": "p_limit int default 200"
+      "args": ""
     },
     {
       "name": "has_pro",
-      "args": "p_user_id uuid, p_group_id uuid default null"
+      "args": ""
+    },
+    {
+      "name": "_insert_expense_from_recurring_series",
+      "args": ""
+    },
+    {
+      "name": "_insert_trip_budget_alert_events",
+      "args": ""
     },
     {
       "name": "invite_preview_client_key",
@@ -290,7 +398,7 @@
     },
     {
       "name": "is_active_group_member",
-      "args": "p_user_id uuid, p_group_id uuid"
+      "args": ""
     },
     {
       "name": "is_app_admin",
@@ -302,79 +410,99 @@
     },
     {
       "name": "is_group_creator",
-      "args": "check_group_id uuid"
+      "args": ""
     },
     {
       "name": "is_group_member",
-      "args": "check_group_id uuid"
+      "args": ""
     },
     {
       "name": "list_claimable_guest_members",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "list_deferred_push_deliveries",
-      "args": "p_limit int default 50"
+      "args": ""
+    },
+    {
+      "name": "mark_activity_seen",
+      "args": ""
     },
     {
       "name": "mark_email_lifecycle_sent",
-      "args": "p_user_id uuid, p_template text"
+      "args": ""
     },
     {
       "name": "mark_pro_trial_lifecycle_sent",
-      "args": "p_day int"
+      "args": ""
     },
     {
       "name": "mark_pro_trial_lifecycle_sent_service",
-      "args": "p_user_id uuid, p_day int"
+      "args": ""
     },
     {
       "name": "mark_referral_rewarded",
-      "args": "p_reward_id uuid, p_ok boolean, p_reason text default null"
+      "args": ""
     },
     {
       "name": "mark_weekly_summary_sent",
-      "args": "p_user_id uuid, p_week_start date"
+      "args": ""
+    },
+    {
+      "name": "profile_images_object_path_for_user",
+      "args": ""
     },
     {
       "name": "profile_is_active_for_group_insert",
-      "args": "p_profile_id uuid"
+      "args": ""
+    },
+    {
+      "name": "_profile_last_active_at",
+      "args": ""
     },
     {
       "name": "profile_visible_to_viewer",
-      "args": "p_profile_id uuid"
+      "args": ""
     },
     {
       "name": "redeem_friend_invite",
-      "args": "p_token text"
+      "args": ""
     },
     {
       "name": "redeem_included_trip_pass",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "referral_on_expense_created",
       "args": ""
     },
     {
+      "name": "register_device_token",
+      "args": ""
+    },
+    {
       "name": "register_pro_trial_feature_usage",
-      "args": "p_usage jsonb"
+      "args": ""
     },
     {
       "name": "register_pro_trial_reminder",
-      "args": "p_trial_ends_at timestamptz"
+      "args": ""
     },
     {
       "name": "register_trip_pass_purchase_intent",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "reject_friend_request",
-      "args": "p_request_id uuid"
+      "args": ""
     },
     {
       "name": "remove_friend",
-      "args": "p_other_user_id uuid"
+      "args": ""
+    },
+    {
+      "name": "restore_deleted_account",
+      "args": ""
     },
     {
       "name": "restore_my_account",
@@ -382,59 +510,99 @@
     },
     {
       "name": "rotate_group_invite",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "rotate_group_public_balance",
-      "args": "p_group_id uuid"
+      "args": ""
     },
     {
       "name": "run_email_lifecycle_dispatch",
-      "args": "p_limit int default 200"
+      "args": ""
     },
     {
       "name": "run_pro_trial_lifecycle_dispatch",
-      "args": "p_limit int default 200"
+      "args": ""
     },
     {
       "name": "run_referral_reward_dispatch",
-      "args": "p_limit int default 50"
+      "args": ""
     },
     {
       "name": "run_retention_unsettled_nudges",
-      "args": "p_limit int default 100"
+      "args": ""
     },
     {
       "name": "run_smart_payment_reminders",
-      "args": "p_limit int default 50"
+      "args": ""
     },
     {
       "name": "run_weekly_summary_dispatch",
-      "args": "p_limit int default 300"
+      "args": ""
     },
     {
       "name": "search_users",
-      "args": "p_query text"
+      "args": ""
     },
     {
       "name": "send_friend_request",
-      "args": "p_to_user_id uuid"
+      "args": ""
+    },
+    {
+      "name": "set_group_public_balance_sharing",
+      "args": ""
+    },
+    {
+      "name": "set_group_smart_reminder",
+      "args": ""
+    },
+    {
+      "name": "set_group_trip_budget",
+      "args": ""
+    },
+    {
+      "name": "set_my_admin_pro_view_mode",
+      "args": ""
     },
     {
       "name": "stop_recurring_expense_series",
-      "args": "p_series_id uuid"
+      "args": ""
     },
     {
       "name": "trg_evaluate_trip_budget_on_expense",
       "args": ""
     },
     {
+      "name": "unarchive_group",
+      "args": ""
+    },
+    {
       "name": "unsubscribe_email_by_token",
-      "args": "p_token text"
+      "args": ""
+    },
+    {
+      "name": "update_expense_with_splits",
+      "args": ""
+    },
+    {
+      "name": "update_group_message",
+      "args": ""
     },
     {
       "name": "update_notification_preferences",
-      "args": "p_prefs jsonb"
+      "args": ""
+    },
+    {
+      "name": "update_recurring_expense_series",
+      "args": ""
+    },
+    {
+      "name": "update_updated_at_column",
+      "args": ""
+    },
+    {
+      "name": "_weekly_digest_stats",
+      "args": ""
     }
   ]
 }
