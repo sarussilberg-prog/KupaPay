@@ -17,8 +17,7 @@ BEGIN
             v_victim::text || '/avatar.jpg'),
         (v_victim,   'av329-victim@test.local',   'Victim',   'USD', 'en', TRUE, 'tt_av329_vic', NULL);
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_attacker::text)::text, TRUE);
-
+    PERFORM public.test_set_authenticated(v_attacker);
     PERFORM public.delete_my_account();
 
     SELECT COUNT(*) INTO v_rows
