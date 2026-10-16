@@ -1,0 +1,21 @@
+{
+  "appLocales": ["en", "he", "ru", "ar", "fr", "es", "de"],
+  "ascLocaleByAppLocale": {
+    "en": "en-US",
+    "he": "he",
+    "ru": "ru",
+    "ar": "ar-SA",
+    "fr": "fr-FR",
+    "es": "es-ES",
+    "de": "de-DE"
+  },
+  "playLocaleDirByAppLocale": {
+    "en": "en",
+    "he": "he",
+    "ru": "ru",
+    "ar": "ar",
+    "fr": "fr",
+    "es": "es",
+    "de": "de"
+  }
+}
