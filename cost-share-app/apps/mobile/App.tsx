@@ -72,6 +72,7 @@ import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
 import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
+import { SettingsRowLayoutPreviewScreen } from './screens/dev/SettingsRowLayoutPreviewScreen';
 import { readGroupsListPreviewParams } from './dev/groupsListPreviewParams';
 
 function isGroupCardPreviewMode(): boolean {
@@ -82,6 +83,11 @@ function isGroupCardPreviewMode(): boolean {
 function isGroupsListB2PreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
   return new URLSearchParams(globalThis.location.search).get('devGroupsListB2Preview') === '1';
+}
+
+function isSettingsRowPreviewMode(): boolean {
+  if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
+  return new URLSearchParams(globalThis.location.search).get('devSettingsRowPreview') === '1';
 }
 
 // Benign when a persisted session was revoked server-side (global sign-out, token rotation, etc.).
@@ -463,6 +469,18 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             <GroupsListB2PreviewScreen />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isSettingsRowPreviewMode()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <SettingsRowLayoutPreviewScreen />
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>
