@@ -24,6 +24,7 @@ import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
 import { useGroupUnreadCounts } from '../../hooks/queries/useGroupUnreadCounts';
+import { ProTrialLifecycleBanner } from '../../components/pro/ProTrialLifecycleBanner';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
 import { prefetchAddExpensePrerequisitesBatched } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
@@ -283,6 +284,7 @@ export function GroupsListScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
+            <ProTrialLifecycleBanner />
             <View className="flex-row items-center px-4 py-2">
                 <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                     <AppIcon name="search" size={18} color={colors.gray500} />

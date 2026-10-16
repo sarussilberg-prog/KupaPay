@@ -12,6 +12,7 @@ describe('productAnalyticsEvents', () => {
             'group_created',
             'expense_added',
             'invite_sent',
+            'expense_share_sent',
             'invite_accepted',
             'settle_up',
             'paywall_view',

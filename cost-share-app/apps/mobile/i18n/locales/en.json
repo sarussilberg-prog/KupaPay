@@ -1350,6 +1350,13 @@
             "title": "KupaPay Pro trial ending soon",
             "body": "Your free KupaPay Pro trial ends in two days. Don't want to continue? You can cancel in Settings."
         },
+        "trialLifecycle": {
+            "day1": { "title": "Welcome to Pro" },
+            "day10": { "title": "4 days left in your trial" },
+            "day13": { "title": "Pro renews tomorrow" },
+            "disclosure": "Payment begins after the trial unless you cancel in Settings → Manage subscription (App Store / Google Play).",
+            "manage": "Manage subscription"
+        },
         "includedTripPass": {
             "title": "Included Trip Pass",
             "body": "Your yearly Pro plan includes one Trip Pass. Activate Pro for every member of this group for 30 days.",
