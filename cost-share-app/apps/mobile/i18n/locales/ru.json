@@ -64,6 +64,9 @@
             "balances": "Балансы"
         },
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
+        "signInWithEmailMagicLink": "Продолжить с email",
+        "emailMagicLinkStubHint": "Вход по ссылке на email скоро появится.",
+        "emailPlaceholder": "imya@example.com",
         "googleSignInSheetTitle": "Вход через Google",
         "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна."
     },
@@ -915,6 +918,7 @@
         "currency": "Валюта",
         "amount": "Сумма",
         "submit": "Записать платёж",
+        "paidInCurrency": "Платёж записан в {{currency}} (долги могут быть в других валютах)",
         "warnPartial": "Частичный платёж — останется долг {{remaining}}",
         "warnOverpay": "Сумма больше долга — получателю придётся вернуть {{flipAmount}}",
         "edit": "Изменить платёж",
@@ -1052,6 +1056,16 @@
         "noFriendsYet": "Общих групп пока нет",
         "friendBreakdownTitle": "Разбивка по группам",
         "friendBreakdownEmpty": "Общих групп с этим другом нет.",
+        "friendCrossNetLabel": "Итого по всем группам",
+        "friendSettleOneCurrency": "Закрыть в одной валюте",
+        "friendSettleAll": "Закрыть всё с {{name}}",
+        "friendCrossSettlePickTitle": "Выберите валюту расчёта",
+        "friendCrossSettleConfirmTitle": "Подтвердить расчёт между группами",
+        "friendCrossSettleConfirmButton": "Записать платежи",
+        "friendCrossSettleNetLabel": "Итого в выбранной валюте",
+        "friendCrossSettleYouPay": "Вы платите {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} платит вам",
+        "friendCrossSettleGroupsHint": "Будет записано платежей в {{count}} группе(ах)",
         "friendMoreCurrencies": "ещё +{{count}}"
     },
     "legal": {
@@ -1279,6 +1293,13 @@
         "recurring": {
             "lockedBody": "Автоматизируйте аренду, подписки и другие повторяющиеся расходы с Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Заполнить из текста чека",
+            "sheetTitle": "Текст чека",
+            "sheetBody": "Вставьте текст чека. Мы предложим сумму и валюту — вы подтверждаете.",
+            "placeholder": "Вставьте текст…",
+            "apply": "Применить"
+        },
         "smartReminder": {
             "sheetTitle": "Умные напоминания",
             "enable": "Автонапоминания о расчётах",
@@ -1292,7 +1313,11 @@
             "upgrade": "Перейти на Pro",
             "empty": "Пока нет расходов в этой валюте.",
             "uncategorized": "Без категории",
-            "tab": { "category": "Категория", "member": "Оплатил", "week": "Недели" }
+            "tab": {
+                "category": "Категория",
+                "member": "Оплатил",
+                "week": "Недели"
+            }
         },
         "tripBudget": {
             "title": "Бюджет поездки",

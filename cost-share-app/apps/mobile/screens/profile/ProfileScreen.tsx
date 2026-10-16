@@ -458,6 +458,7 @@ export function ProfileScreen() {
                     visible
                     friend={selectedFriend}
                     currentUserId={currentUserId}
+                    defaultCurrency={baseCurrency}
                     onClose={handleCloseFriendSheet}
                     onSelectGroup={handleSelectGroup}
                 />

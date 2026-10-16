@@ -8,7 +8,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { colors } from '../../theme';
 
 // Design tokens not in theme/colors.ts — use literal slate-200 / slate-100 values.
@@ -32,10 +32,11 @@ export function SummaryFooter({
     const isRtl = useRtlLayout();
 
     return (
-        <View style={styles.row}>
+        <View style={[styles.row, rtlRowStyle(isRtl)]}>
             <Text
-                className="text-[12px] text-gray-500 flex-1"
-                numberOfLines={1}
+                className="text-[12px] text-gray-500"
+                style={styles.statusText}
+                numberOfLines={2}
             >
                 {settlementCount === 0
                     ? t('groups.summary.noOpenPayments')
@@ -98,15 +99,23 @@ const styles = StyleSheet.create({
         paddingBottom: 14,
         borderTopWidth: 1,
         borderTopColor: BORDER_SOFT,
-        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 10,
+    },
+    statusText: {
+        flex: 1,
+        flexShrink: 1,
+        minWidth: 0,
     },
     pillGroup: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+        flexShrink: 0,
+        // Keep Note immediately left of Settle-up in RTL (avoid Note floating between
+        // the status copy and the settle pill when the row mirrors).
+        direction: 'ltr',
     },
     notePill: {
         backgroundColor: '#fff',

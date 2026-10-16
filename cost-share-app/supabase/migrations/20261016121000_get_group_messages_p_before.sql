@@ -1,7 +1,7 @@
 -- Reconcile dev/prod drift: optional p_before cursor for paginated group chat (KI-030).
 
-DROP FUNCTION IF EXISTS public.get_group_messages(UUID, INT);
-DROP FUNCTION IF EXISTS public.get_group_messages(UUID, INT, TIMESTAMPTZ);
+DROP FUNCTION IF EXISTS public.get_group_messages(UUID, INT); -- safe-breaking: optional p_before overload replaces prior signatures
+DROP FUNCTION IF EXISTS public.get_group_messages(UUID, INT, TIMESTAMPTZ); -- safe-breaking: same RPC name, additive p_before param
 
 CREATE OR REPLACE FUNCTION public.get_group_messages(
     p_group_id UUID,
@@ -33,5 +33,5 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.get_group_messages(UUID, INT, TIMESTAMPTZ) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.get_group_messages(UUID, INT, TIMESTAMPTZ) FROM PUBLIC, anon; -- safe-breaking: new function grants only
 GRANT EXECUTE ON FUNCTION public.get_group_messages(UUID, INT, TIMESTAMPTZ) TO authenticated;

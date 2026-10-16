@@ -15,7 +15,8 @@ psql "$DB_URL" -v ON_ERROR_STOP=1 -c "
   SELECT
     to_regclass('public.profiles') IS NOT NULL AS profiles,
     to_regclass('public.groups') IS NOT NULL AS groups,
-    to_regclass('public.expenses') IS NOT NULL AS expenses;
+    to_regclass('public.expenses') IS NOT NULL AS expenses,
+    to_regclass('public.consolidation_batches') IS NOT NULL AS consolidation_batches;
 "
 
 echo "▶ Pro webhook RPC present"

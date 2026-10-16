@@ -41,7 +41,8 @@
     "supabase:link:prod": "SUPABASE_ENV=production CONFIRM_PRODUCTION=yes bash scripts/supabase-link.sh",
     "supabase:bootstrap:prod": "bash scripts/supabase-bootstrap-production.sh",
     "android": "npm run android:run -w @cost-share/mobile",
-    "ios": "npm run ios:run -w @cost-share/mobile"
+    "ios": "npm run ios:run -w @cost-share/mobile",
+    "audit:ci": "bash scripts/ci-npm-audit.sh"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.45.0",
@@ -60,7 +61,21 @@
     "react": "19.1.0",
     "react-native-css-interop": {
       "lightningcss": "1.32.0"
-    }
+    },
+    "tar": "^7.5.2",
+    "shell-quote": "^1.8.3",
+    "next": {
+      ".": "15.5.28",
+      "postcss": "8.5.30"
+    },
+    "postcss": "^8.5.30",
+    "sharp": "^0.35.5",
+    "source-map-js": "^1.2.2",
+    "browserslist": "^4.29.3",
+    "nanoid": "^3.3.20",
+    "braces": "^3.0.3",
+    "baseline-browser-mapping": "^2.11.0",
+    "postcss-selector-parser": "^7.1.6"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "dependencies": {

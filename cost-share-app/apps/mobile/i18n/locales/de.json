@@ -64,6 +64,9 @@
             "balances": "Salden"
         },
         "signInError": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+        "signInWithEmailMagicLink": "Mit E-Mail fortfahren",
+        "emailMagicLinkStubHint": "Anmeldung per E-Mail-Link kommt demnächst.",
+        "emailPlaceholder": "deine@email.de",
         "googleSignInSheetTitle": "Mit Google anmelden",
         "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster."
     },
@@ -899,6 +902,7 @@
         "currency": "Währung",
         "amount": "Betrag",
         "submit": "Zahlung erfassen",
+        "paidInCurrency": "Zahlung in {{currency}} erfasst (Schulden können in anderen Währungen sein)",
         "warnPartial": "Teilzahlung – {{remaining}} bleiben offen",
         "warnOverpay": "Mehr als geschuldet – {{flipAmount}} werden zurückgeschuldet",
         "edit": "Zahlung bearbeiten",
@@ -1036,6 +1040,16 @@
         "noFriendsYet": "Noch keine gemeinsamen Gruppen",
         "friendBreakdownTitle": "Aufschlüsselung nach Gruppe",
         "friendBreakdownEmpty": "Keine gemeinsamen Gruppen mit diesem Freund.",
+        "friendCrossNetLabel": "Netto über alle Gruppen",
+        "friendSettleOneCurrency": "In einer Währung ausgleichen",
+        "friendSettleAll": "Alles mit {{name}} ausgleichen",
+        "friendCrossSettlePickTitle": "Ausgleichswährung wählen",
+        "friendCrossSettleConfirmTitle": "Gruppenübergreifenden Ausgleich bestätigen",
+        "friendCrossSettleConfirmButton": "Zahlungen erfassen",
+        "friendCrossSettleNetLabel": "Netto in gewählter Währung",
+        "friendCrossSettleYouPay": "Du zahlst an {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} zahlt dir",
+        "friendCrossSettleGroupsHint": "Erfasst Zahlungen in {{count}} Gruppe(n)",
         "friendMoreCurrencies": "+{{count}} weitere"
     },
     "legal": {
@@ -1261,6 +1275,13 @@
         "recurring": {
             "lockedBody": "Automatisieren Sie Miete, Abos und andere wiederkehrende Ausgaben mit Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Aus Belegtext füllen",
+            "sheetTitle": "Belegtext",
+            "sheetBody": "Belegtext einfügen. Betrag und Währung werden vorgeschlagen — Sie bestätigen.",
+            "placeholder": "Text einfügen…",
+            "apply": "Übernehmen"
+        },
         "smartReminder": {
             "sheetTitle": "Intelligente Erinnerungen",
             "enable": "Automatische Ausgleichs-Erinnerungen",
@@ -1274,7 +1295,11 @@
             "upgrade": "Pro freischalten",
             "empty": "Noch keine Ausgaben in dieser Währung.",
             "uncategorized": "Ohne Kategorie",
-            "tab": { "category": "Kategorie", "member": "Bezahlt von", "week": "Wochen" }
+            "tab": {
+                "category": "Kategorie",
+                "member": "Bezahlt von",
+                "week": "Wochen"
+            }
         },
         "tripBudget": {
             "title": "Reisebudget",
