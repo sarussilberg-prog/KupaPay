@@ -1,4 +1,8 @@
 -- cost-share-app/supabase/migrations/20260628120000_consolidation_batches.sql
+--
+-- Idempotent (IF NOT EXISTS / CREATE OR REPLACE / DROP IF EXISTS). Development DB may
+-- already have this schema from MCP-era applies while schema_migrations.version
+-- 20260628120000 is missing — CI uses db push --include-all to record history safely.
 
 -- ============================================
 -- consolidation_batches
