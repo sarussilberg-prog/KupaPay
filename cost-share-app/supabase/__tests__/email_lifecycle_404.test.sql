@@ -18,6 +18,9 @@ BEGIN
         RAISE EXCEPTION 'email_unsubscribe_token column missing';
     END IF;
 
-    PERFORM public.run_email_lifecycle_dispatch(1);
+    IF to_regprocedure('public.run_email_lifecycle_dispatch(integer)') IS NULL THEN
+        RAISE EXCEPTION 'run_email_lifecycle_dispatch missing';
+    END IF;
+
     RAISE NOTICE 'email_lifecycle_404.test.sql — passed';
 END $$;

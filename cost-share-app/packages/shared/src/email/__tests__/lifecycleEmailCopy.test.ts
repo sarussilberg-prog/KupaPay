@@ -1,6 +1,5 @@
 import { lifecycleEmailCopy } from '../lifecycleEmailCopy';
 import { APP_I18N_LOCALE_CODES } from '../../i18n/appLocales';
-import type { Language } from '../../i18n/languages';
 
 describe('lifecycleEmailCopy', () => {
     it('returns copy for every locale and template', () => {

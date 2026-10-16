@@ -1,11 +1,11 @@
+import { lifecycleEmailCopy } from '../../../packages/shared/src/email/lifecycleEmailCopy.ts';
+import { isEmailLifecycleTemplateId } from '../../../packages/shared/src/email/lifecycleTemplates.ts';
 import {
     buildEmailPreferencesUrl,
     buildEmailUnsubscribeUrl,
-    isEmailLifecycleTemplateId,
-    lifecycleEmailCopy,
     renderTransactionalEmailHtml,
-    type Language,
-} from '../../../packages/shared/src/index.ts';
+} from '../../../packages/shared/src/email/renderTransactionalEmail.ts';
+import { type Language } from '../../../packages/shared/src/i18n/languages.ts';
 import {
     sendTransactionalEmail,
     transactionalEmailEnabled,
