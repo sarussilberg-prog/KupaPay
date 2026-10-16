@@ -5,6 +5,7 @@ import {
     proUntilFromEvent,
     tripPassUntilFromEvent,
     verifyAuthorization,
+    type RevenueCatWebhookBody,
     type WebhookEnv,
     PRODUCT_PRO_MONTHLY,
     PRODUCT_TRIP_PASS,
@@ -271,6 +272,68 @@ Deno.test('applyWebhookEvent duplicate event is ignored', async () => {
             env,
         );
         assertEquals(outcome, { ok: true, action: 'ignored', duplicate: true });
+    } finally {
+        restore();
+    }
+});
+
+async function loadFixture(name: string): Promise<RevenueCatWebhookBody> {
+    const raw = await Deno.readTextFile(new URL(`./fixtures/${name}`, import.meta.url));
+    return JSON.parse(raw) as RevenueCatWebhookBody;
+}
+
+const CONTRACT_FIXTURES = [
+    'initial_purchase_pro.json',
+    'renewal_pro.json',
+    'trial_initial_purchase.json',
+    'cancellation_pro.json',
+    'expiration_pro.json',
+] as const;
+
+for (const fixture of CONTRACT_FIXTURES) {
+    Deno.test(`contract fixture ${fixture} maps to RevenueCat RPC payload`, async () => {
+        const body = await loadFixture(fixture);
+        const captured: { body?: Record<string, unknown> } = {};
+        const restore = mockRpcFetch(parsed => {
+            captured.body = parsed;
+            return { status: 200, json: { duplicate: false, action: 'individual' } };
+        });
+        try {
+            const outcome = await applyWebhookEvent(body, env);
+            assertEquals(outcome.ok, true);
+            assertEquals(captured.body?.p_event_id, body.event.id);
+            assertEquals(captured.body?.p_user_id, body.event.app_user_id);
+            assertEquals(captured.body?.p_event_type, body.event.type);
+            const revoke = body.event.type === 'CANCELLATION' || body.event.type === 'EXPIRATION';
+            assertEquals(captured.body?.p_is_revoke, revoke);
+            if (revoke) {
+                assertEquals(captured.body?.p_is_trip_pass, false);
+            }
+        } finally {
+            restore();
+        }
+    });
+}
+
+Deno.test('handleRequest accepts fixture body with shared secret', async () => {
+    const body = await loadFixture('initial_purchase_pro.json');
+    const restore = mockRpcFetch(() => ({
+        status: 200,
+        json: { duplicate: false, action: 'individual' },
+    }));
+    try {
+        const res = await handleRequest(
+            new Request('https://example.com/webhook', {
+                method: 'POST',
+                headers: { authorization: 'Bearer secret', 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+            }),
+            env,
+        );
+        assertEquals(res.status, 200);
+        const json = (await res.json()) as { ok?: boolean; action?: string };
+        assertEquals(json.ok, true);
+        assertEquals(json.action, 'individual');
     } finally {
         restore();
     }
