@@ -147,55 +147,13 @@ jobs:
       - uses: actions/checkout@v4
       - run: bash scripts/supabase-unique-migration-versions.sh
 
-  supabase-sql-tests:
-    name: Supabase SQL tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    defaults:
-      run:
-        working-directory: cost-share-app
-    steps:
-      - uses: actions/checkout@v4
-      - run: bash scripts/supabase-unique-migration-versions.sh
-      - run: bash scripts/ci-supabase-sql-tests.sh
+  ci-performance:
+    name: CI performance
+    uses: ./.github/workflows/ci-performance.yml
 
-  mobile-query-budgets:
-    name: Mobile Supabase budgets
-    needs: setup
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cost-share-app
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - uses: actions/download-artifact@v4
-        with:
-          name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci
-      - run: npm run test:performance
-
-  bundle-size:
-    name: Bundle size budgets
-    needs: setup
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cost-share-app
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - uses: actions/download-artifact@v4
-        with:
-          name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/next || npm ci
-      - run: bash scripts/ci-bundle-size.sh
+  supabase-sql-integration:
+    name: Supabase SQL integration
+    uses: ./.github/workflows/supabase-sql-integration.yml
 
   deno-edge-bundle-check:
     name: Deno edge bundle (all functions)
@@ -222,9 +180,8 @@ jobs:
         migration-versions,
         no-merge-conflicts,
         expo-mobile-config,
-        supabase-sql-tests,
-        mobile-query-budgets,
-        bundle-size,
+        ci-performance,
+        supabase-sql-integration,
       ]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'

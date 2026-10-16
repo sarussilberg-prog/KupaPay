@@ -36,7 +36,7 @@ trap cleanup EXIT
 echo "▶ Starting Postgres (${PG_IMAGE})"
 docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 docker run -d --name "$PG_CONTAINER" \
-  --shm-size=256mb \
+  --shm-size=1gb \
   -e POSTGRES_PASSWORD=postgres \
   -e JWT_SECRET=ci-local-jwt-secret-at-least-32-chars \
   -e JWT_EXP=3600 \
