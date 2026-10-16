@@ -1293,7 +1293,7 @@
             "edit": "Изменить",
             "clear": "Удалить бюджет",
             "emptyHint": "Бюджет не задан — нажмите «Задать бюджет».",
-            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "progress": "{{spent}} из {{budget}} {{currency}} · {{percent}}%",
             "sheetTitle": "Бюджет поездки",
             "sheetBody": "Учитываются только расходы в валюте бюджета.",
             "amountPlaceholder": "Сумма бюджета"

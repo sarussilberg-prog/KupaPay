@@ -1275,7 +1275,7 @@
             "edit": "Bearbeiten",
             "clear": "Budget entfernen",
             "emptyHint": "Noch kein Budget — tippe auf «Budget festlegen».",
-            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "progress": "{{spent}} von {{budget}} {{currency}} · {{percent}} %",
             "sheetTitle": "Reisebudget",
             "sheetBody": "Nur Ausgaben in der Budgetwährung zählen.",
             "amountPlaceholder": "Budgetbetrag"

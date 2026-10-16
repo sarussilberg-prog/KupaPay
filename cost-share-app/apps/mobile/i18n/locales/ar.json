@@ -1357,7 +1357,7 @@
             "edit": "تعديل",
             "clear": "إزالة الميزانية",
             "emptyHint": "لا توجد ميزانية بعد — اضغط «تعيين الميزانية».",
-            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "progress": "{{spent}} من {{budget}} {{currency}} · {{percent}}%",
             "sheetTitle": "ميزانية الرحلة",
             "sheetBody": "المجموع يشمل المصروفات بعملة الميزانية فقط.",
             "amountPlaceholder": "مبلغ الميزانية"

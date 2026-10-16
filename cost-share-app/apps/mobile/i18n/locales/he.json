@@ -1208,7 +1208,7 @@
             "edit": "עריכה",
             "clear": "הסרת תקציב",
             "emptyHint": "עדיין אין תקציב — הקשו «הגדרת תקציב».",
-            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "progress": "{{spent}} מתוך {{budget}} {{currency}} · {{percent}}%",
             "sheetTitle": "תקציב טיול",
             "sheetBody": "הסכום כולל רק הוצאות במטבע התקציב.",
             "amountPlaceholder": "סכום תקציב"

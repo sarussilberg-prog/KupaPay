@@ -1277,7 +1277,7 @@
             "edit": "Editar",
             "clear": "Quitar presupuesto",
             "emptyHint": "Sin presupuesto — pulsa «Definir presupuesto».",
-            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "progress": "{{spent}} de {{budget}} {{currency}} · {{percent}} %",
             "sheetTitle": "Presupuesto del viaje",
             "sheetBody": "Solo cuenta gastos en la moneda del presupuesto.",
             "amountPlaceholder": "Importe del presupuesto"

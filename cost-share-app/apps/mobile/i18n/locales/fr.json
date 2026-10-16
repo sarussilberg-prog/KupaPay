@@ -1275,7 +1275,7 @@
             "edit": "Modifier",
             "clear": "Supprimer le budget",
             "emptyHint": "Pas encore de budget — touchez « Définir le budget ».",
-            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "progress": "{{spent}} sur {{budget}} {{currency}} · {{percent}} %",
             "sheetTitle": "Budget du voyage",
             "sheetBody": "Total des dépenses dans la devise du budget uniquement.",
             "amountPlaceholder": "Montant du budget"
