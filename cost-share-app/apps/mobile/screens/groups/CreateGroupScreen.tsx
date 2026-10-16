@@ -211,9 +211,9 @@ export function CreateGroupScreen() {
                     await updateGroup(result.id, { imageUrl: uploadedUrl });
                 }
             }
-            navigation.navigate('Main', {
-                screen: 'Groups',
-                params: { screen: 'GroupDetail', params: { groupId: result.id } },
+            navigation.navigate('GroupPostCreateInvite', {
+                groupId: result.id,
+                groupName: result.name,
             });
         } finally {
             stopLoading();

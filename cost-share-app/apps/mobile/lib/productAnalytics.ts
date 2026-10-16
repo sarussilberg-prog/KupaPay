@@ -9,7 +9,10 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+    ACTIVATION_ANALYTICS_EVENTS,
+    ACTIVATION_ANALYTICS_STORAGE_KEYS,
     buildProductAnalyticsProperties,
+    secondsSinceSignup,
     type ProductAnalyticsEvent,
     type ProductAnalyticsPropertyValue,
 } from '@cost-share/shared';
@@ -92,12 +95,71 @@ export async function captureProductEvent(
     }
 }
 
+/** Records signup time and fires `signup_completed` once per install. */
+export async function trackSignupCompleted(
+    properties?: Record<string, string | number | boolean | null>,
+): Promise<void> {
+    try {
+        const sent = await AsyncStorage.getItem(
+            ACTIVATION_ANALYTICS_STORAGE_KEYS.signupCompletedSent,
+        );
+        if (sent === '1') return;
+        const atMs = Date.now();
+        await AsyncStorage.setItem(
+            ACTIVATION_ANALYTICS_STORAGE_KEYS.signupCompletedAt,
+            String(atMs),
+        );
+        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.signupCompleted, {
+            ...properties,
+            signup_completed_at_ms: atMs,
+        });
+        await AsyncStorage.setItem(ACTIVATION_ANALYTICS_STORAGE_KEYS.signupCompletedSent, '1');
+    } catch {
+        // ignore
+    }
+}
+
+export async function readSignupCompletedAtMs(): Promise<number | null> {
+    try {
+        const raw = await AsyncStorage.getItem(
+            ACTIVATION_ANALYTICS_STORAGE_KEYS.signupCompletedAt,
+        );
+        if (!raw) return null;
+        const parsed = Number.parseInt(raw, 10);
+        return Number.isFinite(parsed) ? parsed : null;
+    } catch {
+        return null;
+    }
+}
+
+/** Fires `first_expense_added` once per install with seconds since signup. */
+export async function trackFirstExpenseAdded(
+    groupId: string,
+    extra?: Record<string, string | number | boolean | null>,
+): Promise<void> {
+    try {
+        const sent = await AsyncStorage.getItem(ACTIVATION_ANALYTICS_STORAGE_KEYS.firstExpenseSent);
+        if (sent === '1') return;
+        const signupAt = await readSignupCompletedAtMs();
+        const seconds =
+            signupAt != null ? secondsSinceSignup(signupAt) : null;
+        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.firstExpenseAdded, {
+            group_id: groupId,
+            ...(seconds != null ? { seconds_since_signup: seconds } : {}),
+            ...extra,
+        });
+        await AsyncStorage.setItem(ACTIVATION_ANALYTICS_STORAGE_KEYS.firstExpenseSent, '1');
+    } catch {
+        // ignore
+    }
+}
+
 /** Fires `group_created` once per install/user. */
 export async function trackFirstGroupCreated(groupId: string): Promise<void> {
     try {
         const sent = await AsyncStorage.getItem(FIRST_GROUP_FLAG);
         if (sent === '1') return;
-        await captureProductEvent('group_created', { group_id: groupId });
+        await captureProductEvent(ACTIVATION_ANALYTICS_EVENTS.groupCreated, { group_id: groupId });
         await AsyncStorage.setItem(FIRST_GROUP_FLAG, '1');
     } catch {
         // ignore

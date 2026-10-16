@@ -18,8 +18,16 @@ export const PRODUCT_ANALYTICS_FUNNEL_EVENTS = [
 export type ProductAnalyticsFunnelEvent = (typeof PRODUCT_ANALYTICS_FUNNEL_EVENTS)[number];
 
 /** Additional explicit product events (same naming rules as funnel events). */
+/** Activation onboarding funnel (#392) — explicit once-per-install milestones. */
+export const PRODUCT_ANALYTICS_ACTIVATION_EVENT_NAMES = {
+    signupCompleted: 'signup_completed',
+    firstExpenseAdded: 'first_expense_added',
+} as const;
+
 export const PRODUCT_ANALYTICS_EXTENDED_EVENTS = [
     'app_open',
+    PRODUCT_ANALYTICS_ACTIVATION_EVENT_NAMES.signupCompleted,
+    PRODUCT_ANALYTICS_ACTIVATION_EVENT_NAMES.firstExpenseAdded,
     'paywall_load_failed',
     'purchase_completed',
     'purchase_failed',
