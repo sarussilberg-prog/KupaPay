@@ -103,16 +103,17 @@ BEGIN
         RAISE EXCEPTION 'Case 3 failed: expected 2 expense_added rows, got %', v_count;
     END IF;
 
-    -- ---- CASE 4: soft-delete expense → 0 rows remain
+    -- ---- CASE 4: soft-delete expense → rows marked deleted in metadata
+    -- (20260618192600: in-place metadata flag, not DELETE FROM activity_events)
     UPDATE public.expenses SET is_deleted = true WHERE id = v_exp;
     SELECT COUNT(*) INTO v_count FROM activity_events
-    WHERE kind = 'expense_added' AND ref_id = v_exp;
-    IF v_count <> 0 THEN
-        RAISE EXCEPTION 'Case 4 failed: soft-deleted expense left % rows', v_count;
+    WHERE kind = 'expense_added' AND ref_id = v_exp
+      AND COALESCE((metadata->>'is_deleted')::boolean, false);
+    IF v_count <> 2 THEN
+        RAISE EXCEPTION 'Case 4 failed: expected 2 deleted-marked rows, got %', v_count;
     END IF;
 
-    -- ---- CASE 5: idempotency — re-running trigger via UPDATE that flips
-    --             is_deleted back to false produces no duplicates.
+    -- ---- CASE 5: un-delete does not duplicate rows (ON CONFLICT DO NOTHING)
     UPDATE public.expenses SET is_deleted = false WHERE id = v_exp;
     UPDATE public.expenses SET is_deleted = false WHERE id = v_exp; -- no-op
     SELECT COUNT(*) INTO v_count FROM activity_events
@@ -135,13 +136,13 @@ BEGIN
     WHERE id = v_fr;
 
     SELECT COUNT(*) INTO v_count FROM activity_events
-    WHERE kind = 'friend_request_received' AND ref_id = v_fr;
+    WHERE kind = 'friend_request_received' AND ref_id = v_fr AND user_id = v_alice;
     IF v_count <> 1 THEN
-        RAISE EXCEPTION 'Case 6 failed: friend request produced % rows', v_count;
+        RAISE EXCEPTION 'Case 6 failed: friend request produced % rows for Alice', v_count;
     END IF;
 
     SELECT metadata->>'status' INTO v_status FROM activity_events
-        WHERE kind = 'friend_request_received' AND ref_id = v_fr;
+        WHERE kind = 'friend_request_received' AND ref_id = v_fr AND user_id = v_alice;
     IF v_status IS DISTINCT FROM 'accepted' THEN
         RAISE EXCEPTION 'Case 6 failed: expected metadata.status=accepted, got %', v_status;
     END IF;

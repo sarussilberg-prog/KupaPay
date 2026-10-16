@@ -34,7 +34,7 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 
 ## Version / build number
 
-Marketing version is unchanged. Before build, the workflow syncs EAS remote **iOS buildNumber** with the latest **VALID** build in App Store Connect (when possible), then `production` profile **`autoIncrement`** bumps for the new IPA. No git commits from this workflow.
+Marketing version is unchanged. Before build, `scripts/sync-eas-ios-build-number.mjs` reads the latest **VALID** ASC build `N`, sets EAS remote **iOS buildNumber** to `N` via Expo GraphQL (non-interactive; no deprecated `eas build:version:set -p ios N` positional form), then `production` **`autoIncrement`** produces build **`N + 1`** for the IPA. No git commits from this workflow.
 
 ## EAS environment (production)
 
@@ -45,3 +45,19 @@ Other `EXPO_PUBLIC_*` values (Supabase URL, Google client IDs, Sentry, etc.) sho
 **Actions → TestFlight iOS → Run workflow** → choose branch (usually `main`) → set **pro_enabled** → Run.
 
 After success, wait for processing in App Store Connect → TestFlight. On-device checks: [APP_STORE_IOS.md §7](APP_STORE_IOS.md#7-on-device-smoke-test-testflight-install).
+
+## Pro v2 smoke checklist (Phase 0 — Gate I)
+
+Before promoting `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED=true` on a production-bound build, complete once on a **dev / RC sandbox** TestFlight build and attach notes to the workflow run:
+
+- [ ] Sign in (Google + Apple sample accounts)
+- [ ] Paywall loads prices; Terms/Privacy links work
+- [ ] Sandbox purchase → Pro unlocks export PDF
+- [ ] Restore purchases
+- [ ] Trip Pass purchase → group members see Pro (dev group)
+- [ ] Webhook received (RC dashboard + `profiles.pro_until` row)
+- [ ] Push token registered; test settle reminder still works
+- [ ] Hebrew RTL: paywall + one Pro surface
+- [ ] Offline: add expense still works; Pro surfaces degrade gracefully
+
+**Build number sync:** The workflow fails loudly if `sync-eas-ios-build-number.mjs` errors (no `|| true`) so mis-versioned uploads are caught before EAS build.

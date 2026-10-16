@@ -3,7 +3,7 @@
 // Sentry REST endpoints. Exported as a pure function so it is testable without
 // Deno.serve.
 
-import { createClient, type SupabaseClient } from 'supabase';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import { jsonResponse, preflight } from './cors.ts';
 
 export interface ProxyEnv {

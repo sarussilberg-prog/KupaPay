@@ -31,7 +31,27 @@ supabase secrets set PUSH_WEBHOOK_SECRET=<RANDOM_SECRET> --project-ref <PROJECT_
 supabase functions deploy send-push --project-ref <PROJECT_REF>
 ```
 
-## 4. EAS push credentials (Phase 4)
+## 4. Pro trial reminder cron (daily 07:00 UTC)
+
+Migration `20261016120000_pro_trial_reminder_cron.sql` schedules `pro-trial-reminder-dispatch`.
+Add the function URL to Vault (same project as §1):
+
+```sql
+SELECT vault.create_secret(
+  'https://<PROJECT_REF>.supabase.co/functions/v1/pro-trial-reminder-dispatch',
+  'pro_trial_reminder_dispatch_url',
+  'POST target for daily pro trial reminder cron');
+```
+
+Reuses **`send_push_secret`** in Vault and edge **`PUSH_WEBHOOK_SECRET`** (`x-webhook-secret` header).
+
+Deploy the function:
+
+```bash
+supabase functions deploy pro-trial-reminder-dispatch --project-ref <PROJECT_REF>
+```
+
+## 5. EAS push credentials (Phase 4)
 
 - iOS: `eas credentials` → push key (APNs) under Apple Team `HVW3H3DLRB`.
 - Android: create a Firebase project for `com.kupapay.mobile`, upload the FCM v1 service account

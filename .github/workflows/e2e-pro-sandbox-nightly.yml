@@ -1,0 +1,22 @@
+name: E2E Pro sandbox (nightly)
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-pro-sandbox-nightly
+  cancel-in-progress: false
+
+jobs:
+  maestro-smoke:
+    name: Maestro smoke (scaffold)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gate D scaffold
+        run: |
+          echo "Nightly E2E workflow registered (Phase 0 Gate D)."
+          echo "Wire Maestro Cloud or macOS runner + RC sandbox client next."
+          echo "See docs/PRO_V2_PLAN.md Gate D."
