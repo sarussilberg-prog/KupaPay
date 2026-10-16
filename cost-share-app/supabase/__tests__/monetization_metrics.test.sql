@@ -19,11 +19,12 @@ BEGIN
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin);
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
     INSERT INTO public.monetization_events (user_id, feature_key, event_type, platform)
         VALUES (v_admin, 'remind_settle', 'ad_gate_shown', 'ios');
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_user::text)::text, TRUE);
+    SET LOCAL session_replication_role = origin;
+
+    PERFORM public.test_set_authenticated(v_user);
     v_caught := FALSE;
     BEGIN
         PERFORM public.get_monetization_metrics();
@@ -34,7 +35,7 @@ BEGIN
         RAISE EXCEPTION 'Case 1 failed: non-admin should raise not_admin';
     END IF;
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     IF NOT public.is_app_admin() THEN
         RAISE EXCEPTION 'Case 2a failed: is_app_admin() should be TRUE for seeded admin';
     END IF;
