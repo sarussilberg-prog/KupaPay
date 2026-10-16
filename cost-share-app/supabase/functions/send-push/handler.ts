@@ -57,6 +57,7 @@ const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     group_note_changed: 'groups_push',
     settle_up_reminder: 'settlements_push',
     consolidation_batch_added: 'settlements_push',
+    trip_budget_alert: 'groups_push',
 };
 
 const DEFAULT_PREFS: PrefsRow = {

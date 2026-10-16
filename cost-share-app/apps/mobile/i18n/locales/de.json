@@ -871,7 +871,8 @@
             "noteChangedByYou": "Notiz von dir geändert · {{group}}",
             "noteChangedBy": "Notiz von {{name}} geändert · {{group}}",
             "friendRequestRejectedByThem": "{{name}} hat deine Freundschaftsanfrage abgelehnt",
-            "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet"
+            "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet",
+            "tripBudgetAlert": "Reisebudget-Hinweis in {{group}}"
         },
         "addedExpense": "hat eine Ausgabe hinzugefügt",
         "settledPayment": "hat eine Zahlung ausgeglichen",
@@ -1266,6 +1267,7 @@
             "lockedBody": "Pro sendet Erinnerungen nach Ihrem Intervall (mindestens alle 3 Tage).",
             "intervalDays": "Alle {{count}} Tage"
         },
+<<<<<<< HEAD
         "spendingInsights": {
             "menuOption": "Ausgaben-Insights",
             "sheetTitle": "Ausgaben-Insights",
@@ -1274,6 +1276,20 @@
             "empty": "Noch keine Ausgaben in dieser Währung.",
             "uncategorized": "Ohne Kategorie",
             "tab": { "category": "Kategorie", "member": "Bezahlt von", "week": "Wochen" }
+=======
+        "tripBudget": {
+            "title": "Reisebudget",
+            "lockedBody": "Ausgabenlimit mit Hinweisen bei 80 % und 100 %.",
+            "upgrade": "Pro freischalten",
+            "set": "Budget festlegen",
+            "edit": "Bearbeiten",
+            "clear": "Budget entfernen",
+            "emptyHint": "Noch kein Budget — tippe auf «Budget festlegen».",
+            "progress": "{{spent}} von {{budget}} {{currency}} · {{percent}} %",
+            "sheetTitle": "Reisebudget",
+            "sheetBody": "Nur Ausgaben in der Budgetwährung zählen.",
+            "amountPlaceholder": "Budgetbetrag"
+>>>>>>> origin/dev
         }
     },
     "updateRequired": {

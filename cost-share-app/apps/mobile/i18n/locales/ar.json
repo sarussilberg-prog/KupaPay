@@ -913,7 +913,8 @@
             "noteChangedByYou": "عدّلتَ الملاحظة · {{group}}",
             "noteChangedBy": "عدّل {{name}} الملاحظة · {{group}}",
             "friendRequestRejectedByThem": "رفض {{name}} طلب صداقتك",
-            "settleReminder": "أرسل لك {{name}} تذكيرًا بتسوية الحساب في {{group}}"
+            "settleReminder": "أرسل لك {{name}} تذكيرًا بتسوية الحساب في {{group}}",
+            "tripBudgetAlert": "تنبيه ميزانية الرحلة في {{group}}"
         },
         "addedExpense": "أضاف مصروفًا",
         "settledPayment": "سوّى دفعة",
@@ -1348,6 +1349,7 @@
             "lockedBody": "Pro يرسل تذكيرات حسب الجدول (3 أيام كحد أدنى).",
             "intervalDays": "كل {{count}} أيام"
         },
+<<<<<<< HEAD
         "spendingInsights": {
             "menuOption": "رؤى الإنفاق",
             "sheetTitle": "رؤى الإنفاق",
@@ -1356,6 +1358,20 @@
             "empty": "لا مصروفات بهذه العملة بعد.",
             "uncategorized": "بدون فئة",
             "tab": { "category": "فئة", "member": "دفع", "week": "أسبوعي" }
+=======
+        "tripBudget": {
+            "title": "ميزانية الرحلة",
+            "lockedBody": "حدّ للإنفاق مع تنبيهات عند 80% و100%.",
+            "upgrade": "الترقية إلى Pro",
+            "set": "تعيين الميزانية",
+            "edit": "تعديل",
+            "clear": "إزالة الميزانية",
+            "emptyHint": "لا توجد ميزانية بعد — اضغط «تعيين الميزانية».",
+            "progress": "{{spent}} من {{budget}} {{currency}} · {{percent}}%",
+            "sheetTitle": "ميزانية الرحلة",
+            "sheetBody": "المجموع يشمل المصروفات بعملة الميزانية فقط.",
+            "amountPlaceholder": "مبلغ الميزانية"
+>>>>>>> origin/dev
         }
     },
     "updateRequired": {
