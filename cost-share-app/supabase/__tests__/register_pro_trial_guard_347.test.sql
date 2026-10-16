@@ -11,6 +11,7 @@ BEGIN
     INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, invite_token, pro_until) VALUES
         (v_user, 'trial347@test.local', 'Trial', 'USD', 'en', TRUE, 'tt_trial347', NULL);
 
+    SET LOCAL session_replication_role = origin;
     PERFORM public.test_set_authenticated(v_user);
     v_caught := FALSE;
     BEGIN
