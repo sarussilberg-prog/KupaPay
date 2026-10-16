@@ -40,6 +40,10 @@ jest.mock('../../components/skeletons/AppGateSkeleton', () => ({
     },
 }));
 
+jest.mock('../../components/admin/AdminProViewBanner', () => ({
+    AdminProViewBanner: () => null,
+}));
+
 jest.mock('../../lib/sentry', () => ({
     navigationIntegration: { registerNavigationContainer: jest.fn() },
 }));

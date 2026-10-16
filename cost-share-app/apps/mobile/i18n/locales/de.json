@@ -692,6 +692,21 @@
             "resetOnboardingRow": "Onboarding zurücksetzen",
             "previewCreateGroupRow": "Vorschau des Bildschirms zur ersten Gruppe"
         },
+        "proView": {
+            "sectionTitle": "Pro-Ansichtsmodus",
+            "description": "Free- oder Pro-Erfahrung nur für dein Konto testen (24 Std.). Ändert kein echtes Abo.",
+            "loading": "Pro-Status wird geladen…",
+            "expires": "Überschreibung endet {{when}}",
+            "setFailed": "Pro-Ansichtsmodus konnte nicht aktualisiert werden",
+            "bannerPro": "Admin-Ansicht: Pro",
+            "bannerFree": "Admin-Ansicht: Free",
+            "bannerResetHint": "Tippen, um auf „Echt“ zurückzusetzen",
+            "mode": {
+                "real": "Echt",
+                "force_pro": "Pro erzwingen",
+                "force_free": "Free erzwingen"
+            }
+        },
         "onboarding": {
             "resetTitle": "Onboarding zurücksetzen?",
             "resetMessage": "Die Markierungen werden gelöscht und der Bildschirm zur ersten Gruppe wird geöffnet. Für das Onboarding vor der Anmeldung musst du dich abmelden und die App neu starten.",

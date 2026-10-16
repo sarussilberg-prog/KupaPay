@@ -2,6 +2,20 @@
  * Admin Service — admin-only RPCs (gated by is_app_admin() on the DB).
  */
 import { supabase } from '../lib/supabase';
+import {
+    setMyAdminProViewMode,
+    type AdminProViewMode,
+    type MyProStatus,
+} from './proEntitlements.service';
+
+export type { AdminProViewMode };
+
+export async function setAdminProViewMode(
+    mode: AdminProViewMode,
+    durationHours = 24,
+): Promise<MyProStatus> {
+    return setMyAdminProViewMode(mode, durationHours);
+}
 
 export interface DeletedAccount {
     userId: string;
