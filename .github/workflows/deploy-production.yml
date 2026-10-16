@@ -19,6 +19,7 @@ on:
         type: choice
         options:
           - none
+          - probe_only
           - path_b_pro_trial_applied
           - path_b_recurring_applied
           - path_b_pro_trial_and_recurring_applied
