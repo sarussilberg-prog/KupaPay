@@ -1,4 +1,4 @@
-// Group invite landing: https://kupa-pay.com/g/<token>
+// Group invite landing: https://kupa-pay.com/g/<invite-token>
 import { inviteLandingHtml } from '@/app/_lib/inviteLandingHtml';
 
 export const dynamic = 'force-dynamic';

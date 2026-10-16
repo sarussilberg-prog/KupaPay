@@ -14,7 +14,7 @@
  */
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { View, ScrollView, RefreshControl } from 'react-native';
+import { View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
@@ -26,6 +26,7 @@ import {
     isProPerkUnlocked,
 } from '@cost-share/shared';
 import { Text } from '../../components/AppText';
+import { AppIcon } from '../../components/AppIcon';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import { GroupTotalsCard } from '../../components/balances/GroupTotalsCard';
@@ -54,6 +55,7 @@ import {
     getDisplayName,
     getDisplayNameForMember,
 } from '../../lib/userDisplay';
+import { shareGroupBalanceLink } from '../../services/invite.service';
 
 interface SettleTarget {
     fromUserId: string;
@@ -100,10 +102,20 @@ export function BalancesScreen() {
     }, [navigation, groupId]);
 
     useLayoutEffect(() => {
-        if (groupName) {
-            navigation.setOptions({ title: groupName });
-        }
-    }, [navigation, groupName]);
+        navigation.setOptions({
+            ...(groupName ? { title: groupName } : {}),
+            headerRight: () => (
+                <TouchableOpacity
+                    onPress={() => void shareGroupBalanceLink(groupId)}
+                    className="px-3 py-2"
+                    accessibilityLabel={t('groups.share.balanceLinkOption')}
+                    testID="balances-share-web-link"
+                >
+                    <AppIcon name="share-outline" size={22} color={colors.primaryDark} />
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation, groupName, groupId, t]);
 
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [settleTarget, setSettleTarget] = useState<SettleTarget | null>(null);

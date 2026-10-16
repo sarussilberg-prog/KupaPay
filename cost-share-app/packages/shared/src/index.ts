@@ -16,6 +16,7 @@ export * from './i18n/listMetaLabel';
 export * from './i18n/collectStaticI18nKeys';
 export * from './brand';
 export * from './deferredInvite';
+export * from './publicGroupWeb';
 export * from './invites';
 export * from './types';
 export * from './schemas';

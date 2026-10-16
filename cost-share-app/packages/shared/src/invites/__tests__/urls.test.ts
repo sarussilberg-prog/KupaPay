@@ -1,4 +1,4 @@
-import { buildInviteUrl, buildSettleReminderUrl } from '../urls';
+import { buildInviteUrl, buildPublicGroupBalanceUrl, buildSettleReminderUrl } from '../urls';
 
 describe('invite urls', () => {
     it('builds friend invite URL', () => {
@@ -11,5 +11,9 @@ describe('invite urls', () => {
 
     it('builds settle reminder URL', () => {
         expect(buildSettleReminderUrl('Tok1234567')).toBe('https://kupa-pay.com/sr/Tok1234567');
+    });
+
+    it('builds public balance page URL', () => {
+        expect(buildPublicGroupBalanceUrl('BalTok1234567')).toBe('https://kupa-pay.com/b/BalTok1234567');
     });
 });

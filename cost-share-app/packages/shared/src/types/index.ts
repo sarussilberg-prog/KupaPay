@@ -48,7 +48,9 @@ export interface Group {
     imageUrl?: string;
     groupType: GroupType;
     defaultCurrency: string;
-    inviteToken: string;  // 10-char URL-safe slug; used with APP_WEB_ORIGIN + /g/<token>
+    inviteToken: string;  // URL-safe slug; join link APP_WEB_ORIGIN + /g/<token>
+    /** Separate revocable token for read-only web balance page /b/<token>. */
+    publicBalanceToken?: string;
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
     /** Last expense, settlement, or message activity (auto-maintained in DB). */
