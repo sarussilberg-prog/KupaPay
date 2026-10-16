@@ -52,7 +52,8 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 ## Observability & ops (deferred from 2026-06-02 pre-Play audit)
 
 ### 1. Crash & error reporting (Sentry / Crashlytics)
-- **Status (2026-10-15):** **Shipped** — `@sentry/react-native` (EU DSN), release/dist tagging, `sendDefaultPii: false`, user id only. Source-map upload runs on EAS when `SENTRY_AUTH_TOKEN` is set; otherwise `SENTRY_DISABLE_AUTO_UPLOAD=true` from `app.config.ts`.
+- **Status (2026-10-15):** **Shipped (mobile)** — `@sentry/react-native` (EU DSN), release/dist tagging, `sendDefaultPii: false`, user id only. Source-map upload runs on EAS when `SENTRY_AUTH_TOKEN` is set; otherwise `SENTRY_DISABLE_AUTO_UPLOAD=true` from `app.config.ts`.
+- **Status (2026-10-16):** **Shipped (Next.js marketing / proxy)** — `@sentry/nextjs` via `instrumentation.ts` + `instrumentation-client.ts`, release `kupapay-web@…`, `withSentryConfig` uploads source maps on Vercel when `SENTRY_AUTH_TOKEN` is set; runtime no-ops when `NEXT_PUBLIC_SENTRY_DSN` is unset. Sentry project `kupapay-web` must exist in org (owner: [#149](https://github.com/sarussilberg-prog/KupaPay/issues/149)).
 - **Revisit when:** First prod crash where stack is still minified (verify token + upload).
 
 ### 2. Product analytics (PostHog / Amplitude / similar)

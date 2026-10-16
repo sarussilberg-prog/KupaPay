@@ -136,6 +136,8 @@ Squash merge via `gh pr merge --auto` after checks + SonarCloud, then dev prerel
 | Supabase | [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | Migrations → development DB + smoke |
 | Web | Vercel | [`vercel-should-build.sh`](../cost-share-app/apps/web/scripts/vercel-should-build.sh) — path-based skip; dev vs prod by project ID |
 
+**Vercel dashboard + project roots:** See [SSOT/VERCEL.md](SSOT/VERCEL.md).
+
 **Vercel ignored build step (SSOT):** Do not maintain branch/path skip logic in the Vercel dashboard. Set **Ignored Build Step** to the same command as [`apps/web/vercel.json`](../cost-share-app/apps/web/vercel.json) `ignoreCommand` (project root = `cost-share-app/apps/web`):
 
 ```bash
