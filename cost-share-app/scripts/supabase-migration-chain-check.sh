@@ -23,7 +23,7 @@ for f in "${files[@]}"; do
     continue
   fi
   ver="${BASH_REMATCH[1]}"
-  if [[ -n "$prev" && "$ver" <= "$prev" ]]; then
+  if [[ -n "$prev" && ( "$ver" < "$prev" || "$ver" == "$prev" ) ]]; then
     echo "::error::Migration chain order broken: $base (prefix $ver) is not newer than $prev"
     echo "  Rename with a strictly increasing 14-digit timestamp (see docs/SSOT/SUPABASE_MIGRATION_VERSIONS.md)."
     exit 1
@@ -74,7 +74,7 @@ for path in "${NEW_FILES[@]}"; do
     continue
   fi
   ver="${BASH_REMATCH[1]}"
-  if [[ "$ver" <= "$max_on_base" ]]; then
+  if [[ "$ver" < "$max_on_base" || "$ver" == "$max_on_base" ]]; then
     echo "::error::New migration $base prefix $ver must be newer than origin/${BASE_REF} max ($max_on_base)"
     failed=1
   fi
