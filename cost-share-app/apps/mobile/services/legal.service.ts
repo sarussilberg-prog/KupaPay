@@ -1,6 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+    DEFAULT_LANGUAGE,
+    loadStaticLegalDocument,
+    type LegalDocument,
+    type LegalSlug,
+    type Language,
+} from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
-import type { LegalDocument, LegalSlug, Language } from '@cost-share/shared';
 
 const TABLE = 'legal_documents';
 
@@ -30,6 +36,21 @@ function mapRow(row: Row): LegalDocument {
     };
 }
 
+function mapStatic(slug: LegalSlug, locale: Language): LegalDocument | null {
+    const doc = loadStaticLegalDocument(slug, locale);
+    if (!doc) return null;
+    return {
+        id: `static:${slug}:${doc.locale}`,
+        slug,
+        locale: doc.locale,
+        version: 'static',
+        title: doc.title,
+        contentMd: doc.content_md,
+        effectiveDate: doc.effective_date,
+        updatedAt: doc.effective_date,
+    };
+}
+
 async function readCache(slug: LegalSlug, locale: Language): Promise<LegalDocument | null> {
     try {
         const raw = await AsyncStorage.getItem(cacheKey(slug, locale));
@@ -51,6 +72,12 @@ export async function fetchLegalDocument(
     slug: LegalSlug,
     locale: Language,
 ): Promise<LegalDocument> {
+    const staticDoc = mapStatic(slug, locale) ?? mapStatic(slug, DEFAULT_LANGUAGE);
+    if (staticDoc) {
+        await writeCache(staticDoc);
+        return staticDoc;
+    }
+
     const { data, error } = await supabase
         .from(TABLE)
         .select('id, slug, locale, version, title, content_md, effective_date, updated_at')

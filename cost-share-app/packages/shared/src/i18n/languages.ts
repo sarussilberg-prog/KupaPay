@@ -54,7 +54,9 @@ export const LANGUAGE_NATIVE_LABELS: Record<Language, string> = {
     de: 'Deutsch',
 };
 
-/** Legal documents in Supabase are published for en/he only; other UI languages fall back. */
-export function legalDocumentLocale(language: Language): 'en' | 'he' {
-    return language === 'he' ? 'he' : 'en';
+/**
+ * @deprecated Use {@link resolveLegalDocumentLocale} from static legal loader — all UI languages have bundled markdown.
+ */
+export function legalDocumentLocale(language: Language): Language {
+    return language;
 }

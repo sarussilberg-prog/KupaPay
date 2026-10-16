@@ -34,5 +34,8 @@ describe('buildLegalPageUrl', () => {
         expect(buildLegalPageUrl('https://kupa-pay.com', 'terms', 'en')).toBe(
             'https://kupa-pay.com/terms?lang=en',
         );
+        expect(buildLegalPageUrl('https://kupa-pay.com', 'privacy', 'fr')).toBe(
+            'https://kupa-pay.com/privacy?lang=fr',
+        );
     });
 });
