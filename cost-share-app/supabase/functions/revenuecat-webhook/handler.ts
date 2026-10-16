@@ -123,6 +123,11 @@ export async function applyWebhookEvent(
         return { ok: false, status: 400, error: 'missing_event' };
     }
 
+    const userId = parseUuid(event.app_user_id);
+    if (!userId) {
+        return { ok: false, status: 400, error: 'invalid_app_user_id' };
+    }
+
     const type = event.type ?? '';
     const grantTypes = new Set([
         'INITIAL_PURCHASE',
@@ -155,7 +160,7 @@ export async function applyWebhookEvent(
         },
         body: JSON.stringify({
             p_event_id: event.id,
-            p_user_id: event.app_user_id,
+            p_user_id: userId,
             p_event_type: type,
             p_product_id: event.product_id ?? null,
             p_pro_until: isRevoke || isGrantSub ? (proUntil ?? new Date(0).toISOString()) : null,

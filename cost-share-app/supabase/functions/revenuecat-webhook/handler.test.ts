@@ -16,6 +16,8 @@ const env: WebhookEnv = {
     REVENUECAT_WEBHOOK_SECRET: 'secret',
 };
 
+const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+
 function mockRpcFetch(
     handler: (body: Record<string, unknown>) => { status: number; json: Record<string, unknown> },
 ): () => void {
@@ -80,7 +82,7 @@ Deno.test('proUntilFromEvent maps expiration ms', () => {
     const iso = proUntilFromEvent({
         type: 'RENEWAL',
         id: '1',
-        app_user_id: 'u',
+        app_user_id: TEST_USER_ID,
         product_id: PRODUCT_PRO_MONTHLY,
         entitlement_ids: ['pro'],
         expiration_at_ms: 1_700_000_000_000,
@@ -97,6 +99,23 @@ Deno.test('tripPassUntilFromEvent defaults to 30 days', () => {
     assertEquals(until, '2026-01-31T00:00:00.000Z');
 });
 
+Deno.test('applyWebhookEvent rejects non-UUID app_user_id without RPC', async () => {
+    const outcome = await applyWebhookEvent(
+        {
+            event: {
+                type: 'INITIAL_PURCHASE',
+                id: 'evt-bad-user',
+                app_user_id: 'not-a-uuid',
+                product_id: PRODUCT_PRO_MONTHLY,
+                entitlement_ids: ['pro'],
+                expiration_at_ms: 1_700_000_000_000,
+            },
+        },
+        env,
+    );
+    assertEquals(outcome, { ok: false, status: 400, error: 'invalid_app_user_id' });
+});
+
 Deno.test('applyWebhookEvent calls RPC for subscription purchase', async () => {
     const captured: { body?: Record<string, unknown> } = {};
     const restore = mockRpcFetch(body => {
@@ -109,7 +128,7 @@ Deno.test('applyWebhookEvent calls RPC for subscription purchase', async () => {
                 event: {
                     type: 'INITIAL_PURCHASE',
                     id: 'evt-1',
-                    app_user_id: 'user-1',
+                    app_user_id: TEST_USER_ID,
                     product_id: PRODUCT_PRO_MONTHLY,
                     entitlement_ids: ['pro'],
                     expiration_at_ms: 1_800_000_000_000,
@@ -138,7 +157,7 @@ Deno.test('applyWebhookEvent calls RPC with yearly flag on annual subscription',
                 event: {
                     type: 'INITIAL_PURCHASE',
                     id: 'evt-y',
-                    app_user_id: 'user-1',
+                    app_user_id: TEST_USER_ID,
                     product_id: 'kupapay_pro_yearly',
                     entitlement_ids: ['pro'],
                     expiration_at_ms: 1_900_000_000_000,
@@ -166,7 +185,7 @@ Deno.test('applyWebhookEvent trip pass with group_id sends p_attr_group_id to RP
                 event: {
                     type: 'NON_RENEWING_PURCHASE',
                     id: 'evt-g',
-                    app_user_id: 'user-1',
+                    app_user_id: TEST_USER_ID,
                     product_id: PRODUCT_TRIP_PASS,
                     subscriber_attributes: {
                         group_id: { value: groupId },
@@ -194,7 +213,7 @@ Deno.test('applyWebhookEvent trip pass without group stores unassigned via RPC',
                 event: {
                     type: 'NON_RENEWING_PURCHASE',
                     id: 'evt-2',
-                    app_user_id: 'user-1',
+                    app_user_id: TEST_USER_ID,
                     product_id: PRODUCT_TRIP_PASS,
                 },
             },
@@ -217,7 +236,7 @@ Deno.test('applyWebhookEvent handles Google Play INITIAL_PURCHASE like App Store
                 event: {
                     type: 'INITIAL_PURCHASE',
                     id: 'evt-play-1',
-                    app_user_id: 'user-1',
+                    app_user_id: TEST_USER_ID,
                     product_id: PRODUCT_PRO_MONTHLY,
                     entitlement_ids: ['pro'],
                     expiration_at_ms: 1_800_000_000_000,
@@ -243,7 +262,7 @@ Deno.test('applyWebhookEvent duplicate event is ignored', async () => {
                 event: {
                     type: 'INITIAL_PURCHASE',
                     id: 'evt-dup',
-                    app_user_id: 'user-1',
+                    app_user_id: TEST_USER_ID,
                     product_id: PRODUCT_PRO_MONTHLY,
                     entitlement_ids: ['pro'],
                     expiration_at_ms: 1_800_000_000_000,
