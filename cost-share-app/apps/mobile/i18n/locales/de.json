@@ -1247,6 +1247,7 @@
             "subscribeAtPrice": "Abonnieren — {{price}}",
             "buyTripPass": "Trip Pass kaufen — {{price}}",
             "restore": "Käufe wiederherstellen",
+            "redeemOfferCode": "Angebotscode einlösen",
             "manageSubscription": "Abo verwalten",
             "storeNotConfigured": "Käufe sind in diesem Build nicht verfügbar.",
             "loadFailed": "Abopreise konnten nicht geladen werden. Prüfe deine Verbindung oder versuche es gleich erneut.",

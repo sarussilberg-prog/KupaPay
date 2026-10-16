@@ -1173,6 +1173,7 @@
             "subscribeAtPrice": "הצטרפות — {{price}}",
             "buyTripPass": "רכישת Trip Pass — {{price}}",
             "restore": "שחזור רכישות",
+            "redeemOfferCode": "מימוש קוד הטבה",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
             "loadFailed": "לא הצלחנו לטעון מחירי מנוי. בדקו את החיבור או נסו שוב בעוד רגע.",

@@ -206,6 +206,32 @@ Deno.test('applyWebhookEvent trip pass without group stores unassigned via RPC',
     }
 });
 
+Deno.test('applyWebhookEvent handles Google Play INITIAL_PURCHASE like App Store', async () => {
+    const restore = mockRpcFetch(() => ({
+        status: 200,
+        json: { duplicate: false, action: 'individual' },
+    }));
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'INITIAL_PURCHASE',
+                    id: 'evt-play-1',
+                    app_user_id: 'user-1',
+                    product_id: PRODUCT_PRO_MONTHLY,
+                    entitlement_ids: ['pro'],
+                    expiration_at_ms: 1_800_000_000_000,
+                    store: 'PLAY_STORE',
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'individual' });
+    } finally {
+        restore();
+    }
+});
+
 Deno.test('applyWebhookEvent duplicate event is ignored', async () => {
     const restore = mockRpcFetch(() => ({
         status: 200,

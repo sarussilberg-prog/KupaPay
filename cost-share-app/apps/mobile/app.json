@@ -47,6 +47,7 @@
       "package": "com.kupapay.mobile",
       "googleServicesFile": "./google-services.json",
       "label": "KupaPay",
+      "supportsRtl": true,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/android-icon-foreground.png",

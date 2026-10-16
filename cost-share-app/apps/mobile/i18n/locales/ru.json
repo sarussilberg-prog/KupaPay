@@ -1265,6 +1265,7 @@
             "subscribeAtPrice": "Подписаться — {{price}}",
             "buyTripPass": "Купить Trip Pass — {{price}}",
             "restore": "Восстановить покупки",
+            "redeemOfferCode": "Активировать промокод",
             "manageSubscription": "Управление подпиской",
             "storeNotConfigured": "Покупки недоступны в этой сборке.",
             "loadFailed": "Не удалось загрузить цены подписки. Проверьте подключение или повторите попытку чуть позже.",

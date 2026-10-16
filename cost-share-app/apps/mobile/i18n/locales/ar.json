@@ -1329,6 +1329,7 @@
             "subscribeAtPrice": "اشترك — {{price}}",
             "buyTripPass": "شراء Trip Pass — {{price}}",
             "restore": "استعادة المشتريات",
+            "redeemOfferCode": "استرداد رمز العرض",
             "manageSubscription": "إدارة الاشتراك",
             "storeNotConfigured": "المشتريات غير متاحة في هذا الإصدار.",
             "loadFailed": "تعذّر تحميل أسعار الاشتراك. تحقق من الاتصال أو حاول مرة أخرى بعد قليل.",

@@ -1249,6 +1249,7 @@
             "subscribeAtPrice": "Suscribirse — {{price}}",
             "buyTripPass": "Comprar Trip Pass — {{price}}",
             "restore": "Restaurar compras",
+            "redeemOfferCode": "Canjear código promocional",
             "manageSubscription": "Gestionar suscripción",
             "storeNotConfigured": "Las compras no están disponibles en esta compilación.",
             "loadFailed": "No pudimos cargar los precios de suscripción. Comprueba tu conexión o inténtalo de nuevo en un momento.",

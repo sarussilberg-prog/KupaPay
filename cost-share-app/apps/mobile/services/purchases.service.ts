@@ -3,6 +3,7 @@
  */
 
 import { Linking, Platform } from 'react-native';
+import { googlePlayOfferRedeemUrl, offerRedemptionTarget } from '../lib/storeOfferRedemption';
 import {
     REVENUECAT_ENTITLEMENT_PRO,
     REVENUECAT_PACKAGE_ANNUAL,
@@ -336,23 +337,25 @@ export async function openSubscriptionManagement(): Promise<void> {
     }
 }
 
-const PLAY_REDEEM_URL = 'https://play.google.com/redeem';
-
 /** App Store / Play offer-code redemption (subscription promo codes). */
 export async function presentOfferCodeRedemption(): Promise<void> {
-    const Purchases = await getPurchases();
-    if (!Purchases) return;
+    const target = offerRedemptionTarget();
+    if (!target) return;
 
-    if (Platform.OS === 'ios') {
-        try {
-            await Purchases.default.presentCodeRedemptionSheet();
-        } catch {
-            // User dismissed or OS version unsupported
+    const Purchases = await getPurchases();
+    if (target === 'ios_sheet' && Purchases) {
+        const sheet = Purchases.default.presentCodeRedemptionSheet;
+        if (typeof sheet === 'function') {
+            try {
+                await sheet.call(Purchases.default);
+                return;
+            } catch {
+                // User dismissed or OS version unsupported
+            }
         }
-        return;
     }
 
-    if (Platform.OS === 'android') {
-        await Linking.openURL(PLAY_REDEEM_URL);
+    if (target === 'android_play_redeem') {
+        await Linking.openURL(googlePlayOfferRedeemUrl());
     }
 }

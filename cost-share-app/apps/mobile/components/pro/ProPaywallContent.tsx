@@ -171,6 +171,8 @@ export function ProPaywallContent({
         }
     }, [busy, featureKey, groupId, onPurchaseSuccess, selected, selectedPackage]);
 
+    const storeConfigured = isPurchasesConfigured();
+
     const handleRestore = useCallback(async () => {
         if (busy) return;
         setBusy(true);
@@ -193,8 +195,6 @@ export function ProPaywallContent({
     const handleRedeemCode = useCallback(() => {
         void presentOfferCodeRedemption();
     }, []);
-
-    const storeConfigured = isPurchasesConfigured();
 
     const subscriptionPlanKey = selected === 'monthly' ? 'monthly' : selected === 'yearly' ? 'yearly' : null;
 
