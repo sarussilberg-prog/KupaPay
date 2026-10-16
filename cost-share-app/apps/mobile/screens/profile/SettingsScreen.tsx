@@ -4,7 +4,8 @@ import { View, ScrollView, Linking, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as StoreReview from 'expo-store-review';
-import { APP_VERSION, APP_WEB_ORIGIN, buildLegalPageUrl, Language } from '@cost-share/shared';
+import { APP_WEB_ORIGIN, buildLegalPageUrl, Language } from '@cost-share/shared';
+import { AppBuildInfoFooter } from '../../components/settings/AppBuildInfoFooter';
 import { useAppStore } from '../../store';
 import { useChangeAppLanguage } from '../../hooks/useChangeAppLanguage';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
@@ -282,9 +283,7 @@ export function SettingsScreen() {
                     <SettingsRow iconName="log-out-outline" label={t('settings.logout')} variant="danger" onPress={() => setShowLogout(true)} />
                 </SettingsSection>
 
-                <Text className="text-center text-xs text-gray-400 mb-8">
-                    {t('settings.version', { version: APP_VERSION })}
-                </Text>
+                <AppBuildInfoFooter />
             </View>
 
             <ConfirmDialog

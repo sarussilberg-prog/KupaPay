@@ -19,8 +19,11 @@ function readStoreVersion() {
   const versionJson = JSON.parse(
     fs.readFileSync(path.join(mobileDir, "../../packages/shared/version.json"), "utf8"),
   );
+  const marketing = versionJson.marketingVersion?.trim();
+  if (marketing) return marketing;
   if (!versionJson.version) throw new Error("packages/shared/version.json missing version");
-  return versionJson.version;
+  const m = /^(\d+\.\d+\.\d+)(?:-dev\.\d+)?$/.exec(String(versionJson.version).trim());
+  return m ? m[1] : versionJson.version;
 }
 
 function readBundleIdentifier() {

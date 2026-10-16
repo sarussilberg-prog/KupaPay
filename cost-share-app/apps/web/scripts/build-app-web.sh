@@ -49,6 +49,7 @@ export EXPO_PUBLIC_SUPABASE_ANON_KEY="${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${NEXT_PU
 # Sentry (mobile dev project) — web export must embed DSN or SDK stays disabled.
 export EXPO_PUBLIC_SENTRY_DSN="${EXPO_PUBLIC_SENTRY_DSN:-https://0687aa5ff4ed935fca55cbf504f18fc3@o4511495924023297.ingest.de.sentry.io/4511496059682896}"
 export EXPO_PUBLIC_SENTRY_ENVIRONMENT="${EXPO_PUBLIC_SENTRY_ENVIRONMENT:-development}"
+export EXPO_PUBLIC_GIT_COMMIT_SHA="${EXPO_PUBLIC_GIT_COMMIT_SHA:-${VERCEL_GIT_COMMIT_SHA:-}}"
 
 if [[ -z "$EXPO_PUBLIC_SUPABASE_URL" || -z "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ]]; then
   echo "Missing Supabase env vars in Vercel. Set any pair:" >&2

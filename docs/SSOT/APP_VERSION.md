@@ -1,33 +1,36 @@
 # App Version — Single Source of Truth
 
-**The version literal lives only in `packages/shared/version.json`.**
+**Literals live in `cost-share-app/packages/shared/version.json`.**
 
-## Consumers (all derive from that one file)
-- `packages/shared/src/version.ts` exports `APP_VERSION` (re-exported from
-  `@cost-share/shared`) → mobile `LoginScreen`, mobile `LegalDocumentSheet`,
-  web `LegalPage`, web `LandingFooter`.
-- `apps/mobile/app.config.ts` injects it into the Expo config `version` →
-  the native build **and** `Constants.expoConfig.version` (mobile `SettingsScreen`).
+| Field | Purpose |
+|-------|---------|
+| `version` | Internal identifier (on `dev`: `2.x.y-dev.N`; on `main` after release bump: clean semver) |
+| `marketingVersion` | Store / native `CFBundleShortVersionString` (no `-dev` suffix) |
+| `lastTestFlightInternalVersion` | Changelog baseline for the next TestFlight “What to Test” notes |
 
-`apps/mobile/app.json` has **no** `version` field; `app.config.ts` is the only place
-that sets it (from the shared JSON).
+## Consumers
 
-## How it changes
-- Merge a PR to `dev` → the `ci.yml` **auto-merge** job patch-bumps
-  `packages/shared/version.json` (a direct commit; exactly one bump per merge).
-- Merge to `main` → `bump-version-main.yml` minor-bumps and resets the patch.
+- `@cost-share/shared` exports `APP_VERSION`, `APP_MARKETING_VERSION`, build-info formatters, and Sentry release helpers.
+- `apps/mobile/app.config.ts` injects **`marketingVersion`** into the native build; `Constants.expoConfig.version` matches the store string.
+- In-app labels (Settings `AppBuildInfoFooter`, login, legal) use **`APP_VERSION`** (internal string).
+- Sentry `release` / `dist` use **`APP_VERSION` + native build number** (mobile) or **`APP_VERSION` + Vercel git SHA** (web).
 
-The dev bump lives **inside** the auto-merge job — not a separate push-triggered
-workflow — because GitHub does not trigger workflows from `GITHUB_TOKEN` pushes, so
-a push-triggered bump never fires after an auto-merge. No recursion: the bump is a
-push to `dev`, and CI runs only on `pull_request`, so it cannot re-trigger itself.
+## Dev branch automation
 
-## Store build numbers
-`apps/mobile/eas.json` uses `appVersionSource: remote` with `autoIncrement`; EAS
-manages store build numbers independently of this version string.
+Each squash-merge to `dev` (via `ci.yml` auto-merge) runs `cost-share-app/scripts/bump-dev-prerelease.mjs`:
+
+1. Increments `-dev.N` in `version.json`.
+2. Appends the merged PR title to root `CHANGELOG.md`.
+3. Commits with **`[skip ci]`** and pushes to `dev` (no PR loop; Vercel `ignoreCommand` skips the deploy).
+
+## Main / store releases
+
+`bump-version-main.yml` (manual) bumps **`version` and `marketingVersion`** together on `main` (patch/minor/major). EAS still manages integer build numbers (`autoIncrement`).
+
+## TestFlight
+
+`.github/workflows/testflight-ios.yml` sets ASC **What to Test** from `CHANGELOG.md` entries since `lastTestFlightInternalVersion`, then updates that baseline (commit `[skip ci]`).
 
 ## Guardrail
-`apps/mobile/__tests__/guards/ssot.guard.test.ts` fails CI if `app.json` regains a
-version literal, `APP_VERSION` diverges from `version.json`, the old
-`apps/mobile/version.json` reappears, a display stops using `APP_VERSION`, or the
-version-bump automation (`ci.yml` / `bump-version-main.yml`) points at the old path.
+
+`apps/mobile/__tests__/guards/ssot.guard.test.ts` fails CI if version SSOT or bump automation drifts.

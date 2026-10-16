@@ -81,8 +81,8 @@ describe('App version — single source of truth', () => {
   const versionJsonPath = resolve(MONOREPO_DIR, 'packages/shared/version.json');
   const fileVersion = (): string => JSON.parse(read(versionJsonPath)).version;
 
-  it('packages/shared/version.json holds a valid semver', () => {
-    expect(fileVersion()).toMatch(/^\d+\.\d+\.\d+$/);
+  it('packages/shared/version.json holds a valid internal semver (dev prerelease on dev branch)', () => {
+    expect(fileVersion()).toMatch(/^\d+\.\d+\.\d+(-dev\.\d+)?$/);
   });
 
   it('APP_VERSION equals the version.json SSOT', () => {
@@ -101,7 +101,7 @@ describe('App version — single source of truth', () => {
   it('app.config.ts injects the version from the shared version.json', () => {
     const cfg = read(resolve(MOBILE_DIR, 'app.config.ts'));
     expect(cfg).toContain('packages/shared/version.json');
-    expect(cfg).toMatch(/version:\s*versionJson\.version/);
+    expect(cfg).toMatch(/marketingVersionFromJson\(\)/);
   });
 
   it('the per-app version.json is gone', () => {
@@ -117,9 +117,9 @@ describe('App version — single source of truth', () => {
   // Every in-app version display must read the SAME constant (APP_VERSION, from the
   // JS bundle) so they can never disagree. Reading Constants.expoConfig.version (the
   // native binary's frozen value) drifts from APP_VERSION under OTA/dev reloads.
-  it('the settings screen reads APP_VERSION, not the native Constants.expoConfig.version', () => {
+  it('the settings screen uses the shared AppBuildInfoFooter', () => {
     const settings = read(resolve(MOBILE_DIR, 'screens/profile/SettingsScreen.tsx'));
-    expect(settings).toContain('APP_VERSION');
+    expect(settings).toContain('AppBuildInfoFooter');
     expect(settings).not.toMatch(/expoConfig\??\.version/);
   });
 
