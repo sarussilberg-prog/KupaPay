@@ -12,7 +12,7 @@ BASELINE_FILE="supabase/ci/db-lint-baseline.json"
 LINT_SQL="supabase/ci/db-lint-run.sql"
 
 if ! command -v jq >/dev/null 2>&1; then
-  echo "::error::jq not found"
+  echo "::error::jq not found" >&2
   exit 1
 fi
 
@@ -22,7 +22,7 @@ psql_docker_file() {
 
 echo "▶ DB lints (performance + security)"
 if ! EXPORT="$(psql_docker_file "$LINT_SQL")"; then
-  echo "::error::DB lint SQL failed"
+  echo "::error::DB lint SQL failed" >&2
   exit 1
 fi
 
@@ -77,7 +77,7 @@ while IFS='|' read -r lint_type cache_key; do
     (.[$t] // []) | index($k) != null
   ' "$BASELINE_FILE")"
   if [[ "$allowed" != "true" ]]; then
-    echo "::error::New DB lint violation ($lint_type): $cache_key"
+    echo "::error::New DB lint violation ($lint_type): $cache_key" >&2
     fail=1
   fi
 done <<< "$EXPORT"

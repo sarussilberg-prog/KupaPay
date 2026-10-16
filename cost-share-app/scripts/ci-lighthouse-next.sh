@@ -25,7 +25,7 @@ for _ in $(seq 1 60); do
   sleep 2
 done
 
-npx --yes @lhci/cli@0.14.0 autorun --config=lighthouserc.cjs
+"$ROOT/node_modules/.bin/lhci" autorun --config="$ROOT/lighthouserc.cjs"
 
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" C-c
 
