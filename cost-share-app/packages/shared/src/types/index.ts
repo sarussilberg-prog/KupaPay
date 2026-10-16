@@ -51,6 +51,8 @@ export interface Group {
     inviteToken: string;  // URL-safe slug; join link APP_WEB_ORIGIN + /g/<token>
     /** Separate revocable token for read-only web balance page /b/<token>. */
     publicBalanceToken?: string;
+    /** Opt-in gate for get_public_group_balance_page (#398). */
+    publicBalanceSharingEnabled?: boolean;
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
     /** Last expense, settlement, or message activity (auto-maintained in DB). */

@@ -92,6 +92,9 @@ function resolveGroupBalanceShareContext(groupId: string): {
     const group = groups.find(g => g.id === groupId);
     if (!user) throw new Error('not_authenticated');
     if (!group?.publicBalanceToken) throw new Error('group_public_balance_token_unavailable');
+    if (group.publicBalanceSharingEnabled !== true) {
+        throw new Error('group_public_balance_sharing_disabled');
+    }
     const url = buildPublicGroupBalanceUrl(group.publicBalanceToken);
     const message = buildGroupBalanceShareMessage(group.name, url);
     return { group, url, message };
@@ -105,6 +108,18 @@ export async function shareGroupBalanceLink(groupId: string): Promise<void> {
         channel: 'public_balance_link',
         group_id: groupId,
     });
+}
+
+export async function setGroupPublicBalanceSharing(
+    groupId: string,
+    enabled: boolean,
+): Promise<boolean> {
+    const { data, error } = await supabase.rpc('set_group_public_balance_sharing', {
+        p_group_id: groupId,
+        p_enabled: enabled,
+    });
+    if (error) throw error;
+    return Boolean(data);
 }
 
 export async function rotateGroupPublicBalanceLink(groupId: string): Promise<string> {

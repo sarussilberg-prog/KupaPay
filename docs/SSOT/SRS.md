@@ -103,7 +103,7 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 | REQ-NFR-01 | ✅ | Monetary precision | `DECIMAL(12,2)` in DB; no float money in domain |
 | REQ-NFR-02 | ✅ | i18n — no hardcoded UI strings | `t('key')` + all 7 app locales (`en`, `he`, `ar`, `de`, `es`, `fr`, `ru`); RTL for `he` / `ar` |
 | REQ-GROW-01 | ✅ | Post-login activation onboarding | Guided flow: template → create group → first expense → invite; PostHog `signup_completed` → `group_created` → `first_expense_added` |
-| REQ-GROW-02 | ✅ | Public web group balance page | `/b/<public_balance_token>` shows privacy-scoped balances + recent expenses (separate from `/g/<invite_token>` join links); rate-limited `get_public_group_balance_page` RPC; noindex + OG; share entry points on iOS/Android (#398) |
+| REQ-GROW-02 | ✅ | Public web group balance page | Opt-in `public_balance_sharing_enabled`; `/b/<public_balance_token>` shows privacy-scoped balances + recent expenses (separate from `/g/<invite_token>` join links); rate-limited `get_public_group_balance_page` RPC; noindex + OG; mobile toggle + rotate revoke (#398) |
 | REQ-NFR-03 | ✅ | Consistent domain types | `@cost-share/shared` types and mappers |
 | REQ-NFR-04 | ✅ | Row Level Security (Supabase) | RLS enabled; mobile uses anon key + user JWT |
 | REQ-NFR-05 | ⬜ | Offline support | Local queue + sync without screen refactor |

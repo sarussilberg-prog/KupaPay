@@ -1101,6 +1101,12 @@
             "findEmptyCta": "Invitar a un amigo nuevo por enlace",
             "findInviteName": "Invitar a {{name}} a KupaPay"
         },
+        "publicBalance": {
+            "title": "Página pública de saldos",
+            "toggleLabel": "Quien tenga el enlace puede ver saldos en la web",
+            "toggleHint": "Usa tu enlace /b/ de saldos. Desactívalo o rota el enlace para revocar acceso.",
+            "privacyNote": "Solo nombres y saldos — sin correo ni recibos."
+        },
         "group": {
             "title": "Compartir enlace del grupo",
             "shareMessage": "Te añadí al grupo '{{groupName}}' en KupaPay. Únete con este enlace: {{url}}",

@@ -1100,6 +1100,12 @@
             "findEmptyCta": "Invite a new friend by link",
             "findInviteName": "Invite {{name}} to KupaPay"
         },
+        "publicBalance": {
+            "title": "Public balance page",
+            "toggleLabel": "Anyone with the link can view balances on the web",
+            "toggleHint": "Uses your /b/ balance link. Turn off anytime or rotate the link to revoke access.",
+            "privacyNote": "Shows display names and balances only — no email or receipts."
+        },
         "group": {
             "title": "Share group link",
             "shareMessage": "I added you to the '{{groupName}}' group on KupaPay. Join via this link: {{url}}",

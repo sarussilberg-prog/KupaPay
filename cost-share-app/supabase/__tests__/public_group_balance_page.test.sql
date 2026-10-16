@@ -40,33 +40,53 @@ BEGIN
     VALUES (v_exp, v_alice, 20), (v_exp, v_bob, 20);
 
     v_payload := public.get_public_group_balance_page(v_balance);
+    IF (v_payload->>'ok')::BOOLEAN IS DISTINCT FROM FALSE THEN
+        RAISE EXCEPTION 'Case 1 failed: sharing disabled by default';
+    END IF;
+
+    SET LOCAL session_replication_role = origin;
+    PERFORM public.test_set_authenticated(v_alice);
+    BEGIN
+        UPDATE public.groups SET public_balance_sharing_enabled = TRUE WHERE id = v_group;
+        RAISE EXCEPTION 'Case 1b failed: direct PATCH of sharing flag should be denied';
+    EXCEPTION WHEN OTHERS THEN
+        IF SQLERRM NOT LIKE '%group_public_balance_sharing_rpc_only%' AND SQLERRM NOT LIKE '%42501%' THEN
+            RAISE;
+        END IF;
+    END;
+    IF public.set_group_public_balance_sharing(v_group, TRUE) IS DISTINCT FROM TRUE THEN
+        RAISE EXCEPTION 'Case 1c failed: enable RPC should return true';
+    END IF;
+    PERFORM public.test_set_authenticated(NULL);
+
+    v_payload := public.get_public_group_balance_page(v_balance);
     IF (v_payload->>'ok')::BOOLEAN IS DISTINCT FROM TRUE THEN
-        RAISE EXCEPTION 'Case 1 failed: expected ok=true for balance token';
+        RAISE EXCEPTION 'Case 2 failed: expected ok=true after opt-in';
     END IF;
 
     v_payload := public.get_public_group_balance_page(v_invite);
     IF (v_payload->>'ok')::BOOLEAN IS DISTINCT FROM FALSE THEN
-        RAISE EXCEPTION 'Case 2 failed: invite token must not expose balances';
+        RAISE EXCEPTION 'Case 3 failed: invite token must not expose balances';
     END IF;
 
     v_payload := public.get_public_group_balance_page(v_balance);
     IF v_payload->'group'->>'name' IS DISTINCT FROM 'Public Web Group' THEN
-        RAISE EXCEPTION 'Case 3 failed: group name';
+        RAISE EXCEPTION 'Case 4 failed: group name';
     END IF;
 
     v_text := v_payload::TEXT;
     IF v_text ILIKE '%email%' OR v_text ~ '[0-9a-f]{8}-[0-9a-f]{4}-' THEN
-        RAISE EXCEPTION 'Case 4 failed: payload must not include email or UUIDs';
+        RAISE EXCEPTION 'Case 5 failed: payload must not include email or UUIDs';
     END IF;
 
     IF json_array_length(v_payload->'recent_expenses') < 1 THEN
-        RAISE EXCEPTION 'Case 5 failed: expected recent expenses';
+        RAISE EXCEPTION 'Case 6 failed: expected recent expenses';
     END IF;
 
     PERFORM set_config('request.jwt.claim.sub', v_bob::text, true);
     BEGIN
         PERFORM public.redeem_group_invite(v_balance);
-        RAISE EXCEPTION 'Case 6 failed: balance token must not join a group';
+        RAISE EXCEPTION 'Case 7 failed: balance token must not join a group';
     EXCEPTION WHEN OTHERS THEN
         IF SQLERRM NOT LIKE '%invite_not_found%' THEN
             RAISE;
@@ -75,7 +95,7 @@ BEGIN
 
     v_payload := public.get_public_group_balance_page('short');
     IF (v_payload->>'ok')::BOOLEAN IS DISTINCT FROM FALSE THEN
-        RAISE EXCEPTION 'Case 7 failed: short token must return ok=false';
+        RAISE EXCEPTION 'Case 8 failed: short token must return ok=false';
     END IF;
 
     RAISE NOTICE 'public_group_balance_page.test.sql — all cases passed';
