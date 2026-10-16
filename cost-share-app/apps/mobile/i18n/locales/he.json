@@ -563,7 +563,14 @@
         "memberCount_one": "{{count}} חבר",
         "memberCount_two": "{{count}} חברים",
         "memberCount_many": "{{count}} חברים",
-        "memberCount_other": "{{count}} חברים"
+        "memberCount_other": "{{count}} חברים",
+        "monthlyBills": {
+            "title": "חשבונות החודש",
+            "summary": "{{count}} הוצאות · {{total}} {{currency}} במחזור",
+            "cycleDay": "המחזור מתחיל ב-{{day}} לכל חודש",
+            "automationPro": "אוטומציה של חשבונות חוזרים עם Pro",
+            "automationActive": "אוטומציית Pro זמינה לקבוצה"
+        }
     },
     "expenses": {
         "title": "הוצאות",

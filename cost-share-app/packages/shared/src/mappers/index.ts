@@ -52,6 +52,10 @@ export const groupFromRow = (r: Row): Group => ({
     createdBy: r.created_by as string,
     isActive: r.is_active as boolean,
     lastActivityAt: r.last_activity_at ? toDate(r.last_activity_at) : undefined,
+    monthlyBillsMode: r.monthly_bills_mode === true,
+    billingCycleDay: typeof r.billing_cycle_day === 'number'
+        ? (r.billing_cycle_day as number)
+        : Number(r.billing_cycle_day ?? 1) || 1,
     createdAt: toDate(r.created_at),
     updatedAt: toDate(r.updated_at),
 });

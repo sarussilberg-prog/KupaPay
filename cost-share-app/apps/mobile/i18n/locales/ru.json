@@ -570,7 +570,14 @@
         "memberCount_few": "{{count}} участника",
         "memberCount_many": "{{count}} участников",
         "memberCount_other": "{{count}} участника",
-        "memberCount_two": "{{count}} участника"
+        "memberCount_two": "{{count}} участника",
+        "monthlyBills": {
+            "title": "Счета этого месяца",
+            "summary": "{{count}} расходов · {{total}} {{currency}} за цикл",
+            "cycleDay": "Цикл начинается {{day}}-го числа каждого месяца",
+            "automationPro": "Автоматизируйте регулярные счета с Pro",
+            "automationActive": "Pro-автоматизация доступна для группы"
+        }
     },
     "expenses": {
         "title": "Расходы",
