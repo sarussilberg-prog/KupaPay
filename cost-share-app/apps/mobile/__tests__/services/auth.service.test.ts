@@ -49,6 +49,12 @@ jest.mock('../../lib/authSessionLifecycle', () => ({
     clearStaleAuthSession: (...args: unknown[]) => mockClearStaleAuthSession(...args),
 }));
 
+const mockSignalDeactivatedAccount = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('../../lib/signalDeactivatedAccount', () => ({
+    signalDeactivatedAccount: (...args: unknown[]) => mockSignalDeactivatedAccount(...args),
+}));
+
 jest.mock('../../store', () => ({
     useAppStore: {
         getState: () => ({ setSession: mockSetSession }),
