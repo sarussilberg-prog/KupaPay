@@ -3,7 +3,7 @@
   "event": {
     "type": "CANCELLATION",
     "id": "fixture-cancellation",
-    "app_user_id": "00000000-0000-0000-0000-000000014101",
+    "app_user_id": "00000000-0000-4000-8000-000000014101",
     "product_id": "kupapay_pro_monthly",
     "entitlement_ids": ["pro"],
     "expiration_at_ms": null

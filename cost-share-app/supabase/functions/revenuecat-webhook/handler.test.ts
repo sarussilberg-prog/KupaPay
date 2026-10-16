@@ -10,6 +10,11 @@ import {
     PRODUCT_PRO_MONTHLY,
     PRODUCT_TRIP_PASS,
 } from './handler.ts';
+import cancellationFixture from './fixtures/cancellation_pro.json' with { type: 'json' };
+import expirationFixture from './fixtures/expiration_pro.json' with { type: 'json' };
+import initialPurchaseFixture from './fixtures/initial_purchase_pro.json' with { type: 'json' };
+import renewalFixture from './fixtures/renewal_pro.json' with { type: 'json' };
+import trialFixture from './fixtures/trial_initial_purchase.json' with { type: 'json' };
 
 const env: WebhookEnv = {
     SUPABASE_URL: 'https://example.supabase.co',
@@ -277,22 +282,17 @@ Deno.test('applyWebhookEvent duplicate event is ignored', async () => {
     }
 });
 
-async function loadFixture(name: string): Promise<RevenueCatWebhookBody> {
-    const raw = await Deno.readTextFile(new URL(`./fixtures/${name}`, import.meta.url));
-    return JSON.parse(raw) as RevenueCatWebhookBody;
-}
-
-const CONTRACT_FIXTURES = [
-    'initial_purchase_pro.json',
-    'renewal_pro.json',
-    'trial_initial_purchase.json',
-    'cancellation_pro.json',
-    'expiration_pro.json',
-] as const;
+const CONTRACT_FIXTURES: { name: string; body: RevenueCatWebhookBody }[] = [
+    { name: 'initial_purchase_pro.json', body: initialPurchaseFixture as RevenueCatWebhookBody },
+    { name: 'renewal_pro.json', body: renewalFixture as RevenueCatWebhookBody },
+    { name: 'trial_initial_purchase.json', body: trialFixture as RevenueCatWebhookBody },
+    { name: 'cancellation_pro.json', body: cancellationFixture as RevenueCatWebhookBody },
+    { name: 'expiration_pro.json', body: expirationFixture as RevenueCatWebhookBody },
+];
 
 for (const fixture of CONTRACT_FIXTURES) {
-    Deno.test(`contract fixture ${fixture} maps to RevenueCat RPC payload`, async () => {
-        const body = await loadFixture(fixture);
+    Deno.test(`contract fixture ${fixture.name} maps to RevenueCat RPC payload`, async () => {
+        const body = fixture.body;
         const captured: { body?: Record<string, unknown> } = {};
         const restore = mockRpcFetch(parsed => {
             captured.body = parsed;
@@ -316,7 +316,7 @@ for (const fixture of CONTRACT_FIXTURES) {
 }
 
 Deno.test('handleRequest accepts fixture body with shared secret', async () => {
-    const body = await loadFixture('initial_purchase_pro.json');
+    const body = initialPurchaseFixture as RevenueCatWebhookBody;
     const restore = mockRpcFetch(() => ({
         status: 200,
         json: { duplicate: false, action: 'individual' },
