@@ -70,7 +70,7 @@ Path-filtered matrix ([#140](https://github.com/sarussilberg-prog/KupaPay/issues
 
 ### SQL regression + quarantine
 
-[`.github/workflows/supabase-sql-integration.yml`](../.github/workflows/supabase-sql-integration.yml) — Docker Postgres + [`ci-supabase-sql-tests.sh`](../cost-share-app/scripts/ci-supabase-sql-tests.sh). One automatic retry on Docker/Postgres flakes.
+[`.github/workflows/supabase-sql-integration.yml`](../.github/workflows/supabase-sql-integration.yml) — pinned Supabase CLI + Postgres image ([`ci-supabase-versions.env`](../cost-share-app/scripts/ci-supabase-versions.env)), cached Docker image, readiness wait for `auth`/`graphql` init, bootstrap via [`ci-supabase-sql-bootstrap.sh`](../cost-share-app/scripts/ci-supabase-sql-bootstrap.sh) with **one retry on bootstrap only**, then [`ci-supabase-sql-run-tests.sh`](../cost-share-app/scripts/ci-supabase-sql-run-tests.sh) (no test retry). Local one-shot: [`ci-supabase-sql-tests.sh`](../cost-share-app/scripts/ci-supabase-sql-tests.sh).
 
 Flaky SQL tests: quarantine manifest ([#138](https://github.com/sarussilberg-prog/KupaPay/issues/138)) — each `*.test.sql` runs or is quarantined with a tracking issue.
 
