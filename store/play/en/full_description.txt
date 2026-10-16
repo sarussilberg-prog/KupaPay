@@ -1,0 +1,13 @@
+KupaPay makes group expense splitting simple — trips, roommates, events, and more.
+
+• Create groups and invite friends
+• Add expenses with equal, weighted, or multi-currency splits
+• Balances screen shows who owes whom
+• Settle up with Bit and PayBox payment links
+• Full Hebrew (RTL) and English UI; more languages in-app
+• Optional KupaPay Pro: no ads, PDF export, Trip Pass for groups
+
+Privacy: Sign in with Google. Delete your account in Settings. We do not sell your data.
+
+Support: sarussilberg@gmail.com
+Privacy policy: https://kupa-pay.com/legal/privacy

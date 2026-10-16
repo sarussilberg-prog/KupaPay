@@ -17,13 +17,17 @@ import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
 import { APP_WEB_ORIGIN, buildLegalPageUrl } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
+import { Button } from '../Button';
+import { PriceSkeleton } from '../PriceSkeleton';
 import { colors } from '../../theme';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
+import { requiresEuDigitalWithdrawalAck } from '../../lib/euDigitalPurchaseAck';
 import {
     checkIntroductoryPriceEligibility,
     isPurchasesConfigured,
     loadOfferingPackages,
     openSubscriptionManagement,
+    presentOfferCodeRedemption,
     purchasePackage,
     restorePurchases,
     type IntroEligibilityMap,
@@ -37,15 +41,16 @@ import {
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
+
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
 const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 type PlanKey = 'monthly' | 'yearly' | 'trip_pass';
 
-function priceLabel(pkg: PurchasesPackageLike | null): string {
-    if (!pkg) return '—';
-    return pkg.product.priceString;
+function storePriceString(pkg: PurchasesPackageLike | null | undefined): string | null {
+    const value = pkg?.product.priceString?.trim();
+    return value ? value : null;
 }
 
 function subscriptionPeriodKey(pkg: PurchasesPackageLike | null): string {
@@ -83,6 +88,8 @@ export function ProPaywallContent({
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
     const [euDigitalAck, setEuDigitalAck] = useState(false);
+
+    const euWithdrawalRequired = useMemo(() => requiresEuDigitalWithdrawalAck(), []);
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -136,7 +143,8 @@ export function ProPaywallContent({
         return packages.tripPass;
     }, [packages, selected]);
 
-    const tripPassPrice = priceLabel(packages?.tripPass ?? null);
+    const selectedPrice = storePriceString(selectedPackage);
+    const tripPassPrice = storePriceString(packages?.tripPass);
 
     const openLegal = useCallback(
         async (slug: 'terms' | 'privacy') => {
@@ -163,6 +171,8 @@ export function ProPaywallContent({
         }
     }, [busy, featureKey, groupId, onPurchaseSuccess, selected, selectedPackage]);
 
+    const storeConfigured = isPurchasesConfigured();
+
     const handleRestore = useCallback(async () => {
         if (busy) return;
         setBusy(true);
@@ -182,7 +192,9 @@ export function ProPaywallContent({
         if (url) await Linking.openURL(url);
     }, []);
 
-    const storeConfigured = isPurchasesConfigured();
+    const handleRedeemCode = useCallback(() => {
+        void presentOfferCodeRedemption();
+    }, []);
 
     const subscriptionPlanKey = selected === 'monthly' ? 'monthly' : selected === 'yearly' ? 'yearly' : null;
 
@@ -190,36 +202,63 @@ export function ProPaywallContent({
         subscriptionPlanKey != null &&
         planShowsFreeTrial(subscriptionPlanKey, packages, introEligibility);
 
+    const pricesReady = !loading && !loadFailedReason && storeConfigured;
+
     const disclosureText = useMemo(() => {
-        if (loadFailedReason) {
+        if (!pricesReady || !selectedPackage) {
             return '';
         }
         if (selected === 'trip_pass') {
             return t('pro.paywall.tripPassNoRenewal');
         }
-        const price = priceLabel(selectedPackage);
+        const price = selectedPrice;
+        if (!price) return '';
         const period = t(subscriptionPeriodKey(selectedPackage));
         if (showFreeTrial) {
             return t('pro.paywall.trialRenewalDisclosure', { price, period });
         }
         return t('pro.paywall.renewalDisclosure', { price, period });
-    }, [loadFailedReason, selected, selectedPackage, showFreeTrial, t]);
+    }, [
+        loadFailedReason,
+        loading,
+        pricesReady,
+        selected,
+        selectedPackage,
+        selectedPrice,
+        showFreeTrial,
+        storeConfigured,
+        t,
+    ]);
 
     const purchaseCta = useMemo(() => {
         if (!selectedPackage) return t('pro.paywall.subscribe');
-        const price = priceLabel(selectedPackage);
+        const price = selectedPrice;
         if (selected === 'trip_pass') {
-            return t('pro.paywall.buyTripPass', { price });
+            return price ? t('pro.paywall.buyTripPass', { price }) : t('pro.paywall.subscribe');
         }
         if (showFreeTrial) {
             return t('pro.paywall.tryFreeTrialCta');
         }
-        return t('pro.paywall.subscribeAtPrice', { price });
-    }, [selected, selectedPackage, showFreeTrial, t]);
+        return price ? t('pro.paywall.subscribeAtPrice', { price }) : t('pro.paywall.subscribe');
+    }, [selected, selectedPackage, selectedPrice, showFreeTrial, t]);
+
+    const purchaseDisabled =
+        busy ||
+        !storeConfigured ||
+        !selectedPackage ||
+        loading ||
+        !!loadFailedReason ||
+        (euWithdrawalRequired && !euDigitalAck);
 
     const planPickerSection = useMemo(() => {
         if (loading) {
-            return <ActivityIndicator className="my-8" testID="paywall-loading" />;
+            return (
+                <View className="gap-2 mb-3" testID="paywall-loading">
+                    <PlanPickerSkeleton />
+                    <PlanPickerSkeleton />
+                    {showTripPass ? <PlanPickerSkeleton /> : null}
+                </View>
+            );
         }
         if (!storeConfigured) {
             return (
@@ -249,14 +288,14 @@ export function ProPaywallContent({
                 <View className="gap-2 mb-3">
                     <PlanPicker
                         label={t('pro.paywall.planMonthly')}
-                        price={priceLabel(packages?.monthly ?? null)}
+                        price={storePriceString(packages?.monthly)}
                         selected={selected === 'monthly'}
                         onPress={() => setSelected('monthly')}
                         testID="paywall-pick-monthly"
                     />
                     <PlanPicker
                         label={t('pro.paywall.planYearly')}
-                        price={priceLabel(packages?.annual ?? null)}
+                        price={storePriceString(packages?.annual)}
                         selected={selected === 'yearly'}
                         onPress={() => setSelected('yearly')}
                         testID="paywall-pick-yearly"
@@ -273,7 +312,7 @@ export function ProPaywallContent({
                     ) : null}
                 </View>
 
-                {showTripPass && packages?.tripPass ? (
+                {showTripPass && tripPassPrice ? (
                     <Text className="text-sm text-gray-600 text-center mb-4 leading-5">
                         {t('pro.paywall.tripPassLine', { price: tripPassPrice })}
                     </Text>
@@ -319,46 +358,62 @@ export function ProPaywallContent({
 
             {planPickerSection}
 
-            <Pressable
-                onPress={() => setEuDigitalAck(v => !v)}
-                className="flex-row items-start gap-3 mb-4 px-1"
-                testID="paywall-eu-withdrawal-ack"
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: euDigitalAck }}
-            >
-                <View
-                    className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${euDigitalAck ? 'bg-primary border-primary' : 'border-gray-400 bg-white'}`}
-                >
-                    {euDigitalAck ? (
-                        <AppIcon name="checkmark" size={14} color="#fff" />
-                    ) : null}
+            {showFreeTrial && pricesReady ? (
+                <View className="mb-4 px-1">
+                    <Text className="text-sm font-semibold text-gray-800 mb-1">
+                        {t('pro.paywall.trialFreePeriodHeading')}
+                    </Text>
+                    <Text className="text-xs text-gray-600 leading-5">
+                        {t('pro.paywall.trialFreePeriodBody')}
+                    </Text>
                 </View>
-                <Text className="flex-1 text-xs text-gray-600 leading-5">
-                    {t('pro.paywall.euDigitalPurchaseAck')}
-                </Text>
-            </Pressable>
+            ) : null}
 
-            <Pressable
+            {euWithdrawalRequired ? (
+                <View className="mb-4 px-1">
+                    <Text className="text-sm font-semibold text-gray-800 mb-2">
+                        {t('pro.paywall.euWithdrawalWaiverHeading')}
+                    </Text>
+                    <Pressable
+                        onPress={() => setEuDigitalAck(v => !v)}
+                        className="flex-row items-start gap-3"
+                        testID="paywall-eu-withdrawal-ack"
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: euDigitalAck }}
+                    >
+                        <View
+                            className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${euDigitalAck ? 'bg-primary border-primary' : 'border-gray-400 bg-white'}`}
+                        >
+                            {euDigitalAck ? (
+                                <AppIcon name="checkmark" size={14} color="#fff" />
+                            ) : null}
+                        </View>
+                        <Text className="flex-1 text-xs text-gray-600 leading-5">
+                            {t('pro.paywall.euDigitalPurchaseAck')}
+                        </Text>
+                    </Pressable>
+                </View>
+            ) : null}
+
+            <Button
+                title={purchaseCta}
                 onPress={handlePurchase}
-                disabled={
-                    busy ||
-                    !storeConfigured ||
-                    !selectedPackage ||
-                    loading ||
-                    !!loadFailedReason ||
-                    !euDigitalAck
-                }
-                className="bg-primary rounded-2xl py-4 items-center mb-3"
+                disabled={purchaseDisabled}
+                loading={busy}
+                variant="primary"
+                className="rounded-2xl mb-3"
                 testID="paywall-purchase-btn"
-            >
-                {busy ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text className="text-white font-bold text-base text-center">{purchaseCta}</Text>
-                )}
-            </Pressable>
+            />
 
-            <Text className="text-xs text-gray-500 leading-5 mb-4 text-center">{disclosureText}</Text>
+            {disclosureText ? (
+                <Text className="text-xs text-gray-500 leading-5 mb-4 text-center">{disclosureText}</Text>
+            ) : null}
+
+            {storeConfigured ? (
+                <Pressable onPress={handleRedeemCode} className="py-2 items-center mb-2" testID="paywall-redeem-code">
+                    <Text className="text-primary text-sm font-medium">{t('pro.paywall.havePromoCode')}</Text>
+                </Pressable>
+            ) : null}
 
             <View className="flex-row flex-wrap justify-center gap-4 mb-4">
                 <Pressable onPress={() => openLegal('terms')}>
@@ -385,9 +440,18 @@ export function ProPaywallContent({
     );
 }
 
+function PlanPickerSkeleton() {
+    return (
+        <View className="rounded-2xl border border-gray-200 bg-white p-3 flex-row items-center justify-between">
+            <View className="h-5 w-28 rounded-md bg-gray-200" />
+            <PriceSkeleton widthClass="w-14" />
+        </View>
+    );
+}
+
 type PlanPickerProps = Readonly<{
     label: string;
-    price: string;
+    price: string | null;
     selected: boolean;
     onPress: () => void;
     testID?: string;
@@ -405,7 +469,7 @@ function PlanPicker({ label, price, selected, onPress, testID, hint }: PlanPicke
                 <Text className="text-base font-semibold text-gray-900">{label}</Text>
                 {hint ? <Text className="text-xs text-gray-500 mt-1">{hint}</Text> : null}
             </View>
-            <Text className="text-base font-bold text-gray-900">{price}</Text>
+            {price ? <Text className="text-base font-bold text-gray-900">{price}</Text> : null}
         </Pressable>
     );
 }

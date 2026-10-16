@@ -66,7 +66,7 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
 
 ## Apple Guideline 3.1.2
 
-Paywall shows localized price/period from StoreKit via RevenueCat, auto-renew disclosure, cancel instructions, Terms + Privacy links, and Restore Purchases. Settings includes **Manage subscription** (opens platform subscription management).
+Paywall shows localized price/period from the store via RevenueCat (`priceString`), auto-renew disclosure, cancel instructions, Terms + Privacy links, **Restore Purchases**, and **Redeem offer code** (iOS App Store sheet; Android opens `https://play.google.com/redeem`). Settings includes **Manage subscription** (`showManageSubscriptions` / Play subscription center).
 
 When monthly/yearly products include a **7-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
 

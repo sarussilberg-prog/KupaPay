@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
+import { ProUpgradeButton } from '../ProUpgradeButton';
 import { useTranslation } from 'react-i18next';
 type BudgetExpenseRow = {
     amount: number;
@@ -71,12 +72,11 @@ export function TripBudgetSection({
             <View className="mx-4 mb-3 p-4 rounded-2xl bg-amber-50 border border-amber-100">
                 <Text className="text-gray-800 font-semibold mb-1">{t('pro.tripBudget.title')}</Text>
                 <Text className="text-gray-600 text-sm mb-3">{t('pro.tripBudget.lockedBody')}</Text>
-                <TouchableOpacity
+                <ProUpgradeButton
+                    title={t('pro.tripBudget.upgrade')}
                     onPress={onUpgrade}
-                    className="bg-primary rounded-xl py-3 items-center justify-center"
-                >
-                    <Text className="text-white font-semibold text-center">{t('pro.tripBudget.upgrade')}</Text>
-                </TouchableOpacity>
+                    testID="trip-budget-upgrade"
+                />
             </View>
         );
     }

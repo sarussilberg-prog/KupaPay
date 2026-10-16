@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 const REPO_ROOT = path.resolve(__dirname, '../../../../..');
-const WORKFLOW = path.join(REPO_ROOT, '.github/workflows/play-internal-android.yml');
+const WORKFLOW = path.join(REPO_ROOT, '.github/workflows/play-internal.yml');
 const APP_JSON = path.join(REPO_ROOT, 'cost-share-app/apps/mobile/app.json');
 
 describe('Play Internal Android release workflow', () => {
@@ -18,6 +18,8 @@ describe('Play Internal Android release workflow', () => {
         expect(yaml).toContain('eas-submit-play-internal.sh');
         expect(yaml).toMatch(/build:version:get -p android/);
         expect(yaml).toContain('::error::EXPO_PUBLIC_REVENUECAT_ANDROID_KEY is required');
+        expect(yaml).toContain('Preflight secrets');
+        expect(yaml).toContain('ready=false');
     });
 
     it('declares Google Play Billing permission for in-app purchases', () => {

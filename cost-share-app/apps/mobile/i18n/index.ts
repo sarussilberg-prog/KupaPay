@@ -18,35 +18,15 @@ import * as Updates from 'expo-updates';
 import {
     DEFAULT_LANGUAGE,
     RTL_LANGUAGES,
-    SUPPORTED_LANGUAGES,
     type Language,
     isLanguage,
 } from '@cost-share/shared';
-import en from './locales/en.json';
-import he from './locales/he.json';
-import ru from './locales/ru.json';
-import ar from './locales/ar.json';
-import fr from './locales/fr.json';
-import es from './locales/es.json';
-import de from './locales/de.json';
+import { mobileI18nResources, type MobileI18nLocaleCode } from './localeConfig';
 import { useAppStore } from '../store';
 
 type SupportedLanguage = Language;
 
-const resources: Record<SupportedLanguage, { translation: object }> = {
-    en: { translation: en },
-    he: { translation: he },
-    ru: { translation: ru },
-    ar: { translation: ar },
-    fr: { translation: fr },
-    es: { translation: es },
-    de: { translation: de },
-};
-
-const RESOURCE_LANGUAGES = Object.keys(resources) as SupportedLanguage[];
-if (RESOURCE_LANGUAGES.length !== SUPPORTED_LANGUAGES.length) {
-    throw new Error('Mobile i18n resources must match SUPPORTED_LANGUAGES in @cost-share/shared');
-}
+const resources = mobileI18nResources;
 
 // Java's `Locale.getLanguage()` returns deprecated ISO 639-1 codes for backwards
 // compatibility — Hebrew is "iw" (not "he"), Indonesian is "in" (not "id"), Yiddish

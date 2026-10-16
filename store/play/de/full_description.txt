@@ -1,0 +1,11 @@
+KupaPay macht Gruppenausgaben einfach — Reisen, WG, Events.
+
+• Gruppen und Einladungen
+• Ausgaben gleich, gewichtet oder multi-Währung
+• Salden — wer schuldet wem
+• Ausgleich mit Bit und PayBox
+• UI auf Hebräisch (RTL), Englisch und weiteren Sprachen
+• KupaPay Pro (optional): ohne Werbung, PDF, Trip Pass für Gruppe
+
+Support: sarussilberg@gmail.com
+Datenschutz: https://kupa-pay.com/legal/privacy

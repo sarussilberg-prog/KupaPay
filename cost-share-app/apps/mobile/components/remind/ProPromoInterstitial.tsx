@@ -23,6 +23,7 @@ import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 import { platformAlert } from '../../lib/platformAlert';
+import { ProUpgradeButton } from '../ProUpgradeButton';
 
 const APP_LOGO = require('../../assets/logo.png');
 
@@ -156,8 +157,8 @@ export function ProPromoInterstitial({ visible, onDismiss, onUpgrade }: ProPromo
 
                     {/* CTA — only visible once user can dismiss anyway */}
                     {canDismiss && (
-                        <Pressable
-                            style={styles.cta}
+                        <ProUpgradeButton
+                            title={t('monetization.proPromo.cta')}
                             onPress={() => {
                                 if (onUpgrade) {
                                     onUpgrade();
@@ -169,12 +170,9 @@ export function ProPromoInterstitial({ visible, onDismiss, onUpgrade }: ProPromo
                                     [{ text: t('common.ok'), onPress: onDismiss }],
                                 );
                             }}
+                            className="rounded-2xl mb-4"
                             testID="pro-promo-cta-btn"
-                        >
-                            <Text style={styles.ctaText}>
-                                {t('monetization.proPromo.cta')}
-                            </Text>
-                        </Pressable>
+                        />
                     )}
 
                     <Pressable onPress={canDismiss ? onDismiss : undefined} style={styles.skipLink}>

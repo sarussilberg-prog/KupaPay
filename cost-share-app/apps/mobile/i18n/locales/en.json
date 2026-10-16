@@ -66,9 +66,20 @@
         "signInError": "Sign in failed. Please try again.",
         "googleSignInSheetTitle": "Sign in with Google",
         "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet.",
-        "signInWithEmailMagicLink": "Continue with email",
-        "emailMagicLinkStubHint": "Email magic link sign-in is coming soon.",
-        "emailPlaceholder": "you@example.com"
+        "signInWithEmail": "Continue with email",
+        "emailPlaceholder": "you@example.com",
+        "emailOtpSendCode": "Send code",
+        "emailOtpVerify": "Verify and sign in",
+        "emailOtpSentTo": "We sent a 6-digit code to {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Resend code",
+        "emailOtpResendIn": "Resend in {{seconds}}s",
+        "emailOtpChangeEmail": "Change email",
+        "emailOtpInvalidEmail": "Enter a valid email address.",
+        "emailOtpInvalidCode": "That code is invalid or expired. Try again or resend.",
+        "emailOtpRateLimited": "Too many attempts. Wait a minute and try again.",
+        "emailOtpSendError": "Could not send the code. Please try again.",
+        "emailOtpVerifyError": "Could not verify the code. Please try again."
     },
     "onboarding": {
         "skip": "Skip",
@@ -1171,6 +1182,7 @@
             "subscribeAtPrice": "Subscribe — {{price}}",
             "buyTripPass": "Buy Trip Pass — {{price}}",
             "restore": "Restore Purchases",
+            "redeemOfferCode": "Redeem offer code",
             "manageSubscription": "Manage subscription",
             "storeNotConfigured": "Purchases are not available in this build.",
             "loadFailed": "We couldn't load subscription prices. Check your connection or try again in a moment.",
@@ -1181,8 +1193,12 @@
             "restoreNone": "No active purchases found.",
             "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group.",
             "tryFreeTrialCta": "Try 7 days free",
-            "trialRenewalDisclosure": "After 7 days, you'll be charged {{price}}/{{period}}. Cancel anytime in Settings.",
-            "euDigitalPurchaseAck": "I request immediate access to KupaPay Pro and acknowledge that I lose my 14-day right of withdrawal once access begins."
+            "trialFreePeriodHeading": "7-day free trial",
+            "trialFreePeriodBody": "Try every Pro feature free for 7 days. Cancel in Settings before the trial ends if you don't want to continue.",
+            "trialRenewalDisclosure": "After 7 days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
+            "euWithdrawalWaiverHeading": "Immediate access & 14-day withdrawal (EU)",
+            "euDigitalPurchaseAck": "I request immediate access to KupaPay Pro and acknowledge that I lose my 14-day right of withdrawal once access begins.",
+            "havePromoCode": "Have a code?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
