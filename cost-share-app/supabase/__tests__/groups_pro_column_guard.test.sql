@@ -15,10 +15,9 @@ BEGIN
     INSERT INTO public.group_members (group_id, user_id, is_active)
         VALUES (v_group, v_member, TRUE);
 
-    PERFORM public.test_set_authenticated(v_member);
-
-    -- Triggers are disabled under replica role; enable for guard assertion.
+    -- Triggers are disabled under replica role; enable before JWT session (authenticated cannot SET this).
     SET LOCAL session_replication_role = origin;
+    PERFORM public.test_set_authenticated(v_member);
 
     BEGIN
         UPDATE public.groups
