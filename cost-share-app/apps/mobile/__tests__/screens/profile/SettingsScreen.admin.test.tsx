@@ -28,6 +28,10 @@ jest.mock('../../../services/account.service', () => ({
     getMyOpenBalances: jest.fn().mockResolvedValue(null),
 }));
 
+jest.mock('../../../components/admin/AdminProViewModeControl', () => ({
+    AdminProViewModeControl: () => null,
+}));
+
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';
