@@ -30,7 +30,7 @@ import {
 } from '../lib/appToast';
 import i18n from '../i18n';
 
-function resolveSplitAmounts(
+export function resolveSplitAmounts(
     totalAmount: number,
     inputs: ExpenseSplitInput[],
 ): { userId: string; amount: number }[] {

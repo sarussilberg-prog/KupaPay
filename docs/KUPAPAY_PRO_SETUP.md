@@ -80,3 +80,14 @@ Deploy `pro-trial-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261015120000_pro_trial_reminder.sql` on dev before production.
+
+### Recurring expenses cron (Pro v2)
+
+Deploy `pro-recurring-expense-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRET`):
+
+| Item | Value |
+|---|---|
+| URL | `https://<project-ref>.supabase.co/functions/v1/pro-recurring-expense-dispatch` |
+| Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
+
+Apply migration `20261016120000_recurring_expenses.sql` on dev before production.

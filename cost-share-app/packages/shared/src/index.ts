@@ -17,3 +17,4 @@ export * from './notifications';
 export * from './version';
 export * from './receiptStorage';
 export * from './pro/hasPro';
+export * from './recurring/recurringDates';

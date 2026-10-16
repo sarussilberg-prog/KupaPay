@@ -8,6 +8,7 @@ import * as Sentry from '@sentry/react-native';
 import type {
     CreateExpenseDto,
     ExpenseWithSplits,
+    RecurringFrequency,
     UpdateExpenseDto,
 } from '@cost-share/shared';
 import {
@@ -15,6 +16,7 @@ import {
     deleteExpense,
     updateExpense,
 } from '../../services/expenses.service';
+import { createRecurringExpenseSeries } from '../../services/recurringExpenses.service';
 import { queryKeys } from '../queries/keys';
 import {
     addExpenseMutationKey,
@@ -44,6 +46,8 @@ import {
  */
 export interface AddExpenseVariables extends CreateExpenseDto {
     pendingId: string;
+    /** Pro: create a recurring series instead of a one-off expense. */
+    recurringFrequency?: RecurringFrequency;
 }
 
 interface MutationContext {
@@ -127,8 +131,16 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
             }
             // Service signature accepts CreateExpenseDto; pendingId is a
             // client-only field and is dropped before hitting the network.
-            const { pendingId: _ignored, ...dto } = variables;
+            const { pendingId: _ignored, recurringFrequency, ...dto } = variables;
             void _ignored;
+            if (recurringFrequency) {
+                const { expense } = await createRecurringExpenseSeries(dto, recurringFrequency);
+                void captureProductEvent('recurring_series_created', {
+                    group_id: groupId,
+                    frequency: recurringFrequency,
+                });
+                return expense;
+            }
             return createExpense(dto);
         },
         onMutate: async (variables: AddExpenseVariables) => {

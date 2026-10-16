@@ -1,4 +1,4 @@
-import { createClient } from 'supabase';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { dispatchProTrialReminders } from './handler.ts';
 import { sendExpoPush } from '../send-push/expo.ts';
 
