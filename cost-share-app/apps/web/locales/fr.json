@@ -8,6 +8,18 @@
     "toggle": "English",
     "chooseLanguage": "Langue"
   },
+  "seo": {
+    "title": "KupaPay — partagez factures et frais de voyage",
+    "description": "Partagez les notes de groupe, frais de voyage et colocation. Alternative gratuite à Splitwise avec simplification des dettes.",
+    "ogTitle": "KupaPay — partagez les dépenses entre amis",
+    "ogDescription": "Simplification automatique des dettes pour voyages, loyer et restos. Gratuit sur iPhone, Android et web.",
+    "appStoreBadgeTop": "Télécharger sur l'",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "Télécharger KupaPay sur l'App Store",
+    "playStoreBadgeTop": "Disponible sur",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "Obtenir KupaPay sur Google Play"
+  },
   "hero": {
     "headline": "Partagez les dépenses entre amis, sans effort",
     "subheadline": "KupaPay simplifie automatiquement les dettes — moins de virements, moins de stress",

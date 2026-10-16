@@ -8,6 +8,18 @@
     "toggle": "English",
     "chooseLanguage": "اللغة"
   },
+  "seo": {
+    "title": "KupaPay — تقسيم الفواتير ومصاريف الرحلات",
+    "description": "قسّم فواتير المجموعة ومصاريف السفر والسكن. بديل مجاني لـ Splitwise مع تبسيط الديون وواجهة RTL.",
+    "ogTitle": "KupaPay — تقسيم المصاريف مع الأصدقاء",
+    "ogDescription": "تبسيط تلقائي للديون للرحلات والإيجار والعشاء. مجاني على iPhone وAndroid والويب.",
+    "appStoreBadgeTop": "تنزيل من",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "تنزيل KupaPay من App Store",
+    "playStoreBadgeTop": "متاح على",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "احصل على KupaPay من Google Play"
+  },
   "hero": {
     "headline": "قسّم النفقات مع الأصدقاء بسهولة",
     "subheadline": "KupaPay تبسّط الديون تلقائيًا — تحويلات أقل وضغط أقل",

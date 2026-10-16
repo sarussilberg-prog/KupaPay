@@ -1,21 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isLanguage } from '@cost-share/shared';
+import { isLanguage, SUPPORTED_LANGUAGES } from '@cost-share/shared';
+import { marketingLandingPath } from '@/lib/marketingSeo';
+
+const LOCALE_SEGMENT = new RegExp(
+  `^/(${SUPPORTED_LANGUAGES.join('|')})/?$`,
+);
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const locale = formData.get('locale');
 
-  // Redirect back to the same page (same-origin only for safety)
   const referer = request.headers.get('referer') ?? '/';
-  let redirectPath = '/';
+  let redirectPath = '/en';
   try {
     const refererUrl = new URL(referer);
     if (refererUrl.origin === new URL(request.url).origin) {
-      redirectPath = refererUrl.pathname + refererUrl.search;
+      const pathname = refererUrl.pathname;
+      if (pathname === '/' || LOCALE_SEGMENT.test(pathname)) {
+        redirectPath =
+          typeof locale === 'string' && isLanguage(locale)
+            ? marketingLandingPath(locale)
+            : '/en';
+      } else {
+        redirectPath = pathname + refererUrl.search;
+      }
     }
   } catch {
-    // Invalid referer — fall back to /
+    redirectPath =
+      typeof locale === 'string' && isLanguage(locale)
+        ? marketingLandingPath(locale)
+        : '/en';
   }
 
   const response = NextResponse.redirect(new URL(redirectPath, request.url));
