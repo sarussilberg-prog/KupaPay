@@ -32,12 +32,12 @@ TMP="$(mktemp)"
 collect_sql > "$TMP"
 
 TABLES_JSON="$(
-  rg -NIo 'CREATE TABLE (IF NOT EXISTS )?public\.([a-z0-9_]+)' "$TMP" -r '$2' | sort -u \
+  rg -io 'create table (if not exists )?(public\.)?([a-z0-9_]+)' "$TMP" -r '$3' | sort -u \
     | jq -R . | jq -s 'map({name: ., columns: []})'
 )"
 
 FUNCS_JSON="$(
-  rg -NIo 'FUNCTION public\.([a-z0-9_]+)\(' "$TMP" -r '$1' | sort -u \
+  rg -io '(function|procedure) (public\.)?([a-z0-9_]+)\(' "$TMP" -r '$3' | sort -u \
     | jq -R . | jq -s 'map({name: ., args: ""})'
 )"
 

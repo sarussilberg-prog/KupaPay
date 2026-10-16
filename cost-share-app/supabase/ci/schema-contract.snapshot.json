@@ -1,7 +1,19 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-16T21:52:02Z",
+  "generated_at": "2026-10-16T22:10:14Z",
   "tables": [
+    {
+      "name": "account_deletions_audit",
+      "columns": []
+    },
+    {
+      "name": "activity_events",
+      "columns": []
+    },
+    {
+      "name": "activity_group_last_seen",
+      "columns": []
+    },
     {
       "name": "admin_pro_view_overrides",
       "columns": []
@@ -15,7 +27,43 @@
       "columns": []
     },
     {
+      "name": "consolidation_batches",
+      "columns": []
+    },
+    {
+      "name": "deleted_account_emails",
+      "columns": []
+    },
+    {
+      "name": "device_tokens",
+      "columns": []
+    },
+    {
       "name": "email_lifecycle_deliveries",
+      "columns": []
+    },
+    {
+      "name": "expenses",
+      "columns": []
+    },
+    {
+      "name": "expense_splits",
+      "columns": []
+    },
+    {
+      "name": "friend_blocks",
+      "columns": []
+    },
+    {
+      "name": "friend_requests",
+      "columns": []
+    },
+    {
+      "name": "friendships",
+      "columns": []
+    },
+    {
+      "name": "group_members",
       "columns": []
     },
     {
@@ -27,7 +75,15 @@
       "columns": []
     },
     {
+      "name": "groups",
+      "columns": []
+    },
+    {
       "name": "group_smart_reminder_recipient_state",
+      "columns": []
+    },
+    {
+      "name": "group_user_archive",
       "columns": []
     },
     {
@@ -36,6 +92,22 @@
     },
     {
       "name": "legal_documents",
+      "columns": []
+    },
+    {
+      "name": "monetization_events",
+      "columns": []
+    },
+    {
+      "name": "notification_preferences",
+      "columns": []
+    },
+    {
+      "name": "profiles",
+      "columns": []
+    },
+    {
+      "name": "push_deliveries",
       "columns": []
     },
     {
@@ -60,6 +132,18 @@
     },
     {
       "name": "revenuecat_webhook_events",
+      "columns": []
+    },
+    {
+      "name": "settlements",
+      "columns": []
+    },
+    {
+      "name": "storage_cleanup_queue",
+      "columns": []
+    },
+    {
+      "name": "support_messages",
       "columns": []
     },
     {
@@ -173,6 +257,10 @@
       "args": ""
     },
     {
+      "name": "create_consolidation_batch",
+      "args": ""
+    },
+    {
       "name": "create_demo_group",
       "args": ""
     },
@@ -197,11 +285,19 @@
       "args": ""
     },
     {
+      "name": "default_group_invite_token",
+      "args": ""
+    },
+    {
       "name": "default_group_public_balance_token",
       "args": ""
     },
     {
       "name": "default_home_monthly_bills_mode",
+      "args": ""
+    },
+    {
+      "name": "default_profile_invite_token",
       "args": ""
     },
     {
@@ -221,7 +317,15 @@
       "args": ""
     },
     {
+      "name": "emit_expense_split_viewer_delta",
+      "args": ""
+    },
+    {
       "name": "emit_friend_request_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_group_activity_events",
       "args": ""
     },
     {
@@ -293,7 +397,15 @@
       "args": ""
     },
     {
+      "name": "get_group_unread_counts",
+      "args": ""
+    },
+    {
       "name": "get_growth_metrics",
+      "args": ""
+    },
+    {
+      "name": "get_invite_preview",
       "args": ""
     },
     {
@@ -369,6 +481,14 @@
       "args": ""
     },
     {
+      "name": "handle_consolidation_batch_activity_event",
+      "args": ""
+    },
+    {
+      "name": "handle_consolidation_batch_delete",
+      "args": ""
+    },
+    {
       "name": "handle_new_user",
       "args": ""
     },
@@ -377,11 +497,19 @@
       "args": ""
     },
     {
+      "name": "handle_settlement_activity_event",
+      "args": ""
+    },
+    {
       "name": "hard_purge_expired_deleted_accounts",
       "args": ""
     },
     {
       "name": "has_pro",
+      "args": ""
+    },
+    {
+      "name": "increment_push_attempt",
       "args": ""
     },
     {
@@ -433,6 +561,14 @@
       "args": ""
     },
     {
+      "name": "mark_group_activity_seen",
+      "args": ""
+    },
+    {
+      "name": "mark_group_note_seen",
+      "args": ""
+    },
+    {
       "name": "mark_pro_trial_lifecycle_sent",
       "args": ""
     },
@@ -469,6 +605,10 @@
       "args": ""
     },
     {
+      "name": "redeem_group_invite",
+      "args": ""
+    },
+    {
       "name": "redeem_included_trip_pass",
       "args": ""
     },
@@ -501,11 +641,19 @@
       "args": ""
     },
     {
+      "name": "resolve_settle_reminder_link",
+      "args": ""
+    },
+    {
       "name": "restore_deleted_account",
       "args": ""
     },
     {
       "name": "restore_my_account",
+      "args": ""
+    },
+    {
+      "name": "rotate_friend_invite",
       "args": ""
     },
     {
@@ -549,6 +697,10 @@
       "args": ""
     },
     {
+      "name": "send_settle_reminder",
+      "args": ""
+    },
+    {
       "name": "set_group_public_balance_sharing",
       "args": ""
     },
@@ -565,6 +717,10 @@
       "args": ""
     },
     {
+      "name": "stamp_group_note_updated_at",
+      "args": ""
+    },
+    {
       "name": "stop_recurring_expense_series",
       "args": ""
     },
@@ -574,6 +730,10 @@
     },
     {
       "name": "unarchive_group",
+      "args": ""
+    },
+    {
+      "name": "unregister_device_token",
       "args": ""
     },
     {
