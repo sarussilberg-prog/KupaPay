@@ -3,9 +3,11 @@
 // renders + sends an Expo push for the inserted activity_events row.
 // See docs/superpowers/specs/2026-06-11-push-notifications-design.md
 
+import { createClient } from 'supabase';
 import { processActivityEvent, type ActivityRecord } from './handler.ts';
 import { makeSupabaseDeps } from './deps.ts';
 import { jsonResponse, preflight } from './cors.ts';
+import { fetchVerifiedActivityRecord } from './verifyRecord.ts';
 
 const PUSH_WEBHOOK_SECRET = Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -32,8 +34,15 @@ Deno.serve(async (req) => {
     }
 
     try {
+        const sb = createClient(SUPABASE_URL, SERVICE_ROLE, {
+            auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const verified = await fetchVerifiedActivityRecord(sb, record);
+        if (!verified) {
+            return jsonResponse({ ok: false, error: 'invalid_record' }, 400);
+        }
         const deps = makeSupabaseDeps({ url: SUPABASE_URL, serviceRole: SERVICE_ROLE });
-        const outcome = await processActivityEvent(record, deps);
+        const outcome = await processActivityEvent(verified, deps);
         return jsonResponse({ ok: true, outcome }, 200);
     } catch (e) {
         console.error('send-push failed', e);
