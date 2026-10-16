@@ -24,6 +24,8 @@ import {
 } from '../lib/proTrialPaywall';
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
+import { supabase } from '../lib/supabase';
+import { useAppStore } from '../store';
 
 export type { PaywallPackages, PurchasesPackageLike };
 export type { IntroEligibilityMap };
@@ -32,6 +34,8 @@ export interface ProSubscriptionUiState {
     isInFreeTrial: boolean;
     trialEndsAt: string | null;
     manageSubscriptionsAvailable: boolean;
+    trialLifecycleSent?: number[];
+    trialFeatureUsage?: Record<string, boolean>;
 }
 
 type PurchasesModule = typeof import('react-native-purchases');
@@ -161,10 +165,36 @@ export async function fetchProSubscriptionUiState(): Promise<ProSubscriptionUiSt
 
         const periodType = ent.periodType;
         const inTrial = periodType === 'TRIAL' || periodType === 'INTRO';
+        let trialLifecycleSent: number[] = [];
+        let trialFeatureUsage: Record<string, boolean> = {};
+        const userId = useAppStore.getState().currentUser?.id;
+        if (userId) {
+            const { data: profileRow } = await supabase
+                .from('profiles')
+                .select('pro_trial_lifecycle_sent, pro_trial_feature_usage')
+                .eq('id', userId)
+                .maybeSingle();
+            const sentRaw = profileRow?.pro_trial_lifecycle_sent;
+            if (Array.isArray(sentRaw)) {
+                trialLifecycleSent = sentRaw.map(v => Number(v)).filter(n => Number.isFinite(n));
+            } else if (typeof sentRaw === 'string') {
+                try {
+                    const parsed = JSON.parse(sentRaw) as unknown[];
+                    trialLifecycleSent = parsed.map(v => Number(v)).filter(n => Number.isFinite(n));
+                } catch {
+                    trialLifecycleSent = [];
+                }
+            }
+            if (profileRow?.pro_trial_feature_usage && typeof profileRow.pro_trial_feature_usage === 'object') {
+                trialFeatureUsage = profileRow.pro_trial_feature_usage as Record<string, boolean>;
+            }
+        }
         return {
             isInFreeTrial: inTrial,
             trialEndsAt: inTrial ? (ent.expirationDate ?? null) : null,
             manageSubscriptionsAvailable: true,
+            trialLifecycleSent,
+            trialFeatureUsage,
         };
     } catch {
         return empty;

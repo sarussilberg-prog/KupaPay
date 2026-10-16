@@ -46,6 +46,8 @@ export const PRODUCT_ANALYTICS_EXTENDED_EVENTS = [
     'trip_budget_configured',
     'trip_budget_viewed',
     'receipt_scan_applied',
+    'pro_trial_nudge_shown',
+    'pro_trial_nudge_dismissed',
 ] as const;
 
 export type ProductAnalyticsExtendedEvent = (typeof PRODUCT_ANALYTICS_EXTENDED_EVENTS)[number];

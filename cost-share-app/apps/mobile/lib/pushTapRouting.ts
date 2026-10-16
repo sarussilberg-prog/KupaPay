@@ -29,6 +29,7 @@ export function notificationDataToPendingNavigation(data: NotificationData): Pen
         case 'trip_budget_alert':
             return groupId ? { target: 'groupDetail', groupId } : null;
         case 'pro_trial_reminder':
+        case 'pro_trial_lifecycle':
             return { target: 'manageSubscription' };
         case 'weekly_summary':
             return { target: 'groupsList' };

@@ -31,6 +31,7 @@ export * from './changelog';
 export * from './sentryReleaseMetadata';
 export * from './receiptStorage';
 export * from './pro/hasPro';
+export * from './pro/proTrialLifecycle';
 export * from './recurring/recurringDates';
 export * from './appReview';
 export * from './receiptOcr/parseReceiptDraftFromText';
