@@ -30,16 +30,6 @@ export function countLegalPlaceholders(markdown: string): Record<(typeof LEGAL_P
     return counts;
 }
 
-function countOccurrences(haystack: string, needle: string): number {
-    let count = 0;
-    let idx = 0;
-    while ((idx = haystack.indexOf(needle, idx)) !== -1) {
-        count += 1;
-        idx += needle.length;
-    }
-    return count;
-}
-
 export function countLegalSections(markdown: string): number {
     const matches = markdown.match(/^## \d+\./gm);
     return matches?.length ?? 0;
