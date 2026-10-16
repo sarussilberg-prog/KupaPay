@@ -8,9 +8,9 @@ const userId = __ENV.K6_USER_ID || '';
 const vus = Number(__ENV.K6_VUS || 15);
 const duration = __ENV.K6_DURATION || '1m';
 
-if (!supabaseUrl || !anonKey || !userJwt) {
+if (!supabaseUrl || !anonKey || !userJwt || !userId) {
     throw new Error(
-        'Set SUPABASE_URL, SUPABASE_ANON_KEY, and K6_USER_JWT (dev test user) before running k6.',
+        'Set SUPABASE_URL, SUPABASE_ANON_KEY, K6_USER_JWT, and K6_USER_ID before running k6.',
     );
 }
 
@@ -46,10 +46,6 @@ function rpc(name, body) {
 }
 
 export default function () {
-    const userId = JSON.parse(
-        Buffer.from(userJwt.split('.')[1], 'base64url').toString('utf8'),
-    ).sub;
-
     rpc('get_user_dashboard', { p_user_id: userId });
     sleep(0.2);
     rpc('get_user_simplified_inputs', { p_user_id: userId });

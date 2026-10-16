@@ -16,6 +16,7 @@ cd cost-share-app/scripts/load-test
 export SUPABASE_URL="https://drxfbicunusmipdgbgdk.supabase.co"
 export SUPABASE_ANON_KEY="<dev anon key>"
 export K6_USER_JWT="<authenticated user JWT for a test account>"
+export K6_USER_ID="<same user's UUID>"
 k6 run k6-dev-rpcs.js
 ```
 
