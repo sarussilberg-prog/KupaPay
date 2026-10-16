@@ -735,10 +735,6 @@
         "adminPortal": "بوابة المشرف"
     },
     "appReview": {
-        "prePromptTitle": "هل تستمتع بـ KupaPay؟",
-        "prePromptMessage": "سؤال سريع — تقييمك يساعد الأصدقاء على اكتشاف تقسيم نفقات عادل.",
-        "happyCta": "نعم، أعجبني",
-        "unhappyCta": "يمكن أن يتحسّن",
         "notNow": "ليس الآن",
         "webTitle": "كيف تجربة KupaPay لديك؟",
         "webMessage": "ما زلنا نطوّر نسخة الويب. ملاحظاتك تصل مباشرة إلى الفريق.",

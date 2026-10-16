@@ -16,7 +16,7 @@ import { handleError } from '../lib/handleError';
 import { captureProductEvent } from '../lib/productAnalytics';
 import {
     incrementSettleCountForStoreReview,
-    maybeQueueAppReviewPrompt,
+    maybePromptForAppReview,
 } from '../lib/storeReviewPrompt';
 
 export async function fetchSettlements(groupId?: string): Promise<Settlement[]> {
@@ -87,7 +87,7 @@ export async function createSettlement(dto: CreateSettlementDto): Promise<Settle
             currency: dto.currency,
         });
         void incrementSettleCountForStoreReview().then(() =>
-            maybeQueueAppReviewPrompt('first_settle_up'),
+            maybePromptForAppReview('first_settle_up'),
         );
         return settlementFromRow(data);
     } catch (error) {

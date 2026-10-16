@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
 import { Platform } from 'react-native';
-import * as StoreReview from 'expo-store-review';
 import { useAppStore } from '../../store';
-import { AppReviewPrePromptSheet } from './AppReviewPrePromptSheet';
+import { AppReviewWebFeedbackSheet } from './AppReviewWebFeedbackSheet';
 import { markAppReviewPromptConsumed } from '../../lib/storeReviewPrompt';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { rootNavigationRef } from '../../lib/rootNavigationRef';
@@ -15,7 +14,7 @@ function navigateToContactUs(): void {
     useAppStore.getState().setPendingNavigation({ target: 'contactUs' });
 }
 
-export function AppReviewPromptHost() {
+function WebAppReviewPromptHost() {
     const pending = useAppStore((s) => s.pendingAppReview);
     const setPending = useAppStore((s) => s.setPendingAppReview);
 
@@ -23,36 +22,15 @@ export function AppReviewPromptHost() {
 
     const onDismiss = useCallback(() => {
         if (pending) {
-            void captureProductEvent('review_pre_prompt_dismissed', { trigger: pending.trigger });
+            void captureProductEvent('review_web_feedback_dismissed', { trigger: pending.trigger });
         }
         clear();
     }, [clear, pending]);
 
-    const onHappy = useCallback(async () => {
+    const onShareFeedback = useCallback(async () => {
         if (!pending) return;
         const { trigger } = pending;
-        void captureProductEvent('review_pre_prompt_happy', { trigger });
-
-        if (Platform.OS === 'web') {
-            void captureProductEvent('review_web_feedback_shown', { trigger });
-            await markAppReviewPromptConsumed();
-            clear();
-            navigateToContactUs();
-            return;
-        }
-
-        if (await StoreReview.isAvailableAsync()) {
-            await StoreReview.requestReview();
-            void captureProductEvent('review_prompt_shown', { trigger });
-        }
-        await markAppReviewPromptConsumed();
-        clear();
-    }, [clear, pending]);
-
-    const onUnhappy = useCallback(async () => {
-        if (!pending) return;
-        const { trigger } = pending;
-        void captureProductEvent('review_pre_prompt_unhappy', { trigger });
+        void captureProductEvent('review_web_feedback_cta', { trigger });
         await markAppReviewPromptConsumed();
         clear();
         navigateToContactUs();
@@ -60,18 +38,20 @@ export function AppReviewPromptHost() {
 
     React.useEffect(() => {
         if (!pending) return;
-        void captureProductEvent('review_pre_prompt_shown', { trigger: pending.trigger });
+        void captureProductEvent('review_web_feedback_shown', { trigger: pending.trigger });
     }, [pending]);
 
-    const mode = Platform.OS === 'web' ? 'web' : 'native';
-
     return (
-        <AppReviewPrePromptSheet
+        <AppReviewWebFeedbackSheet
             visible={pending != null}
-            mode={mode}
             onClose={onDismiss}
-            onHappy={() => void onHappy()}
-            onUnhappy={() => void onUnhappy()}
+            onShareFeedback={() => void onShareFeedback()}
         />
     );
+}
+
+/** Web-only host for post–positive-moment feedback prompt. Native uses in-app review directly. */
+export function AppReviewPromptHost() {
+    if (Platform.OS !== 'web') return null;
+    return <WebAppReviewPromptHost />;
 }

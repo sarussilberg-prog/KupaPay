@@ -704,10 +704,6 @@
         "adminPortal": "Portal de administración"
     },
     "appReview": {
-        "prePromptTitle": "¿Te gusta KupaPay?",
-        "prePromptMessage": "Una pregunta rápida: tu valoración ayuda a más amigos a descubrir repartos justos.",
-        "happyCta": "Sí, me encanta",
-        "unhappyCta": "Podría mejorar",
         "notNow": "Ahora no",
         "webTitle": "¿Cómo te va con KupaPay?",
         "webMessage": "Seguimos puliendo la versión web. Tu opinión llega directo al equipo.",

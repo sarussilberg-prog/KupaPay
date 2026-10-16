@@ -705,10 +705,6 @@
         "adminPortal": "פורטל מנהלים"
     },
     "appReview": {
-        "prePromptTitle": "נהנים מ-KupaPay?",
-        "prePromptMessage": "שאלה קצרה — הדירוג שלך עוזר לחברים לגלות חלוקת הוצאות הוגנת.",
-        "happyCta": "כן, אוהבים",
-        "unhappyCta": "יכול להשתפר",
         "notNow": "לא עכשיו",
         "webTitle": "איך KupaPay עובד עבורך?",
         "webMessage": "אנחנו עדיין משפרים את גרסת האינטרנט. המשוב שלך מגיע ישירות לצוות.",

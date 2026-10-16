@@ -11,7 +11,7 @@ export interface AppReviewEligibilityState {
 }
 
 /**
- * Whether to show the pre-prompt after a positive moment (settle-up or 3rd expense).
+ * Whether to prompt after a positive moment (settle-up or 3rd expense).
  * Does not account for in-flight errors — callers must only invoke after success.
  */
 export function shouldOfferAppReview(

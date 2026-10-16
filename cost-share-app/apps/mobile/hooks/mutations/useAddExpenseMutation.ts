@@ -33,7 +33,7 @@ import { SENTRY_TAGS } from '../../lib/sentryTags';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import {
     incrementExpenseCountForStoreReview,
-    maybeQueueAppReviewPrompt,
+    maybePromptForAppReview,
 } from '../../lib/storeReviewPrompt';
 
 /**
@@ -188,7 +188,7 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
             if (serverRow?.id) {
                 void captureProductEvent('expense_added', { group_id: groupId });
                 void incrementExpenseCountForStoreReview().then((n) => {
-                    if (n === 3) void maybeQueueAppReviewPrompt('third_expense');
+                    if (n === 3) void maybePromptForAppReview('third_expense');
                 });
             }
 

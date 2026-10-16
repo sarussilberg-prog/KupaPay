@@ -1,13 +1,18 @@
 /**
- * In-app review orchestration — eligibility in @cost-share/shared; UI in AppReviewPromptHost.
+ * In-app review at positive moments — eligibility in @cost-share/shared.
+ * Native: calls StoreKit / Play In-App Review directly (no sentiment pre-prompt).
+ * Web: queues a gentle feedback sheet via AppReviewPromptHost.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import * as StoreReview from 'expo-store-review';
 import {
     APP_REVIEW_STORAGE_KEYS,
     shouldOfferAppReview,
     type AppReviewTrigger,
 } from '@cost-share/shared';
+import { captureProductEvent } from './productAnalytics';
 import { useAppStore } from '../store';
 
 export type StoreReviewTrigger = AppReviewTrigger;
@@ -62,16 +67,36 @@ export async function markAppReviewPromptConsumed(nowMs = Date.now()): Promise<v
     await AsyncStorage.setItem(APP_REVIEW_STORAGE_KEYS.lastPromptMs, String(nowMs));
 }
 
-/** Queues the pre-prompt when eligibility passes (native or web feedback). */
-export async function maybeQueueAppReviewPrompt(trigger: StoreReviewTrigger): Promise<boolean> {
-    const state = await readEligibilityState(Date.now());
-    if (!shouldOfferAppReview(trigger, state)) return false;
-
-    useAppStore.getState().setPendingAppReview({ trigger });
+async function requestNativeStoreReview(trigger: StoreReviewTrigger): Promise<boolean> {
+    if (!(await StoreReview.isAvailableAsync())) return false;
+    await StoreReview.requestReview();
+    await markAppReviewPromptConsumed();
+    void captureProductEvent('review_prompt_shown', { trigger });
     return true;
 }
 
-/** @deprecated Use {@link maybeQueueAppReviewPrompt}. */
+/**
+ * After a positive moment (successful settle-up or 3rd expense), prompt when eligible.
+ * Never call from error paths.
+ */
+export async function maybePromptForAppReview(trigger: StoreReviewTrigger): Promise<boolean> {
+    const state = await readEligibilityState(Date.now());
+    if (!shouldOfferAppReview(trigger, state)) return false;
+
+    if (Platform.OS === 'web') {
+        useAppStore.getState().setPendingAppReview({ trigger });
+        return true;
+    }
+
+    return requestNativeStoreReview(trigger);
+}
+
+/** @deprecated Use {@link maybePromptForAppReview}. */
+export async function maybeQueueAppReviewPrompt(trigger: StoreReviewTrigger): Promise<boolean> {
+    return maybePromptForAppReview(trigger);
+}
+
+/** @deprecated Use {@link maybePromptForAppReview}. */
 export async function maybeRequestStoreReview(trigger: StoreReviewTrigger): Promise<boolean> {
-    return maybeQueueAppReviewPrompt(trigger);
+    return maybePromptForAppReview(trigger);
 }
