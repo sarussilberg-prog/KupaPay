@@ -3,11 +3,15 @@
  * Single SSOT — web legal pages and mobile paywall links use the same values.
  */
 export const OWNER_LEGAL_CONFIG = {
-    /** Legal name / trader name (DSA, store listings). */
-    ownerLegalName: '[OWNER LEGAL NAME]',
+    /** Operator name shown in Terms, Privacy, and store listings. */
+    operatorDisplayName: 'Sarussilberg',
+    /** Individual legally responsible (trader). */
+    legalResponsibleName: 'Nave Sarussi',
+    /** Replaces [OWNER LEGAL NAME] in draft markdown. */
+    ownerLegalName: 'Sarussilberg',
     /** Support and privacy contact email. */
-    supportEmail: '[SUPPORT EMAIL]',
-    /** Physical address (EU trader disclosure). */
+    supportEmail: 'sarussilberg@gmail.com',
+    /** Physical address (EU trader disclosure) — TODO before publish. */
     address: '[ADDRESS]',
     /** ISO date string shown as "Last updated" when [DATE] appears in drafts. */
     lastUpdated: '2026-10-16',
