@@ -25,6 +25,7 @@ BEGIN
         END IF;
     END;
 
+    PERFORM set_config('role', 'service_role', TRUE);
     SELECT public.consume_receipt_ocr_quota_for_user(v_user) INTO v_ok;
     IF v_ok IS DISTINCT FROM TRUE THEN
         RAISE EXCEPTION 'Case B failed: service path should consume quota (got %)', v_ok;
