@@ -189,12 +189,12 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-<<<<<<< HEAD
     needs:
       [
         lint,
         typecheck,
         test,
+        legal-locale-parity,
         deno-edge-functions,
         deno-edge-bundle-check,
         migration-versions,
@@ -203,9 +203,6 @@ jobs:
         ci-performance,
         supabase-sql-integration,
       ]
-=======
-    needs: [lint, typecheck, test, legal-locale-parity, deno-edge-functions, deno-edge-bundle-check, migration-versions, no-merge-conflicts, expo-mobile-config]
->>>>>>> e12156c (feat(legal): Terms and Privacy for all app locales)
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest
