@@ -181,8 +181,8 @@ export function SpendingInsightsSheet({
             </BottomSheetShell>
             <CurrencyPicker
                 visible={pickerOpen}
-                selected={currency}
-                onSelect={c => {
+                value={currency}
+                onChange={(c: string) => {
                     setCurrency(c);
                     setPickerOpen(false);
                 }}
