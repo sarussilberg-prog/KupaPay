@@ -8,8 +8,24 @@ jest.mock('../../../services/groups.service', () => ({
 jest.mock('../../../services/expenses.service', () => ({
     createExpense: jest.fn(),
 }));
+jest.mock('react-native-qrcode-svg', () => () => null);
+
+jest.mock('../../../hooks/useEnsureGroupInviteToken', () => ({
+    useEnsureGroupInviteToken: () => true,
+}));
+
+jest.mock('../../../hooks/useInviteLink', () => ({
+    useInviteLink: () => ({
+        url: 'https://kupa-pay.com/g/tok',
+        isReady: true,
+        share: jest.fn(),
+        rotate: jest.fn(),
+    }),
+}));
+
 jest.mock('../../../services/invite.service', () => ({
-    shareGroupInvite: jest.fn(),
+    shareGroupInviteViaWhatsApp: jest.fn(),
+    copyGroupInviteLink: jest.fn(),
 }));
 jest.mock('../../../lib/onboardingStorage', () => ({
     markPostLoginOnboardingComplete: jest.fn().mockResolvedValue(undefined),
@@ -109,8 +125,8 @@ describe('ActivationOnboardingScreen', () => {
             expect(trackFirstExpenseAdded).toHaveBeenCalledWith('g1', expect.any(Object));
         });
 
-        expect(getByTestId('activation-invite-done')).toBeTruthy();
-        fireEvent.press(getByTestId('activation-invite-done'));
+        expect(getByTestId('activation-invite-step')).toBeTruthy();
+        fireEvent.press(getByTestId('group-invite-skip'));
 
         await waitFor(() => {
             expect(markPostLoginOnboardingComplete).toHaveBeenCalled();

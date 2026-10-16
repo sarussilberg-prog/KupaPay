@@ -3,7 +3,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Platform, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,8 +17,8 @@ import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
 import { createGroup } from '../../services/groups.service';
 import { createExpense } from '../../services/expenses.service';
-import { shareGroupInvite } from '../../services/invite.service';
 import { markPostLoginOnboardingComplete } from '../../lib/onboardingStorage';
+import { GroupInviteSharePanel } from '../../components/invite/GroupInviteSharePanel';
 import { captureProductEvent, trackFirstExpenseAdded } from '../../lib/productAnalytics';
 import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { CreateGroupFormShell } from '../../components/groups/CreateGroupFormShell';
@@ -48,7 +48,7 @@ function parseAmountInput(raw: string): number | null {
 
 export function ActivationOnboardingScreen({ onDone, previewMode = false }: Props) {
     const { t } = useTranslation();
-    const { bottom: safeBottom } = useSafeAreaInsets();
+    const { bottom: safeBottom, top: safeTop } = useSafeAreaInsets();
     const isRtl = useRtlLayout();
     const appLanguage = useAppLanguage();
     const currentUser = useAppStore((s) => s.currentUser);
@@ -193,15 +193,6 @@ export function ActivationOnboardingScreen({ onDone, previewMode = false }: Prop
         templateId,
     ]);
 
-    const handleShareInvite = useCallback(async () => {
-        if (!groupId) return;
-        try {
-            await shareGroupInvite(groupId);
-        } catch {
-            showAppToast({ type: 'error', titleKey: 'common.error' });
-        }
-    }, [groupId]);
-
     const headerTitle = t(
         step === 'create'
             ? 'onboarding.activation.header.create'
@@ -250,29 +241,29 @@ export function ActivationOnboardingScreen({ onDone, previewMode = false }: Prop
                 </View>
             );
         }
+        return null;
+    })();
+
+    if (step === 'invite' && groupId) {
         return (
-            <View className="gap-2">
-                <CreateGroupFloatingButton
-                    title={
-                        Platform.OS === 'web'
-                            ? t('onboarding.activation.cta.shareInviteWeb')
-                            : t('onboarding.activation.cta.shareInvite')
-                    }
-                    onPress={() => void handleShareInvite()}
-                    loading={false}
-                    disabled={!groupId}
-                    testID="activation-invite-share"
-                />
-                <CreateGroupFloatingButton
-                    title={t('onboarding.activation.cta.done')}
-                    onPress={() => void finish()}
-                    loading={false}
-                    disabled={false}
-                    testID="activation-invite-done"
+            <View
+                className="flex-1 bg-slate-50"
+                style={{ paddingTop: safeTop, paddingBottom: safeBottom }}
+                testID="activation-invite-step"
+            >
+                <View className="px-5 pt-2 pb-1">
+                    <ActivationStepIndicator current="invite" />
+                </View>
+                <GroupInviteSharePanel
+                    groupId={groupId}
+                    groupName={name.trim()}
+                    onContinue={() => void finish()}
+                    onSkip={() => void finish()}
+                    continueLabelKey="onboarding.activation.cta.done"
                 />
             </View>
         );
-    })();
+    }
 
     return (
         <CreateGroupFormShell
@@ -366,23 +357,6 @@ export function ActivationOnboardingScreen({ onDone, previewMode = false }: Prop
                 </View>
             ) : null}
 
-            {step === 'invite' ? (
-                <View className="gap-3 items-center py-4">
-                    <Text style={{ fontSize: 40 }}>🎉</Text>
-                    <Text
-                        className="text-center text-base font-semibold"
-                        style={{ color: onboardingColors.ink }}
-                    >
-                        {t('onboarding.activation.invite.title')}
-                    </Text>
-                    <Text
-                        className="text-center text-sm"
-                        style={{ color: onboardingColors.muted, maxWidth: 320 }}
-                    >
-                        {t('onboarding.activation.invite.body')}
-                    </Text>
-                </View>
-            ) : null}
         </CreateGroupFormShell>
     );
 }

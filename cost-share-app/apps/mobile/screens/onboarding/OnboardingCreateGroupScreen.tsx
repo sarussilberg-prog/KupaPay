@@ -29,7 +29,6 @@ import { GroupMembersField } from '../../components/groups/GroupMembersField';
 import { OnboardingStepCard } from '../../components/groups/OnboardingStepCard';
 import { OnboardingCreateGroupHero } from '../../components/onboarding/OnboardingCreateGroupHero';
 import { OnboardingNameSuggestions } from '../../components/onboarding/OnboardingNameSuggestions';
-import { GroupInviteSharePanel } from '../../components/invite/GroupInviteSharePanel';
 import { colors } from '../../theme';
 import { useAppLanguage, useRtlLayout } from '../../hooks/useRtlLayout';
 import { initialCreateGroupCurrency } from '../../lib/appDefaultCurrency';
@@ -60,7 +59,6 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
     const [members, setMembers] = useState<User[]>([]);
     const [addMembersOpen, setAddMembersOpen] = useState(false);
     const [openStep, setOpenStep] = useState<StepKey | null>('name');
-    const [createdGroup, setCreatedGroup] = useState<{ id: string; name: string } | null>(null);
 
     const toggleStep = useCallback((key: StepKey) => {
         setOpenStep((prev) => (prev === key ? null : key));
@@ -139,27 +137,11 @@ export function OnboardingCreateGroupScreen({ onDone, previewMode = false }: Pro
                     await updateGroup(group.id, { imageUrl: uploadedUrl });
                 }
             }
-            if (!previewMode) {
-                await markPostLoginOnboardingComplete();
-            }
-            setCreatedGroup({ id: group.id, name: group.name });
+            await finish();
         } finally {
             stopLoading();
         }
-    }, [currency, groupType, localImageUri, members, name, previewMode, startLoading, stopLoading, t]);
-
-    if (createdGroup) {
-        return (
-            <View className="flex-1 bg-slate-50" style={{ paddingBottom: safeBottom }} testID="onboarding-invite-step">
-                <GroupInviteSharePanel
-                    groupId={createdGroup.id}
-                    groupName={createdGroup.name}
-                    onContinue={() => void finish()}
-                    onSkip={() => void finish()}
-                />
-            </View>
-        );
-    }
+    }, [currency, finish, groupType, localImageUri, members, name, startLoading, stopLoading, t]);
 
     const displayMembers = currentUser ? [currentUser, ...members] : members;
     const hasName = name.trim().length > 0;

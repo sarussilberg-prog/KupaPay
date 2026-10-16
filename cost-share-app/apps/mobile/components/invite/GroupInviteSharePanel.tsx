@@ -26,6 +26,8 @@ export type GroupInviteSharePanelProps = {
     onContinue: () => void;
     /** Skippable path (same destination as continue by default). */
     onSkip: () => void;
+    continueLabelKey?: string;
+    skipLabelKey?: string;
     testID?: string;
 };
 
@@ -44,6 +46,8 @@ export function GroupInviteSharePanel({
     groupName,
     onContinue,
     onSkip,
+    continueLabelKey = 'invite.postCreate.continue',
+    skipLabelKey = 'invite.postCreate.skip',
     testID = 'group-invite-share-panel',
 }: GroupInviteSharePanelProps) {
     const { t } = useTranslation();
@@ -171,7 +175,7 @@ export function GroupInviteSharePanel({
                     accessibilityRole="button"
                 >
                     <Text className="text-base font-semibold text-white">
-                        {t('invite.postCreate.continue')}
+                        {t(continueLabelKey)}
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -181,7 +185,7 @@ export function GroupInviteSharePanel({
                     accessibilityRole="button"
                 >
                     <Text className="text-base font-medium text-gray-500">
-                        {t('invite.postCreate.skip')}
+                        {t(skipLabelKey)}
                     </Text>
                 </TouchableOpacity>
             </View>
