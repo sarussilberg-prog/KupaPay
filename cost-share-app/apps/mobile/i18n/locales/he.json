@@ -694,6 +694,21 @@
             "resetOnboardingRow": "איפוס אונבורדינג",
             "previewCreateGroupRow": "תצוגה מקדימה — יצירת קופה ראשונה"
         },
+        "proView": {
+            "sectionTitle": "מצב תצוגת Pro",
+            "description": "תצוגה מקדימה של חוויית Free או Pro לחשבון שלך בלבד (24 שעות). לא משנה מנוי אמיתי.",
+            "loading": "טוען סטטוס Pro…",
+            "expires": "העקיפה תפוג {{when}}",
+            "setFailed": "לא ניתן לעדכן את מצב תצוגת Pro",
+            "bannerPro": "תצוגת מנהל: Pro",
+            "bannerFree": "תצוגת מנהל: Free",
+            "bannerResetHint": "הקש לאיפוס ל-Real",
+            "mode": {
+                "real": "Real",
+                "force_pro": "Force Pro",
+                "force_free": "Force Free"
+            }
+        },
         "onboarding": {
             "resetTitle": "לאפס את האונבורדינג?",
             "resetMessage": "הדגלים יאופסו ומסך יצירת הקופה הראשונה ייפתח. אונבורדינג לפני התחברות דורש התנתקות והפעלה מחדש.",

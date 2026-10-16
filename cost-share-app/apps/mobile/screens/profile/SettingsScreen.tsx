@@ -30,6 +30,7 @@ import { InviteLinkBlock } from '../../components/InviteLinkBlock';
 import { useSystemNotificationsDenied } from '../../hooks/useSystemNotificationsDenied';
 import { NotificationsDisabledHint } from '../../components/settings/NotificationsDisabledHint';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { AdminProViewModeControl } from '../../components/admin/AdminProViewModeControl';
 import {
     fetchProSubscriptionUiState,
     isPurchasesConfigured,
@@ -216,6 +217,7 @@ export function SettingsScreen() {
                             onPress={() => navigation.navigate('AdminPortal')}
                             testID="settings-admin-portal"
                         />
+                        <AdminProViewModeControl testIDPrefix="settings-pro-view" />
                     </SettingsSection>
                 ) : null}
 

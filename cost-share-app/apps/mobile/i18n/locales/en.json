@@ -692,6 +692,21 @@
             "resetOnboardingRow": "Reset onboarding",
             "previewCreateGroupRow": "Preview first-group screen"
         },
+        "proView": {
+            "sectionTitle": "Pro view mode",
+            "description": "Preview Free or Pro UX for your account only (24h). Does not change real subscriptions.",
+            "loading": "Loading Pro status…",
+            "expires": "Override expires {{when}}",
+            "setFailed": "Could not update Pro view mode",
+            "bannerPro": "Admin view: Pro",
+            "bannerFree": "Admin view: Free",
+            "bannerResetHint": "Tap to reset to Real",
+            "mode": {
+                "real": "Real",
+                "force_pro": "Force Pro",
+                "force_free": "Force Free"
+            }
+        },
         "onboarding": {
             "resetTitle": "Reset onboarding?",
             "resetMessage": "Flags will be cleared and the first-group screen opens. Pre-login onboarding requires signing out and restarting the app.",
