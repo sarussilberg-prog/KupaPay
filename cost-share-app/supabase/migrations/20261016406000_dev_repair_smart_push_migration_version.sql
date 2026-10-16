@@ -2,6 +2,10 @@
 
 DO $$
 BEGIN
+    IF to_regclass('supabase_migrations.schema_migrations') IS NULL THEN
+        RETURN;
+    END IF;
+
     IF EXISTS (
         SELECT 1
         FROM supabase_migrations.schema_migrations
