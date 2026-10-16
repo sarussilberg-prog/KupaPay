@@ -27,8 +27,8 @@ BEGIN
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin);
 
-    INSERT INTO public.groups (id, name, created_by, default_currency)
-    VALUES (v_group, 'Growth NS', v_u1, 'ILS');
+    INSERT INTO public.groups (id, name, created_by, default_currency, invite_token)
+    VALUES (v_group, 'Growth NS', v_u1, 'ILS', 'tt_gr_grp01');
 
     INSERT INTO public.group_members (group_id, user_id, is_active)
     VALUES
