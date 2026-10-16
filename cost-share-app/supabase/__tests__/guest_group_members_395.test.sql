@@ -13,9 +13,9 @@ DECLARE
     v_expense_id UUID;
     v_bob_owed NUMERIC;
 BEGIN
-    INSERT INTO public.profiles (id, name, is_active) VALUES
-        (v_alice, 'Alice', TRUE),
-        (v_bob, 'Bob', TRUE);
+    INSERT INTO public.profiles (id, name, is_active, invite_token) VALUES
+        (v_alice, 'Alice', TRUE, 'it_guest395_alice'),
+        (v_bob, 'Bob', TRUE, 'it_guest395_bob');
 
     INSERT INTO public.groups (id, name, default_currency, is_active, created_by, group_type, invite_token)
     VALUES (v_group, 'Guest test', 'ILS', TRUE, v_alice, 'general', v_token);
