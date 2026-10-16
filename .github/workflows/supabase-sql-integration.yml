@@ -73,9 +73,11 @@ jobs:
             if bash scripts/ci-supabase-sql-bootstrap.sh; then
               exit 0
             fi
-            echo "::warning::Bootstrap attempt ${attempt} failed — retrying once (Postgres/Docker flake)"
             remove_pg_container
-            sleep 15
+            if [[ "$attempt" -eq 1 ]]; then
+              echo "::warning::Bootstrap attempt 1 failed — retrying once (Postgres/Docker flake)"
+              sleep 15
+            fi
           done
           exit 1
 
