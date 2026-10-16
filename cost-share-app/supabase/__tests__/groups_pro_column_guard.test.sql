@@ -17,6 +17,9 @@ BEGIN
 
     PERFORM public.test_set_authenticated(v_member);
 
+    -- Triggers are disabled under replica role; enable for guard assertion.
+    SET LOCAL session_replication_role = origin;
+
     BEGIN
         UPDATE public.groups
         SET smart_reminder_enabled = TRUE,
@@ -28,6 +31,8 @@ BEGIN
             RAISE;
         END IF;
     END;
+
+    SET LOCAL session_replication_role = replica;
 END;
 $outer$;
 
