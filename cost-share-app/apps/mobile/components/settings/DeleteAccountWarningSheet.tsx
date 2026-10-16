@@ -48,7 +48,7 @@ export function DeleteAccountWarningSheet({
                     <View className="items-center pt-2 pb-1">
                         <View className="w-10 h-1 bg-gray-300 rounded-full" />
                     </View>
-                    <Text className="text-xl font-bold text-red-600 px-5 mt-2 mb-3">
+                    <Text className="text-xl font-bold text-red-600 px-5 mt-2 mb-3 text-start">
                         {t('deleteAccount.warningTitle')}
                     </Text>
 
@@ -57,10 +57,10 @@ export function DeleteAccountWarningSheet({
                             className="mx-5 mb-3 p-3 rounded-xl bg-red-50 border border-red-200"
                             testID="delete-account-balance-banner"
                         >
-                            <Text className="text-sm font-semibold text-red-700 mb-1">
+                            <Text className="text-sm font-semibold text-red-700 mb-1 text-start">
                                 {t('deleteAccount.openBalancesWarningTitle')}
                             </Text>
-                            <Text className="text-sm text-red-700 leading-5">
+                            <Text className="text-sm text-red-700 leading-5 text-start">
                                 {t('deleteAccount.openBalancesWarningBody')}
                             </Text>
                             <TouchableOpacity
@@ -79,7 +79,7 @@ export function DeleteAccountWarningSheet({
                         {BULLET_KEYS.map((key) => (
                             <View key={key} style={rtlRowStyle(isRtl)} className="items-start mb-3">
                                 <AppIcon name="alert-circle-outline" size={18} color={colors.error} />
-                                <Text className="flex-1 ms-2 text-base text-gray-700 leading-6">
+                                <Text className="flex-1 ms-2 text-base text-gray-700 leading-6 text-start">
                                     {t(key, { email: SUPPORT_EMAIL })}
                                 </Text>
                             </View>
