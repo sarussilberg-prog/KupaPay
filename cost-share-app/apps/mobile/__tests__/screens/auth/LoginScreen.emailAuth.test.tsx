@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 
 jest.mock('../../../services/auth.service', () => ({
     signInWithGoogle: jest.fn(),
@@ -22,9 +22,15 @@ jest.mock('../../../components/AppLogoAnimated', () => {
 import { LoginScreen } from '../../../screens/auth/LoginScreen';
 
 describe('LoginScreen email auth flag', () => {
-    it('renders email magic-link stub when flag enabled', () => {
+    it('renders email OTP entry when flag enabled', () => {
         const { getByTestId } = render(<LoginScreen />);
-        expect(getByTestId('login-email-magic-link-stub')).toBeTruthy();
+        expect(getByTestId('login-email-otp-auth')).toBeTruthy();
+        expect(getByTestId('login-email-continue-button')).toBeTruthy();
+    });
+
+    it('expands email flow from continue button', () => {
+        const { getByTestId } = render(<LoginScreen />);
+        fireEvent.press(getByTestId('login-email-continue-button'));
         expect(getByTestId('login-email-input')).toBeTruthy();
     });
 });
