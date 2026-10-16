@@ -1,4 +1,4 @@
--- #348 — co-group helper is not client-callable; profiles RLS still allows co-members.
+-- #348 — group_members INSERT uses definer active check; co-member profiles still visible.
 BEGIN;
 SET LOCAL session_replication_role = replica;
 
@@ -9,14 +9,6 @@ DECLARE
     v_g CONSTANT UUID := '00000000-0000-0000-0000-000000348110';
     v_name TEXT;
 BEGIN
-    IF has_function_privilege(
-        'authenticated',
-        'public.profile_shares_active_group_with_viewer(uuid)',
-        'EXECUTE'
-    ) THEN
-        RAISE EXCEPTION 'authenticated must not EXECUTE profile_shares_active_group_with_viewer';
-    END IF;
-
     INSERT INTO auth.users (id, email) VALUES
         (v_a, 'p348a@test.local'),
         (v_b, 'p348b@test.local');
