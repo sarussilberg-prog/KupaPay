@@ -20,7 +20,8 @@ export interface ReceiptOcrRequest {
 
 const MAX_TEXT_LEN = 20_000;
 const MAX_IMAGE_B64 = 2_800_000;
-const MAX_CALLS_PER_USER_PER_DAY = 60;
+
+export const RECEIPT_OCR_QUOTA_RPC = 'consume_receipt_ocr_quota_for_user';
 
 export function bearerJwt(req: Request): string | null {
     const h = req.headers.get('authorization') ?? '';
@@ -33,6 +34,23 @@ function authedClient(env: ReceiptOcrEnv, jwt: string): SupabaseClient {
         global: { headers: { Authorization: `Bearer ${jwt}` } },
         auth: { persistSession: false, autoRefreshToken: false },
     });
+}
+
+function serviceClient(env: ReceiptOcrEnv): SupabaseClient {
+    return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+    });
+}
+
+/** Service-role quota consume (#309) — test hook for RPC name + client. */
+export async function consumeReceiptOcrQuota(
+    client: SupabaseClient,
+    userId: string,
+): Promise<{ ok: boolean; error?: string }> {
+    const { data, error } = await client.rpc(RECEIPT_OCR_QUOTA_RPC, { p_user_id: userId });
+    if (error) return { ok: false, error: error.message };
+    if (data !== true) return { ok: false, error: 'quota_exceeded' };
+    return { ok: true };
 }
 
 /** Optional vendor OCR — only when RECEIPT_OCR_API_URL is configured. */
@@ -92,10 +110,11 @@ export async function handleReceiptOcr(
         return { ok: false, error: 'pro_required', code: 'pro_required' };
     }
 
-    const { data: quotaOk, error: quotaErr } = await client.rpc('consume_receipt_ocr_quota', {
-        p_max: MAX_CALLS_PER_USER_PER_DAY,
-    });
-    if (quotaErr || quotaOk !== true) {
+    if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+        return { ok: false, error: 'misconfigured', code: 'misconfigured' };
+    }
+    const quota = await consumeReceiptOcrQuota(serviceClient(env), userId);
+    if (!quota.ok) {
         return { ok: false, error: 'rate_limited', code: 'rate_limited' };
     }
 
