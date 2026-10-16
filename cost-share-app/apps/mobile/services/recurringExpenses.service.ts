@@ -3,27 +3,11 @@
  */
 
 import type { CreateExpenseDto, ExpenseSplitInput, RecurringFrequency } from '@cost-share/shared';
-import {
-    expenseFromRow,
-    expenseSplitFromRow,
-    validateExpenseSplits,
-    calculateEqualSplit,
-} from '@cost-share/shared';
+import { expenseFromRow, expenseSplitFromRow, validateExpenseSplits } from '@cost-share/shared';
 import type { ExpenseWithSplits } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
-
-function resolveSplitAmounts(
-    totalAmount: number,
-    inputs: ExpenseSplitInput[],
-): { userId: string; amount: number }[] {
-    const useEqualSplit = inputs.every(s => s.amount === undefined);
-    if (useEqualSplit) {
-        const equal = calculateEqualSplit(totalAmount, inputs.length);
-        return inputs.map((s, i) => ({ userId: s.userId, amount: equal[i] }));
-    }
-    return inputs.map(s => ({ userId: s.userId, amount: s.amount ?? 0 }));
-}
+import { resolveSplitAmounts } from './expenses.service';
 
 export interface RecurringSeriesMeta {
     seriesId: string;
