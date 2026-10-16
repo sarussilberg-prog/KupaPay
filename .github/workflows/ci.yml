@@ -513,9 +513,10 @@ jobs:
     needs: [ci-gate, migration-versions]
     if: >-
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false &&
-      github.base_ref == 'dev' &&
-      needs.ci-gate.result == 'success'
+      github.event.pull_request.draft != true &&
+      github.event.pull_request.base.ref == 'dev' &&
+      needs.ci-gate.result == 'success' &&
+      needs.migration-versions.result == 'success'
     runs-on: ubuntu-latest
     concurrency:
       group: dev-merge-and-bump
