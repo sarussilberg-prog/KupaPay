@@ -1100,6 +1100,12 @@
             "findEmptyCta": "Neuen Freund per Link einladen",
             "findInviteName": "{{name}} zu KupaPay einladen"
         },
+        "publicBalance": {
+            "title": "Öffentliche Salden-Seite",
+            "toggleLabel": "Wer den Link hat, kann Salden im Web sehen",
+            "toggleHint": "Nutzt euren /b/-Saldenlink. Abschalten oder Link rotieren entzieht den Zugriff.",
+            "privacyNote": "Nur Anzeigenamen und Salden — keine E-Mail oder Belege."
+        },
         "group": {
             "title": "Gruppenlink teilen",
             "shareMessage": "Ich habe dich zur Gruppe „{{groupName}}“ auf KupaPay hinzugefügt. Tritt über diesen Link bei: {{url}}",

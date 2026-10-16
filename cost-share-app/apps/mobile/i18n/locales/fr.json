@@ -1100,6 +1100,12 @@
             "findEmptyCta": "Inviter un nouvel ami par lien",
             "findInviteName": "Inviter {{name}} sur KupaPay"
         },
+        "publicBalance": {
+            "title": "Page publique des soldes",
+            "toggleLabel": "Toute personne avec le lien peut voir les soldes sur le web",
+            "toggleHint": "Utilise votre lien /b/ des soldes. Désactivez ou régénérez le lien pour révoquer l’accès.",
+            "privacyNote": "Prénoms et soldes uniquement — pas d’e-mail ni de reçus."
+        },
         "group": {
             "title": "Partager le lien du groupe",
             "shareMessage": "Je t'ai ajouté au groupe « {{groupName}} » sur KupaPay. Rejoins-nous via ce lien : {{url}}",

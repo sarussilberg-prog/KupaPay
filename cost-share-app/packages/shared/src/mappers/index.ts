@@ -47,6 +47,7 @@ export const groupFromRow = (r: Row): Group => ({
     defaultCurrency: r.default_currency as string,
     inviteToken: (r.invite_token as string) ?? '',
     publicBalanceToken: (r.public_balance_token as string) ?? '',
+    publicBalanceSharingEnabled: r.public_balance_sharing_enabled === true,
     createdBy: r.created_by as string,
     isActive: r.is_active as boolean,
     lastActivityAt: r.last_activity_at ? toDate(r.last_activity_at) : undefined,

@@ -9,7 +9,8 @@ import { platformAlert } from '../../lib/platformAlert';
 import { handleError } from '../../lib/handleError';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { GroupType, User } from '@cost-share/shared';
+import { buildPublicGroupBalanceUrl, GroupType, User } from '@cost-share/shared';
+import { GroupPublicBalanceShareSection } from '../../components/invite/GroupPublicBalanceShareSection';
 import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
 import {
@@ -68,6 +69,10 @@ export function CreateGroupScreen() {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [unsettledMemberIds, setUnsettledMemberIds] = useState<Set<string>>(new Set());
     const [initialLoading, setInitialLoading] = useState(isEdit);
+    const [editBalanceShareMeta, setEditBalanceShareMeta] = useState<{
+        publicBalanceToken: string;
+        publicBalanceSharingEnabled: boolean;
+    } | null>(null);
 
     useEffect(() => {
         void getCurrentUserId().then(setCurrentUserId);
@@ -107,6 +112,12 @@ export function CreateGroupScreen() {
                 setGroupType(group.groupType);
                 setCurrency(group.defaultCurrency);
                 setImageUrl(group.imageUrl);
+                if (group.publicBalanceToken) {
+                    setEditBalanceShareMeta({
+                        publicBalanceToken: group.publicBalanceToken,
+                        publicBalanceSharingEnabled: group.publicBalanceSharingEnabled === true,
+                    });
+                }
             }
             await loadMembers();
             setInitialLoading(false);
@@ -361,6 +372,18 @@ export function CreateGroupScreen() {
                     onAddMembers={() => setAddMembersOpen(true)}
                     onRemoveMember={openRemoveDialog}
                 />
+                {isEdit && groupId && editBalanceShareMeta?.publicBalanceToken ? (
+                    <GroupPublicBalanceShareSection
+                        groupId={groupId}
+                        enabled={editBalanceShareMeta.publicBalanceSharingEnabled}
+                        balanceUrl={buildPublicGroupBalanceUrl(editBalanceShareMeta.publicBalanceToken)}
+                        onEnabledChange={(next) =>
+                            setEditBalanceShareMeta((prev) =>
+                                prev ? { ...prev, publicBalanceSharingEnabled: next } : prev,
+                            )
+                        }
+                    />
+                ) : null}
             </CreateGroupFormShell>
 
             <AddMembersSheet
