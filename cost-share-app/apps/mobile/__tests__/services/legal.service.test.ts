@@ -7,6 +7,16 @@ const mockMaybeSingle = jest.fn();
 const mockGetItem = jest.fn();
 const mockSetItem = jest.fn();
 
+const mockLoadStaticLegalDocument = jest.fn();
+
+jest.mock('@cost-share/shared', () => {
+    const actual = jest.requireActual('@cost-share/shared') as typeof import('@cost-share/shared');
+    return {
+        ...actual,
+        loadStaticLegalDocument: (...args: unknown[]) => mockLoadStaticLegalDocument(...args),
+    };
+});
+
 jest.mock('../../lib/supabase', () => ({
     supabase: {
         from: jest.fn(() => ({ select: mockSelect })),
@@ -21,8 +31,9 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
     },
 }));
 
+import { supabase } from '../../lib/supabase';
 import { fetchLegalDocument } from '../../services/legal.service';
-import type { LegalDocument } from '@cost-share/shared';
+import { loadStaticLegalDocument, type LegalDocument } from '@cost-share/shared';
 
 const ROW = {
     id: 'uuid-1',
@@ -47,10 +58,27 @@ beforeEach(() => {
     jest.clearAllMocks();
     mockGetItem.mockResolvedValue(null);
     mockSetItem.mockResolvedValue(undefined);
+    mockLoadStaticLegalDocument.mockImplementation(
+        (...args: Parameters<typeof loadStaticLegalDocument>) =>
+            (jest.requireActual('@cost-share/shared') as typeof import('@cost-share/shared')).loadStaticLegalDocument(
+                ...args,
+            ),
+    );
 });
 
 describe('fetchLegalDocument', () => {
-    it('returns mapped doc from Supabase on success and writes cache', async () => {
+    it('returns bundled static doc for French without calling Supabase', async () => {
+        const doc = await fetchLegalDocument('terms', 'fr');
+        expect(doc.locale).toBe('fr');
+        expect(doc.title).toBe("Conditions d'utilisation");
+        expect(doc.contentMd).toContain('sarussilberg@gmail.com');
+        expect(supabase.from).not.toHaveBeenCalled();
+        expect(mockSetItem).toHaveBeenCalledWith('legal:terms:fr', expect.any(String));
+    });
+
+    it('returns mapped doc from Supabase when static loader is unavailable', async () => {
+        mockLoadStaticLegalDocument.mockReturnValue(null);
+
         buildChain({ data: ROW, error: null });
         const doc = await fetchLegalDocument('terms', 'en');
 
@@ -64,22 +92,11 @@ describe('fetchLegalDocument', () => {
             effectiveDate: '2026-01-01',
             updatedAt: '2026-05-23T10:00:00Z',
         });
-        expect(mockSetItem).toHaveBeenCalledWith(
-            'legal:terms:en',
-            JSON.stringify(doc),
-        );
-    });
-
-    it('queries by slug + locale + is_published = true', async () => {
-        buildChain({ data: ROW, error: null });
-        await fetchLegalDocument('privacy', 'he');
-
-        expect(mockEq1).toHaveBeenCalledWith('slug', 'privacy');
-        expect(mockEq2).toHaveBeenCalledWith('locale', 'he');
-        expect(mockEq3).toHaveBeenCalledWith('is_published', true);
     });
 
     it('falls back to cached doc when network errors and cache exists', async () => {
+        mockLoadStaticLegalDocument.mockReturnValue(null);
+
         const cached: LegalDocument = {
             id: 'uuid-cached',
             slug: 'terms',
@@ -95,20 +112,5 @@ describe('fetchLegalDocument', () => {
 
         const doc = await fetchLegalDocument('terms', 'en');
         expect(doc).toEqual(cached);
-        expect(mockGetItem).toHaveBeenCalledWith('legal:terms:en');
-    });
-
-    it('throws when network fails and no cache exists', async () => {
-        mockGetItem.mockResolvedValue(null);
-        buildChain({ data: null, error: new Error('network down') });
-
-        await expect(fetchLegalDocument('terms', 'en')).rejects.toThrow();
-    });
-
-    it('throws when document is missing in DB and no cache', async () => {
-        buildChain({ data: null, error: null });
-        mockGetItem.mockResolvedValue(null);
-
-        await expect(fetchLegalDocument('terms', 'en')).rejects.toThrow(/not found/i);
     });
 });

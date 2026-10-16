@@ -29,3 +29,6 @@ export * from './recurring/recurringDates';
 export * from './receiptOcr/parseReceiptDraftFromText';
 export * from './legal/ownerLegalConfig';
 export * from './legal/legalPageUrl';
+export * from './legal/staticLegalDocument';
+export * from './legal/legalParity';
+export { LEGAL_ENGLISH_PREVAILS_NOTE } from './legal/legalEnglishPrevailsNote';

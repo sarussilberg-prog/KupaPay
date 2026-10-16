@@ -9,7 +9,6 @@ import {
   APP_VERSION,
   isRtlLanguage,
   languageToIntlLocale,
-  legalDocumentLocale,
   type LegalSlug,
 } from '@cost-share/shared';
 import { loadStaticLegalDocument } from '@/lib/legalContent';
@@ -33,7 +32,6 @@ interface Props {
 export default async function LegalPage({ slug, langOverride }: Props) {
   const locale = await getLocale(langOverride);
   const t = getTranslations(locale);
-  const docLocale = legalDocumentLocale(locale);
   const staticDoc = loadStaticLegalDocument(slug, locale);
 
   let data: { title: string; content_md: string; effective_date: string | null } | null =
@@ -51,7 +49,7 @@ export default async function LegalPage({ slug, langOverride }: Props) {
       .from('legal_documents')
       .select('title, content_md, effective_date')
       .eq('slug', slug)
-      .eq('locale', docLocale)
+      .eq('locale', locale)
       .eq('is_published', true)
       .maybeSingle();
     data = remote;

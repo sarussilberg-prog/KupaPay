@@ -19,33 +19,5 @@ export const OWNER_LEGAL_CONFIG = {
     lastUpdated: '2026-10-16',
 } as const;
 
-function addressForLocale(locale: 'en' | 'he'): string {
-    return locale === 'he' ? OWNER_LEGAL_CONFIG.addressHe : OWNER_LEGAL_CONFIG.address;
-}
-
-function buildPlaceholderMap(locale: 'en' | 'he'): Record<string, string> {
-    const address = addressForLocale(locale);
-    return {
-        '[OWNER LEGAL NAME]': OWNER_LEGAL_CONFIG.ownerLegalName,
-        '[SUPPORT EMAIL]': OWNER_LEGAL_CONFIG.supportEmail,
-        '[ADDRESS]': address,
-        '[ADDRESS — required for EU trader info]': address,
-        '[כתובת – נדרשת לפרטי הסוחר באיחוד]': address,
-        '[DATE]': OWNER_LEGAL_CONFIG.lastUpdated,
-    };
-}
-
-/** Replace draft placeholders in legal markdown (does not strip lawyer-review banners). */
-export function applyLegalPlaceholders(markdown: string, locale: 'en' | 'he' = 'en'): string {
-    const placeholders = buildPlaceholderMap(locale);
-    let out = markdown;
-    for (const [token, value] of Object.entries(placeholders)) {
-        out = out.split(token).join(value);
-    }
-    return out;
-}
-
-export function legalDocumentTitle(slug: 'terms' | 'privacy', locale: 'en' | 'he'): string {
-    if (slug === 'terms') return locale === 'he' ? 'תנאי שימוש' : 'Terms of Use';
-    return locale === 'he' ? 'מדיניות פרטיות' : 'Privacy Policy';
-}
+export { applyLegalPlaceholders } from './legalPlaceholders';
+export { legalDocumentTitle } from './legalTitles';
