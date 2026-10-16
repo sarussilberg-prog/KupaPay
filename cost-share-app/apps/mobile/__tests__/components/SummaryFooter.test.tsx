@@ -42,7 +42,7 @@ describe('SummaryFooter', () => {
     const { getByTestId } = render(
       <SummaryFooter {...base} settlementCount={0} onOpenSettleUp={onOpenSettleUp} />,
     );
-    fireEvent.press(getByTestId('summary-settle-pill'));
+    fireEvent.press(getByTestId('group-detail-settle-up'));
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
   });
 
@@ -57,7 +57,7 @@ describe('SummaryFooter', () => {
       />,
     );
     fireEvent.press(getByTestId('summary-note-pill'));
-    fireEvent.press(getByTestId('summary-settle-pill'));
+    fireEvent.press(getByTestId('group-detail-settle-up'));
     expect(onOpenNote).toHaveBeenCalledTimes(1);
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
   });
