@@ -1106,6 +1106,12 @@
             "rotated": "Enlace de invitación del grupo actualizado",
             "emptyStateLink": "o comparte el enlace del grupo"
         },
+        "publicWeb": {
+            "title": "Página pública de saldos",
+            "toggleLabel": "Quien tenga el enlace puede ver los saldos",
+            "toggleHint": "Usa el enlace de invitación del grupo. Desactívalo cuando quieras o rota el enlace para revocar acceso.",
+            "privacyNote": "Solo nombres y saldos — sin correo ni recibos."
+        },
         "postCreate": {
             "title": "Invitar amigos",
             "subtitle": "Trae gente a «{{groupName}}» — enlace, WhatsApp o código QR.",

@@ -103,6 +103,15 @@ export async function rotateFriendInvite(): Promise<string> {
     return newToken;
 }
 
+export async function setGroupPublicWebShare(groupId: string, enabled: boolean): Promise<boolean> {
+    const { data, error } = await supabase.rpc('set_group_public_web_share', {
+        p_group_id: groupId,
+        p_enabled: enabled,
+    });
+    if (error) throw error;
+    return Boolean(data);
+}
+
 export async function rotateGroupInvite(groupId: string): Promise<string> {
     const { data, error } = await supabase.rpc('rotate_group_invite', { p_group_id: groupId });
     if (error) throw error;

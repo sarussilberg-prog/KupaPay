@@ -46,6 +46,7 @@ export const groupFromRow = (r: Row): Group => ({
     groupType: r.group_type as Group['groupType'],
     defaultCurrency: r.default_currency as string,
     inviteToken: (r.invite_token as string) ?? '',
+    publicWebShareEnabled: r.public_web_share_enabled === true,
     createdBy: r.created_by as string,
     isActive: r.is_active as boolean,
     lastActivityAt: r.last_activity_at ? toDate(r.last_activity_at) : undefined,

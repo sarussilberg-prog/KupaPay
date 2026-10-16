@@ -49,6 +49,8 @@ export interface Group {
     groupType: GroupType;
     defaultCurrency: string;
     inviteToken: string;  // 10-char URL-safe slug; used with APP_WEB_ORIGIN + /g/<token>
+    /** Opt-in public balance page at /g/<inviteToken> (#398). */
+    publicWebShareEnabled?: boolean;
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
     /** Last expense, settlement, or message activity (auto-maintained in DB). */

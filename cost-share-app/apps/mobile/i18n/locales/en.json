@@ -1105,6 +1105,12 @@
             "rotated": "Group invite link updated",
             "emptyStateLink": "or share group link"
         },
+        "publicWeb": {
+            "title": "Public balance page",
+            "toggleLabel": "Anyone with the link can view balances",
+            "toggleHint": "Uses your group invite link. Turn off anytime or rotate the link to revoke access.",
+            "privacyNote": "Shows member first names and balances only — no email or receipts."
+        },
         "postCreate": {
             "title": "Invite friends",
             "subtitle": "Bring people into «{{groupName}}» — share a link, WhatsApp, or scan a QR code.",

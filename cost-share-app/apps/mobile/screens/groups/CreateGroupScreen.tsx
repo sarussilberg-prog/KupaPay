@@ -9,7 +9,11 @@ import { platformAlert } from '../../lib/platformAlert';
 import { handleError } from '../../lib/handleError';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { GroupType, User } from '@cost-share/shared';
+import { buildInviteUrl, GroupType, User } from '@cost-share/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../hooks/queries/keys';
+import type { GroupWithMembers } from '@cost-share/shared';
+import { GroupPublicWebShareSection } from '../../components/invite/GroupPublicWebShareSection';
 import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
 import {
@@ -44,6 +48,12 @@ export function CreateGroupScreen() {
     const { isLoading, startLoading, stopLoading } = useLoading();
     const currentUser = useAppStore((state) => state.currentUser);
     const appLanguage = useAppLanguage();
+    const queryClient = useQueryClient();
+    const cachedGroup = groupId
+        ? (queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? []).find(
+              (g) => g.id === groupId,
+          )
+        : undefined;
 
     const [name, setName] = useState('');
     const [groupType, setGroupType] = useState<GroupType>('general');
@@ -361,6 +371,13 @@ export function CreateGroupScreen() {
                     onAddMembers={() => setAddMembersOpen(true)}
                     onRemoveMember={openRemoveDialog}
                 />
+                {isEdit && groupId && cachedGroup?.inviteToken ? (
+                    <GroupPublicWebShareSection
+                        groupId={groupId}
+                        enabled={cachedGroup.publicWebShareEnabled === true}
+                        inviteUrl={buildInviteUrl('group', cachedGroup.inviteToken)}
+                    />
+                ) : null}
             </CreateGroupFormShell>
 
             <AddMembersSheet

@@ -1105,6 +1105,12 @@
             "rotated": "Lien d'invitation du groupe mis à jour",
             "emptyStateLink": "ou partagez le lien du groupe"
         },
+        "publicWeb": {
+            "title": "Page publique des soldes",
+            "toggleLabel": "Toute personne avec le lien peut voir les soldes",
+            "toggleHint": "Utilise le lien d’invitation du groupe. Désactivez à tout moment ou régénérez le lien pour révoquer l’accès.",
+            "privacyNote": "Prénoms et soldes uniquement — pas d’e-mail ni de reçus."
+        },
         "postCreate": {
             "title": "Inviter des amis",
             "subtitle": "Faites rejoindre « {{groupName}} » — lien, WhatsApp ou QR code.",
