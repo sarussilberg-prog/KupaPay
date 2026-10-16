@@ -12,15 +12,18 @@ DECLARE
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_owner, 'gm307-owner@test.local'),
-        (v_bob,   'gm307-bob@test.local');
+        (v_bob,   'gm307-bob@test.local'),
+        (v_carol, 'gm307-carol@test.local');
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_owner, 'Owner', 'ILS', TRUE, 'gm307Owner123'),
-        (v_bob,   'Bob',   'ILS', TRUE, 'gm307Bob0123');
+        (v_bob,   'Bob',   'ILS', TRUE, 'gm307Bob0123'),
+        (v_carol, 'Carol', 'ILS', TRUE, 'gm307Carol12');
     INSERT INTO public.groups (id, name, default_currency, is_active, created_by, invite_token)
         VALUES (v_group, 'GM307', 'ILS', TRUE, v_owner, 'gm307Group123');
     INSERT INTO public.group_members (group_id, user_id, is_active) VALUES
         (v_group, v_owner, TRUE),
-        (v_group, v_bob, TRUE);
+        (v_group, v_bob, TRUE),
+        (v_group, v_carol, TRUE);
 
     SET LOCAL session_replication_role = origin;
     PERFORM public.test_set_authenticated(v_bob);
@@ -33,17 +36,14 @@ BEGIN
         RAISE EXCEPTION 'Case A failed: member must not deactivate owner';
     END IF;
 
+    PERFORM public.test_set_authenticated(v_carol);
     UPDATE public.group_members
     SET is_active = FALSE, left_at = NOW()
-    WHERE group_id = v_group AND user_id = v_bob AND is_active = TRUE;
+    WHERE group_id = v_group AND user_id = v_carol AND is_active = TRUE;
     GET DIAGNOSTICS v_rows = ROW_COUNT;
     IF v_rows <> 1 THEN
         RAISE EXCEPTION 'Case B failed: member must deactivate self (removeGroupMember)';
     END IF;
-
-    INSERT INTO public.group_members (group_id, user_id, is_active)
-        VALUES (v_group, v_bob, TRUE)
-    ON CONFLICT (group_id, user_id) DO UPDATE SET is_active = TRUE, left_at = NULL;
 
     PERFORM public.test_set_authenticated(v_owner);
     UPDATE public.group_members
