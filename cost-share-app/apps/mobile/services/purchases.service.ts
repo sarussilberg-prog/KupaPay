@@ -21,6 +21,7 @@ import {
     collectSubscriptionProductIds,
     type IntroEligibilityMap,
 } from '../lib/proTrialPaywall';
+import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
 
 export type { PaywallPackages, PurchasesPackageLike };
@@ -149,13 +150,16 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     const offering = offerings.all[offeringId] ?? offerings.current;
     if (!offering) return empty;
 
-    const find = (id: string) =>
-        offering.availablePackages.find(p => p.identifier === id) ?? null;
+    const packages = offering.availablePackages as PurchasesPackageLike[];
 
     return {
-        monthly: find(REVENUECAT_PACKAGE_MONTHLY),
-        annual: find(REVENUECAT_PACKAGE_ANNUAL),
-        tripPass: find(REVENUECAT_PACKAGE_TRIP_PASS),
+        monthly: findOfferingPackage(packages, REVENUECAT_PACKAGE_MONTHLY),
+        annual: findOfferingPackage(packages, REVENUECAT_PACKAGE_ANNUAL),
+        tripPass: findOfferingPackage(
+            packages,
+            REVENUECAT_PACKAGE_TRIP_PASS,
+            STORE_PRODUCT_TRIP_PASS,
+        ),
     };
 }
 

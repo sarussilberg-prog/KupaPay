@@ -58,7 +58,8 @@
         "android.permission.INTERNET",
         "android.permission.CAMERA",
         "android.permission.VIBRATE",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "com.android.vending.BILLING"
       ],
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",

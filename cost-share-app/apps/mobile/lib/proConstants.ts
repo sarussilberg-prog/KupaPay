@@ -8,4 +8,5 @@ export const STORE_PRODUCT_TRIP_PASS = 'kupapay_trip_pass';
 
 export const REVENUECAT_PACKAGE_MONTHLY = '$rc_monthly';
 export const REVENUECAT_PACKAGE_ANNUAL = '$rc_annual';
+/** RevenueCat offering package id (Play/App Store product id is STORE_PRODUCT_TRIP_PASS). */
 export const REVENUECAT_PACKAGE_TRIP_PASS = 'trip_pass';

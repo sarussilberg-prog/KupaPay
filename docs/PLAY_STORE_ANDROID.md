@@ -122,6 +122,10 @@ Two options:
 3. Fill release notes, save, review, **Start rollout**.
 
 **Automated (subsequent releases):**
+
+- **GitHub Actions (recommended for CI):** [PLAY_INTERNAL_GITHUB_ACTIONS.md](PLAY_INTERNAL_GITHUB_ACTIONS.md) — manual workflow **Play Internal Android** (EAS cloud AAB + internal track submit; secrets `EXPO_TOKEN`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` when Pro is enabled).
+
+- **Local CLI:**
 ```bash
 cd cost-share-app/apps/mobile
 npm run eas:submit:android   # uploads latest production build to track: internal
