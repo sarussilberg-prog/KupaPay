@@ -100,8 +100,9 @@ Squash merge via `gh pr merge --auto` after checks + SonarCloud, then dev prerel
 |-----------|----------|----------|
 | Supabase | [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | Migrations → development DB + smoke |
 | Web | Vercel | [`vercel-should-build.sh`](../cost-share-app/apps/web/scripts/vercel-should-build.sh) — path-based skip; dev vs prod by project ID |
-| iOS | [`testflight-ios.yml`](../.github/workflows/testflight-ios.yml) | Manual + smart **push** (mobile/shared paths); TestFlight only; `[skip mobile cd]` |
-| Android | [`play-internal.yml`](../.github/workflows/play-internal.yml) | Manual + smart **push**; Play **internal** only |
+| iOS + Android | [`mobile-staging-nightly.yml`](../.github/workflows/mobile-staging-nightly.yml) | **02:00 Asia/Jerusalem** — at most **one iOS + one Android** per day if mobile/shared changed since last successful build ([`mobile-cd-baseline.json`](../cost-share-app/apps/mobile/mobile-cd-baseline.json)) |
+| iOS | [`testflight-ios.yml`](../.github/workflows/testflight-ios.yml) | Manual **workflow_dispatch**; TestFlight “What to Test” from [`CHANGELOG.md`](../CHANGELOG.md) since last build |
+| Android | [`play-internal.yml`](../.github/workflows/play-internal.yml) | Manual **workflow_dispatch**; release notes in job summary since last Play internal build |
 
 ### Production (`main`)
 

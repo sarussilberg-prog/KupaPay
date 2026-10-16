@@ -1,6 +1,7 @@
-# Manual TestFlight upload: macOS runner + `eas build --local` (no EAS cloud build quota).
+# TestFlight upload: macOS runner + `eas build --local` (no EAS cloud build quota).
 # Upload only — does not submit for App Store review.
 #
+# Triggers: manual workflow_dispatch; called from mobile-staging-nightly.yml.
 # Secrets: see docs/TESTFLIGHT_GITHUB_ACTIONS.md
 name: TestFlight iOS
 
@@ -11,13 +12,19 @@ on:
         description: Enable KupaPay Pro (RevenueCat) for this TestFlight build
         type: boolean
         default: true
-  push:
-    branches: [dev]
-    paths:
-      - 'cost-share-app/apps/mobile/**'
-      - 'cost-share-app/packages/shared/**'
-      - 'cost-share-app/package.json'
-      - 'cost-share-app/package-lock.json'
+  workflow_call:
+    inputs:
+      git_ref:
+        description: Git ref to build (nightly uses dev)
+        type: string
+        default: dev
+      pro_enabled:
+        type: boolean
+        default: true
+      mobile_cd_sha:
+        description: origin/dev SHA recorded in mobile-cd-baseline after success
+        type: string
+        default: ''
 
 concurrency:
   group: testflight-ios
@@ -35,22 +42,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref || github.ref }}
+          fetch-depth: 0
 
-      - name: Skip on [skip mobile cd] or missing secrets
+      - name: Skip when secrets missing
         id: preflight
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
         run: |
           set -euo pipefail
-          if echo "${{ github.event.head_commit.message }}" | grep -qiE '\[skip mobile cd\]'; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping TestFlight ([skip mobile cd] in commit message)"
-            exit 0
-          fi
           if [ -z "${EXPO_TOKEN:-}" ] || [ -z "${ASC_API_KEY_P8:-}" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping TestFlight — set EXPO_TOKEN and ASC_API_KEY_P8 to enable auto builds on dev push"
+            echo "::notice::Skipping TestFlight — set EXPO_TOKEN and ASC_API_KEY_P8"
             exit 0
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -88,19 +93,15 @@ jobs:
         run: node scripts/sync-eas-ios-build-number.mjs
 
       - name: Require RevenueCat iOS key when Pro enabled
-        if: >-
-          steps.preflight.outputs.ready == 'true' &&
-          (github.event_name == 'push' ||
-            (github.event_name == 'workflow_dispatch' && inputs.pro_enabled == true))
+        if: steps.preflight.outputs.ready == 'true' && inputs.pro_enabled == true
         env:
           EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
         run: |
           set -euo pipefail
           if [ -z "${EXPO_PUBLIC_REVENUECAT_IOS_KEY:-}" ]; then
-            echo "::error::EXPO_PUBLIC_REVENUECAT_IOS_KEY is required when pro_enabled=true (GitHub Actions secret appl_…)"
+            echo "::error::EXPO_PUBLIC_REVENUECAT_IOS_KEY is required when pro_enabled=true"
             exit 1
           fi
-          echo "RevenueCat iOS key present (${#EXPO_PUBLIC_REVENUECAT_IOS_KEY} chars)"
 
       - name: Build iOS locally & submit to TestFlight
         if: steps.preflight.outputs.ready == 'true'
@@ -110,9 +111,8 @@ jobs:
           ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
           ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
           ASC_APP_ID: "6780216665"
-          EXPO_PUBLIC_KUPAPAY_PRO_ENABLED: ${{ (github.event_name == 'push' || inputs.pro_enabled == true) && 'true' || 'false' }}
+          EXPO_PUBLIC_KUPAPAY_PRO_ENABLED: ${{ inputs.pro_enabled == true && 'true' || 'false' }}
           EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
-          # Sentry source maps (optional — app.config.ts sets SENTRY_DISABLE_AUTO_UPLOAD when token absent)
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_URL: ${{ secrets.SENTRY_URL }}
@@ -130,13 +130,16 @@ jobs:
           NOTES="$(node scripts/changelog-testflight-notes.mjs)"
           node scripts/asc-set-testflight-notes.mjs "$EXPECTED" "$NOTES"
           node scripts/record-testflight-version.mjs
-      - name: Commit TestFlight changelog baseline
+          node scripts/record-mobile-cd-baseline.mjs ios "${{ inputs.mobile_cd_sha }}"
+
+      - name: Commit mobile CD baselines
         if: steps.preflight.outputs.ready == 'true'
+        working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cost-share-app/packages/shared/version.json
+          git add cost-share-app/packages/shared/version.json cost-share-app/apps/mobile/mobile-cd-baseline.json
           if git diff --staged --quiet; then exit 0; fi
-          git commit -m "chore: record TestFlight changelog baseline [skip ci]"
-          git push origin "${{ github.ref_name }}"
+          git commit -m "chore: record TestFlight + mobile CD baseline [skip ci]"
+          git push origin HEAD:"${{ inputs.git_ref || github.ref_name }}"
