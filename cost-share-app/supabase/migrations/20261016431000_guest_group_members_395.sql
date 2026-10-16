@@ -145,12 +145,15 @@ BEGIN
         RAISE EXCEPTION 'group_not_found';
     END IF;
 
-    INSERT INTO public.profiles (id, name, is_guest, is_active, guest_claim_token, default_currency, language)
+    INSERT INTO public.profiles (
+        id, name, is_guest, is_active, invite_token, guest_claim_token, default_currency, language
+    )
     VALUES (
         v_guest_id,
         v_name,
         TRUE,
         TRUE,
+        public.generate_invite_token(),
         public.generate_invite_token(),
         COALESCE(v_currency, 'ILS'),
         COALESCE((SELECT language FROM public.profiles WHERE id = v_me LIMIT 1), 'en')
