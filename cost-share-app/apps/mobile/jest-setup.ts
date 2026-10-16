@@ -1,5 +1,18 @@
 import '@testing-library/jest-native/extend-expect';
 
+jest.mock('expo-secure-store', () => {
+    const mockSecureStoreMemory = new Map<string, string>();
+    return {
+        getItemAsync: jest.fn(async (key: string) => mockSecureStoreMemory.get(key) ?? null),
+        setItemAsync: jest.fn(async (key: string, value: string) => {
+            mockSecureStoreMemory.set(key, value);
+        }),
+        deleteItemAsync: jest.fn(async (key: string) => {
+            mockSecureStoreMemory.delete(key);
+        }),
+    };
+});
+
 jest.mock('expo-crypto', () => {
     let mockCounter = 0;
     return {
