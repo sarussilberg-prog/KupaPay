@@ -236,11 +236,6 @@ export type Translations = {
 };
 
 export function getTranslations(locale: Language): Translations {
-<<<<<<< HEAD
   const pack = isWebI18nLocale(locale) ? webI18nTranslations[locale] : undefined;
   return (pack ?? webI18nTranslations.en) as Translations;
-=======
-  const pack = translations[locale as keyof typeof translations];
-  return (pack ?? translations.en) as Translations;
->>>>>>> origin/dev
 }
