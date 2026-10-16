@@ -23,12 +23,23 @@ jest.mock('../../../lib/featureFlags', () => ({
     isProUpsellSurfaceEnabled: () => true,
 }));
 
-const proStatusMock = {
-    data: { hasPro: false, adminProViewMode: 'real' as const },
+type ProStatusMockData = {
+    hasPro: boolean;
+    adminProViewMode?: 'real' | 'force_pro' | 'force_free';
+};
+
+const proStatusMock: {
+    data: ProStatusMockData;
+    hasPro: boolean;
+    proPerkUnlocked: boolean;
+    isLoading: boolean;
+    adminProViewMode: 'real' | 'force_pro' | 'force_free';
+} = {
+    data: { hasPro: false, adminProViewMode: 'real' },
     hasPro: false,
     proPerkUnlocked: false,
     isLoading: false,
-    adminProViewMode: 'real' as const,
+    adminProViewMode: 'real',
 };
 
 jest.mock('../../../hooks/queries/useProStatusQuery', () => ({
@@ -66,10 +77,11 @@ jest.mock('../../../hooks/queries/useGroupsQuery', () => ({
 describe('AddExpenseScreen recurring Pro gate', () => {
     beforeEach(() => {
         mockNavigate.mockClear();
-        proStatusMock.data = { hasPro: false };
+        proStatusMock.data = { hasPro: false, adminProViewMode: 'real' };
         proStatusMock.hasPro = false;
         proStatusMock.proPerkUnlocked = false;
         proStatusMock.isLoading = false;
+        proStatusMock.adminProViewMode = 'real';
         useAppStore.setState({
             currentUser: {
                 id: 'u1',
