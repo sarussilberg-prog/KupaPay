@@ -21,7 +21,10 @@ import {
     collectSubscriptionProductIds,
     type IntroEligibilityMap,
 } from '../lib/proTrialPaywall';
+<<<<<<< HEAD
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
+=======
+>>>>>>> origin/main
 import { syncProTrialReminder } from './proTrialReminder.service';
 
 export type { PaywallPackages, PurchasesPackageLike };
@@ -150,6 +153,7 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     const offering = offerings.all[offeringId] ?? offerings.current;
     if (!offering) return empty;
 
+<<<<<<< HEAD
     const packages = offering.availablePackages as PurchasesPackageLike[];
 
     return {
@@ -160,6 +164,15 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
             REVENUECAT_PACKAGE_TRIP_PASS,
             STORE_PRODUCT_TRIP_PASS,
         ),
+=======
+    const find = (id: string) =>
+        offering.availablePackages.find(p => p.identifier === id) ?? null;
+
+    return {
+        monthly: find(REVENUECAT_PACKAGE_MONTHLY),
+        annual: find(REVENUECAT_PACKAGE_ANNUAL),
+        tripPass: find(REVENUECAT_PACKAGE_TRIP_PASS),
+>>>>>>> origin/main
     };
 }
 

@@ -40,7 +40,10 @@ import {
     showSuccessToast,
 } from '../lib/appToast';
 import { trackFirstGroupCreated, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+<<<<<<< HEAD
 import { parseRpcResult } from '../lib/rpcResult';
+=======
+>>>>>>> origin/main
 type GroupArchiveState = { mine: boolean; auto: boolean };
 
 async function fetchGroupsArchiveState(): Promise<Map<string, GroupArchiveState>> {
