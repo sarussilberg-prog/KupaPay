@@ -2,6 +2,9 @@ import { DEFAULT_LANGUAGE, type Language } from '@cost-share/shared';
 
 export type { Language };
 
+/** Base locale for web marketing copy parity checks. */
+export const WEB_I18N_BASE_LOCALE = DEFAULT_LANGUAGE;
+
 const translations = {
   he: {
     header: {
@@ -195,6 +198,16 @@ const translations = {
     },
   },
 } as const;
+
+/** All locale packs registered in the web app (add a key here when adding a language). */
+export const webI18nTranslations = translations;
+
+/** Derived from `webI18nTranslations` — not a hand-maintained list. */
+export const WEB_I18N_LOCALE_CODES = Object.keys(webI18nTranslations) as Language[];
+
+export function getWebI18nBundles(): Record<string, unknown> {
+    return { ...webI18nTranslations };
+}
 
 export type Translations = {
   header: { signIn: string; signOut: string; hello: string };
