@@ -65,7 +65,10 @@
         },
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
         "googleSignInSheetTitle": "התחברות עם Google",
-        "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה."
+        "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה.",
+        "signInWithEmailMagicLink": "המשך עם אימייל",
+        "emailMagicLinkStubHint": "כניסה באימייל (קישור קסם) תגיע בקרוב.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "דלג",
@@ -1207,7 +1210,11 @@
             "upgrade": "שדרוג ל-Pro",
             "empty": "אין עדיין הוצאות במטבע זה.",
             "uncategorized": "ללא קטגוריה",
-            "tab": { "category": "קטגוריה", "member": "שילם", "week": "שבועי" }
+            "tab": {
+                "category": "קטגוריה",
+                "member": "שילם",
+                "week": "שבועי"
+            }
         },
         "tripBudget": {
             "title": "תקציב טיול",

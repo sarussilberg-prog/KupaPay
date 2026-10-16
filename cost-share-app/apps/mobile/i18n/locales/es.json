@@ -65,7 +65,10 @@
         },
         "signInError": "No se pudo iniciar sesión. Inténtalo de nuevo.",
         "googleSignInSheetTitle": "Iniciar sesión con Google",
-        "googleSignInSheetHint": "Toca abajo: la selección de cuenta se abre sobre esta hoja."
+        "googleSignInSheetHint": "Toca abajo: la selección de cuenta se abre sobre esta hoja.",
+        "signInWithEmailMagicLink": "Continuar con email",
+        "emailMagicLinkStubHint": "El inicio con enlace mágico llegará pronto.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "Omitir",
@@ -1276,7 +1279,11 @@
             "upgrade": "Mejorar a Pro",
             "empty": "Sin gastos en esta moneda.",
             "uncategorized": "Sin categoría",
-            "tab": { "category": "Categoría", "member": "Pagó", "week": "Semanal" }
+            "tab": {
+                "category": "Categoría",
+                "member": "Pagó",
+                "week": "Semanal"
+            }
         },
         "tripBudget": {
             "title": "Presupuesto del viaje",

@@ -65,7 +65,10 @@
         },
         "signInError": "Échec de la connexion. Veuillez réessayer.",
         "googleSignInSheetTitle": "Se connecter avec Google",
-        "googleSignInSheetHint": "Appuyez ci-dessous : la sélection du compte s'ouvre par-dessus cette fenêtre."
+        "googleSignInSheetHint": "Appuyez ci-dessous : la sélection du compte s'ouvre par-dessus cette fenêtre.",
+        "signInWithEmailMagicLink": "Continuer avec e-mail",
+        "emailMagicLinkStubHint": "La connexion par lien magique arrive bientôt.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "Passer",
@@ -1274,7 +1277,11 @@
             "upgrade": "Passer à Pro",
             "empty": "Aucune dépense dans cette devise.",
             "uncategorized": "Sans catégorie",
-            "tab": { "category": "Catégorie", "member": "Payé par", "week": "Semaines" }
+            "tab": {
+                "category": "Catégorie",
+                "member": "Payé par",
+                "week": "Semaines"
+            }
         },
         "tripBudget": {
             "title": "Budget du voyage",

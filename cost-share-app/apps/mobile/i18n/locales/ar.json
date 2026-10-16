@@ -65,7 +65,10 @@
         },
         "signInError": "فشل تسجيل الدخول. يُرجى المحاولة مرة أخرى.",
         "googleSignInSheetTitle": "تسجيل الدخول باستخدام Google",
-        "googleSignInSheetHint": "اضغط أدناه — ستظهر شاشة اختيار الحساب فوق هذه النافذة."
+        "googleSignInSheetHint": "اضغط أدناه — ستظهر شاشة اختيار الحساب فوق هذه النافذة.",
+        "signInWithEmailMagicLink": "المتابعة بالبريد",
+        "emailMagicLinkStubHint": "تسجيل الدخول بالبريد (رابط سحري) قريباً.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "تخطّي",
@@ -1356,7 +1359,11 @@
             "upgrade": "الترقية إلى Pro",
             "empty": "لا مصروفات بهذه العملة بعد.",
             "uncategorized": "بدون فئة",
-            "tab": { "category": "فئة", "member": "دفع", "week": "أسبوعي" }
+            "tab": {
+                "category": "فئة",
+                "member": "دفع",
+                "week": "أسبوعي"
+            }
         },
         "tripBudget": {
             "title": "ميزانية الرحلة",

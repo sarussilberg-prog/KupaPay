@@ -65,7 +65,10 @@
         },
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
         "googleSignInSheetTitle": "Вход через Google",
-        "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна."
+        "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна.",
+        "signInWithEmailMagicLink": "Продолжить с email",
+        "emailMagicLinkStubHint": "Вход по magic link скоро будет доступен.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "Пропустить",
@@ -1292,7 +1295,11 @@
             "upgrade": "Перейти на Pro",
             "empty": "Пока нет расходов в этой валюте.",
             "uncategorized": "Без категории",
-            "tab": { "category": "Категория", "member": "Оплатил", "week": "Недели" }
+            "tab": {
+                "category": "Категория",
+                "member": "Оплатил",
+                "week": "Недели"
+            }
         },
         "tripBudget": {
             "title": "Бюджет поездки",
