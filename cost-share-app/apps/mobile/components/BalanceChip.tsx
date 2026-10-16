@@ -2,8 +2,8 @@
  * BalanceChip — localized net balance for one group (list / cards).
  */
 
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity, type ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
     GroupRollup,
@@ -12,6 +12,8 @@ import {
     countNonZeroCurrencyOthers,
     formatMoney,
 } from '@cost-share/shared';
+import { Text } from './AppText';
+import { useRtlLayout } from '../hooks/useRtlLayout';
 
 interface BalanceChipProps {
     rollup?: GroupRollup;
@@ -23,17 +25,17 @@ interface BalanceChipProps {
 
 const toneStyles = {
     settled: {
-        container: 'rounded-2xl bg-gray-100 px-2.5 py-1.5 max-w-[148px]',
+        container: 'rounded-2xl bg-gray-100 px-2.5 py-1.5',
         label: 'text-[10px] font-medium text-gray-500',
         amount: 'text-xs font-semibold text-gray-500',
     },
     owe: {
-        container: 'rounded-2xl bg-red-50 px-2.5 py-1.5 max-w-[148px]',
+        container: 'rounded-2xl bg-red-50 px-2.5 py-1.5',
         label: 'text-[10px] font-medium text-red-600/90',
         amount: 'text-xs font-semibold text-red-600',
     },
     owed: {
-        container: 'rounded-2xl bg-green-50 px-2.5 py-1.5 max-w-[148px]',
+        container: 'rounded-2xl bg-green-50 px-2.5 py-1.5',
         label: 'text-[10px] font-medium text-green-700/90',
         amount: 'text-xs font-semibold text-green-700',
     },
@@ -44,6 +46,42 @@ const toneStyles = {
     },
 } as const;
 
+/** Trailing column: align copy toward the card center so RTL/LTR chips stay inside the card. */
+function chipColumnAlign(isRtl: boolean): ViewStyle['alignItems'] {
+    return isRtl ? 'flex-start' : 'flex-end';
+}
+
+function chipTextAlign(isRtl: boolean): 'left' | 'right' {
+    return isRtl ? 'left' : 'right';
+}
+
+function ChipText({
+    className,
+    children,
+    textAlign,
+    numberOfLines = 1,
+    testID,
+    writingDirection,
+}: {
+    className: string;
+    children: React.ReactNode;
+    textAlign: 'left' | 'right';
+    numberOfLines?: number;
+    testID?: string;
+    writingDirection?: 'ltr' | 'rtl';
+}) {
+    return (
+        <Text
+            className={className}
+            numberOfLines={numberOfLines}
+            testID={testID}
+            style={{ textAlign, width: '100%', writingDirection }}
+        >
+            {children}
+        </Text>
+    );
+}
+
 export function BalanceChip({
     rollup,
     defaultCurrency,
@@ -52,18 +90,35 @@ export function BalanceChip({
     onPressExtraCurrencies,
 }: BalanceChipProps) {
     const { t, i18n } = useTranslation();
+    const isRtl = useRtlLayout();
     const primary = rollup?.primary;
     const extraCount = countNonZeroCurrencyOthers(rollup?.others);
     const hasRealBalance = primary && Math.abs(primary.net) >= 0.01;
+
+    const columnStyle = useMemo<ViewStyle>(
+        () => ({
+            flexShrink: 0,
+            maxWidth: 136,
+            minWidth: 88,
+            alignItems: chipColumnAlign(isRtl),
+            alignSelf: 'center',
+        }),
+        [isRtl],
+    );
+
+    const textAlign = chipTextAlign(isRtl);
 
     if (!hasRealBalance && balanceUnknown) {
         return (
             <View
                 className={toneStyles.unknown.container}
+                style={columnStyle}
                 testID="balance-chip-unknown"
                 accessibilityLabel={t('groups.card.balanceUnavailable')}
             >
-                <Text className={toneStyles.unknown.amount}>—</Text>
+                <ChipText className={toneStyles.unknown.amount} textAlign={textAlign}>
+                    —
+                </ChipText>
             </View>
         );
     }
@@ -72,14 +127,14 @@ export function BalanceChip({
         ? classifyUserNetBalance(primary!.net)
         : 'settled';
     const styles = toneStyles[tone === 'unknown' ? 'settled' : tone];
-    const labelKey = balanceChipLabelKey(tone, groupHasOpenDebts);
+    const captionKey = balanceChipLabelKey(tone, groupHasOpenDebts);
 
     if (tone === 'settled' || tone === 'unknown') {
         return (
-            <View className={styles.container} testID="balance-chip-settled">
-                <Text className={styles.label} numberOfLines={2}>
-                    {t(labelKey)}
-                </Text>
+            <View className={styles.container} style={columnStyle} testID="balance-chip-settled">
+                <ChipText className={styles.label} textAlign={textAlign} numberOfLines={2}>
+                    {t(captionKey)}
+                </ChipText>
             </View>
         );
     }
@@ -96,10 +151,18 @@ export function BalanceChip({
             : null;
 
     return (
-        <View className={`${styles.container} items-end`} testID="balance-chip-active">
-            <Text className={styles.amount} numberOfLines={2}>
-                {t(labelKey, { amount: amountText })}
-            </Text>
+        <View className={styles.container} style={columnStyle} testID="balance-chip-active">
+            <ChipText className={styles.label} textAlign={textAlign} numberOfLines={2}>
+                {t(captionKey)}
+            </ChipText>
+            <ChipText
+                className={styles.amount}
+                textAlign={textAlign}
+                testID="balance-chip-amount"
+                writingDirection="ltr"
+            >
+                {amountText}
+            </ChipText>
             {extraLabel ? (
                 onPressExtraCurrencies ? (
                     <TouchableOpacity
@@ -107,12 +170,21 @@ export function BalanceChip({
                         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                         testID="balance-chip-others"
                     >
-                        <Text className={`${styles.label} underline mt-0.5`}>{extraLabel}</Text>
+                        <ChipText
+                            className={`${styles.label} underline mt-0.5`}
+                            textAlign={textAlign}
+                        >
+                            {extraLabel}
+                        </ChipText>
                     </TouchableOpacity>
                 ) : (
-                    <Text className={`${styles.label} mt-0.5`} testID="balance-chip-others">
+                    <ChipText
+                        className={`${styles.label} mt-0.5`}
+                        textAlign={textAlign}
+                        testID="balance-chip-others"
+                    >
                         {extraLabel}
-                    </Text>
+                    </ChipText>
                 )
             ) : null}
         </View>

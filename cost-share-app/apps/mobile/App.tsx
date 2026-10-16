@@ -62,6 +62,12 @@ import {
 } from './services/appClientConfig.service';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
+import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
+
+function isGroupCardPreviewMode(): boolean {
+  if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
+  return new URLSearchParams(globalThis.location.search).get('devGroupCardPreview') === '1';
+}
 
 // Benign when a persisted session was revoked server-side (global sign-out, token rotation, etc.).
 LogBox.ignoreLogs([/Invalid Refresh Token/i, /Refresh Token Not Found/i]);
@@ -380,6 +386,18 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             <UpdateRequiredScreen config={forcedUpdateConfig} />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isGroupCardPreviewMode()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <GroupCardListPreviewScreen />
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>

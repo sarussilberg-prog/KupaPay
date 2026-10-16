@@ -1,16 +1,12 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { GroupCard } from '../../components/GroupCard';
-import type { GroupRollup, GroupWithMembers } from '@cost-share/shared';
+import type { GroupWithMembers } from '@cost-share/shared';
+import { rollupOf } from '../../testUtils/groupRollup';
 
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
 }));
-
-const rollupOf = (
-    primary: { currency: string; net: number },
-    others: { currency: string; net: number }[] = [],
-): GroupRollup => ({ groupId: 'g1', primary, others });
 
 const baseGroup: GroupWithMembers = {
     id: 'g1',
@@ -63,25 +59,27 @@ describe('GroupCard', () => {
     });
 
     it('renders localized owed chip when primary.net > 0', () => {
-        const { getByText } = render(
+        const { getByText, getByTestId } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'EUR', net: 42.5 })}
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/groups\.card\.owedToYou/)).toBeTruthy();
+        expect(getByText('groups.card.owedToYouCaption')).toBeTruthy();
+        expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
     it('renders localized owe chip when primary.net < 0', () => {
-        const { getByText } = render(
+        const { getByText, getByTestId } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'ILS', net: -761.5 })}
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/groups\.card\.youOwe/)).toBeTruthy();
+        expect(getByText('groups.card.youOweCaption')).toBeTruthy();
+        expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
     it('shows localized multi-currency affordance', () => {
