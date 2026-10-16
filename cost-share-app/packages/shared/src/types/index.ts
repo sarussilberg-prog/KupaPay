@@ -29,6 +29,8 @@ export interface User {
     defaultCurrency: string;  // 'USD', 'ILS', 'EUR', etc.
     language: Language;
     isActive: boolean;  // Soft-delete flag — false means the user has deleted their account
+    /** Placeholder member without an auth account (#395). */
+    isGuest?: boolean;
     isAdmin: boolean;   // App-admin flag (gates admin portal entry in Settings) — set by hydrateCurrentUserProfile via is_app_admin() RPC
     createdAt: Date;
     updatedAt: Date;
@@ -549,6 +551,8 @@ export interface GroupMemberLite {
     displayName: string;
     avatarUrl?: string;
     isActive: boolean;
+    /** True for name-only placeholder members (#395). */
+    isGuest?: boolean;
 }
 
 /** Group enriched with its active members. */

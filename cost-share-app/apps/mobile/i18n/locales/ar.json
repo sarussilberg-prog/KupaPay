@@ -571,7 +571,12 @@
             "searchPlaceholder": "البحث عن الأصدقاء",
             "noSearchResults": "لا يوجد أصدقاء مطابقون لبحثك.",
             "mutualHint": "تظهر لك فقط الصداقات المتبادلة بينكما.",
-            "missingSomeoneCta": "لا تجده؟ أضف أصدقاء"
+            "missingSomeoneCta": "لا تجده؟ أضف أصدقاء",
+            "addGuestTitle": "ليس لديه حساب بعد؟",
+            "addGuestPlaceholder": "اسم الصديق",
+            "addGuestButton": "إضافة",
+            "guestAddError": "تعذّر إضافة عضو مؤقت",
+            "guestAdded": "تمت إضافة {{name}} — سيربط حسابه عند الانضمام"
         },
         "memberCount_zero": "لا أحد",
         "memberCount_one": "{{count}} شخص",
@@ -1190,6 +1195,14 @@
             "alreadyMember": "أنت عضو في هذه المجموعة بالفعل",
             "selfInvite": "هذا هو رابط الدعوة الخاص بك",
             "invalid": "رابط الدعوة هذا لم يعد صالحًا"
+        },
+        "guestClaim": {
+            "title": "هل أُضفتَ بالاسم؟",
+            "subtitle": "اختر اسمك للحفاظ على الأرصدة الصحيحة.",
+            "confirm": "هذا أنا",
+            "skip": "ليس أنا",
+            "success": "تم ربط نفقاتك المشتركة بحسابك",
+            "error": "تعذّر ربط الاسم بحسابك"
         }
     },
     "dashboard": {

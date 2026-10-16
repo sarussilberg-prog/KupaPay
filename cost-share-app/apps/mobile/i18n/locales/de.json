@@ -547,7 +547,12 @@
             "searchPlaceholder": "Freunde suchen",
             "noSearchResults": "Keine Freunde entsprechen deiner Suche.",
             "mutualHint": "Du siehst nur Freunde, die sich gegenseitig hinzugefügt haben.",
-            "missingSomeoneCta": "Nicht gefunden? Freunde hinzufügen"
+            "missingSomeoneCta": "Nicht gefunden? Freunde hinzufügen",
+            "addGuestTitle": "Noch kein Konto?",
+            "addGuestPlaceholder": "Name des Freundes",
+            "addGuestButton": "Hinzufügen",
+            "guestAddError": "Platzhalter konnte nicht hinzugefügt werden",
+            "guestAdded": "{{name}} hinzugefügt — verknüpft sich beim Beitritt"
         },
         "memberCount_one": "{{count}} Person",
         "memberCount_other": "{{count}} Personen",
@@ -1136,6 +1141,14 @@
             "alreadyMember": "Du bist bereits Mitglied dieser Gruppe",
             "selfInvite": "Das ist dein eigener Einladungslink",
             "invalid": "Dieser Einladungslink ist nicht mehr gültig"
+        },
+        "guestClaim": {
+            "title": "Unter deinem Namen hinzugefügt?",
+            "subtitle": "Wähle deinen Namen, damit die Salden stimmen.",
+            "confirm": "Das bin ich",
+            "skip": "Nicht ich",
+            "success": "Deine geteilten Ausgaben sind mit deinem Konto verknüpft",
+            "error": "Name konnte nicht verknüpft werden"
         }
     },
     "dashboard": {
