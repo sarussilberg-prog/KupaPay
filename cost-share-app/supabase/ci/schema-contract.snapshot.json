@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-16T22:10:14Z",
+  "generated_at": "2026-10-16T22:11:57Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -107,6 +107,18 @@
       "columns": []
     },
     {
+      "name": "promo_codes",
+      "columns": []
+    },
+    {
+      "name": "promo_redeem_rate_limits",
+      "columns": []
+    },
+    {
+      "name": "promo_redemptions",
+      "columns": []
+    },
+    {
       "name": "push_deliveries",
       "columns": []
     },
@@ -177,6 +189,10 @@
       "args": ""
     },
     {
+      "name": "admin_create_promo_code",
+      "args": ""
+    },
+    {
       "name": "admin_get_platform_metrics",
       "args": ""
     },
@@ -185,11 +201,19 @@
       "args": ""
     },
     {
+      "name": "admin_list_promo_codes",
+      "args": ""
+    },
+    {
       "name": "admin_list_support_messages",
       "args": ""
     },
     {
       "name": "admin_restore_deleted_account",
+      "args": ""
+    },
+    {
+      "name": "admin_set_promo_code_active",
       "args": ""
     },
     {
@@ -345,6 +369,10 @@
       "args": ""
     },
     {
+      "name": "enforce_promo_redeem_rate_limit",
+      "args": ""
+    },
+    {
       "name": "enforce_support_message_rate_limit",
       "args": ""
     },
@@ -430,6 +458,10 @@
     },
     {
       "name": "get_my_referral_status",
+      "args": ""
+    },
+    {
+      "name": "get_promo_redemption_for_rc_sync",
       "args": ""
     },
     {
@@ -569,6 +601,10 @@
       "args": ""
     },
     {
+      "name": "mark_promo_redemption_rc_synced",
+      "args": ""
+    },
+    {
       "name": "mark_pro_trial_lifecycle_sent",
       "args": ""
     },
@@ -610,6 +646,10 @@
     },
     {
       "name": "redeem_included_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "redeem_promo_code",
       "args": ""
     },
     {
