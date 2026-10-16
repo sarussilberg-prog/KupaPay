@@ -21,6 +21,7 @@ AS $$
 $$;
 
 REVOKE ALL ON FUNCTION public.profile_shares_active_group_with_viewer(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.profile_shares_active_group_with_viewer(uuid) FROM anon, authenticated;
 
 DROP POLICY IF EXISTS profiles_select_scoped ON public.profiles;
 
