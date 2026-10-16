@@ -36,7 +36,7 @@ export function buildPublicGroupViewModel(
     for (const m of wire.members) {
         memberNameByKey.set(
             m.member_key,
-            memberLabel(copy, m.display_name, m.redacted, false),
+            memberLabel(copy, m.display_name, m.redacted, m.is_former === true),
         );
     }
 

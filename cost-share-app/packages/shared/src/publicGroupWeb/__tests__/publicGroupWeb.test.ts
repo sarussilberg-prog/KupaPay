@@ -38,6 +38,20 @@ describe('public group web page', () => {
         expect(vm?.debtsByCurrency[0]?.[0]?.toName).toBe('Alice');
     });
 
+    it('labels former members separately from deleted accounts', () => {
+        const wire: PublicGroupBalancePageWire = {
+            ...sampleWire,
+            members: [
+                { member_key: 'm0', display_name: null, redacted: true, is_former: false },
+                { member_key: 'm1', display_name: null, redacted: false, is_former: true },
+            ],
+            balances_by_currency: [],
+        };
+        const vm = buildPublicGroupViewModel(wire, 'en');
+        expect(vm?.memberNameByKey.get('m0')).toBe('Deleted user');
+        expect(vm?.memberNameByKey.get('m1')).toBe('Former member');
+    });
+
     it('renders noindex, OG tags, and localized RTL for Hebrew', () => {
         const html = renderPublicGroupPageHtml({
             locale: 'he',

@@ -2,6 +2,8 @@ export type PublicGroupMemberWire = {
     member_key: string;
     display_name: string | null;
     redacted: boolean;
+    /** Left the group but account is still active (not deleted). */
+    is_former?: boolean;
 };
 
 export type PublicGroupNetWire = {
