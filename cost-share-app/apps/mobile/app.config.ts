@@ -1,5 +1,6 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import versionJson from '../../packages/shared/version.json';
+import { ADMOB_ANDROID_APP_ID, ADMOB_IOS_APP_ID } from './lib/admobConfig';
 
 const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
 const DEFAULT_POSTHOG_KEY = 'phc_umvGfkx4Qoa272QiFeNs9WKe2j6C8HQSJfMpUjkaqmhp';
@@ -34,12 +35,40 @@ function applySentryBuildDefaults(): void {
 // APP_VERSION from @cost-share/shared) so the native build, Constants.expoConfig.version,
 // and every in-app label can never drift. The `as ExpoConfig` cast acknowledges that
 // the required name/slug come from app.json via the spread — no duplicated literals.
+function resolveAdMobAppIds(): { iosAppId: string; androidAppId: string } {
+    return {
+        iosAppId: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID?.trim() || ADMOB_IOS_APP_ID,
+        androidAppId: process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID?.trim() || ADMOB_ANDROID_APP_ID,
+    };
+}
+
+function withAdMobPlugin(config: ExpoConfig): ExpoConfig {
+    const { iosAppId, androidAppId } = resolveAdMobAppIds();
+    const plugins = (config.plugins ?? []).map(entry => {
+        if (Array.isArray(entry) && entry[0] === 'react-native-google-mobile-ads') {
+            return [
+                entry[0],
+                {
+                    androidAppId,
+                    iosAppId,
+                    android_app_id: androidAppId,
+                    ios_app_id: iosAppId,
+                },
+            ] as typeof entry;
+        }
+        return entry;
+    });
+    return { ...config, plugins };
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => {
     applyPostHogPublicDefaults();
     applySentryBuildDefaults();
 
-    return {
+    const merged = {
         ...config,
         version: versionJson.version,
     } as ExpoConfig;
+
+    return withAdMobPlugin(merged);
 };

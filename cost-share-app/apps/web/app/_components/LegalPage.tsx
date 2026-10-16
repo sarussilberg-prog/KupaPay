@@ -5,7 +5,13 @@ import { getLocale } from '@/lib/locale';
 import { getTranslations } from '@/lib/i18n';
 import LandingHeader from './LandingHeader';
 import LandingFooter from './LandingFooter';
-import { APP_VERSION, type LegalSlug } from '@cost-share/shared';
+import {
+  APP_VERSION,
+  isRtlLanguage,
+  languageToIntlLocale,
+  legalDocumentLocale,
+  type LegalSlug,
+} from '@cost-share/shared';
 
 // Legal pages are public — use a plain anon client with no session/cookie handling.
 // The legal_documents table has anon-readable RLS for published rows.
@@ -27,16 +33,17 @@ export default async function LegalPage({ slug, langOverride }: Props) {
   const locale = await getLocale(langOverride);
   const t = getTranslations(locale);
   const supabase = createAnonClient();
+  const docLocale = legalDocumentLocale(locale);
 
   const { data } = await supabase
     .from('legal_documents')
     .select('title, content_md, effective_date')
     .eq('slug', slug)
-    .eq('locale', locale)
+    .eq('locale', docLocale)
     .eq('is_published', true)
     .maybeSingle();
 
-  const isRtl = locale === 'he';
+  const isRtl = isRtlLanguage(locale);
   const dir = isRtl ? ('rtl' as const) : ('ltr' as const);
   const textAlign = isRtl ? 'text-right' : 'text-left';
 
@@ -57,9 +64,7 @@ export default async function LegalPage({ slug, langOverride }: Props) {
             {data.effective_date && (
               <p className={`text-sm text-gray-400 mb-1 ${textAlign}`}>
                 {t.legal.effectiveDate}
-                {new Date(data.effective_date).toLocaleDateString(
-                  locale === 'he' ? 'he-IL' : 'en-US',
-                )}
+                {new Date(data.effective_date).toLocaleDateString(languageToIntlLocale(locale))}
               </p>
             )}
             <p className={`text-sm text-gray-400 mb-10 ${textAlign}`}>

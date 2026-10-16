@@ -1,6 +1,12 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { DeleteAccountWarningSheet } from '../../../components/settings/DeleteAccountWarningSheet';
+import { RtlLayoutProvider } from '../../../hooks/useRtlLayout';
+
+jest.mock('../../../store', () => ({
+    useAppStore: (selector: (state: { language: 'he' | 'en' }) => unknown) =>
+        selector({ language: 'he' }),
+}));
 
 describe('DeleteAccountWarningSheet', () => {
     it('renders title + 4 bullets when visible', () => {
@@ -56,6 +62,19 @@ describe('DeleteAccountWarningSheet', () => {
         expect(getByText('deleteAccount.openBalancesWarningTitle')).toBeTruthy();
         fireEvent.press(getByTestId('delete-account-settle-up-btn'));
         expect(onSettleUp).toHaveBeenCalledTimes(1);
+    });
+
+    it('aligns warning copy to the right in RTL (Hebrew)', () => {
+        const { getByText } = render(
+            <RtlLayoutProvider>
+                <DeleteAccountWarningSheet visible onClose={() => {}} onContinue={() => {}} />
+            </RtlLayoutProvider>,
+        );
+        const title = getByText('deleteAccount.warningTitle');
+        expect(title.props.className).toContain('text-right');
+        expect(title.props.style).toEqual(
+            expect.arrayContaining([expect.objectContaining({ writingDirection: 'rtl' })]),
+        );
     });
 
     it('omits the banner when openBalances.hasOpenBalances=false', () => {

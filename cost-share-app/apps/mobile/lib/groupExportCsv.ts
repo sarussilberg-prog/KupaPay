@@ -23,7 +23,7 @@ export interface GroupExportInput {
     debts: PairwiseDebt[];
     members: GroupMemberLite[];
     exportedAt: Date;
-    language: 'en' | 'he';
+    language: import('@cost-share/shared').Language;
     t: TFunction;
 }
 
@@ -111,7 +111,7 @@ function buildHistoryLines(
     feed: FeedItem[],
     names: Map<string, string>,
     t: TFunction,
-    language: 'en' | 'he',
+    language: import('@cost-share/shared').Language,
 ): string[] {
     const lines: string[] = [];
     lines.push(row(t('groups.share.sectionHistory')));

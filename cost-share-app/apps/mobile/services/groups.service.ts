@@ -40,6 +40,7 @@ import {
     showSuccessToast,
 } from '../lib/appToast';
 import { trackFirstGroupCreated, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+import { parseRpcResult } from '../lib/rpcResult';
 type GroupArchiveState = { mine: boolean; auto: boolean };
 
 async function fetchGroupsArchiveState(): Promise<Map<string, GroupArchiveState>> {
@@ -229,26 +230,36 @@ export async function fetchGroups(): Promise<GroupWithMembers[]> {
     return fetchGroupsInFlight;
 }
 
-export type ArchiveGroupError = 'has_balance' | 'not_a_member' | 'unknown';
+export type ArchiveGroupError = 'has_balance' | 'not_a_member' | 'not_authenticated' | 'unknown';
 
 export async function archiveGroup(groupId: string): Promise<ArchiveGroupError | null> {
-    const { error } = await supabase.rpc('archive_group', { p_group_id: groupId });
+    const { data, error } = await supabase.rpc('archive_group', { p_group_id: groupId });
     if (error) {
-        const code: ArchiveGroupError = error.message?.includes('has_balance')
-            ? 'has_balance'
-            : error.message?.includes('not_a_member')
-                ? 'not_a_member'
-                : 'unknown';
+        handleError(error, {
+            toast: { titleKey: 'groups.archive.errorGeneric' },
+            tags: { service: 'groups', op: 'archive', reason: 'unknown' },
+            extra: { groupId },
+        });
+        return 'unknown';
+    }
+
+    const parsed = parseRpcResult(data);
+    if (parsed && !parsed.ok) {
+        const code = (
+            ['has_balance', 'not_a_member', 'not_authenticated'].includes(parsed.error_code)
+                ? parsed.error_code
+                : 'unknown'
+        ) as ArchiveGroupError;
         const titleKey =
             code === 'has_balance'
                 ? 'groups.archive.errorHasBalance'
                 : 'groups.archive.errorGeneric';
-        handleError(error, {
+        handleError(new Error(parsed.error_code), {
             toast: { titleKey },
             tags: { service: 'groups', op: 'archive', reason: code },
             extra: { groupId },
         });
-        return code;
+        return code === 'not_authenticated' ? 'unknown' : code;
     }
 
     queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>

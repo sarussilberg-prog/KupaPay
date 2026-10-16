@@ -13,7 +13,8 @@ import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { captureProductEvent } from '../lib/productAnalytics';
 
-const INVITE_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
+/** Universal Links / App Links must always use the production host, not web dev origins. */
+const INVITE_ORIGIN = APP_WEB_ORIGIN;
 
 export function buildInviteUrl(kind: 'friend' | 'group', token: string): string {
     const prefix = kind === 'friend' ? '/i/' : '/g/';

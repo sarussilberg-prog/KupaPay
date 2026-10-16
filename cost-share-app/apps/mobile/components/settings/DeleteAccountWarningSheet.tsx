@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, Modal, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import { View, Modal, ScrollView, TouchableOpacity, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
+import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { colors } from '../../theme';
 import type { OpenBalancesSummary } from '../../services/account.service';
 
@@ -30,6 +32,7 @@ export function DeleteAccountWarningSheet({
     openBalances,
 }: Props) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     if (!visible) return null;
 
     const showBalanceBanner = openBalances?.hasOpenBalances === true;
@@ -74,7 +77,7 @@ export function DeleteAccountWarningSheet({
 
                     <ScrollView className="px-5">
                         {BULLET_KEYS.map((key) => (
-                            <View key={key} className="flex-row items-start mb-3">
+                            <View key={key} style={rtlRowStyle(isRtl)} className="items-start mb-3">
                                 <AppIcon name="alert-circle-outline" size={18} color={colors.error} />
                                 <Text className="flex-1 ms-2 text-base text-gray-700 leading-6 text-start">
                                     {t(key, { email: SUPPORT_EMAIL })}

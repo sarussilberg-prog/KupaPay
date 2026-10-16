@@ -5,7 +5,14 @@ import Markdown from 'react-native-markdown-display';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { useLegalDocument } from '../../hooks/queries/useLegalDocument';
-import { APP_VERSION, type LegalSlug } from '@cost-share/shared';
+import {
+    APP_VERSION,
+    isLanguage,
+    isRtlLanguage,
+    languageToIntlLocale,
+    legalDocumentLocale,
+    type LegalSlug,
+} from '@cost-share/shared';
 
 interface Props {
     visible: boolean;
@@ -17,8 +24,11 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
     const { t, i18n } = useTranslation();
     const query = useLegalDocument(slug);
 
-    const docLocale = query.data?.locale ?? (i18n.language === 'he' ? 'he' : 'en');
-    const isRtl = docLocale === 'he';
+    const uiLangCode = i18n.language.split('-')[0];
+    const uiLanguage = isLanguage(uiLangCode) ? uiLangCode : 'en';
+    const fallbackLocale = legalDocumentLocale(uiLanguage);
+    const docLocale = query.data?.locale ?? fallbackLocale;
+    const isRtl = isRtlLanguage(uiLanguage);
     const styles = useMemo(() => buildMarkdownStyles(isRtl), [isRtl]);
     const contentMd = useMemo(
         () => (isRtl && query.data ? prepareRtlMarkdown(query.data.contentMd) : query.data?.contentMd ?? ''),
@@ -27,13 +37,15 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
 
     if (!visible) return null;
 
-    const formattedDate = query.data
-        ? new Intl.DateTimeFormat(isRtl ? 'he-IL' : 'en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-          }).format(new Date(query.data.effectiveDate))
-        : '';
+    const legalDateLanguage = docLocale === 'he' ? 'he' : 'en';
+    let formattedDate = '';
+    if (query.data) {
+        formattedDate = new Intl.DateTimeFormat(languageToIntlLocale(legalDateLanguage), {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }).format(new Date(query.data.effectiveDate));
+    }
 
     const titleAlign = isRtl ? 'right' : 'left';
 

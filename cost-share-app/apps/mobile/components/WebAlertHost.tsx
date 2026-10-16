@@ -37,14 +37,29 @@ export function WebAlertHost() {
 
     const dismiss = () => setActive(null);
 
+    const cancelButton = active.buttons.find((b) => b.style === 'cancel');
+
+    const dismissViaCancel = () => {
+        if (cancelButton) {
+            dismiss();
+            cancelButton.onPress?.();
+            return;
+        }
+        dismiss();
+    };
+
     const handlePress = (button: PlatformAlertButton) => {
         dismiss();
         button.onPress?.();
     };
 
     return (
-        <Modal visible transparent animationType="fade" onRequestClose={dismiss}>
-            <Pressable className="flex-1 bg-black/50 justify-center items-center p-4" onPress={dismiss}>
+        <Modal visible transparent animationType="fade" onRequestClose={dismissViaCancel}>
+            <Pressable
+                testID="web-alert-backdrop"
+                className="flex-1 bg-black/50 justify-center items-center p-4"
+                onPress={dismissViaCancel}
+            >
                 <Pressable
                     onPress={e => e.stopPropagation()}
                     className="bg-white rounded-2xl p-6 w-full max-w-sm"

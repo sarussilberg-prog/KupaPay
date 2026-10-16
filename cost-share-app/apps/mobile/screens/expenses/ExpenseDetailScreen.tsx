@@ -13,6 +13,13 @@ import { Expense, ExpenseSplit, User } from '@cost-share/shared';
 import { useLoading } from '../../hooks/useLoading';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { getExpenseWithSplits, deleteExpense } from '../../services/expenses.service';
+import {
+    getRecurringSeriesForExpense,
+    stopRecurringExpenseSeries,
+    type RecurringSeriesMeta,
+} from '../../services/recurringExpenses.service';
+import { captureProductEvent } from '../../lib/productAnalytics';
+import { showSuccessMessage } from '../../lib/appToast';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { EmptyState } from '../../components/EmptyState';
 import { Button } from '../../components/Button';
@@ -44,6 +51,8 @@ export function ExpenseDetailScreen() {
     const [expense, setExpense] = useState<Expense | null>(null);
     const [splits, setSplits] = useState<ExpenseSplit[]>([]);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showStopSeriesDialog, setShowStopSeriesDialog] = useState(false);
+    const [seriesMeta, setSeriesMeta] = useState<RecurringSeriesMeta | null>(null);
     const [showReceiptModal, setShowReceiptModal] = useState(false);
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
     const receiptDisplayUrl = useExpenseReceiptDisplayUrl(expense?.receiptUrl);
@@ -55,11 +64,27 @@ export function ExpenseDetailScreen() {
             if (expenseData) {
                 setExpense(expenseData.expense);
                 setSplits(expenseData.splits);
+                const meta = await getRecurringSeriesForExpense(expenseId);
+                setSeriesMeta(meta);
             }
             stopLoading();
         };
         void loadData();
-    }, [expenseId]);
+    }, [expenseId, startLoading, stopLoading]);
+
+    const handleStopSeries = useCallback(async () => {
+        setShowStopSeriesDialog(false);
+        if (!seriesMeta?.seriesId) return;
+        const ok = await stopRecurringExpenseSeries(seriesMeta.seriesId);
+        if (ok) {
+            setSeriesMeta({ ...seriesMeta, endedAt: new Date().toISOString() });
+            showSuccessMessage('expenses.v2.recurring.stopped');
+            void captureProductEvent('recurring_series_stopped', {
+                group_id: groupId,
+                frequency: seriesMeta.frequency,
+            });
+        }
+    }, [seriesMeta, groupId]);
 
     const getUserName = (userId: string): string => {
         return getDisplayName(allUsers.find((u) => u.id === userId) ?? null, t);
@@ -115,6 +140,14 @@ export function ExpenseDetailScreen() {
                         </Text>
                     </View>
                 )}
+                {seriesMeta ? (
+                    <View className="bg-violet-50 rounded-full px-3 py-1 mt-2">
+                        <Text className="text-xs font-medium text-violet-800">
+                            {t('expenses.v2.recurring.seriesBadge')} ·{' '}
+                            {t(`expenses.v2.recurring.frequency.${seriesMeta.frequency}`)}
+                        </Text>
+                    </View>
+                ) : null}
             </View>
 
             {/* Paid By */}
@@ -175,6 +208,14 @@ export function ExpenseDetailScreen() {
 
             {/* Actions */}
             <View className="px-4 mb-8 gap-2">
+                {seriesMeta && !seriesMeta.endedAt ? (
+                    <Button
+                        title={t('expenses.v2.recurring.stopSeries')}
+                        onPress={() => setShowStopSeriesDialog(true)}
+                        variant="outline"
+                        testID="stop-recurring-series"
+                    />
+                ) : null}
                 <Button
                     title={t('common.edit')}
                     onPress={handleEdit}
@@ -215,6 +256,17 @@ export function ExpenseDetailScreen() {
                 </Pressable>
             </Modal>
 
+
+            <ConfirmDialog
+                visible={showStopSeriesDialog}
+                title={t('expenses.v2.recurring.stopConfirmTitle')}
+                message={t('expenses.v2.recurring.stopConfirmBody')}
+                confirmText={t('expenses.v2.recurring.stopSeries')}
+                cancelText={t('common.cancel')}
+                onConfirm={handleStopSeries}
+                onCancel={() => setShowStopSeriesDialog(false)}
+                destructive
+            />
 
             {/* Delete Confirmation */}
             <ConfirmDialog

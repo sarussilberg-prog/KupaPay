@@ -1,17 +1,16 @@
 import { cookies, headers } from 'next/headers';
-import type { Language } from '@cost-share/shared';
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, isLanguage, type Language } from '@cost-share/shared';
 
 const LOCALE_COOKIE = 'locale';
-const SUPPORTED: Language[] = ['he', 'en'];
-// Fall back to English when the language is unknown or unsupported.
-const DEFAULT: Language = 'en';
+const SUPPORTED: Language[] = [...SUPPORTED_LANGUAGES];
+const DEFAULT: Language = DEFAULT_LANGUAGE;
 
 // Normalize a raw value (cookie, query param, header tag) to a supported
 // Language, or null if it isn't one. Accepts region subtags like 'he-IL'.
 function normalizeLang(value: string | null | undefined): Language | null {
   if (!value) return null;
   const lang = value.split('-')[0].trim().toLowerCase();
-  return (SUPPORTED as string[]).includes(lang) ? (lang as Language) : null;
+  return isLanguage(lang) ? lang : null;
 }
 
 function parseAcceptLanguage(header: string | null): Language {

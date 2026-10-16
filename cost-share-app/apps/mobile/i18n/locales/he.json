@@ -410,20 +410,20 @@
             "splitBetweenCount_many": "מתחלק בין · {{count}} אנשים",
             "splitBetweenCount_other": "מתחלק בין · {{count}} אנשים",
             "splitParty": "מתחלקים",
-            "paidForSplitters_one": "שילם על אדם אחד שמתחלק",
+            "paidForSplitters_one": "שילם על {{count}} אדם שמתחלק",
             "paidForSplitters_two": "שילם על {{count}} אנשים שמתחלקים",
             "paidForSplitters_many": "שילם על {{count}} אנשים שמתחלקים",
             "paidForSplitters_other": "שילם על {{count}} אנשים שמתחלקים",
-            "feedYouPaid_one": "שילמת על אדם אחד",
+            "feedYouPaid_one": "שילמת על {{count}} אדם",
             "feedYouPaid_two": "שילמת על {{count}} אנשים",
             "feedYouPaid_many": "שילמת על {{count}} אנשים",
             "feedYouPaid_other": "שילמת על {{count}} אנשים",
             "feedPaidForYou": "שילם/ה עליך",
-            "feedPaidForYouAndOthers_one": "שילם/ה עליך ועל עוד אדם אחד שמתחלק",
+            "feedPaidForYouAndOthers_one": "שילם/ה עליך ועל {{count}} אדם נוסף שמתחלק",
             "feedPaidForYouAndOthers_two": "שילם/ה עליך ועל עוד {{count}} אנשים שמתחלקים",
             "feedPaidForYouAndOthers_many": "שילם/ה עליך ועל עוד {{count}} אנשים שמתחלקים",
             "feedPaidForYouAndOthers_other": "שילם/ה עליך ועל עוד {{count}} אנשים שמתחלקים",
-            "feedPaidExcludingYou_one": "שילם/ה על אדם אחד שמתחלק בלעדיך",
+            "feedPaidExcludingYou_one": "שילם/ה על {{count}} אדם שמתחלק בלעדיך",
             "feedPaidExcludingYou_two": "שילם/ה על {{count}} אנשים שמתחלקים בלעדיך",
             "feedPaidExcludingYou_many": "שילם/ה על {{count}} אנשים שמתחלקים בלעדיך",
             "feedPaidExcludingYou_other": "שילם/ה על {{count}} אנשים שמתחלקים בלעדיך"
@@ -467,7 +467,7 @@
             "mutualHint": "מוצגים רק חברים שאתם הוספתם זה את זה.",
             "missingSomeoneCta": "לא מוצאים? הוסיפו חברים"
         },
-        "memberCount_one": "חבר אחד",
+        "memberCount_one": "{{count}} חבר",
         "memberCount_two": "{{count}} חברים",
         "memberCount_many": "{{count}} חברים",
         "memberCount_other": "{{count}} חברים"
@@ -572,7 +572,21 @@
             },
             "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד",
             "splitMetaPercent": "{{selected}} מתוך {{total}} · {{allocated}}% מוקצים",
-            "splitMetaExact": "{{selected}} מתוך {{total}} · {{currency}} {{allocated}} מוקצים"
+            "splitMetaExact": "{{selected}} מתוך {{total}} · {{currency}} {{allocated}} מוקצים",
+            "recurring": {
+                "label": "קבועה",
+                "sheetTitle": "תדירות",
+                "seriesBadge": "הוצאה קבועה",
+                "stopSeries": "הפסקת חזרה",
+                "stopConfirmTitle": "להפסיק הוצאה קבועה?",
+                "stopConfirmBody": "הוצאות שכבר נוצרו נשארות. לא ייווצרו הוצאות חדשות.",
+                "stopped": "סדרת ההוצאות הקבועה הופסקה",
+                "frequency": {
+                    "weekly": "שבועי",
+                    "monthly": "חודשי",
+                    "yearly": "שנתי"
+                }
+            }
         }
     },
     "balances": {
@@ -715,9 +729,9 @@
             "empty": "אין שגיאות בטווח הזה",
             "failed": "טעינה נכשלה. משכו לרענון.",
             "occurrences": "{{count}} מקרים",
-            "occurrences_one": "מקרה אחד",
+            "occurrences_one": "{{count}} מקרה",
             "affectedUsers": "{{count}} משתמשים נפגעו",
-            "affectedUsers_one": "משתמש אחד נפגע",
+            "affectedUsers_one": "{{count}} משתמש נפגע",
             "lastSeen": "נראתה לאחרונה {{when}}",
             "firstSeen": "נראתה לראשונה {{when}}",
             "level": "חומרה",
@@ -1130,6 +1144,8 @@
             "restore": "שחזור רכישות",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
+            "loadFailed": "לא הצלחנו לטעון מחירי מנוי. בדקו את החיבור או נסו שוב בעוד רגע.",
+            "retry": "נסו שוב",
             "purchaseSuccess": "ברוכים הבאים ל-Pro!",
             "purchaseError": "לא ניתן להשלים את הרכישה.",
             "restoreSuccess": "הרכישות שוחזרו.",
@@ -1171,6 +1187,9 @@
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "אוטומציה לשכירות, מנויים והוצאות חוזרות — עם Pro."
         }
     },
     "remind": {
@@ -1216,7 +1235,7 @@
         "summaryDescription": "{{from}} ישלם ל-{{to}} עבור {{count}} חובות ב-{{currency}}",
         "totalLabel": "סה\"כ",
         "rateDisclaimer": "שערי החליפין מתעדכנים כל יום",
-        "rateLabel": "@ {{rate}}",
+        "rateLabel": "בשער {{rate}}",
         "toastCreated": "המטבעות אוחדו",
         "toastDeleted": "האיחוד נמחק",
         "recordError": "לא ניתן לרשום את האיחוד",

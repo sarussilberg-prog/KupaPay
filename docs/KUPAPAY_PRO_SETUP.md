@@ -18,7 +18,7 @@ Create these in **App Store Connect**, **Google Play Console**, and link them in
 2. **Offering:** `default` (or set `EXPO_PUBLIC_REVENUECAT_OFFERING_ID`) with packages:
    - `$rc_monthly` → `kupapay_pro_monthly`
    - `$rc_annual` → `kupapay_pro_yearly`
-   - Custom package identifier `trip_pass` → `kupapay_trip_pass`
+   - Custom package identifier `trip_pass` → `kupapay_trip_pass` (Android may use package id `kupapay_trip_pass` instead — the app resolves Trip Pass by store product id `kupapay_trip_pass` as well)
 3. **API keys** (Project → API keys):
    - iOS public SDK key → `EXPO_PUBLIC_REVENUECAT_IOS_KEY`
    - Android public SDK key → `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`
@@ -80,3 +80,14 @@ Deploy `pro-trial-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261015120000_pro_trial_reminder.sql` on dev before production.
+
+### Recurring expenses cron (Pro v2)
+
+Deploy `pro-recurring-expense-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRET`):
+
+| Item | Value |
+|---|---|
+| URL | `https://<project-ref>.supabase.co/functions/v1/pro-recurring-expense-dispatch` |
+| Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
+
+Apply migration `20261016120000_recurring_expenses.sql` on dev before production.

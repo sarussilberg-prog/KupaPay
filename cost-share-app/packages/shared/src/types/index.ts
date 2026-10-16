@@ -336,7 +336,8 @@ export type PaymentMethod =
 /**
  * Language options for i18n
  */
-export type Language = 'en' | 'he';
+import type { Language } from '../i18n/languages';
+export type { Language } from '../i18n/languages';
 
 /**
  * Currency codes (ISO 4217)

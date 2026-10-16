@@ -1,4 +1,4 @@
-import type { Language } from '@cost-share/shared';
+import { DEFAULT_LANGUAGE, type Language } from '@cost-share/shared';
 
 export type { Language };
 
@@ -11,6 +11,7 @@ const translations = {
     },
     locale: {
       toggle: 'English',
+      chooseLanguage: 'Language',
     },
     hero: {
       headline: 'לחלק הוצאות עם חברים, בלי חישובים',
@@ -105,6 +106,7 @@ const translations = {
     },
     locale: {
       toggle: 'עברית',
+      chooseLanguage: 'שפה',
     },
     hero: {
       headline: 'Split expenses with friends, effortlessly',
@@ -196,7 +198,7 @@ const translations = {
 
 export type Translations = {
   header: { signIn: string; signOut: string; hello: string };
-  locale: { toggle: string };
+  locale: { toggle: string; chooseLanguage: string };
   hero: { headline: string; subheadline: string; ctaDownloadIos: string; ctaDownloadAndroid: string; ctaSignIn: string };
   features: {
     title: string;
@@ -215,5 +217,6 @@ export type Translations = {
 };
 
 export function getTranslations(locale: Language): Translations {
-  return translations[locale];
+  const pack = translations[locale as keyof typeof translations];
+  return (pack ?? translations[DEFAULT_LANGUAGE]) as Translations;
 }

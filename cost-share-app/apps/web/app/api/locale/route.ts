@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const SUPPORTED = ['he', 'en'];
+import { isLanguage } from '@cost-share/shared';
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.redirect(new URL(redirectPath, request.url));
 
-  if (typeof locale === 'string' && SUPPORTED.includes(locale)) {
+  if (typeof locale === 'string' && isLanguage(locale)) {
     response.cookies.set('locale', locale, {
       path: '/',
       maxAge: 365 * 24 * 60 * 60,

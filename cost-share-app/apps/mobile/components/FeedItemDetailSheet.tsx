@@ -21,6 +21,8 @@ import {
     ExpenseWithDelta,
     GroupMemberLite,
     Settlement,
+    languageToIntlLocale,
+    type Language,
 } from '@cost-share/shared';
 import { Text } from './AppText';
 import { AppIcon, AppIconName } from './AppIcon';
@@ -222,8 +224,8 @@ export function FeedItemDetailSheet({
     );
 }
 
-function formatHeroDate(date: Date, language: 'en' | 'he'): string {
-    const locale = language === 'he' ? 'he-IL' : 'en-US';
+function formatHeroDate(date: Date, language: Language): string {
+    const locale = languageToIntlLocale(language);
     return date.toLocaleDateString(locale, {
         weekday: 'long',
         month: 'long',
@@ -240,7 +242,7 @@ function ExpenseDetailBody({
     expense: ExpenseWithDelta;
     memberMap: Record<string, GroupMemberLite>;
     currentUserId: string;
-    language: 'en' | 'he';
+    language: Language;
 }) {
     const { t } = useTranslation();
     const [breakdownOpen, setBreakdownOpen] = useState(false);
@@ -1119,7 +1121,7 @@ function SettlementDetailBody({
     settlement: Settlement;
     memberMap: Record<string, GroupMemberLite>;
     currentUserId: string;
-    language: 'en' | 'he';
+    language: Language;
 }) {
     const { t } = useTranslation();
     const fromName = memberName(
@@ -1183,7 +1185,7 @@ function DeletionNoticeBody({
     deletedByName: string;
     deletedByYou: boolean;
     kind: 'expense' | 'settlement';
-    language: 'en' | 'he';
+    language: Language;
 }) {
     const { t } = useTranslation();
     const formatter = new Intl.DateTimeFormat(language === 'he' ? 'he-IL' : 'en-US', {

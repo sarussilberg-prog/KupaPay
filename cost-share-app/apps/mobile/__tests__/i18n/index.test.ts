@@ -153,7 +153,7 @@ describe('initializeLanguage', () => {
         });
 
         it('falls back to en for an unsupported language', async () => {
-            getLocalesMock.mockReturnValue([{ languageCode: 'fr' }]);
+            getLocalesMock.mockReturnValue([{ languageCode: 'ja' }]);
 
             await initializeLanguage();
 
@@ -195,9 +195,20 @@ describe('initializeLanguage', () => {
         });
 
         it('picks the first supported language across preferred locales', async () => {
-            // User has French primary, Hebrew secondary; app supports en + he.
             getLocalesMock.mockReturnValue([
                 { languageCode: 'fr', languageTag: 'fr-FR' },
+                { languageCode: 'iw', languageTag: 'iw-IL' },
+            ]);
+
+            await initializeLanguage();
+
+            expect(await AsyncStorage.getItem('@app_language')).toBe('fr');
+            expect(i18n.language).toBe('fr');
+        });
+
+        it('skips unsupported locales and picks the next supported preference', async () => {
+            getLocalesMock.mockReturnValue([
+                { languageCode: 'ja', languageTag: 'ja-JP' },
                 { languageCode: 'iw', languageTag: 'iw-IL' },
             ]);
 

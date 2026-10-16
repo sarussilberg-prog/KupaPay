@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
     View,
-    Text,
     Modal,
     TouchableOpacity,
     Pressable,
@@ -11,6 +10,7 @@ import {
     Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../AppText';
 
 interface Props {
     visible: boolean;

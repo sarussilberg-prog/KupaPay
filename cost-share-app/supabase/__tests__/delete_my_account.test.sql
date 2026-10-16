@@ -3,6 +3,10 @@
 -- and refresh tokens (so the deleted user cannot stay signed in or refresh).
 -- Run via Supabase MCP (mcp__supabase__execute_sql) against the dev project
 -- drxfbicunusmipdgbgdk. The transaction ROLLBACKs at the end.
+--
+-- auth.refresh_tokens.user_id is TEXT in Supabase Auth; delete_my_account deletes with
+-- user_id::text (see 20261010220000_delete_my_account_sessions.sql). Re-run this test
+-- after prod deploy if auth schema drifts (KI-034 / #112).
 -- ============================================================================
 
 BEGIN;
