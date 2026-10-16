@@ -60,7 +60,7 @@ if [[ "${GENERATE_DB_LINT_BASELINE:-}" == "1" ]]; then
   exit 0
 fi
 
-valid_lint_re='^(unindexed_foreign_keys|auth_rls_initplan|rls_filter_columns_missing_index)$'
+valid_lint_re='^(unindexed_foreign_keys|auth_rls_initplan|rls_filter_columns_missing_index|public_tables_without_rls|security_definer_missing_search_path)$'
 
 fail=0
 while IFS='|' read -r lint_type cache_key; do

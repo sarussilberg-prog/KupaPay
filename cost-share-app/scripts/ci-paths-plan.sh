@@ -122,6 +122,11 @@ if [[ "$only_docs" == true && "$docs" == true ]]; then
   exit 0
 fi
 
+# Every PR to dev runs Supabase security SQL (RLS inventory + regression tests).
+if [[ "$GITHUB_EVENT_NAME" == "pull_request" && "$BASE_REF" == "dev" ]]; then
+  supabase=true
+fi
+
 jq -n \
   --argjson monorepo "$monorepo" \
   --argjson mobile "$mobile" \
