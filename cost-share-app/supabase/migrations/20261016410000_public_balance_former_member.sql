@@ -1,4 +1,4 @@
--- Audit fix: label inactive accounts vs former members on /b/ public balance page.
+-- Former vs deleted member labels on public /b/ page (post opt-in #449).
 
 CREATE OR REPLACE FUNCTION public.get_public_group_balance_page(p_token TEXT)
 RETURNS JSON
@@ -25,6 +25,7 @@ BEGIN
     FROM public.groups AS g
     WHERE g.public_balance_token = btrim(p_token)
       AND g.is_active = TRUE
+      AND g.public_balance_sharing_enabled = TRUE
     LIMIT 1;
 
     IF NOT FOUND THEN
