@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE, type Language } from '@cost-share/shared';
+import { type Language } from '@cost-share/shared';
 
 export type { Language };
 
@@ -218,5 +218,5 @@ export type Translations = {
 
 export function getTranslations(locale: Language): Translations {
   const pack = translations[locale as keyof typeof translations];
-  return (pack ?? translations[DEFAULT_LANGUAGE]) as Translations;
+  return (pack ?? translations.en) as Translations;
 }

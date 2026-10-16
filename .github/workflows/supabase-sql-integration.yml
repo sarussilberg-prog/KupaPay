@@ -1,20 +1,10 @@
 name: Supabase SQL integration
 
 on:
-  pull_request:
-    branches: [dev, main, 'cursor/**']
-    paths:
-      - 'cost-share-app/supabase/migrations/**'
-      - 'cost-share-app/supabase/__tests__/**'
-      - 'cost-share-app/supabase/config.toml'
-      - 'cost-share-app/supabase/schema.sql'
-      - 'cost-share-app/scripts/ci-supabase-sql-tests.sh'
-      - 'cost-share-app/scripts/supabase-unique-migration-versions.sh'
-      - 'cost-share-app/supabase/ci-local-postgres-bootstrap.sql'
-      - '.github/workflows/supabase-sql-integration.yml'
+  workflow_call:
 
 concurrency:
-  group: supabase-sql-${{ github.event.pull_request.number }}
+  group: supabase-sql-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 jobs:

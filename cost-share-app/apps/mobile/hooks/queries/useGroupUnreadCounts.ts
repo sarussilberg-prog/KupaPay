@@ -10,7 +10,7 @@ type GroupUnreadRow = { group_id: string; unread: number };
 /** Map of groupId → unread activity count for the current user. */
 export type GroupUnreadCounts = Record<string, number>;
 
-async function fetchGroupUnreadCounts(): Promise<GroupUnreadCounts> {
+export async function fetchGroupUnreadCounts(): Promise<GroupUnreadCounts> {
     const { data, error } = await supabase.rpc('get_group_unread_counts');
     if (error) {
         console.error('Failed to fetch group unread counts:', error);
