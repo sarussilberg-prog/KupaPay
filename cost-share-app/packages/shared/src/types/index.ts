@@ -51,6 +51,8 @@ export interface Group {
     inviteToken: string;  // 10-char URL-safe slug; used with APP_WEB_ORIGIN + /g/<token>
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
+    /** Last expense, settlement, or message activity (auto-maintained in DB). */
+    lastActivityAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -1,11 +1,9 @@
 /**
  * GroupCard — list row for a group on the GroupsListScreen.
- * Trailing ⋮ opens the full group menu (same actions as GroupDetail).
- * Menu button is a SIBLING of the card press target so web/native both work.
  */
 
 import { Text } from './AppText';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     View,
     TouchableOpacity,
@@ -17,12 +15,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
-import { GroupRollup, GroupWithMembers } from '@cost-share/shared';
+import { formatRelativeTimeShort, GroupRollup, GroupWithMembers } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
 import { GroupAvatar } from './GroupAvatar';
 import { BalanceChip } from './BalanceChip';
 import { HighlightedText } from './HighlightedText';
 import { UnreadBadge } from './UnreadBadge';
+import { IconLabel } from './primitives/IconLabel';
+import { ListRow } from './primitives/ListRow';
 import { colors } from '../theme';
 import { shareGroupInvite } from '../services/invite.service';
 import {
@@ -36,6 +36,7 @@ import { useAppStore } from '../store';
 import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
+import { toDate } from '../lib/dateUtils';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -58,7 +59,7 @@ function GroupCardBase({
     unreadCount,
     onPress,
 }: GroupCardProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const favoriteGroupId = useAppStore(s => s.favoriteGroupId);
@@ -71,6 +72,11 @@ function GroupCardBase({
     const isArchived = group.isArchivedByMe || group.isAutoArchived;
     const isFavorite = favoriteGroupId === group.id;
     const hasOpenBalance = groupHasOpenDebts === true;
+
+    const lastActivityWhen = useMemo(() => {
+        const when = group.lastActivityAt ?? group.updatedAt;
+        return formatRelativeTimeShort(toDate(when), Date.now(), i18n.language);
+    }, [group.lastActivityAt, group.updatedAt, i18n.language]);
 
     const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -173,35 +179,37 @@ function GroupCardBase({
         ]);
     }, [closeMenu, t, group.id]);
 
+    const openBalances = useCallback(() => {
+        navigation.navigate('Balances', { groupId: group.id });
+    }, [navigation, group.id]);
+
     const cardClass = isArchived
-        ? 'bg-slate-50 rounded-2xl p-5 mb-3 border border-dashed border-gray-300'
-        : 'bg-white rounded-2xl p-5 mb-3 border border-gray-100';
+        ? 'bg-slate-50 rounded-2xl px-3.5 py-3.5 mb-2.5 border border-dashed border-gray-300'
+        : 'bg-white rounded-2xl px-3.5 py-3.5 mb-2.5 border border-gray-100';
 
     return (
         <>
-            <View className={cardClass} style={[rtlRowStyle(isRtl), { alignItems: 'center' }]}>
-                <TouchableOpacity
+            <View className={cardClass} style={[rtlRowStyle(isRtl), { alignItems: 'stretch' }]}>
+                <ListRow
                     onPress={() => onPress(group.id)}
-                    activeOpacity={0.7}
-                    style={{ flex: 1, flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', minWidth: 0 }}
                     testID={`group-card-${group.id}`}
+                    style={{ flex: 1, alignItems: 'center', gap: 12 }}
                 >
-                    <View className="mr-4">
-                        <GroupAvatar
-                            imageUrl={group.imageUrl}
-                            groupType={group.groupType}
-                            size="md"
-                        />
-                    </View>
+                    <GroupAvatar
+                        imageUrl={group.imageUrl}
+                        groupType={group.groupType}
+                        name={group.name}
+                        size="md"
+                    />
 
-                    <View className="flex-1 mr-2 self-stretch" style={{ minWidth: 0 }}>
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center' }]}>
+                    <View className="flex-1 self-stretch" style={{ minWidth: 0, gap: 4 }}>
+                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
                             <View style={{ flexShrink: 1, minWidth: 0 }}>
                                 <HighlightedText
                                     className={
                                         isArchived
-                                            ? 'text-lg font-semibold text-gray-600'
-                                            : 'text-lg font-semibold text-gray-900'
+                                            ? 'text-base font-semibold text-gray-600'
+                                            : 'text-base font-semibold text-gray-900'
                                     }
                                     text={group.name}
                                     query={searchQuery}
@@ -209,45 +217,42 @@ function GroupCardBase({
                                 />
                             </View>
                             {!isArchived && (unreadCount ?? 0) > 0 && (
-                                <UnreadBadge
-                                    count={unreadCount ?? 0}
-                                    style={{ marginStart: 8, marginEnd: 4 }}
-                                />
+                                <UnreadBadge count={unreadCount ?? 0} />
                             )}
                             {isArchived && (
                                 <View
-                                    className="px-2 py-1 rounded-md bg-gray-200"
-                                    style={{ marginStart: 'auto', marginEnd: 4 }}
+                                    className="px-2 py-0.5 rounded-md bg-gray-200"
+                                    style={{ marginStart: 'auto' }}
                                     testID="group-archived-badge"
                                 >
-                                    <Text
-                                        className="text-gray-600 font-medium"
-                                        style={{ fontSize: 12, letterSpacing: 0.5 }}
-                                    >
+                                    <Text className="text-gray-600 font-medium" style={{ fontSize: 11 }}>
                                         {t('groups.archive.badge')}
                                     </Text>
                                 </View>
                             )}
                         </View>
-                        <Text
-                            className={`text-sm mt-1 ${isArchived ? 'text-gray-500' : 'text-gray-400'}`}
-                            numberOfLines={1}
-                        >
-                            {t(`groups.types.${group.groupType}`)}
-                            {memberCount > 0
-                                ? ` · ${t('groups.memberCount', { count: memberCount })}`
-                                : ''}
-                        </Text>
+
+                        <IconLabel
+                            icon="people-outline"
+                            label={
+                                memberCount > 0
+                                    ? t('groups.memberCount', { count: memberCount })
+                                    : t(`groups.types.${group.groupType}`)
+                            }
+                        />
+                        {lastActivityWhen ? (
+                            <IconLabel
+                                icon="time-outline"
+                                label={t('groups.card.lastActivity', { when: lastActivityWhen })}
+                            />
+                        ) : null}
                         {hasMatches && (
-                            <Text
-                                className="text-sm text-gray-500 mt-0.5"
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                            >
-                                {t('groups.card.matchedMembers', {
+                            <IconLabel
+                                label={t('groups.card.matchedMembers', {
                                     names: (matchedMemberNames ?? []).join(', '),
                                 })}
-                            </Text>
+                                tone="default"
+                            />
                         )}
                     </View>
 
@@ -256,18 +261,19 @@ function GroupCardBase({
                         defaultCurrency={group.defaultCurrency}
                         groupHasOpenDebts={groupHasOpenDebts}
                         balanceUnknown={balanceUnknown}
+                        onPressExtraCurrencies={openBalances}
                     />
-                </TouchableOpacity>
+                </ListRow>
 
                 <TouchableOpacity
                     onPress={() => setMenuOpen(true)}
-                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
                     testID={`group-card-menu-${group.id}`}
-                    style={{ marginStart: 4, padding: 6 }}
+                    style={{ marginStart: 2, padding: 4, alignSelf: 'center' }}
                 >
-                    <AppIcon name="ellipsis-vertical" size={20} color={colors.gray400} />
+                    <AppIcon name="ellipsis-vertical" size={18} color={colors.gray400} />
                 </TouchableOpacity>
             </View>
 

@@ -6,19 +6,15 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { BalanceSummaryRow } from '@cost-share/shared';
+import { BalanceSummaryRow, formatMoney } from '@cost-share/shared';
 import { useRtlLayout, rtlTextAlign } from '../hooks/useRtlLayout';
 
 interface BalanceSummaryHeaderProps {
     rows: BalanceSummaryRow[];
 }
 
-function formatAmount(amount: number, currency: string): string {
-    return `${currency} ${amount.toFixed(2)}`;
-}
-
 export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const align = rtlTextAlign(isRtl);
     const direction: 'rtl' | 'ltr' = isRtl ? 'rtl' : 'ltr';
@@ -40,7 +36,10 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
                         >
                             {/* <1>…</1> markers are for the SummaryBalanceStrip <Trans> consumer; strip them here. */}
                             {t('groups.summary.youAreOwed', {
-                                amount: formatAmount(row.owed, row.currency),
+                                amount: formatMoney(row.owed, row.currency, {
+                                    language: i18n.language,
+                                    absolute: true,
+                                }),
                             }).replace(/<\/?1>/g, '')}
                         </Text>
                     )}
@@ -50,7 +49,10 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
                             style={{ textAlign: align, writingDirection: direction }}
                         >
                             {t('groups.summary.youOwe', {
-                                amount: formatAmount(row.owe, row.currency),
+                                amount: formatMoney(row.owe, row.currency, {
+                                    language: i18n.language,
+                                    absolute: true,
+                                }),
                             }).replace(/<\/?1>/g, '')}
                         </Text>
                     )}

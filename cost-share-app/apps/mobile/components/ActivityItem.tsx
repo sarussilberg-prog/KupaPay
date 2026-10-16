@@ -18,7 +18,7 @@ import {
     getAvatarUrlForMember,
     getDisplayNameForMember,
 } from '../lib/userDisplay';
-import { formatAmountDecimal } from '../lib/currencyDisplay';
+import { formatMoney } from '@cost-share/shared';
 
 interface ActivityItemProps {
     event: ActivityEvent;
@@ -44,7 +44,7 @@ export const ActivityItem = React.memo(function ActivityItem({
     currentUserId,
     onPress,
 }: ActivityItemProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const language = useAppLanguage();
     const pressable = Boolean(onPress) && event.kind !== 'group_removed';
 
@@ -70,7 +70,10 @@ export const ActivityItem = React.memo(function ActivityItem({
         const toUserId = md.paid_to_user_id as string | undefined;
         const paymentAmount = Number(md.payment_amount ?? 0);
         const paymentCurrency = (md.payment_currency as string | undefined) ?? '';
-        const amountText = `${formatAmountDecimal(paymentAmount)} ${paymentCurrency}`;
+        const amountText = formatMoney(paymentAmount, paymentCurrency, {
+            language: i18n.language,
+            absolute: true,
+        });
         const fromName = paidById === currentUserId ? t('common.you') : actorName;
         const toName = toUserId === currentUserId
             ? t('common.you')
@@ -95,7 +98,10 @@ export const ActivityItem = React.memo(function ActivityItem({
         const toName = toId === currentUserId
             ? t('common.you')
             : (toId === actor?.userId ? actorName : getDisplayNameForMember(counterpart ?? null, t));
-        const amountText = `${currency} ${amount.toFixed(2)}`;
+        const amountText = formatMoney(amount, currency, {
+            language: i18n.language,
+            absolute: true,
+        });
         if (fromId === currentUserId) {
             titleOverride = t('activity.youPaid', { name: toName, amount: amountText });
         } else if (toId === currentUserId) {

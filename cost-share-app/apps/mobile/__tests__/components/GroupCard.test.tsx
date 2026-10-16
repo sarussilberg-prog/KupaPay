@@ -3,6 +3,10 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { GroupCard } from '../../components/GroupCard';
 import type { GroupRollup, GroupWithMembers } from '@cost-share/shared';
 
+jest.mock('@react-navigation/native', () => ({
+    useNavigation: () => ({ navigate: jest.fn() }),
+}));
+
 const rollupOf = (
     primary: { currency: string; net: number },
     others: { currency: string; net: number }[] = [],
@@ -19,6 +23,7 @@ const baseGroup: GroupWithMembers = {
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    lastActivityAt: new Date(Date.now() - 86_400_000),
     members: [
         { userId: 'u1', displayName: 'Alice', isActive: true },
         { userId: 'u2', displayName: 'Bob', isActive: true },
@@ -36,12 +41,18 @@ describe('GroupCard', () => {
         expect(getByText('Trip to Paris')).toBeTruthy();
     });
 
-    it('renders group type label via i18n key and member count', () => {
+    it('renders member count via IconLabel row', () => {
         const { getByText } = render(
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
-        expect(getByText(/groups\.types\.trip/)).toBeTruthy();
         expect(getByText(/groups\.memberCount/)).toBeTruthy();
+    });
+
+    it('renders last activity subtitle when timestamp exists', () => {
+        const { getByText } = render(
+            <GroupCard group={baseGroup} onPress={() => {}} />,
+        );
+        expect(getByText(/groups\.card\.lastActivity/)).toBeTruthy();
     });
 
     it('renders a settled chip when no rollup is provided', () => {
@@ -51,7 +62,7 @@ describe('GroupCard', () => {
         expect(getByText('groups.card.settled')).toBeTruthy();
     });
 
-    it('renders an "owed" chip when primary.net > 0', () => {
+    it('renders localized owed chip when primary.net > 0', () => {
         const { getByText } = render(
             <GroupCard
                 group={baseGroup}
@@ -59,22 +70,22 @@ describe('GroupCard', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/\+EUR\s*42\.50/)).toBeTruthy();
+        expect(getByText(/groups\.card\.owedToYou/)).toBeTruthy();
     });
 
-    it('renders an "owe" chip when primary.net < 0', () => {
+    it('renders localized owe chip when primary.net < 0', () => {
         const { getByText } = render(
             <GroupCard
                 group={baseGroup}
-                rollup={rollupOf({ currency: 'EUR', net: -10 })}
+                rollup={rollupOf({ currency: 'ILS', net: -761.5 })}
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/EUR\s*10\.00/)).toBeTruthy();
+        expect(getByText(/groups\.card\.youOwe/)).toBeTruthy();
     });
 
-    it('appends "+N" when the rollup has additional non-zero currencies', () => {
-        const { getByTestId } = render(
+    it('shows localized multi-currency affordance', () => {
+        const { getByText } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'EUR', net: 50 }, [
@@ -83,10 +94,10 @@ describe('GroupCard', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByTestId('balance-chip-others').props.children).toBe('+1');
+        expect(getByText(/groups\.card\.moreCurrencies/)).toBeTruthy();
     });
 
-    it('shows "incl. {names}" subtitle when matchedMemberNames is set', () => {
+    it('shows matched members subtitle when matchedMemberNames is set', () => {
         const { getByText } = render(
             <GroupCard
                 group={baseGroup}
@@ -115,6 +126,13 @@ describe('GroupCard', () => {
             />,
         );
         expect(getByTestId('group-avatar-image')).toBeTruthy();
+    });
+
+    it('renders emoji avatar fallback for named groups without image', () => {
+        const { getByTestId } = render(
+            <GroupCard group={baseGroup} onPress={() => {}} />,
+        );
+        expect(getByTestId('group-avatar-initials')).toBeTruthy();
     });
 
     it('renders an unread badge when unreadCount > 0', () => {

@@ -1,4 +1,9 @@
-import { isLanguage, languageToIntlLocale } from '@cost-share/shared';
+import {
+    formatMoney as sharedFormatMoney,
+    isLanguage,
+    languageToIntlLocale,
+    type FormatMoneyOptions,
+} from '@cost-share/shared';
 import { CURRENCY_LOCALE_NAMES } from './currencyLocaleNames';
 
 const displayNamesCache = new Map<string, Intl.DisplayNames>();
@@ -54,6 +59,15 @@ export function getDistinctCurrencySymbol(code: string): string | null {
     return symbol.toUpperCase() === normalized ? null : symbol;
 }
 
+export function resolveCurrencyLocale(language: string): string {
+    const code = language.split('-')[0];
+    if (isLanguage(code)) {
+        return languageToIntlLocale(code).split('-')[0];
+    }
+    if (language.startsWith('he')) return 'he';
+    return 'en';
+}
+
 export function formatAmountDecimal(value: number, language?: string): string {
     const isWhole = value % 1 === 0;
     const code = language?.split('-')[0];
@@ -65,21 +79,18 @@ export function formatAmountDecimal(value: number, language?: string): string {
     });
 }
 
-export function formatCurrencyAmount(value: number, currency: string): string {
-    const formatted = formatAmountDecimal(value);
-    const symbol = getCurrencySymbol(currency);
-    if (symbol === '₪') return `${symbol}${formatted}`;
-    if (symbol.length === 1 || symbol.endsWith('$')) return `${symbol}${formatted}`;
-    return `${formatted} ${symbol}`;
-}
-
-export function resolveCurrencyLocale(language: string): string {
-    const code = language.split('-')[0];
-    if (isLanguage(code)) {
-        return languageToIntlLocale(code).split('-')[0];
-    }
-    if (language.startsWith('he')) return 'he';
-    return 'en';
+/** Locale-aware currency amount (absolute magnitude) with bidi isolation for RTL. */
+export function formatCurrencyAmount(
+    value: number,
+    currency: string,
+    language?: string,
+    options?: Pick<FormatMoneyOptions, 'bidiIsolate'>,
+): string {
+    return sharedFormatMoney(value, currency, {
+        language,
+        absolute: true,
+        bidiIsolate: options?.bidiIsolate,
+    });
 }
 
 export function normalizeCurrencyCode(code: string): string {

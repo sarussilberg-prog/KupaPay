@@ -3,7 +3,7 @@
 ## Policy
 
 - **PR merge to `dev`:** `GITHUB_TOKEN` only (`gh pr merge --auto` after Sonar + CI).
-- **Version bump:** opened as a normal **`chore/version-bump/*` PR** so required checks run; **no `ADMIN_PAT` direct push** to bypass protection.
+- **Dev prerelease bump:** direct push to `dev` with **`[skip ci]`** after auto-merge (no follow-up PR; Vercel ignores the commit).
 - **`ADMIN_PAT`:** remove from workflows; rotate/revoke any legacy token used for bypass.
 
 ## If version-bump PR creation fails

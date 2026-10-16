@@ -3,6 +3,7 @@ import { ScrollView, View, RefreshControl, ActivityIndicator } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../components/AppText';
 import { useAdminMonetizationMetricsQuery } from '../../hooks/queries/useAdminMonetizationMetricsQuery';
+import { AdminMonetizationMetricsError } from '../../services/admin.service';
 import type { MonetizationFunnel } from '../../services/admin.service';
 
 function pct(num: number, den: number): string {
@@ -47,6 +48,30 @@ function FunnelCard({ funnel, title }: { funnel: MonetizationFunnel; title: stri
     );
 }
 
+function resolveLoadErrorMessage(error: unknown, t: (key: string) => string): { title: string; body: string; testID: string } {
+    if (error instanceof AdminMonetizationMetricsError) {
+        if (error.code === 'not_admin') {
+            return {
+                title: t('admin.metrics.notAdminTitle'),
+                body: t('admin.metrics.notAdminBody'),
+                testID: 'admin-monetization-not-admin',
+            };
+        }
+        if (error.code === 'analytics_unavailable') {
+            return {
+                title: t('admin.metrics.analyticsUnavailableTitle'),
+                body: t('admin.metrics.analyticsUnavailableBody'),
+                testID: 'admin-monetization-unconfigured',
+            };
+        }
+    }
+    return {
+        title: t('admin.metrics.loadErrorTitle'),
+        body: t('admin.metrics.loadError'),
+        testID: 'admin-monetization-error',
+    };
+}
+
 export function AdminMonetizationScreen() {
     const { t } = useTranslation();
     const query = useAdminMonetizationMetricsQuery();
@@ -60,12 +85,20 @@ export function AdminMonetizationScreen() {
     }
 
     if (query.isError || !query.data) {
+        const { title, body, testID } = resolveLoadErrorMessage(query.error, t);
         return (
-            <View className="flex-1 items-center justify-center p-8">
-                <Text className="text-sm text-slate-500 text-center" testID="admin-monetization-error">
-                    {t('admin.metrics.loadError')}
+            <ScrollView
+                className="flex-1 bg-slate-50"
+                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 32 }}
+                refreshControl={
+                    <RefreshControl refreshing={query.isRefetching} onRefresh={() => void query.refetch()} />
+                }
+            >
+                <Text className="text-base font-semibold text-slate-700 text-center mb-2" testID={testID}>
+                    {title}
                 </Text>
-            </View>
+                <Text className="text-sm text-slate-500 text-center">{body}</Text>
+            </ScrollView>
         );
     }
 

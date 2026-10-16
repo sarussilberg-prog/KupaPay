@@ -1,19 +1,7 @@
-import { Platform, type ViewStyle } from 'react-native';
-import { rtlRowStyle } from '../../hooks/useRtlLayout';
+import type { ViewStyle } from 'react-native';
+import { listRowContainerStyle, ICON_LABEL_GAP } from '../ui/iconLabelLayout';
 
-/** Shared Settings list row layout — matches GroupCard / LegalDocumentSheet RTL spacing. */
+/** @deprecated Use listRowContainerStyle from components/ui/iconLabelLayout */
 export function settingsRowContainerStyle(isRtl: boolean): ViewStyle {
-    const base = { alignItems: 'center' as const, gap: 12 };
-    // iOS native: `direction` alone does not mirror flex children until I18nManager
-    // reloads; use explicit row-reverse (see FeedItemDetailSheet / GroupCard).
-    if (Platform.OS !== 'web') {
-        return {
-            ...base,
-            flexDirection: isRtl ? 'row-reverse' : 'row',
-        };
-    }
-    return {
-        ...base,
-        ...rtlRowStyle(isRtl),
-    };
+    return listRowContainerStyle(isRtl, ICON_LABEL_GAP);
 }

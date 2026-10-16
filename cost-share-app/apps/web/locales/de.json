@@ -1,0 +1,102 @@
+{
+  "header": {
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "hello": "Hallo"
+  },
+  "locale": {
+    "toggle": "English",
+    "chooseLanguage": "Sprache"
+  },
+  "hero": {
+    "headline": "Ausgaben mit Freunden teilen — mühelos",
+    "subheadline": "KupaPay vereinfacht Schulden automatisch — weniger Überweisungen, weniger Stress",
+    "ctaDownloadIos": "Für iPhone herunterladen",
+    "ctaDownloadAndroid": "Für Android herunterladen",
+    "ctaSignIn": "Auf der Website anmelden"
+  },
+  "features": {
+    "title": "Warum KupaPay?",
+    "items": [
+      {
+        "icon": "simplify",
+        "title": "Automatische Schuldenvereinfachung",
+        "description": "Eure Gruppe hat 20 Zahlungen gemacht — KupaPay zeigt, dass du nur einmal überweisen musst"
+      },
+      {
+        "icon": "realtime",
+        "title": "Echtzeit-Updates",
+        "description": "Jede Ausgabe wird sofort für alle Gruppenmitglieder aktualisiert"
+      },
+      {
+        "icon": "groups",
+        "title": "Flexible Gruppen",
+        "description": "Erstellt Gruppen für Reisen, Miete, Essen — so viele ihr wollt"
+      },
+      {
+        "icon": "offline",
+        "title": "Funktioniert offline",
+        "description": "Ausgaben hinzufügen und ansehen auch ohne Internet — alles synchronisiert sich automatisch wieder"
+      },
+      {
+        "icon": "security",
+        "title": "Datenschutz und Sicherheit",
+        "description": "Deine Daten sind geschützt und sicher"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "So funktioniert’s",
+    "steps": [
+      {
+        "title": "Gruppe erstellen",
+        "description": "Freunde in 2 Sekunden einladen"
+      },
+      {
+        "title": "Ausgaben erfassen",
+        "description": "Wer hat bezahlt, wie viel, für wen"
+      },
+      {
+        "title": "Aufteilung erhalten",
+        "description": "KupaPay zeigt genau, wer wem wie viel schuldet"
+      }
+    ]
+  },
+  "faq": {
+    "title": "FAQ",
+    "items": [
+      {
+        "question": "Worin unterscheidet sich KupaPay von anderen Apps?",
+        "answer": "KupaPay nutzt einen Algorithmus zur Schuldenvereinfachung, der die Anzahl der Überweisungen zwischen Freunden reduziert. Statt 10 Überweisungen reichen vielleicht 3."
+      },
+      {
+        "question": "Ist es kostenlos?",
+        "answer": "Ja, KupaPay ist völlig kostenlos."
+      },
+      {
+        "question": "Wie funktioniert die Schuldenvereinfachung?",
+        "answer": "Die App berechnet den Nettosaldo jedes Mitglieds und findet die minimale Anzahl an Überweisungen, um alle Schulden auszugleichen."
+      },
+      {
+        "question": "Kann ich eine Gruppe löschen?",
+        "answer": "Ja, du kannst eine Gruppe jederzeit in den Gruppeneinstellungen schließen oder löschen."
+      },
+      {
+        "question": "Sind meine Daten sicher?",
+        "answer": "Ja. Daten werden in Supabase mit vollständiger Verschlüsselung und Zwei-Faktor-Authentifizierung gespeichert."
+      }
+    ]
+  },
+  "footer": {
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "contact": "Kontakt",
+    "copyright": "© 2026 KupaPay"
+  },
+  "legal": {
+    "notFound": "Dokument nicht gefunden.",
+    "backHome": "Zur Startseite",
+    "effectiveDate": "Gültig ab ",
+    "appVersion": "App-Version "
+  }
+}

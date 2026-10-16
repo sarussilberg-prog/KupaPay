@@ -23,7 +23,7 @@ interface Props {
  * indicator so the row stays compact; the breakdown sheet shows them in full.
  */
 function FriendBalanceRowInner({ friend, onPress, testID, isLast = false }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
 
     const sorted = [...friend.byCurrency]
@@ -42,7 +42,7 @@ function FriendBalanceRowInner({ friend, onPress, testID, isLast = false }: Prop
     const isSettled = !primary;
     const owesYou = primary ? primary.net > 0 : false;
     const amountText = primary
-        ? formatCurrencyAmount(Math.abs(primary.net), primary.currency)
+        ? formatCurrencyAmount(Math.abs(primary.net), primary.currency, i18n.language)
         : null;
     const amountClass = isSettled
         ? 'text-slate-400'

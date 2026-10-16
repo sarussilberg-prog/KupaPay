@@ -66,6 +66,7 @@ const ALLOWLIST_KEYS = new Set([
 export function isAllowlistedLocaleValue(value: string, key?: string): boolean {
     const trimmed = value.trim();
     if (!trimmed) return true;
+    if (key?.endsWith('.icon')) return true;
     if (key && ALLOWLIST_KEYS.has(key)) return true;
     if (key && ALLOWLIST_KEY_VALUE[key]?.has(trimmed)) return true;
     if (LOCALE_VALUE_ALLOWLIST_EXACT.has(trimmed)) return true;

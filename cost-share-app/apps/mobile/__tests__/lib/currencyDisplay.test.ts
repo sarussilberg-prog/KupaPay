@@ -41,12 +41,12 @@ describe('currencyDisplay', () => {
     });
 
     describe('formatCurrencyAmount', () => {
-        it('prefixes shekel symbol', () => {
-            expect(formatCurrencyAmount(50, 'ILS')).toMatch(/^₪50/);
+        it('prefixes shekel symbol with bidi isolation', () => {
+            expect(formatCurrencyAmount(50, 'ILS')).toMatch(/₪50/);
         });
 
-        it('prefixes dollar symbol', () => {
-            expect(formatCurrencyAmount(150, 'USD')).toMatch(/^\$150/);
+        it('prefixes dollar symbol with bidi isolation', () => {
+            expect(formatCurrencyAmount(150, 'USD')).toMatch(/\$150/);
         });
     });
 

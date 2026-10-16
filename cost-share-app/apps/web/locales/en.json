@@ -1,0 +1,102 @@
+{
+  "header": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "hello": "Hello"
+  },
+  "locale": {
+    "toggle": "עברית",
+    "chooseLanguage": "Language"
+  },
+  "hero": {
+    "headline": "Split expenses with friends, effortlessly",
+    "subheadline": "KupaPay automatically simplifies debts — fewer transfers, less stress",
+    "ctaDownloadIos": "Download for iPhone",
+    "ctaDownloadAndroid": "Download for Android",
+    "ctaSignIn": "Sign in"
+  },
+  "features": {
+    "title": "Why KupaPay?",
+    "items": [
+      {
+        "icon": "simplify",
+        "title": "Automatic debt simplification",
+        "description": "Your group made 20 payments — KupaPay figures out you only need to transfer once"
+      },
+      {
+        "icon": "realtime",
+        "title": "Real-time updates",
+        "description": "Every expense updates instantly for all group members"
+      },
+      {
+        "icon": "groups",
+        "title": "Flexible groups",
+        "description": "Create groups for trips, rent, dinners — as many as you like"
+      },
+      {
+        "icon": "offline",
+        "title": "Works offline",
+        "description": "Add and view expenses even without internet — everything syncs automatically when you reconnect"
+      },
+      {
+        "icon": "security",
+        "title": "Privacy & security",
+        "description": "Your data is protected and secure"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "steps": [
+      {
+        "title": "Create a group",
+        "description": "Invite friends in 2 seconds"
+      },
+      {
+        "title": "Add expenses",
+        "description": "Who paid, how much, for whom"
+      },
+      {
+        "title": "Get the breakdown",
+        "description": "KupaPay shows exactly who owes what"
+      }
+    ]
+  },
+  "faq": {
+    "title": "FAQ",
+    "items": [
+      {
+        "question": "How is KupaPay different from other apps?",
+        "answer": "KupaPay uses a debt-simplification algorithm that reduces the number of transfers between friends. Instead of 10 transfers, you might only need 3."
+      },
+      {
+        "question": "Is it free?",
+        "answer": "Yes, KupaPay is completely free."
+      },
+      {
+        "question": "How does debt simplification work?",
+        "answer": "The app calculates the net balance for each group member and finds the minimum number of transfers to settle all debts."
+      },
+      {
+        "question": "Can I delete a group?",
+        "answer": "Yes, you can close or delete a group at any time from the group settings."
+      },
+      {
+        "question": "Is my data secure?",
+        "answer": "Yes. Data is stored in Supabase with full encryption and two-factor authentication."
+      }
+    ]
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact",
+    "copyright": "© 2026 KupaPay"
+  },
+  "legal": {
+    "notFound": "Document not found.",
+    "backHome": "Back to home",
+    "effectiveDate": "Effective from ",
+    "appVersion": "App version "
+  }
+}

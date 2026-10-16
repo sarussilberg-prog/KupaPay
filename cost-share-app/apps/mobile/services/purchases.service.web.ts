@@ -89,3 +89,5 @@ export async function restorePurchases(_featureKey: string, _groupId?: string): 
 }
 
 export async function openSubscriptionManagement(): Promise<void> {}
+
+export async function presentOfferCodeRedemption(): Promise<void> {}

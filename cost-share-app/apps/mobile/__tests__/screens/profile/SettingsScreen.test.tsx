@@ -96,10 +96,10 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         expect(mockNavigate).toHaveBeenCalledWith('ContactUs');
     });
 
-    it('renders version footer', () => {
-        const { getByText, queryByText } = render(<SettingsScreen />);
-        expect(getByText('settings.version')).toBeTruthy();
-        expect(queryByText(/\{\{version\}\}/)).toBeNull();
+    it('renders build info footer', () => {
+        const { getByText } = render(<SettingsScreen />);
+        expect(getByText(/Version /)).toBeTruthy();
+        expect(getByText(/Environment /)).toBeTruthy();
     });
 
     it('renders Delete account row in Privacy & Account section', () => {

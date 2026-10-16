@@ -5,6 +5,10 @@
 
 export * from './constants';
 export * from './i18n/languages';
+export * from './i18n/formatMoney';
+export * from './i18n/balanceSemantics';
+export * from './i18n/formatRelativeTime';
+export * from './i18n/appLocales';
 export * from './i18n/localeParity';
 export * from './i18n/localeAllowlist';
 export * from './brand';
@@ -15,6 +19,9 @@ export * from './mappers';
 export * from './calculations';
 export * from './notifications';
 export * from './version';
+export * from './appBuildInfo';
+export * from './changelog';
+export * from './sentryReleaseMetadata';
 export * from './receiptStorage';
 export * from './pro/hasPro';
 export * from './recurring/recurringDates';

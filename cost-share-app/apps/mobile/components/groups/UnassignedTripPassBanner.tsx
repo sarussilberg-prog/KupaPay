@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
+import { Button } from '../Button';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
@@ -50,15 +51,14 @@ export function UnassignedTripPassBanner({ groupId }: UnassignedTripPassBannerPr
             <Text className="text-gray-600 text-sm mb-3">
                 {t('pro.unassignedTripPass.body', { count })}
             </Text>
-            <TouchableOpacity
+            <Button
+                title={t('pro.unassignedTripPass.cta')}
                 onPress={onAssign}
+                loading={busy}
                 disabled={busy}
-                className="bg-primary rounded-xl py-3 items-center flex-row justify-center gap-2"
+                variant="pro"
                 testID="assign-unassigned-trip-pass"
-            >
-                {busy ? <ActivityIndicator color="#fff" size="small" /> : null}
-                <Text className="text-white font-semibold">{t('pro.unassignedTripPass.cta')}</Text>
-            </TouchableOpacity>
+            />
         </View>
     );
 }

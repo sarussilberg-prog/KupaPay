@@ -64,9 +64,20 @@
             "balances": "Балансы"
         },
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
-        "signInWithEmailMagicLink": "Продолжить с email",
-        "emailMagicLinkStubHint": "Вход по ссылке на email скоро появится.",
+        "signInWithEmail": "Продолжить с email",
         "emailPlaceholder": "imya@example.com",
+        "emailOtpSendCode": "Отправить код",
+        "emailOtpVerify": "Подтвердить и войти",
+        "emailOtpSentTo": "Мы отправили 6-значный код на {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Отправить код снова",
+        "emailOtpResendIn": "Повтор через {{seconds}} с",
+        "emailOtpChangeEmail": "Изменить email",
+        "emailOtpInvalidEmail": "Введите корректный адрес email.",
+        "emailOtpInvalidCode": "Код неверный или просрочен. Попробуйте снова или запросите новый.",
+        "emailOtpRateLimited": "Слишком много попыток. Подождите минуту и попробуйте снова.",
+        "emailOtpSendError": "Не удалось отправить код. Попробуйте снова.",
+        "emailOtpVerifyError": "Не удалось проверить код. Попробуйте снова.",
         "googleSignInSheetTitle": "Вход через Google",
         "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна."
     },
@@ -332,6 +343,11 @@
             "matchedMembers": "в т. ч. {{names}}",
             "settled": "Всё рассчитано",
             "youSettled": "Вы в расчёте",
+            "youOwe": "Вы должны {{amount}}",
+            "owedToYou": "Вам должны {{amount}}",
+            "moreCurrencies": "+{{count}} валют",
+            "moreCurrencies_one": "+{{count}} валюта",
+            "lastActivity": "Активность {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
         "bigCreateCta": "Создать группу",
@@ -780,7 +796,11 @@
             "noStack": "Трассировка стека недоступна"
         },
         "monetization": {
-            "portalRow": "Аналитика монетизации"
+            "portalRow": "Аналитика монетизации",
+            "allTimeFunnel": "Воронка за всё время",
+            "byPlatform": "По платформе",
+            "last7Days": "Последние 7 дней",
+            "noData": "За этот период событий пока нет"
         },
         "supportMessages": {
             "title": "Обращения в поддержку",
@@ -797,7 +817,12 @@
             "activeGroups": "Активные группы",
             "archivedGroups": "Архивные группы",
             "archiveFootnote": "Архивные = неактивные 2+ месяца и с нулевыми балансами (по всему приложению). Группы, которые пользователи архивировали вручную, не учитываются.",
-            "loadError": "Не удалось загрузить метрики. Потяните вниз, чтобы обновить, или повторите позже."
+            "loadError": "Потяните вниз для обновления или повторите позже.",
+            "loadErrorTitle": "Не удалось загрузить метрики",
+            "notAdminTitle": "Требуются права администратора",
+            "notAdminBody": "Ваш аккаунт не входит в список администраторов приложения, поэтому аналитика монетизации недоступна.",
+            "analyticsUnavailableTitle": "Аналитика не настроена",
+            "analyticsUnavailableBody": "Функция метрик монетизации отсутствует или не выдана в этом проекте Supabase. Примените последние миграции на dev и обновите экран."
         }
     },
     "profile": {
@@ -1265,6 +1290,7 @@
             "subscribeAtPrice": "Подписаться — {{price}}",
             "buyTripPass": "Купить Trip Pass — {{price}}",
             "restore": "Восстановить покупки",
+            "redeemOfferCode": "Активировать промокод",
             "manageSubscription": "Управление подпиской",
             "storeNotConfigured": "Покупки недоступны в этой сборке.",
             "loadFailed": "Не удалось загрузить цены подписки. Проверьте подключение или повторите попытку чуть позже.",
@@ -1274,8 +1300,11 @@
             "restoreSuccess": "Покупки восстановлены.",
             "restoreNone": "Активных покупок не найдено.",
             "tripPassNeedsGroup": "Сначала откройте группу, чтобы купить для неё Trip Pass.",
-            "tryFreeTrialCta": "Попробовать {{days}} дней бесплатно",
-            "trialRenewalDisclosure": "Через {{days}} дней спишется {{price}}/{{period}}. Отмена в любой момент в настройках."
+            "tryFreeTrialCta": "Попробовать {{trialDays}} дн. бесплатно",
+            "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
+            "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
+            "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
+            "havePromoCode": "Есть код?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

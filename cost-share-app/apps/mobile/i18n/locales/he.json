@@ -64,9 +64,20 @@
             "balances": "יתרות"
         },
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
-        "signInWithEmailMagicLink": "המשך עם אימייל",
-        "emailMagicLinkStubHint": "כניסה בקישור לאימייל תגיע בקרוב.",
+        "signInWithEmail": "המשך עם אימייל",
         "emailPlaceholder": "name@example.com",
+        "emailOtpSendCode": "שלח קוד",
+        "emailOtpVerify": "אמת והיכנס",
+        "emailOtpSentTo": "שלחנו קוד בן 6 ספרות ל-{{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "שלח קוד שוב",
+        "emailOtpResendIn": "שליחה חוזרת בעוד {{seconds}} שנ'",
+        "emailOtpChangeEmail": "שנה אימייל",
+        "emailOtpInvalidEmail": "הזן כתובת אימייל תקינה.",
+        "emailOtpInvalidCode": "הקוד לא תקין או שפג תוקפו. נסה שוב או שלח מחדש.",
+        "emailOtpRateLimited": "יותר מדי ניסיונות. המתן דקה ונסה שוב.",
+        "emailOtpSendError": "לא ניתן לשלוח את הקוד. נסה שוב.",
+        "emailOtpVerifyError": "לא ניתן לאמת את הקוד. נסה שוב.",
         "googleSignInSheetTitle": "התחברות עם Google",
         "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה."
     },
@@ -332,6 +343,11 @@
             "matchedMembers": "כולל {{names}}",
             "settled": "מסודר",
             "youSettled": "את/ה מסודר/ת",
+            "youOwe": "את/ה חייב/ת {{amount}}",
+            "owedToYou": "מגיע לך {{amount}}",
+            "moreCurrencies": "+{{count}} מטבעות",
+            "moreCurrencies_one": "+מטבע {{count}}",
+            "lastActivity": "פעיל {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
         "bigCreateCta": "פתח קופה",
@@ -766,7 +782,11 @@
             "noStack": "אין מחסנית קריאה"
         },
         "monetization": {
-            "portalRow": "ניתוח הכנסות"
+            "portalRow": "ניתוח הכנסות",
+            "allTimeFunnel": "משפך מצטבר",
+            "byPlatform": "לפי פלטפורמה",
+            "last7Days": "7 ימים אחרונים",
+            "noData": "אין אירועים בתקופה זו עדיין"
         },
         "supportMessages": {
             "title": "הודעות תמיכה",
@@ -783,7 +803,12 @@
             "activeGroups": "קבוצות פעילות",
             "archivedGroups": "קבוצות בארכיון",
             "archiveFootnote": "ארכיון = ללא פעילות במשך חודשיים ויתרות אפס (לכל המשתמשים). ארכיון ידני אישי לא נספר כאן.",
-            "loadError": "לא ניתן לטעון נתונים. נסו שוב מאוחר יותר."
+            "loadError": "משוך לרענון או נסה שוב מאוחר יותר.",
+            "loadErrorTitle": "לא ניתן לטעון נתונים",
+            "notAdminTitle": "נדרשות הרשאות מנהל",
+            "notAdminBody": "החשבון שלך לא ברשימת מנהלי האפליקציה.",
+            "analyticsUnavailableTitle": "אנליטיקת מונטיזציה לא מוגדרת",
+            "analyticsUnavailableBody": "פונקציית המדדים חסרה או ללא הרשאה בפרויקט Supabase. יש להחיל מיגרציות ולרענן."
         }
     },
     "profile": {
@@ -1173,6 +1198,7 @@
             "subscribeAtPrice": "הצטרפות — {{price}}",
             "buyTripPass": "רכישת Trip Pass — {{price}}",
             "restore": "שחזור רכישות",
+            "redeemOfferCode": "מימוש קוד הטבה",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
             "loadFailed": "לא הצלחנו לטעון מחירי מנוי. בדקו את החיבור או נסו שוב בעוד רגע.",
@@ -1182,8 +1208,11 @@
             "restoreSuccess": "הרכישות שוחזרו.",
             "restoreNone": "לא נמצאו רכישות פעילות.",
             "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
-            "tryFreeTrialCta": "נסו {{days}} ימים בחינם",
-            "trialRenewalDisclosure": "אחרי {{days}} ימים יחויב {{price}} ל{{period}}. ניתן לבטל בכל עת בהגדרות."
+            "tryFreeTrialCta": "נסו {{trialDays}} ימים בחינם",
+            "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
+            "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
+            "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
+            "havePromoCode": "יש לכם קוד?"
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

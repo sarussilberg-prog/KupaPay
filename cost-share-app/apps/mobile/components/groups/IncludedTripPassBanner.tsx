@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
+import { Button } from '../Button';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
@@ -50,15 +51,14 @@ export function IncludedTripPassBanner({ groupId }: IncludedTripPassBannerProps)
         <View className="mx-4 mb-3 p-4 rounded-2xl bg-blue-50 border border-blue-100">
             <Text className="text-gray-900 font-semibold mb-1">{t('pro.includedTripPass.title')}</Text>
             <Text className="text-gray-600 text-sm mb-3">{t('pro.includedTripPass.body')}</Text>
-            <TouchableOpacity
+            <Button
+                title={t('pro.includedTripPass.cta')}
                 onPress={onRedeem}
+                loading={busy}
                 disabled={busy}
-                className="bg-primary rounded-xl py-3 items-center flex-row justify-center gap-2"
+                variant="pro"
                 testID="redeem-included-trip-pass"
-            >
-                {busy ? <ActivityIndicator color="#fff" size="small" /> : null}
-                <Text className="text-white font-semibold">{t('pro.includedTripPass.cta')}</Text>
-            </TouchableOpacity>
+            />
         </View>
     );
 }

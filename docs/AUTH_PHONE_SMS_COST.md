@@ -19,7 +19,7 @@ For US outbound SMS, Twilio list pricing is commonly cited around **$0.0075 per 
 
 ## Product implications
 
-- **Email magic link** can ship behind `EXPO_PUBLIC_ENABLE_EMAIL_AUTH=true` with no per-login SMS cost (Supabase email limits apply on Free/Pro).
+- **Email OTP** ships behind `EXPO_PUBLIC_ENABLE_EMAIL_AUTH=true` with no per-login SMS cost (Supabase email limits apply on Free/Pro). See [AUTH_EMAIL_OTP.md](./AUTH_EMAIL_OTP.md).
 - **Phone OTP login** should not be toggled on until messaging provider + Supabase phone add-on costs are accepted and abuse/rate limits are defined.
 
 ## Related

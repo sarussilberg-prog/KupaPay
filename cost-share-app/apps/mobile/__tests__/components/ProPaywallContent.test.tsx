@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 
@@ -37,6 +38,7 @@ jest.mock('../../services/purchases.service', () => ({
     purchasePackage: jest.fn(),
     restorePurchases: jest.fn(),
     openSubscriptionManagement: jest.fn(),
+    presentOfferCodeRedemption: jest.fn(),
 }));
 
 import { fetchPaywallOfferings } from '../../lib/paywallOfferingsLoad';
@@ -52,6 +54,11 @@ const mockPackage = {
         priceString: '₪69.90',
         introPrice: { price: 0, priceString: '₪0.00', periodNumberOfUnits: 2, periodUnit: 'WEEK' },
     },
+} as const;
+
+const mockMonthly = {
+    identifier: 'monthly',
+    product: { identifier: 'kupapay_pro_monthly', priceString: '₪12.90' },
 } as const;
 
 describe('ProPaywallContent offerings load', () => {
@@ -73,15 +80,33 @@ describe('ProPaywallContent offerings load', () => {
         expect(queryByTestId('paywall-loading')).toBeNull();
     });
 
-    it('allows purchase without EU withdrawal acknowledgement', async () => {
+    it('shows localized store prices from RevenueCat packages', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
             packages: {
-                monthly: {
-                    ...mockPackage,
-                    identifier: 'monthly',
-                    product: { ...mockPackage.product, identifier: 'kupapay_pro_monthly' },
-                },
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
+
+        const { getByText, findByText } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
+        );
+
+        expect(await findByText('₪12.90')).toBeTruthy();
+        expect(getByText('₪69.90')).toBeTruthy();
+    });
+
+    it('never shows EU withdrawal acknowledgement', async () => {
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
+
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
                 annual: mockPackage,
                 tripPass: null,
             },
@@ -91,7 +116,7 @@ describe('ProPaywallContent offerings load', () => {
         });
         purchaseMock.mockResolvedValue({ ok: true });
 
-        const { getByTestId, queryByTestId } = render(
+        const { queryByTestId, getByTestId } = render(
             <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
         );
 
@@ -99,10 +124,13 @@ describe('ProPaywallContent offerings load', () => {
             expect(queryByTestId('paywall-loading')).toBeNull();
             expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
         });
+        expect(queryByTestId('paywall-eu-withdrawal-ack')).toBeNull();
 
         fireEvent.press(getByTestId('paywall-purchase-btn'));
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
         });
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
     });
 });

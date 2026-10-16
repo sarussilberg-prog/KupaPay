@@ -20,6 +20,9 @@ import { handleError } from '../../lib/handleError';
 import { Text } from '../../components/AppText';
 import { MemberAvatar } from '../../components/MemberAvatar';
 import { AppIcon } from '../../components/AppIcon';
+import { MenuRow } from '../../components/ui/MenuRow';
+import { IconLabel } from '../../components/ui/IconLabel';
+import { ListRow } from '../../components/ui/ListRow';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { EmptyState } from '../../components/EmptyState';
 import { colors } from '../../theme';
@@ -163,22 +166,21 @@ export function FriendsScreen() {
                 }
             >
                 {/* Invite CTA */}
-                <TouchableOpacity
+                <ListRow
                     onPress={() => {
                         void shareFriendInvite();
                     }}
-                    activeOpacity={0.7}
-                    className="mx-4 mt-4 mb-2 px-4 py-3 bg-primary/10 rounded-xl flex-row items-center"
+                    className="mx-4 mt-4 mb-2 px-4 py-3 bg-primary/10 rounded-xl min-h-0"
                     testID="friends-invite-cta"
                 >
-                    <AppIcon name="person-add-outline" size={22} color={colors.primary} />
-                    <View className="flex-1 ml-3">
-                        <Text className="text-sm font-semibold text-gray-800">
-                            {t('invite.friend.title')}
-                        </Text>
-                    </View>
+                    <IconLabel
+                        iconName="person-add-outline"
+                        iconColor={colors.primary}
+                        label={t('invite.friend.title')}
+                        labelClassName="text-sm font-semibold text-gray-800"
+                    />
                     <AppIcon name={isRtl ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.gray400} />
-                </TouchableOpacity>
+                </ListRow>
 
                 {/* Incoming requests */}
                 <View className="px-4 mb-4">
@@ -317,28 +319,24 @@ export function FriendsScreen() {
                         onPress={() => { }}
                         className="bg-white rounded-2xl overflow-hidden"
                     >
-                        <TouchableOpacity
+                        <MenuRow
+                            iconName="people-outline"
+                            iconColor={colors.primary}
+                            label={t('friends.actions.createGroupWith')}
                             onPress={() => actionsFor && handleCreateGroupWith(actionsFor)}
-                            disabled={actionsFor ? isDeleted(actionsFor) : true}
-                            style={{ opacity: actionsFor && isDeleted(actionsFor) ? 0.4 : 1 }}
-                            className="flex-row items-center px-4 py-4 border-b border-slate-100"
+                            disabled={!actionsFor || isDeleted(actionsFor)}
+                            className="px-4 py-4 min-h-0 bg-transparent border-b border-slate-100"
                             testID="friend-action-create-group"
-                        >
-                            <AppIcon name="people-outline" size={20} color={colors.primary} />
-                            <Text className="ml-3 text-sm font-medium text-gray-800">
-                                {t('friends.actions.createGroupWith')}
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
+                        />
+                        <MenuRow
+                            iconName="trash-outline"
+                            iconColor={colors.error}
+                            label={t('friends.actions.removeFriendship')}
+                            labelClassName="text-sm font-medium text-red-600"
                             onPress={() => actionsFor && handleRemoveFromMenu(actionsFor)}
-                            className="flex-row items-center px-4 py-4"
+                            className="px-4 py-4 min-h-0 bg-transparent"
                             testID="friend-action-remove"
-                        >
-                            <AppIcon name="trash-outline" size={20} color={colors.error} />
-                            <Text className="ml-3 text-sm font-medium text-red-600">
-                                {t('friends.actions.removeFriendship')}
-                            </Text>
-                        </TouchableOpacity>
+                        />
                     </Pressable>
                 </Pressable>
             </Modal>

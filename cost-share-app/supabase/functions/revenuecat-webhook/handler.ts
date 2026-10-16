@@ -1,5 +1,6 @@
 /**
  * RevenueCat webhook → Supabase entitlement writes (idempotent via handle_revenuecat_webhook RPC).
+ * Store-agnostic: App Store and Google Play events share product ids (`kupapay_pro_*`, `kupapay_trip_pass`).
  * @see docs/KUPAPAY_PRO_SETUP.md
  */
 
@@ -18,6 +19,8 @@ export interface RevenueCatEvent {
     type: string;
     id: string;
     app_user_id: string;
+    /** APP_STORE | PLAY_STORE | etc. — not used for entitlement logic (product ids are shared). */
+    store?: string;
     product_id?: string;
     transaction_id?: string;
     entitlement_ids?: string[];

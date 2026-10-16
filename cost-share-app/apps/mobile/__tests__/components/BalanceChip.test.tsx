@@ -18,33 +18,31 @@ describe('BalanceChip', () => {
         const { getByTestId, queryByText } = render(
             <BalanceChip defaultCurrency="USD" balanceUnknown />,
         );
-        // Never claim "settled" when we simply don't have the data (offline,
-        // no cache) — show a neutral placeholder instead.
         expect(getByTestId('balance-chip-unknown')).toBeTruthy();
         expect(queryByText('groups.card.settled')).toBeNull();
         expect(queryByText('groups.card.youSettled')).toBeNull();
     });
 
     it('ignores balanceUnknown once a real rollup is present', () => {
-        const { getByText, queryByTestId } = render(
+        const { getByTestId, queryByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
                 balanceUnknown
                 rollup={rollupOf({ currency: 'USD', net: 12 })}
             />,
         );
-        expect(getByText('+USD 12.00')).toBeTruthy();
+        expect(getByTestId('balance-chip-active')).toBeTruthy();
         expect(queryByTestId('balance-chip-unknown')).toBeNull();
     });
 
     it('shows Settled label when primary net rounds to zero', () => {
-        const { getByText } = render(
+        const { getByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
                 rollup={rollupOf({ currency: 'USD', net: 0.004 })}
             />,
         );
-        expect(getByText('groups.card.settled')).toBeTruthy();
+        expect(getByTestId('balance-chip-settled')).toBeTruthy();
     });
 
     it('shows "You are settled" when the group has open debts among others', () => {
@@ -54,46 +52,28 @@ describe('BalanceChip', () => {
         expect(getByText('groups.card.youSettled')).toBeTruthy();
     });
 
-    it('still shows "Settled" when groupHasOpenDebts is false', () => {
-        const { getByText } = render(
-            <BalanceChip defaultCurrency="USD" groupHasOpenDebts={false} />,
-        );
-        expect(getByText('groups.card.settled')).toBeTruthy();
-    });
-
-    it('shows signed amount, not "You are settled", when the user has a non-zero net even if group has open debts', () => {
+    it('shows localized owe copy when primary net is negative', () => {
         const { getByText } = render(
             <BalanceChip
                 defaultCurrency="USD"
-                rollup={rollupOf({ currency: 'USD', net: 12 })}
-                groupHasOpenDebts
+                rollup={rollupOf({ currency: 'ILS', net: -761.5 })}
             />,
         );
-        expect(getByText('+USD 12.00')).toBeTruthy();
+        expect(getByText(/groups\.card\.youOwe/)).toBeTruthy();
     });
 
-    it('formats a positive primary with + and its currency', () => {
+    it('shows localized owed copy when primary net is positive', () => {
         const { getByText } = render(
             <BalanceChip
                 defaultCurrency="USD"
-                rollup={rollupOf({ currency: 'ILS', net: 17 })}
+                rollup={rollupOf({ currency: 'EUR', net: 42.5 })}
             />,
         );
-        expect(getByText('+ILS 17.00')).toBeTruthy();
+        expect(getByText(/groups\.card\.owedToYou/)).toBeTruthy();
     });
 
-    it('formats a negative primary using an absolute value', () => {
+    it('shows localized multi-currency label instead of bare +N', () => {
         const { getByText } = render(
-            <BalanceChip
-                defaultCurrency="USD"
-                rollup={rollupOf({ currency: 'USD', net: -8.5 })}
-            />,
-        );
-        expect(getByText('−USD 8.50')).toBeTruthy();
-    });
-
-    it('appends "+N" when there are additional non-zero currencies', () => {
-        const { getByText, getByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
                 rollup={rollupOf({ currency: 'USD', net: 50 }, [
@@ -102,11 +82,10 @@ describe('BalanceChip', () => {
                 ])}
             />,
         );
-        expect(getByText('+USD 50.00')).toBeTruthy();
-        expect(getByTestId('balance-chip-others').props.children).toBe('+2');
+        expect(getByText(/groups\.card\.moreCurrencies/)).toBeTruthy();
     });
 
-    it('ignores zero-net others when counting the "+N" badge', () => {
+    it('ignores zero-net others when counting extra currencies', () => {
         const { queryByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
