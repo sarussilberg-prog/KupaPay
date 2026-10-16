@@ -24,11 +24,11 @@ interface GroupsListSummaryCardProps {
 }
 
 const toneAmountClass: Record<string, string> = {
-    settled: 'text-2xl font-semibold text-slate-500 tabular-nums text-center',
-    owe: 'text-3xl font-bold text-red-600 tabular-nums text-center',
-    owed: 'text-3xl font-bold text-emerald-600 tabular-nums text-center',
-    unknown: 'text-3xl font-semibold text-slate-400 tabular-nums text-center',
-    loading: 'text-3xl font-semibold text-slate-400 tabular-nums text-center',
+    settled: 'text-2xl font-semibold text-slate-500 dark:text-slate-400 tabular-nums text-center',
+    owe: 'text-3xl font-bold text-red-600 dark:text-red-400 tabular-nums text-center',
+    owed: 'text-3xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-center',
+    unknown: 'text-3xl font-semibold text-slate-400 dark:text-slate-500 tabular-nums text-center',
+    loading: 'text-3xl font-semibold text-slate-400 dark:text-slate-500 tabular-nums text-center',
 };
 
 export function GroupsListSummaryCard({
@@ -87,11 +87,11 @@ export function GroupsListSummaryCard({
     return (
         <View
             testID="groups-list-summary-card"
-            className="mx-0 mb-4 rounded-2xl bg-white border border-slate-200/80 px-4 py-4"
+            className="mx-0 mb-4 rounded-2xl bg-white dark:bg-gray-800 border border-slate-200/80 dark:border-gray-700 px-4 py-4"
             style={shadows.sm}
         >
             <Text
-                className="text-xs font-medium text-slate-500 mb-2"
+                className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2"
                 style={{ textAlign: align, writingDirection: direction }}
             >
                 {t(labelKey)}
@@ -110,7 +110,7 @@ export function GroupsListSummaryCard({
             {foreignLine ? (
                 <Text
                     testID="groups-list-summary-foreign"
-                    className="text-sm text-slate-500 mt-2"
+                    className="text-sm text-slate-500 dark:text-slate-400 mt-2"
                     style={{ textAlign: align, writingDirection: direction }}
                 >
                     {foreignLine}

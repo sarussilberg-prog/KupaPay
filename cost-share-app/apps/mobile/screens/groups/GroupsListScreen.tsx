@@ -324,7 +324,7 @@ export function GroupsListScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
+        <SafeAreaView className="flex-1 bg-slate-50 dark:bg-gray-900" edges={['top']}>
             <ProTrialLifecycleBanner />
             <GroupsListHeader
                 searchQuery={searchQuery}

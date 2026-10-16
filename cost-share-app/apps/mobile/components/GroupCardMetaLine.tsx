@@ -18,7 +18,7 @@ export const GROUP_CARD_UPDATED_META_MIN_AGE_MS = 90_000;
 
 const META_SEPARATOR = '\u00A0·\u00A0';
 
-const metaTextClass = 'text-xs text-gray-500 leading-4';
+const metaTextClass = 'text-xs text-gray-500 dark:text-gray-400 leading-4';
 
 type Props = {
     group: GroupWithMembers;
@@ -61,7 +61,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
 
     return (
         <View testID={testID} style={{ minWidth: 0, alignSelf: 'stretch' }}>
-            <Text className={metaTextClass}>
+            <Text className={metaTextClass} style={{ flexShrink: 1 }}>
                 <Text className={metaTextClass}>{memberLabel}</Text>
                 {updatedLabel ? (
                     <>

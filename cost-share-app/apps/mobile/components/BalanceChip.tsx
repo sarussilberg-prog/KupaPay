@@ -26,24 +26,26 @@ interface BalanceChipProps {
 
 const toneStyles = {
     settled: {
-        container: 'rounded-xl bg-gray-100/90 px-3 py-2 border border-gray-200/60',
-        label: 'text-[11px] font-medium text-gray-500 leading-tight',
-        amount: 'text-sm font-semibold text-gray-600 leading-tight',
+        container:
+            'rounded-xl bg-gray-100/90 dark:bg-gray-700/50 px-3 py-2 border border-gray-200/60 dark:border-gray-600',
+        label: 'text-[11px] font-medium text-gray-500 dark:text-gray-400 leading-tight',
+        amount: 'text-sm font-semibold text-gray-600 dark:text-gray-300 leading-tight',
     },
     owe: {
-        container: 'rounded-xl bg-red-50 px-3 py-2 border border-red-100',
-        label: 'text-[11px] font-medium text-red-700/90 leading-tight',
-        amount: 'text-sm font-bold text-red-600 leading-tight',
+        container: 'rounded-xl bg-red-50 dark:bg-red-950/40 px-3 py-2 border border-red-100 dark:border-red-900/60',
+        label: 'text-[11px] font-medium text-red-700/90 dark:text-red-300 leading-tight',
+        amount: 'text-sm font-bold text-red-600 dark:text-red-400 leading-tight',
     },
     owed: {
-        container: 'rounded-xl bg-emerald-50 px-3 py-2 border border-emerald-100',
-        label: 'text-[11px] font-medium text-emerald-800/90 leading-tight',
-        amount: 'text-sm font-bold text-emerald-700 leading-tight',
+        container:
+            'rounded-xl bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 border border-emerald-100 dark:border-emerald-900/60',
+        label: 'text-[11px] font-medium text-emerald-800/90 dark:text-emerald-300 leading-tight',
+        amount: 'text-sm font-bold text-emerald-700 dark:text-emerald-400 leading-tight',
     },
     unknown: {
-        container: 'rounded-xl bg-gray-100 px-3 py-2 border border-gray-200/60',
-        label: 'text-[11px] font-medium text-gray-400 leading-tight',
-        amount: 'text-sm font-medium text-gray-400 leading-tight',
+        container: 'rounded-xl bg-gray-100 dark:bg-gray-700/50 px-3 py-2 border border-gray-200/60 dark:border-gray-600',
+        label: 'text-[11px] font-medium text-gray-400 dark:text-gray-500 leading-tight',
+        amount: 'text-sm font-medium text-gray-400 dark:text-gray-500 leading-tight',
     },
 } as const;
 
@@ -99,8 +101,8 @@ export function BalanceChip({
     const columnStyle = useMemo<ViewStyle>(
         () => ({
             flexShrink: 0,
-            maxWidth: 132,
-            minWidth: 92,
+            maxWidth: 140,
+            minWidth: 88,
             alignItems: chipColumnAlign(isRtl),
             alignSelf: 'center',
             gap: 2,
@@ -175,12 +177,13 @@ export function BalanceChip({
                         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                         testID="balance-chip-others"
                     >
-                        <ChipText
-                            className={`${styles.label} underline mt-0.5`}
-                            textAlign={textAlign}
-                        >
-                            {extraLabel}
-                        </ChipText>
+                <ChipText
+                        className={`${styles.label} underline mt-0.5`}
+                        textAlign={textAlign}
+                        numberOfLines={2}
+                    >
+                        {extraLabel}
+                    </ChipText>
                     </TouchableOpacity>
                 ) : (
                     <ChipText
