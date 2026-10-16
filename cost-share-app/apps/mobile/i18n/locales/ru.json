@@ -1002,6 +1002,7 @@
             "noteChangedBy": "{{name}} изменил(а) заметку · {{group}}",
             "friendRequestRejectedByThem": "{{name}} отклонил(а) ваш запрос в друзья",
             "settleReminder": "{{name}} напоминает вам о расчёте в группе {{group}}",
+            "unsettledBalanceNudge": "Вы всё ещё должны {{name}} в группе {{group}}",
             "tripBudgetAlert": "Оповещение о бюджете поездки в {{group}}"
         },
         "addedExpense": "добавил(а) расход",
@@ -1245,6 +1246,17 @@
         "categoryMessages": "Чат группы",
         "categoryFriends": "Запросы в друзья",
         "categoryGroups": "Группы",
+        "categoryReminders": "Напоминания о балансе",
+        "quietHoursTitle": "Тихие часы",
+        "quietHoursEnable": "Соблюдать тихие часы",
+        "quietHoursSummary": "Без push с {{start}}:00 до {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "Не более {{count}} push-уведомлений в день.",
+        "webFallback": {
+            "default": "Новая активность в KupaPay",
+            "expense_added": "Новый расход в группе",
+            "settlement_added": "Кто-то рассчитался с вами",
+            "unsettled_balance_nudge": "Напоминание: открытый баланс"
+        },
         "systemDisabled": "Уведомления для этого приложения отключены",
         "openSettings": "Открыть настройки",
         "systemDisabledHint": "Чтобы изменить эти настройки, сначала включите уведомления в настройках устройства.",

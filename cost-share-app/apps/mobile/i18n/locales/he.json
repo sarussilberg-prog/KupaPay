@@ -988,6 +988,7 @@
             "noteChangedBy": "הפתק שונה על ידי {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך",
             "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}",
+            "unsettledBalanceNudge": "עדיין חייבים ל-{{name}} ב-{{group}}",
             "tripBudgetAlert": "התראת תקציב טיול ב-{{group}}"
         },
         "addedExpense": "הוסיף הוצאה",
@@ -1231,6 +1232,17 @@
         "categoryMessages": "הודעות צ'אט",
         "categoryFriends": "בקשות חברות",
         "categoryGroups": "קבוצות",
+        "categoryReminders": "תזכורות יתרה",
+        "quietHoursTitle": "שעות שקט",
+        "quietHoursEnable": "שעות שקט להתראות",
+        "quietHoursSummary": "ללא התראות בין {{start}}:00 ל-{{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "עד {{count}} התראות push ביום.",
+        "webFallback": {
+            "default": "פעילות חדשה ב-KupaPay",
+            "expense_added": "הוצאה חדשה בקבוצה",
+            "settlement_added": "מישהו הסדיר איתך חוב",
+            "unsettled_balance_nudge": "תזכורת: יש יתרה פתוחה לסגירה"
+        },
         "systemDisabled": "ההתראות כבויות עבור האפליקציה",
         "openSettings": "פתח הגדרות",
         "systemDisabledHint": "כדי לעדכן הגדרות אלו, יש להפעיל תחילה התראות בהגדרות המכשיר.",

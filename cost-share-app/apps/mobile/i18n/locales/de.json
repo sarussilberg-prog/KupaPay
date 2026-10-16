@@ -986,6 +986,7 @@
             "noteChangedBy": "Notiz von {{name}} geändert · {{group}}",
             "friendRequestRejectedByThem": "{{name}} hat deine Freundschaftsanfrage abgelehnt",
             "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet",
+            "unsettledBalanceNudge": "Du schuldest {{name}} noch in {{group}}",
             "tripBudgetAlert": "Reisebudget-Hinweis in {{group}}"
         },
         "addedExpense": "hat eine Ausgabe hinzugefügt",
@@ -1229,6 +1230,17 @@
         "categoryMessages": "Gruppenchat",
         "categoryFriends": "Freundschaftsanfragen",
         "categoryGroups": "Gruppen",
+        "categoryReminders": "Saldo-Erinnerungen",
+        "quietHoursTitle": "Ruhezeiten",
+        "quietHoursEnable": "Ruhezeiten einhalten",
+        "quietHoursSummary": "Keine Pushs zwischen {{start}}:00 und {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "Maximal {{count}} Push-Benachrichtigungen pro Tag.",
+        "webFallback": {
+            "default": "Neue Aktivität in KupaPay",
+            "expense_added": "Neue Ausgabe in deiner Gruppe",
+            "settlement_added": "Jemand hat mit dir verrechnet",
+            "unsettled_balance_nudge": "Erinnerung: offener Saldo"
+        },
         "systemDisabled": "Benachrichtigungen sind für diese App ausgeschaltet",
         "openSettings": "Einstellungen öffnen",
         "systemDisabledHint": "Um diese Einstellungen zu ändern, aktiviere zuerst die Benachrichtigungen in den Geräteeinstellungen.",

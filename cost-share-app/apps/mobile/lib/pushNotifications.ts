@@ -3,7 +3,6 @@ import * as Notifications from 'expo-notifications';
 import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 
-// Foreground display: show a banner unless the caller suppresses it.
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowBanner: true,
@@ -23,20 +22,35 @@ export async function ensureAndroidChannel(): Promise<void> {
 }
 
 export async function getPermissionStatus(): Promise<Notifications.PermissionStatus> {
+    if (Platform.OS === 'web') {
+        if (typeof Notification === 'undefined') return Notifications.PermissionStatus.DENIED;
+        if (Notification.permission === 'granted') return Notifications.PermissionStatus.GRANTED;
+        if (Notification.permission === 'denied') return Notifications.PermissionStatus.DENIED;
+        return Notifications.PermissionStatus.UNDETERMINED;
+    }
     const { status } = await Notifications.getPermissionsAsync();
     return status;
 }
 
 export async function requestPermission(): Promise<boolean> {
+    if (Platform.OS === 'web') {
+        if (typeof Notification === 'undefined') return false;
+        const result = await Notification.requestPermission();
+        return result === 'granted';
+    }
     const { status } = await Notifications.requestPermissionsAsync();
     return status === 'granted';
 }
 
-// Returns the Expo push token, or null if permission is missing / fetch fails.
 export async function fetchExpoPushToken(): Promise<string | null> {
     const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
     try {
+        if (Platform.OS === 'web') {
+            if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+                return null;
+            }
+        }
         await ensureAndroidChannel();
         const { data } = await Notifications.getExpoPushTokenAsync(
             projectId ? { projectId } : undefined,
@@ -48,9 +62,10 @@ export async function fetchExpoPushToken(): Promise<string | null> {
     }
 }
 
-export function currentPlatform(): 'ios' | 'android' | null {
+export function currentPlatform(): 'ios' | 'android' | 'web' | null {
     if (Platform.OS === 'ios') return 'ios';
     if (Platform.OS === 'android') return 'android';
+    if (Platform.OS === 'web') return 'web';
     return null;
 }
 
@@ -59,6 +74,7 @@ export function appVersion(): string | undefined {
 }
 
 export async function setBadgeCount(count: number): Promise<void> {
+    if (Platform.OS === 'web') return;
     try {
         await Notifications.setBadgeCountAsync(Math.max(0, count));
     } catch {

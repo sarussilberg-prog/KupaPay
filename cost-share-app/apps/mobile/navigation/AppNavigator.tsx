@@ -24,6 +24,8 @@ import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
 import { usePushNotificationListeners } from '../hooks/usePushNotificationListeners';
+import { useWebInAppPushFallback } from '../hooks/useWebInAppPushFallback';
+import { useAuthUserId } from '../hooks/useAuthUserId';
 import { prefetchGroupsList } from '../hooks/queries/prefetchGroupsList';
 import { prefetchProfileWarmup } from '../hooks/queries/prefetchProfileWarmup';
 import { prefetchAddExpensePrerequisitesForAllGroups } from '../hooks/queries/prefetchAddExpenseForAllGroups';
@@ -349,6 +351,8 @@ export function AppNavigator() {
     useInviteRedemption();
     usePendingNavigationFlush();
     usePushNotificationListeners();
+    const userId = useAuthUserId();
+    useWebInAppPushFallback(userId);
 
     useEffect(() => {
         prefetchGroupsList();

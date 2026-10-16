@@ -1028,6 +1028,7 @@
             "noteChangedBy": "عدّل {{name}} الملاحظة · {{group}}",
             "friendRequestRejectedByThem": "رفض {{name}} طلب صداقتك",
             "settleReminder": "أرسل لك {{name}} تذكيرًا بتسوية الحساب في {{group}}",
+            "unsettledBalanceNudge": "ما زلت مدينًا لـ {{name}} في {{group}}",
             "tripBudgetAlert": "تنبيه ميزانية الرحلة في {{group}}"
         },
         "addedExpense": "أضاف مصروفًا",
@@ -1289,6 +1290,17 @@
         "categoryMessages": "دردشة المجموعة",
         "categoryFriends": "طلبات الصداقة",
         "categoryGroups": "المجموعات",
+        "categoryReminders": "تذكيرات الرصيد",
+        "quietHoursTitle": "ساعات الهدوء",
+        "quietHoursEnable": "احترام ساعات الهدوء",
+        "quietHoursSummary": "لا إشعارات بين {{start}}:00 و{{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "بحد أقصى {{count}} إشعار push يوميًا.",
+        "webFallback": {
+            "default": "نشاط جديد في KupaPay",
+            "expense_added": "مصروف جديد في مجموعتك",
+            "settlement_added": "قام شخص بتسوية حساب معك",
+            "unsettled_balance_nudge": "تذكير: رصيد مفتوح للتسوية"
+        },
         "systemDisabled": "الإشعارات متوقفة لهذا التطبيق",
         "openSettings": "فتح الإعدادات",
         "systemDisabledHint": "لتعديل هذه الإعدادات، فعّل الإشعارات أولًا من إعدادات جهازك.",

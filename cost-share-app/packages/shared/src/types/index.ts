@@ -280,6 +280,7 @@ export type ActivityEventKind =
     | 'group_deleted'
     | 'group_note_changed'
     | 'settle_up_reminder'
+    | 'unsettled_balance_nudge'
     | 'trip_budget_alert';
 
 /**

@@ -27,6 +27,10 @@ describe('notificationDataToPendingNavigation', () => {
         expect(notificationDataToPendingNavigation({ kind: 'group_removed', groupId: 'g9', refId: 'r' }))
             .toEqual({ target: 'groupsList' });
     });
+    it('routes unsettled balance nudge to settle up', () => {
+        expect(notificationDataToPendingNavigation({ kind: 'unsettled_balance_nudge', groupId: 'g7', refId: 'r' }))
+            .toEqual({ target: 'settleUpList', groupId: 'g7' });
+    });
     it('routes pro trial reminder to subscription management', () => {
         expect(notificationDataToPendingNavigation({ kind: 'pro_trial_reminder' }))
             .toEqual({ target: 'manageSubscription' });
