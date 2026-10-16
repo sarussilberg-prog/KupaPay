@@ -50,6 +50,7 @@ BEGIN
         WHERE n.nspname = 'public'
           AND c.relkind = 'r'
           AND has_table_privilege('anon', c.oid, 'SELECT')
+          AND c.relname <> 'legal_documents'
         ORDER BY 1
     LOOP
         BEGIN
