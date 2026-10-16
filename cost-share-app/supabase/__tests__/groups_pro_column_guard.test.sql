@@ -16,7 +16,6 @@ BEGIN
         VALUES (v_group, v_member, TRUE);
 
     PERFORM public.test_set_authenticated(v_member);
-    SET LOCAL ROLE authenticated;
 
     BEGIN
         UPDATE public.groups
@@ -29,8 +28,6 @@ BEGIN
             RAISE;
         END IF;
     END;
-
-    RESET ROLE;
 END;
 $outer$;
 
