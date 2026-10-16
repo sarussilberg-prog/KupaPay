@@ -115,7 +115,7 @@ netBalance = totalPaid - totalOwed + totalSettledReceived - totalSettledPaid
 | [PENDING REFACTOR]: Lock down `SECURITY DEFINER` functions — `REVOKE EXECUTE FROM PUBLIC` / `GRANT TO authenticated` | KI-006. 17 functions on prod are anon-callable per `get_advisors(security)`. Helpers used in RLS (`is_group_member`, `is_group_creator`, `is_app_admin`, `is_caller_active`) must keep policy access — test in dev branch first. |
 | [PENDING REFACTOR]: Wrap `auth.uid()` in `(SELECT auth.uid())` across ~12 RLS policies | Performance at scale only. Deferred — see TECHNICAL_DEBT.md §4. |
 | [PENDING REFACTOR]: Add `tsc --noEmit` job to `.github/workflows/ci.yml` | KI-015. Sequenced after fixing KI-004 (9 outstanding type errors). |
-| [PENDING REFACTOR]: Tests for `groups.service.ts`, `messages.service.ts`, `AuthenticatedAppGate`, `OnboardingPreAuthFlow`, `OnboardingCreateGroupScreen` | KI-010 + KI-018. High-blast-radius modules without coverage. |
+| [PENDING REFACTOR]: Tests for `groups.service.ts`, `messages.service.ts`, `OnboardingPreAuthFlow`, `OnboardingCreateGroupScreen` | KI-010 (partial) + KI-018. High-blast-radius modules without coverage. |
 
 **Bugs and launch gaps:** [KNOWN_ISSUES.md](./KNOWN_ISSUES.md). **Deferred features:** [TECHNICAL_DEBT.md](./TECHNICAL_DEBT.md).
 
