@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
-# Vercel Ignored Build Step (ignoreCommand): exit 0 = skip build, exit 1 = build.
-# Branch routing: kupa-*-dev projects → dev only; kupa-* prod → main only.
+# Vercel Ignored Build Step — SINGLE SOURCE OF TRUTH for skip vs build.
+#
+# Dashboard: Project Settings → Git → "Ignored Build Step" must delegate here
+# (same command as vercel.json `ignoreCommand`), e.g. for apps/web root:
+#   bash scripts/vercel-should-build.sh web
+# Do not duplicate branch/path logic inline in Vercel UI — only this script decides.
+#
+# Semantics: exit 0 = skip build, exit 1 = build.
+# Branch routing: listed dev project IDs → dev ref only; all other projects → main only.
 # Path routing: web vs mobile (arg or cwd) — skip when app + shared workspace unchanged.
 set -euo pipefail
 
