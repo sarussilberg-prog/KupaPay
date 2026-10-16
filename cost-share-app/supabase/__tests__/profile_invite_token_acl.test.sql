@@ -4,8 +4,8 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
-    v_alice CONSTANT UUID := '00000000-0000-0000-0000-00000000acl001';
-    v_bob   CONSTANT UUID := '00000000-0000-0000-0000-00000000acl002';
+    v_alice CONSTANT UUID := '00000000-0000-0000-0000-000000a01001';
+    v_bob   CONSTANT UUID := '00000000-0000-0000-0000-000000a01002';
     v_tok   TEXT;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
@@ -16,13 +16,24 @@ BEGIN
         (v_alice, 'acl-alice@test.local', 'Alice', 'ILS', 'he', TRUE, 'aliceSecret01'),
         (v_bob,   'acl-bob@test.local',   'Bob',   'ILS', 'he', TRUE, 'bobSecret0123');
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    INSERT INTO public.groups (id, name, default_currency, is_active, created_by, invite_token)
+        VALUES ('00000000-0000-0000-0000-000000a01010', 'ACL Group', 'ILS', TRUE, v_alice, 'tt_acl_grp');
+    INSERT INTO public.group_members (group_id, user_id, is_active)
+        VALUES ('00000000-0000-0000-0000-000000a01010', v_alice, TRUE),
+               ('00000000-0000-0000-0000-000000a01010', v_bob, TRUE);
 
-    SELECT invite_token INTO v_tok FROM public.profiles WHERE id = v_bob;
-    IF v_tok IS NOT NULL THEN
-        RAISE EXCEPTION 'Bob invite_token should be hidden from column ACL (got %)', v_tok;
-    END IF;
+    RESET ROLE;
+    SET LOCAL session_replication_role = origin;
+    PERFORM public.test_set_authenticated(v_alice);
+
+    -- invite_token is not in authenticated column GRANTs; peer reads must fail closed (42501).
+    BEGIN
+        SELECT invite_token INTO v_tok FROM public.profiles WHERE id = v_bob;
+        RAISE EXCEPTION 'Bob invite_token SELECT should be denied by column ACL (got %)', v_tok;
+    EXCEPTION
+        WHEN insufficient_privilege THEN
+            NULL;
+    END;
 
     SELECT public.get_my_invite_token() INTO v_tok;
     IF v_tok <> 'aliceSecret01' THEN

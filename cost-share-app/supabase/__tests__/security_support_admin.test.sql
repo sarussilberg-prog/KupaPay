@@ -4,8 +4,8 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
-    v_admin CONSTANT UUID := '00000000-0000-0000-0000-00000000sec001';
-    v_alice CONSTANT UUID := '00000000-0000-0000-0000-00000000sec002';
+    v_admin CONSTANT UUID := '00000000-0000-0000-0000-0000000a0101';
+    v_alice CONSTANT UUID := '00000000-0000-0000-0000-0000000a0102';
     v_msg_id UUID;
     v_caught BOOLEAN;
 BEGIN
@@ -24,7 +24,7 @@ BEGIN
         RETURNING id INTO v_msg_id;
 
     -- Non-admin cannot list
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
     v_caught := FALSE;
     BEGIN
         PERFORM public.admin_list_support_messages();
@@ -47,7 +47,7 @@ BEGIN
     END IF;
 
     -- Admin can list and close
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     IF (SELECT COUNT(*) FROM public.admin_list_support_messages()) < 1 THEN
         RAISE EXCEPTION 'Admin should list support messages';
     END IF;
