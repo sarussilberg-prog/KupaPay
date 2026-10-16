@@ -16,7 +16,7 @@ const env: WebhookEnv = {
     REVENUECAT_WEBHOOK_SECRET: 'secret',
 };
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+const TEST_USER_ID = '00000000-0000-4000-8000-000000000001';
 
 function mockRpcFetch(
     handler: (body: Record<string, unknown>) => { status: number; json: Record<string, unknown> },
