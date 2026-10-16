@@ -9,10 +9,25 @@ import { jsonResponse, preflight } from './cors.ts';
 export interface ProxyEnv {
     SUPABASE_URL: string;
     SUPABASE_ANON_KEY: string;
+    /** Regional Sentry API host, e.g. https://de.sentry.io for EU orgs. */
+    SENTRY_API_BASE_URL: string;
     SENTRY_API_TOKEN: string;
     SENTRY_ORG: string;
     SENTRY_PROJECT_DEV: string;
     SENTRY_PROJECT_PROD: string;
+}
+
+/** EU org kupay-hb lives on de.sentry.io — sentry.io does not return EU project data. */
+export function normalizeSentryApiBase(raw: string | undefined): string {
+    const trimmed = raw?.trim();
+    if (!trimmed) return 'https://de.sentry.io';
+    return trimmed.replace(/\/$/, '');
+}
+
+export function buildSentryApiUrl(env: ProxyEnv, path: string): string {
+    const base = normalizeSentryApiBase(env.SENTRY_API_BASE_URL);
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return `${base}/api/0${suffix}`;
 }
 
 export type FetchFn = typeof fetch;
@@ -71,10 +86,30 @@ interface ActionIssueDetail {
 }
 type ProxyAction = ActionListIssues | ActionIssueEvents | ActionIssueDetail;
 
-async function isCallerAdmin(client: SupabaseClient): Promise<boolean> {
+type AdminVerdict =
+    | { ok: true; isAdmin: boolean }
+    | { ok: false; detail: string };
+
+async function verifyCallerAdmin(client: SupabaseClient): Promise<AdminVerdict> {
     const { data, error } = await client.rpc('is_app_admin');
-    if (error) return false;
-    return data === true;
+    if (error) return { ok: false, detail: error.message };
+    return { ok: true, isAdmin: data === true };
+}
+
+function missingSentryCoreConfig(env: ProxyEnv): string[] {
+    const missing: string[] = [];
+    if (!env.SENTRY_API_TOKEN.trim()) missing.push('SENTRY_API_TOKEN');
+    if (!env.SENTRY_ORG.trim()) missing.push('SENTRY_ORG');
+    return missing;
+}
+
+function missingSentryConfig(env: ProxyEnv, environment: 'dev' | 'prod'): string[] {
+    const missing = missingSentryCoreConfig(env);
+    const project = environment === 'prod' ? env.SENTRY_PROJECT_PROD : env.SENTRY_PROJECT_DEV;
+    if (!project.trim()) {
+        missing.push(environment === 'prod' ? 'SENTRY_PROJECT_PROD' : 'SENTRY_PROJECT_DEV');
+    }
+    return missing;
 }
 
 function makeAuthedClient(env: ProxyEnv, jwt: string): SupabaseClient {
@@ -163,7 +198,14 @@ export async function handleRequest(
     }
 
     const client = makeAuthedClient(env, jwt);
-    if (!(await isCallerAdmin(client))) {
+    const adminVerdict = await verifyCallerAdmin(client);
+    if (!adminVerdict.ok) {
+        return jsonResponse(
+            { ok: false, error: 'admin_check_failed', detail: adminVerdict.detail },
+            503,
+        );
+    }
+    if (!adminVerdict.isAdmin) {
         return jsonResponse({ ok: false, error: 'forbidden' }, 403);
     }
 
@@ -230,6 +272,13 @@ async function proxyListIssues(
     if (body.environment !== 'dev' && body.environment !== 'prod') {
         return jsonResponse({ ok: false, error: 'invalid_environment' }, 400);
     }
+    const configGaps = missingSentryConfig(env, body.environment);
+    if (configGaps.length > 0) {
+        return jsonResponse(
+            { ok: false, error: 'sentry_not_configured', missing: configGaps },
+            503,
+        );
+    }
     const project = projectSlug(env, body.environment);
     const statusFilter = body.status === 'all' ? '' : 'is:unresolved';
     const range = body.timeRange ?? '24h';
@@ -241,7 +290,7 @@ async function proxyListIssues(
         limit: String(limit),
         sort: 'date',
     });
-    const url = `https://sentry.io/api/0/projects/${env.SENTRY_ORG}/${project}/issues/?${params.toString()}`;
+    const url = `${buildSentryApiUrl(env, `/projects/${env.SENTRY_ORG}/${project}/issues/`)}?${params.toString()}`;
 
     const result = await callSentry(url, env, fetchFn);
     if (!result.ok) return result.response;
@@ -335,7 +384,14 @@ async function proxyIssueEvents(
     if (!body.issueId || typeof body.issueId !== 'string') {
         return jsonResponse({ ok: false, error: 'invalid_issue_id' }, 400);
     }
-    const url = `https://sentry.io/api/0/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/events/?limit=20`;
+    const configGaps = missingSentryCoreConfig(env);
+    if (configGaps.length > 0) {
+        return jsonResponse(
+            { ok: false, error: 'sentry_not_configured', missing: configGaps },
+            503,
+        );
+    }
+    const url = `${buildSentryApiUrl(env, `/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/events/`)}?limit=20`;
     const result = await callSentry(url, env, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryEventRaw[];
@@ -389,7 +445,17 @@ async function proxyIssueDetail(
     if (!body.issueId || typeof body.issueId !== 'string') {
         return jsonResponse({ ok: false, error: 'invalid_issue_id' }, 400);
     }
-    const url = `https://sentry.io/api/0/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/`;
+    const configGaps = missingSentryCoreConfig(env);
+    if (configGaps.length > 0) {
+        return jsonResponse(
+            { ok: false, error: 'sentry_not_configured', missing: configGaps },
+            503,
+        );
+    }
+    const url = buildSentryApiUrl(
+        env,
+        `/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/`,
+    );
     const result = await callSentry(url, env, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryIssueDetailRaw;

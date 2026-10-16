@@ -85,5 +85,24 @@ describe('AdminErrorsScreen', () => {
         await waitFor(() => expect(getByTestId('admin-errors-failed')).toBeTruthy(), {
             timeout: 5000,
         });
+        expect(getByTestId('admin-errors-failed-reason')).toBeTruthy();
+    });
+
+    it('shows sentry_not_configured reason from structured proxy body', async () => {
+        mockInvoke.mockResolvedValue({
+            data: {
+                ok: false,
+                error: 'sentry_not_configured',
+                missing: ['SENTRY_API_TOKEN'],
+            },
+            error: null,
+        });
+        const { getByTestId } = renderWithQuery(<AdminErrorsScreen />);
+        await waitFor(() => expect(getByTestId('admin-errors-failed-reason')).toBeTruthy(), {
+            timeout: 5000,
+        });
+        expect(String(getByTestId('admin-errors-failed-reason').props.children)).toContain(
+            'SENTRY_API_TOKEN',
+        );
     });
 });
