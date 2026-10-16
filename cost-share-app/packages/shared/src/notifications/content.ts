@@ -28,6 +28,8 @@ export interface NotificationPreferences {
     emailEnabled: boolean;
     /** Welcome, activation, and win-back email (#404). */
     lifecycleEmailEnabled: boolean;
+    weeklyDigestPush: boolean;
+    weeklyDigestEmail: boolean;
 }
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
@@ -46,6 +48,8 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
     unsettledNudgeAfterDays: 7,
     emailEnabled: true,
     lifecycleEmailEnabled: true,
+    weeklyDigestPush: true,
+    weeklyDigestEmail: true,
 };
 
 export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {

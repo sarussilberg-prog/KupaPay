@@ -17,6 +17,8 @@ interface PrefsRow {
     unsettled_nudge_after_days: number;
     email_enabled: boolean;
     lifecycle_email_enabled: boolean;
+    weekly_digest_push: boolean;
+    weekly_digest_email: boolean;
 }
 
 function rowToPrefs(row: PrefsRow): NotificationPreferences {
@@ -38,6 +40,8 @@ function rowToPrefs(row: PrefsRow): NotificationPreferences {
         emailEnabled: row.email_enabled ?? DEFAULT_NOTIFICATION_PREFERENCES.emailEnabled,
         lifecycleEmailEnabled: row.lifecycle_email_enabled
             ?? DEFAULT_NOTIFICATION_PREFERENCES.lifecycleEmailEnabled,
+        weeklyDigestPush: row.weekly_digest_push ?? DEFAULT_NOTIFICATION_PREFERENCES.weeklyDigestPush,
+        weeklyDigestEmail: row.weekly_digest_email ?? DEFAULT_NOTIFICATION_PREFERENCES.weeklyDigestEmail,
     };
 }
 
@@ -54,7 +58,8 @@ export async function fetchNotificationPreferences(userId: string): Promise<Noti
         .from('notification_preferences')
         .select(`push_enabled, expenses_push, settlements_push, messages_push, friends_push, groups_push,
             reminders_push, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, timezone,
-            daily_push_cap, unsettled_nudge_after_days, email_enabled, lifecycle_email_enabled`)
+            daily_push_cap, unsettled_nudge_after_days, email_enabled, lifecycle_email_enabled,
+            weekly_digest_push, weekly_digest_email`)
         .eq('user_id', userId)
         .maybeSingle();
     if (error || !data) return { ...DEFAULT_NOTIFICATION_PREFERENCES, timezone: deviceTimezone() };
@@ -79,6 +84,8 @@ export async function saveNotificationPreferences(prefs: NotificationPreferences
             unsettled_nudge_after_days: prefs.unsettledNudgeAfterDays,
             email_enabled: prefs.emailEnabled,
             lifecycle_email_enabled: prefs.lifecycleEmailEnabled,
+            weekly_digest_push: prefs.weeklyDigestPush,
+            weekly_digest_email: prefs.weeklyDigestEmail,
         },
     });
     if (error) throw error;
