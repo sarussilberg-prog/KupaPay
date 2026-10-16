@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     }
 
     const e = env();
-    if (!e.SUPABASE_URL || !e.SUPABASE_ANON_KEY) {
+    if (!e.SUPABASE_URL || !e.SUPABASE_ANON_KEY || !e.SUPABASE_SERVICE_ROLE_KEY) {
         return jsonResponse({ ok: false, error: 'misconfigured' }, 500);
     }
 
