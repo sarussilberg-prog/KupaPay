@@ -75,7 +75,7 @@ export function SummaryFooter({
                 <TouchableOpacity
                     onPress={onOpenSettleUp}
                     activeOpacity={0.7}
-                    testID="summary-settle-pill"
+                    testID="group-detail-settle-up"
                     style={[
                         styles.settlePill,
                         { backgroundColor: colors.primaryExtraLight },

@@ -41,6 +41,12 @@ describe('Apple Team ID — single source of truth', () => {
     expect(appJson.expo.ios.appleTeamId).toBe(CANONICAL_TEAM_ID);
   });
 
+  it('app.json enables Hermes on iOS and Android', () => {
+    const appJson = JSON.parse(read(resolve(MOBILE_DIR, 'app.json')));
+    expect(appJson.expo.ios.jsEngine).toBe('hermes');
+    expect(appJson.expo.android.jsEngine).toBe('hermes');
+  });
+
   it('the legacy team id appears in no scanned source', () => {
     // Scoped on purpose to the files/dirs that could carry a REAL team-id usage.
     // Do NOT widen this to the whole monorepo: the design docs (docs/superpowers/**,

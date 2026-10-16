@@ -11,6 +11,7 @@ import {
     Pressable,
     Platform,
     ScrollView,
+    useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
@@ -67,6 +68,8 @@ function GroupCardBase({
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
+    const { width: windowWidth } = useWindowDimensions();
+    const stackBalanceChip = windowWidth < 360;
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
     const isArchived = group.isArchivedByMe || group.isAutoArchived;
@@ -184,8 +187,18 @@ function GroupCardBase({
     }, [navigation, group.id]);
 
     const cardClass = isArchived
-        ? 'bg-slate-50 rounded-2xl px-4 py-3 mb-3 border border-dashed border-gray-300'
-        : 'bg-white rounded-2xl px-4 py-3 mb-3 border border-gray-100';
+        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-2xl px-4 py-3 mb-3 border border-dashed border-gray-300 dark:border-gray-600'
+        : 'bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 mb-3 border border-gray-100 dark:border-gray-700';
+
+    const balanceChipNode = (
+        <BalanceChip
+            rollup={rollup}
+            defaultCurrency={group.defaultCurrency}
+            groupHasOpenDebts={groupHasOpenDebts}
+            balanceUnknown={balanceUnknown}
+            onPressExtraCurrencies={openBalances}
+        />
+    );
 
     const cardShadow =
         isArchived || Platform.OS === 'web'
@@ -220,18 +233,17 @@ function GroupCardBase({
                         size="sm"
                     />
 
-                    <View className="flex-1 self-stretch" style={{ minWidth: 0, gap: 6 }}>
+                    <View style={{ flex: 1, minWidth: 0, alignSelf: 'stretch', gap: 6 }}>
                         <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
                             <View style={{ flexShrink: 1, minWidth: 0 }}>
                                 <HighlightedText
                                     className={
                                         isArchived
-                                            ? 'text-[17px] font-semibold text-gray-600 leading-5'
-                                            : 'text-[17px] font-semibold text-gray-900 leading-5'
+                                            ? 'text-[17px] font-semibold text-gray-600 dark:text-gray-300 leading-5'
+                                            : 'text-[17px] font-semibold text-gray-900 dark:text-gray-50 leading-5'
                                     }
                                     text={group.name}
                                     query={searchQuery}
-                                    numberOfLines={1}
                                 />
                             </View>
                             {!isArchived && (unreadCount ?? 0) > 0 && (
@@ -263,15 +275,19 @@ function GroupCardBase({
                                 tone="default"
                             />
                         )}
+                        {stackBalanceChip ? (
+                            <View
+                                style={{
+                                    alignSelf: isRtl ? 'flex-start' : 'flex-end',
+                                    marginTop: 2,
+                                }}
+                            >
+                                {balanceChipNode}
+                            </View>
+                        ) : null}
                     </View>
 
-                    <BalanceChip
-                        rollup={rollup}
-                        defaultCurrency={group.defaultCurrency}
-                        groupHasOpenDebts={groupHasOpenDebts}
-                        balanceUnknown={balanceUnknown}
-                        onPressExtraCurrencies={openBalances}
-                    />
+                    {!stackBalanceChip ? balanceChipNode : null}
                 </ListRow>
 
                 <TouchableOpacity

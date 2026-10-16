@@ -9,6 +9,18 @@ name: Deploy production — Supabase migrations
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Plan only (drift check + db push --dry-run, no apply)
+        type: boolean
+        default: false
+      prod_migration_repair:
+        description: Optional prod migration repair (see docs/PROD_MIGRATION_REPAIR.md)
+        type: choice
+        options:
+          - none
+          - probe_only
+        default: none
 
 concurrency:
   group: deploy-production-supabase
@@ -76,7 +88,19 @@ jobs:
         with:
           version: latest
 
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Plan migrations (dry-run)
+        if: github.event.inputs.dry_run == true
+        env:
+          SUPABASE_ENV: production
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+          DRY_RUN: '1'
+        run: bash scripts/supabase-ci-db-push.sh
+
       - name: Apply pending migrations
+        if: github.event.inputs.dry_run != true
         env:
           SUPABASE_ENV: production
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}

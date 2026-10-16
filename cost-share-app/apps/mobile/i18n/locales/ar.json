@@ -245,6 +245,8 @@
     },
     "groups": {
         "title": "المجموعات",
+        "listTitle": "مجموعاتي",
+        "newGroupCta": "مجموعة جديدة",
         "createGroup": "إنشاء مجموعة",
         "editGroup": "تعديل المجموعة",
         "favorite": {
@@ -411,6 +413,9 @@
             "showMore_other": "عرض المزيد ({{count}})",
             "showLess": "عرض أقل"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى"
+        },
         "hero": {
             "spentTogether": "المصروف معًا",
             "leftToSettle": "المتبقي للتسوية"
@@ -423,8 +428,8 @@
             "youOweCaption": "أنت مدين",
             "owedToYou": "مستحق لك {{amount}}",
             "owedToYouCaption": "مستحق لك",
-            "moreCurrencies": "{{plusCount}} عملات",
-            "moreCurrencies_one": "{{plusCount}} عملة",
+            "moreCurrencies": "{{count}} عملات",
+            "moreCurrencies_one": "{{count}} عملة",
             "updatedAgo": "تم التحديث {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
@@ -907,7 +912,19 @@
             },
             "loading": "جارٍ تحميل الأخطاء…",
             "empty": "لا توجد أخطاء في هذه الفترة",
-            "failed": "تعذّر التحميل. اسحب للأسفل لإعادة المحاولة.",
+            "failed": "تعذّر تحميل الأخطاء",
+            "failedHint": "اسحب للأسفل لإعادة المحاولة.",
+            "failedReasons": {
+                "forbidden": "الخادم لا يعرفك كمسؤول للتطبيق.",
+                "admin_check_failed": "تعذّر التحقق من صلاحيات المسؤول: {{detail}}",
+                "sentry_not_configured": "أسرار Sentry مفقودة في admin-sentry-proxy: {{missing}}",
+                "sentry_client_error": "رفض Sentry الطلب. تحقق من SENTRY_API_TOKEN وSENTRY_ORG وأسماء المشاريع (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "خطأ في خادم Sentry. حاول مرة أخرى بعد قليل.",
+                "sentry_unreachable": "تعذّر الوصول إلى Sentry: {{detail}}",
+                "invoke_failed": "فشل استدعاء Edge Function: {{detail}}",
+                "missing_authorization": "انتهت الجلسة — سجّل الدخول مجدداً وافتح بوابة الإدارة.",
+                "unknown": "خطأ غير معروف. اسحب لإعادة المحاولة أو راجع سجلات admin-sentry-proxy."
+            },
             "occurrences": "{{count}} حالة",
             "occurrences_zero": "لا توجد حالات",
             "occurrences_one": "{{count}} حالة",

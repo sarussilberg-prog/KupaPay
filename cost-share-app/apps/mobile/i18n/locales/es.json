@@ -245,6 +245,8 @@
     },
     "groups": {
         "title": "Grupos",
+        "listTitle": "Mis grupos",
+        "newGroupCta": "Grupo nuevo",
         "createGroup": "Crear grupo",
         "editGroup": "Editar grupo",
         "favorite": {
@@ -399,6 +401,9 @@
             "showMore": "Mostrar {{count}} más",
             "showLess": "Mostrar menos"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} en otras monedas"
+        },
         "hero": {
             "spentTogether": "Gastado en conjunto",
             "leftToSettle": "Pendiente de saldar"
@@ -411,8 +416,8 @@
             "youOweCaption": "Debes",
             "owedToYou": "Te deben {{amount}}",
             "owedToYouCaption": "Te deben",
-            "moreCurrencies": "{{plusCount}} monedas",
-            "moreCurrencies_one": "{{plusCount}} moneda",
+            "moreCurrencies": "{{count}} monedas",
+            "moreCurrencies_one": "{{count}} moneda",
             "updatedAgo": "Actualizado {{when}}",
             "balanceUnavailable": "Saldo no disponible sin conexión"
         },
@@ -876,7 +881,19 @@
             },
             "loading": "Cargando errores…",
             "empty": "No hay errores en este periodo",
-            "failed": "No se pudo cargar. Desliza hacia abajo para reintentar.",
+            "failed": "No se pudieron cargar los errores",
+            "failedHint": "Desliza hacia abajo para reintentar.",
+            "failedReasons": {
+                "forbidden": "El servidor no le reconoce como administrador de la app.",
+                "admin_check_failed": "No se pudo verificar el estado de administrador: {{detail}}",
+                "sentry_not_configured": "Faltan secretos de Sentry en admin-sentry-proxy: {{missing}}",
+                "sentry_client_error": "Sentry rechazó la solicitud. Revise SENTRY_API_TOKEN, SENTRY_ORG y los slugs del proyecto (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "Error del servidor de Sentry. Inténtelo de nuevo en un momento.",
+                "sentry_unreachable": "No se pudo contactar con Sentry: {{detail}}",
+                "invoke_failed": "Falló la llamada a la Edge Function: {{detail}}",
+                "missing_authorization": "Sesión caducada — inicie sesión de nuevo y abra el portal de administración.",
+                "unknown": "Error desconocido. Desliza para reintentar o revise los logs de admin-sentry-proxy."
+            },
             "occurrences": "{{count}} ocurrencias",
             "occurrences_one": "{{count}} ocurrencia",
             "affectedUsers": "{{count}} usuarios afectados",
