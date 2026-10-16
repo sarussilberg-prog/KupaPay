@@ -5,7 +5,8 @@ import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({
-        t: (key: string) => key,
+        t: (key: string, opts?: { trialDays?: number }) =>
+            opts?.trialDays != null ? `${key}:${opts.trialDays}` : key,
         i18n: { language: 'en' },
     }),
 }));
@@ -97,6 +98,26 @@ describe('ProPaywallContent offerings load', () => {
 
         expect(await findByText('₪12.90')).toBeTruthy();
         expect(getByText('₪69.90')).toBeTruthy();
+    });
+
+    it('shows 14-day free trial CTA for eligible yearly plan', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {
+                kupapay_pro_yearly: { status: 2 },
+            },
+        });
+
+        const { findByText } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
+        );
+
+        expect(await findByText('pro.paywall.tryFreeTrialCta:14')).toBeTruthy();
     });
 
     it('never shows EU withdrawal acknowledgement', async () => {
