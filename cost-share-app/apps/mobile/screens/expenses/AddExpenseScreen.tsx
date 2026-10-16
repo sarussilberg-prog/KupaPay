@@ -105,7 +105,9 @@ import {
     ExpenseSplitInput,
     isProPerkUnlocked,
     type RecurringFrequency,
+    type ReceiptDraft,
 } from '@cost-share/shared';
+import { ReceiptTextScanSheet } from '../../components/receipt/ReceiptTextScanSheet';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import {
@@ -195,6 +197,7 @@ export function AddExpenseScreen() {
         proStatusQuery.data?.hasPro === true,
         KUPAPAY_PRO_ENABLED,
     );
+    const receiptOcrUnlocked = recurringUnlocked;
 
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
@@ -224,6 +227,7 @@ export function AddExpenseScreen() {
     const [date, setDate] = useState<Date>(new Date());
     const [editorVisible, setEditorVisible] = useState(false);
     const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
+    const [receiptScanOpen, setReceiptScanOpen] = useState(false);
     const amountCurrencySymbol = useMemo(
         () => getDistinctCurrencySymbol(currency),
         [currency],
@@ -520,7 +524,27 @@ export function AddExpenseScreen() {
         );
     }, [selectedMemberIds, splitMode, unequalValues, parsedAmount]);
 
+    const applyReceiptDraft = useCallback((draft: ReceiptDraft) => {
+        if (draft.amount != null) setAmount(String(draft.amount));
+        if (draft.currency) setCurrency(draft.currency);
+        if (draft.merchant) setDescription(draft.merchant);
+        if (draft.expenseDate) {
+            const parsed = new Date(`${draft.expenseDate}T12:00:00`);
+            if (!Number.isNaN(parsed.getTime())) setDate(parsed);
+        }
+    }, []);
+
     const handleReceiptPress = useCallback(() => {
+        const openTextScan = () => {
+            if (!receiptOcrUnlocked && KUPAPAY_PRO_ENABLED) {
+                navigation.navigate('Paywall', {
+                    featureKey: 'receipt_ocr',
+                    groupId,
+                });
+                return;
+            }
+            setReceiptScanOpen(true);
+        };
         const takePhoto = async () => {
             const perm = await ImagePicker.requestCameraPermissionsAsync();
             if (!perm.granted) {
@@ -559,13 +583,14 @@ export function AddExpenseScreen() {
         };
         const hasReceipt = Boolean(localReceiptUri || (receiptUrl && !receiptRemoved));
         const buttons: Parameters<typeof platformAlert>[2] = [
+            { text: t('pro.receiptOcr.menuOption'), onPress: openTextScan },
             { text: t('expenses.takePhoto'), onPress: takePhoto },
             { text: t('expenses.chooseFromLibrary'), onPress: pickFromLibrary },
         ];
         if (hasReceipt) buttons.push({ text: t('expenses.removeReceipt'), onPress: removeReceipt, style: 'destructive' });
         buttons.push({ text: t('common.cancel'), style: 'cancel' });
         platformAlert(t('expenses.receipt'), undefined, buttons, { cancelable: true });
-    }, [t, localReceiptUri, receiptUrl, receiptRemoved]);
+    }, [t, localReceiptUri, receiptUrl, receiptRemoved, receiptOcrUnlocked, navigation, groupId]);
 
     const handleRecurringPress = useCallback(() => {
         if (isEditMode) return;
@@ -1155,6 +1180,12 @@ export function AddExpenseScreen() {
                     setDate(next);
                     setDatePickerVisible(false);
                 }}
+            />
+
+            <ReceiptTextScanSheet
+                visible={receiptScanOpen}
+                onClose={() => setReceiptScanOpen(false)}
+                onApply={applyReceiptDraft}
             />
 
             <RecurringFrequencySheet

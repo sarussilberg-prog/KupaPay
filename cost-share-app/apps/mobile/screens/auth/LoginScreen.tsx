@@ -65,9 +65,11 @@ export function LoginScreen() {
                 return;
             }
 
-            const persisted = await consumeDeactivationNoticePending();
-            if (!cancelled && persisted) {
-                showDeletedAccountNotice();
+            if (Platform.OS === 'web') {
+                const persisted = await consumeDeactivationNoticePending();
+                if (!cancelled && persisted) {
+                    showDeletedAccountNotice();
+                }
             }
         })();
 
@@ -220,7 +222,10 @@ export function LoginScreen() {
                 message={deletedNoticeMessage}
                 closeLabel={t('common.close')}
                 contactLabel={t('common.openMail')}
-                onClose={() => setDeletedNoticeVisible(false)}
+                onClose={() => {
+                    setDeletedNoticeVisible(false);
+                    void clearDeactivationNoticePending();
+                }}
                 onContact={() => {
                     void openSupportContact().catch(() => {
                         platformAlert(t('common.error'), supportEmail);

@@ -29,6 +29,7 @@ import { configureNativeGoogleSignIn } from './lib/googleSignInNative';
 import { supabase } from './lib/supabase';
 import { assertProfileActiveWithTimeout } from './lib/auth';
 import { signalDeactivatedAccount } from './lib/signalDeactivatedAccount';
+import { clearDeactivationNoticePending } from './lib/deactivationNoticeStorage';
 import { acceptSessionIfAllowed as acceptSessionIfAllowedImpl } from './lib/acceptSessionIfAllowed';
 import { queryClient } from './lib/queryClient';
 import { restoreClient } from './lib/persistQueryClient';
@@ -273,6 +274,11 @@ function App() {
           await acceptSession(hydratedSession, 'hydration');
         } else {
           store.setSession(null);
+          // Drop legacy native persisted flags so a cold start never shows the
+          // deleted-account dialog without a fresh sign-in attempt.
+          if (Platform.OS !== 'web') {
+            await clearDeactivationNoticePending();
+          }
         }
 
         setupSupabaseAuthAutoRefresh();

@@ -9,6 +9,7 @@ jest.mock('../../components/expenseV2/DatePickerPopup', () => ({
 }));
 jest.mock('../../lib/israeliPaymentLinks', () => ({
     openPaymentApp: jest.fn(async () => undefined),
+    isIsraeliPaymentAppAvailable: jest.fn(() => true),
 }));
 
 const members: GroupMemberLite[] = [
@@ -132,6 +133,12 @@ describe('SettleUpSheet (redesign)', () => {
         });
         fireEvent.press(getByTestId('settle-record-button'));
         expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('renders Bit and PayBox launcher tiles on native', () => {
+        const { getByTestId } = renderSheet();
+        expect(getByTestId('payment-app-tile-bit')).toBeTruthy();
+        expect(getByTestId('payment-app-tile-paybox')).toBeTruthy();
     });
 
     it('record button shows the simple Save label', () => {
