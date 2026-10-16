@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1"
+  }
+}

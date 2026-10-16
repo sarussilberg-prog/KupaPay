@@ -1,56 +1,37 @@
 /**
- * Native App Store / Play in-app review prompt — positive moments only.
+ * In-app review at positive moments — eligibility in @cost-share/shared.
+ * Native: calls StoreKit / Play In-App Review directly (no sentiment pre-prompt).
+ * Web: queues a gentle feedback sheet via AppReviewPromptHost.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import * as StoreReview from 'expo-store-review';
+import {
+    APP_REVIEW_STORAGE_KEYS,
+    shouldOfferAppReview,
+    type AppReviewTrigger,
+} from '@cost-share/shared';
 import { captureProductEvent } from './productAnalytics';
+import { useAppStore } from '../store';
 
-const LAST_PROMPT_KEY = '@kupapay/store_review_last_prompt_ms';
-const LAUNCH_COUNT_KEY = '@kupapay/store_review_launch_count';
-const SETTLE_COUNT_KEY = '@kupapay/store_review_settle_count';
-const EXPENSE_COUNT_KEY = '@kupapay/store_review_expense_count';
+export type StoreReviewTrigger = AppReviewTrigger;
 
-export const STORE_REVIEW_THROTTLE_MS = 90 * 24 * 60 * 60 * 1000;
+export {
+    shouldOfferAppReview,
+    shouldOfferAppReview as shouldOfferStoreReview,
+    APP_REVIEW_THROTTLE_MS,
+    APP_REVIEW_THROTTLE_MS as STORE_REVIEW_THROTTLE_MS,
+} from '@cost-share/shared';
 
-export type StoreReviewTrigger = 'first_settle_up' | 'third_expense';
+export type { AppReviewEligibilityState as StoreReviewState } from '@cost-share/shared';
 
-export interface StoreReviewState {
-    launchCount: number;
-    lastPromptMs: number | null;
-    settleCount: number;
-    expenseCount: number;
-    nowMs: number;
-    isAvailable: boolean;
-}
-
-export function shouldOfferStoreReview(
-    trigger: StoreReviewTrigger,
-    state: StoreReviewState,
-): boolean {
-    if (!state.isAvailable) return false;
-    if (state.launchCount < 2) return false;
-    if (
-        state.lastPromptMs != null &&
-        state.nowMs - state.lastPromptMs < STORE_REVIEW_THROTTLE_MS
-    ) {
-        return false;
-    }
-    if (trigger === 'first_settle_up') {
-        return state.settleCount === 1;
-    }
-    if (trigger === 'third_expense') {
-        return state.expenseCount === 3;
-    }
-    return false;
-}
-
-async function readState(nowMs: number, isAvailable: boolean): Promise<StoreReviewState> {
+async function readEligibilityState(nowMs: number) {
     const [launchRaw, lastRaw, settleRaw, expenseRaw] = await Promise.all([
-        AsyncStorage.getItem(LAUNCH_COUNT_KEY),
-        AsyncStorage.getItem(LAST_PROMPT_KEY),
-        AsyncStorage.getItem(SETTLE_COUNT_KEY),
-        AsyncStorage.getItem(EXPENSE_COUNT_KEY),
+        AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.launchCount),
+        AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.lastPromptMs),
+        AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.settleCount),
+        AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.expenseCount),
     ]);
     return {
         launchCount: launchRaw ? Number.parseInt(launchRaw, 10) || 0 : 0,
@@ -58,38 +39,64 @@ async function readState(nowMs: number, isAvailable: boolean): Promise<StoreRevi
         settleCount: settleRaw ? Number.parseInt(settleRaw, 10) || 0 : 0,
         expenseCount: expenseRaw ? Number.parseInt(expenseRaw, 10) || 0 : 0,
         nowMs,
-        isAvailable,
     };
 }
 
 /** Call once per cold start after the app is ready (not first launch). */
 export async function recordAppLaunchForStoreReview(): Promise<void> {
-    const raw = await AsyncStorage.getItem(LAUNCH_COUNT_KEY);
+    const raw = await AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.launchCount);
     const n = raw ? Number.parseInt(raw, 10) || 0 : 0;
-    await AsyncStorage.setItem(LAUNCH_COUNT_KEY, String(n + 1));
+    await AsyncStorage.setItem(APP_REVIEW_STORAGE_KEYS.launchCount, String(n + 1));
 }
 
 export async function incrementSettleCountForStoreReview(): Promise<number> {
-    const raw = await AsyncStorage.getItem(SETTLE_COUNT_KEY);
+    const raw = await AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.settleCount);
     const n = (raw ? Number.parseInt(raw, 10) || 0 : 0) + 1;
-    await AsyncStorage.setItem(SETTLE_COUNT_KEY, String(n));
+    await AsyncStorage.setItem(APP_REVIEW_STORAGE_KEYS.settleCount, String(n));
     return n;
 }
 
 export async function incrementExpenseCountForStoreReview(): Promise<number> {
-    const raw = await AsyncStorage.getItem(EXPENSE_COUNT_KEY);
+    const raw = await AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.expenseCount);
     const n = (raw ? Number.parseInt(raw, 10) || 0 : 0) + 1;
-    await AsyncStorage.setItem(EXPENSE_COUNT_KEY, String(n));
+    await AsyncStorage.setItem(APP_REVIEW_STORAGE_KEYS.expenseCount, String(n));
     return n;
 }
 
-export async function maybeRequestStoreReview(trigger: StoreReviewTrigger): Promise<boolean> {
-    const isAvailable = await StoreReview.isAvailableAsync();
-    const state = await readState(Date.now(), isAvailable);
-    if (!shouldOfferStoreReview(trigger, state)) return false;
+export async function markAppReviewPromptConsumed(nowMs = Date.now()): Promise<void> {
+    await AsyncStorage.setItem(APP_REVIEW_STORAGE_KEYS.lastPromptMs, String(nowMs));
+}
 
+async function requestNativeStoreReview(trigger: StoreReviewTrigger): Promise<boolean> {
+    if (!(await StoreReview.isAvailableAsync())) return false;
     await StoreReview.requestReview();
-    await AsyncStorage.setItem(LAST_PROMPT_KEY, String(state.nowMs));
+    await markAppReviewPromptConsumed();
     void captureProductEvent('review_prompt_shown', { trigger });
     return true;
+}
+
+/**
+ * After a positive moment (successful settle-up or 3rd expense), prompt when eligible.
+ * Never call from error paths.
+ */
+export async function maybePromptForAppReview(trigger: StoreReviewTrigger): Promise<boolean> {
+    const state = await readEligibilityState(Date.now());
+    if (!shouldOfferAppReview(trigger, state)) return false;
+
+    if (Platform.OS === 'web') {
+        useAppStore.getState().setPendingAppReview({ trigger });
+        return true;
+    }
+
+    return requestNativeStoreReview(trigger);
+}
+
+/** @deprecated Use {@link maybePromptForAppReview}. */
+export async function maybeQueueAppReviewPrompt(trigger: StoreReviewTrigger): Promise<boolean> {
+    return maybePromptForAppReview(trigger);
+}
+
+/** @deprecated Use {@link maybePromptForAppReview}. */
+export async function maybeRequestStoreReview(trigger: StoreReviewTrigger): Promise<boolean> {
+    return maybePromptForAppReview(trigger);
 }

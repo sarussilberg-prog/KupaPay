@@ -56,8 +56,12 @@ function formatNotes(entries, maxChars = 4000) {
   return `${text.slice(0, maxChars - 1)}…`;
 }
 
+const sinceField =
+  process.env.MOBILE_RELEASE_NOTES_SINCE_FIELD?.trim() || 'lastTestFlightInternalVersion';
 const versionJson = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
-const since = versionJson.lastTestFlightInternalVersion?.trim() || versionJson.version;
+const since =
+  (typeof versionJson[sinceField] === 'string' && versionJson[sinceField].trim()) ||
+  versionJson.version;
 const markdown = fs.readFileSync(changelogPath, 'utf8');
 const entries = entriesSince(markdown, since);
 const notes =

@@ -1,14 +1,16 @@
-// Settle-up reminder landing: https://kupa-pay.com/sr/<token>
-// Serves the interstitial page (see app/_lib/inviteLandingHtml.ts) as real
-// text/html so the app-open script runs. Mirrors i/[token] and g/[token].
+// Settle-reminder link landing: https://kupa-pay.com/sr/<token>
 import { inviteLandingHtml } from '@/app/_lib/inviteLandingHtml';
 
-// The body is identical for every token; the per-invite work happens in the
-// browser. Render dynamically (the [token] segment cannot be pre-generated).
 export const dynamic = 'force-dynamic';
 
-export function GET(): Response {
-    return new Response(inviteLandingHtml(), {
+export async function GET(req: Request): Promise<Response> {
+    const url = new URL(req.url);
+    const html = inviteLandingHtml(
+        req.headers.get('accept-language'),
+        url.searchParams.get('lang'),
+        url.pathname,
+    );
+    return new Response(html, {
         headers: {
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'no-store',

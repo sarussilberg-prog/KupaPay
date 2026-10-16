@@ -3,21 +3,19 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-FUNCTIONS=(
-  revenuecat-webhook
-  send-push
-  pro-trial-reminder-dispatch
-  storage-cleanup-dispatch
+mapfile -t FUNCTIONS < <(
+  for dir in "$ROOT/supabase/functions"/*/; do
+    [[ -f "${dir}index.ts" ]] || continue
+    basename "$dir"
+  done | sort
 )
 
 for fn in "${FUNCTIONS[@]}"; do
-  dir="$ROOT/supabase/functions/$fn"
-  if [[ ! -d "$dir" ]]; then
+  if [[ ! -d "$ROOT/supabase/functions/$fn" ]]; then
     echo "::error::missing edge function directory: $fn"
     exit 1
   fi
-  echo "▶ deno test — $fn"
-  (cd "$dir" && deno test --allow-env)
+  bash "$ROOT/scripts/ci-deno-edge-function.sh" "$fn"
 done
 
 echo "✅ All Deno edge tests passed"

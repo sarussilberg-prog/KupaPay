@@ -1,3 +1,4 @@
+-- Renamed from 20261016320000 (version collision with reapply_archive_group). Idempotent REVOKE/GRANT.
 -- Round 11 / P1 — handle_revenuecat_webhook must be service_role only (PostgREST RPC).
 
 REVOKE ALL ON FUNCTION public.handle_revenuecat_webhook(

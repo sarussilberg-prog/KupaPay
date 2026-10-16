@@ -2,10 +2,20 @@ name: Supabase SQL integration
 
 on:
   workflow_call:
+  workflow_dispatch:
+    inputs:
+      stress_runs:
+        description: 'Repeat bootstrap+tests N times (manual flake check)'
+        required: false
+        default: '1'
 
 concurrency:
   group: supabase-sql-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
+
+env:
+  SUPABASE_CLI_VERSION: '2.121.0'
+  SUPABASE_POSTGRES_IMAGE: ghcr.io/supabase/postgres:17.6.1.136
 
 jobs:
   sql-integration:
@@ -18,8 +28,77 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pin Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+
+      - name: Verify pinned toolchain
+        run: |
+          set -euo pipefail
+          source scripts/ci-supabase-versions.env
+          test "$SUPABASE_CLI_VERSION" = "${{ env.SUPABASE_CLI_VERSION }}"
+          test "$SUPABASE_POSTGRES_IMAGE" = "${{ env.SUPABASE_POSTGRES_IMAGE }}"
+          supabase --version
+
+      - name: Cache Supabase Postgres Docker image
+        uses: actions/cache@v4
+        id: pg-image-cache
+        with:
+          path: /tmp/supabase-postgres-image.tar
+          key: supabase-postgres-${{ env.SUPABASE_POSTGRES_IMAGE }}
+
+      - name: Load cached Postgres image
+        if: steps.pg-image-cache.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/supabase-postgres-image.tar
+
+      - name: Pull Postgres image
+        if: steps.pg-image-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          docker pull "${{ env.SUPABASE_POSTGRES_IMAGE }}"
+          docker save "${{ env.SUPABASE_POSTGRES_IMAGE }}" -o /tmp/supabase-postgres-image.tar
+
+      - name: Lint migration filenames
+        run: bash scripts/supabase-lint-migration-filenames.sh
+
       - name: Check unique migration timestamp prefixes
         run: bash scripts/supabase-unique-migration-versions.sh
 
-      - name: Run SQL regression suite (local stack)
-        run: bash scripts/ci-supabase-sql-tests.sh
+      - name: Bootstrap local Postgres stack
+        run: |
+          set -euo pipefail
+          source scripts/ci-supabase-sql-lib.sh
+          for attempt in 1 2; do
+            if bash scripts/ci-supabase-sql-bootstrap.sh; then
+              exit 0
+            fi
+            remove_pg_container
+            if [[ "$attempt" -eq 1 ]]; then
+              echo "::warning::Bootstrap attempt 1 failed — retrying once (Postgres/Docker flake)"
+              sleep 15
+            fi
+          done
+          exit 1
+
+      - name: Run SQL regression tests
+        run: bash scripts/ci-supabase-sql-run-tests.sh
+
+      - name: Stress repeat (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch' && inputs.stress_runs != '1'
+        env:
+          STRESS_RUNS: ${{ github.event.inputs.stress_runs }}
+        run: |
+          set -euo pipefail
+          source scripts/ci-supabase-sql-lib.sh
+          runs="${STRESS_RUNS:-1}"
+          for n in $(seq 2 "$runs"); do
+            echo "▶ Stress iteration ${n}/${runs}"
+            remove_pg_container
+            bash scripts/ci-supabase-sql-bootstrap.sh
+            bash scripts/ci-supabase-sql-run-tests.sh
+          done
+
+      - name: Stop Postgres container
+        if: always()
+        run: docker rm -f kupapay-sql-ci-postgres 2>/dev/null || true

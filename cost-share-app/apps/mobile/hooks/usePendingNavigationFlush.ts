@@ -43,5 +43,8 @@ export function usePendingNavigationFlush(): void {
         if (pendingNavigation.target === 'manageSubscription') {
             void openSubscriptionManagement();
         }
+        if (pendingNavigation.target === 'contactUs') {
+            navigation.navigate('ContactUs');
+        }
     }, [pendingNavigation, navigation, setPendingNavigation]);
 }

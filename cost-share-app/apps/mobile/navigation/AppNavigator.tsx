@@ -60,6 +60,7 @@ import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
 import { FavoriteGroupScreen } from '../screens/favoriteGroup/FavoriteGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
+import { GroupPostCreateInviteScreen } from '../screens/groups/GroupPostCreateInviteScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
 import { ExpenseListScreen } from '../screens/expenses/ExpenseListScreen';
@@ -442,6 +443,11 @@ export function AppNavigator() {
                 name="CreateGroup"
                 component={CreateGroupScreen}
                 options={{ headerShown: false }}
+            />
+            <RootStack.Screen
+                name="GroupPostCreateInvite"
+                component={GroupPostCreateInviteScreen}
+                options={{ headerShown: false, presentation: 'modal' }}
             />
             <RootStack.Screen
                 name="EditGroup"
