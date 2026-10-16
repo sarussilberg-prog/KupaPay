@@ -34,7 +34,6 @@ BEGIN
         SET is_active = TRUE, deleted_at = NULL, email = 'av329-attacker@test.local', name = 'Attacker',
             avatar_url = v_attacker::text || '/avatar.png'
         WHERE id = v_attacker;
-    UPDATE auth.users SET email = 'av329-attacker@test.local' WHERE id = v_attacker;
 
     PERFORM public.test_set_authenticated(v_attacker);
     PERFORM public.delete_my_account();
