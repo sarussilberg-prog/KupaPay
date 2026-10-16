@@ -47,12 +47,14 @@ BEGIN
     IF v_status->>'adminProViewMode' <> 'force_pro' THEN
         RAISE EXCEPTION 'Case 2b failed: adminProViewMode should be force_pro';
     END IF;
+    PERFORM set_config('role', 'service_role', TRUE);
     IF public.has_pro(v_admin, v_group) IS NOT TRUE THEN
         RAISE EXCEPTION 'Case 2c failed: has_pro should honor force_pro';
     END IF;
 
     -- ---- Admin force_free masks real Pro (Alice) ----------------------
     PERFORM public.test_set_authenticated(v_alice);
+    PERFORM set_config('role', 'service_role', TRUE);
     IF public.has_pro(v_alice, NULL) IS NOT TRUE THEN
         RAISE EXCEPTION 'Case 3a failed: Alice should have real Pro';
     END IF;
@@ -76,6 +78,7 @@ BEGIN
     IF v_status->>'adminProViewMode' <> 'real' THEN
         RAISE EXCEPTION 'Case 5 failed: real mode should clear override';
     END IF;
+    PERFORM set_config('role', 'service_role', TRUE);
     IF public.has_pro(v_admin, v_group) IS NOT FALSE THEN
         RAISE EXCEPTION 'Case 5b failed: admin without entitlement should not have Pro in real mode';
     END IF;
