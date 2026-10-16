@@ -402,7 +402,7 @@
             "showLess": "Weniger anzeigen"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}}"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} in anderen Währungen"
         },
         "hero": {
             "spentTogether": "Gemeinsam ausgegeben",

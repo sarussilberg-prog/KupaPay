@@ -402,7 +402,7 @@
             "showLess": "Свернуть"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}}"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} в других валютах"
         },
         "hero": {
             "spentTogether": "Потрачено вместе",
