@@ -1347,6 +1347,15 @@
             "enable": "تذكيرات تلقائية للتسوية",
             "lockedBody": "Pro يرسل تذكيرات حسب الجدول (3 أيام كحد أدنى).",
             "intervalDays": "كل {{count}} أيام"
+        },
+        "spendingInsights": {
+            "menuOption": "رؤى الإنفاق",
+            "sheetTitle": "رؤى الإنفاق",
+            "lockedBody": "مجاميع حسب الفئة والدافع والأسابيع.",
+            "upgrade": "الترقية إلى Pro",
+            "empty": "لا مصروفات بهذه العملة بعد.",
+            "uncategorized": "بدون فئة",
+            "tab": { "category": "فئة", "member": "دفع", "week": "أسبوعي" }
         }
     },
     "updateRequired": {

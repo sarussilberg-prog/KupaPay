@@ -102,3 +102,9 @@ Deploy `pro-smart-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261016130000_smart_payment_reminders.sql` on dev before production.
+
+### Spending insights (Pro v2)
+
+RPCs `get_group_spending_by_category`, `get_group_spending_by_member`, and `get_group_spending_by_week` require `has_pro`. No cron.
+
+Apply migration `20261016150000_group_spending_insights.sql` on dev before production.

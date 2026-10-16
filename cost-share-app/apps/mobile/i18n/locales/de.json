@@ -1265,6 +1265,15 @@
             "enable": "Automatische Ausgleichs-Erinnerungen",
             "lockedBody": "Pro sendet Erinnerungen nach Ihrem Intervall (mindestens alle 3 Tage).",
             "intervalDays": "Alle {{count}} Tage"
+        },
+        "spendingInsights": {
+            "menuOption": "Ausgaben-Insights",
+            "sheetTitle": "Ausgaben-Insights",
+            "lockedBody": "Summen nach Kategorie, Zahler und Woche.",
+            "upgrade": "Pro freischalten",
+            "empty": "Noch keine Ausgaben in dieser Währung.",
+            "uncategorized": "Ohne Kategorie",
+            "tab": { "category": "Kategorie", "member": "Bezahlt von", "week": "Wochen" }
         }
     },
     "updateRequired": {

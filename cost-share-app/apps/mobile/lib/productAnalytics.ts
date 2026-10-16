@@ -35,7 +35,8 @@ export type ProductAnalyticsEvent =
     | 'recurring_series_created'
     | 'recurring_series_stopped'
     | 'trip_currency_viewed'
-    | 'smart_reminder_configured';
+    | 'smart_reminder_configured'
+    | 'spending_insights_viewed';
 
 export interface ProductAnalyticsClient {
     capture: (event: string, properties?: Record<string, unknown>) => void;

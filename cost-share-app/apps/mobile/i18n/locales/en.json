@@ -1196,6 +1196,19 @@
             "enable": "Automatic settle-up reminders",
             "lockedBody": "Pro can nudge members to settle on a schedule you choose (minimum every 3 days).",
             "intervalDays": "Every {{count}} days"
+        },
+        "spendingInsights": {
+            "menuOption": "Spending insights",
+            "sheetTitle": "Spending insights",
+            "lockedBody": "See totals by category, who paid, and weekly trends for this group.",
+            "upgrade": "Upgrade to Pro",
+            "empty": "No expenses in this currency yet.",
+            "uncategorized": "Uncategorized",
+            "tab": {
+                "category": "Category",
+                "member": "Paid by",
+                "week": "Weekly"
+            }
         }
     },
     "remind": {
