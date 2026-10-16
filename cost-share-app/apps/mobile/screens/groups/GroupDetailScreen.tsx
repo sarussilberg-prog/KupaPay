@@ -53,7 +53,6 @@ import {
 import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
 import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
-import { isProPerkUnlocked } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
@@ -341,16 +340,10 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [exporting, setExporting] = useState(false);
     const [pendingExport, setPendingExport] = useState(false);
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
-    const { data: proStatus } = useProStatusQuery(groupId);
-    const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
-    const insightsUnlocked = isProPerkUnlocked(
-        proStatus?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
-    const tripBudgetUnlocked = isProPerkUnlocked(
-        proStatus?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
+    const { hasPro, proPerkUnlocked } = useProStatusQuery(groupId);
+    const exportProLocked = KUPAPAY_PRO_ENABLED && !hasPro;
+    const insightsUnlocked = proPerkUnlocked;
+    const tripBudgetUnlocked = proPerkUnlocked;
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
