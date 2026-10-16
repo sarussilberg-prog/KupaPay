@@ -131,10 +131,26 @@ netBalance = totalPaid - totalOwed + totalSettledReceived - totalSettledPaid
 
 ---
 
-## 8. Changelog
+## 8. SonarCloud (static analysis)
+
+SonarCloud runs on pull requests via the GitHub integration (check name: **SonarCloud Code Analysis**). Configuration lives at the repo root:
+
+| File | Purpose |
+|------|---------|
+| [`sonar-project.properties`](../../sonar-project.properties) | `sonar.projectKey` (`sarussilberg-prog_CoPay`), `sonar.organization` (`sarussilberg-prog`), and path exclusions for migration SQL / generated `dist` |
+| [`.sonarcloud.properties`](../../.sonarcloud.properties) | Auto-Scan settings (Auto-Scan ignores `sonar-project.properties`; exclusions are mirrored here) |
+
+**CI coupling:** The `auto-merge` job in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) polls `gh pr checks` until SonarCloud reports **pass** (or fails on **fail** / timeout) before enabling squash merge to `dev`.
+
+**Exclusions:** `cost-share-app/supabase/migrations/**/*.sql` is excluded from copy-paste detection because migrations intentionally repeat function bodies from `schema.sql` — otherwise every DB refactor fails the quality gate.
+
+---
+
+## 9. Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-10-16 | Documented SonarCloud config, quality gate, and CI auto-merge wait behavior. |
 | 2026-06-02 | Pre-Google-Play audit: added 6 pending refactors (RPC error contract, atomic writes, SECURITY DEFINER lockdown, RLS perf, CI typecheck, critical-path tests). |
 | 2026-05-20 | Added `supabase/group-images-bucket.sql` + `fix-groups-update-members.sql` — group avatar storage + member UPDATE RLS |
 | 2026-05-19 | v0.2 — Removed NestJS; Supabase-only architecture |
