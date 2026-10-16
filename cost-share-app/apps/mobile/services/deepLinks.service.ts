@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+import { listClaimableGuestMembers } from './groups.service';
 import { INVITE_TOKEN_RE } from '../lib/inviteToken';
 
 export type InviteRedemptionResult =
@@ -70,11 +71,12 @@ function navigateAfterFriendInvite(navigation: NavigationProp<any> | null): void
 function navigateAfterGroupInvite(
     navigation: NavigationProp<any> | null,
     groupId: string,
+    openGuestClaim = false,
 ): void {
     if (navigation) {
         (navigation.navigate as any)('Groups', {
             screen: 'GroupDetail',
-            params: { groupId },
+            params: { groupId, openGuestClaim: openGuestClaim || undefined },
         });
         return;
     }
@@ -166,7 +168,10 @@ async function redeemInviteLink(
     });
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
     void queryClient.invalidateQueries({ queryKey: ['groups'] });
-    navigateAfterGroupInvite(navigation, payload.group_id);
+    const claimable = !payload.already_member
+        ? await listClaimableGuestMembers(payload.group_id)
+        : [];
+    navigateAfterGroupInvite(navigation, payload.group_id, claimable.length > 0);
     if (!payload.already_member) {
         void captureProductEvent('invite_accepted', { kind: 'group' });
         void trackSecondGroupMemberJoined(payload.group_id);

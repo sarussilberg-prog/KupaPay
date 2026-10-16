@@ -31,6 +31,7 @@ export const profileFromRow = (r: Row): User => ({
     // should not accidentally render every user as "Deleted". Once Phase E
     // rolls out every select includes `is_active` and this default never kicks in.
     isActive: r.is_active === undefined ? true : (r.is_active as boolean),
+    isGuest: r.is_guest === undefined ? false : (r.is_guest as boolean),
     isAdmin: false,  // The profiles table does NOT carry admin status; populated by hydrateCurrentUserProfile via is_app_admin() RPC.
     createdAt: toDate(r.created_at),
     updatedAt: toDate(r.updated_at),
@@ -67,7 +68,13 @@ export const groupMemberFromRow = (r: Row): GroupMember => ({
 type MemberJoinRow = {
     user_id: unknown;
     is_active?: unknown;
-    profiles?: { id?: unknown; name?: unknown; avatar_url?: unknown; is_active?: unknown } | null;
+    profiles?: {
+        id?: unknown;
+        name?: unknown;
+        avatar_url?: unknown;
+        is_active?: unknown;
+        is_guest?: unknown;
+    } | null;
 };
 
 export const groupWithMembersFromRow = (
@@ -83,6 +90,7 @@ export const groupWithMembersFromRow = (
             displayName: String(m.profiles?.name ?? ''),
             avatarUrl: (m.profiles?.avatar_url as string | undefined) ?? undefined,
             isActive: m.profiles?.is_active === undefined ? true : (m.profiles?.is_active as boolean),
+            isGuest: m.profiles?.is_guest === undefined ? false : (m.profiles?.is_guest as boolean),
         }))
         .filter(m => m.userId.length > 0);
     return {

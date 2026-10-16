@@ -558,6 +558,73 @@ export async function addGroupMember(groupId: string, userId: string): Promise<G
     return groupMemberFromRow(data);
 }
 
+export type ClaimableGuest = { userId: string; displayName: string };
+
+export async function addGuestGroupMember(
+    groupId: string,
+    displayName: string,
+): Promise<{ userId: string; displayName: string } | null> {
+    const { data, error } = await supabase.rpc('add_guest_group_member', {
+        p_group_id: groupId,
+        p_display_name: displayName,
+    });
+    if (error) {
+        handleError(error, {
+            toast: { titleKey: 'groups.members.guestAddError' },
+            tags: { service: 'groups', op: 'addGuestMember' },
+            extra: { groupId },
+        });
+        return null;
+    }
+    const payload = data as { ok?: boolean; guest_user_id?: string; display_name?: string };
+    if (!payload.ok || !payload.guest_user_id) return null;
+    await syncGroupMembershipState(groupId);
+    showSuccessMessage('groups.members.guestAdded', { name: payload.display_name ?? displayName });
+    return { userId: payload.guest_user_id, displayName: payload.display_name ?? displayName };
+}
+
+export async function listClaimableGuestMembers(groupId: string): Promise<ClaimableGuest[]> {
+    const { data, error } = await supabase.rpc('list_claimable_guest_members', {
+        p_group_id: groupId,
+    });
+    if (error) {
+        console.error('listClaimableGuestMembers failed:', error);
+        return [];
+    }
+    const guests = (data as { guests?: { user_id?: string; display_name?: string }[] })?.guests ?? [];
+    return guests
+        .map(g => ({
+            userId: String(g.user_id ?? ''),
+            displayName: String(g.display_name ?? ''),
+        }))
+        .filter(g => g.userId.length > 0);
+}
+
+export async function claimGuestGroupMember(
+    groupId: string,
+    guestUserId: string,
+): Promise<boolean> {
+    const { data, error } = await supabase.rpc('claim_guest_group_member', {
+        p_group_id: groupId,
+        p_guest_user_id: guestUserId,
+    });
+    if (error) {
+        handleError(error, {
+            toast: { titleKey: 'invite.guestClaim.error' },
+            tags: { service: 'groups', op: 'claimGuest' },
+            extra: { groupId, guestUserId },
+        });
+        return false;
+    }
+    const ok = (data as { ok?: boolean })?.ok === true;
+    if (ok) {
+        await syncGroupMembershipState(groupId);
+        invalidateBalanceCaches(groupId);
+        showSuccessMessage('invite.guestClaim.success');
+    }
+    return ok;
+}
+
 export async function removeGroupMember(groupId: string, userId: string): Promise<boolean> {
     const { data, error } = await supabase
         .from('group_members')

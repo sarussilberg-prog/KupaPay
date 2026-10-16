@@ -547,7 +547,12 @@
             "searchPlaceholder": "Buscar amigos",
             "noSearchResults": "Ningún amigo coincide con tu búsqueda.",
             "mutualHint": "Solo ves a los amigos que os habéis añadido mutuamente.",
-            "missingSomeoneCta": "¿No los encuentras? Añade amigos"
+            "missingSomeoneCta": "¿No los encuentras? Añade amigos",
+            "addGuestTitle": "¿Aún sin cuenta?",
+            "addGuestPlaceholder": "Nombre del amigo",
+            "addGuestButton": "Añadir",
+            "guestAddError": "No se pudo añadir el miembro provisional",
+            "guestAdded": "Se añadió a {{name}} — lo vinculará al unirse"
         },
         "memberCount_one": "{{count}} persona",
         "memberCount_many": "{{count}} de personas",
@@ -1137,6 +1142,14 @@
             "alreadyMember": "Ya eres miembro de este grupo",
             "selfInvite": "Ese es tu propio enlace de invitación",
             "invalid": "Este enlace de invitación ya no es válido"
+        },
+        "guestClaim": {
+            "title": "¿Te añadieron por nombre?",
+            "subtitle": "Elige tu nombre para mantener los saldos correctos.",
+            "confirm": "Soy yo",
+            "skip": "No soy yo",
+            "success": "Tus gastos compartidos están en tu cuenta",
+            "error": "No se pudo vincular ese nombre"
         }
     },
     "dashboard": {

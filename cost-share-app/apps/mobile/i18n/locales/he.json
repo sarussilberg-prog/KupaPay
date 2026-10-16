@@ -547,7 +547,12 @@
             "searchPlaceholder": "חיפוש חברים",
             "noSearchResults": "אין חברים התואמים לחיפוש.",
             "mutualHint": "מוצגים רק חברים שאתם הוספתם זה את זה.",
-            "missingSomeoneCta": "לא מוצאים? הוסיפו חברים"
+            "missingSomeoneCta": "לא מוצאים? הוסיפו חברים",
+            "addGuestTitle": "עדיין בלי אפליקציה?",
+            "addGuestPlaceholder": "שם החבר/ה",
+            "addGuestButton": "הוסף",
+            "guestAddError": "לא הצלחנו להוסיף חבר זמני",
+            "guestAdded": "נוסף/ה {{name}} — יוכל/תה לקשר בכניסה לקופה"
         },
         "memberCount_one": "{{count}} חבר",
         "memberCount_two": "{{count}} חברים",
@@ -1138,6 +1143,14 @@
             "alreadyMember": "את/ה כבר חבר/ה בקופה הזו",
             "selfInvite": "זה הקישור שלך",
             "invalid": "קישור ההזמנה כבר לא תקף"
+        },
+        "guestClaim": {
+            "title": "הוספתם אתכם בשם?",
+            "subtitle": "בחרו את השם שלכם כדי לשמור על יתרות נכונות.",
+            "confirm": "זה אני",
+            "skip": "לא אני",
+            "success": "ההוצאות המשותפות מקושרות לחשבון שלכם",
+            "error": "לא הצלחנו לקשר את השם לחשבון"
         }
     },
     "dashboard": {

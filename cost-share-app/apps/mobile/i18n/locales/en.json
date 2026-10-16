@@ -547,7 +547,12 @@
             "searchPlaceholder": "Search friends",
             "noSearchResults": "No friends match your search.",
             "mutualHint": "You only see friends you've added each other.",
-            "missingSomeoneCta": "Can't find them? Add friends"
+            "missingSomeoneCta": "Can't find them? Add friends",
+            "addGuestTitle": "No account yet?",
+            "addGuestPlaceholder": "Friend's name",
+            "addGuestButton": "Add",
+            "guestAddError": "Couldn't add placeholder member",
+            "guestAdded": "Added {{name}} — they'll claim this when they join"
         },
         "memberCount_one": "{{count}} person",
         "memberCount_two": "{{count}} people",
@@ -1136,6 +1141,14 @@
             "alreadyMember": "You're already a member of this group",
             "selfInvite": "That's your own invite link",
             "invalid": "This invite link is no longer valid"
+        },
+        "guestClaim": {
+            "title": "Were you added by name?",
+            "subtitle": "Pick your name so balances stay correct.",
+            "confirm": "That's me",
+            "skip": "Not me",
+            "success": "Your shared expenses are on your account now",
+            "error": "Couldn't link that name to your account"
         }
     },
     "dashboard": {

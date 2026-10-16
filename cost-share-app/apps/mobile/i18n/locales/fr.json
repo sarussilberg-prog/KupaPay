@@ -547,7 +547,12 @@
             "searchPlaceholder": "Rechercher des amis",
             "noSearchResults": "Aucun ami ne correspond à votre recherche.",
             "mutualHint": "Vous ne voyez que les amis que vous vous êtes mutuellement ajoutés.",
-            "missingSomeoneCta": "Vous ne les trouvez pas ? Ajoutez des amis"
+            "missingSomeoneCta": "Vous ne les trouvez pas ? Ajoutez des amis",
+            "addGuestTitle": "Pas encore de compte ?",
+            "addGuestPlaceholder": "Nom de l'ami",
+            "addGuestButton": "Ajouter",
+            "guestAddError": "Impossible d'ajouter le membre provisoire",
+            "guestAdded": "{{name}} ajouté — il pourra se réclamer à l'inscription"
         },
         "memberCount_one": "{{count}} personne",
         "memberCount_other": "{{count}} personnes",
@@ -1136,6 +1141,14 @@
             "alreadyMember": "Vous êtes déjà membre de ce groupe",
             "selfInvite": "C'est votre propre lien d'invitation",
             "invalid": "Ce lien d'invitation n'est plus valide"
+        },
+        "guestClaim": {
+            "title": "Ajouté·e par votre nom ?",
+            "subtitle": "Choisissez votre nom pour garder les bons soldes.",
+            "confirm": "C'est moi",
+            "skip": "Ce n'est pas moi",
+            "success": "Vos dépenses partagées sont liées à votre compte",
+            "error": "Impossible de lier ce nom"
         }
     },
     "dashboard": {

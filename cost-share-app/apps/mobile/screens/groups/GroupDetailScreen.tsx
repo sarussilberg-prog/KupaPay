@@ -87,6 +87,7 @@ import { useNetworkStatus } from '../../lib/networkStatus';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupSummaryCard } from '../../components/groupDetail/GroupSummaryCard';
 import { GroupMembersSheet } from '../../components/groupDetail/GroupMembersSheet';
+import { ClaimGuestMembersSheet } from '../../components/guest/ClaimGuestMembersSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedItemRow } from '../../components/FeedItemRow';
 import {
@@ -229,12 +230,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         editSettlementId: editSettlementIdParam,
         openNote: openNoteParam,
         openSettleUp: openSettleUpParam,
+        openGuestClaim: openGuestClaimParam,
     } = route.params as {
         groupId: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
         openNote?: boolean;
         openSettleUp?: boolean;
+        openGuestClaim?: boolean;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
@@ -319,6 +322,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [composer, setComposer] = useState<ComposerState>({ open: false });
     const [addMembersOpen, setAddMembersOpen] = useState(false);
+    const [guestClaimOpen, setGuestClaimOpen] = useState(false);
     const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
     const [feedDetailItem, setFeedDetailItem] = useState<
         | { kind: 'expense'; expense: ExpenseWithDelta }
@@ -587,6 +591,12 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         navigation.setParams({ groupId, openSettleUp: undefined });
         navigation.navigate('SettleUpList', { groupId });
     }, [openSettleUpParam, navigation, groupId]);
+
+    useEffect(() => {
+        if (!openGuestClaimParam) return;
+        navigation.setParams({ groupId, openGuestClaim: undefined });
+        setGuestClaimOpen(true);
+    }, [openGuestClaimParam, navigation, groupId]);
 
     const handleClearFeedSearchAndFilters = useCallback(() => {
         setSearchQuery('');
@@ -1234,6 +1244,16 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                     groupName={displayGroup?.name}
                 />
             )}
+
+            <ClaimGuestMembersSheet
+                visible={guestClaimOpen}
+                groupId={groupId}
+                onClose={() => setGuestClaimOpen(false)}
+                onClaimed={() => {
+                    void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
+                    void queryClient.invalidateQueries({ queryKey: ['groupFeed', groupId] });
+                }}
+            />
 
             <GroupMembersSheet
                 visible={membersSheetOpen}
