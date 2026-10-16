@@ -1286,6 +1286,25 @@
         "primingEnable": "Enable notifications",
         "primingLater": "Not now"
     },
+    "referral": {
+        "title": "Invite friends, earn Pro",
+        "settingsRow": "Referral rewards",
+        "body": "Share your invite link. When a friend joins a group and adds an expense, you get one free month of Pro.",
+        "shareCta": "Share invite link",
+        "copyLink": "Copy link",
+        "linkCopied": "Invite link copied",
+        "capHint": "{{count}} of {{cap}} free months claimed this year",
+        "statusTitle": "Your referrals",
+        "empty": "No referrals yet — share your link to get started.",
+        "refresh": "Refresh status",
+        "disabled": "Referral rewards are not available in this build.",
+        "status": {
+            "pending": "Waiting for their first group expense",
+            "qualified": "Qualified — reward pending",
+            "rewarded": "Pro month granted",
+            "rejected": "Could not grant reward"
+        }
+    },
     "monetization": {
         "adGateTitle": "Unlock this feature",
         "watchAdButton": "Watch a short ad",

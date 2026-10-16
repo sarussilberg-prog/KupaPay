@@ -1509,5 +1509,24 @@
         "body": "Esta versión de KupaPay ya no es compatible. Instala la última actualización desde la tienda para continuar.",
         "versionLine": "Tu versión: {{current}} · Requerida: {{required}} o superior",
         "cta": "Abrir tienda"
+    },
+    "referral": {
+        "title": "Invita amigos, gana Pro",
+        "settingsRow": "Recompensas por invitación",
+        "body": "Comparte tu enlace. Cuando un amigo se una a un grupo y añada un gasto, recibes un mes de Pro gratis.",
+        "shareCta": "Compartir enlace",
+        "copyLink": "Copiar enlace",
+        "linkCopied": "Enlace copiado",
+        "capHint": "{{count}} de {{cap}} meses gratis este año",
+        "statusTitle": "Tus invitaciones",
+        "empty": "Aún no hay invitaciones — comparte tu enlace.",
+        "refresh": "Actualizar",
+        "disabled": "Las recompensas no están disponibles en esta versión.",
+        "status": {
+            "pending": "Esperando el primer gasto en grupo",
+            "qualified": "Calificado — recompensa pendiente",
+            "rewarded": "Mes Pro concedido",
+            "rejected": "No se pudo conceder"
+        }
     }
 }

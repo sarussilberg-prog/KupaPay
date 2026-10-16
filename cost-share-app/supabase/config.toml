@@ -61,3 +61,7 @@ verify_jwt = false
 # Daily cron (#406) — Pro trial day 1/10/13 push nudges.
 [functions.pro-trial-lifecycle-dispatch]
 verify_jwt = false
+
+# Hourly cron (#400) — RevenueCat promotional Pro for qualified referrals.
+[functions.referral-reward-dispatch]
+verify_jwt = false
