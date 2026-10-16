@@ -275,7 +275,8 @@ export type ActivityEventKind =
     | 'group_created'
     | 'group_deleted'
     | 'group_note_changed'
-    | 'settle_up_reminder';
+    | 'settle_up_reminder'
+    | 'trip_budget_alert';
 
 /**
  * ActivityEvent — one row of the per-user activity feed.

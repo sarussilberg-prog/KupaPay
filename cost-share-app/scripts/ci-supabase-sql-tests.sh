@@ -138,6 +138,29 @@ for f in "${migration_files_sorted[@]}"; do
   psql_docker_file "$f"
 done
 
+echo "▶ SQL test auth helpers"
+psql_docker <<'SQL'
+CREATE OR REPLACE FUNCTION public.test_set_jwt_sub(p_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub', p_user_id::text, TRUE);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', p_user_id::text)::text, TRUE);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.test_set_authenticated(p_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM public.test_set_jwt_sub(p_user_id);
+  PERFORM set_config('role', 'authenticated', TRUE);
+END;
+$$;
+SQL
+
 files=(supabase/__tests__/*.test.sql)
 if [[ ${#files[@]} -eq 0 ]]; then
   echo "::error::no SQL tests found"

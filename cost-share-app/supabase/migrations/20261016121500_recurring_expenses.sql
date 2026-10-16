@@ -1,4 +1,5 @@
--- Pro v2: recurring expense series (#167)
+-- Version 20261016121500 (renamed from 20261016120000 — unique schema_migrations.version).
+-- Pro v2: recurring expense series (#167). Idempotent re-apply (IF NOT EXISTS / OR REPLACE / DROP IF EXISTS).
 
 CREATE TABLE IF NOT EXISTS public.recurring_expense_series (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),

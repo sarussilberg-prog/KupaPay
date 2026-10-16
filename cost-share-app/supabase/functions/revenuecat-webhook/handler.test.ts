@@ -65,6 +65,17 @@ Deno.test('verifyAuthorization accepts raw secret and Bearer', () => {
     assertEquals(verifyAuthorization(new Request('https://x'), 'secret'), false);
 });
 
+Deno.test('verifyAuthorization rejects wrong secret without throwing', () => {
+    assertEquals(
+        verifyAuthorization(new Request('https://x', { headers: { authorization: 'Bearer wrong' } }), 'secret'),
+        false,
+    );
+    assertEquals(
+        verifyAuthorization(new Request('https://x', { headers: { authorization: 'secrex' } }), 'secret'),
+        false,
+    );
+});
+
 Deno.test('proUntilFromEvent maps expiration ms', () => {
     const iso = proUntilFromEvent({
         type: 'RENEWAL',

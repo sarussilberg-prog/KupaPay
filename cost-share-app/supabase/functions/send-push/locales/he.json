@@ -32,5 +32,6 @@
     "group_created": "קבוצה נוצרה",
     "group_deleted": "נמחקה על ידי {actor}",
     "group_note_changed": "הפתק שונה על ידי {actor}",
-    "settle_up_reminder": "תזכורת מ-{actor}"
+    "settle_up_reminder": "תזכורת מ-{actor}",
+    "trip_budget_alert": "עדכון תקציב טיול"
 }

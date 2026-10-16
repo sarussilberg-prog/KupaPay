@@ -12,13 +12,12 @@ BEGIN
     INSERT INTO auth.users (id, email) VALUES (v_user, 'arch-rpc@test.local');
     INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, invite_token)
         VALUES (v_user, 'arch-rpc@test.local', 'Arch', 'USD', 'en', TRUE, 'arch_rpc_tok');
-    INSERT INTO public.groups (id, name, default_currency, created_by, invite_token)
-        VALUES (v_group, 'G', 'USD', v_user, 'grp_rpc_tok');
+    INSERT INTO public.groups (id, name, default_currency, created_by, invite_token, is_active)
+        VALUES (v_group, 'G', 'USD', v_user, 'grp_rpc_tok', TRUE);
     INSERT INTO public.group_members (group_id, user_id, is_active)
         VALUES (v_group, v_user, TRUE);
 
-    PERFORM set_config('request.jwt.claim.sub', v_user::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_user::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_user);
 
     v_result := public.archive_group(v_group);
     IF v_result->>'ok' IS DISTINCT FROM 'true' THEN
