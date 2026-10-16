@@ -73,6 +73,14 @@ jobs:
           SELECT pg_get_function_result('public.archive_group(uuid)'::regprocedure) AS archive_group_returns;
           SELECT to_regclass('public.recurring_expense_series') IS NOT NULL AS recurring_table;
           SELECT jobname, schedule FROM cron.job WHERE jobname = 'pro-trial-reminder-dispatch-daily';
+          SELECT version, count(*) FROM supabase_migrations.schema_migrations GROUP BY version HAVING count(*) > 1;
+          SELECT version, name FROM supabase_migrations.schema_migrations WHERE version >= '20261016300000' ORDER BY version;
+          SELECT r AS role, has_function_privilege(r, 'public.handle_revenuecat_webhook(text,uuid,text,text,timestamptz,timestamptz,uuid,boolean,boolean,boolean)', 'EXECUTE') AS can_exec
+            FROM unnest(ARRAY['anon','authenticated','service_role']) r;
+          SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='profiles' ORDER BY policyname;
+          SELECT has_table_privilege('authenticated','public.profiles','SELECT') AS auth_profiles_select;
+          SELECT count(*) AS vault_storage_cleanup_url FROM vault.secrets WHERE name = 'storage_cleanup_dispatch_url';
+          SELECT name FROM vault.secrets ORDER BY name;
           SQL
 
   supabase-migrations:
