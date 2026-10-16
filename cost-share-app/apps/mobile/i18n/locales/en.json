@@ -245,6 +245,8 @@
     },
     "groups": {
         "title": "Groups",
+        "listTitle": "My groups",
+        "newGroupCta": "New group",
         "createGroup": "Create group",
         "editGroup": "Edit Group",
         "favorite": {
@@ -398,6 +400,9 @@
             "noOpenPayments": "No open payments",
             "showMore": "Show {{count}} more",
             "showLess": "Show less"
+        },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}}"
         },
         "hero": {
             "spentTogether": "Spent together",

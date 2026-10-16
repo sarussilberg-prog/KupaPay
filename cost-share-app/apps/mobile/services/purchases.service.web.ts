@@ -4,6 +4,7 @@
  */
 
 import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
+import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 
 export type { PaywallPackages, PurchasesPackageLike };
 
@@ -18,8 +19,9 @@ function captureMode(): boolean {
 
 const CAPTURE = captureMode();
 
+/** Web can display paywall pricing (RevenueCat is native-only); purchases still no-op. */
 export function isPurchasesConfigured(): boolean {
-    return CAPTURE;
+    return CAPTURE || KUPAPAY_PRO_ENABLED;
 }
 
 export async function configurePurchasesForUser(_userId: string): Promise<void> {}
@@ -53,14 +55,14 @@ function capturePackages(): PaywallPackages {
 }
 
 export async function loadOfferingPackages(): Promise<PaywallPackages> {
-    if (CAPTURE) return capturePackages();
+    if (CAPTURE || KUPAPAY_PRO_ENABLED) return capturePackages();
     return { monthly: null, annual: null, tripPass: null };
 }
 
 export async function checkIntroductoryPriceEligibility(): Promise<
     Record<string, { status: number }>
 > {
-    if (CAPTURE) {
+    if (CAPTURE || KUPAPAY_PRO_ENABLED) {
         return {
             kupapay_pro_monthly: { status: 2 },
             kupapay_pro_yearly: { status: 2 },

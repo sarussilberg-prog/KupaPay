@@ -8,7 +8,8 @@ export function PaywallScreen() {
     const navigation = useNavigation<any>();
     const featureKey = (route.params?.featureKey as string) ?? 'paywall';
     const groupId = route.params?.groupId as string | undefined;
-    const showTripPass = route.params?.showTripPass === true;
+    /** Default on: Trip Pass is a third plan unless a caller opts out explicitly. */
+    const showTripPass = route.params?.showTripPass !== false;
 
     return (
         <View className="flex-1">

@@ -48,6 +48,10 @@ push_pending() {
     return 0
   fi
   echo "$out" >&2
+  if grep -qE 'duplicate key value violates unique constraint "schema_migrations_pkey"' <<<"$out"; then
+    echo "::error::Remote already has this migration version under a different name — renumber or repair history (docs/SSOT/SUPABASE_MIGRATION_VERSIONS.md, docs/SSOT/ROLLBACK_RUNBOOK.md)."
+    return "$code"
+  fi
   if grep -qE 'inserted before the last migration|Rerun the command with --include-all' <<<"$out"; then
     echo "▶ Migration history gap (local version older than remote tail, row missing) — retry with --include-all."
     echo "   SQL must be idempotent; see 20260628120000_consolidation_batches.sql / 20260610120000_reconcile_prod_drift.sql."
@@ -56,6 +60,9 @@ push_pending() {
   fi
   return "$code"
 }
+
+echo "▶ Remote migration precheck ..."
+bash scripts/supabase-remote-migration-precheck.sh
 
 echo "▶ Pushing pending migrations ..."
 push_pending

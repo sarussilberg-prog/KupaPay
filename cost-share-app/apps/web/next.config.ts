@@ -56,6 +56,13 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@cost-share/shared'],
+  // Marketing pages: allow CDN/browser caching between deploys (free-tier friendly).
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+      static: 300,
+    },
+  },
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
     NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: vercelSha.slice(0, 7),

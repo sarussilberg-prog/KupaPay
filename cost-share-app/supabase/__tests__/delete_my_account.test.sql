@@ -33,7 +33,7 @@ BEGIN
         VALUES (v_user::text, v_session_id, 'rt_test_token_dm', FALSE);
 
     -- ---- call delete_my_account() as the user --------------------------
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_user::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_user);
     PERFORM public.delete_my_account();
 
     -- ---- assertions ----------------------------------------------------
@@ -48,12 +48,13 @@ BEGIN
         RAISE EXCEPTION 'Case B failed: auth.users.banned_until should be NULL during grace, got %', v_banned;
     END IF;
 
+    RESET ROLE;
     SELECT COUNT(*) INTO v_sessions FROM auth.sessions WHERE user_id = v_user;
     IF v_sessions <> 0 THEN
         RAISE EXCEPTION 'Case C failed: expected 0 sessions after delete, got %', v_sessions;
     END IF;
 
-    SELECT COUNT(*) INTO v_tokens FROM auth.refresh_tokens WHERE user_id = v_user::text;
+    SELECT COUNT(*) INTO v_tokens FROM auth.refresh_tokens WHERE user_id = v_user::text; -- superuser after RESET ROLE
     IF v_tokens <> 0 THEN
         RAISE EXCEPTION 'Case D failed: expected 0 refresh tokens after delete, got %', v_tokens;
     END IF;

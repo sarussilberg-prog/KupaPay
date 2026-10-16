@@ -8,7 +8,6 @@
 
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { View, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
-import { isProPerkUnlocked } from '@cost-share/shared';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -94,11 +93,7 @@ export function SettleUpListScreen() {
     const group = groupsQuery.data?.find(g => g.id === groupId);
     const groupName = group?.name;
     const groupDefaultCurrency = group?.defaultCurrency ?? 'USD';
-    const proStatusQuery = useProStatusQuery(groupId);
-    const smartReminderUnlocked = isProPerkUnlocked(
-        proStatusQuery.data?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
+    const { proPerkUnlocked: smartReminderUnlocked } = useProStatusQuery(groupId);
     const [smartReminderSheetVisible, setSmartReminderSheetVisible] = useState(false);
     const [shareSummaryVisible, setShareSummaryVisible] = useState(false);
 

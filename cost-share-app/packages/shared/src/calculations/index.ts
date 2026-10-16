@@ -56,6 +56,12 @@ export {
 } from './simplifiedDebtsModel';
 
 export {
+    deriveGroupsListSummaryParts,
+    type GroupsListForeignBalanceHint,
+    type GroupsListSummaryParts,
+} from './groupsListSummary';
+
+export {
     calculateGroupTotalSpent,
     calculateGroupTotalUnsettled,
     sortCurrencyAmounts,

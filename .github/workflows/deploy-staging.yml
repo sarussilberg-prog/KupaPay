@@ -22,10 +22,20 @@ jobs:
         working-directory: cost-share-app
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Destructive SQL guard (new migrations in push)
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: bash scripts/supabase-destructive-migration-check.sh
 
       - name: Apply pending migrations
         env:

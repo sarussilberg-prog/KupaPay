@@ -4,11 +4,10 @@ export const PRO_TRIAL_REMINDER_NOTIFICATION_ID = 'kupapay-pro-trial-reminder';
 
 import { proTrialLengthDays } from './proSubscriptionStorePolicy';
 
-/** @deprecated Prefer `proTrialLengthDays()` — iOS 7, Play 14. */
-export const PRO_TRIAL_LENGTH_DAYS = 7;
-
-/** When RevenueCat omits expirationDate during TRIAL, trial end = purchase + this many days. */
-export const PRO_TRIAL_FALLBACK_END_DAYS_FROM_PURCHASE = 5;
+/** When RevenueCat omits expirationDate during TRIAL, trial end = purchase + policy length. */
+export function proTrialFallbackEndDaysFromPurchase(): number {
+    return proTrialLengthDays();
+}
 
 export const PRO_TRIAL_REMINDER_DAYS_BEFORE_END = 2;
 
@@ -16,7 +15,7 @@ export type ProPeriodType = 'TRIAL' | 'INTRO' | 'NORMAL' | string | null | undef
 
 export function fallbackTrialEndFromPurchase(purchasedAt: Date): Date {
     const end = new Date(purchasedAt);
-    end.setUTCDate(end.getUTCDate() + PRO_TRIAL_FALLBACK_END_DAYS_FROM_PURCHASE);
+    end.setUTCDate(end.getUTCDate() + proTrialFallbackEndDaysFromPurchase());
     return end;
 }
 

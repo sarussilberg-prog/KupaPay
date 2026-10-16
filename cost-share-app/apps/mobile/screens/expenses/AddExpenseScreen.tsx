@@ -103,7 +103,6 @@ import {
     DEFAULT_CURRENCY,
     ExpenseCategory,
     ExpenseSplitInput,
-    isProPerkUnlocked,
     type RecurringFrequency,
     type ReceiptDraft,
 } from '@cost-share/shared';
@@ -192,11 +191,7 @@ export function AddExpenseScreen() {
         : undefined;
     const queryClient = useQueryClient();
     const addExpense = useAddExpenseMutation(groupId);
-    const proStatusQuery = useProStatusQuery(groupId);
-    const recurringUnlocked = isProPerkUnlocked(
-        proStatusQuery.data?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
+    const { proPerkUnlocked: recurringUnlocked } = useProStatusQuery(groupId);
     const receiptOcrUnlocked = recurringUnlocked;
 
     const [description, setDescription] = useState('');
