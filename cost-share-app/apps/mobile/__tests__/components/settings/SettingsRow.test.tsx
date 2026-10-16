@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SettingsRow } from '../../../components/settings/SettingsRow';
 
@@ -32,8 +33,12 @@ describe('SettingsRow', () => {
         );
         const row = getByTestId('settings-row-rtl').children[0] as { props: { style: unknown[] } };
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));
-        expect(flat.direction).toBe('rtl');
         expect(flat.gap).toBe(12);
+        if (Platform.OS === 'web') {
+            expect(flat.direction).toBe('rtl');
+        } else {
+            expect(flat.flexDirection).toBe('row-reverse');
+        }
     });
 
     it('chevron variant: onPress fires', () => {
