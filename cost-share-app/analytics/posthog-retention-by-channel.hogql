@@ -1,0 +1,13 @@
+-- D1 / D7 / D30 retention by acquisition channel (#424)
+-- Requires person properties: acquisition_channel, utm_source (set on first app_open with UTM)
+-- Build as PostHog → Retention → target event app_open, returning event app_open, breakdown acquisition_channel
+
+-- Cohort size by channel (signup cohort, last 90 days)
+SELECT
+    person.properties.acquisition_channel AS channel,
+    count(DISTINCT person_id) AS signups
+FROM events
+WHERE event = 'signup'
+  AND timestamp >= now() - INTERVAL 90 DAY
+GROUP BY channel
+ORDER BY signups DESC
