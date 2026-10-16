@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
-import { APP_WEB_ORIGIN } from '@cost-share/shared';
+import { APP_WEB_ORIGIN, buildLegalPageUrl } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
@@ -82,6 +82,7 @@ export function ProPaywallContent({
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
+    const [euDigitalAck, setEuDigitalAck] = useState(false);
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -139,7 +140,7 @@ export function ProPaywallContent({
 
     const openLegal = useCallback(
         async (slug: 'terms' | 'privacy') => {
-            await Linking.openURL(`${WEB_ORIGIN}/${slug}?lang=${language}`);
+            await Linking.openURL(buildLegalPageUrl(WEB_ORIGIN, slug, language));
         },
         [language],
     );
@@ -319,8 +320,34 @@ export function ProPaywallContent({
             {planPickerSection}
 
             <Pressable
+                onPress={() => setEuDigitalAck(v => !v)}
+                className="flex-row items-start gap-3 mb-4 px-1"
+                testID="paywall-eu-withdrawal-ack"
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: euDigitalAck }}
+            >
+                <View
+                    className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${euDigitalAck ? 'bg-primary border-primary' : 'border-gray-400 bg-white'}`}
+                >
+                    {euDigitalAck ? (
+                        <AppIcon name="checkmark" size={14} color="#fff" />
+                    ) : null}
+                </View>
+                <Text className="flex-1 text-xs text-gray-600 leading-5">
+                    {t('pro.paywall.euDigitalPurchaseAck')}
+                </Text>
+            </Pressable>
+
+            <Pressable
                 onPress={handlePurchase}
-                disabled={busy || !storeConfigured || !selectedPackage || loading || !!loadFailedReason}
+                disabled={
+                    busy ||
+                    !storeConfigured ||
+                    !selectedPackage ||
+                    loading ||
+                    !!loadFailedReason ||
+                    !euDigitalAck
+                }
                 className="bg-primary rounded-2xl py-4 items-center mb-3"
                 testID="paywall-purchase-btn"
             >

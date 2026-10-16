@@ -245,11 +245,12 @@ export async function archiveGroup(groupId: string): Promise<ArchiveGroupError |
 
     const parsed = parseRpcResult(data);
     if (parsed && !parsed.ok) {
-        const code = (
-            ['has_balance', 'not_a_member', 'not_authenticated'].includes(parsed.error_code)
-                ? parsed.error_code
-                : 'unknown'
-        ) as ArchiveGroupError;
+        const code: ArchiveGroupError =
+            parsed.error_code === 'has_balance'
+                ? 'has_balance'
+                : parsed.error_code === 'not_a_member'
+                  ? 'not_a_member'
+                  : 'unknown';
         const titleKey =
             code === 'has_balance'
                 ? 'groups.archive.errorHasBalance'
@@ -259,7 +260,7 @@ export async function archiveGroup(groupId: string): Promise<ArchiveGroupError |
             tags: { service: 'groups', op: 'archive', reason: code },
             extra: { groupId },
         });
-        return code === 'not_authenticated' ? 'unknown' : code;
+        return code;
     }
 
     queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>

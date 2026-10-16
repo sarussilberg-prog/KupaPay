@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 
 jest.mock('react-i18next', () => ({
@@ -40,8 +40,15 @@ jest.mock('../../services/purchases.service', () => ({
 }));
 
 import { fetchPaywallOfferings } from '../../lib/paywallOfferingsLoad';
+import { purchasePackage } from '../../services/purchases.service';
 
 const fetchMock = fetchPaywallOfferings as jest.MockedFunction<typeof fetchPaywallOfferings>;
+const purchaseMock = purchasePackage as jest.MockedFunction<typeof purchasePackage>;
+
+const mockPackage = {
+    identifier: 'annual',
+    product: { identifier: 'kupapay_pro_yearly', priceString: '₪69.90' },
+} as const;
 
 describe('ProPaywallContent offerings load', () => {
     beforeEach(() => {
@@ -60,5 +67,33 @@ describe('ProPaywallContent offerings load', () => {
         });
         expect(getByTestId('paywall-retry')).toBeTruthy();
         expect(queryByTestId('paywall-loading')).toBeNull();
+    });
+
+    it('blocks purchase until EU digital withdrawal acknowledgement', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: { ...mockPackage, identifier: 'monthly' },
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
+        purchaseMock.mockResolvedValue({ ok: true });
+
+        const { getByTestId } = render(<ProPaywallContent featureKey="export_pdf" showTripPass={false} />);
+
+        await waitFor(() => {
+            expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
+        });
+
+        fireEvent.press(getByTestId('paywall-purchase-btn'));
+        expect(purchaseMock).not.toHaveBeenCalled();
+
+        fireEvent.press(getByTestId('paywall-eu-withdrawal-ack'));
+        fireEvent.press(getByTestId('paywall-purchase-btn'));
+        await waitFor(() => {
+            expect(purchaseMock).toHaveBeenCalled();
+        });
     });
 });

@@ -18,3 +18,5 @@ export * from './version';
 export * from './receiptStorage';
 export * from './pro/hasPro';
 export * from './recurring/recurringDates';
+export * from './legal/ownerLegalConfig';
+export * from './legal/legalPageUrl';

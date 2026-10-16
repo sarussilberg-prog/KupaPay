@@ -130,7 +130,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public._insert_expense_from_recurring_series(public.recurring_expense_series, date) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public._insert_expense_from_recurring_series(public.recurring_expense_series, date) FROM PUBLIC; -- safe-breaking: new Pro recurring RPCs only
 
 CREATE OR REPLACE FUNCTION public._advance_recurring_next_date(
     p_from DATE,
@@ -258,7 +258,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.create_recurring_expense_series(
     uuid, text, numeric, text, text, date, text, uuid, text, jsonb, text, text
-) FROM PUBLIC, anon;
+) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.create_recurring_expense_series(
     uuid, text, numeric, text, text, date, text, uuid, text, jsonb, text, text
 ) TO authenticated;
@@ -330,7 +330,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.update_recurring_expense_series(
     uuid, text, numeric, text, text, uuid, text, jsonb, text
-) FROM PUBLIC, anon;
+) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.update_recurring_expense_series(
     uuid, text, numeric, text, text, uuid, text, jsonb, text
 ) TO authenticated;
@@ -368,7 +368,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.stop_recurring_expense_series(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.stop_recurring_expense_series(uuid) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.stop_recurring_expense_series(uuid) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.get_recurring_series_for_expense(p_expense_id uuid)
@@ -396,7 +396,7 @@ AS $$
       );
 $$;
 
-REVOKE ALL ON FUNCTION public.get_recurring_series_for_expense(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.get_recurring_series_for_expense(uuid) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.get_recurring_series_for_expense(uuid) TO authenticated;
 
 -- Cron / service_role: generate due occurrences (idempotent).
@@ -446,5 +446,5 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.generate_due_recurring_expenses(int) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.generate_due_recurring_expenses(int) FROM PUBLIC, anon, authenticated; -- safe-breaking: cron-only RPC
 GRANT EXECUTE ON FUNCTION public.generate_due_recurring_expenses(int) TO service_role;
