@@ -872,7 +872,8 @@
             "noteChangedByYou": "Cambiaste la nota · {{group}}",
             "noteChangedBy": "{{name}} cambió la nota · {{group}}",
             "friendRequestRejectedByThem": "{{name}} rechazó tu solicitud de amistad",
-            "settleReminder": "{{name}} te envió un recordatorio para saldar cuentas en {{group}}"
+            "settleReminder": "{{name}} te envió un recordatorio para saldar cuentas en {{group}}",
+            "tripBudgetAlert": "Alerta de presupuesto del viaje en {{group}}"
         },
         "addedExpense": "añadió un gasto",
         "settledPayment": "realizó un pago",
@@ -1267,6 +1268,19 @@
             "enable": "Recordatorios automáticos de liquidación",
             "lockedBody": "Pro envía recordatorios según tu intervalo (mínimo cada 3 días).",
             "intervalDays": "Cada {{count}} días"
+        },
+        "tripBudget": {
+            "title": "Presupuesto del viaje",
+            "lockedBody": "Tope de gasto y alertas al 80 % y 100 %.",
+            "upgrade": "Mejorar a Pro",
+            "set": "Definir presupuesto",
+            "edit": "Editar",
+            "clear": "Quitar presupuesto",
+            "emptyHint": "Sin presupuesto — pulsa «Definir presupuesto».",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "sheetTitle": "Presupuesto del viaje",
+            "sheetBody": "Solo cuenta gastos en la moneda del presupuesto.",
+            "amountPlaceholder": "Importe del presupuesto"
         }
     },
     "updateRequired": {

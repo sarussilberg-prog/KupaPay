@@ -53,8 +53,10 @@ import {
 import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
 import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
+import { isProPerkUnlocked } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { TripBudgetSection } from '../../components/budget/TripBudgetSection';
 import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -332,6 +334,10 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
     const { data: proStatus } = useProStatusQuery(groupId);
     const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
+    const tripBudgetUnlocked = isProPerkUnlocked(
+        proStatus?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -965,6 +971,18 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                         />
                         <UnassignedTripPassBanner groupId={groupId} />
                         <IncludedTripPassBanner groupId={groupId} />
+                        <TripBudgetSection
+                            groupId={groupId}
+                            defaultCurrency={displayGroup.defaultCurrency}
+                            expenses={groupExpenses}
+                            unlocked={tripBudgetUnlocked}
+                            onUpgrade={() =>
+                                navigation.navigate('Paywall', {
+                                    featureKey: 'trip_budget',
+                                    groupId,
+                                })
+                            }
+                        />
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                                 <AppIcon name="search" size={18} color={colors.gray500} />

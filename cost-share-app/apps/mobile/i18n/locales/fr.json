@@ -871,7 +871,8 @@
             "noteChangedByYou": "Note modifiée par vous · {{group}}",
             "noteChangedBy": "Note modifiée par {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} a refusé votre demande d'ami",
-            "settleReminder": "{{name}} vous a envoyé un rappel pour régler vos comptes dans {{group}}"
+            "settleReminder": "{{name}} vous a envoyé un rappel pour régler vos comptes dans {{group}}",
+            "tripBudgetAlert": "Alerte budget voyage dans {{group}}"
         },
         "addedExpense": "a ajouté une dépense",
         "settledPayment": "a effectué un remboursement",
@@ -1265,6 +1266,19 @@
             "enable": "Rappels automatiques de règlement",
             "lockedBody": "Pro envoie des rappels selon votre intervalle (minimum 3 jours).",
             "intervalDays": "Tous les {{count}} jours"
+        },
+        "tripBudget": {
+            "title": "Budget du voyage",
+            "lockedBody": "Plafond de dépenses et alertes à 80 % et 100 %.",
+            "upgrade": "Passer à Pro",
+            "set": "Définir le budget",
+            "edit": "Modifier",
+            "clear": "Supprimer le budget",
+            "emptyHint": "Pas encore de budget — touchez « Définir le budget ».",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "sheetTitle": "Budget du voyage",
+            "sheetBody": "Total des dépenses dans la devise du budget uniquement.",
+            "amountPlaceholder": "Montant du budget"
         }
     },
     "updateRequired": {

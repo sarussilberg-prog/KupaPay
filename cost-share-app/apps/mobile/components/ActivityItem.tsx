@@ -137,6 +137,7 @@ export const ActivityItem = React.memo(function ActivityItem({
             case 'group_deleted':
             case 'group_note_changed':
             case 'settle_up_reminder':
+            case 'trip_budget_alert':
                 metaText = timestamp;
                 break;
             case 'expense_added':

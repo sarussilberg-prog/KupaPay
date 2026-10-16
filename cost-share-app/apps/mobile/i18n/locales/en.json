@@ -871,7 +871,8 @@
             "noteChangedByYou": "Note changed by you · {{group}}",
             "noteChangedBy": "Note changed by {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} declined your friend request",
-            "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}"
+            "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}",
+            "tripBudgetAlert": "Trip budget alert in {{group}}"
         },
         "addedExpense": "added an expense",
         "settledPayment": "settled a payment",
@@ -1196,6 +1197,19 @@
             "enable": "Automatic settle-up reminders",
             "lockedBody": "Pro can nudge members to settle on a schedule you choose (minimum every 3 days).",
             "intervalDays": "Every {{count}} days"
+        },
+        "tripBudget": {
+            "title": "Trip budget",
+            "lockedBody": "Set a spending cap for this trip and get alerts at 80% and 100%.",
+            "upgrade": "Upgrade to Pro",
+            "set": "Set budget",
+            "edit": "Edit",
+            "clear": "Remove budget",
+            "emptyHint": "No budget yet — tap Set budget to add one.",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "sheetTitle": "Trip budget",
+            "sheetBody": "Totals include expenses in the budget currency only.",
+            "amountPlaceholder": "Budget amount"
         }
     },
     "remind": {

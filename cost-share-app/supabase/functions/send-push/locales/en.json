@@ -32,5 +32,6 @@
     "group_created": "Group created",
     "group_deleted": "Deleted by {actor}",
     "group_note_changed": "Note changed by {actor}",
-    "settle_up_reminder": "Reminder from {actor}"
+    "settle_up_reminder": "Reminder from {actor}",
+    "trip_budget_alert": "Trip budget update"
 }

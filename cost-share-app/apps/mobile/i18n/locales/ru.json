@@ -887,7 +887,8 @@
             "noteChangedByYou": "Вы изменили заметку · {{group}}",
             "noteChangedBy": "{{name}} изменил(а) заметку · {{group}}",
             "friendRequestRejectedByThem": "{{name}} отклонил(а) ваш запрос в друзья",
-            "settleReminder": "{{name}} напоминает вам о расчёте в группе {{group}}"
+            "settleReminder": "{{name}} напоминает вам о расчёте в группе {{group}}",
+            "tripBudgetAlert": "Оповещение о бюджете поездки в {{group}}"
         },
         "addedExpense": "добавил(а) расход",
         "settledPayment": "записал(а) платёж",
@@ -1283,6 +1284,19 @@
             "enable": "Автонапоминания о расчётах",
             "lockedBody": "Pro отправляет напоминания по расписанию (минимум раз в 3 дня).",
             "intervalDays": "Каждые {{count}} дн."
+        },
+        "tripBudget": {
+            "title": "Бюджет поездки",
+            "lockedBody": "Лимит расходов и оповещения при 80% и 100%.",
+            "upgrade": "Перейти на Pro",
+            "set": "Задать бюджет",
+            "edit": "Изменить",
+            "clear": "Удалить бюджет",
+            "emptyHint": "Бюджет не задан — нажмите «Задать бюджет».",
+            "progress": "{{spent}} / {{budget}} {{currency}} ({{percent}}%)",
+            "sheetTitle": "Бюджет поездки",
+            "sheetBody": "Учитываются только расходы в валюте бюджета.",
+            "amountPlaceholder": "Сумма бюджета"
         }
     },
     "updateRequired": {
