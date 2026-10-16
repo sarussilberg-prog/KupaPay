@@ -84,7 +84,8 @@ END $$;
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.get_group_messages(
     p_group_id UUID,
-    p_limit INT DEFAULT 100
+    p_limit INT DEFAULT 100,
+    p_before TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS SETOF public.group_messages
 LANGUAGE plpgsql
@@ -105,6 +106,7 @@ BEGIN
     FROM public.group_messages m
     WHERE m.group_id = p_group_id
       AND m.is_deleted = FALSE
+      AND (p_before IS NULL OR m.created_at < p_before)
     ORDER BY m.created_at DESC
     LIMIT v_limit;
 END;
@@ -203,12 +205,12 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.get_group_messages(UUID, INT) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.get_group_messages(UUID, INT, TIMESTAMPTZ) FROM PUBLIC, anon;
 REVOKE EXECUTE ON FUNCTION public.create_group_message(UUID, TEXT) FROM PUBLIC, anon;
 REVOKE EXECUTE ON FUNCTION public.update_group_message(UUID, TEXT) FROM PUBLIC, anon;
 REVOKE EXECUTE ON FUNCTION public.delete_group_message(UUID) FROM PUBLIC, anon;
 
-GRANT EXECUTE ON FUNCTION public.get_group_messages(UUID, INT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_group_messages(UUID, INT, TIMESTAMPTZ) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.create_group_message(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.update_group_message(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.delete_group_message(UUID) TO authenticated;

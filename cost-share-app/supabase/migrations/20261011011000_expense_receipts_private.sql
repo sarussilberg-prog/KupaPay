@@ -1,7 +1,7 @@
 -- Private expense-receipts bucket: member-scoped SELECT + migrate public URLs to paths.
 
 UPDATE storage.buckets
-SET public = false
+SET public = false -- safe-breaking: private bucket + signed URLs; public URL migration in same file (#111)
 WHERE id = 'expense-receipts';
 
 DROP POLICY IF EXISTS "Expense receipts are publicly readable" ON storage.objects; -- safe-breaking: security stack #113; policy/GRANT replaced in same migration

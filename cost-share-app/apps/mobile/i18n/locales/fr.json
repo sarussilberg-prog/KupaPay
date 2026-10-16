@@ -414,7 +414,19 @@
             "feedPaidForYouAndOthers_one": "Payé pour vous et {{count}} autre personne dans le partage",
             "feedPaidForYouAndOthers_other": "Payé pour vous et {{count}} autres personnes dans le partage",
             "feedPaidExcludingYou_one": "Payé pour {{count}} personne, sans vous dans le partage",
-            "feedPaidExcludingYou_other": "Payé pour {{count}} personnes, sans vous dans le partage"
+            "feedPaidExcludingYou_other": "Payé pour {{count}} personnes, sans vous dans le partage",
+            "toNPeople_two": "Pour {{count}} personnes",
+            "splitBetweenCount_two": "Partagé entre · {{count}} personnes",
+            "paidForSplitters_two": "Payé pour {{count}} personnes dans le partage",
+            "feedYouPaid_two": "Vous avez payé pour {{count}} personnes",
+            "feedPaidForYouAndOthers_two": "Payé pour vous et {{count}} autres personnes dans le partage",
+            "feedPaidExcludingYou_two": "Payé pour {{count}} personnes, sans vous dans le partage",
+            "toNPeople_many": "Pour {{count}} personnes",
+            "splitBetweenCount_many": "Partagé entre · {{count}} personnes",
+            "paidForSplitters_many": "Payé pour {{count}} personnes dans le partage",
+            "feedYouPaid_many": "Vous avez payé pour {{count}} personnes",
+            "feedPaidForYouAndOthers_many": "Payé pour vous et {{count}} autres personnes dans le partage",
+            "feedPaidExcludingYou_many": "Payé pour {{count}} personnes, sans vous dans le partage"
         },
         "feedDetail": {
             "expenseTitle": "Détails de la dépense",
@@ -456,7 +468,9 @@
             "missingSomeoneCta": "Vous ne les trouvez pas ? Ajoutez des amis"
         },
         "memberCount_one": "{{count}} personne",
-        "memberCount_other": "{{count}} personnes"
+        "memberCount_other": "{{count}} personnes",
+        "memberCount_two": "{{count}} personnes",
+        "memberCount_many": "{{count}} personnes"
     },
     "expenses": {
         "title": "Dépenses",
@@ -621,7 +635,9 @@
             "paypal": "PayPal",
             "credit_card": "Carte bancaire",
             "other": "Autre"
-        }
+        },
+        "paymentsToSettle_two": "{{count}} virements pour que tout le monde soit à jour",
+        "paymentsToSettle_many": "{{count}} virements pour que tout le monde soit à jour"
     },
     "settings": {
         "title": "Paramètres",
