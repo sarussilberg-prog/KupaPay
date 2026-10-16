@@ -176,44 +176,44 @@ jobs:
           REPO: ${{ github.repository }}
         run: gh pr merge "$PR_NUMBER" --squash --repo "$REPO" --auto
 
-      - name: Check out dev (post-merge)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: dev
           fetch-depth: 0
-          token: ${{ secrets.ADMIN_PAT }}
 
-      # Patch-bump the App Version SSOT on every merge to dev (except version-bump
-      # commits themselves, to prevent recursion). Commits the bump directly to dev:
-      # dev requires status checks (Lint, Mobile tests, SonarCloud) before any push,
-      # including direct ones, so pushing with GITHUB_TOKEN gets rejected (GH006) —
-      # a fresh bump commit has no checks recorded against it. An admin PAT bypasses
-      # required status checks (enforce_admins is false). CI only runs on
-      # pull_request (not push), so there is no recursion. Mirrors the direct-commit
-      # approach used by bump-version-main.yml — no gh pr create, which the repo's
-      # "Allow GitHub Actions to create and approve pull requests" setting blocks.
-      - name: Bump patch version on dev
+      # Version bump via a normal PR (GITHUB_TOKEN) — no ADMIN_PAT bypass of branch protection (#146, #213).
+      - name: Bump patch version via follow-up PR
         if: "!startsWith(github.head_ref, 'chore/version-bump/')"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          for attempt in 1 2 3; do
-            git fetch origin dev
-            git reset --hard origin/dev
-            current=$(jq -r '.version' "$VERSION_FILE")
-            IFS='.' read -r major minor patch <<< "$current"
-            new="${major}.${minor}.$((patch + 1))"
-            jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
-            git add "$VERSION_FILE"
-            git commit -m "chore: bump version ${current} → ${new}"
-            if git push origin HEAD:dev; then
-              echo "✅ Bumped ${current} → ${new}"
-              exit 0
-            fi
-            echo "dev moved during bump; retrying (${attempt}/3)"
-          done
-          echo "::error::failed to bump version after 3 attempts"
-          exit 1
+          git fetch origin dev
+          git checkout dev
+          git pull origin dev
+
+          current=$(jq -r '.version' "$VERSION_FILE")
+          IFS='.' read -r major minor patch <<< "$current"
+          new="${major}.${minor}.$((patch + 1))"
+          jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
+          git add "$VERSION_FILE"
+          git commit -m "chore: bump version ${current} → ${new}"
+
+          BR="chore/version-bump/run-${{ github.run_id }}"
+          git checkout -b "$BR"
+          git push origin "$BR"
+
+          if ! gh pr create --repo "$REPO" --base dev --head "$BR" \
+            --title "chore: bump version ${current} → ${new}" \
+            --body "Automated SSOT patch bump after a dev merge. Merges only after required CI checks pass (replaces ADMIN_PAT direct push). Related: #146 #213." \
+            --draft; then
+            echo "::warning::Could not open version-bump PR (enable Actions to create PRs, or bump manually)."
+            exit 0
+          fi
+          gh pr merge "$BR" --repo "$REPO" --squash --auto || true
+          echo "✅ Version bump PR opened for ${current} → ${new}"
