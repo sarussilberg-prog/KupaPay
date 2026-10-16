@@ -10,7 +10,7 @@ import {
     isLanguage,
     isRtlLanguage,
     languageToIntlLocale,
-    legalDocumentLocale,
+    resolveLegalDocumentLocale,
     type LegalSlug,
 } from '@cost-share/shared';
 
@@ -26,7 +26,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
 
     const uiLangCode = i18n.language.split('-')[0];
     const uiLanguage = isLanguage(uiLangCode) ? uiLangCode : 'en';
-    const fallbackLocale = legalDocumentLocale(uiLanguage);
+    const fallbackLocale = resolveLegalDocumentLocale(uiLanguage);
     const docLocale = query.data?.locale ?? fallbackLocale;
     const isRtl = isRtlLanguage(uiLanguage);
     const styles = useMemo(() => buildMarkdownStyles(isRtl), [isRtl]);
@@ -37,10 +37,9 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
 
     if (!visible) return null;
 
-    const legalDateLanguage = docLocale === 'he' ? 'he' : 'en';
     let formattedDate = '';
     if (query.data) {
-        formattedDate = new Intl.DateTimeFormat(languageToIntlLocale(legalDateLanguage), {
+        formattedDate = new Intl.DateTimeFormat(languageToIntlLocale(docLocale), {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

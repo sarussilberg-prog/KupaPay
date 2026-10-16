@@ -45,7 +45,9 @@
     "audit:ci": "bash scripts/ci-npm-audit.sh",
     "test:performance": "npm test --workspace=@cost-share/mobile -- --testPathPattern=performance --ci",
     "size": "size-limit",
-    "size:ci": "bash scripts/ci-bundle-size.sh"
+    "size:ci": "bash scripts/ci-bundle-size.sh",
+    "generate:legal": "node scripts/generate-legal-bundle.mjs",
+    "check:legal": "bash scripts/ci-legal-locale-parity.sh"
   },
   "devDependencies": {
     "@lhci/cli": "^0.14.0",

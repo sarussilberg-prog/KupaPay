@@ -88,6 +88,25 @@ jobs:
       - run: test -x node_modules/.bin/jest || npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
 
+  legal-locale-parity:
+    name: Legal locale parity
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/jest || npm ci --ignore-scripts
+      - run: bash scripts/ci-legal-locale-parity.sh
+
   deno-edge-functions:
     name: Deno edge (${{ matrix.function }})
     strategy:
@@ -175,6 +194,7 @@ jobs:
         lint,
         typecheck,
         test,
+        legal-locale-parity,
         deno-edge-functions,
         deno-edge-bundle-check,
         migration-versions,
