@@ -56,6 +56,7 @@ import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTrip
 import { isProPerkUnlocked } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
+import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
 import { TripBudgetSection } from '../../components/budget/TripBudgetSection';
 import { shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
@@ -110,7 +111,7 @@ import {
     type FocusSessionState,
     type GroupDetailFocusFeedItem,
 } from '../../lib/groupDetailFocus';
-import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
+import { getAvatarUrl, getDisplayName, getDisplayNameForMember } from '../../lib/userDisplay';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
 import {
     useDeleteSettlementMutation,
@@ -327,6 +328,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         settlements: Settlement[];
     } | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [insightsOpen, setInsightsOpen] = useState(false);
     const [membersSheetOpen, setMembersSheetOpen] = useState(false);
     const [archiveBusy, setArchiveBusy] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -334,6 +336,10 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
     const { data: proStatus } = useProStatusQuery(groupId);
     const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
+    const insightsUnlocked = isProPerkUnlocked(
+        proStatus?.hasPro === true,
+        KUPAPAY_PRO_ENABLED,
+    );
     const tripBudgetUnlocked = isProPerkUnlocked(
         proStatus?.hasPro === true,
         KUPAPAY_PRO_ENABLED,
@@ -424,6 +430,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         });
         return map;
     }, [memberLites, feedParticipants]);
+
+    const memberNameById = useMemo(() => {
+        const map: Record<string, string> = {};
+        memberLites.forEach(m => {
+            map[m.userId] = getDisplayNameForMember(m, t);
+        });
+        return map;
+    }, [memberLites, t]);
 
     const loadAll = useCallback(
         async (options?: { force?: boolean }) => {
@@ -1269,6 +1283,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             testID="group-menu-export"
                         />
                         <DetailMenuRow
+                            label={t('pro.spendingInsights.menuOption')}
+                            onPress={() => {
+                                setMenuOpen(false);
+                                setInsightsOpen(true);
+                            }}
+                            testID="group-menu-insights"
+                        />
+                        <DetailMenuRow
                             label={
                                 isArchivedByMe
                                     ? t('groups.archive.unarchiveCta')
@@ -1290,6 +1312,22 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                     </View>
                 </Pressable>
             </Modal>
+
+            <SpendingInsightsSheet
+                visible={insightsOpen}
+                groupId={groupId}
+                defaultCurrency={displayGroup?.defaultCurrency ?? 'USD'}
+                memberNames={memberNameById}
+                unlocked={insightsUnlocked}
+                onClose={() => setInsightsOpen(false)}
+                onUpgrade={() => {
+                    setInsightsOpen(false);
+                    navigation.navigate('Paywall', {
+                        featureKey: 'spending_insights',
+                        groupId,
+                    });
+                }}
+            />
 
             <GroupExportSheet
                 visible={exportSheetOpen}

@@ -915,6 +915,7 @@
         "currency": "Валюта",
         "amount": "Сумма",
         "submit": "Записать платёж",
+        "paidInCurrency": "Платёж записан в {{currency}} (долги могут быть в других валютах)",
         "warnPartial": "Частичный платёж — останется долг {{remaining}}",
         "warnOverpay": "Сумма больше долга — получателю придётся вернуть {{flipAmount}}",
         "edit": "Изменить платёж",
@@ -1052,6 +1053,16 @@
         "noFriendsYet": "Общих групп пока нет",
         "friendBreakdownTitle": "Разбивка по группам",
         "friendBreakdownEmpty": "Общих групп с этим другом нет.",
+        "friendCrossNetLabel": "Итого по всем группам",
+        "friendSettleOneCurrency": "Закрыть в одной валюте",
+        "friendSettleAll": "Закрыть всё с {{name}}",
+        "friendCrossSettlePickTitle": "Выберите валюту расчёта",
+        "friendCrossSettleConfirmTitle": "Подтвердить расчёт между группами",
+        "friendCrossSettleConfirmButton": "Записать платежи",
+        "friendCrossSettleNetLabel": "Итого в выбранной валюте",
+        "friendCrossSettleYouPay": "Вы платите {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} платит вам",
+        "friendCrossSettleGroupsHint": "Будет записано платежей в {{count}} группе(ах)",
         "friendMoreCurrencies": "ещё +{{count}}"
     },
     "legal": {
@@ -1279,11 +1290,27 @@
         "recurring": {
             "lockedBody": "Автоматизируйте аренду, подписки и другие повторяющиеся расходы с Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Заполнить из текста чека",
+            "sheetTitle": "Текст чека",
+            "sheetBody": "Вставьте текст чека. Мы предложим сумму и валюту — вы подтверждаете.",
+            "placeholder": "Вставьте текст…",
+            "apply": "Применить"
+        },
         "smartReminder": {
             "sheetTitle": "Умные напоминания",
             "enable": "Автонапоминания о расчётах",
             "lockedBody": "Pro отправляет напоминания по расписанию (минимум раз в 3 дня).",
             "intervalDays": "Каждые {{count}} дн."
+        },
+        "spendingInsights": {
+            "menuOption": "Аналитика расходов",
+            "sheetTitle": "Аналитика расходов",
+            "lockedBody": "Суммы по категориям, плательщикам и неделям.",
+            "upgrade": "Перейти на Pro",
+            "empty": "Пока нет расходов в этой валюте.",
+            "uncategorized": "Без категории",
+            "tab": { "category": "Категория", "member": "Оплатил", "week": "Недели" }
         },
         "tripBudget": {
             "title": "Бюджет поездки",
