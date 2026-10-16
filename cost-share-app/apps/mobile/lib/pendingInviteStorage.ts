@@ -20,7 +20,7 @@ export async function loadPersistedPendingInvite(): Promise<PendingInvite | null
         if (
             (parsed.kind === 'friend' || parsed.kind === 'group') &&
             typeof parsed.token === 'string' &&
-            parsed.token.length >= 10 &&
+            parsed.token.length >= 12 &&
             parsed.token.length <= 14 &&
             /^[A-Za-z0-9_-]+$/.test(parsed.token)
         ) {
