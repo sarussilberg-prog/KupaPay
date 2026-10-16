@@ -172,6 +172,11 @@ function App() {
 
   const processOAuthCallbackUrl = useCallback(async (url: string) => {
     const { error } = await handleAuthRedirectUrl(url);
+    if (error?.code === 'account_restorable') {
+      useAppStore.getState().setPendingAccountRestore(true);
+      useAppStore.getState().setSession(null);
+      return error;
+    }
     if (error?.code === 'account_deleted') {
       await rejectDeactivatedSession();
     }
@@ -218,10 +223,16 @@ function App() {
         acceptSessionIfAllowedImpl(nextSession, mode, {
           setSession: store.setSession,
           setPendingDeactivationNotice: store.setPendingDeactivationNotice,
+          setPendingAccountRestore: store.setPendingAccountRestore,
         });
 
       const processOAuth = async (url: string) => {
         const { error } = await handleAuthRedirectUrl(url);
+        if (error?.code === 'account_restorable') {
+          store.setPendingAccountRestore(true);
+          store.setSession(null);
+          return;
+        }
         if (error?.code === 'account_deleted') {
           void signalDeactivatedAccount(store.setPendingDeactivationNotice);
           await clearStaleAuthSession();

@@ -43,8 +43,9 @@ BEGIN
     END IF;
 
     SELECT banned_until INTO v_banned FROM auth.users WHERE id = v_user;
-    IF v_banned IS NULL OR v_banned < NOW() THEN
-        RAISE EXCEPTION 'Case B failed: auth.users.banned_until should be future/infinity, got %', v_banned;
+    -- During the 30-day grace window we do not ban auth.users (self-restore via OAuth).
+    IF v_banned IS NOT NULL THEN
+        RAISE EXCEPTION 'Case B failed: auth.users.banned_until should be NULL during grace, got %', v_banned;
     END IF;
 
     SELECT COUNT(*) INTO v_sessions FROM auth.sessions WHERE user_id = v_user;

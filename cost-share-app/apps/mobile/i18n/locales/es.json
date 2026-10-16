@@ -1153,7 +1153,7 @@
         "warningBullet1": "Ya no podrás iniciar sesión.",
         "warningBullet2": "Tu nombre y tu historial seguirán visibles para los amigos con quienes compartiste grupos.",
         "warningBullet3": "Los saldos pendientes seguirán abiertos: sáldalos antes si no quieres que permanezcan.",
-        "warningBullet4": "Esta acción es irreversible. Escríbenos a {{email}} para restaurarla.",
+        "warningBullet4": "Puedes restaurar en 30 días iniciando sesión de nuevo. Después, la eliminación es permanente.",
         "continueBtn": "Continuar",
         "confirmTitle": "Escribe tu correo para confirmar",
         "typeEmailHint": "Para confirmar la eliminación, escribe:",
@@ -1166,7 +1166,14 @@
         "openBalancesWarningBody": "Tus amigos verán estas deudas a nombre de 'Usuario eliminado'.",
         "openBalancesCta": "Saldar cuentas ahora",
         "reSignupBlockedTitle": "Cuenta eliminada",
-        "reSignupBlocked": "Esta cuenta se eliminó. Escribe a {{email}} para restaurarla."
+        "reSignupBlocked": "Esta cuenta se eliminó. Escribe a {{email}} para restaurarla.",
+        "restoreTitle": "¿Restaurar tu cuenta?",
+        "restoreMessage": "Esta cuenta se eliminó recientemente. Puedes restaurarla ahora con tus grupos y saldos.",
+        "restoreBtn": "Restaurar cuenta",
+        "restoredToast": "Cuenta restaurada",
+        "restoreFailed": "No se pudo restaurar. Inicia sesión de nuevo o contacta soporte.",
+        "restoreReauthRequired": "Por seguridad, inicia sesión de nuevo y pulsa Restaurar.",
+        "restoreWindowExpired": "El plazo de restauración terminó. Contacta soporte."
     },
     "consolidation": {
         "convertButton": "Convertir moneda",

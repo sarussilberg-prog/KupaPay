@@ -7,7 +7,12 @@ jest.mock('../../services/auth.service', () => ({
     clearLocalAuthSession: (...a: unknown[]) => mockClearLocalAuthSession(...a),
 }));
 
-import { deleteMyAccount, getMyOpenBalances } from '../../services/account.service';
+import {
+    deleteMyAccount,
+    getMyOpenBalances,
+    getMyAccountDeletionState,
+    restoreMyAccount,
+} from '../../services/account.service';
 
 beforeEach(() => {
     mockRpc.mockReset();
@@ -72,6 +77,31 @@ describe('getMyOpenBalances', () => {
         expect(result.totalOwed).toBe(150);
         expect(result.totalOwing).toBe(25);
         expect(result.currency).toBe('ILS');
+    });
+
+    it('maps get_my_account_deletion_state RPC', async () => {
+        mockRpc.mockResolvedValue({
+            data: {
+                isDeleted: true,
+                canRestore: true,
+                deletedAt: '2026-01-01T00:00:00Z',
+                graceEndsAt: '2026-01-31T00:00:00Z',
+            },
+            error: null,
+        });
+
+        const state = await getMyAccountDeletionState();
+
+        expect(mockRpc).toHaveBeenCalledWith('get_my_account_deletion_state');
+        expect(state.isDeleted).toBe(true);
+        expect(state.canRestore).toBe(true);
+    });
+
+    it('calls restore_my_account RPC', async () => {
+        mockRpc.mockResolvedValue({ data: null, error: null });
+        const result = await restoreMyAccount();
+        expect(result).toEqual({ ok: true });
+        expect(mockRpc).toHaveBeenCalledWith('restore_my_account');
     });
 
     it('falls back to ILS currency on RPC error', async () => {

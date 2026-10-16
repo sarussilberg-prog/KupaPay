@@ -18,11 +18,12 @@ import {
 import { APP_WEB_ORIGIN } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { signalDeactivatedAccount } from '../lib/signalDeactivatedAccount';
+import { resolveAccountDeletionGate } from '../lib/accountDeletionGate';
 import { useAppStore } from '../store';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export type AuthErrorCode = 'account_deleted' | 'generic';
+export type AuthErrorCode = 'account_deleted' | 'account_restorable' | 'generic';
 
 export interface AuthError {
   code: AuthErrorCode;
@@ -33,6 +34,18 @@ async function rejectDeletedAccount(): Promise<{ error: AuthError }> {
   await clearStaleAuthSession();
   await signalDeactivatedAccount(useAppStore.getState().setPendingDeactivationNotice);
   return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+}
+
+async function gateFreshSignInSession(): Promise<{ error: AuthError | null }> {
+  const gate = await resolveAccountDeletionGate();
+  if (gate === 'active') {
+    return { error: null };
+  }
+  if (gate === 'restorable') {
+    useAppStore.getState().setPendingAccountRestore(true);
+    return { error: { code: 'account_restorable', message: 'account restorable' } satisfies AuthError };
+  }
+  return rejectDeletedAccount();
 }
 
 function toAuthError(err: unknown): AuthError {
@@ -128,9 +141,9 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (error) return { error: toAuthError(error) };
 
-      const allowed = await isAuthSessionAllowed();
-      if (!allowed) {
-        return rejectDeletedAccount();
+      const gated = await gateFreshSignInSession();
+      if (gated.error) {
+        return gated;
       }
 
       return { error: null };
@@ -144,9 +157,9 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
     const { error } = await supabase.auth.setSession({ access_token, refresh_token });
     if (error) return { error: toAuthError(error) };
 
-    const allowed = await isAuthSessionAllowed();
-    if (!allowed) {
-      return rejectDeletedAccount();
+    const gated = await gateFreshSignInSession();
+    if (gated.error) {
+      return gated;
     }
 
     return { error: null };
@@ -255,9 +268,9 @@ async function signInWithGoogleNativeIos(): Promise<{ error: AuthError | null }>
   });
   if (error) return { error: toAuthError(error) };
 
-  const allowed = await isAuthSessionAllowed();
-  if (!allowed) {
-    return rejectDeletedAccount();
+  const gated = await gateFreshSignInSession();
+  if (gated.error) {
+    return gated;
   }
 
   return { error: null };
@@ -304,9 +317,9 @@ async function signInWithAppleNative(): Promise<{ error: AuthError | null }> {
     });
     if (error) return { error: toAuthError(error) };
 
-    const allowed = await isAuthSessionAllowed();
-    if (!allowed) {
-      return rejectDeletedAccount();
+    const gated = await gateFreshSignInSession();
+    if (gated.error) {
+      return gated;
     }
 
     // Apple returns fullName only on the FIRST authorization; persist it so the profile

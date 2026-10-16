@@ -172,6 +172,7 @@ LOCAL_SKIP=(
   get_group_pairwise_debts.test.sql
   admin_portal.test.sql
   delete_my_account.test.sql
+  account_deletion_lifecycle.test.sql
   security_support_admin.test.sql
   group_friend_activity_events.test.sql
   profile_invite_token_acl.test.sql

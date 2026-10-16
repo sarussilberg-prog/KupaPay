@@ -40,6 +40,10 @@ interface AppState {
     pendingDeactivationNotice: boolean;
     setPendingDeactivationNotice: (value: boolean) => void;
 
+    /** Grace-period restore offered after OAuth while profile is still soft-deleted. */
+    pendingAccountRestore: boolean;
+    setPendingAccountRestore: (value: boolean) => void;
+
     // Favorite group — the group the "Favorite Group" tab opens on. Persisted.
     // Setter only stores the id; the effective/fallback resolution lives in
     // lib/favoriteGroup.ts so it can be unit-tested without a store.
@@ -81,6 +85,9 @@ export const useAppStore = create<AppState>()(
             // Deactivation notice flag
             pendingDeactivationNotice: false,
             setPendingDeactivationNotice: (value) => set({ pendingDeactivationNotice: value }),
+
+            pendingAccountRestore: false,
+            setPendingAccountRestore: (value) => set({ pendingAccountRestore: value }),
 
             // Favorite group state
             favoriteGroupId: null,

@@ -17,6 +17,19 @@ export interface OpenBalancesSummary {
     currency: string;
 }
 
+export interface AccountDeletionState {
+    isDeleted: boolean;
+    canRestore: boolean;
+    deletedAt?: string;
+    graceEndsAt?: string;
+    hardPurged?: boolean;
+}
+
+export interface RestoreAccountResult {
+    ok: boolean;
+    error?: string;
+}
+
 interface SummaryRow {
     currency: string;
     owed: number;
@@ -89,4 +102,39 @@ export async function getMyOpenBalances(): Promise<OpenBalancesSummary> {
         totalOwing,
         currency: dominant.currency || FALLBACK_CURRENCY,
     };
+}
+
+/** Deletion / grace-period state for the signed-in user (works while profile is inactive). */
+export async function getMyAccountDeletionState(): Promise<AccountDeletionState> {
+    const { data, error } = await supabase.rpc('get_my_account_deletion_state');
+    if (error || !data || typeof data !== 'object') {
+        return { isDeleted: false, canRestore: false };
+    }
+    const row = data as Record<string, unknown>;
+    return {
+        isDeleted: Boolean(row.isDeleted),
+        canRestore: Boolean(row.canRestore),
+        deletedAt: typeof row.deletedAt === 'string' ? row.deletedAt : undefined,
+        graceEndsAt: typeof row.graceEndsAt === 'string' ? row.graceEndsAt : undefined,
+        hardPurged: Boolean(row.hardPurged),
+    };
+}
+
+/** Self-service restore within the grace window (requires a fresh sign-in JWT). */
+export async function restoreMyAccount(): Promise<RestoreAccountResult> {
+    const { error: rpcError } = await supabase.rpc('restore_my_account');
+    if (rpcError) {
+        captureError(rpcError, {
+            tags: { service: 'account', op: 'restoreMyAccount' },
+        });
+        const msg = rpcError.message ?? '';
+        if (msg.includes('reauthentication_required')) {
+            return { ok: false, error: 'deleteAccount.restoreReauthRequired' };
+        }
+        if (msg.includes('restore_window_expired')) {
+            return { ok: false, error: 'deleteAccount.restoreWindowExpired' };
+        }
+        return { ok: false, error: 'deleteAccount.restoreFailed' };
+    }
+    return { ok: true };
 }

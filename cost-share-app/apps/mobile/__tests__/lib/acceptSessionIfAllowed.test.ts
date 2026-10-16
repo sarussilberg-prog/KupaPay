@@ -22,12 +22,18 @@ jest.mock('../../services/users.service', () => ({
     hydrateCurrentUserProfile: (...args: unknown[]) => mockHydrateProfile(...args),
 }));
 
+const mockResolveGate = jest.fn();
+jest.mock('../../lib/accountDeletionGate', () => ({
+    resolveAccountDeletionGate: (...args: unknown[]) => mockResolveGate(...args),
+}));
+
 const fakeSession = { user: { id: 'u1' } } as unknown as Session;
 
 function makeDeps() {
     return {
         setSession: jest.fn(),
         setPendingDeactivationNotice: jest.fn(),
+        setPendingAccountRestore: jest.fn(),
     };
 }
 
@@ -37,6 +43,8 @@ describe('acceptSessionIfAllowed', () => {
         mockHydrateProfile.mockReset();
         mockClearStaleAuthSession.mockClear();
         mockSignalDeactivated.mockClear();
+        mockResolveGate.mockReset();
+        mockResolveGate.mockResolvedValue('deleted');
     });
 
     it('rejects a null session by calling setSession(null)', async () => {
@@ -91,6 +99,16 @@ describe('acceptSessionIfAllowed', () => {
         const deps = makeDeps();
         await acceptSessionIfAllowed(fakeSession, 'fresh', deps);
         expect(mockSignalDeactivated).toHaveBeenCalled();
+        expect(deps.setSession).toHaveBeenCalledWith(null);
+    });
+
+    it('offers restore when deactivated within grace (fresh) without clearing Supabase session', async () => {
+        mockAssertProfileActive.mockResolvedValue('deactivated');
+        mockResolveGate.mockResolvedValue('restorable');
+        const deps = makeDeps();
+        await acceptSessionIfAllowed(fakeSession, 'fresh', deps);
+        expect(deps.setPendingAccountRestore).toHaveBeenCalledWith(true);
+        expect(mockClearStaleAuthSession).not.toHaveBeenCalled();
         expect(deps.setSession).toHaveBeenCalledWith(null);
     });
 });

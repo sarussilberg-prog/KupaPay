@@ -13,6 +13,10 @@ import { AppIcon } from '../../components/AppIcon';
 import { AppLogoAnimated } from '../../components/AppLogoAnimated';
 import { AppBrandTitle } from '../../components/AppBrandTitle';
 import { DeletedAccountNoticeDialog } from '../../components/DeletedAccountNoticeDialog';
+import { RestoreAccountDialog } from '../../components/RestoreAccountDialog';
+import { restoreMyAccount } from '../../services/account.service';
+import { hydrateCurrentUserProfile } from '../../services/users.service';
+import { supabase } from '../../lib/supabase';
 import { LoginFeatureChips } from '../../components/auth/LoginFeatureChips';
 import { LoginGoogleButton } from '../../components/auth/LoginGoogleButton';
 import { LoginAppleButton } from '../../components/auth/LoginAppleButton';
@@ -41,12 +45,17 @@ export function LoginScreen() {
     const changeAppLanguage = useChangeAppLanguage();
     const pendingDeactivationNotice = useAppStore((state) => state.pendingDeactivationNotice);
     const setPendingDeactivationNotice = useAppStore((state) => state.setPendingDeactivationNotice);
+    const pendingAccountRestore = useAppStore((state) => state.pendingAccountRestore);
+    const setPendingAccountRestore = useAppStore((state) => state.setPendingAccountRestore);
+    const setSession = useAppStore((state) => state.setSession);
     const [loadingProvider, setLoadingProvider] = useState<'apple' | 'google' | null>(null);
     const isAppleLoading = loadingProvider === 'apple';
     const isGoogleLoading = loadingProvider === 'google';
     const isAnyLoading = loadingProvider !== null;
     const [languagePickerVisible, setLanguagePickerVisible] = useState(false);
     const [deletedNoticeVisible, setDeletedNoticeVisible] = useState(false);
+    const [restoreDialogVisible, setRestoreDialogVisible] = useState(false);
+    const [restoreLoading, setRestoreLoading] = useState(false);
 
     const supportEmail = getSupportEmail();
     const deletedNoticeMessage = t('deleteAccount.deactivatedMessage', { email: supportEmail });
@@ -80,6 +89,12 @@ export function LoginScreen() {
         };
     }, [pendingDeactivationNotice, setPendingDeactivationNotice, showDeletedAccountNotice]);
 
+    useEffect(() => {
+        if (pendingAccountRestore) {
+            setRestoreDialogVisible(true);
+        }
+    }, [pendingAccountRestore]);
+
     const handleLanguageChange = useCallback(
         async (lang: import('@cost-share/shared').Language) => {
             setLanguagePickerVisible(false);
@@ -95,6 +110,11 @@ export function LoginScreen() {
             if (error) {
                 // account_deleted is expected business state (user previously deleted their account),
                 // shown via a dedicated dialog — not a bug, so no Sentry capture.
+                if (error.code === 'account_restorable') {
+                    setPendingAccountRestore(true);
+                    setRestoreDialogVisible(true);
+                    return;
+                }
                 if (error.code === 'account_deleted') {
                     showDeletedAccountNotice();
                     return;
@@ -115,11 +135,52 @@ export function LoginScreen() {
         }
     };
 
+    const handleRestoreAccount = async () => {
+        setRestoreLoading(true);
+        try {
+            const result = await restoreMyAccount();
+            if (!result.ok) {
+                handleError(new Error(result.error ?? 'restore failed'), {
+                    toast: { titleKey: result.error ?? 'deleteAccount.restoreFailed' },
+                    tags: { service: 'account', op: 'restoreFromLogin' },
+                });
+                return;
+            }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                handleError(new Error('no session after restore'), {
+                    toast: { titleKey: 'deleteAccount.restoreFailed' },
+                    tags: { service: 'account', op: 'restoreFromLogin' },
+                });
+                return;
+            }
+            const hydration = await hydrateCurrentUserProfile(session.user.id);
+            if (hydration === 'deactivated') {
+                handleError(new Error('still deactivated'), {
+                    toast: { titleKey: 'deleteAccount.restoreFailed' },
+                    tags: { service: 'account', op: 'restoreFromLogin' },
+                });
+                return;
+            }
+            setPendingAccountRestore(false);
+            setRestoreDialogVisible(false);
+            setSession(session);
+            showAppToast({ type: 'success', titleKey: 'deleteAccount.restoredToast' });
+        } finally {
+            setRestoreLoading(false);
+        }
+    };
+
     const handleAppleSignIn = async () => {
         setLoadingProvider('apple');
         try {
             const { error } = await signInWithApple();
             if (error) {
+                if (error.code === 'account_restorable') {
+                    setPendingAccountRestore(true);
+                    setRestoreDialogVisible(true);
+                    return;
+                }
                 if (error.code === 'account_deleted') {
                     showDeletedAccountNotice();
                     return;
@@ -220,6 +281,21 @@ export function LoginScreen() {
                     </Text>
                 </View>
             </SafeAreaView>
+
+            <RestoreAccountDialog
+                visible={restoreDialogVisible}
+                title={t('deleteAccount.restoreTitle')}
+                message={t('deleteAccount.restoreMessage')}
+                restoreLabel={t('deleteAccount.restoreBtn')}
+                cancelLabel={t('common.close')}
+                loading={restoreLoading}
+                onRestore={() => void handleRestoreAccount()}
+                onCancel={() => {
+                    setRestoreDialogVisible(false);
+                    setPendingAccountRestore(false);
+                    void supabase.auth.signOut();
+                }}
+            />
 
             <DeletedAccountNoticeDialog
                 visible={deletedNoticeVisible}
