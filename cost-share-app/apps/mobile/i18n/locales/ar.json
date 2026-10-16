@@ -245,6 +245,8 @@
     },
     "groups": {
         "title": "المجموعات",
+        "listTitle": "مجموعاتي",
+        "newGroupCta": "مجموعة جديدة",
         "createGroup": "إنشاء مجموعة",
         "editGroup": "تعديل المجموعة",
         "favorite": {
@@ -410,6 +412,9 @@
             "showMore_many": "عرض المزيد ({{count}})",
             "showMore_other": "عرض المزيد ({{count}})",
             "showLess": "عرض أقل"
+        },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى"
         },
         "hero": {
             "spentTogether": "المصروف معًا",

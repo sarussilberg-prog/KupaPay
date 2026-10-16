@@ -139,6 +139,12 @@ describe('GroupsListScreen', () => {
         expect(await findByTestId('groups-create-btn')).toBeTruthy();
     });
 
+    it('renders the list title and summary card when groups exist', async () => {
+        queryClient.setQueryData(queryKeys.groups, [makeGroup({})]);
+        const { findByTestId } = render(<GroupsListScreen />);
+        expect(await findByTestId('groups-list-title')).toBeTruthy();
+    });
+
     it('filters groups by member name', async () => {
         queryClient.setQueryData(queryKeys.groups, [
             makeGroup({
@@ -153,6 +159,7 @@ describe('GroupsListScreen', () => {
             }),
         ]);
         const { findByTestId, queryByText, getByText } = render(<GroupsListScreen />);
+        fireEvent.press(await findByTestId('groups-search-btn'));
         const input = await findByTestId('groups-search-input');
         fireEvent.changeText(input, 'bob');
         await waitFor(() => {

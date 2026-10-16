@@ -245,6 +245,8 @@
     },
     "groups": {
         "title": "קופות",
+        "listTitle": "הקופות שלי",
+        "newGroupCta": "קופה חדשה",
         "createGroup": "יצירת קופה",
         "editGroup": "ערוך קופה",
         "favorite": {
@@ -398,6 +400,9 @@
             "noOpenPayments": "אין תשלומים פתוחים",
             "showMore": "הצג עוד {{count}}",
             "showLess": "הצג פחות"
+        },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} במטבעות נוספים"
         },
         "hero": {
             "spentTogether": "הוציאו ביחד",

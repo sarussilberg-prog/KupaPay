@@ -360,6 +360,12 @@ jobs:
           GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
         run: bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
 
+      - name: Destructive SQL guard (new migrations)
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: bash cost-share-app/scripts/supabase-destructive-migration-check.sh
+
   ci-performance:
     name: CI performance
     needs: ci-paths

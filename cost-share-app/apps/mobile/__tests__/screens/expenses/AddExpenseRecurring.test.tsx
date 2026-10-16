@@ -3,6 +3,7 @@ import { fireEvent } from '@testing-library/react-native';
 import { renderWithQuery } from '../../helpers/renderWithQuery';
 import { AddExpenseScreen } from '../../../screens/expenses/AddExpenseScreen';
 import { useAppStore } from '../../../store';
+import type { MyProStatus } from '../../../services/proEntitlements.service';
 
 const mockNavigate = jest.fn();
 
@@ -23,17 +24,12 @@ jest.mock('../../../lib/featureFlags', () => ({
     isProUpsellSurfaceEnabled: () => true,
 }));
 
-type ProStatusMockData = {
-    hasPro: boolean;
-    adminProViewMode?: 'real' | 'force_pro' | 'force_free';
-};
-
 const proStatusMock: {
-    data: ProStatusMockData;
+    data: Partial<MyProStatus> | undefined;
     hasPro: boolean;
     proPerkUnlocked: boolean;
     isLoading: boolean;
-    adminProViewMode: 'real' | 'force_pro' | 'force_free';
+    adminProViewMode: MyProStatus['adminProViewMode'];
 } = {
     data: { hasPro: false, adminProViewMode: 'real' },
     hasPro: false,
