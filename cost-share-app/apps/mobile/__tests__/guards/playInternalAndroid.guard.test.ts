@@ -20,6 +20,9 @@ describe('Play Internal Android release workflow', () => {
         expect(yaml).toContain('::error::EXPO_PUBLIC_REVENUECAT_ANDROID_KEY is required');
         expect(yaml).toContain('Preflight secrets');
         expect(yaml).toContain('ready=false');
+        expect(yaml).toContain('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON');
+        expect(yaml).toContain('ci-verify-google-play-service-account.sh');
+        expect(yaml).toContain('eas-play-submit@kupa-496716.iam.gserviceaccount.com');
     });
 
     it('declares Google Play Billing permission for in-app purchases', () => {
