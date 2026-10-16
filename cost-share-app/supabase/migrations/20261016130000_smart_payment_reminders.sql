@@ -236,3 +236,23 @@ $$;
 
 REVOKE ALL ON FUNCTION public.run_smart_payment_reminders(INT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.run_smart_payment_reminders(INT) TO service_role;
+
+-- Deduplicate pairwise debt SQL: member RPC delegates to core.
+CREATE OR REPLACE FUNCTION public.get_group_pairwise_debts(p_group_id UUID)
+RETURNS TABLE (
+    from_user_id UUID,
+    to_user_id UUID,
+    currency VARCHAR,
+    amount NUMERIC
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    IF NOT public.is_group_member(p_group_id) THEN
+        RAISE EXCEPTION 'not a member of group';
+    END IF;
+    RETURN QUERY SELECT * FROM public._get_group_pairwise_debts_core(p_group_id);
+END;
+$$;
