@@ -92,7 +92,11 @@ Create or verify products with these **exact IDs** (must match RevenueCat and th
 | `kupapay_pro_yearly` | Subscription, base plan yearly |
 | `kupapay_trip_pass` | One-time product **or** prepaid / non-renewing subscription (30-day Trip Pass) |
 
-Set prices (VAT-inclusive). Optional: 7-day free trial on monthly/yearly (mirrors App Store).
+Set prices (VAT-inclusive).
+
+**Free trial (owner decision):** attach a **14-day free trial** offer on the **base plan** for both monthly and yearly (not 7 days). Step-by-step: [`store/play/SUBSCRIPTION_OFFERS.md`](../store/play/SUBSCRIPTION_OFFERS.md).
+
+**EU consumers:** do **not** add an in-app EU withdrawal waiver on Android — Play Billing handles purchase terms in Google’s UI. (iOS keeps a separate App Store acknowledgement where required.)
 
 **Automation (optional, after §5):** [Google Play Developer API](https://developers.google.com/android-publisher) — only after the service account is linked.
 

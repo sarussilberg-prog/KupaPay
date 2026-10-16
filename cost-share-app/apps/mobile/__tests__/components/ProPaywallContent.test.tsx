@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 
@@ -98,7 +99,41 @@ describe('ProPaywallContent offerings load', () => {
         expect(getByText('₪69.90')).toBeTruthy();
     });
 
-    it('blocks purchase until EU digital withdrawal acknowledgement', async () => {
+    it('does not show EU withdrawal ack on Android (Play Billing)', async () => {
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'android' });
+
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
+        purchaseMock.mockResolvedValue({ ok: true });
+
+        const { queryByTestId, getByTestId } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
+        );
+
+        await waitFor(() => {
+            expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
+        });
+        expect(queryByTestId('paywall-eu-withdrawal-ack')).toBeNull();
+
+        fireEvent.press(getByTestId('paywall-purchase-btn'));
+        await waitFor(() => {
+            expect(purchaseMock).toHaveBeenCalled();
+        });
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
+    });
+
+    it('blocks purchase until EU digital withdrawal acknowledgement on iOS', async () => {
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
         fetchMock.mockResolvedValue({
             status: 'ready',
             packages: {
@@ -124,5 +159,7 @@ describe('ProPaywallContent offerings load', () => {
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
         });
+
+        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
     });
 });

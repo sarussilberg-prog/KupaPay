@@ -1,10 +1,10 @@
 import { Text } from '../AppText';
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
 import { AppIcon, AppIconName } from '../AppIcon';
 import { colors } from '../../theme';
-import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
-import { settingsRowContainerStyle } from './settingsRowLayout';
+import { IconLabel } from '../ui/IconLabel';
+import { ListRow } from '../ui/ListRow';
+import { useRtlLayout } from '../../hooks/useRtlLayout';
 
 type Variant = 'chevron' | 'value' | 'danger';
 
@@ -28,31 +28,21 @@ export function SettingsRow(props: Props) {
     const textColor = isDanger ? 'text-red-600' : 'text-gray-900';
 
     return (
-        <TouchableOpacity onPress={props.onPress} testID={testID} disabled={disabled}>
-            <View
-                className="bg-white px-4 py-3.5 min-h-[52px]"
-                style={[
-                    settingsRowContainerStyle(isRtl),
-                    disabled ? { opacity: 0.45 } : undefined,
-                ]}
-            >
-                <View style={{ width: 28, alignItems: 'center', flexShrink: 0 }}>
-                    <AppIcon name={iconName} size={22} color={iconColor} />
-                </View>
-                <Text
-                    className={`flex-1 min-w-0 text-base ${textColor} ${rtlTextClassName(isRtl, `text-base ${textColor}`)}`}
-                >
-                    {label}
-                </Text>
-                {props.variant === 'value' ? (
-                    <Text className="text-sm text-gray-500 shrink-0">{props.valueText}</Text>
-                ) : null}
-                <AppIcon
-                    name={isRtl ? 'chevron-back' : 'chevron-forward'}
-                    size={18}
-                    color={colors.gray400}
-                />
-            </View>
-        </TouchableOpacity>
+        <ListRow onPress={props.onPress} testID={testID} disabled={disabled}>
+            <IconLabel
+                iconName={iconName}
+                iconColor={iconColor}
+                label={label}
+                labelClassName={`text-base ${textColor}`}
+            />
+            {props.variant === 'value' ? (
+                <Text className="text-sm text-gray-500 shrink-0">{props.valueText}</Text>
+            ) : null}
+            <AppIcon
+                name={isRtl ? 'chevron-back' : 'chevron-forward'}
+                size={18}
+                color={colors.gray400}
+            />
+        </ListRow>
     );
 }

@@ -64,9 +64,20 @@
             "balances": "יתרות"
         },
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
-        "signInWithEmailMagicLink": "המשך עם אימייל",
-        "emailMagicLinkStubHint": "כניסה בקישור לאימייל תגיע בקרוב.",
+        "signInWithEmail": "המשך עם אימייל",
         "emailPlaceholder": "name@example.com",
+        "emailOtpSendCode": "שלח קוד",
+        "emailOtpVerify": "אמת והיכנס",
+        "emailOtpSentTo": "שלחנו קוד בן 6 ספרות ל-{{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "שלח קוד שוב",
+        "emailOtpResendIn": "שליחה חוזרת בעוד {{seconds}} שנ'",
+        "emailOtpChangeEmail": "שנה אימייל",
+        "emailOtpInvalidEmail": "הזן כתובת אימייל תקינה.",
+        "emailOtpInvalidCode": "הקוד לא תקין או שפג תוקפו. נסה שוב או שלח מחדש.",
+        "emailOtpRateLimited": "יותר מדי ניסיונות. המתן דקה ונסה שוב.",
+        "emailOtpSendError": "לא ניתן לשלוח את הקוד. נסה שוב.",
+        "emailOtpVerifyError": "לא ניתן לאמת את הקוד. נסה שוב.",
         "googleSignInSheetTitle": "התחברות עם Google",
         "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה."
     },
@@ -766,7 +777,11 @@
             "noStack": "אין מחסנית קריאה"
         },
         "monetization": {
-            "portalRow": "ניתוח הכנסות"
+            "portalRow": "ניתוח הכנסות",
+            "allTimeFunnel": "משפך מצטבר",
+            "byPlatform": "לפי פלטפורמה",
+            "last7Days": "7 ימים אחרונים",
+            "noData": "אין אירועים בתקופה זו עדיין"
         },
         "supportMessages": {
             "title": "הודעות תמיכה",
@@ -783,7 +798,12 @@
             "activeGroups": "קבוצות פעילות",
             "archivedGroups": "קבוצות בארכיון",
             "archiveFootnote": "ארכיון = ללא פעילות במשך חודשיים ויתרות אפס (לכל המשתמשים). ארכיון ידני אישי לא נספר כאן.",
-            "loadError": "לא ניתן לטעון נתונים. נסו שוב מאוחר יותר."
+            "loadError": "משוך לרענון או נסה שוב מאוחר יותר.",
+            "loadErrorTitle": "לא ניתן לטעון נתונים",
+            "notAdminTitle": "נדרשות הרשאות מנהל",
+            "notAdminBody": "החשבון שלך לא ברשימת מנהלי האפליקציה.",
+            "analyticsUnavailableTitle": "אנליטיקת מונטיזציה לא מוגדרת",
+            "analyticsUnavailableBody": "פונקציית המדדים חסרה או ללא הרשאה בפרויקט Supabase. יש להחיל מיגרציות ולרענן."
         }
     },
     "profile": {
@@ -1183,10 +1203,10 @@
             "restoreSuccess": "הרכישות שוחזרו.",
             "restoreNone": "לא נמצאו רכישות פעילות.",
             "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
-            "tryFreeTrialCta": "נסו 7 ימים בחינם",
-            "trialFreePeriodHeading": "ניסיון חינם ל-7 ימים",
-            "trialFreePeriodBody": "כל יכולות Pro בחינם ל-7 ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
-            "trialRenewalDisclosure": "אחרי 7 ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
+            "tryFreeTrialCta": "נסו {{trialDays}} ימים בחינם",
+            "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
+            "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
+            "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
             "euWithdrawalWaiverHeading": "גישה מיידית וויתור על 14 יום ביטול (EU)",
             "euDigitalPurchaseAck": "אני מבקש/ת גישה מיידית ל-KupaPay Pro ומאשר/ת שאבד/ת את זכות הביטול בתוך 14 יום ברגע שהגישה מתחילה.",
             "havePromoCode": "יש לכם קוד?"

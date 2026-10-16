@@ -2,7 +2,9 @@
 
 export const PRO_TRIAL_REMINDER_NOTIFICATION_ID = 'kupapay-pro-trial-reminder';
 
-/** App Store intro offer length (copy + scheduling fallback). */
+import { proTrialLengthDays } from './proSubscriptionStorePolicy';
+
+/** @deprecated Prefer `proTrialLengthDays()` — iOS 7, Play 14. */
 export const PRO_TRIAL_LENGTH_DAYS = 7;
 
 /** When RevenueCat omits expirationDate during TRIAL, trial end = purchase + this many days. */
@@ -20,7 +22,7 @@ export function fallbackTrialEndFromPurchase(purchasedAt: Date): Date {
 
 export function fallbackTrialEndFromNow(now = new Date()): Date {
     const end = new Date(now);
-    end.setUTCDate(end.getUTCDate() + PRO_TRIAL_LENGTH_DAYS);
+    end.setUTCDate(end.getUTCDate() + proTrialLengthDays());
     return end;
 }
 
