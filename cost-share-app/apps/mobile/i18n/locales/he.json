@@ -416,8 +416,8 @@
             "youOweCaption": "את/ה חייב/ת",
             "owedToYou": "מגיע לך {{amount}}",
             "owedToYouCaption": "מגיע לך",
-            "moreCurrencies": "{{plusCount}} מטבעות",
-            "moreCurrencies_one": "{{plusCount}} מטבע",
+            "moreCurrencies": "{{count}} מטבעות",
+            "moreCurrencies_one": "{{count}} מטבע",
             "updatedAgo": "עודכן {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },

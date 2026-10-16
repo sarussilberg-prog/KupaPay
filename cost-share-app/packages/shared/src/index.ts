@@ -7,6 +7,7 @@ export * from './constants';
 export * from './profileColumns';
 export * from './i18n/languages';
 export * from './i18n/formatMoney';
+export * from './i18n/groupsListAmount';
 export * from './i18n/balanceSemantics';
 export * from './i18n/formatRelativeTime';
 export * from './i18n/appLocales';

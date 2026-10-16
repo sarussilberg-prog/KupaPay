@@ -10,7 +10,7 @@ import {
     balanceChipLabelKey,
     classifyUserNetBalance,
     countNonZeroCurrencyOthers,
-    formatMoney,
+    formatGroupsListAmount,
     wrapLtrForBidi,
 } from '@cost-share/shared';
 import { Text } from './AppText';
@@ -142,17 +142,17 @@ export function BalanceChip({
     }
 
     const currency = primary?.currency || defaultCurrency;
-    const amountText = formatMoney(primary!.net, currency, {
+    const amountText = formatGroupsListAmount(primary!.net, currency, {
         language: i18n.language,
-        absolute: true,
     });
 
     const extraLabel =
         extraCount > 0
-            ? t('groups.card.moreCurrencies', {
-                  count: extraCount,
-                  plusCount: wrapLtrForBidi(`+${extraCount}`),
-              })
+            ? wrapLtrForBidi(
+                  t('groups.card.moreCurrencies', {
+                      count: extraCount,
+                  }),
+              )
             : null;
 
     return (

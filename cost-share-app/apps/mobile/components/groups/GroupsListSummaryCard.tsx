@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
     classifyUserNetBalance,
     deriveGroupsListSummaryParts,
-    formatMoney,
+    formatGroupsListAmount,
     wrapLtrForBidi,
     type BalanceSummary,
 } from '@cost-share/shared';
@@ -63,23 +63,24 @@ export function GroupsListSummaryCard({
     const amountText =
         isLoading || net === null
             ? '—'
-            : formatMoney(net, parts.primaryCurrency, {
+            : formatGroupsListAmount(net, parts.primaryCurrency, {
                   language: i18n.language,
-                  absolute: true,
               });
 
     const foreignLine =
         parts.foreignHint && !isLoading
             ? t('groups.listSummary.otherCurrenciesLine', {
                   count: parts.foreignHint.count,
-                  countLabel: t('groups.card.moreCurrencies', {
-                      count: parts.foreignHint.count,
-                      plusCount: wrapLtrForBidi(`+${parts.foreignHint.count}`),
-                  }),
-                  amount: formatMoney(parts.foreignHint.net, parts.foreignHint.currency, {
-                      language: i18n.language,
-                      absolute: true,
-                  }),
+                  countLabel: wrapLtrForBidi(
+                      t('groups.card.moreCurrencies', {
+                          count: parts.foreignHint.count,
+                      }),
+                  ),
+                  amount: formatGroupsListAmount(
+                      parts.foreignHint.net,
+                      parts.foreignHint.currency,
+                      { language: i18n.language },
+                  ),
               })
             : null;
 
