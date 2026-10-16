@@ -12,6 +12,7 @@ import {
   type LegalSlug,
 } from '@cost-share/shared';
 import { loadStaticLegalDocument } from '@/lib/legalContent';
+import { marketingLandingPath } from '@/lib/marketingSeo';
 
 // Legal pages are public — use a plain anon client with no session/cookie handling.
 // The legal_documents table has anon-readable RLS for published rows.
@@ -61,12 +62,12 @@ export default async function LegalPage({ slug, langOverride }: Props) {
 
   return (
     <>
-      <LandingHeader />
+      <LandingHeader locale={locale} />
       <main className="max-w-2xl mx-auto px-4 py-16 min-h-[60vh]" dir={dir}>
         {!data ? (
           <div className="text-center py-20">
             <p className="text-gray-500 mb-6">{t.legal.notFound}</p>
-            <Link href="/" className="text-blue-500 hover:underline">
+            <Link href={marketingLandingPath(locale)} className="text-blue-500 hover:underline">
               {t.legal.backHome}
             </Link>
           </div>

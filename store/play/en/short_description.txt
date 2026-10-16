@@ -1,1 +1,1 @@
-Split trip & roommate expenses. Hebrew RTL, Bit/PayBox settle-up, multi-currency.
+Split trip & roommate bills. Free Splitwise alternative with debt simplify & RTL.

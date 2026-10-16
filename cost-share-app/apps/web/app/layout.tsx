@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { APP_BRAND_COLOR, APP_BRAND_TITLE } from '@/lib/brand';
 import { isRtlLanguage } from '@cost-share/shared';
 import { getLocale } from '@/lib/locale';
+import { MARKETING_LOCALE_HEADER } from '@/lib/marketingSeo';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: APP_BRAND_TITLE,
   applicationName: APP_BRAND_TITLE,
   description: 'Split expenses with friends',
+  metadataBase: new URL('https://kupa-pay.com'),
   appleWebApp: {
     capable: true,
     title: APP_BRAND_TITLE,
@@ -25,7 +28,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
+  const headerStore = await headers();
+  const fromPath = headerStore.get(MARKETING_LOCALE_HEADER);
+  const locale = fromPath ? await getLocale(fromPath) : await getLocale();
   const dir = isRtlLanguage(locale) ? 'rtl' : 'ltr';
 
   return (

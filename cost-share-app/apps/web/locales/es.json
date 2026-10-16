@@ -8,6 +8,18 @@
     "toggle": "English",
     "chooseLanguage": "Idioma"
   },
+  "seo": {
+    "title": "KupaPay — divide gastos y facturas de viaje",
+    "description": "Divide gastos de grupo, viajes y piso compartido. Alternativa gratis a Splitwise con simplificación de deudas y RTL.",
+    "ogTitle": "KupaPay — divide gastos con amigos",
+    "ogDescription": "Simplificación automática de deudas para viajes, alquiler y cenas. Gratis en iPhone, Android y web.",
+    "appStoreBadgeTop": "Descargar en",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "Descargar KupaPay en App Store",
+    "playStoreBadgeTop": "Disponible en",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "Obtener KupaPay en Google Play"
+  },
   "hero": {
     "headline": "Divide gastos con amigos, sin complicaciones",
     "subheadline": "KupaPay simplifica las deudas automáticamente — menos transferencias, menos estrés",

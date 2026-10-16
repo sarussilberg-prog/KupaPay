@@ -31,6 +31,8 @@ export const LOCALE_VALUE_ALLOWLIST_EXACT = new Set([
     'ID',
     'iOS',
     'Android',
+    'App Store',
+    'Google Play',
     'Airbnb',
     'Bit',
     'PayBox',

@@ -8,6 +8,18 @@
     "toggle": "English",
     "chooseLanguage": "שפה"
   },
+  "seo": {
+    "title": "KupaPay — חלוקת חשבונות והוצאות עם חברים",
+    "description": "לחלק הוצאות קבוצתיות, טיולים ושותפים לדירה. חלופה חינמית ל-Splitwise עם פישוט חובות, עברית RTL וקישורי Bit/PayBox.",
+    "ogTitle": "KupaPay — חלוקת הוצאות עם חברים",
+    "ogDescription": "פישוט חובות אוטומטי לטיולים, שכירות וארוחות. חינם באייפון, אנדרואיד ובאתר.",
+    "appStoreBadgeTop": "הורדה ב-",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "הורד את KupaPay ב-App Store",
+    "playStoreBadgeTop": "זמין ב-",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "הורד את KupaPay ב-Google Play"
+  },
   "hero": {
     "headline": "לחלק הוצאות עם חברים, בלי חישובים",
     "subheadline": "KupaPay מפשטת חובות אוטומטית — פחות העברות, יותר שקט",
