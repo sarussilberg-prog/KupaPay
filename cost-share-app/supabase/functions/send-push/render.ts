@@ -7,7 +7,7 @@ export type ActivityKind =
     | 'expense_added' | 'settlement_added' | 'message_posted'
     | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed'
     | 'group_created' | 'group_deleted' | 'group_note_changed' | 'settle_up_reminder'
-    | 'consolidation_batch_added';
+    | 'consolidation_batch_added' | 'trip_budget_alert';
 
 export interface RenderParams {
     actorName: string;
@@ -39,6 +39,7 @@ interface Messages {
     group_deleted: string;
     group_note_changed: string;
     settle_up_reminder: string;
+    trip_budget_alert: string;
 }
 
 const LOCALES: Record<Lang, Messages> = { en: en as Messages, he: he as Messages };
@@ -117,5 +118,10 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
                 body: p.body ?? interpolate(t.settle_up_reminder, vars),
             };
         }
+        case 'trip_budget_alert':
+            return {
+                title: p.groupName,
+                body: p.body ?? interpolate(t.trip_budget_alert, vars),
+            };
     }
 }

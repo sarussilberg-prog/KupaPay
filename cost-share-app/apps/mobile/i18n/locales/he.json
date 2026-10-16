@@ -873,7 +873,8 @@
             "noteChangedByYou": "הפתק שונה על ידך · {{group}}",
             "noteChangedBy": "הפתק שונה על ידי {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך",
-            "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}"
+            "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}",
+            "tripBudgetAlert": "התראת תקציב טיול ב-{{group}}"
         },
         "addedExpense": "הוסיף הוצאה",
         "settledPayment": "ביצע תשלום",
@@ -1198,6 +1199,19 @@
             "enable": "תזכורות אוטומטיות לסגירת חובות",
             "lockedBody": "Pro יכול לשלוח תזכורות לפי לוח זמנים (מינימום כל 3 ימים).",
             "intervalDays": "כל {{count}} ימים"
+        },
+        "tripBudget": {
+            "title": "תקציב טיול",
+            "lockedBody": "הגדרת תקרת הוצאות לטיול והתראות ב-80% וב-100%.",
+            "upgrade": "שדרוג ל-Pro",
+            "set": "הגדרת תקציב",
+            "edit": "עריכה",
+            "clear": "הסרת תקציב",
+            "emptyHint": "עדיין אין תקציב — הקשו «הגדרת תקציב».",
+            "progress": "{{spent}} מתוך {{budget}} {{currency}} · {{percent}}%",
+            "sheetTitle": "תקציב טיול",
+            "sheetBody": "הסכום כולל רק הוצאות במטבע התקציב.",
+            "amountPlaceholder": "סכום תקציב"
         }
     },
     "remind": {

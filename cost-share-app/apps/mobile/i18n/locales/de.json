@@ -871,7 +871,8 @@
             "noteChangedByYou": "Notiz von dir geändert · {{group}}",
             "noteChangedBy": "Notiz von {{name}} geändert · {{group}}",
             "friendRequestRejectedByThem": "{{name}} hat deine Freundschaftsanfrage abgelehnt",
-            "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet"
+            "settleReminder": "{{name}} hat dir eine Erinnerung zum Ausgleichen in {{group}} gesendet",
+            "tripBudgetAlert": "Reisebudget-Hinweis in {{group}}"
         },
         "addedExpense": "hat eine Ausgabe hinzugefügt",
         "settledPayment": "hat eine Zahlung ausgeglichen",
@@ -1265,6 +1266,19 @@
             "enable": "Automatische Ausgleichs-Erinnerungen",
             "lockedBody": "Pro sendet Erinnerungen nach Ihrem Intervall (mindestens alle 3 Tage).",
             "intervalDays": "Alle {{count}} Tage"
+        },
+        "tripBudget": {
+            "title": "Reisebudget",
+            "lockedBody": "Ausgabenlimit mit Hinweisen bei 80 % und 100 %.",
+            "upgrade": "Pro freischalten",
+            "set": "Budget festlegen",
+            "edit": "Bearbeiten",
+            "clear": "Budget entfernen",
+            "emptyHint": "Noch kein Budget — tippe auf «Budget festlegen».",
+            "progress": "{{spent}} von {{budget}} {{currency}} · {{percent}} %",
+            "sheetTitle": "Reisebudget",
+            "sheetBody": "Nur Ausgaben in der Budgetwährung zählen.",
+            "amountPlaceholder": "Budgetbetrag"
         }
     },
     "updateRequired": {

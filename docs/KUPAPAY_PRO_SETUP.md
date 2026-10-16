@@ -102,3 +102,9 @@ Deploy `pro-smart-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261016130000_smart_payment_reminders.sql` on dev before production.
+
+### Trip budget alerts (Pro v2)
+
+No cron: alerts run from the `expenses` trigger via `evaluate_trip_budget_alerts`. Pro members set budget with RPC `set_group_trip_budget`. Activity kind `trip_budget_alert` uses the existing `send-push` pipeline.
+
+Apply migration `20261016140000_trip_budget.sql` on dev before production.
