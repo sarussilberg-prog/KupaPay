@@ -14,17 +14,27 @@ fi
 echo "▶ deno lint — $FN"
 (
   cd "$DIR"
-  if compgen -G "*.ts" >/dev/null || compgen -G "**/*.ts" >/dev/null; then
-    deno lint
-  else
-    echo "(no TypeScript sources — skip lint)"
-  fi
+  # Deploy bundles use bare npm: imports (no import map on Supabase deploy); allow that in lint.
+  deno lint \
+    --rules-exclude=no-import-prefix \
+    --rules-exclude=no-unversioned-import \
+    --rules-exclude=no-explicit-any \
+    --rules-exclude=require-await
 )
 
 echo "▶ deno test — $FN"
-(cd "$DIR" && deno test --allow-env --allow-read)
+(
+  cd "$DIR"
+  shopt -s nullglob
+  tests=(*.test.ts **/*.test.ts)
+  if [[ ${#tests[@]} -eq 0 ]]; then
+    echo "(no *.test.ts — skip deno test)"
+  else
+    deno test --allow-env --allow-read
+  fi
+)
 
-echo "▶ deno check (deploy bundle) — $FN"
+echo "▶ deno check — deploy bundle — $FN"
 (cd "$DIR" && deno check --no-config index.ts)
 
 echo "✅ $FN — lint, test, check passed"
