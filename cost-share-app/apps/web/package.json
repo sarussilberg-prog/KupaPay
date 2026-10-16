@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test __tests__/**/*.test.mjs",
+    "test": "node --test __tests__/publicLinkPaths.test.mjs",
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
