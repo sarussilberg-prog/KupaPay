@@ -1349,7 +1349,6 @@
             "lockedBody": "Pro يرسل تذكيرات حسب الجدول (3 أيام كحد أدنى).",
             "intervalDays": "كل {{count}} أيام"
         },
-<<<<<<< HEAD
         "spendingInsights": {
             "menuOption": "رؤى الإنفاق",
             "sheetTitle": "رؤى الإنفاق",
@@ -1358,7 +1357,7 @@
             "empty": "لا مصروفات بهذه العملة بعد.",
             "uncategorized": "بدون فئة",
             "tab": { "category": "فئة", "member": "دفع", "week": "أسبوعي" }
-=======
+        },
         "tripBudget": {
             "title": "ميزانية الرحلة",
             "lockedBody": "حدّ للإنفاق مع تنبيهات عند 80% و100%.",
@@ -1371,7 +1370,6 @@
             "sheetTitle": "ميزانية الرحلة",
             "sheetBody": "المجموع يشمل المصروفات بعملة الميزانية فقط.",
             "amountPlaceholder": "مبلغ الميزانية"
->>>>>>> origin/dev
         }
     },
     "updateRequired": {

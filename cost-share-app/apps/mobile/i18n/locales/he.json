@@ -1200,7 +1200,6 @@
             "lockedBody": "Pro יכול לשלוח תזכורות לפי לוח זמנים (מינימום כל 3 ימים).",
             "intervalDays": "כל {{count}} ימים"
         },
-<<<<<<< HEAD
         "spendingInsights": {
             "menuOption": "תובנות הוצאות",
             "sheetTitle": "תובנות הוצאות",
@@ -1209,7 +1208,7 @@
             "empty": "אין עדיין הוצאות במטבע זה.",
             "uncategorized": "ללא קטגוריה",
             "tab": { "category": "קטגוריה", "member": "שילם", "week": "שבועי" }
-=======
+        },
         "tripBudget": {
             "title": "תקציב טיול",
             "lockedBody": "הגדרת תקרת הוצאות לטיול והתראות ב-80% וב-100%.",
@@ -1222,7 +1221,6 @@
             "sheetTitle": "תקציב טיול",
             "sheetBody": "הסכום כולל רק הוצאות במטבע התקציב.",
             "amountPlaceholder": "סכום תקציב"
->>>>>>> origin/dev
         }
     },
     "remind": {

@@ -1267,7 +1267,6 @@
             "lockedBody": "Pro envoie des rappels selon votre intervalle (minimum 3 jours).",
             "intervalDays": "Tous les {{count}} jours"
         },
-<<<<<<< HEAD
         "spendingInsights": {
             "menuOption": "Aperçu des dépenses",
             "sheetTitle": "Aperçu des dépenses",
@@ -1276,7 +1275,7 @@
             "empty": "Aucune dépense dans cette devise.",
             "uncategorized": "Sans catégorie",
             "tab": { "category": "Catégorie", "member": "Payé par", "week": "Semaines" }
-=======
+        },
         "tripBudget": {
             "title": "Budget du voyage",
             "lockedBody": "Plafond de dépenses et alertes à 80 % et 100 %.",
@@ -1289,7 +1288,6 @@
             "sheetTitle": "Budget du voyage",
             "sheetBody": "Total des dépenses dans la devise du budget uniquement.",
             "amountPlaceholder": "Montant du budget"
->>>>>>> origin/dev
         }
     },
     "updateRequired": {
