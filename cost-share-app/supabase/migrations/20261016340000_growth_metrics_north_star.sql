@@ -3,7 +3,7 @@
 
 CREATE OR REPLACE VIEW public.analytics_north_star_groups AS
 SELECT
-    date_trunc('month', e.created_at AT TIME ZONE 'UTC') AS month_start,
+    date_trunc('month', e.created_at)::timestamptz AS month_start,
     e.group_id,
     COUNT(DISTINCT e.created_by) AS distinct_expense_authors
 FROM public.expenses e
@@ -21,7 +21,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-    v_now_month TIMESTAMPTZ := date_trunc('month', NOW() AT TIME ZONE 'UTC');
+    v_now_month TIMESTAMPTZ := date_trunc('month', NOW());
     v_prev_month TIMESTAMPTZ := v_now_month - INTERVAL '1 month';
     v_north_star_current BIGINT;
     v_north_star_previous BIGINT;
@@ -55,7 +55,7 @@ BEGIN
     SELECT COUNT(DISTINCT e.created_by) INTO v_dau_expense_authors
     FROM expenses e
     WHERE COALESCE(e.is_deleted, FALSE) = FALSE
-      AND e.created_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC');
+      AND e.created_at >= date_trunc('day', NOW());
 
     SELECT COALESCE(jsonb_agg(row ORDER BY row->>'month'), '[]'::JSONB)
     INTO v_monthly_series

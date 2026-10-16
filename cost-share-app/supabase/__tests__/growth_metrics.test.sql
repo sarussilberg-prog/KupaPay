@@ -9,7 +9,7 @@ DECLARE
     v_u1    CONSTANT UUID := '00000000-0000-0000-0000-00000000a703';
     v_u2    CONSTANT UUID := '00000000-0000-0000-0000-00000000a704';
     v_group CONSTANT UUID := '00000000-0000-0000-0000-00000000a705';
-    v_month TIMESTAMPTZ := date_trunc('month', NOW() AT TIME ZONE 'UTC');
+    v_month TIMESTAMPTZ := date_trunc('month', NOW());
     v_metrics JSONB;
     v_caught BOOLEAN;
 BEGIN
