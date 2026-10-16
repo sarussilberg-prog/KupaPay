@@ -61,6 +61,8 @@ import {
 } from './services/appClientConfig.service';
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
+import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
+import { AscScreenshotDemoRoot } from './screenshotDemo/AscScreenshotDemoRoot';
 
 // Benign when a persisted session was revoked server-side (global sign-out, token rotation, etc.).
 LogBox.ignoreLogs([/Invalid Refresh Token/i, /Refresh Token Not Found/i]);
@@ -371,6 +373,18 @@ function App() {
     });
     return () => sub.remove();
   }, [guardSession]);
+
+  if (isAscScreenshotDemo()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <AscScreenshotDemoRoot />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
 
   if (forcedUpdateConfig) {
     return (

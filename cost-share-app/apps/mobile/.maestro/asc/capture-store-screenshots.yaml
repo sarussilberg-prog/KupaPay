@@ -1,0 +1,24 @@
+appId: com.kupapay.mobile
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: asc-demo-root
+    timeout: 120000
+- runFlow:
+    when:
+      true: ${LOCALE}
+    commands:
+      - tapOn:
+          id: asc-demo-locale-${LOCALE}
+- runScript:
+    script: |
+      const screens = ['groups','balances','add-expense','simplified-debts','pro-currency'];
+      output.screens = screens;
+- repeat:
+    times: 5
+    commands:
+      - runFlow:
+          file: capture-one-screen.yaml
+          env:
+            SCREEN_INDEX: ${repeat.index}

@@ -1,0 +1,125 @@
+{
+  "subscriptionGroupId": "22479636",
+  "reviewNotes": "KupaPay Pro removes ads, adds automatic trip currency conversion, and PDF export for groups. Trip Pass is a one-time purchase that unlocks Pro for every member of one group for 30 days (no auto-renewal). Monthly and yearly plans may include a 7-day free trial in Israel. Use Sandbox Apple ID to test purchases on the in-app paywall.",
+  "products": [
+    {
+      "ascId": "6823093058",
+      "productId": "kupapay_pro_monthly",
+      "kind": "subscription",
+      "expectedPriceILS": 12.9
+    },
+    {
+      "ascId": "6823093795",
+      "productId": "kupapay_pro_yearly",
+      "kind": "subscription",
+      "expectedPriceILS": 69.9
+    },
+    {
+      "ascId": "6823094904",
+      "productId": "kupapay_trip_pass",
+      "kind": "subscription",
+      "expectedPriceILS": 19.9
+    }
+  ],
+  "ascLocales": ["en-US", "he", "ru", "ar-SA", "fr-FR", "es-ES", "de-DE"],
+  "localizations": {
+    "en-US": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro Monthly",
+        "description": "Ad-free splits, trip FX, PDF reports."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro Yearly",
+        "description": "Best value: Pro all year + 1 Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 days)",
+        "description": "Pro for one group, 30 days, no renewal."
+      }
+    },
+    "he": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro חודשי",
+        "description": "בלי פרסומות, המרת מטבע לטיול, PDF."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro שנתי",
+        "description": "הכי משתלם: Pro לשנה + Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 יום)",
+        "description": "Pro לכל הקבוצה, 30 יום, בלי חידוש."
+      }
+    },
+    "ru": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro — месяц",
+        "description": "Без рекламы, валюта поездки, PDF."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro — год",
+        "description": "Выгодно: Pro на год + Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 дней)",
+        "description": "Pro для группы, 30 дней, без продления."
+      }
+    },
+    "ar-SA": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro شهري",
+        "description": "بدون إعلانات، عملات الرحلة، PDF."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro سنوي",
+        "description": "أفضل قيمة: Pro سنة + Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 يومًا)",
+        "description": "Pro للمجموعة، 30 يومًا، بدون تجديد."
+      }
+    },
+    "fr-FR": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro mensuel",
+        "description": "Sans pub, devises voyage, PDF."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro annuel",
+        "description": "Meilleur prix : Pro 1 an + Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 jours)",
+        "description": "Pro pour un groupe, 30 j, sans renouvellement."
+      }
+    },
+    "es-ES": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro mensual",
+        "description": "Sin anuncios, divisas viaje, PDF."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro anual",
+        "description": "Mejor valor: Pro 1 año + Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 días)",
+        "description": "Pro para un grupo, 30 días, sin renovación."
+      }
+    },
+    "de-DE": {
+      "kupapay_pro_monthly": {
+        "name": "KupaPay Pro monatlich",
+        "description": "Ohne Werbung, Reise-FX, PDF-Berichte."
+      },
+      "kupapay_pro_yearly": {
+        "name": "KupaPay Pro jährlich",
+        "description": "Bestes Angebot: Pro 1 Jahr + Trip Pass."
+      },
+      "kupapay_trip_pass": {
+        "name": "Trip Pass (30 Tage)",
+        "description": "Pro für eine Gruppe, 30 Tage, kein Abo."
+      }
+    }
+  }
+}
