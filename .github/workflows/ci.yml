@@ -110,6 +110,16 @@ jobs:
       - name: Deploy bundle check (no import map)
         run: deno check --no-config index.ts
 
+  migration-versions:
+    name: Supabase migration version uniqueness
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/supabase-unique-migration-versions.sh
+
   deno-edge-bundle-check:
     name: Deno edge bundle (all functions)
     runs-on: ubuntu-latest
@@ -125,7 +135,7 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check]
+    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check, migration-versions]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest

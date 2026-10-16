@@ -1,6 +1,6 @@
 -- archive_group: return structured { ok, error_code } instead of raising English exceptions (KI-017).
 
-DROP FUNCTION IF EXISTS public.archive_group(UUID);
+DROP FUNCTION IF EXISTS public.archive_group(UUID); -- safe-breaking: mobile ships JSONB archive_group before prod deploy
 
 CREATE OR REPLACE FUNCTION public.archive_group(p_group_id UUID)
 RETURNS JSONB
@@ -46,5 +46,5 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.archive_group(UUID) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.archive_group(UUID) FROM PUBLIC, anon; -- safe-breaking: replaces grants on recreated RPC
 GRANT EXECUTE ON FUNCTION public.archive_group(UUID) TO authenticated;

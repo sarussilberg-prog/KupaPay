@@ -899,6 +899,7 @@
         "currency": "Devise",
         "amount": "Montant",
         "submit": "Enregistrer le paiement",
+        "paidInCurrency": "Paiement enregistré en {{currency}} (les dettes peuvent être dans d'autres devises)",
         "warnPartial": "Paiement partiel — il restera {{remaining}} à rembourser",
         "warnOverpay": "Plus que le montant dû — {{flipAmount}} vous sera dû en retour",
         "edit": "Modifier le paiement",
@@ -1036,6 +1037,16 @@
         "noFriendsYet": "Aucun groupe en commun pour l'instant",
         "friendBreakdownTitle": "Détail par groupe",
         "friendBreakdownEmpty": "Aucun groupe en commun avec cet ami.",
+        "friendCrossNetLabel": "Net tous groupes confondus",
+        "friendSettleOneCurrency": "Régler en une devise",
+        "friendSettleAll": "Tout régler avec {{name}}",
+        "friendCrossSettlePickTitle": "Choisir la devise de règlement",
+        "friendCrossSettleConfirmTitle": "Confirmer le règlement multi-groupes",
+        "friendCrossSettleConfirmButton": "Enregistrer les paiements",
+        "friendCrossSettleNetLabel": "Net dans la devise choisie",
+        "friendCrossSettleYouPay": "Vous payez {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} vous paie",
+        "friendCrossSettleGroupsHint": "Enregistrera des paiements dans {{count}} groupe(s)",
         "friendMoreCurrencies": "+{{count}} de plus"
     },
     "legal": {
@@ -1260,6 +1271,13 @@
         },
         "recurring": {
             "lockedBody": "Automatisez le loyer, les abonnements et autres dépenses récurrentes avec Pro."
+        },
+        "receiptOcr": {
+            "menuOption": "Remplir depuis le texte",
+            "sheetTitle": "Texte du reçu",
+            "sheetBody": "Collez le texte du reçu. Montant et devise suggérés — vous confirmez.",
+            "placeholder": "Collez ici…",
+            "apply": "Appliquer"
         },
         "smartReminder": {
             "sheetTitle": "Rappels intelligents",
