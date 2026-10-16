@@ -1040,6 +1040,17 @@
             "rotated": "Group invite link updated",
             "emptyStateLink": "or share group link"
         },
+        "postCreate": {
+            "title": "Invite friends",
+            "subtitle": "Bring people into «{{groupName}}» — share a link, WhatsApp, or scan a QR code.",
+            "shareSheet": "Share…",
+            "shareSheetWeb": "Share or copy",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Copy link",
+            "qrHint": "Scan to join the group",
+            "skip": "Not now",
+            "continue": "Open group"
+        },
         "addMembers": {
             "searchOthers": "Search other users",
             "sendLink": "Share group link"

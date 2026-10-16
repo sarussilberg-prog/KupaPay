@@ -36,6 +36,21 @@ jest.mock('../../../components/onboarding/OnboardingCreateGroupHero', () => {
     return { OnboardingCreateGroupHero };
 });
 
+jest.mock('react-native-qrcode-svg', () => () => null);
+
+jest.mock('../../../hooks/useEnsureGroupInviteToken', () => ({
+    useEnsureGroupInviteToken: () => true,
+}));
+
+jest.mock('../../../hooks/useInviteLink', () => ({
+    useInviteLink: () => ({
+        url: 'https://kupa-pay.com/g/tok',
+        isReady: true,
+        share: jest.fn(),
+        rotate: jest.fn(),
+    }),
+}));
+
 jest.mock('../../../components/AddMembersSheet', () => {
     const React = require('react');
     const { Pressable, Text } = require('react-native');
@@ -108,7 +123,7 @@ describe('OnboardingCreateGroupScreen — interactive steps (current dev)', () =
     });
 
     it('creates the group with name, type and currency on submit', async () => {
-        mockCreateGroup.mockResolvedValueOnce({ id: 'g1' } as any);
+        mockCreateGroup.mockResolvedValueOnce({ id: 'g1', name: 'טיול לים' } as any);
         const onDone = jest.fn();
         const { getByTestId } = renderWithQuery(
             <OnboardingCreateGroupScreen onDone={onDone} />,
@@ -121,6 +136,9 @@ describe('OnboardingCreateGroupScreen — interactive steps (current dev)', () =
             }),
         );
         await waitFor(() => expect(markPostLoginOnboardingComplete).toHaveBeenCalled());
+        await waitFor(() => expect(getByTestId('onboarding-invite-step')).toBeTruthy());
+        expect(onDone).not.toHaveBeenCalled();
+        fireEvent.press(getByTestId('group-invite-skip'));
         await waitFor(() => expect(onDone).toHaveBeenCalled());
     });
 

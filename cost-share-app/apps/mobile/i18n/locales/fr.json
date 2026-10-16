@@ -1040,6 +1040,17 @@
             "rotated": "Lien d'invitation du groupe mis à jour",
             "emptyStateLink": "ou partagez le lien du groupe"
         },
+        "postCreate": {
+            "title": "Inviter des amis",
+            "subtitle": "Faites rejoindre « {{groupName}} » — lien, WhatsApp ou QR code.",
+            "shareSheet": "Partager…",
+            "shareSheetWeb": "Partager ou copier",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Copier le lien",
+            "qrHint": "Scannez pour rejoindre le groupe",
+            "skip": "Plus tard",
+            "continue": "Ouvrir le groupe"
+        },
         "addMembers": {
             "searchOthers": "Rechercher d'autres utilisateurs",
             "sendLink": "Partager le lien du groupe"

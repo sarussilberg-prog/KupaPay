@@ -1094,6 +1094,17 @@
             "rotated": "تم تحديث رابط دعوة المجموعة",
             "emptyStateLink": "أو شارك رابط المجموعة"
         },
+        "postCreate": {
+            "title": "ادعُ الأصدقاء",
+            "subtitle": "أضِف أشخاصًا إلى «{{groupName}}» — عبر رابط أو WhatsApp أو رمز QR.",
+            "shareSheet": "مشاركة…",
+            "shareSheetWeb": "مشاركة أو نسخ",
+            "whatsapp": "WhatsApp",
+            "copyLink": "نسخ الرابط",
+            "qrHint": "امسح الرمز للانضمام إلى المجموعة",
+            "skip": "ليس الآن",
+            "continue": "فتح المجموعة"
+        },
         "addMembers": {
             "searchOthers": "البحث عن مستخدمين آخرين",
             "sendLink": "مشاركة رابط المجموعة"

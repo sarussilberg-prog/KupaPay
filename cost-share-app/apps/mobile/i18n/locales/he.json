@@ -1042,6 +1042,17 @@
             "rotated": "קישור הקופה עודכן",
             "emptyStateLink": "או שתף קישור לקופה"
         },
+        "postCreate": {
+            "title": "הזמינו חברים",
+            "subtitle": "הוסיפו אנשים ל«{{groupName}}» — קישור, וואטסאפ או QR.",
+            "shareSheet": "שיתוף…",
+            "shareSheetWeb": "שיתוף או העתקה",
+            "whatsapp": "WhatsApp",
+            "copyLink": "העתקת קישור",
+            "qrHint": "סרקו כדי להצטרף לקופה",
+            "skip": "לא עכשיו",
+            "continue": "פתיחת הקופה"
+        },
         "addMembers": {
             "searchOthers": "חפש משתמשים אחרים",
             "sendLink": "שלח קישור לקופה"

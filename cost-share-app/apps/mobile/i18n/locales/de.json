@@ -1040,6 +1040,17 @@
             "rotated": "Gruppen-Einladungslink aktualisiert",
             "emptyStateLink": "oder Gruppenlink teilen"
         },
+        "postCreate": {
+            "title": "Freunde einladen",
+            "subtitle": "Hol Leute in «{{groupName}}» — per Link, WhatsApp oder QR-Code.",
+            "shareSheet": "Teilen…",
+            "shareSheetWeb": "Teilen oder kopieren",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Link kopieren",
+            "qrHint": "Scannen, um der Gruppe beizutreten",
+            "skip": "Später",
+            "continue": "Gruppe öffnen"
+        },
         "addMembers": {
             "searchOthers": "Andere Nutzer suchen",
             "sendLink": "Gruppenlink teilen"
