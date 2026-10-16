@@ -14,7 +14,8 @@ Package: **`com.kupapay.mobile`** · Mobile root: `cost-share-app/apps/mobile` �
 | Live app | **`com.kupapay.mobile`** — already on **Production** (last updated **26 Jul 2026**, ~13 installs). |
 | Legacy draft | **`com.kupay.mobile`** — old draft; **ignore** (do not publish or migrate). |
 | Payments profile | **Appears configured** — verify in Console; no need to create from scratch unless something is incomplete. |
-| API access | **Not linked yet** — no service account for `eas submit` / Play Developer API (priority below). |
+| GitHub CI secret | **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` is set** — service account **`eas-play-submit@kupa-496716.iam.gserviceaccount.com`** (Google Cloud project **`kupa-496716`**), same key used for **EAS submit** → [play-internal.yml](../.github/workflows/play-internal.yml). |
+| Play API access | **Verify in Console** — **Setup → API access** should list the linked Cloud project; **Users and permissions** must grant this service account **Release manager** (or Admin) on **`com.kupapay.mobile`**. |
 | Signing | Play App Signing + **existing upload key** on **EAS** — **must reuse**; never generate a new Android keystore for this app. |
 
 ---
@@ -66,17 +67,21 @@ Marketing **version name** comes from `packages/shared/version.json` via `app.co
 
 ---
 
-## 5. Service account + API access (**next owner step**)
+## 5. Service account + API access (CI configured — verify Console)
 
-API access is **not** linked yet. Required for GitHub **Play Internal Android** workflow and optional product API automation.
+**GitHub (done):** repository secret **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`** holds the JSON for **`eas-play-submit@kupa-496716.iam.gserviceaccount.com`**. The [**Play Internal Android**](../.github/workflows/play-internal.yml) workflow writes it to `google-play-service-account.json` and runs `eas submit` (same path as local EAS submit).
 
-1. Play Console → **Setup → API access** → link a Google Cloud project (create or select).
-2. Create a **service account**; grant it **Release manager** (or Admin) under **Users and permissions**.
-3. Download JSON key → local `cost-share-app/apps/mobile/google-play-service-account.json` (**never commit**).
-4. GitHub secrets:
-   - **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`** (full JSON)
-   - **`EXPO_TOKEN`** ([Expo access tokens](https://expo.dev/accounts/saussilberg/settings/access-tokens))
-5. RevenueCat (§7) may use the same JSON once API access is active.
+**Owner verify (Play Console):**
+
+1. **Setup → API access** — Cloud project **`kupa-496716`** (or equivalent) linked; service account visible with Play Developer API access.
+2. **Users and permissions** — `eas-play-submit@kupa-496716.iam.gserviceaccount.com` invited with **Release manager** (or Admin) for **`com.kupapay.mobile`**.
+3. If `eas submit` fails with permission errors, fix Console roles — do **not** create a second service account unless you rotate keys deliberately.
+
+**Local / EAS:** copy the **same** JSON to `cost-share-app/apps/mobile/google-play-service-account.json` (**never commit**).
+
+**Also required for CI:** **`EXPO_TOKEN`** ([Expo access tokens](https://expo.dev/accounts/saussilberg/settings/access-tokens)).
+
+RevenueCat (§7) can reuse this JSON for Play product sync once linked in the RevenueCat dashboard.
 
 **App Links / Google Sign-In:** If not already wired, copy **App signing key** SHA-1 / SHA-256 from **Setup → App signing** into Google Cloud OAuth (Android client) and Supabase `KUPAPAY_ANDROID_RELEASE_SHA256` — [PLAY_STORE_ANDROID.md](PLAY_STORE_ANDROID.md) §3.3.
 
@@ -98,7 +103,7 @@ Set prices (VAT-inclusive).
 
 **EU consumers:** do **not** add an in-app EU withdrawal waiver on Android — Play Billing handles purchase terms in Google’s UI. (iOS keeps a separate App Store acknowledgement where required.)
 
-**Automation (optional, after §5):** [Google Play Developer API](https://developers.google.com/android-publisher) — only after the service account is linked.
+**Automation (optional):** [Google Play Developer API](https://developers.google.com/android-publisher) — available via the same service account once Console API access is confirmed.
 
 ---
 
@@ -107,7 +112,7 @@ Set prices (VAT-inclusive).
 Follow [KUPAPAY_PRO_SETUP.md](KUPAPAY_PRO_SETUP.md), Android-specific:
 
 1. RevenueCat → **Apps** → **Google Play** app `com.kupapay.mobile`.
-2. After §5, upload **Play service account JSON** in RevenueCat (per their Play integration docs).
+2. Upload the same **Play service account JSON** (`eas-play-submit@…`) in RevenueCat (per their Play integration docs).
 3. Map products to entitlement **`pro`** and offering **`default`** (`$rc_monthly`, `$rc_annual`, `trip_pass`).
 4. **`EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`** (`goog_…`) → GitHub secret + EAS env (`eas-sync-secrets.sh`).
 5. Webhook → Supabase `revenuecat-webhook` (iOS + Play, shared product ids).
@@ -120,7 +125,7 @@ Follow [KUPAPAY_PRO_SETUP.md](KUPAPAY_PRO_SETUP.md), Android-specific:
 
 **Option A — GitHub Actions (recommended for pre-prod validation):**
 
-1. Complete §5 secrets.
+1. Ensure **`EXPO_TOKEN`** is set (Play JSON secret is already configured).
 2. **Actions → Play Internal Android → Run workflow** (`pro_enabled` as needed).
 3. Confirm **`versionCode`** from §4 before/after build (`eas build:version:get -p android` in workflow logs).
 
@@ -143,7 +148,7 @@ npm run eas:submit:android   # internal track unless you change profile delibera
 - Creating **`com.kupapay.mobile`** or publishing **`com.kupay.mobile`**.
 - Generating a **new** Android upload/signing key (breaks updates to the live app).
 - Promoting releases to **Production** or increasing rollout % without owner approval.
-- Linking API access or downloading service account keys (owner credentials).
+- Rotating or replacing the Play service account key without updating GitHub **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`** and local `google-play-service-account.json`.
 
 ---
 
@@ -162,3 +167,5 @@ npm run eas:submit:android   # internal track unless you change profile delibera
 | AdMob Android app id | `ca-app-pub-8860544182475196~8155234876` |
 | Offer codes (Android) | Paywall → `https://play.google.com/redeem` |
 | versionCode | Must exceed current **Production**; EAS remote + `autoIncrement` |
+| Play submit service account | `eas-play-submit@kupa-496716.iam.gserviceaccount.com` |
+| GitHub secret (Play JSON) | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (configured) |

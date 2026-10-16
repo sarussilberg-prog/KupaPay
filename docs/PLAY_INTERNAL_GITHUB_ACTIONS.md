@@ -11,7 +11,7 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 | Secret | Description |
 |--------|-------------|
 | `EXPO_TOKEN` | Expo access token for `@saussilberg/kupapay` ([Expo access tokens](https://expo.dev/accounts/saussilberg/settings/access-tokens)). |
-| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Full JSON for the Play Console service account (same file as local `google-play-service-account.json` next to `eas.json`). |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Full JSON for **`eas-play-submit@kupa-496716.iam.gserviceaccount.com`** (Google Cloud **`kupa-496716`**). **Configured** in repo secrets — same key as local/EAS submit (`google-play-service-account.json` next to `eas.json`). Workflow verifies `client_email` before submit. |
 
 ## Optional / conditional secrets
 
@@ -46,7 +46,7 @@ In addition to EAS **production** environment variables (Supabase, Google OAuth,
 
 ## Graceful skip
 
-If `EXPO_TOKEN` or `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` is not configured, the workflow completes successfully with a notice and **does not** run EAS build or submit. This keeps CI green on forks and before Play Console is wired.
+If `EXPO_TOKEN` or `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` is not configured, the workflow completes successfully with a notice and **does not** run EAS build or submit. This keeps CI green on forks. **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` is set on the KupaPay repo**; only `EXPO_TOKEN` may still need to be confirmed before running.
 
 ## Run
 
