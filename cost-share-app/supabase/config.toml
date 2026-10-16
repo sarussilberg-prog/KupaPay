@@ -53,3 +53,7 @@ verify_jwt = false
 # Daily cron (#404) — lifecycle email (Resend / Auth SMTP provider).
 [functions.email-lifecycle-dispatch]
 verify_jwt = false
+
+# Weekly cron (#405) — activity digest push + email.
+[functions.weekly-summary-dispatch]
+verify_jwt = false

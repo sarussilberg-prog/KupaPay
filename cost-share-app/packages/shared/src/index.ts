@@ -45,3 +45,4 @@ export * from './activation';
 export * from './email/lifecycleTemplates';
 export * from './email/lifecycleEmailCopy';
 export * from './email/renderTransactionalEmail';
+export * from './email/weeklyDigestCopy';
