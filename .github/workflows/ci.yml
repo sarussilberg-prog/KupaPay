@@ -107,28 +107,75 @@ jobs:
       - run: test -x node_modules/.bin/jest || npm ci --ignore-scripts
       - run: bash scripts/ci-legal-locale-parity.sh
 
+  deno-edge-plan:
+    name: Deno edge plan
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.plan.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: plan
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          functions="$(bash cost-share-app/scripts/ci-deno-matrix-plan.sh)"
+          echo "functions=${functions}" >> "$GITHUB_OUTPUT"
+          echo "Planned Deno matrix: ${functions}"
+
   deno-edge-functions:
     name: Deno edge (${{ matrix.function }})
+    needs: deno-edge-plan
+    if: needs.deno-edge-plan.outputs.functions != '[]'
     strategy:
       fail-fast: true
       matrix:
-        function:
-          - revenuecat-webhook
-          - send-push
-          - pro-trial-reminder-dispatch
-          - storage-cleanup-dispatch
+        function: ${{ fromJSON(needs.deno-edge-plan.outputs.functions) }}
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: cost-share-app/supabase/functions/${{ matrix.function }}
+        working-directory: cost-share-app
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
-      - run: deno test --allow-env
-      - name: Deploy bundle check (no import map)
-        run: deno check --no-config index.ts
+      - run: bash scripts/ci-deno-edge-function.sh "${{ matrix.function }}"
+
+  deno-edge-functions-skipped:
+    name: Deno edge (skipped — no function paths changed)
+    needs: deno-edge-plan
+    if: needs.deno-edge-plan.outputs.functions == '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No edge-function paths changed on this PR; Deno matrix skipped."
+
+  deno-edge-gate:
+    name: Deno edge gate
+    needs: [deno-edge-plan, deno-edge-functions, deno-edge-functions-skipped]
+    if: always() && !cancelled() && needs.deno-edge-plan.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Deno matrix result
+        run: |
+          set -euo pipefail
+          functions='${{ needs.deno-edge-plan.outputs.functions }}'
+          if [[ "$functions" == "[]" ]]; then
+            if [[ "${{ needs.deno-edge-functions-skipped.result }}" != "success" ]]; then
+              echo "::error::expected skipped Deno job to succeed"
+              exit 1
+            fi
+            echo "Deno edge checks skipped (no path changes)."
+            exit 0
+          fi
+          if [[ "${{ needs.deno-edge-functions.result }}" != "success" ]]; then
+            echo "::error::Deno edge matrix failed"
+            exit 1
+          fi
+          echo "Deno edge matrix passed."
 
   no-merge-conflicts:
     name: No merge conflict markers
@@ -195,7 +242,7 @@ jobs:
         typecheck,
         test,
         legal-locale-parity,
-        deno-edge-functions,
+        deno-edge-gate,
         deno-edge-bundle-check,
         migration-versions,
         no-merge-conflicts,
