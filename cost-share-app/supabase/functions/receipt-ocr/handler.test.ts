@@ -1,6 +1,6 @@
 import { assertEquals } from 'jsr:@std/assert';
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
-import { parseReceiptDraftFromText } from './parse.ts';
+import { parseReceiptDraftFromText } from '../../../packages/shared/src/receiptOcr/parseReceiptDraftFromText.ts';
 import {
     consumeReceiptOcrQuota,
     handleReceiptOcr,
