@@ -8,7 +8,7 @@ import {
 import { dispatchRecurringExpenses } from './handler.ts';
 
 Deno.serve(async (req) => {
-    const denied = assertCronPost(req, cronWebhookSecret());
+    const denied = assertCronPost(req, cronWebhookSecret('PRO_RECURRING_EXPENSE_WEBHOOK_SECRET'));
     if (denied) return denied;
 
     const sb = createServiceSupabase();

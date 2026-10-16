@@ -12,6 +12,7 @@ module.exports = {
     },
     // Preflight runs tsc + shared build first; cold screen imports can exceed 5s on first test per file.
     testTimeout: 15000,
+    roots: ['<rootDir>', '<rootDir>/../../packages/shared/src'],
     testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/__tests__/helpers/'],
     collectCoverageFrom: [
         'components/**/*.{ts,tsx}',

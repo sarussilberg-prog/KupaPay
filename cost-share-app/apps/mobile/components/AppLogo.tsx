@@ -1,7 +1,6 @@
 import React from 'react';
 import { Image, ImageStyle, StyleProp } from 'react-native';
-
-const logoSource = require('../assets/logo.png');
+import { resolveInAppLogoSource } from '../lib/appIconVariant';
 
 interface AppLogoProps {
     size?: number;
@@ -13,7 +12,7 @@ interface AppLogoProps {
 export function AppLogo({ size = 120, style, testID = 'app-logo' }: AppLogoProps) {
     return (
         <Image
-            source={logoSource}
+            source={resolveInAppLogoSource()}
             style={[{ width: size, height: size }, style]}
             resizeMode="contain"
             accessibilityLabel="KupaPay"

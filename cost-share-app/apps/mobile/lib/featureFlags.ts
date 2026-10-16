@@ -9,6 +9,9 @@ export const SHOW_KUPAPAY_PRO_UPSELL =
 /** Master switch for Pro v1 (RevenueCat, paywall, perks). Default off — safe to ship. */
 export const KUPAPAY_PRO_ENABLED = process.env.EXPO_PUBLIC_KUPAPAY_PRO_ENABLED === 'true';
 
+/** Email magic-link sign-in UI (stub until Supabase OTP flow is wired). */
+export const EMAIL_AUTH_ENABLED = process.env.EXPO_PUBLIC_ENABLE_EMAIL_AUTH === 'true';
+
 export function isProUpsellSurfaceEnabled(): boolean {
     return KUPAPAY_PRO_ENABLED || SHOW_KUPAPAY_PRO_UPSELL;
 }

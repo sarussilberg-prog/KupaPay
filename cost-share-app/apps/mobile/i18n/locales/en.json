@@ -65,7 +65,10 @@
         },
         "signInError": "Sign in failed. Please try again.",
         "googleSignInSheetTitle": "Sign in with Google",
-        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet."
+        "googleSignInSheetHint": "Tap below — account selection opens on top of this sheet.",
+        "signInWithEmailMagicLink": "Continue with email",
+        "emailMagicLinkStubHint": "Email magic link sign-in is coming soon.",
+        "emailPlaceholder": "you@example.com"
     },
     "onboarding": {
         "skip": "Skip",
@@ -899,6 +902,7 @@
         "currency": "Currency",
         "amount": "Amount",
         "submit": "Record payment",
+        "paidInCurrency": "Payment recorded in {{currency}} (debts may be in other currencies)",
         "warnPartial": "Partial payment — {{remaining}} will still be owed",
         "warnOverpay": "More than owed — {{flipAmount}} will be owed back",
         "edit": "Edit payment",
@@ -1036,7 +1040,17 @@
         "noFriendsYet": "No shared groups yet",
         "friendBreakdownTitle": "Per-group breakdown",
         "friendBreakdownEmpty": "No shared groups with this friend.",
-        "friendMoreCurrencies": "+{{count}} more"
+        "friendMoreCurrencies": "+{{count}} more",
+        "friendCrossNetLabel": "Net across groups",
+        "friendSettleOneCurrency": "Settle in one currency",
+        "friendSettleAll": "Settle all with {{name}}",
+        "friendCrossSettlePickTitle": "Choose settlement currency",
+        "friendCrossSettleConfirmTitle": "Confirm cross-group settle",
+        "friendCrossSettleConfirmButton": "Record settlements",
+        "friendCrossSettleNetLabel": "Net in chosen currency",
+        "friendCrossSettleYouPay": "You pay {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} pays you",
+        "friendCrossSettleGroupsHint": "Will record payments in {{count}} group(s)"
     },
     "legal": {
         "termsTitle": "Terms of Service",
@@ -1191,6 +1205,13 @@
         },
         "recurring": {
             "lockedBody": "Automate rent, subscriptions, and other repeating expenses with Pro."
+        },
+        "receiptOcr": {
+            "menuOption": "Fill from receipt text",
+            "sheetTitle": "Receipt text",
+            "sheetBody": "Paste text from a receipt email or OCR app. We suggest amount, currency, and merchant — you confirm before saving.",
+            "placeholder": "Paste receipt text here…",
+            "apply": "Apply to form"
         },
         "smartReminder": {
             "sheetTitle": "Smart reminders",

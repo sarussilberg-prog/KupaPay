@@ -6,6 +6,13 @@ jest.mock('../../../services/auth.service', () => ({
     signInWithApple: jest.fn(),
 }));
 
+jest.mock('../../../lib/featureFlags', () => ({
+    EMAIL_AUTH_ENABLED: false,
+    SHOW_KUPAPAY_PRO_UPSELL: false,
+    KUPAPAY_PRO_ENABLED: false,
+    isProUpsellSurfaceEnabled: () => false,
+}));
+
 jest.mock('../../../hooks/useChangeAppLanguage', () => ({
     useChangeAppLanguage: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
 }));
@@ -141,6 +148,11 @@ describe('LoginScreen', () => {
         expect(await findByText('deleteAccount.deactivatedTitle')).toBeTruthy();
         expect(clearDeactivationNoticePending).toHaveBeenCalled();
         expect(useAppStore.getState().pendingDeactivationNotice).toBe(false);
+    });
+
+    it('hides email magic-link stub when EMAIL_AUTH_ENABLED is false', () => {
+        const { queryByTestId } = render(<LoginScreen />);
+        expect(queryByTestId('login-email-magic-link-stub')).toBeNull();
     });
 
     it('shows deleted-account dialog when persisted notice is consumed on mount (web)', async () => {
