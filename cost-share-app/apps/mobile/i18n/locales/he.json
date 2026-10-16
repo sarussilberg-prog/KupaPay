@@ -901,6 +901,7 @@
         "currency": "מטבע",
         "amount": "סכום",
         "submit": "רשום תשלום",
+        "paidInCurrency": "התשלום נרשם ב-{{currency}} (החובות עשויים להיות במטבעות אחרים)",
         "warnPartial": "תשלום חלקי — {{remaining}} עדיין יישארו חוב",
         "warnOverpay": "מעבר לסכום — {{flipAmount}} יהיו חוב בכיוון ההפוך",
         "edit": "ערוך תשלום",
@@ -1038,6 +1039,16 @@
         "noFriendsYet": "אין קופות משותפות",
         "friendBreakdownTitle": "פירוט לפי קופה",
         "friendBreakdownEmpty": "אין קופות משותפות עם החבר הזה.",
+        "friendCrossNetLabel": "נטו בכל הקופות",
+        "friendSettleOneCurrency": "סגירה במטבע אחד",
+        "friendSettleAll": "סגירה מלאה עם {{name}}",
+        "friendCrossSettlePickTitle": "בחר מטבע לסגירה",
+        "friendCrossSettleConfirmTitle": "אישור סגירה בין קופות",
+        "friendCrossSettleConfirmButton": "רשום תשלומים",
+        "friendCrossSettleNetLabel": "נטו במטבע שנבחר",
+        "friendCrossSettleYouPay": "אתה משלם ל-{{name}}",
+        "friendCrossSettleTheyPay": "{{name}} משלם/ת לך",
+        "friendCrossSettleGroupsHint": "ירשמו תשלומים ב-{{count}} קופות",
         "friendMoreCurrencies": "עוד {{count}}"
     },
     "legal": {
@@ -1194,11 +1205,27 @@
         "recurring": {
             "lockedBody": "אוטומציה לשכירות, מנויים והוצאות חוזרות — עם Pro."
         },
+        "receiptOcr": {
+            "menuOption": "מילוי מטקסט קבלה",
+            "sheetTitle": "טקסט קבלה",
+            "sheetBody": "הדביקו טקסט מהקבלה או מאפליקציית OCR. תוכלו לאשר לפני שמירה.",
+            "placeholder": "הדביקו כאן…",
+            "apply": "החלה על הטופס"
+        },
         "smartReminder": {
             "sheetTitle": "תזכורות חכמות",
             "enable": "תזכורות אוטומטיות לסגירת חובות",
             "lockedBody": "Pro יכול לשלוח תזכורות לפי לוח זמנים (מינימום כל 3 ימים).",
             "intervalDays": "כל {{count}} ימים"
+        },
+        "spendingInsights": {
+            "menuOption": "תובנות הוצאות",
+            "sheetTitle": "תובנות הוצאות",
+            "lockedBody": "סיכומים לפי קטגוריה, מי שילם ומגמות שבועיות.",
+            "upgrade": "שדרוג ל-Pro",
+            "empty": "אין עדיין הוצאות במטבע זה.",
+            "uncategorized": "ללא קטגוריה",
+            "tab": { "category": "קטגוריה", "member": "שילם", "week": "שבועי" }
         },
         "tripBudget": {
             "title": "תקציב טיול",

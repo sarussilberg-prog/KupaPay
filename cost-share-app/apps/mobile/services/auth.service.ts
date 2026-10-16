@@ -17,6 +17,7 @@ import {
 } from '../lib/googleSignInNative';
 import { APP_WEB_ORIGIN } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
+import { signalDeactivatedAccount } from '../lib/signalDeactivatedAccount';
 import { useAppStore } from '../store';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -26,6 +27,12 @@ export type AuthErrorCode = 'account_deleted' | 'generic';
 export interface AuthError {
   code: AuthErrorCode;
   message: string;
+}
+
+async function rejectDeletedAccount(): Promise<{ error: AuthError }> {
+  await clearStaleAuthSession();
+  await signalDeactivatedAccount(useAppStore.getState().setPendingDeactivationNotice);
+  return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
 }
 
 function toAuthError(err: unknown): AuthError {
@@ -123,7 +130,7 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
 
       const allowed = await isAuthSessionAllowed();
       if (!allowed) {
-        return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+        return rejectDeletedAccount();
       }
 
       return { error: null };
@@ -139,7 +146,7 @@ export async function handleAuthRedirectUrl(url: string): Promise<{ error: AuthE
 
     const allowed = await isAuthSessionAllowed();
     if (!allowed) {
-      return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+      return rejectDeletedAccount();
     }
 
     return { error: null };
@@ -250,7 +257,7 @@ async function signInWithGoogleNativeIos(): Promise<{ error: AuthError | null }>
 
   const allowed = await isAuthSessionAllowed();
   if (!allowed) {
-    return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+    return rejectDeletedAccount();
   }
 
   return { error: null };
@@ -299,7 +306,7 @@ async function signInWithAppleNative(): Promise<{ error: AuthError | null }> {
 
     const allowed = await isAuthSessionAllowed();
     if (!allowed) {
-      return { error: { code: 'account_deleted', message: 'account deleted' } satisfies AuthError };
+      return rejectDeletedAccount();
     }
 
     // Apple returns fullName only on the FIRST authorization; persist it so the profile

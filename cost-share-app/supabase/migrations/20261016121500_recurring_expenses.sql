@@ -1,4 +1,5 @@
--- Pro v2: recurring expense series (#167)
+-- Version 20261016121500 (renamed from 20261016120000 — unique schema_migrations.version).
+-- Pro v2: recurring expense series (#167). Idempotent re-apply (IF NOT EXISTS / OR REPLACE / DROP IF EXISTS).
 
 CREATE TABLE IF NOT EXISTS public.recurring_expense_series (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -27,6 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_recurring_series_due
     ON public.recurring_expense_series(next_run_date)
     WHERE ended_at IS NULL;
 
+DROP TRIGGER IF EXISTS update_recurring_expense_series_updated_at ON public.recurring_expense_series;
 CREATE TRIGGER update_recurring_expense_series_updated_at
     BEFORE UPDATE ON public.recurring_expense_series
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -46,6 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_recurring_occurrences_series
 ALTER TABLE public.recurring_expense_series ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recurring_expense_occurrences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "group members read recurring series" ON public.recurring_expense_series;
 CREATE POLICY "group members read recurring series"
     ON public.recurring_expense_series FOR SELECT
     TO authenticated
@@ -58,6 +61,7 @@ CREATE POLICY "group members read recurring series"
         )
     );
 
+DROP POLICY IF EXISTS "group members read recurring occurrences" ON public.recurring_expense_occurrences;
 CREATE POLICY "group members read recurring occurrences"
     ON public.recurring_expense_occurrences FOR SELECT
     TO authenticated
@@ -130,7 +134,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public._insert_expense_from_recurring_series(public.recurring_expense_series, date) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public._insert_expense_from_recurring_series(public.recurring_expense_series, date) FROM PUBLIC; -- safe-breaking: new Pro recurring RPCs only
 
 CREATE OR REPLACE FUNCTION public._advance_recurring_next_date(
     p_from DATE,
@@ -258,7 +262,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.create_recurring_expense_series(
     uuid, text, numeric, text, text, date, text, uuid, text, jsonb, text, text
-) FROM PUBLIC, anon;
+) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.create_recurring_expense_series(
     uuid, text, numeric, text, text, date, text, uuid, text, jsonb, text, text
 ) TO authenticated;
@@ -330,7 +334,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.update_recurring_expense_series(
     uuid, text, numeric, text, text, uuid, text, jsonb, text
-) FROM PUBLIC, anon;
+) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.update_recurring_expense_series(
     uuid, text, numeric, text, text, uuid, text, jsonb, text
 ) TO authenticated;
@@ -368,7 +372,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.stop_recurring_expense_series(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.stop_recurring_expense_series(uuid) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.stop_recurring_expense_series(uuid) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.get_recurring_series_for_expense(p_expense_id uuid)
@@ -396,7 +400,7 @@ AS $$
       );
 $$;
 
-REVOKE ALL ON FUNCTION public.get_recurring_series_for_expense(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.get_recurring_series_for_expense(uuid) FROM PUBLIC, anon; -- safe-breaking: new Pro recurring RPCs only
 GRANT EXECUTE ON FUNCTION public.get_recurring_series_for_expense(uuid) TO authenticated;
 
 -- Cron / service_role: generate due occurrences (idempotent).
@@ -446,5 +450,5 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.generate_due_recurring_expenses(int) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.generate_due_recurring_expenses(int) FROM PUBLIC, anon, authenticated; -- safe-breaking: cron-only RPC
 GRANT EXECUTE ON FUNCTION public.generate_due_recurring_expenses(int) TO service_role;
