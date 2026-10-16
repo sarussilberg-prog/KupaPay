@@ -16,6 +16,7 @@ BEGIN
         VALUES (v_group, 'G', 'USD', v_user, 'grp_rpc_tok');
 
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_user::text)::text, TRUE);
+    PERFORM set_config('role', 'authenticated', TRUE);
 
     v_result := public.archive_group(v_group);
     IF v_result->>'ok' IS DISTINCT FROM 'true' THEN

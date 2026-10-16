@@ -40,6 +40,11 @@ BEGIN
     INSERT INTO public.expense_splits (expense_id, user_id, amount) VALUES
         (v_expense, v_a, 20), (v_expense, v_b, 20);
 
+    INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
+        ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config('role', 'authenticated', TRUE);
+
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT COALESCE(SUM((n->>'net')::numeric),0) INTO v_sum
       FROM jsonb_array_elements(v_payload->'groups') grp, jsonb_array_elements(grp->'currencies') cur,
@@ -88,6 +93,11 @@ BEGIN
     INSERT INTO public.expenses (id, group_id, description, amount, currency, paid_by, created_by, is_deleted)
         VALUES (v_expense, v_group, 'orphan', 50, 'ILS', v_a, v_a, FALSE);
 
+    INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
+        ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config('role', 'authenticated', TRUE);
+
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT EXISTS(
         SELECT 1 FROM jsonb_array_elements(v_payload->'groups') grp
@@ -131,6 +141,11 @@ BEGIN
         VALUES (v_expense, v_group, 'C paid', 30, 'ILS', v_c, v_c, FALSE);
     INSERT INTO public.expense_splits (expense_id, user_id, amount) VALUES
         (v_expense, v_c, 10), (v_expense, v_a, 10);
+
+    INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
+        ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config('role', 'authenticated', TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT COALESCE(SUM((n->>'net')::numeric),0) INTO v_sum
@@ -188,6 +203,11 @@ BEGIN
         (v_e2, v_group, 'usd', 20, 'USD', v_a, v_a, FALSE);
     INSERT INTO public.expense_splits (expense_id, user_id, amount) VALUES
         (v_e1, v_a, 10), (v_e1, v_b, 10), (v_e2, v_a, 5), (v_e2, v_b, 5);
+
+    INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
+        ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config('role', 'authenticated', TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT COALESCE(SUM((n->>'net')::numeric),0) INTO v_ils_sum FROM jsonb_array_elements(v_payload->'groups') grp,

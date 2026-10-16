@@ -26,6 +26,8 @@ DECLARE
     v_group_rows INT;
     v_legacy_payer_net NUMERIC;
 BEGIN
+    INSERT INTO auth.users (id, email) VALUES (v_payer, 'arch-usd-p@test.local');
+
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_payer, 'Payer', 'USD', TRUE, 'tt_arc_p'),
         (v_borrow, 'Borrow', 'USD', TRUE, 'tt_arc_b');
@@ -65,6 +67,9 @@ BEGIN
     IF ABS(v_legacy_payer_net) < 0.01 THEN
         RAISE EXCEPTION 'Sanity failed: legacy formula should show open balance, got %', v_legacy_payer_net;
     END IF;
+
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_payer::text)::text, TRUE);
+    PERFORM set_config('role', 'authenticated', TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_payer);
     SELECT COUNT(*) INTO v_group_rows
