@@ -12,8 +12,8 @@ WEB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Vercel projects that should always use development Supabase defaults when env is unset.
 KUPAPAY_DEV_VERCEL_PROJECT_IDS=(
-  "prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"
   "prj_ldRyqXhp9Gg0QAHCNzEBw3VIcWbc"
+  "prj_wa5noNsRFK5797IRthACeREIa8jR"
 )
 IS_DEV_VERCEL_PROJECT=false
 for id in "${KUPAPAY_DEV_VERCEL_PROJECT_IDS[@]}"; do
