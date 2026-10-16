@@ -39,6 +39,7 @@ BEGIN
         SET avatar_url = v_attacker::text || '/avatar.png'
         WHERE id = v_attacker;
 
+    PERFORM public.test_set_authenticated(v_attacker);
     PERFORM public.delete_my_account();
 
     SELECT COUNT(*) INTO v_rows
