@@ -28,6 +28,35 @@ if [[ -z "${EXPORT//[$'\n ']/}" ]]; then
   exit 0
 fi
 
+if [[ "${GENERATE_DB_LINT_BASELINE:-}" == "1" ]]; then
+  OUT_FILE="${DB_LINT_BASELINE_OUT:-supabase/ci/db-lint-baseline.json}"
+  tmp="$(mktemp)"
+  while IFS='|' read -r lint_type cache_key; do
+    [[ -z "$lint_type" ]] && continue
+    echo "$lint_type|$cache_key"
+  done <<< "$EXPORT" > "$tmp"
+  jq -n \
+    --slurpfile lines "$tmp" \
+    --arg desc "Generated from local SQL CI (GENERATE_DB_LINT_BASELINE=1)" \
+    '{
+      description: $desc,
+      enforce: {
+        unindexed_foreign_keys: true,
+        auth_rls_initplan: true,
+        rls_filter_columns_missing_index: true
+      },
+      unindexed_foreign_keys: [],
+      auth_rls_initplan: [],
+      rls_filter_columns_missing_index: []
+    }
+    | reduce ($lines | split("\n") | map(select(length > 0) | split("|")) | .[]) as $row (.;
+        .[$row[0]] += [$row[1]]
+      )' > "$OUT_FILE"
+  rm -f "$tmp"
+  echo "✅ Wrote baseline to $OUT_FILE"
+  exit 0
+fi
+
 fail=0
 while IFS='|' read -r lint_type cache_key; do
   [[ -z "$lint_type" ]] && continue
