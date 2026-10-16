@@ -1,5 +1,11 @@
 import { assertEquals } from '@std/assert';
+import { verifyCronWebhookSecret } from '../cron-webhook/auth.ts';
 import { dispatchStorageCleanup } from './handler.ts';
+
+Deno.test('verifyCronWebhookSecret accepts exact cron secret', () => {
+    assertEquals(verifyCronWebhookSecret('cron-secret', 'cron-secret'), true);
+    assertEquals(verifyCronWebhookSecret('wrong', 'cron-secret'), false);
+});
 
 Deno.test('dispatchStorageCleanup marks rows processed after successful remove', async () => {
     const processed: string[] = [];
