@@ -1169,6 +1169,17 @@
             "error": "Couldn't link that name to your account"
         }
     },
+    "shareSummary": {
+        "title": "Share group summary",
+        "share": "Share image",
+        "hideAmounts": "Hide amounts",
+        "hiddenAmount": "•••",
+        "allSettled": "All settled ✓",
+        "balancesSnapshot": "Balance snapshot",
+        "debtLine": "{{from}} → {{to}}",
+        "watermark": "Split expenses on {{url}}",
+        "fallback": "Check out our group \"{{groupName}}\" on KupaPay"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "You owe",

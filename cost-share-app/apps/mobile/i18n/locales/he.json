@@ -1171,6 +1171,17 @@
             "error": "לא הצלחנו לקשר את השם לחשבון"
         }
     },
+    "shareSummary": {
+        "title": "שיתוף סיכום קופה",
+        "share": "שתף תמונה",
+        "hideAmounts": "הסתר סכומים",
+        "hiddenAmount": "***",
+        "allSettled": "הכל מסולק ✓",
+        "balancesSnapshot": "תמונת מצב יתרות",
+        "debtLine": "{{from}} ל-{{to}}",
+        "watermark": "חלוקת הוצאות ב-{{url}}",
+        "fallback": "הצטרפו לקופה \"{{groupName}}\" ב-KupaPay"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "את/ה חייב/ת",

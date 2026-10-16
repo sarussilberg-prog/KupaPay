@@ -1169,6 +1169,17 @@
             "error": "Impossible de lier ce nom"
         }
     },
+    "shareSummary": {
+        "title": "Partager le résumé du groupe",
+        "share": "Partager l'image",
+        "hideAmounts": "Masquer les montants",
+        "hiddenAmount": "***",
+        "allSettled": "Tout est réglé ✓",
+        "balancesSnapshot": "Aperçu des soldes",
+        "debtLine": "{{from}} à {{to}}",
+        "watermark": "Partagez les dépenses sur {{url}}",
+        "fallback": "Découvrez notre groupe « {{groupName}} » sur KupaPay"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "Vous devez",

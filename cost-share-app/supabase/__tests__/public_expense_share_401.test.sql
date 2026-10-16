@@ -9,7 +9,8 @@ DECLARE
     v_token TEXT := 'tt_expshare01';
     v_json JSON;
 BEGIN
-    INSERT INTO public.profiles (id, name, is_active) VALUES (v_user, 'Payer', TRUE);
+    INSERT INTO public.profiles (id, name, is_active, invite_token)
+    VALUES (v_user, 'Payer', TRUE, 'it_exp401_payer');
     INSERT INTO public.groups (id, name, created_by, default_currency, invite_token)
     VALUES (v_group, 'Share test', v_user, 'ILS', 'tt_grp401xxx');
     INSERT INTO public.group_members (group_id, user_id, is_active) VALUES (v_group, v_user, TRUE);

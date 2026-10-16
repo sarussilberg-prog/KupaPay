@@ -17,6 +17,7 @@ BEGIN;
 SET LOCAL session_replication_role = replica;
 
 ALTER TABLE expenses      ENABLE ALWAYS TRIGGER trg_expense_activity_events;
+ALTER TABLE expenses      ENABLE ALWAYS TRIGGER trg_default_expense_share_token;
 ALTER TABLE group_members ENABLE ALWAYS TRIGGER trg_group_membership_activity_events;
 
 DO $outer$

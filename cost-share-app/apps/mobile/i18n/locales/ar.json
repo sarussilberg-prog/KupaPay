@@ -1223,6 +1223,17 @@
             "error": "تعذّر ربط الاسم بحسابك"
         }
     },
+    "shareSummary": {
+        "title": "مشاركة ملخص المجموعة",
+        "share": "مشاركة صورة",
+        "hideAmounts": "إخفاء المبالغ",
+        "hiddenAmount": "***",
+        "allSettled": "تمت التسوية بالكامل ✓",
+        "balancesSnapshot": "لقطة للأرصدة",
+        "debtLine": "{{from}} إلى {{to}}",
+        "watermark": "قسّم المصروفات على {{url}}",
+        "fallback": "انضم إلى مجموعتنا \"{{groupName}}\" على KupaPay"
+    },
     "dashboard": {
         "appTitle": "KupaPay",
         "youOwe": "عليك",

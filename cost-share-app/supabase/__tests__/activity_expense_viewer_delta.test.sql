@@ -19,6 +19,7 @@ SET LOCAL session_replication_role = replica;
 -- Re-enable the triggers under test (replica mode disables them).
 ALTER TABLE expenses       ENABLE ALWAYS TRIGGER trg_expense_activity_events;
 ALTER TABLE expense_splits ENABLE ALWAYS TRIGGER trg_expense_split_viewer_delta;
+ALTER TABLE expenses       ENABLE ALWAYS TRIGGER trg_default_expense_share_token;
 
 DO $outer$
 DECLARE
