@@ -32,6 +32,8 @@ import {
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
 import { APP_VERSION } from '@cost-share/shared';
+import { EMAIL_AUTH_ENABLED } from '../../lib/featureFlags';
+import { LoginEmailMagicLinkStub } from '../../components/auth/LoginEmailMagicLinkStub';
 
 export function LoginScreen() {
     const { t } = useTranslation();
@@ -210,6 +212,9 @@ export function LoginScreen() {
                             />
                         </>
                     )}
+                    {EMAIL_AUTH_ENABLED ? (
+                        <LoginEmailMagicLinkStub disabled={isAnyLoading} />
+                    ) : null}
                     <Text className="text-[11px] text-gray-300 text-center mt-4">
                         v{APP_VERSION}
                     </Text>

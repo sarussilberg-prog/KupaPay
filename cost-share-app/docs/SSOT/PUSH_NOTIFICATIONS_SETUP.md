@@ -43,7 +43,15 @@ SELECT vault.create_secret(
   'POST target for daily pro trial reminder cron');
 ```
 
-Reuses **`send_push_secret`** in Vault and edge **`PUSH_WEBHOOK_SECRET`** (`x-webhook-secret` header).
+**`send-push`** uses Vault `send_push_secret` / edge **`PUSH_WEBHOOK_SECRET`**.
+
+Cron dispatch functions use **separate** secrets (edge env + Vault where applicable):
+
+| Function | Edge env | Vault (pg_net cron) |
+|----------|----------|---------------------|
+| `pro-trial-reminder-dispatch` | `PRO_TRIAL_REMINDER_WEBHOOK_SECRET` | `pro_trial_reminder_webhook_secret` (falls back to `send_push_secret` until rotated) |
+| `pro-recurring-expense-dispatch` | `PRO_RECURRING_EXPENSE_WEBHOOK_SECRET` | configure per deploy |
+| `pro-smart-reminder-dispatch` | `PRO_SMART_REMINDER_WEBHOOK_SECRET` | configure per deploy |
 
 Deploy the function:
 

@@ -64,6 +64,9 @@
             "balances": "Soldes"
         },
         "signInError": "Échec de la connexion. Veuillez réessayer.",
+        "signInWithEmailMagicLink": "Continuer avec l'e-mail",
+        "emailMagicLinkStubHint": "La connexion par lien e-mail arrive bientôt.",
+        "emailPlaceholder": "vous@exemple.com",
         "googleSignInSheetTitle": "Se connecter avec Google",
         "googleSignInSheetHint": "Appuyez ci-dessous : la sélection du compte s'ouvre par-dessus cette fenêtre."
     },
@@ -899,6 +902,7 @@
         "currency": "Devise",
         "amount": "Montant",
         "submit": "Enregistrer le paiement",
+        "paidInCurrency": "Paiement enregistré en {{currency}} (les dettes peuvent être dans d'autres devises)",
         "warnPartial": "Paiement partiel — il restera {{remaining}} à rembourser",
         "warnOverpay": "Plus que le montant dû — {{flipAmount}} vous sera dû en retour",
         "edit": "Modifier le paiement",
@@ -1036,6 +1040,16 @@
         "noFriendsYet": "Aucun groupe en commun pour l'instant",
         "friendBreakdownTitle": "Détail par groupe",
         "friendBreakdownEmpty": "Aucun groupe en commun avec cet ami.",
+        "friendCrossNetLabel": "Net tous groupes confondus",
+        "friendSettleOneCurrency": "Régler en une devise",
+        "friendSettleAll": "Tout régler avec {{name}}",
+        "friendCrossSettlePickTitle": "Choisir la devise de règlement",
+        "friendCrossSettleConfirmTitle": "Confirmer le règlement multi-groupes",
+        "friendCrossSettleConfirmButton": "Enregistrer les paiements",
+        "friendCrossSettleNetLabel": "Net dans la devise choisie",
+        "friendCrossSettleYouPay": "Vous payez {{name}}",
+        "friendCrossSettleTheyPay": "{{name}} vous paie",
+        "friendCrossSettleGroupsHint": "Enregistrera des paiements dans {{count}} groupe(s)",
         "friendMoreCurrencies": "+{{count}} de plus"
     },
     "legal": {
@@ -1261,6 +1275,13 @@
         "recurring": {
             "lockedBody": "Automatisez le loyer, les abonnements et autres dépenses récurrentes avec Pro."
         },
+        "receiptOcr": {
+            "menuOption": "Remplir depuis le texte",
+            "sheetTitle": "Texte du reçu",
+            "sheetBody": "Collez le texte du reçu. Montant et devise suggérés — vous confirmez.",
+            "placeholder": "Collez ici…",
+            "apply": "Appliquer"
+        },
         "smartReminder": {
             "sheetTitle": "Rappels intelligents",
             "enable": "Rappels automatiques de règlement",
@@ -1274,7 +1295,11 @@
             "upgrade": "Passer à Pro",
             "empty": "Aucune dépense dans cette devise.",
             "uncategorized": "Sans catégorie",
-            "tab": { "category": "Catégorie", "member": "Payé par", "week": "Semaines" }
+            "tab": {
+                "category": "Catégorie",
+                "member": "Payé par",
+                "week": "Semaines"
+            }
         },
         "tripBudget": {
             "title": "Budget du voyage",

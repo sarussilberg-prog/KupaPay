@@ -34,6 +34,10 @@ function makeBatch(overrides: Partial<ConsolidationBatch> = {}): ConsolidationBa
 }
 
 describe('groupSettlementsForDisplay', () => {
+    it('returns empty array for no settlements', () => {
+        expect(groupSettlementsForDisplay([], [])).toEqual([]);
+    });
+
     it('wraps a standalone settlement as kind=standalone', () => {
         const s = makeSettlement();
         const result = groupSettlementsForDisplay([s], []);
@@ -85,5 +89,18 @@ describe('groupSettlementsForDisplay', () => {
         // Falls back to standalone when batch row is missing
         expect(result).toHaveLength(1);
         expect(result[0].kind).toBe('standalone');
+    });
+
+    it('sorts two batches by createdAt descending', () => {
+        const older = makeBatch({ id: 'b-old', createdAt: new Date('2026-06-20T10:00:00Z') });
+        const newer = makeBatch({ id: 'b-new', createdAt: new Date('2026-06-25T10:00:00Z') });
+        const sOld = makeSettlement({ id: 's-old', consolidationBatchId: 'b-old' });
+        const sNew = makeSettlement({ id: 's-new', consolidationBatchId: 'b-new' });
+        const result = groupSettlementsForDisplay([sOld, sNew], [older, newer]);
+        expect(result).toHaveLength(2);
+        expect(result[0].kind).toBe('batch');
+        if (result[0].kind === 'batch') {
+            expect(result[0].batch.id).toBe('b-new');
+        }
     });
 });

@@ -38,7 +38,8 @@ export type ProductAnalyticsEvent =
     | 'smart_reminder_configured'
     | 'spending_insights_viewed'
     | 'trip_budget_configured'
-    | 'trip_budget_viewed';
+    | 'trip_budget_viewed'
+    | 'receipt_scan_applied';
 
 export interface ProductAnalyticsClient {
     capture: (event: string, properties?: Record<string, unknown>) => void;

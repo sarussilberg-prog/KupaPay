@@ -114,3 +114,7 @@ Apply migration `20261016140000_trip_budget.sql` on dev before production.
 RPCs `get_group_spending_by_category`, `get_group_spending_by_member`, and `get_group_spending_by_week` require `has_pro`. No cron.
 
 Apply migration `20261016150000_group_spending_insights.sql` on dev before production.
+
+### Receipt OCR (Pro v2, heuristic)
+
+Deploy `receipt-ocr` (user JWT). Default: **no paid OCR** — paste text + shared heuristic. Optional vendor via `RECEIPT_OCR_API_URL`. See [RECEIPT_OCR.md](RECEIPT_OCR.md).
