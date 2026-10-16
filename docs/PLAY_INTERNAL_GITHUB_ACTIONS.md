@@ -32,6 +32,8 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 
 Marketing version comes from `packages/shared/version.json` via `app.config.ts`. **`versionCode`** is managed on EAS (`appVersionSource: remote` + production profile **`autoIncrement`**). The workflow does not commit version bumps.
 
+**Live Production app:** `com.kupapay.mobile` is already on Production in Play Console — every upload must use a **`versionCode` higher than the current Production release** and the **existing EAS upload key** (see [PLAY_SETUP.md](PLAY_SETUP.md) §4).
+
 ## Build-time public env (this workflow)
 
 In addition to EAS **production** environment variables (Supabase, Google OAuth, Sentry DSN, etc. — sync locally with `bash scripts/eas-sync-secrets.sh .env.production`):
