@@ -37,7 +37,8 @@ import {
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
 import { APP_VERSION } from '@cost-share/shared';
 import { EMAIL_AUTH_ENABLED } from '../../lib/featureFlags';
-import { LoginEmailMagicLinkStub } from '../../components/auth/LoginEmailMagicLinkStub';
+import { LoginEmailOtpAuth } from '../../components/auth/LoginEmailOtpAuth';
+import type { AuthError } from '../../services/auth.service';
 
 export function LoginScreen() {
     const { t } = useTranslation();
@@ -171,6 +172,27 @@ export function LoginScreen() {
         }
     };
 
+    const handleEmailAuthResult = useCallback(
+        ({ error }: { error: AuthError | null }) => {
+            if (!error) return;
+            if (error.code === 'account_restorable') {
+                setPendingAccountRestore(true);
+                setRestoreDialogVisible(true);
+                return;
+            }
+            if (error.code === 'account_deleted') {
+                showDeletedAccountNotice();
+                return;
+            }
+            handleError(error, {
+                toast: { titleKey: 'auth.signInError', message: error.message },
+                tags: { service: 'auth', op: 'signInWithEmailOtp' },
+                extra: { errorCode: error.code },
+            });
+        },
+        [setPendingAccountRestore, showDeletedAccountNotice],
+    );
+
     const handleAppleSignIn = async () => {
         setLoadingProvider('apple');
         try {
@@ -274,7 +296,10 @@ export function LoginScreen() {
                         </>
                     )}
                     {EMAIL_AUTH_ENABLED ? (
-                        <LoginEmailMagicLinkStub disabled={isAnyLoading} />
+                        <LoginEmailOtpAuth
+                            disabled={isAnyLoading}
+                            onAuthResult={handleEmailAuthResult}
+                        />
                     ) : null}
                     <Text className="text-[11px] text-gray-300 text-center mt-4">
                         v{APP_VERSION}

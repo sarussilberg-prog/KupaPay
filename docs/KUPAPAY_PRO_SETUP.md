@@ -64,11 +64,24 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
 # EXPO_PUBLIC_REVENUECAT_OFFERING_ID=default
 ```
 
+## Google Play — subscriptions & trial
+
+Configure in Play Console (see [`store/play/SUBSCRIPTION_OFFERS.md`](../store/play/SUBSCRIPTION_OFFERS.md)):
+
+| Product | Free trial on base plan |
+|---------|-------------------------|
+| `kupapay_pro_monthly` | **14 days** |
+| `kupapay_pro_yearly` | **14 days** |
+
+Android paywall: **no EU withdrawal checkbox** (Play purchase flow). Trial copy uses **14 days** on Android; iOS remains **7 days** when configured in App Store Connect.
+
 ## Apple Guideline 3.1.2
 
 Paywall shows localized price/period from the store via RevenueCat (`priceString`), auto-renew disclosure, cancel instructions, Terms + Privacy links, **Restore Purchases**, and **Redeem offer code** (iOS App Store sheet; Android opens `https://play.google.com/redeem`). Settings includes **Manage subscription** (`showManageSubscriptions` / Play subscription center).
 
-When monthly/yearly products include a **7-day free trial**, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and Apple-required post-trial price copy. After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+When monthly/yearly products include a store free trial, the paywall uses `checkTrialOrIntroductoryPriceEligibility` for the trial CTA and post-trial price copy (**7 days** on iOS, **14 days** on Play). After a trial starts, the app schedules a **local notification** two days before trial end and registers `profiles.pro_trial_ends_at` for a server fallback.
+
+On **iOS only**, EU/EEA/UK/CH consumers may need to acknowledge loss of the 14-day withdrawal right before purchase (`requiresEuDigitalWithdrawalAck`).
 
 ### Trial reminder cron (server fallback)
 

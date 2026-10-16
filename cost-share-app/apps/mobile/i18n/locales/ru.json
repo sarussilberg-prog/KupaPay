@@ -64,9 +64,20 @@
             "balances": "Балансы"
         },
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
-        "signInWithEmailMagicLink": "Продолжить с email",
-        "emailMagicLinkStubHint": "Вход по ссылке на email скоро появится.",
+        "signInWithEmail": "Продолжить с email",
         "emailPlaceholder": "imya@example.com",
+        "emailOtpSendCode": "Отправить код",
+        "emailOtpVerify": "Подтвердить и войти",
+        "emailOtpSentTo": "Мы отправили 6-значный код на {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Отправить код снова",
+        "emailOtpResendIn": "Повтор через {{seconds}} с",
+        "emailOtpChangeEmail": "Изменить email",
+        "emailOtpInvalidEmail": "Введите корректный адрес email.",
+        "emailOtpInvalidCode": "Код неверный или просрочен. Попробуйте снова или запросите новый.",
+        "emailOtpRateLimited": "Слишком много попыток. Подождите минуту и попробуйте снова.",
+        "emailOtpSendError": "Не удалось отправить код. Попробуйте снова.",
+        "emailOtpVerifyError": "Не удалось проверить код. Попробуйте снова.",
         "googleSignInSheetTitle": "Вход через Google",
         "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна."
     },
@@ -780,7 +791,11 @@
             "noStack": "Трассировка стека недоступна"
         },
         "monetization": {
-            "portalRow": "Аналитика монетизации"
+            "portalRow": "Аналитика монетизации",
+            "allTimeFunnel": "Воронка за всё время",
+            "byPlatform": "По платформе",
+            "last7Days": "Последние 7 дней",
+            "noData": "За этот период событий пока нет"
         },
         "supportMessages": {
             "title": "Обращения в поддержку",
@@ -797,7 +812,12 @@
             "activeGroups": "Активные группы",
             "archivedGroups": "Архивные группы",
             "archiveFootnote": "Архивные = неактивные 2+ месяца и с нулевыми балансами (по всему приложению). Группы, которые пользователи архивировали вручную, не учитываются.",
-            "loadError": "Не удалось загрузить метрики. Потяните вниз, чтобы обновить, или повторите позже."
+            "loadError": "Потяните вниз для обновления или повторите позже.",
+            "loadErrorTitle": "Не удалось загрузить метрики",
+            "notAdminTitle": "Требуются права администратора",
+            "notAdminBody": "Ваш аккаунт не входит в список администраторов приложения, поэтому аналитика монетизации недоступна.",
+            "analyticsUnavailableTitle": "Аналитика не настроена",
+            "analyticsUnavailableBody": "Функция метрик монетизации отсутствует или не выдана в этом проекте Supabase. Примените последние миграции на dev и обновите экран."
         }
     },
     "profile": {
@@ -1275,10 +1295,10 @@
             "restoreSuccess": "Покупки восстановлены.",
             "restoreNone": "Активных покупок не найдено.",
             "tripPassNeedsGroup": "Сначала откройте группу, чтобы купить для неё Trip Pass.",
-            "tryFreeTrialCta": "Попробовать 7 дней бесплатно",
-            "trialFreePeriodHeading": "7 дней бесплатно",
-            "trialFreePeriodBody": "Все функции Pro бесплатно 7 дней. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
-            "trialRenewalDisclosure": "Через 7 дней спишется {{price}}/{{period}}, если не отменить в настройках.",
+            "tryFreeTrialCta": "Попробовать {{trialDays}} дн. бесплатно",
+            "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
+            "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
+            "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
             "euWithdrawalWaiverHeading": "Немедленный доступ и отказ от 14 дней (ЕС)",
             "euDigitalPurchaseAck": "Я запрашиваю немедленный доступ к KupaPay Pro и подтверждаю, что теряю 14-дневное право на отказ с момента начала доступа.",
             "havePromoCode": "Есть код?"

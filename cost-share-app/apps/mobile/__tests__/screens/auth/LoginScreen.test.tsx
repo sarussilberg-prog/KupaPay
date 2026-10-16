@@ -150,9 +150,9 @@ describe('LoginScreen', () => {
         expect(useAppStore.getState().pendingDeactivationNotice).toBe(false);
     });
 
-    it('hides email magic-link stub when EMAIL_AUTH_ENABLED is false', () => {
+    it('hides email OTP auth when EMAIL_AUTH_ENABLED is false', () => {
         const { queryByTestId } = render(<LoginScreen />);
-        expect(queryByTestId('login-email-magic-link-stub')).toBeNull();
+        expect(queryByTestId('login-email-otp-auth')).toBeNull();
     });
 
     it('does not show deleted-account dialog on web cold start when no persisted notice', async () => {

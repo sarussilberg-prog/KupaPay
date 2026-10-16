@@ -27,6 +27,7 @@ describe('Play store listing assets', () => {
     it('documents data safety and content rating answers', () => {
         expect(fs.existsSync(path.join(STORE_PLAY, 'DATA_SAFETY_ANSWERS.md'))).toBe(true);
         expect(fs.existsSync(path.join(STORE_PLAY, 'CONTENT_RATING_ANSWERS.md'))).toBe(true);
+        expect(fs.existsSync(path.join(STORE_PLAY, 'SUBSCRIPTION_OFFERS.md'))).toBe(true);
         expect(fs.existsSync(path.join(REPO_ROOT, 'docs/PLAY_SETUP.md'))).toBe(true);
     });
 });

@@ -20,6 +20,8 @@ import { User } from '@cost-share/shared';
 import { Text } from './AppText';
 import { MemberSelector } from './MemberSelector';
 import { AppIcon } from './AppIcon';
+import { IconLabel } from './ui/IconLabel';
+import { ListRow } from './ui/ListRow';
 import { colors } from '../theme';
 import { useFriendsQuery } from '../hooks/queries/useFriendsQueries';
 import { addGroupMember } from '../services/groups.service';
@@ -205,39 +207,47 @@ function AddMembersSheetView({
                             style={{ width: '85%' }}
                             className="mt-4 rounded-xl bg-primary-extra-light border border-primary/30 px-3 py-2.5"
                         >
-                            <View className="flex-row items-start">
-                                <AppIcon name="information-circle" size={18} color={colors.primary} />
-                                <View className="flex-1 ml-2">
-                                    <Text className="text-sm text-primary-dark font-medium">
-                                        {t('groups.members.mutualHint')}
-                                    </Text>
-                                    <TouchableOpacity
-                                        onPress={handleFindFriends}
-                                        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                        testID="add-members-find-friends-link"
-                                    >
-                                        <Text className="text-sm font-semibold text-primary mt-1 underline">
-                                            {t('groups.members.missingSomeoneCta')}
+                            <IconLabel
+                                iconName="information-circle"
+                                iconSize={18}
+                                iconColor={colors.primary}
+                                align="start"
+                                label={
+                                    <View className="flex-1 min-w-0">
+                                        <Text className="text-sm text-primary-dark font-medium">
+                                            {t('groups.members.mutualHint')}
                                         </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                                        <TouchableOpacity
+                                            onPress={handleFindFriends}
+                                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                                            testID="add-members-find-friends-link"
+                                        >
+                                            <Text className="text-sm font-semibold text-primary mt-1 underline">
+                                                {t('groups.members.missingSomeoneCta')}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+                            />
                         </View>
                     </ScrollView>
 
                     <View className="px-4 pb-4">
                         {groupId && (
-                            <TouchableOpacity
+                            <ListRow
                                 onPress={() => { void shareGroupInvite(groupId); }}
-                                className="flex-row items-center py-3 px-2"
+                                className="py-3 px-2 min-h-0 bg-transparent"
                                 testID="add-members-share-link"
                             >
-                                <AppIcon name="share-outline" size={20} color={colors.primary} />
-                                <Text className="flex-1 ml-3 text-sm font-medium text-gray-800">
-                                    {t('invite.addMembers.sendLink')}
-                                </Text>
+                                <IconLabel
+                                    iconName="share-outline"
+                                    iconSize={20}
+                                    iconColor={colors.primary}
+                                    label={t('invite.addMembers.sendLink')}
+                                    labelClassName="text-sm font-medium text-gray-800"
+                                />
                                 <AppIcon name={isRtl ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.gray400} />
-                            </TouchableOpacity>
+                            </ListRow>
                         )}
 
                         {eligible.length > 0 && (

@@ -12,7 +12,8 @@ import React, { useMemo, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DebtSummary } from '@cost-share/shared';
-import { AppIcon } from '../AppIcon';
+import { IconLabel } from '../ui/IconLabel';
+import { ListRow } from '../ui/ListRow';
 import { Text } from '../AppText';
 import { DebtRow } from './DebtRow';
 import type { SimplifiedDebtsByCurrencyEntry } from '../../services/groups.service';
@@ -137,22 +138,19 @@ export function SimplifiedDebtsSection({
 
             {others.length > 0 && (
                 <View className={involved.length > 0 ? 'mt-2' : 'mt-0'}>
-                    <TouchableOpacity
+                    <ListRow
                         onPress={() => setOthersExpanded(v => !v)}
-                        activeOpacity={0.7}
-                        accessibilityRole="button"
-                        className="flex-row items-center px-3 py-2.5 rounded-2xl bg-slate-100/70 border border-gray-200"
+                        className="px-3 py-2.5 rounded-2xl bg-slate-100/70 border border-gray-200 min-h-0"
                         testID="settle-others-toggle"
                     >
-                        <AppIcon
-                            name={othersExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={16}
-                            color={colors.gray500}
+                        <IconLabel
+                            density="compact"
+                            iconName={othersExpanded ? 'chevron-up' : 'chevron-down'}
+                            iconColor={colors.gray500}
+                            label={t('settleUp.othersToggle', { count: others.length })}
+                            labelClassName="text-[13px] font-medium text-gray-600"
                         />
-                        <Text className="ml-2 flex-1 text-[13px] font-medium text-gray-600">
-                            {t('settleUp.othersToggle', { count: others.length })}
-                        </Text>
-                    </TouchableOpacity>
+                    </ListRow>
                     {othersExpanded && (
                         <View className="mt-2">
                             {others.map(item => renderRow(item, false))}
