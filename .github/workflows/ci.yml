@@ -385,6 +385,12 @@ jobs:
       - name: Lint migration filenames
         working-directory: cost-share-app
         run: bash scripts/supabase-lint-migration-filenames.sh
+      - name: Migration chain (order + newer than base)
+        working-directory: cost-share-app
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: bash scripts/supabase-migration-chain-check.sh
       - name: Unique prefixes (PR tree)
         working-directory: cost-share-app
         run: bash scripts/supabase-unique-migration-versions.sh
