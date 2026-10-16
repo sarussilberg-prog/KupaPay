@@ -426,7 +426,13 @@
             "feedPaidExcludingYou_one": "Оплачено за {{count}} человека в разделе без вас",
             "feedPaidExcludingYou_few": "Оплачено за {{count}} человека в разделе без вас",
             "feedPaidExcludingYou_many": "Оплачено за {{count}} человек в разделе без вас",
-            "feedPaidExcludingYou_other": "Оплачено за {{count}} человека в разделе без вас"
+            "feedPaidExcludingYou_other": "Оплачено за {{count}} человека в разделе без вас",
+            "toNPeople_two": "{{count}} людям",
+            "splitBetweenCount_two": "Делится на {{count}} человека",
+            "paidForSplitters_two": "Оплачено за {{count}} человека в разделе",
+            "feedYouPaid_two": "Вы заплатили за {{count}} человека",
+            "feedPaidForYouAndOthers_two": "Оплачено за вас и ещё {{count}} человека в разделе",
+            "feedPaidExcludingYou_two": "Оплачено за {{count}} человека в разделе без вас"
         },
         "feedDetail": {
             "expenseTitle": "Сведения о расходе",
@@ -470,7 +476,8 @@
         "memberCount_one": "{{count}} участник",
         "memberCount_few": "{{count}} участника",
         "memberCount_many": "{{count}} участников",
-        "memberCount_other": "{{count}} участника"
+        "memberCount_other": "{{count}} участника",
+        "memberCount_two": "{{count}} участника"
     },
     "expenses": {
         "title": "Расходы",
@@ -639,7 +646,8 @@
             "paypal": "PayPal",
             "credit_card": "Банковская карта",
             "other": "Другое"
-        }
+        },
+        "paymentsToSettle_two": "Нужно {{count}} платежа, чтобы все рассчитались"
     },
     "settings": {
         "title": "Настройки",

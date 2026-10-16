@@ -414,7 +414,19 @@
             "feedPaidForYouAndOthers_one": "Für dich und {{count}} weitere beteiligte Person bezahlt",
             "feedPaidForYouAndOthers_other": "Für dich und {{count}} weitere beteiligte Personen bezahlt",
             "feedPaidExcludingYou_one": "Für {{count}} beteiligte Person ohne dich bezahlt",
-            "feedPaidExcludingYou_other": "Für {{count}} beteiligte Personen ohne dich bezahlt"
+            "feedPaidExcludingYou_other": "Für {{count}} beteiligte Personen ohne dich bezahlt",
+            "toNPeople_two": "An {{count}} Personen",
+            "splitBetweenCount_two": "Aufgeteilt auf · {{count}} Personen",
+            "paidForSplitters_two": "Bezahlt für {{count}} beteiligte Personen",
+            "feedYouPaid_two": "Du hast für {{count}} Personen bezahlt",
+            "feedPaidForYouAndOthers_two": "Für dich und {{count}} weitere beteiligte Personen bezahlt",
+            "feedPaidExcludingYou_two": "Für {{count}} beteiligte Personen ohne dich bezahlt",
+            "toNPeople_many": "An {{count}} Personen",
+            "splitBetweenCount_many": "Aufgeteilt auf · {{count}} Personen",
+            "paidForSplitters_many": "Bezahlt für {{count}} beteiligte Personen",
+            "feedYouPaid_many": "Du hast für {{count}} Personen bezahlt",
+            "feedPaidForYouAndOthers_many": "Für dich und {{count}} weitere beteiligte Personen bezahlt",
+            "feedPaidExcludingYou_many": "Für {{count}} beteiligte Personen ohne dich bezahlt"
         },
         "feedDetail": {
             "expenseTitle": "Ausgabendetails",
@@ -456,7 +468,9 @@
             "missingSomeoneCta": "Nicht gefunden? Freunde hinzufügen"
         },
         "memberCount_one": "{{count}} Person",
-        "memberCount_other": "{{count}} Personen"
+        "memberCount_other": "{{count}} Personen",
+        "memberCount_two": "{{count}} Personen",
+        "memberCount_many": "{{count}} Personen"
     },
     "expenses": {
         "title": "Ausgaben",
@@ -621,7 +635,9 @@
             "paypal": "PayPal",
             "credit_card": "Kreditkarte",
             "other": "Sonstiges"
-        }
+        },
+        "paymentsToSettle_two": "{{count}} Zahlungen, um alle auszugleichen",
+        "paymentsToSettle_many": "{{count}} Zahlungen, um alle auszugleichen"
     },
     "settings": {
         "title": "Einstellungen",
