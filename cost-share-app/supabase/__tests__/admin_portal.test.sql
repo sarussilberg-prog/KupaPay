@@ -41,16 +41,18 @@ BEGIN
     UPDATE profiles SET is_active = FALSE, deleted_at = NOW(), email = NULL, name = NULL
         WHERE id IN (v_alice, v_bob);
 
-    INSERT INTO account_deletions_audit (user_id, email_hash, reason)
-        VALUES (v_alice, 'hash_alice', 'self_service'),
-               (v_bob,   'hash_bob',   'self_service');
+    INSERT INTO account_deletions_audit (user_id, email_hash, reason, recovery_email)
+        VALUES (v_alice, 'hash_alice', 'self_service', 'ap-alice@test.local'),
+               (v_bob,   'hash_bob',   'self_service', 'ap-bob@test.local');
 
     -- Bob is already restored (older audit row remains, restored_at set).
     UPDATE account_deletions_audit SET restored_at = NOW() WHERE user_id = v_bob;
     UPDATE profiles SET is_active = TRUE, email = 'ap-bob@test.local', name = 'Bob' WHERE id = v_bob;
 
+    SET LOCAL session_replication_role = origin;
+
     -- ---- Baseline counts BEFORE seeding test groups (admin metrics use deltas) ----
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     SELECT public.admin_get_platform_metrics() INTO v_metrics;
     v_base_registered  := (v_metrics->'users'->>'registered')::INT;
     v_base_active      := (v_metrics->'groups'->>'active')::INT;
@@ -69,12 +71,12 @@ BEGIN
         ('00000000-0000-0000-0000-0000000ad012', v_admin, TRUE);
 
     -- ---- CASE 1: is_app_admin() ---------------------------------------
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     IF NOT public.is_app_admin() THEN
         RAISE EXCEPTION 'Case 1a failed: is_app_admin() should return TRUE for admin';
     END IF;
 
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
     IF public.is_app_admin() THEN
         RAISE EXCEPTION 'Case 1b failed: is_app_admin() should return FALSE for non-admin';
     END IF;
@@ -94,7 +96,7 @@ BEGIN
     -- 2b: admin sees Alice (deleted, not restored) but not Bob (restored).
     -- Filter to the synthetic test users so the assertion is robust to pre-existing
     -- deleted accounts in shared dev databases.
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     SELECT COUNT(*) INTO v_rows FROM public.admin_list_deleted_accounts()
         WHERE user_id IN (v_alice, v_bob);
     IF v_rows <> 1 THEN
@@ -108,7 +110,7 @@ BEGIN
 
     -- ---- CASE 3: admin_restore_deleted_account(uuid) ------------------
     -- 3a: non-admin → not_authorized
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
     v_caught := FALSE;
     BEGIN
         PERFORM public.admin_restore_deleted_account(v_alice);
@@ -120,11 +122,13 @@ BEGIN
     END IF;
 
     -- 3b: admin restores Alice; notes contain restored_by_admin:<admin uuid>
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     PERFORM public.admin_restore_deleted_account(v_alice);
 
+    RESET ROLE;
     SELECT notes INTO v_notes FROM account_deletions_audit
         WHERE user_id = v_alice ORDER BY deleted_at DESC LIMIT 1;
+    PERFORM public.test_set_authenticated(v_admin);
     IF v_notes IS NULL OR position('restored_by_admin:' || v_admin::text IN v_notes) = 0 THEN
         RAISE EXCEPTION 'Case 3b failed: notes missing restored_by_admin marker, got %', v_notes;
     END IF;
@@ -137,11 +141,10 @@ BEGIN
     END IF;
 
     -- ---- CASE 4: app_admins is locked (no RLS policy) -----------------
-    -- Re-enable RLS enforcement for this case by clearing replica role,
-    -- then attempt a direct INSERT as a non-admin authenticated session.
+    RESET ROLE;
     SET LOCAL session_replication_role = origin;
     SET LOCAL ROLE authenticated;
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
 
     v_caught := FALSE;
     BEGIN
@@ -153,13 +156,11 @@ BEGIN
         RAISE EXCEPTION 'Case 4 failed: non-admin INSERT into app_admins should be blocked by RLS';
     END IF;
 
-    -- Restore replica role for clean ROLLBACK.
     RESET ROLE;
-    SET LOCAL session_replication_role = replica;
 
     -- ---- CASE 5: admin_get_platform_metrics() -------------------------
     -- 5a: non-admin → not_authorized
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_bob::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_bob);
     v_caught := FALSE;
     BEGIN
         PERFORM public.admin_get_platform_metrics();
@@ -171,7 +172,7 @@ BEGIN
     END IF;
 
     -- 5b: admin sees post-seed deltas matching the seeded groups
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_admin);
     SELECT public.admin_get_platform_metrics() INTO v_metrics;
 
     -- Registered users: baseline was taken after seeding admin+bob as active (alice was
