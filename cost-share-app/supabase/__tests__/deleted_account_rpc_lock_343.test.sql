@@ -20,6 +20,9 @@ BEGIN
     INSERT INTO public.expenses (id, group_id, paid_by, amount, currency, description, expense_date, created_by)
         VALUES ('00000000-0000-0000-0000-000000343020', v_group, v_user, 40, 'USD', 'meal', CURRENT_DATE, v_user);
 
+    INSERT INTO public.activity_events (user_id, kind, group_id, ref_id, actor_user_id)
+        VALUES (v_user, 'expense_added', v_group, gen_random_uuid(), v_user);
+
     UPDATE public.profiles SET is_active = FALSE WHERE id = v_user;
 
     PERFORM public.test_set_authenticated(v_user);
@@ -53,14 +56,6 @@ BEGIN
     IF NOT v_caught THEN
         RAISE EXCEPTION 'Case 2 failed: expected spending RPC denial';
     END IF;
-
-    SELECT COUNT(*) INTO v_rows FROM public.activity_events WHERE user_id = v_user;
-    IF v_rows <> 0 THEN
-        RAISE EXCEPTION 'Case 3 setup: expected 0 activity rows, got %', v_rows;
-    END IF;
-
-    INSERT INTO public.activity_events (user_id, kind, group_id, ref_id, actor_user_id)
-        VALUES (v_user, 'expense_added', v_group, gen_random_uuid(), v_user);
 
     SELECT COUNT(*) INTO v_rows FROM public.activity_events WHERE user_id = v_user;
     IF v_rows <> 0 THEN
