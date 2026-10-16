@@ -29,14 +29,12 @@ BEGIN
         RAISE EXCEPTION 'Case 1 failed: foreign avatar path must not be queued (rows=%)', v_rows;
     END IF;
 
+    PERFORM set_config('role', 'service_role', TRUE);
     UPDATE public.profiles
-        SET is_active = TRUE, deleted_at = NULL, email = 'av329-attacker@test.local', name = 'Attacker'
+        SET is_active = TRUE, deleted_at = NULL, email = 'av329-attacker@test.local', name = 'Attacker',
+            avatar_url = v_attacker::text || '/avatar.png'
         WHERE id = v_attacker;
     UPDATE auth.users SET email = 'av329-attacker@test.local' WHERE id = v_attacker;
-
-    UPDATE public.profiles
-        SET avatar_url = v_attacker::text || '/avatar.png'
-        WHERE id = v_attacker;
 
     PERFORM public.test_set_authenticated(v_attacker);
     PERFORM public.delete_my_account();
