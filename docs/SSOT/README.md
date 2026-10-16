@@ -21,6 +21,7 @@
 | Types / DTOs / balance math | `packages/shared/` | [SRS.md](./SRS.md) glossary |
 | Database model (reference) | [DATABASE_ARCHITECTURE.md](../../DATABASE_ARCHITECTURE.md) | `supabase/schema.sql` |
 | Pre-merge checklist | `AI-CHECKLIST.md` | — |
+| Performance CI, budgets, Sentry tracing | [PERFORMANCE.md](./PERFORMANCE.md) | — |
 | Bugs, gaps, pre-launch blockers | [KNOWN_ISSUES.md](./KNOWN_ISSUES.md) | [TECHNICAL_DEBT.md](./TECHNICAL_DEBT.md) (deferrals only) |
 
 ---

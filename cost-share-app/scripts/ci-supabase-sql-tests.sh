@@ -138,6 +138,9 @@ for f in "${migration_files_sorted[@]}"; do
   psql_docker_file "$f"
 done
 
+echo "▶ DB lints (Splinter-style, baseline-gated)"
+bash scripts/ci-compare-db-lint-baseline.sh "$PG_CONTAINER" "$PGUSER"
+
 echo "▶ SQL test auth helpers"
 psql_docker <<'SQL'
 CREATE OR REPLACE FUNCTION public.test_set_jwt_sub(p_user_id UUID)
