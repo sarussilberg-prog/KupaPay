@@ -86,6 +86,7 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         expect(getByText('settings.general')).toBeTruthy();
         expect(getByText('settings.support')).toBeTruthy();
         expect(getByText('settings.legal')).toBeTruthy();
+        expect(getByText('settings.privacyAndAccount')).toBeTruthy();
         expect(getByText('settings.account')).toBeTruthy();
     });
 
@@ -101,7 +102,7 @@ describe('SettingsScreen (grouped, no notifications)', () => {
         expect(queryByText(/\{\{version\}\}/)).toBeNull();
     });
 
-    it('renders Delete account row in Account section', () => {
+    it('renders Delete account row in Privacy & Account section', () => {
         const { getByText } = render(<SettingsScreen />);
         expect(getByText('settings.deleteAccount')).toBeTruthy();
     });

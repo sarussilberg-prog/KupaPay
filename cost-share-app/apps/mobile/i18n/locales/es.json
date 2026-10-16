@@ -675,6 +675,7 @@
         "legal": "Aviso legal",
         "terms": "Términos del servicio",
         "privacy": "Política de privacidad",
+        "privacyAndAccount": "Privacidad y cuenta",
         "account": "Cuenta",
         "logout": "Cerrar sesión",
         "version": "Versión {{version}}",
