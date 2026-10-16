@@ -1247,6 +1247,7 @@
             "subscribeAtPrice": "S’abonner — {{price}}",
             "buyTripPass": "Acheter Trip Pass — {{price}}",
             "restore": "Restaurer les achats",
+            "redeemOfferCode": "Utiliser un code promo",
             "manageSubscription": "Gérer l’abonnement",
             "storeNotConfigured": "Les achats ne sont pas disponibles dans cette version.",
             "loadFailed": "Impossible de charger les tarifs d’abonnement. Vérifiez votre connexion ou réessayez dans un instant.",

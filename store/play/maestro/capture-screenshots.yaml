@@ -1,0 +1,9 @@
+# Maestro flows for Play Store phone screenshots (run on Android emulator or device).
+# Requires signed-in dev seed user — see store/play/README.md
+appId: com.kupapay.mobile
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "KupaPay"
+    timeout: 60000
+- takeScreenshot: ../../store/play/graphics/phone/maestro-01-launch

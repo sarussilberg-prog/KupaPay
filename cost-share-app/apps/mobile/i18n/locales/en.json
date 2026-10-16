@@ -1171,6 +1171,7 @@
             "subscribeAtPrice": "Subscribe — {{price}}",
             "buyTripPass": "Buy Trip Pass — {{price}}",
             "restore": "Restore Purchases",
+            "redeemOfferCode": "Redeem offer code",
             "manageSubscription": "Manage subscription",
             "storeNotConfigured": "Purchases are not available in this build.",
             "loadFailed": "We couldn't load subscription prices. Check your connection or try again in a moment.",

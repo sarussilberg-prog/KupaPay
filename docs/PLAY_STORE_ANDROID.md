@@ -123,7 +123,7 @@ Two options:
 
 **Automated (subsequent releases):**
 
-- **GitHub Actions (recommended for CI):** [PLAY_INTERNAL_GITHUB_ACTIONS.md](PLAY_INTERNAL_GITHUB_ACTIONS.md) — manual workflow **Play Internal Android** (EAS cloud AAB + internal track submit; secrets `EXPO_TOKEN`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` when Pro is enabled).
+- **GitHub Actions (recommended for CI):** [PLAY_INTERNAL_GITHUB_ACTIONS.md](PLAY_INTERNAL_GITHUB_ACTIONS.md) — manual workflow **Play Internal Android** ([`play-internal.yml`](../.github/workflows/play-internal.yml): EAS cloud AAB + internal track submit; secrets `EXPO_TOKEN`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` when Pro is enabled). Skips gracefully when Play secrets are missing.
 
 - **Local CLI:**
 ```bash
