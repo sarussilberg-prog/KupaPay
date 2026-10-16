@@ -870,12 +870,17 @@ export function ActivityFeedScreen() {
         }
         return (
             <EmptyState
+                illustrationEmoji="✨"
                 iconName="list-outline"
                 title={t('activity.noActivity')}
                 message={t('activity.noActivityMessage')}
+                actionTitle={t('activity.createGroupCta')}
+                onAction={() =>
+                    navigation.getParent()?.navigate('Groups', { screen: 'CreateGroup' })
+                }
             />
         );
-    }, [showInitialSkeleton, isError, t, handleRefresh, searchQuery]);
+    }, [showInitialSkeleton, isError, t, handleRefresh, searchQuery, navigation]);
 
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>

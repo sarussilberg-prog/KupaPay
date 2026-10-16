@@ -257,6 +257,12 @@
         },
         "noGroups": "Aucun groupe pour l'instant",
         "noGroupsMessage": "Créez votre premier groupe pour commencer à partager les dépenses",
+        "demo": {
+            "try": "Essayer un groupe démo",
+            "created": "Groupe démo prêt — voyez comment ça marche",
+            "alreadyExists": "Vous avez déjà le groupe démo",
+            "error": "Impossible de créer le groupe démo"
+        },
         "offlineMessage": "Nous ne pouvons pas charger vos groupes pour le moment. Ils apparaîtront ici automatiquement une fois que vous serez de nouveau en ligne.",
         "groupName": "Nom du groupe",
         "enterGroupName": "Entrez le nom du groupe",
@@ -950,6 +956,7 @@
         },
         "noActivity": "Aucune activité pour le moment",
         "noActivityMessage": "Vos dépenses récentes, remboursements et messages de groupe apparaîtront ici",
+        "createGroupCta": "Créer un groupe",
         "noSearchResults": "Aucune activité correspondante",
         "noSearchResultsMessage": "Aucun résultat ne correspond à votre recherche. Essayez un autre terme ou effacez la recherche.",
         "expense": "Dépense",

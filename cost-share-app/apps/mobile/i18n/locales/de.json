@@ -257,6 +257,12 @@
         },
         "noGroups": "Noch keine Gruppen",
         "noGroupsMessage": "Erstelle deine erste Gruppe, um Ausgaben zu teilen",
+        "demo": {
+            "try": "Demo-Gruppe ausprobieren",
+            "created": "Demo-Gruppe bereit — so funktioniert's",
+            "alreadyExists": "Du hast die Demo-Gruppe schon",
+            "error": "Demo-Gruppe konnte nicht erstellt werden"
+        },
         "offlineMessage": "Deine Gruppen können gerade nicht geladen werden. Sie erscheinen hier automatisch, sobald du wieder online bist.",
         "groupName": "Gruppenname",
         "enterGroupName": "Gruppennamen eingeben",
@@ -950,6 +956,7 @@
         },
         "noActivity": "Noch keine Aktivität",
         "noActivityMessage": "Deine letzten Ausgaben, Ausgleichszahlungen und Gruppennachrichten erscheinen hier",
+        "createGroupCta": "Gruppe erstellen",
         "noSearchResults": "Keine passende Aktivität",
         "noSearchResultsMessage": "Keine Ergebnisse für deine Suche. Probiere einen anderen Begriff oder setze die Suche zurück.",
         "expense": "Ausgabe",
