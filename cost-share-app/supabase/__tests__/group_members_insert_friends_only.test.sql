@@ -32,12 +32,16 @@ BEGIN
     SET LOCAL session_replication_role = origin;
     PERFORM public.test_set_authenticated(v_alice);
 
-    INSERT INTO public.group_members (group_id, user_id, is_active)
-        VALUES (v_group, v_stranger, TRUE);
-    GET DIAGNOSTICS v_rows = ROW_COUNT;
-    IF v_rows > 0 THEN
+    BEGIN
+        INSERT INTO public.group_members (group_id, user_id, is_active)
+            VALUES (v_group, v_stranger, TRUE);
         RAISE EXCEPTION 'Case A failed: must not add non-friend stranger';
-    END IF;
+    EXCEPTION WHEN insufficient_privilege OR check_violation OR OTHERS THEN
+        IF SQLERRM NOT LIKE '%row-level security%'
+           AND SQLERRM NOT LIKE '%42501%' THEN
+            RAISE;
+        END IF;
+    END;
 
     INSERT INTO public.group_members (group_id, user_id, is_active)
         VALUES (v_group, v_bob, TRUE);
