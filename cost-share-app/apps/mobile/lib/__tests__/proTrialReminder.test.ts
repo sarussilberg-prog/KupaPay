@@ -1,7 +1,7 @@
 import {
     computeTrialReminderDate,
     fallbackTrialEndFromPurchase,
-    PRO_TRIAL_FALLBACK_END_DAYS_FROM_PURCHASE,
+    proTrialFallbackEndDaysFromPurchase,
     PRO_TRIAL_REMINDER_DAYS_BEFORE_END,
     resolveTrialEndDate,
 } from '../proTrialReminder';
@@ -28,7 +28,7 @@ describe('resolveTrialEndDate', () => {
         ).toBeNull();
     });
 
-    it('falls back to purchase + 5 days when TRIAL without expirationDate', () => {
+    it('falls back to purchase + 14 days when TRIAL without expirationDate', () => {
         const purchasedAtMs = Date.parse('2026-10-10T00:00:00.000Z');
         const end = resolveTrialEndDate({
             periodType: 'TRIAL',
@@ -40,7 +40,7 @@ describe('resolveTrialEndDate', () => {
         expect(end?.toISOString()).toBe(expected.toISOString());
         expect(
             (end!.getTime() - purchasedAtMs) / (24 * 60 * 60 * 1000),
-        ).toBe(PRO_TRIAL_FALLBACK_END_DAYS_FROM_PURCHASE);
+        ).toBe(proTrialFallbackEndDaysFromPurchase());
     });
 });
 

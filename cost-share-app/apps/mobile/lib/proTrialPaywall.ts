@@ -3,6 +3,7 @@ import {
     STORE_PRODUCT_PRO_MONTHLY,
     STORE_PRODUCT_PRO_YEARLY,
 } from './proConstants';
+import { proTrialLengthDays } from './proSubscriptionStorePolicy';
 
 /** Mirrors RevenueCat INTRO_ELIGIBILITY_STATUS.ELIGIBLE */
 export const INTRO_ELIGIBILITY_ELIGIBLE = 2;
@@ -32,9 +33,12 @@ export function introFreeTrialDaysFromIntroPrice(
     return unitDays * units;
 }
 
+/** Paywall copy uses product policy length (14d), not a shorter legacy store intro. */
 export function introFreeTrialDaysForPackage(pkg: PurchasesPackageLike | null): number {
-    const fromStore = introFreeTrialDaysFromIntroPrice(pkg?.product.introPrice ?? null);
-    return fromStore ?? DEFAULT_INTRO_FREE_TRIAL_DAYS;
+    if (packageHasIntroFreeTrial(pkg)) {
+        return proTrialLengthDays();
+    }
+    return DEFAULT_INTRO_FREE_TRIAL_DAYS;
 }
 
 export function packageHasIntroFreeTrial(pkg: PurchasesPackageLike | null): boolean {
