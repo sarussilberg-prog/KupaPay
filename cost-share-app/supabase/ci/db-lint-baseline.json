@@ -39,6 +39,8 @@
     "rls_col_index_public_profiles_group_id",
     "rls_col_index_public_profiles_user_id",
     "rls_col_index_public_monetization_events_user_id",
+    "rls_col_index_public_profiles_group_id",
+    "rls_col_index_public_profiles_user_id",
     "rls_col_index_public_recurring_expense_occurrences_group_id",
     "rls_col_index_public_recurring_expense_occurrences_user_id",
     "rls_col_index_public_recurring_expense_series_user_id",
