@@ -1,0 +1,26 @@
+{
+  "description": "CI coverage floors (ratchet only — never decrease without explicit baseline update).",
+  "metrics": {
+    "mobile_ui": {
+      "path_globs": ["apps/mobile/components/", "apps/mobile/screens/", "apps/mobile/store/"],
+      "lines": 49.0,
+      "statements": 47.5,
+      "branches": 43.5,
+      "functions": 39.5
+    },
+    "mobile_critical": {
+      "path_globs": ["apps/mobile/lib/", "apps/mobile/services/", "apps/mobile/hooks/"],
+      "lines": 58.0,
+      "statements": 56.0,
+      "branches": 48.0,
+      "functions": 52.0
+    },
+    "sql_integration_tests": {
+      "min_test_files": 71,
+      "max_quarantined": 9
+    },
+    "web_unit_tests": {
+      "min_test_files": 1
+    }
+  }
+}
