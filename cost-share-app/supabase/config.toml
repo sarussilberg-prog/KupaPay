@@ -49,3 +49,7 @@ verify_jwt = false
 # Every 15m cron (#402) — deliver pushes deferred for quiet hours.
 [functions.flush-deferred-push]
 verify_jwt = false
+
+# Daily cron (#404) — lifecycle email (Resend / Auth SMTP provider).
+[functions.email-lifecycle-dispatch]
+verify_jwt = false

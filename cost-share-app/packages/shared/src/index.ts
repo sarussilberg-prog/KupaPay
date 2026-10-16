@@ -41,3 +41,6 @@ export { LEGAL_ENGLISH_PREVAILS_NOTE } from './legal/legalEnglishPrevailsNote';
 export * from './analytics/productAnalyticsEvents';
 export * from './analytics/marketingAttribution';
 export * from './activation';
+export * from './email/lifecycleTemplates';
+export * from './email/lifecycleEmailCopy';
+export * from './email/renderTransactionalEmail';
