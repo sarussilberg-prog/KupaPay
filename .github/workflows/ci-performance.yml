@@ -43,7 +43,6 @@ jobs:
   lighthouse-next:
     name: Lighthouse (Next.js local)
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: cost-share-app
