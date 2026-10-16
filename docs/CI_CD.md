@@ -100,7 +100,7 @@ Squash merge via `gh pr merge --auto` after checks + SonarCloud, then dev prerel
 |-----------|----------|----------|
 | Supabase | [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | Migrations → development DB + smoke |
 | Web | Vercel | [`vercel-should-build.sh`](../cost-share-app/apps/web/scripts/vercel-should-build.sh) — path-based skip; dev vs prod by project ID |
-| iOS + Android | [`mobile-staging-nightly.yml`](../.github/workflows/mobile-staging-nightly.yml) | **02:00 Asia/Jerusalem** — at most **one iOS + one Android** per day if mobile/shared changed since last successful build ([`mobile-cd-baseline.json`](../cost-share-app/apps/mobile/mobile-cd-baseline.json)) |
+| iOS + Android | [`mobile-staging-nightly.yml`](../.github/workflows/mobile-staging-nightly.yml) | **02:00 Asia/Jerusalem** — at most **one iOS + one Android** per day if mobile/shared changed since last successful build. Baseline is stored in the repo Actions variable **`MOBILE_CD_BASELINE`** (JSON); [`mobile-cd-baseline.json`](../cost-share-app/apps/mobile/mobile-cd-baseline.json) is a read-only fallback for local/plan when the variable is unset. Failed baseline updates do not fail the workflow. |
 | iOS | [`testflight-ios.yml`](../.github/workflows/testflight-ios.yml) | Manual **workflow_dispatch**; TestFlight “What to Test” from [`CHANGELOG.md`](../CHANGELOG.md) since last build |
 | Android | [`play-internal.yml`](../.github/workflows/play-internal.yml) | Manual **workflow_dispatch**; release notes in job summary since last Play internal build |
 
@@ -112,6 +112,8 @@ Squash merge via `gh pr merge --auto` after checks + SonarCloud, then dev prerel
 | Web | Vercel production project after migrations land |
 
 No workflow submits for App Store review or Play production.
+
+**Seeding `MOBILE_CD_BASELINE`:** after the first successful TestFlight or Play internal run, the workflow writes the variable automatically (uses `ADMIN_PAT` when `GITHUB_TOKEN` cannot patch repo variables). If a build succeeded but baseline commit failed historically, set the variable once with `gh api` (see `cost-share-app/apps/mobile/scripts/mobile-cd-baseline-lib.sh` JSON shape) using the `dev` commit SHA that was built.
 
 ## CI duration (before / after)
 

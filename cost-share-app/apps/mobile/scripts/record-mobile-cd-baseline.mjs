@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-/** Record last successful mobile CD build (path baseline + daily cap). */
+/** @deprecated CI uses persist-mobile-cd-baseline.sh + MOBILE_CD_BASELINE variable (no git push). */
+/** Record last successful mobile CD build (local fallback file only). */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

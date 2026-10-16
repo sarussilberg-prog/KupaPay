@@ -33,7 +33,8 @@ jobs:
     name: Build AAB & submit to Play internal
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      actions: write
     defaults:
       run:
         working-directory: cost-share-app/apps/mobile
@@ -90,8 +91,12 @@ jobs:
       - name: Release notes (since last Play internal build)
         if: steps.preflight.outputs.ready == 'true'
         id: release_notes
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
         run: |
           set -euo pipefail
+          chmod +x scripts/ci-mobile-cd-load-baseline.sh
+          export MOBILE_CD_BASELINE_JSON="$(bash scripts/ci-mobile-cd-load-baseline.sh)"
           NOTES="$(MOBILE_RELEASE_NOTES_SINCE_FIELD=lastPlayInternalVersion node scripts/changelog-testflight-notes.mjs)"
           {
             echo 'notes<<EOF'
@@ -140,18 +145,16 @@ jobs:
             echo "::error::Could not read EAS remote Android versionCode after build"
             exit 1
           fi
-          echo "EAS remote Android versionCode: $EXPECTED"
-          node scripts/record-play-internal-version.mjs
-          node scripts/record-mobile-cd-baseline.mjs android "${{ inputs.mobile_cd_sha }}"
+          echo "Play internal upload complete (versionCode ${EXPECTED})"
 
-      - name: Commit mobile CD baselines
+      - name: Persist mobile CD baseline (non-fatal)
         if: steps.preflight.outputs.ready == 'true'
-        working-directory: ${{ github.workspace }}
+        continue-on-error: true
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          MOBILE_CD_SHA: ${{ inputs.mobile_cd_sha || github.sha }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cost-share-app/packages/shared/version.json cost-share-app/apps/mobile/mobile-cd-baseline.json
-          if git diff --staged --quiet; then exit 0; fi
-          git commit -m "chore: record Play internal + mobile CD baseline [skip ci]"
-          git push origin HEAD:"${{ inputs.git_ref || github.ref_name }}"
+          chmod +x scripts/persist-mobile-cd-baseline.sh
+          RELEASE_VER="$(jq -r .version ../../packages/shared/version.json)"
+          bash scripts/persist-mobile-cd-baseline.sh android "${MOBILE_CD_SHA}" "$RELEASE_VER"

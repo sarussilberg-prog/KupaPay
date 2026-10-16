@@ -25,6 +25,9 @@ jobs:
   plan:
     name: Plan nightly mobile CD
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     outputs:
       ios: ${{ steps.plan.outputs.ios }}
       android: ${{ steps.plan.outputs.android }}
@@ -39,9 +42,11 @@ jobs:
         env:
           ENFORCE_DAILY_LIMIT: ${{ inputs.force_all != true && 'true' || 'false' }}
           MOBILE_CD_GIT_REF: dev
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
         run: |
           set -euo pipefail
           chmod +x cost-share-app/apps/mobile/scripts/ci-mobile-cd-plan.sh
+          chmod +x cost-share-app/apps/mobile/scripts/ci-mobile-cd-load-baseline.sh
           git fetch origin dev --quiet
           HEAD_SHA="$(git rev-parse origin/dev)"
           echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
