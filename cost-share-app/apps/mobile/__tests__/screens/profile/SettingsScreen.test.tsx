@@ -22,6 +22,7 @@ jest.mock('../../../services/account.service', () => ({
 }));
 jest.mock('../../../services/users.service', () => ({
     updateUser: jest.fn(),
+    refreshCurrentUserAdminFlag: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('expo-clipboard', () => ({
@@ -36,8 +37,8 @@ jest.mock('../../../lib/openMailto', () => ({
 
 const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
-    ...jest.requireActual('@react-navigation/native'),
     useNavigation: () => ({ navigate: mockNavigate }),
+    useFocusEffect: jest.fn(),
 }));
 
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';
