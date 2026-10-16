@@ -28,4 +28,25 @@ psql "$DB_URL" -v ON_ERROR_STOP=1 -c "
   ) AS webhook_rpc;
 "
 
+echo "▶ profiles_select_scoped policy (no profile_visible_to_viewer oracle)"
+psql "$DB_URL" -v ON_ERROR_STOP=1 -c "
+  SELECT CASE
+    WHEN pg_get_expr(p.polqual, p.polrelid) ILIKE '%profile_visible_to_viewer%' THEN
+      'FAIL: profiles_select_scoped still calls profile_visible_to_viewer'
+    WHEN NOT has_function_privilege(
+      'authenticated',
+      'app_private.profile_peer_visible_for_rls(uuid)',
+      'EXECUTE'
+    ) THEN
+      'FAIL: missing EXECUTE on app_private.profile_peer_visible_for_rls'
+    ELSE 'ok'
+  END AS profiles_rls_check
+  FROM pg_policy p
+  JOIN pg_class c ON c.oid = p.polrelid
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public'
+    AND c.relname = 'profiles'
+    AND p.polname = 'profiles_select_scoped';
+"
+
 echo "✅ Staging DB smoke passed"

@@ -4,31 +4,23 @@
  * writes via SECURITY DEFINER RPCs.
  */
 
-import { APP_WEB_ORIGIN, type GroupWithMembers } from '@cost-share/shared';
+import {
+    buildInviteUrl,
+    buildSettleReminderUrl,
+    buildWhatsAppShareUrl,
+    type GroupWithMembers,
+} from '@cost-share/shared';
+export { buildInviteUrl, buildSettleReminderUrl };
+import * as Clipboard from 'expo-clipboard';
+import { Linking } from 'react-native';
 import i18n from '../i18n';
 import { shareTextMessage } from '../lib/platformShare';
+import { showSuccessMessage } from '../lib/appToast';
 import { supabase } from '../lib/supabase';
 import { useAppStore } from '../store';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { captureProductEvent } from '../lib/productAnalytics';
-
-/** Universal Links / App Links must always use the production host, not web dev origins. */
-const INVITE_ORIGIN = APP_WEB_ORIGIN;
-
-export function buildInviteUrl(kind: 'friend' | 'group', token: string): string {
-    const prefix = kind === 'friend' ? '/i/' : '/g/';
-    return `${INVITE_ORIGIN}${prefix}${token}`;
-}
-
-/**
- * Build the settle-up reminder share link (/sr/<group invite token>).
- * Uses the same env-based origin as invite links so it stays on the canonical
- * web host that deepLinks.service recognises — never a hardcoded domain.
- */
-export function buildSettleReminderUrl(token: string): string {
-    return `${INVITE_ORIGIN}/sr/${token}`;
-}
 
 export function buildFriendInviteMessage(inviterName: string, url: string): string {
     return i18n.t('invite.friend.shareMessage', { inviterName, url });
@@ -42,8 +34,32 @@ export function buildGroupInviteMessage(
     return i18n.t('invite.group.shareMessage', { inviterName, groupName, url });
 }
 
+type GroupInviteContext = {
+    groupId: string;
+    group: GroupWithMembers;
+    user: NonNullable<ReturnType<typeof useAppStore.getState>['currentUser']>;
+    url: string;
+    message: string;
+};
+
+function resolveGroupInviteContext(groupId: string): GroupInviteContext {
+    const user = useAppStore.getState().currentUser;
+    const groups = queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? [];
+    const group = groups.find(g => g.id === groupId);
+    if (!user) throw new Error('not_authenticated');
+    if (!group || !group.inviteToken) throw new Error('group_invite_token_unavailable');
+    const url = buildInviteUrl('group', group.inviteToken);
+    const message = buildGroupInviteMessage(user.name, group.name, url);
+    return { groupId, group, user, url, message };
+}
+
 async function openShare(message: string): Promise<void> {
     await shareTextMessage(message);
+}
+
+export function getGroupInviteSharePayload(groupId: string): { url: string; message: string } {
+    const { url, message } = resolveGroupInviteContext(groupId);
+    return { url, message };
 }
 
 export async function shareFriendInvite(): Promise<void> {
@@ -56,15 +72,23 @@ export async function shareFriendInvite(): Promise<void> {
 }
 
 export async function shareGroupInvite(groupId: string): Promise<void> {
-    const user = useAppStore.getState().currentUser;
-    const groups = queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? [];
-    const group = groups.find(g => g.id === groupId);
-    if (!user) throw new Error('not_authenticated');
-    if (!group || !group.inviteToken) throw new Error('group_invite_token_unavailable');
-    const url = buildInviteUrl('group', group.inviteToken);
-    const message = buildGroupInviteMessage(user.name, group.name, url);
+    const { message } = resolveGroupInviteContext(groupId);
     await openShare(message);
-    void captureProductEvent('invite_sent', { kind: 'group', group_id: groupId });
+    void captureProductEvent('invite_sent', { kind: 'group', channel: 'share_sheet', group_id: groupId });
+}
+
+export async function shareGroupInviteViaWhatsApp(groupId: string): Promise<void> {
+    const { message } = resolveGroupInviteContext(groupId);
+    const waUrl = buildWhatsAppShareUrl(message);
+    await Linking.openURL(waUrl);
+    void captureProductEvent('invite_sent', { kind: 'group', channel: 'whatsapp', group_id: groupId });
+}
+
+export async function copyGroupInviteLink(groupId: string): Promise<void> {
+    const { url } = resolveGroupInviteContext(groupId);
+    await Clipboard.setStringAsync(url);
+    showSuccessMessage('common.linkCopied');
+    void captureProductEvent('invite_sent', { kind: 'group', channel: 'copy_link', group_id: groupId });
 }
 
 export async function rotateFriendInvite(): Promise<string> {

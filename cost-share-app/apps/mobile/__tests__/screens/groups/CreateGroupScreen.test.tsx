@@ -132,7 +132,7 @@ describe('CreateGroupScreen', () => {
     });
 
     it('calls createGroup with the form data and enters the new group on success', async () => {
-        mockCreateGroup.mockResolvedValueOnce({ id: 'g1' } as any);
+        mockCreateGroup.mockResolvedValueOnce({ id: 'g1', name: 'My Group' } as any);
         const { findAllByText, getByPlaceholderText } = render(<CreateGroupScreen />);
         fireEvent.changeText(
             getByPlaceholderText('groups.createForm.namePlaceholder'),
@@ -145,9 +145,9 @@ describe('CreateGroupScreen', () => {
             expect.objectContaining({ name: 'My Group' })
         );
         await waitFor(() =>
-            expect(mockNavigate).toHaveBeenCalledWith('Main', {
-                screen: 'Groups',
-                params: { screen: 'GroupDetail', params: { groupId: 'g1' } },
+            expect(mockNavigate).toHaveBeenCalledWith('GroupPostCreateInvite', {
+                groupId: 'g1',
+                groupName: 'My Group',
             })
         );
     });

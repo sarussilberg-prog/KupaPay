@@ -33,6 +33,7 @@ import { FriendGroupBalancesSheet } from '../../components/dashboard/FriendGroup
 import { colors, shadows } from '../../theme';
 import { useRtlLayout, rtlRowStyle } from '../../hooks/useRtlLayout';
 import { useFriendsQuery, useIncomingFriendRequestsQuery } from '../../hooks/queries/useFriendsQueries';
+import { effectiveCurrentUser } from '../../lib/effectiveCurrentUser';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import { shareFriendInvite } from '../../services/invite.service';
 
@@ -193,7 +194,12 @@ export function ProfileScreen() {
     const navigation = useNavigation<any>();
     const queryClient = useQueryClient();
     const currentUser = useAppStore((s) => s.currentUser);
-    const sessionUserId = useAppStore((s) => s.session?.user?.id);
+    const session = useAppStore((s) => s.session);
+    const displayUser = useMemo(
+        () => effectiveCurrentUser(session, currentUser),
+        [session, currentUser],
+    );
+    const sessionUserId = session?.user?.id;
 
     useFocusEffect(
         useCallback(() => {
@@ -210,16 +216,16 @@ export function ProfileScreen() {
     const isError = groupsQuery.isError;
 
     const baseCurrency = useMemo(
-        () => currentUser?.defaultCurrency ?? 'ILS',
-        [currentUser?.defaultCurrency],
+        () => displayUser?.defaultCurrency ?? currentUser?.defaultCurrency ?? 'ILS',
+        [displayUser?.defaultCurrency, currentUser?.defaultCurrency],
     );
 
     const rawBalanceSummary = useMemo(
         () =>
-            simplified && currentUser?.id
-                ? deriveBalanceSummary(simplified, currentUser.id, baseCurrency)
+            simplified && sessionUserId
+                ? deriveBalanceSummary(simplified, sessionUserId, baseCurrency)
                 : undefined,
-        [simplified, currentUser?.id, baseCurrency],
+        [simplified, sessionUserId, baseCurrency],
     );
 
     const friendsList = useMemo(
@@ -339,8 +345,8 @@ export function ProfileScreen() {
         () => (
             <>
                 <ProfileHeaderRow
-                    name={getDisplayName(currentUser, t)}
-                    avatarUrl={getAvatarUrl(currentUser) ?? undefined}
+                    name={getDisplayName(displayUser, t)}
+                    avatarUrl={getAvatarUrl(displayUser) ?? undefined}
                     onSharePress={handleShareFriendInvite}
                     onEditPress={handleEditProfile}
                 />

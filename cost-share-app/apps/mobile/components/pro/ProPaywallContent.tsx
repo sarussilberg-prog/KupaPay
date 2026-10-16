@@ -90,7 +90,7 @@ export function ProPaywallContent({
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
-        void captureProductEvent('paywall_viewed', { feature_key: featureKey, group_id: groupId ?? null });
+        void captureProductEvent('paywall_view', { feature_key: featureKey, group_id: groupId ?? null });
     }, [featureKey, groupId]);
 
     const loadOfferings = useCallback(async () => {

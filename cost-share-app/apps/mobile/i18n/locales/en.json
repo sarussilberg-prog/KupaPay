@@ -183,6 +183,64 @@
                     "summarySuffix": "members"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Three quick steps — under a minute to your first expense.",
+            "skipConfirm": "Skip",
+            "header": {
+                "create": "Pick a template",
+                "expense": "First expense",
+                "invite": "Invite your crew"
+            },
+            "steps": {
+                "create": "Group",
+                "expense": "Expense",
+                "invite": "Invite"
+            },
+            "fields": {
+                "groupName": "Group name"
+            },
+            "templates": {
+                "label": "What are you splitting?",
+                "trip": {
+                    "label": "Trip",
+                    "defaultName": "Weekend trip",
+                    "defaultExpense": "Gas or rideshare"
+                },
+                "roommates": {
+                    "label": "Roommates",
+                    "defaultName": "Our place",
+                    "defaultExpense": "Groceries or utilities"
+                },
+                "event": {
+                    "label": "Event",
+                    "defaultName": "Group dinner",
+                    "defaultExpense": "Food & drinks"
+                },
+                "couple": {
+                    "label": "Couple",
+                    "defaultName": "Us two",
+                    "defaultExpense": "Dinner out"
+                }
+            },
+            "expense": {
+                "hint": "Log something you already paid — you can edit details later.",
+                "amountRequired": "Enter an amount greater than zero"
+            },
+            "invite": {
+                "title": "Bring others in",
+                "body": "Share a link so friends can join this group and split the next bill."
+            },
+            "skipExpenseTitle": "Skip the first expense?",
+            "skipExpenseMessage": "Adding one expense now is the fastest way to see balances. You can add expenses anytime from the group.",
+            "cta": {
+                "createGroup": "Continue",
+                "addExpense": "Add expense",
+                "skipExpense": "Skip for now",
+                "shareInvite": "Share invite link",
+                "shareInviteWeb": "Share or copy link",
+                "done": "Go to my group"
+            }
         }
     },
     "groups": {
@@ -702,6 +760,13 @@
         "deleteAccount": "Delete account",
         "adminPortal": "Admin Portal"
     },
+    "appReview": {
+        "notNow": "Not now",
+        "webTitle": "How is KupaPay working for you?",
+        "webMessage": "We are still polishing the web experience. Your feedback goes straight to the team.",
+        "webFeedbackCta": "Share feedback",
+        "webStoreHint": "For App Store or Google Play ratings, use KupaPay on your phone."
+    },
     "admin": {
         "portal": {
             "title": "Admin Portal",
@@ -1039,6 +1104,17 @@
             "rotateConfirmBody": "Anyone holding the current link won't be able to join until you send them the new one. Members already in the group are unaffected.",
             "rotated": "Group invite link updated",
             "emptyStateLink": "or share group link"
+        },
+        "postCreate": {
+            "title": "Invite friends",
+            "subtitle": "Bring people into «{{groupName}}» — share a link, WhatsApp, or scan a QR code.",
+            "shareSheet": "Share…",
+            "shareSheetWeb": "Share or copy",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Copy link",
+            "qrHint": "Scan to join the group",
+            "skip": "Not now",
+            "continue": "Open group"
         },
         "addMembers": {
             "searchOthers": "Search other users",
