@@ -4,6 +4,12 @@
 set -euo pipefail
 
 REF="${VERCEL_GIT_COMMIT_REF:-}"
+MSG="${VERCEL_GIT_COMMIT_MESSAGE:-}"
+
+if echo "$MSG" | grep -qiE '\[(skip ci|ci skip)\]'; then
+  echo "Skipping Vercel build ([skip ci] in commit message)"
+  exit 0
+fi
 
 KUPAPAY_DEV_VERCEL_PROJECT_IDS=(
   "prj_W8uZeTmZW0rdAnxEr9ywqMvH5yb8"

@@ -1,4 +1,11 @@
 import type { NextConfig } from 'next';
+import versionJson from '../../packages/shared/version.json';
+
+const appVersion = (versionJson as { version: string }).version;
+const vercelSha = (process.env.VERCEL_GIT_COMMIT_SHA ?? '').trim();
+const kupapayEnvLabel =
+  process.env.NEXT_PUBLIC_KUPAPAY_ENV ??
+  (process.env.VERCEL_ENV === 'production' ? 'production' : 'development');
 
 // The web *app* (the Expo web build — login + the full product) is deployed as a
 // separate Vercel project. We proxy it under THIS marketing domain so users only
@@ -46,6 +53,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@cost-share/shared'],
+  env: {
+    NEXT_PUBLIC_APP_VERSION: appVersion,
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: vercelSha.slice(0, 7),
+    NEXT_PUBLIC_KUPAPAY_ENV: kupapayEnvLabel,
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

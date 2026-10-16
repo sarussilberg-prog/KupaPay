@@ -228,15 +228,15 @@ jobs:
           ref: dev
           fetch-depth: 0
 
-      # Version bump via a normal PR (GITHUB_TOKEN) — no ADMIN_PAT bypass of branch protection (#146, #213).
-      - name: Bump patch version via follow-up PR
-        if: "!startsWith(github.head_ref, 'chore/version-bump/')"
+      - name: Bump dev prerelease + changelog
+        if: >-
+          !startsWith(github.head_ref, 'chore/version-bump/') &&
+          !startsWith(github.head_ref, 'chore/dev-version/')
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          VERSION_FILE="cost-share-app/packages/shared/version.json"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -244,23 +244,8 @@ jobs:
           git checkout dev
           git pull origin dev
 
-          current=$(jq -r '.version' "$VERSION_FILE")
-          IFS='.' read -r major minor patch <<< "$current"
-          new="${major}.${minor}.$((patch + 1))"
-          jq -c --arg v "$new" '.version = $v' "$VERSION_FILE" > tmp.json && mv tmp.json "$VERSION_FILE"
-          git add "$VERSION_FILE"
-          git commit -m "chore: bump version ${current} → ${new}"
-
-          BR="chore/version-bump/run-${{ github.run_id }}"
-          git checkout -b "$BR"
-          git push origin "$BR"
-
-          if ! gh pr create --repo "$REPO" --base dev --head "$BR" \
-            --title "chore: bump version ${current} → ${new}" \
-            --body "Automated SSOT patch bump after a dev merge. Merges only after required CI checks pass (replaces ADMIN_PAT direct push). Related: #146 #213." \
-            --draft; then
-            echo "::warning::Could not open version-bump PR (enable Actions to create PRs, or bump manually)."
-            exit 0
-          fi
-          gh pr merge "$BR" --repo "$REPO" --squash --auto || true
-          echo "✅ Version bump PR opened for ${current} → ${new}"
+          node cost-share-app/scripts/bump-dev-prerelease.mjs
+          git add cost-share-app/packages/shared/version.json CHANGELOG.md
+          git commit -m "chore: bump dev prerelease [skip ci]"
+          git push origin dev
+          echo "✅ Dev prerelease bumped (push skipped CI/Vercel via [skip ci])"

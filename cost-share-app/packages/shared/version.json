@@ -1,1 +1,5 @@
-{"version":"2.2.0"}
+{
+  "version": "2.2.0-dev.0",
+  "marketingVersion": "2.2.0",
+  "lastTestFlightInternalVersion": "2.2.0-dev.0"
+}
