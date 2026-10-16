@@ -10,9 +10,6 @@ import { handleError } from '../../lib/handleError';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { buildInviteUrl, GroupType, User } from '@cost-share/shared';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../hooks/queries/keys';
-import type { GroupWithMembers } from '@cost-share/shared';
 import { GroupPublicWebShareSection } from '../../components/invite/GroupPublicWebShareSection';
 import { useLoading } from '../../hooks/useLoading';
 import { useAppStore } from '../../store';
@@ -48,12 +45,10 @@ export function CreateGroupScreen() {
     const { isLoading, startLoading, stopLoading } = useLoading();
     const currentUser = useAppStore((state) => state.currentUser);
     const appLanguage = useAppLanguage();
-    const queryClient = useQueryClient();
-    const cachedGroup = groupId
-        ? (queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? []).find(
-              (g) => g.id === groupId,
-          )
-        : undefined;
+    const [editShareMeta, setEditShareMeta] = useState<{
+        inviteToken: string;
+        publicWebShareEnabled: boolean;
+    } | null>(null);
 
     const [name, setName] = useState('');
     const [groupType, setGroupType] = useState<GroupType>('general');
@@ -117,6 +112,10 @@ export function CreateGroupScreen() {
                 setGroupType(group.groupType);
                 setCurrency(group.defaultCurrency);
                 setImageUrl(group.imageUrl);
+                setEditShareMeta({
+                    inviteToken: group.inviteToken,
+                    publicWebShareEnabled: group.publicWebShareEnabled === true,
+                });
             }
             await loadMembers();
             setInitialLoading(false);
@@ -371,11 +370,16 @@ export function CreateGroupScreen() {
                     onAddMembers={() => setAddMembersOpen(true)}
                     onRemoveMember={openRemoveDialog}
                 />
-                {isEdit && groupId && cachedGroup?.inviteToken ? (
+                {isEdit && groupId && editShareMeta?.inviteToken ? (
                     <GroupPublicWebShareSection
                         groupId={groupId}
-                        enabled={cachedGroup.publicWebShareEnabled === true}
-                        inviteUrl={buildInviteUrl('group', cachedGroup.inviteToken)}
+                        enabled={editShareMeta.publicWebShareEnabled}
+                        inviteUrl={buildInviteUrl('group', editShareMeta.inviteToken)}
+                        onEnabledChange={(next) =>
+                            setEditShareMeta((prev) =>
+                                prev ? { ...prev, publicWebShareEnabled: next } : prev,
+                            )
+                        }
                     />
                 ) : null}
             </CreateGroupFormShell>

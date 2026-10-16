@@ -14,9 +14,15 @@ type Props = {
     groupId: string;
     enabled: boolean;
     inviteUrl: string;
+    onEnabledChange?: (enabled: boolean) => void;
 };
 
-export function GroupPublicWebShareSection({ groupId, enabled: initialEnabled, inviteUrl }: Props) {
+export function GroupPublicWebShareSection({
+    groupId,
+    enabled: initialEnabled,
+    inviteUrl,
+    onEnabledChange,
+}: Props) {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [enabled, setEnabled] = useState(initialEnabled);
@@ -28,6 +34,7 @@ export function GroupPublicWebShareSection({ groupId, enabled: initialEnabled, i
             try {
                 const saved = await setGroupPublicWebShare(groupId, next);
                 setEnabled(saved);
+                onEnabledChange?.(saved);
                 queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
                     (prev ?? []).map((g) =>
                         g.id === groupId ? { ...g, publicWebShareEnabled: saved } : g,
@@ -43,7 +50,7 @@ export function GroupPublicWebShareSection({ groupId, enabled: initialEnabled, i
                 setBusy(false);
             }
         },
-        [groupId, queryClient],
+        [groupId, onEnabledChange, queryClient],
     );
 
     return (

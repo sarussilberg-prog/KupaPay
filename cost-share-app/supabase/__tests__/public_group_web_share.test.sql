@@ -41,19 +41,19 @@ BEGIN
     END IF;
 
     PERFORM public.test_set_authenticated(v_a);
-    v_enabled := public.set_group_public_web_share(v_g, TRUE);
-    IF v_enabled IS DISTINCT FROM TRUE THEN
-        RAISE EXCEPTION 'Case 2 failed: enable RPC should return true';
-    END IF;
-
     BEGIN
         UPDATE public.groups SET public_web_share_enabled = TRUE WHERE id = v_g;
-        RAISE EXCEPTION 'Case 3 failed: direct PATCH of public_web_share_enabled should be denied';
+        RAISE EXCEPTION 'Case 2 failed: direct PATCH of public_web_share_enabled should be denied';
     EXCEPTION WHEN OTHERS THEN
         IF SQLERRM NOT LIKE '%group_public_web_share_rpc_only%' AND SQLERRM NOT LIKE '%42501%' THEN
             RAISE;
         END IF;
     END;
+
+    v_enabled := public.set_group_public_web_share(v_g, TRUE);
+    IF v_enabled IS DISTINCT FROM TRUE THEN
+        RAISE EXCEPTION 'Case 3 failed: enable RPC should return true';
+    END IF;
 
     PERFORM public.test_set_authenticated(NULL);
 
