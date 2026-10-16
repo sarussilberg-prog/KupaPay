@@ -1,5 +1,3 @@
-import type { Language } from '../i18n/languages';
-
 /** Hour 0–23 in the user's IANA timezone. */
 export function localHourInTimeZone(date: Date, timeZone: string): number {
     try {
@@ -64,7 +62,7 @@ export const DEFAULT_DAILY_PUSH_CAP = 8;
 export const DEFAULT_UNSETTLED_NUDGE_DAYS = 7;
 export const MIN_HOURS_BETWEEN_RETENTION_NUDGES = 72;
 
-export type PushLocale = Language;
+export type PushLocale = 'en' | 'he' | 'ru' | 'ar' | 'fr' | 'es' | 'de';
 
 export function normalizePushLocale(code: string | null | undefined): PushLocale {
     const c = (code ?? 'en').toLowerCase();
