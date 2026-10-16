@@ -131,7 +131,22 @@ netBalance = totalPaid - totalOwed + totalSettledReceived - totalSettledPaid
 
 ---
 
-## 8. Changelog
+## 8. SonarCloud (static analysis)
+
+SonarCloud runs on pull requests via the GitHub integration (check name: **SonarCloud Code Analysis**). Configuration lives at the repo root:
+
+| File | Purpose |
+|------|---------|
+| [`sonar-project.properties`](../../sonar-project.properties) | `sonar.projectKey` (`sarussilberg-prog_CoPay`), `sonar.organization` (`sarussilberg-prog`), and path exclusions for migration SQL / generated `dist` |
+| [`.sonarcloud.properties`](../../.sonarcloud.properties) | Auto-Scan settings (Sonar ignores `sonar-project.properties` for Auto-Scan; exclusions are mirrored here) |
+
+**CI coupling:** The `auto-merge` job in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) polls `gh pr checks` until SonarCloud reports **pass** (or fails the workflow on **fail** / timeout) before enabling squash merge to `dev`. Local lint/tests do not replace the Sonar quality gate.
+
+**Exclusions rationale:** `cost-share-app/supabase/migrations/**/*.sql` is excluded from copy-paste detection because migrations intentionally repeat function bodies from `schema.sql` — treating that as duplication produces false gate failures.
+
+---
+
+## 9. Changelog
 
 | Date | Change |
 |------|--------|
