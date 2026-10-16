@@ -97,16 +97,16 @@ export function OnboardingFeatureScreen({
                 </View>
             </View>
 
-            <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}>
+            <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 20) + 20 }]}>
                 <Text
-                    className={rtlTextClassName(isRtl, 'text-xs font-bold tracking-wider mb-2.5')}
-                    style={{ color: onboardingColors.blue }}
+                    className={rtlTextClassName(isRtl, 'text-xs font-bold tracking-[0.14em] mb-3')}
+                    style={{ color: onboardingColors.blueDeep }}
                 >
                     {t(eyebrowKey)}
                 </Text>
                 <Text
-                    className={rtlTextClassName(isRtl, 'text-[26px] font-extrabold leading-tight mb-2.5')}
-                    style={{ color: onboardingColors.ink, letterSpacing: -0.3 }}
+                    className={rtlTextClassName(isRtl, 'text-[28px] font-extrabold leading-[34px] mb-6')}
+                    style={{ color: onboardingColors.ink, letterSpacing: -0.4 }}
                 >
                     {t(titleKey)}
                 </Text>
@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
     },
     sheet: {
         backgroundColor: onboardingColors.white,
-        paddingHorizontal: 26,
-        paddingTop: 24,
+        paddingHorizontal: 28,
+        paddingTop: 28,
         borderTopStartRadius: 28,
         borderTopEndRadius: 28,
         shadowColor: onboardingColors.navy,
