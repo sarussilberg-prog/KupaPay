@@ -110,6 +110,13 @@ jobs:
       - name: Deploy bundle check (no import map)
         run: deno check --no-config index.ts
 
+  no-merge-conflicts:
+    name: No merge conflict markers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/ci-no-merge-conflicts.sh
+
   migration-versions:
     name: Supabase migration version uniqueness
     runs-on: ubuntu-latest
@@ -135,7 +142,7 @@ jobs:
 
   auto-merge:
     name: Auto-merge to dev
-    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check, migration-versions]
+    needs: [lint, typecheck, test, deno-edge-functions, deno-edge-bundle-check, migration-versions, no-merge-conflicts]
     # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
     if: github.event.pull_request.draft == false && github.base_ref == 'dev'
     runs-on: ubuntu-latest

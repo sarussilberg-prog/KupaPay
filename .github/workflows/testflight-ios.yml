@@ -59,10 +59,7 @@ jobs:
         env:
           EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
         run: |
-<<<<<<< HEAD
           set -euo pipefail
-=======
->>>>>>> origin/main
           if [ -z "${EXPO_PUBLIC_REVENUECAT_IOS_KEY:-}" ]; then
             echo "::error::EXPO_PUBLIC_REVENUECAT_IOS_KEY is required when pro_enabled=true (GitHub Actions secret appl_…)"
             exit 1
