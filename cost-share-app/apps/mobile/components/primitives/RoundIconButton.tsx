@@ -31,7 +31,7 @@ export function RoundIconButton({
             accessibilityLabel={accessibilityLabel}
             testID={testID}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            className="w-10 h-10 items-center justify-center rounded-full bg-white border border-slate-200/80 relative"
+            className="w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-slate-200/80 dark:border-gray-700 relative"
             style={shadows.sm}
         >
             <AppIcon name={iconName} size={iconSize} color={colors.gray600} />
