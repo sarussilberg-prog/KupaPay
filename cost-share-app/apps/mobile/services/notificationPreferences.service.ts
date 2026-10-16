@@ -15,6 +15,8 @@ interface PrefsRow {
     timezone: string;
     daily_push_cap: number;
     unsettled_nudge_after_days: number;
+    email_enabled: boolean;
+    lifecycle_email_enabled: boolean;
 }
 
 function rowToPrefs(row: PrefsRow): NotificationPreferences {
@@ -33,6 +35,9 @@ function rowToPrefs(row: PrefsRow): NotificationPreferences {
         dailyPushCap: row.daily_push_cap ?? DEFAULT_NOTIFICATION_PREFERENCES.dailyPushCap,
         unsettledNudgeAfterDays: row.unsettled_nudge_after_days
             ?? DEFAULT_NOTIFICATION_PREFERENCES.unsettledNudgeAfterDays,
+        emailEnabled: row.email_enabled ?? DEFAULT_NOTIFICATION_PREFERENCES.emailEnabled,
+        lifecycleEmailEnabled: row.lifecycle_email_enabled
+            ?? DEFAULT_NOTIFICATION_PREFERENCES.lifecycleEmailEnabled,
     };
 }
 
@@ -49,7 +54,7 @@ export async function fetchNotificationPreferences(userId: string): Promise<Noti
         .from('notification_preferences')
         .select(`push_enabled, expenses_push, settlements_push, messages_push, friends_push, groups_push,
             reminders_push, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, timezone,
-            daily_push_cap, unsettled_nudge_after_days`)
+            daily_push_cap, unsettled_nudge_after_days, email_enabled, lifecycle_email_enabled`)
         .eq('user_id', userId)
         .maybeSingle();
     if (error || !data) return { ...DEFAULT_NOTIFICATION_PREFERENCES, timezone: deviceTimezone() };
@@ -72,6 +77,8 @@ export async function saveNotificationPreferences(prefs: NotificationPreferences
             timezone: prefs.timezone || deviceTimezone(),
             daily_push_cap: prefs.dailyPushCap,
             unsettled_nudge_after_days: prefs.unsettledNudgeAfterDays,
+            email_enabled: prefs.emailEnabled,
+            lifecycle_email_enabled: prefs.lifecycleEmailEnabled,
         },
     });
     if (error) throw error;

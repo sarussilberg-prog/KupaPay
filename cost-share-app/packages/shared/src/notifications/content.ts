@@ -24,6 +24,10 @@ export interface NotificationPreferences {
     dailyPushCap: number;
     /** Days with an open balance before a retention nudge. */
     unsettledNudgeAfterDays: number;
+    /** Master switch for lifecycle / digest email (#404). */
+    emailEnabled: boolean;
+    /** Welcome, activation, and win-back email (#404). */
+    lifecycleEmailEnabled: boolean;
 }
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
@@ -40,6 +44,8 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
     timezone: 'UTC',
     dailyPushCap: 8,
     unsettledNudgeAfterDays: 7,
+    emailEnabled: true,
+    lifecycleEmailEnabled: true,
 };
 
 export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
