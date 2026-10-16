@@ -1,0 +1,29 @@
+name: PR hygiene
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches: [dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  scope-and-title:
+    name: PR hygiene (scope + title)
+    if: startsWith(github.head_ref, 'cursor/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scope labels + conventional title
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          HEAD_REF: ${{ github.head_ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: bash cost-share-app/scripts/ci-pr-hygiene.sh
