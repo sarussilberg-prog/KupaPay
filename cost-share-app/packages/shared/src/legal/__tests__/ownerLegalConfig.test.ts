@@ -2,11 +2,13 @@ import { applyLegalPlaceholders, OWNER_LEGAL_CONFIG } from '../ownerLegalConfig'
 import { buildLegalPageUrl } from '../legalPageUrl';
 
 describe('applyLegalPlaceholders', () => {
-    it('replaces owner TODO tokens', () => {
+    it('replaces owner tokens; address stays TODO', () => {
         const md = 'Contact [SUPPORT EMAIL] at [ADDRESS] — [OWNER LEGAL NAME]';
         expect(applyLegalPlaceholders(md)).toContain(OWNER_LEGAL_CONFIG.supportEmail);
         expect(applyLegalPlaceholders(md)).toContain(OWNER_LEGAL_CONFIG.address);
         expect(applyLegalPlaceholders(md)).toContain(OWNER_LEGAL_CONFIG.ownerLegalName);
+        expect(OWNER_LEGAL_CONFIG.legalResponsibleName).toBe('Nave Sarussi');
+        expect(OWNER_LEGAL_CONFIG.operatorDisplayName).toBe('Sarussilberg');
     });
 });
 
