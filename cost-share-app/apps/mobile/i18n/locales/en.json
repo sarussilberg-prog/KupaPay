@@ -347,8 +347,8 @@
             "youOweCaption": "You owe",
             "owedToYou": "Owed to you {{amount}}",
             "owedToYouCaption": "Owed to you",
-            "moreCurrencies": "+{{count}} currencies",
-            "moreCurrencies_one": "+{{count}} currency",
+            "moreCurrencies": "{{plusCount}} currencies",
+            "moreCurrencies_one": "{{plusCount}} currency",
             "lastActivity": "Active {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },

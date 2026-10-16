@@ -359,8 +359,8 @@
             "youOweCaption": "أنت مدين",
             "owedToYou": "مستحق لك {{amount}}",
             "owedToYouCaption": "مستحق لك",
-            "moreCurrencies": "+{{count}} عملات",
-            "moreCurrencies_one": "+عملة {{count}}",
+            "moreCurrencies": "{{plusCount}} عملات",
+            "moreCurrencies_one": "{{plusCount}} عملة",
             "lastActivity": "نشط {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },

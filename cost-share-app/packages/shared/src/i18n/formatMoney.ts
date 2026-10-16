@@ -10,6 +10,11 @@ export function wrapMoneyForBidi(formatted: string): string {
     return `${BIDI_LRI}${formatted}${BIDI_PDI}`;
 }
 
+/** Keep digits, +/−, and Latin tokens in visual LTR inside RTL paragraphs (e.g. "+2"). */
+export function wrapLtrForBidi(text: string): string {
+    return wrapMoneyForBidi(text);
+}
+
 export type FormatMoneyOptions = {
     /** Format the absolute magnitude (no leading sign). */
     absolute?: boolean;

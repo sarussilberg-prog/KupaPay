@@ -8,7 +8,6 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GroupType } from '@cost-share/shared';
 import { getGroupTypeVisual, groupInitialsFromName } from '../lib/groupTypeVisuals';
-import { AppIcon } from './AppIcon';
 import { Text } from './AppText';
 
 interface GroupAvatarProps {
@@ -35,7 +34,7 @@ export function GroupAvatar({
     size = 'sm',
     testID = 'group-avatar',
 }: GroupAvatarProps) {
-    const { className, iconSize, emoji, initials } = sizeStyles[size];
+    const { className, emoji, initials } = sizeStyles[size];
     const visual = getGroupTypeVisual(groupType);
 
     const [attempt, setAttempt] = useState(0);
@@ -87,17 +86,6 @@ export function GroupAvatar({
                     </Text>
                 )}
             </LinearGradient>
-            <View
-                pointerEvents="none"
-                style={{
-                    position: 'absolute',
-                    bottom: 2,
-                    end: 2,
-                    opacity: initialsText.length >= 2 ? 0.85 : 0,
-                }}
-            >
-                <AppIcon name={visual.icon} size={Math.max(10, iconSize * 0.35)} color="#FFFFFF" />
-            </View>
         </View>
     );
 }
