@@ -12,6 +12,13 @@ import type { NextConfig } from 'next';
 // stays out of the client bundle. When unset, no proxy is configured.
 const APP_PROXY_ORIGIN = (process.env.APP_PROXY_ORIGIN ?? '').replace(/\/+$/, '');
 
+/** Supabase invite-landing edge base — must follow NEXT_PUBLIC_SUPABASE_URL per deploy (dev vs prod). */
+function inviteLandingBase(): string {
+  const root = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/+$/, '');
+  if (!root) return '';
+  return `${root}/functions/v1/invite-landing`;
+}
+
 const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -43,8 +50,28 @@ const nextConfig: NextConfig = {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
   async rewrites() {
-    if (!APP_PROXY_ORIGIN) return [];
+    const landing = inviteLandingBase();
+    const beforeFiles = landing
+      ? [
+          {
+            source: '/.well-known/apple-app-site-association',
+            destination: `${landing}/.well-known/apple-app-site-association`,
+          },
+          {
+            source: '/.well-known/assetlinks.json',
+            destination: `${landing}/.well-known/assetlinks.json`,
+          },
+          { source: '/legal/:slug', destination: `${landing}/legal/:slug` },
+          { source: '/account-deletion', destination: `${landing}/account-deletion` },
+        ]
+      : [];
+
+    if (!APP_PROXY_ORIGIN) {
+      return beforeFiles.length ? { beforeFiles } : [];
+    }
+
     return {
+      beforeFiles,
       fallback: [{ source: '/:path*', destination: `${APP_PROXY_ORIGIN}/:path*` }],
     };
   },
