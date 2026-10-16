@@ -51,9 +51,7 @@ jest.mock('../../../services/settlements.service', () => ({
     fetchGroupPairwiseDebts: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('../../../services/simplifiedDebts.service', () => ({
-    fetchSimplifiedInputs: jest.fn().mockResolvedValue({ groups: [] }),
-}));
+jest.mock('../../../hooks/useSimplifiedDebts');
 
 jest.mock('../../../components/AddMembersSheet', () => ({
     AddMembersSheet: (props: any) => {
