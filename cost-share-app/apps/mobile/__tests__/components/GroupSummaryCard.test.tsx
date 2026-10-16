@@ -41,7 +41,7 @@ describe('GroupSummaryCard', () => {
     expect(getByText('Paris Trip')).toBeTruthy();
     expect(getByText(/USD 42(\.00)?\b/)).toBeTruthy();
     expect(getByTestId('summary-note-pill')).toBeTruthy();
-    expect(getByTestId('summary-settle-pill')).toBeTruthy();
+    expect(getByTestId('group-detail-settle-up')).toBeTruthy();
   });
 
   it('routes the balance/note/settle taps to their handlers', () => {
@@ -58,7 +58,7 @@ describe('GroupSummaryCard', () => {
     );
     fireEvent.press(getByTestId('summary-balance-strip'));
     fireEvent.press(getByTestId('summary-note-pill'));
-    fireEvent.press(getByTestId('summary-settle-pill'));
+    fireEvent.press(getByTestId('group-detail-settle-up'));
     expect(onOpenBalances).toHaveBeenCalledTimes(1);
     expect(onOpenNote).toHaveBeenCalledTimes(1);
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
