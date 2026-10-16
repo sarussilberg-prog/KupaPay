@@ -37,6 +37,7 @@ BEGIN
     PERFORM public.test_set_authenticated(v_owned);
     PERFORM public.delete_my_account();
 
+    PERFORM set_config('role', 'service_role', TRUE);
     SELECT COUNT(*) INTO v_rows
     FROM public.storage_cleanup_queue
     WHERE bucket = 'profile-images'
