@@ -41,8 +41,6 @@
     "rls_col_index_public_recurring_expense_occurrences_user_id",
     "rls_col_index_public_recurring_expense_series_user_id",
     "rls_col_index_public_settlements_created_by",
-    "rls_col_index_public_settlements_user_id",
-    "rls_col_index_public_profiles_group_id",
-    "rls_col_index_public_profiles_user_id"
+    "rls_col_index_public_settlements_user_id"
   ]
 }
