@@ -12,31 +12,40 @@ if ! postgres_container_running; then
   exit 1
 fi
 
+QUARANTINE_FILE="supabase/__tests__/ci-quarantine.json"
+if [[ ! -f "$QUARANTINE_FILE" ]]; then
+  echo "::error::missing $QUARANTINE_FILE"
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "::error::jq required to read quarantine manifest"
+  exit 1
+fi
+
+mapfile -t QUARANTINED < <(jq -r 'keys[] | select(startswith("_") | not)' "$QUARANTINE_FILE" | sort)
+for q in "${QUARANTINED[@]}"; do
+  if [[ ! -f "supabase/__tests__/$q" ]]; then
+    echo "::error::quarantine entry missing file: $q"
+    exit 1
+  fi
+done
+
 files=(supabase/__tests__/*.test.sql)
 if [[ ${#files[@]} -eq 0 ]]; then
   echo "::error::no SQL tests found"
   exit 1
 fi
 
-LOCAL_SKIP=(
-  activity_events.test.sql
-  get_group_pairwise_debts.test.sql
-  admin_portal.test.sql
-  delete_my_account.test.sql
-  account_deletion_lifecycle.test.sql
-  security_support_admin.test.sql
-  group_friend_activity_events.test.sql
-  profile_invite_token_acl.test.sql
-  redeem_group_invite_atomic.test.sql
-)
-
 ran=0
 skipped=0
 echo "▶ Running SQL tests (transaction rollback)"
 for f in "${files[@]}"; do
   base="$(basename "$f")"
-  if [[ " ${LOCAL_SKIP[*]} " == *" ${base} "* ]]; then
-    echo "▶ skip — ${base} (full run on development DB post-deploy)"
+  issue="$(jq -r --arg f "$base" '.[$f].issue // empty' "$QUARANTINE_FILE")"
+  if [[ -n "$issue" ]]; then
+    reason="$(jq -r --arg f "$base" '.[$f].reason // "quarantined"' "$QUARANTINE_FILE")"
+    echo "▶ skip — ${base} (quarantine #${issue}: ${reason})"
     skipped=$((skipped + 1))
     continue
   fi
@@ -45,4 +54,18 @@ for f in "${files[@]}"; do
   ran=$((ran + 1))
 done
 
-echo "✅ SQL integration tests passed (${ran} files, ${skipped} skipped locally)"
+for q in "${QUARANTINED[@]}"; do
+  found=0
+  for f in "${files[@]}"; do
+    if [[ "$(basename "$f")" == "$q" ]]; then
+      found=1
+      break
+    fi
+  done
+  if [[ "$found" -ne 1 ]]; then
+    echo "::error::quarantine lists unknown test: $q"
+    exit 1
+  fi
+done
+
+echo "✅ SQL integration tests passed (${ran} ran, ${skipped} quarantined, ${#files[@]} total)"
