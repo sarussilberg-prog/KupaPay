@@ -1,0 +1,58 @@
+name: CI performance
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ci-perf-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  mobile-query-budgets:
+    name: Mobile Supabase budgets
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run test:performance
+
+  bundle-size:
+    name: Bundle size budgets
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: bash scripts/ci-bundle-size.sh
+
+  lighthouse-next:
+    name: Lighthouse (Next.js local)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: bash scripts/ci-lighthouse-next.sh

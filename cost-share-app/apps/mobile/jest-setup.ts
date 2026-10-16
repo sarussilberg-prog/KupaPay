@@ -221,6 +221,8 @@ jest.mock('@sentry/react-native', () => ({
     reactNavigationIntegration: () => ({
         registerNavigationContainer: jest.fn(),
     }),
+    reactNativeTracingIntegration: () => ({}),
+    startSpan: (_opts: unknown, cb: () => unknown) => cb(),
 }));
 
 // Mock native Google Sign-In: it touches TurboModule at import time.

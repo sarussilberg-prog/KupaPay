@@ -36,7 +36,7 @@ trap cleanup EXIT
 echo "▶ Starting Postgres (${PG_IMAGE})"
 docker rm -f "$PG_CONTAINER" 2>/dev/null || true
 docker run -d --name "$PG_CONTAINER" \
-  --shm-size=256mb \
+  --shm-size=1gb \
   -e POSTGRES_PASSWORD=postgres \
   -e JWT_SECRET=ci-local-jwt-secret-at-least-32-chars \
   -e JWT_EXP=3600 \
@@ -137,6 +137,9 @@ for f in "${migration_files_sorted[@]}"; do
   echo "▶ migration — $(basename "$f")"
   psql_docker_file "$f"
 done
+
+echo "▶ DB lints (Splinter-style, baseline-gated)"
+bash scripts/ci-compare-db-lint-baseline.sh "$PG_CONTAINER" "$PGUSER"
 
 echo "▶ SQL test auth helpers"
 psql_docker <<'SQL'
