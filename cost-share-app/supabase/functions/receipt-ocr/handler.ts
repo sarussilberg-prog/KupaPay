@@ -21,24 +21,6 @@ const MAX_TEXT_LEN = 20_000;
 const MAX_IMAGE_B64 = 2_800_000;
 const MAX_CALLS_PER_USER_PER_DAY = 60;
 
-const dailyCounts = new Map<string, { day: string; count: number }>();
-
-function utcDay(): string {
-    return new Date().toISOString().slice(0, 10);
-}
-
-export function checkRateLimit(userId: string): boolean {
-    const day = utcDay();
-    const row = dailyCounts.get(userId);
-    if (!row || row.day !== day) {
-        dailyCounts.set(userId, { day, count: 1 });
-        return true;
-    }
-    if (row.count >= MAX_CALLS_PER_USER_PER_DAY) return false;
-    row.count += 1;
-    return true;
-}
-
 export function bearerJwt(req: Request): string | null {
     const h = req.headers.get('authorization') ?? '';
     const m = /^Bearer\s+(.+)$/i.exec(h);
@@ -90,8 +72,12 @@ export async function handleReceiptOcr(
         return { ok: false, error: 'unauthorized', code: 'unauthorized' };
     }
     const userId = userData.user.id;
-    if (!checkRateLimit(userId)) {
-        return { ok: false, error: 'rate_limited', code: 'rate_limited' };
+
+    const { data: isMember, error: memberErr } = await client.rpc('is_group_member', {
+        check_group_id: req.groupId,
+    });
+    if (memberErr || isMember !== true) {
+        return { ok: false, error: 'not_group_member', code: 'not_group_member' };
     }
 
     const { data: hasPro, error: proErr } = await client.rpc('has_pro', {
@@ -100,6 +86,13 @@ export async function handleReceiptOcr(
     });
     if (proErr || hasPro !== true) {
         return { ok: false, error: 'pro_required', code: 'pro_required' };
+    }
+
+    const { data: quotaOk, error: quotaErr } = await client.rpc('consume_receipt_ocr_quota', {
+        p_max: MAX_CALLS_PER_USER_PER_DAY,
+    });
+    if (quotaErr || quotaOk !== true) {
+        return { ok: false, error: 'rate_limited', code: 'rate_limited' };
     }
 
     let text = (req.text ?? '').trim();
