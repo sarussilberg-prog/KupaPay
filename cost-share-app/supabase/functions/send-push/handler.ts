@@ -1,6 +1,6 @@
 import { renderNotification, type ActivityKind, type Lang } from './render.ts';
 import type { ExpoMessage, ExpoSendResult } from './expo.ts';
-import { isInQuietHours, nextAllowedAfterQuietHours } from './pushPolicy.ts';
+import { isInQuietHours, nextAllowedAfterQuietHours } from '../../../packages/shared/src/notifications/pushPolicy.ts';
 
 export interface ActivityRecord {
     id: string;

@@ -5,9 +5,9 @@ import de from './locales/de.json' with { type: 'json' };
 import es from './locales/es.json' with { type: 'json' };
 import fr from './locales/fr.json' with { type: 'json' };
 import ru from './locales/ru.json' with { type: 'json' };
-import { normalizePushLang, type PushLang } from './pushPolicy.ts';
+import { normalizePushLocale, type PushLocale } from '../../../packages/shared/src/notifications/pushPolicy.ts';
 
-export type Lang = PushLang;
+export type Lang = PushLocale;
 
 export type ActivityKind =
     | 'expense_added' | 'settlement_added' | 'message_posted'
@@ -79,7 +79,7 @@ function interpolate(template: string, vars: Record<string, string>): string {
 }
 
 export function resolveLang(code: string | null | undefined): Lang {
-    return normalizePushLang(code);
+    return normalizePushLocale(code);
 }
 
 export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderParams): Rendered {
