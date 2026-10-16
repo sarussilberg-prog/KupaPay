@@ -416,8 +416,8 @@
             "youOweCaption": "Debes",
             "owedToYou": "Te deben {{amount}}",
             "owedToYouCaption": "Te deben",
-            "moreCurrencies": "{{plusCount}} monedas",
-            "moreCurrencies_one": "{{plusCount}} moneda",
+            "moreCurrencies": "{{count}} monedas",
+            "moreCurrencies_one": "{{count}} moneda",
             "updatedAgo": "Actualizado {{when}}",
             "balanceUnavailable": "Saldo no disponible sin conexión"
         },

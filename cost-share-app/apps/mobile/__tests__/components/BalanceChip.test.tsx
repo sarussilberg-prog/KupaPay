@@ -66,10 +66,12 @@ describe('BalanceChip', () => {
             />,
         );
         expect(getByText('groups.card.owedToYouCaption')).toBeTruthy();
-        expect(getByTestId('balance-chip-amount')).toBeTruthy();
+        const amount = getByTestId('balance-chip-amount');
+        expect(amount).toBeTruthy();
+        expect(String(amount.props.children)).not.toMatch(/\+/);
     });
 
-    it('shows localized multi-currency label instead of bare +N', () => {
+    it('shows localized multi-currency label without a leading plus', () => {
         const { getByText } = render(
             <BalanceChip
                 defaultCurrency="USD"

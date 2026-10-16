@@ -3,8 +3,12 @@
   "enforce": {
     "unindexed_foreign_keys": false,
     "auth_rls_initplan": true,
-    "rls_filter_columns_missing_index": true
+    "rls_filter_columns_missing_index": true,
+    "public_tables_without_rls": true,
+    "security_definer_missing_search_path": true
   },
+  "public_tables_without_rls": [],
+  "security_definer_missing_search_path": [],
   "unindexed_foreign_keys": [
     "unindexed_foreign_keys_public_activity_events_activity_events_actor_user_id_fkey",
     "unindexed_foreign_keys_public_activity_events_activity_events_group_id_fkey",

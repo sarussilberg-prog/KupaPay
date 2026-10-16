@@ -3,7 +3,7 @@ import { finishAppBootSpan } from './lib/appBootPerformance';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppState, type AppStateStatus, LogBox, View, Platform } from 'react-native';
+import { AppState, type AppStateStatus, Appearance, LogBox, View, Platform } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import * as SplashScreen from 'expo-splash-screen';
@@ -72,6 +72,7 @@ import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
 import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
+import { readGroupsListPreviewParams } from './dev/groupsListPreviewParams';
 
 function isGroupCardPreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
@@ -92,14 +93,24 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 // On web, frame the app in a phone-shaped column so mobile screens don't stretch across the browser.
 function WebFrame({ children }: { children: React.ReactNode }) {
   if (Platform.OS !== 'web') return <>{children}</>;
+  const b2Preview = isGroupsListB2PreviewMode();
+  const preview = b2Preview ? readGroupsListPreviewParams() : null;
+  const isDark = preview?.theme === 'dark';
+  const maxWidth = preview?.narrow ? 320 : 430;
   return (
-    <View style={{ flex: 1, alignItems: 'center', backgroundColor: '#0f172a' }}>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        backgroundColor: isDark ? '#030712' : '#0f172a',
+      }}
+    >
       <View
         style={{
           flex: 1,
           width: '100%',
-          maxWidth: 430,
-          backgroundColor: '#ffffff',
+          maxWidth,
+          backgroundColor: isDark ? '#111827' : '#ffffff',
           overflow: 'hidden',
           boxShadow: '0 0 24px rgba(0,0,0,0.25)',
         }}
@@ -128,6 +139,17 @@ function App() {
   useEffect(() => {
     applySentryUser(currentUser ?? null);
   }, [currentUser]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    if (isGroupsListB2PreviewMode()) return;
+    const apply = (scheme: 'light' | 'dark' | null | undefined) => {
+      document.documentElement.classList.toggle('dark', scheme === 'dark');
+    };
+    apply(Appearance.getColorScheme());
+    const sub = Appearance.addChangeListener(({ colorScheme }) => apply(colorScheme));
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     const user = session?.user;
