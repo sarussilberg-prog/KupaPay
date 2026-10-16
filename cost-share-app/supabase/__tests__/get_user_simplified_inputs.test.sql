@@ -30,6 +30,8 @@ DECLARE
     v_c_in_members BOOLEAN;
     v_payload     JSONB;
 BEGIN
+    INSERT INTO auth.users (id, email) VALUES (v_a, 'si-test-a@test.local');
+
     -- ---- seed profiles (C is a deleted account: name NULL, profile inactive) ----
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Ari', 'ILS', TRUE,  'tt_si_a'),
@@ -55,6 +57,8 @@ BEGIN
         (v_expense, v_c, 10);
 
     -- Expected ILS nets: A +20, B -10, C -10  → sum 0 (only if C is included).
+
+    PERFORM public.test_set_authenticated(v_a);
 
     v_payload := public.get_user_simplified_inputs(v_a);
 
