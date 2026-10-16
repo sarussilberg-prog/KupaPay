@@ -35,10 +35,13 @@ BEGIN
         (v_group, v_member, TRUE);
 
     PERFORM set_config('role', 'anon', TRUE);
-    SELECT COUNT(*) INTO v_rows FROM public.profiles;
-    IF v_rows <> 0 THEN
-        RAISE EXCEPTION 'Case 1 failed: anon must not read profiles (got % rows)', v_rows;
-    END IF;
+    v_rows := 0;
+    BEGIN
+        SELECT COUNT(*) INTO v_rows FROM public.profiles;
+        RAISE EXCEPTION 'Case 1 failed: anon SELECT should be denied (got % rows)', v_rows;
+    EXCEPTION WHEN insufficient_privilege THEN
+        NULL;
+    END;
 
     PERFORM public.test_set_authenticated(v_out);
     SELECT email INTO v_email FROM public.profiles WHERE id = v_bob;
