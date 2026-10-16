@@ -26,7 +26,7 @@ BEGIN
     BEGIN
         PERFORM public.register_device_token(v_tok, 'android');
     EXCEPTION WHEN OTHERS THEN
-        IF SQLERRM = 'token_bound_to_other_user' THEN
+        IF SQLERRM LIKE '%token_bound_to_other_user%' THEN
             v_caught := TRUE;
         ELSE
             RAISE;
