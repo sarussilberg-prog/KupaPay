@@ -1,12 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import type { GroupRollup } from '@cost-share/shared';
 import { BalanceChip } from '../../components/BalanceChip';
-
-const rollupOf = (
-    primary: { currency: string; net: number },
-    others: { currency: string; net: number }[] = [],
-): GroupRollup => ({ groupId: 'g1', primary, others });
+import { rollupOf } from '../../testUtils/groupRollup';
 
 describe('BalanceChip', () => {
     it('shows Settled label when rollup is undefined', () => {
@@ -53,23 +48,25 @@ describe('BalanceChip', () => {
     });
 
     it('shows localized owe copy when primary net is negative', () => {
-        const { getByText } = render(
+        const { getByText, getByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
                 rollup={rollupOf({ currency: 'ILS', net: -761.5 })}
             />,
         );
-        expect(getByText(/groups\.card\.youOwe/)).toBeTruthy();
+        expect(getByText('groups.card.youOweCaption')).toBeTruthy();
+        expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
     it('shows localized owed copy when primary net is positive', () => {
-        const { getByText } = render(
+        const { getByText, getByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
                 rollup={rollupOf({ currency: 'EUR', net: 42.5 })}
             />,
         );
-        expect(getByText(/groups\.card\.owedToYou/)).toBeTruthy();
+        expect(getByText('groups.card.owedToYouCaption')).toBeTruthy();
+        expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
     it('shows localized multi-currency label instead of bare +N', () => {

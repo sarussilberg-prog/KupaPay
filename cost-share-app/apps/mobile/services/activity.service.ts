@@ -3,7 +3,7 @@
  * user. Triggers populate the table; this service only queries.
  */
 
-import { ActivityEvent, ActivityEventKind } from '@cost-share/shared';
+import { ActivityEvent, ActivityEventKind, PROFILE_ACTIVITY_LAST_SEEN_COLUMN } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 
@@ -55,7 +55,7 @@ export async function fetchActivityLastSeenAt(): Promise<Date | null> {
     if (!userId) return null;
     const { data, error } = await supabase
         .from('profiles')
-        .select('activity_last_seen_at')
+        .select(PROFILE_ACTIVITY_LAST_SEEN_COLUMN)
         .eq('id', userId)
         .maybeSingle();
     if (error || !data?.activity_last_seen_at) return null;

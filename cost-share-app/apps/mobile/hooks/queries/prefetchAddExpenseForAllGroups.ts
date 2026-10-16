@@ -6,7 +6,7 @@
  */
 
 import type { GroupMember, GroupWithMembers, User } from '@cost-share/shared';
-import { groupMemberFromRow, profileFromRow } from '@cost-share/shared';
+import { groupMemberFromRow, profileFromRow, PROFILE_SELECT_COLUMNS } from '@cost-share/shared';
 import { supabase } from '../../lib/supabase';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from './keys';
@@ -50,7 +50,7 @@ async function batchPrefetchAddExpensePrerequisites(groupIds: string[]): Promise
     if (userIds.length > 0) {
         const { data: profileRows, error: profilesError } = await supabase
             .from('profiles')
-            .select('*')
+            .select(PROFILE_SELECT_COLUMNS)
             .in('id', userIds);
         if (profilesError) {
             console.error('batchPrefetchAddExpensePrerequisites profiles failed:', profilesError);
