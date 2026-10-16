@@ -36,7 +36,9 @@ export function SettingsRow(props: Props) {
                     disabled ? { opacity: 0.45 } : undefined,
                 ]}
             >
-                <AppIcon name={iconName} size={22} color={iconColor} />
+                <View style={{ width: 28, alignItems: 'center', flexShrink: 0 }}>
+                    <AppIcon name={iconName} size={22} color={iconColor} />
+                </View>
                 <Text
                     className={`flex-1 min-w-0 text-base ${textColor} ${rtlTextClassName(isRtl, `text-base ${textColor}`)}`}
                 >

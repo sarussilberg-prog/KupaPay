@@ -14,8 +14,8 @@ import {
 } from '@cost-share/shared';
 import { fetchSimplifiedInputs } from '../services/simplifiedDebts.service';
 import { captureError } from '../lib/captureError';
-import { useAppStore } from '../store';
 import { queryKeys } from './queries/keys';
+import { useAuthUserId } from './useAuthUserId';
 
 const STALE_MS = 60 * 1000;
 
@@ -24,7 +24,7 @@ export function useSimplifiedDebts(): {
     isLoading: boolean;
     isError: boolean;
 } {
-    const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
+    const currentUserId = useAuthUserId() ?? '';
     const query = useQuery({
         queryKey: queryKeys.simplifiedDebts,
         queryFn: fetchSimplifiedInputs,

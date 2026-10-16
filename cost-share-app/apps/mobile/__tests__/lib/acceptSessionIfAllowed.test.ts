@@ -27,7 +27,21 @@ jest.mock('../../lib/accountDeletionGate', () => ({
     resolveAccountDeletionGate: (...args: unknown[]) => mockResolveGate(...args),
 }));
 
-const fakeSession = { user: { id: 'u1' } } as unknown as Session;
+const mockSetCurrentUser = jest.fn();
+let mockCurrentUser: { id: string } | null = null;
+
+jest.mock('../../store', () => ({
+    useAppStore: {
+        getState: () => ({
+            currentUser: mockCurrentUser,
+            setCurrentUser: mockSetCurrentUser,
+        }),
+    },
+}));
+
+const fakeSession = {
+    user: { id: 'u1', email: 'nave@example.com', user_metadata: { full_name: 'Nave' } },
+} as unknown as Session;
 
 function makeDeps() {
     return {
@@ -42,7 +56,9 @@ describe('acceptSessionIfAllowed', () => {
         mockAssertProfileActive.mockReset();
         mockHydrateProfile.mockReset();
         mockClearStaleAuthSession.mockClear();
-        mockSignalDeactivated.mockClear();
+        mockSignalDeactivated.mockReset();
+        mockSetCurrentUser.mockReset();
+        mockCurrentUser = null;
         mockResolveGate.mockReset();
         mockResolveGate.mockResolvedValue('deleted');
     });
@@ -91,6 +107,17 @@ describe('acceptSessionIfAllowed', () => {
         await acceptSessionIfAllowed(fakeSession, 'hydration', deps);
         expect(deps.setSession).toHaveBeenCalledWith(fakeSession);
         expect(mockSignalDeactivated).not.toHaveBeenCalled();
+    });
+
+    it('sets a provisional currentUser when hydration did not populate the store', async () => {
+        mockAssertProfileActive.mockResolvedValue('active');
+        mockHydrateProfile.mockResolvedValue('unknown');
+        const deps = makeDeps();
+        await acceptSessionIfAllowed(fakeSession, 'hydration', deps);
+        expect(mockSetCurrentUser).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'u1', name: 'Nave', email: 'nave@example.com' }),
+        );
+        expect(deps.setSession).toHaveBeenCalledWith(fakeSession);
     });
 
     it('rejects a session when hydration returns deactivated (fresh)', async () => {

@@ -7,6 +7,7 @@ import { wipePersistedCache } from './persistQueryClient';
 import { hydrateCurrentUserProfile } from '../services/users.service';
 import { resolveAccountDeletionGate } from './accountDeletionGate';
 import { useAppStore } from '../store';
+import { provisionalUserFromSession } from './provisionalUserFromSession';
 
 export type SessionAcceptMode = 'fresh' | 'hydration';
 
@@ -16,7 +17,7 @@ export interface AcceptSessionDeps {
     setPendingAccountRestore: (value: boolean) => void;
 }
 
-const HYDRATE_PROFILE_TIMEOUT_MS = 4000;
+const HYDRATE_PROFILE_TIMEOUT_MS = 8000;
 
 function hydrateProfileWithTimeout(
     userId: string,
@@ -131,5 +132,10 @@ export async function acceptSessionIfAllowed(
     if (mode === 'fresh') {
         await wipePersistedCache();
     }
+
+    if (!useAppStore.getState().currentUser) {
+        useAppStore.getState().setCurrentUser(provisionalUserFromSession(nextSession));
+    }
+
     setSession(nextSession);
 }

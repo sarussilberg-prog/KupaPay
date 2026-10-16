@@ -89,7 +89,12 @@ export function createTabPopToTopListener(initialScreen: string) {
         route: RouteProp<ParamListBase>;
     }) => ({
         tabPress: (e: { preventDefault: () => void }) => {
-            if (!navigation.isFocused()) return;
+            const tabState = navigation.getState();
+            const activeTab = tabState.routes[tabState.index ?? 0];
+            // Only handle re-press on the already-selected tab. When switching
+            // tabs, the pressed route is not active yet — must not preventDefault
+            // or CustomTabBar will skip navigation.navigate().
+            if (activeTab?.key !== route.key) return;
 
             const nestedState = navigation
                 .getState()

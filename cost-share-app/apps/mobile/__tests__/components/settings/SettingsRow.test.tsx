@@ -33,7 +33,7 @@ describe('SettingsRow', () => {
         );
         const row = getByTestId('settings-row-rtl').children[0] as { props: { style: unknown[] } };
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));
-        expect(flat.gap).toBe(12);
+        expect(flat.gap ?? flat.columnGap).toBe(12);
         if (Platform.OS === 'web') {
             expect(flat.direction).toBe('rtl');
         } else {

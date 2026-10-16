@@ -13,6 +13,10 @@ export function isPurchasesConfigured(): boolean {
 
 export async function configurePurchasesForUser(_userId: string): Promise<void> {}
 
+export async function waitForPurchasesReady(): Promise<boolean> {
+    return false;
+}
+
 export async function logOutPurchases(): Promise<void> {}
 
 export async function loadOfferingPackages(): Promise<PaywallPackages> {
