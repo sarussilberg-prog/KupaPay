@@ -800,6 +800,29 @@
             "resetOnboardingRow": "Reset onboarding",
             "previewCreateGroupRow": "Preview first-group screen"
         },
+        "promoCodes": {
+            "title": "Promo codes",
+            "portalRow": "Promo codes",
+            "empty": "No promo codes yet.",
+            "createCta": "Create code",
+            "createTitle": "New promo code",
+            "codePlaceholder": "Code (e.g. SUMMER-2026)",
+            "durationPlaceholder": "Pro duration (days)",
+            "maxUsesPlaceholder": "Max uses (optional)",
+            "createConfirm": "Create",
+            "createSuccess": "Promo code created",
+            "createError": "Could not create promo code",
+            "statusActive": "Active",
+            "statusInactive": "Inactive",
+            "metaLine": "{{days}} days · {{uses}} / {{max}} uses",
+            "unlimited": "∞",
+            "deactivateCta": "Deactivate",
+            "deactivateTitle": "Deactivate {{code}}?",
+            "deactivateMessage": "Users won't be able to redeem this code after deactivation.",
+            "deactivateConfirm": "Deactivate",
+            "deactivateSuccess": "Code deactivated",
+            "deactivateError": "Could not deactivate code"
+        },
         "proView": {
             "sectionTitle": "Pro view mode",
             "description": "Preview Free or Pro UX for your account only (24h). Does not change real subscriptions.",
@@ -1377,6 +1400,23 @@
             "trialFreePeriodBody": "Try every Pro feature free for {{trialDays}} days. Cancel in Settings before the trial ends if you don't want to continue.",
             "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
             "havePromoCode": "Have a code?"
+        },
+        "promoCode": {
+            "sheetTitle": "Redeem code",
+            "kupapayHint": "Enter your KupaPay promo code to unlock Pro on your account.",
+            "inputPlaceholder": "KupaPay code",
+            "redeeming": "Redeeming…",
+            "storeSection": "App Store or Google Play",
+            "playRedeem": "Redeem on Google Play",
+            "success": "Pro unlocked with your promo code.",
+            "errorInvalid": "That code isn't valid.",
+            "errorInactive": "This code is no longer active.",
+            "errorExpired": "This code has expired.",
+            "errorMaxUses": "This code has reached its redemption limit.",
+            "errorAlreadyRedeemed": "You've already used this code.",
+            "errorRateLimit": "Too many attempts. Try again later.",
+            "errorAuth": "Sign in to redeem a code.",
+            "errorGeneric": "Could not redeem this code. Try again."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

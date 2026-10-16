@@ -27,7 +27,6 @@ import {
     isPurchasesConfigured,
     loadOfferingPackages,
     openSubscriptionManagement,
-    presentOfferCodeRedemption,
     purchasePackage,
     restorePurchases,
     type IntroEligibilityMap,
@@ -42,6 +41,7 @@ import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
 import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
+import { PromoCodeRedeemSheet } from './PromoCodeRedeemSheet';
 
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
@@ -90,6 +90,7 @@ export function ProPaywallContent({
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
+    const [promoSheetOpen, setPromoSheetOpen] = useState(false);
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -198,8 +199,10 @@ export function ProPaywallContent({
     }, []);
 
     const handleRedeemCode = useCallback(() => {
-        void presentOfferCodeRedemption();
+        setPromoSheetOpen(true);
     }, []);
+
+    const showPromoCodeEntry = storeConfigured || Platform.OS === 'web';
 
     const subscriptionPlanKey = selected === 'monthly' ? 'monthly' : selected === 'yearly' ? 'yearly' : null;
 
@@ -396,11 +399,17 @@ export function ProPaywallContent({
                 <Text className="text-xs text-gray-500 leading-5 mb-4 text-center">{disclosureText}</Text>
             ) : null}
 
-            {storeConfigured ? (
+            {showPromoCodeEntry ? (
                 <Pressable onPress={handleRedeemCode} className="py-2 items-center mb-2" testID="paywall-redeem-code">
                     <Text className="text-primary text-sm font-medium">{t('pro.paywall.havePromoCode')}</Text>
                 </Pressable>
             ) : null}
+
+            <PromoCodeRedeemSheet
+                visible={promoSheetOpen}
+                onClose={() => setPromoSheetOpen(false)}
+                onRedeemSuccess={onPurchaseSuccess}
+            />
 
             <View className="flex-row flex-wrap justify-center gap-4 mb-4">
                 <Pressable onPress={() => openLegal('terms')}>

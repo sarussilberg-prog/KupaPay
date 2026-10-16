@@ -65,3 +65,7 @@ verify_jwt = false
 # Hourly cron (#400) — RevenueCat promotional Pro for qualified referrals.
 [functions.referral-reward-dispatch]
 verify_jwt = false
+
+# Client-invoked after redeem_promo_code — RevenueCat promotional Pro sync.
+[functions.promo-code-redeem]
+verify_jwt = true

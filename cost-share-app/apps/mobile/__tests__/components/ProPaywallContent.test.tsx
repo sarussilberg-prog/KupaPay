@@ -42,6 +42,14 @@ jest.mock('../../services/purchases.service', () => ({
     presentOfferCodeRedemption: jest.fn(),
 }));
 
+jest.mock('../../components/pro/PromoCodeRedeemSheet', () => {
+    const { View } = require('react-native');
+    return {
+        PromoCodeRedeemSheet: ({ visible }: { visible: boolean }) =>
+            visible ? <View testID="promo-sheet-open" /> : null,
+    };
+});
+
 import { fetchPaywallOfferings } from '../../lib/paywallOfferingsLoad';
 import { purchasePackage } from '../../services/purchases.service';
 
@@ -198,5 +206,22 @@ describe('ProPaywallContent offerings load', () => {
         });
 
         Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
+    });
+
+    it('opens promo code sheet from Have a code link', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: { monthly: mockMonthly, annual: mockPackage, tripPass: null },
+            introEligibility: {},
+        });
+
+        const { getByTestId, queryByTestId } = render(<ProPaywallContent featureKey="export_pdf" />);
+
+        await waitFor(() => {
+            expect(getByTestId('paywall-redeem-code')).toBeTruthy();
+        });
+
+        fireEvent.press(getByTestId('paywall-redeem-code'));
+        expect(queryByTestId('promo-sheet-open')).toBeTruthy();
     });
 });

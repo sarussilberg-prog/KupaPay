@@ -801,6 +801,29 @@
             "resetOnboardingRow": "Restablecer la introducción",
             "previewCreateGroupRow": "Vista previa de la pantalla del primer grupo"
         },
+        "promoCodes": {
+            "title": "Códigos promocionales",
+            "portalRow": "Códigos promocionales",
+            "empty": "Aún no hay códigos promocionales.",
+            "createCta": "Crear código",
+            "createTitle": "Nuevo código promocional",
+            "codePlaceholder": "Código (p. ej. SUMMER-2026)",
+            "durationPlaceholder": "Duración Pro (días)",
+            "maxUsesPlaceholder": "Usos máximos (opcional)",
+            "createConfirm": "Crear",
+            "createSuccess": "Código creado",
+            "createError": "No se pudo crear el código",
+            "statusActive": "Activo",
+            "statusInactive": "Inactivo",
+            "metaLine": "{{days}} días · {{uses}} / {{max}} usos",
+            "unlimited": "∞",
+            "deactivateCta": "Desactivar",
+            "deactivateTitle": "¿Desactivar {{code}}?",
+            "deactivateMessage": "Los usuarios no podrán canjear este código después.",
+            "deactivateConfirm": "Desactivar",
+            "deactivateSuccess": "Código desactivado",
+            "deactivateError": "No se pudo desactivar el código"
+        },
         "proView": {
             "sectionTitle": "Modo de vista Pro",
             "description": "Vista previa de Free o Pro solo para tu cuenta (24 h). No cambia la suscripción real.",
@@ -1436,6 +1459,23 @@
             "trialFreePeriodBody": "Prueba todas las funciones Pro gratis durante {{trialDays}} días. Cancela en Ajustes antes de que termine la prueba si no quieres continuar.",
             "trialRenewalDisclosure": "Tras {{trialDays}} días se cobrará {{price}}/{{period}} salvo que canceles en Ajustes.",
             "havePromoCode": "¿Tienes un código?"
+        },
+        "promoCode": {
+            "sheetTitle": "Canjear código",
+            "kupapayHint": "Introduce tu código promocional de KupaPay para desbloquear Pro.",
+            "inputPlaceholder": "Código KupaPay",
+            "redeeming": "Canjeando…",
+            "storeSection": "App Store o Google Play",
+            "playRedeem": "Canjear en Google Play",
+            "success": "Pro desbloqueado con tu código.",
+            "errorInvalid": "Ese código no es válido.",
+            "errorInactive": "Este código ya no está activo.",
+            "errorExpired": "Este código ha caducado.",
+            "errorMaxUses": "Este código alcanzó el límite de canjes.",
+            "errorAlreadyRedeemed": "Ya usaste este código.",
+            "errorRateLimit": "Demasiados intentos. Inténtalo más tarde.",
+            "errorAuth": "Inicia sesión para canjear un código.",
+            "errorGeneric": "No se pudo canjear el código. Inténtalo de nuevo."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
