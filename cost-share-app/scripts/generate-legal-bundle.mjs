@@ -3,9 +3,9 @@
  * Bundles packages/shared/content/legal/*.md into legalMarkdownBundle.generated.ts
  * for web + mobile static legal documents.
  */
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -16,7 +16,7 @@ const SLUGS = ['terms', 'privacy'];
 const LOCALES = ['en', 'he', 'ru', 'ar', 'fr', 'es', 'de'];
 
 function escapeTemplateLiteral(value) {
-    return value.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+    return value.replaceAll('\\', '\\\\').replaceAll('`', '\\`').replaceAll('${', '\\${');
 }
 
 const bundle = {};

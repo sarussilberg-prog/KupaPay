@@ -30,15 +30,6 @@ export function countLegalPlaceholders(markdown: string): Record<(typeof LEGAL_P
     return counts;
 }
 
-/** EU trader address occurrences (English token or Hebrew localized token). */
-export function countEuTraderAddressTokens(markdown: string): number {
-    const english =
-        countOccurrences(markdown, '[ADDRESS — required for EU trader info]') +
-        countOccurrences(markdown, '[ADDRESS]');
-    const hebrew = countOccurrences(markdown, LEGAL_EU_ADDRESS_TOKEN_HE);
-    return Math.max(english, hebrew > 0 ? hebrew : 0);
-}
-
 function countOccurrences(haystack: string, needle: string): number {
     let count = 0;
     let idx = 0;
