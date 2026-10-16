@@ -42,6 +42,7 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
     PERFORM set_config('role', 'authenticated', TRUE);
 
@@ -95,6 +96,7 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
     PERFORM set_config('role', 'authenticated', TRUE);
 
@@ -144,6 +146,7 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
     PERFORM set_config('role', 'authenticated', TRUE);
 
@@ -206,6 +209,7 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
+    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
     PERFORM set_config('role', 'authenticated', TRUE);
 

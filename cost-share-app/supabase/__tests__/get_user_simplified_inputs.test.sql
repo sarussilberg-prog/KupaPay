@@ -58,6 +58,7 @@ BEGIN
 
     -- Expected ILS nets: A +20, B -10, C -10  → sum 0 (only if C is included).
 
+    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
     PERFORM set_config('role', 'authenticated', TRUE);
 

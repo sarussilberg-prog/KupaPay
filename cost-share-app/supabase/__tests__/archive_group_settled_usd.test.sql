@@ -68,6 +68,7 @@ BEGIN
         RAISE EXCEPTION 'Sanity failed: legacy formula should show open balance, got %', v_legacy_payer_net;
     END IF;
 
+    PERFORM set_config('request.jwt.claim.sub', v_payer::text, TRUE);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_payer::text)::text, TRUE);
     PERFORM set_config('role', 'authenticated', TRUE);
 
