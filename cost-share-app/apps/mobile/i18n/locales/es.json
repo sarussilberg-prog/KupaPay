@@ -64,9 +64,20 @@
             "balances": "Saldos"
         },
         "signInError": "No se pudo iniciar sesión. Inténtalo de nuevo.",
-        "signInWithEmailMagicLink": "Continuar con correo",
-        "emailMagicLinkStubHint": "El inicio de sesión con enlace por correo llegará pronto.",
+        "signInWithEmail": "Continuar con correo",
         "emailPlaceholder": "tu@ejemplo.com",
+        "emailOtpSendCode": "Enviar código",
+        "emailOtpVerify": "Verificar e iniciar sesión",
+        "emailOtpSentTo": "Enviamos un código de 6 dígitos a {{email}}",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Reenviar código",
+        "emailOtpResendIn": "Reenviar en {{seconds}} s",
+        "emailOtpChangeEmail": "Cambiar correo",
+        "emailOtpInvalidEmail": "Introduce un correo válido.",
+        "emailOtpInvalidCode": "El código no es válido o expiró. Inténtalo de nuevo o reenvía.",
+        "emailOtpRateLimited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
+        "emailOtpSendError": "No se pudo enviar el código. Inténtalo de nuevo.",
+        "emailOtpVerifyError": "No se pudo verificar el código. Inténtalo de nuevo.",
         "googleSignInSheetTitle": "Iniciar sesión con Google",
         "googleSignInSheetHint": "Toca abajo: la selección de cuenta se abre sobre esta hoja."
     },
@@ -765,7 +776,11 @@
             "noStack": "No hay traza de pila disponible"
         },
         "monetization": {
-            "portalRow": "Analíticas de monetización"
+            "portalRow": "Analíticas de monetización",
+            "allTimeFunnel": "Embudo histórico",
+            "byPlatform": "Por plataforma",
+            "last7Days": "Últimos 7 días",
+            "noData": "Aún no hay eventos en este periodo"
         },
         "supportMessages": {
             "title": "Mensajes de ayuda",
@@ -782,7 +797,12 @@
             "activeGroups": "Grupos activos",
             "archivedGroups": "Grupos archivados",
             "archiveFootnote": "Archivados = inactivos durante 2 meses o más y con saldos en cero (en toda la app). No incluye el archivo manual de cada usuario.",
-            "loadError": "No se pudieron cargar las métricas. Desliza hacia abajo para actualizar o inténtalo más tarde."
+            "loadError": "Desliza hacia abajo para actualizar o inténtalo más tarde.",
+            "loadErrorTitle": "No se pudieron cargar las métricas",
+            "notAdminTitle": "Se requiere acceso de administrador",
+            "notAdminBody": "Tu cuenta no está en la lista de administradores de la app, por lo que las analíticas de monetización están ocultas.",
+            "analyticsUnavailableTitle": "Analíticas no configuradas",
+            "analyticsUnavailableBody": "Falta la función de métricas de monetización o no tiene permisos en este proyecto de Supabase. Aplica las migraciones más recientes en dev y actualiza."
         }
     },
     "profile": {
@@ -1259,10 +1279,10 @@
             "restoreSuccess": "Compras restauradas.",
             "restoreNone": "No se encontraron compras activas.",
             "tripPassNeedsGroup": "Abre un grupo primero para comprar un Trip Pass para ese grupo.",
-            "tryFreeTrialCta": "Probar 7 días gratis",
-            "trialFreePeriodHeading": "Prueba gratis de 7 días",
-            "trialFreePeriodBody": "Prueba todas las funciones Pro gratis durante 7 días. Cancela en Ajustes antes de que termine la prueba si no quieres continuar.",
-            "trialRenewalDisclosure": "Tras 7 días se cobrará {{price}}/{{period}} salvo que canceles en Ajustes.",
+            "tryFreeTrialCta": "Probar {{trialDays}} días gratis",
+            "trialFreePeriodHeading": "Prueba gratis de {{trialDays}} días",
+            "trialFreePeriodBody": "Prueba todas las funciones Pro gratis durante {{trialDays}} días. Cancela en Ajustes antes de que termine la prueba si no quieres continuar.",
+            "trialRenewalDisclosure": "Tras {{trialDays}} días se cobrará {{price}}/{{period}} salvo que canceles en Ajustes.",
             "euWithdrawalWaiverHeading": "Acceso inmediato y desistimiento de 14 días (UE)",
             "euDigitalPurchaseAck": "Solicito acceso inmediato a KupaPay Pro y reconozco que pierdo mi derecho de desistimiento de 14 días cuando comience el acceso.",
             "havePromoCode": "¿Tienes un código?"

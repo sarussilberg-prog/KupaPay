@@ -31,7 +31,7 @@ describe('SettingsRow', () => {
                 testID="settings-row-rtl"
             />,
         );
-        const row = getByTestId('settings-row-rtl').children[0] as { props: { style: unknown[] } };
+        const row = getByTestId('settings-row-rtl') as { props: { style: unknown[] } };
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));
         expect(flat.gap ?? flat.columnGap).toBe(12);
         if (Platform.OS === 'web') {

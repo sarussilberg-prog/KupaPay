@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Text } from './AppText';
 import { AppIcon } from './AppIcon';
 import { colors } from '../theme';
+import { MenuRow } from './ui/MenuRow';
 
 export interface DetailSheetHeaderProps {
     /** Label shown centered; rendered uppercase by the component. */
@@ -94,82 +95,42 @@ export function DetailSheetHeader({
                             />
                             <View style={styles.menuCard}>
                                 {onOpenInGroup && (
-                                    <TouchableOpacity
+                                    <MenuRow
+                                        iconName="arrow-forward-outline"
+                                        iconColor={colors.gray700}
+                                        label={openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
                                         onPress={handleOpenInGroup}
-                                        accessibilityRole="button"
-                                        accessibilityLabel={openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
-                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
                                         testID="detail-open-in-group-btn"
-                                    >
-                                        <AppIcon
-                                            name="arrow-forward-outline"
-                                            size={16}
-                                            color={colors.gray700}
-                                        />
-                                        <Text className="text-sm font-medium text-gray-900 ml-2.5" numberOfLines={1}>
-                                            {openInGroupLabel ?? t('activity.openInGroup', { group: '' })}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    />
                                 )}
                                 {onEdit && (
-                                    <TouchableOpacity
+                                    <MenuRow
+                                        iconName="create-outline"
+                                        iconColor={colors.gray700}
+                                        label={t('common.edit')}
                                         onPress={handleEdit}
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t('common.edit')}
-                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
                                         testID="detail-edit-btn"
-                                    >
-                                        <AppIcon
-                                            name="create-outline"
-                                            size={16}
-                                            color={colors.gray700}
-                                        />
-                                        <Text className="text-sm font-medium text-gray-900 ml-2.5">
-                                            {t('common.edit')}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    />
                                 )}
                                 {onDelete && (
-                                    <TouchableOpacity
+                                    <MenuRow
+                                        iconName="trash-outline"
+                                        iconColor={colors.error}
+                                        label={t('common.delete')}
+                                        labelClassName="text-sm font-medium text-red-600"
                                         onPress={handleDelete}
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t('common.delete')}
-                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
                                         testID="detail-delete-btn"
-                                    >
-                                        <AppIcon
-                                            name="trash-outline"
-                                            size={16}
-                                            color={colors.error}
-                                        />
-                                        <Text
-                                            className="text-sm font-medium ml-2.5"
-                                            style={{ color: colors.error }}
-                                        >
-                                            {t('common.delete')}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    />
                                 )}
                                 {onRemoveFromActivity && (
-                                    <TouchableOpacity
+                                    <MenuRow
+                                        iconName="trash-outline"
+                                        iconColor={colors.error}
+                                        label={t('activity.removeFromActivity')}
+                                        labelClassName="text-sm font-medium text-red-600"
                                         onPress={handleRemoveFromActivity}
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t('activity.removeFromActivity')}
-                                        className="flex-row items-center px-3 py-2.5 rounded-lg"
                                         testID="detail-remove-from-activity-btn"
-                                    >
-                                        <AppIcon
-                                            name="trash-outline"
-                                            size={16}
-                                            color={colors.error}
-                                        />
-                                        <Text
-                                            className="text-sm font-medium ml-2.5"
-                                            style={{ color: colors.error }}
-                                        >
-                                            {t('activity.removeFromActivity')}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    />
                                 )}
                             </View>
                         </>

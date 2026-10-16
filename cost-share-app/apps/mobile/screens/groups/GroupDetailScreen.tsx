@@ -121,6 +121,8 @@ import {
 import { useGroupConsolidationBatchesQuery, useDeleteConsolidationBatchMutation } from '../../hooks/queries/useConsolidationQueries';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
 import { AppIcon } from '../../components/AppIcon';
+import { IconLabel } from '../../components/ui/IconLabel';
+import { ListRow } from '../../components/ui/ListRow';
 import { FeedItemDetailSheet } from '../../components/FeedItemDetailSheet';
 import { colors } from '../../theme';
 import { showInfoToast, showSuccessMessage } from '../../lib/appToast';
@@ -1081,16 +1083,20 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             <Text className="text-sm text-gray-500 text-center mb-4">
                                 {t('groups.emptyFeed.message')}
                             </Text>
-                            <TouchableOpacity
+                            <ListRow
                                 onPress={() => setAddMembersOpen(true)}
-                                className="h-11 rounded-xl border border-primary px-5 items-center justify-center flex-row"
+                                className="h-11 rounded-xl border border-primary px-5 items-center justify-center min-h-0 bg-transparent"
                                 testID="empty-feed-add-members"
                             >
-                                <AppIcon name="person-add-outline" size={18} color={colors.primary} />
-                                <Text className="text-sm font-semibold text-primary-dark ml-2">
-                                    {t('groups.emptyFeed.addMembers')}
-                                </Text>
-                            </TouchableOpacity>
+                                <IconLabel
+                                    density="compact"
+                                    iconName="person-add-outline"
+                                    iconColor={colors.primary}
+                                    label={t('groups.emptyFeed.addMembers')}
+                                    labelClassName="text-sm font-semibold text-primary-dark"
+                                    flex={false}
+                                />
+                            </ListRow>
                             <TouchableOpacity
                                 onPress={() => { void shareGroupInvite(groupId); }}
                                 className="mt-4 self-center"

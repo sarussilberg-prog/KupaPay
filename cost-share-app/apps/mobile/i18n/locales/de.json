@@ -64,9 +64,20 @@
             "balances": "Salden"
         },
         "signInError": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
-        "signInWithEmailMagicLink": "Mit E-Mail fortfahren",
-        "emailMagicLinkStubHint": "Anmeldung per E-Mail-Link kommt demnächst.",
+        "signInWithEmail": "Mit E-Mail fortfahren",
         "emailPlaceholder": "deine@email.de",
+        "emailOtpSendCode": "Code senden",
+        "emailOtpVerify": "Bestätigen und anmelden",
+        "emailOtpSentTo": "Wir haben einen 6-stelligen Code an {{email}} gesendet",
+        "emailOtpCodePlaceholder": "000000",
+        "emailOtpResend": "Code erneut senden",
+        "emailOtpResendIn": "Erneut senden in {{seconds}} s",
+        "emailOtpChangeEmail": "E-Mail ändern",
+        "emailOtpInvalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "emailOtpInvalidCode": "Code ungültig oder abgelaufen. Erneut versuchen oder Code neu senden.",
+        "emailOtpRateLimited": "Zu viele Versuche. Warte eine Minute und versuche es erneut.",
+        "emailOtpSendError": "Code konnte nicht gesendet werden. Bitte erneut versuchen.",
+        "emailOtpVerifyError": "Code konnte nicht bestätigt werden. Bitte erneut versuchen.",
         "googleSignInSheetTitle": "Mit Google anmelden",
         "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster."
     },
@@ -764,7 +775,11 @@
             "noStack": "Kein Stacktrace verfügbar"
         },
         "monetization": {
-            "portalRow": "Monetarisierungsanalyse"
+            "portalRow": "Monetarisierungsanalyse",
+            "allTimeFunnel": "Gesamter Trichter",
+            "byPlatform": "Nach Plattform",
+            "last7Days": "Letzte 7 Tage",
+            "noData": "In diesem Zeitraum noch keine Ereignisse"
         },
         "supportMessages": {
             "title": "Support-Nachrichten",
@@ -781,7 +796,12 @@
             "activeGroups": "Aktive Gruppen",
             "archivedGroups": "Archivierte Gruppen",
             "archiveFootnote": "Archiviert = seit über 2 Monaten inaktiv mit Saldo null (App-weit). Manuelle Archivierung durch einzelne Nutzer ist nicht enthalten.",
-            "loadError": "Kennzahlen konnten nicht geladen werden. Zum Aktualisieren nach unten ziehen oder später erneut versuchen."
+            "loadError": "Zum Aktualisieren nach unten ziehen oder später erneut versuchen.",
+            "loadErrorTitle": "Kennzahlen konnten nicht geladen werden",
+            "notAdminTitle": "Admin-Zugriff erforderlich",
+            "notAdminBody": "Dein Konto steht nicht auf der Admin-Liste der App, daher sind Monetarisierungs-Kennzahlen ausgeblendet.",
+            "analyticsUnavailableTitle": "Analyse nicht konfiguriert",
+            "analyticsUnavailableBody": "Die Monetarisierungs-Kennzahlen-Funktion fehlt oder hat auf diesem Supabase-Projekt keine Berechtigung. Wende die neuesten Migrationen auf dev an und aktualisiere."
         }
     },
     "profile": {
@@ -1257,10 +1277,10 @@
             "restoreSuccess": "Käufe wiederhergestellt.",
             "restoreNone": "Keine aktiven Käufe gefunden.",
             "tripPassNeedsGroup": "Öffne zuerst eine Gruppe, um einen Trip Pass dafür zu kaufen.",
-            "tryFreeTrialCta": "7 Tage kostenlos testen",
-            "trialFreePeriodHeading": "7 Tage kostenlos testen",
-            "trialFreePeriodBody": "7 Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
-            "trialRenewalDisclosure": "Nach 7 Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
+            "tryFreeTrialCta": "{{trialDays}} Tage kostenlos testen",
+            "trialFreePeriodHeading": "{{trialDays}} Tage kostenlos testen",
+            "trialFreePeriodBody": "{{trialDays}} Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
+            "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
             "euWithdrawalWaiverHeading": "Sofortiger Zugang & 14-Tage-Widerruf (EU)",
             "euDigitalPurchaseAck": "Ich verlange sofortigen Zugang zu KupaPay Pro und bestätige, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald der Zugang beginnt.",
             "havePromoCode": "Code vorhanden?"
