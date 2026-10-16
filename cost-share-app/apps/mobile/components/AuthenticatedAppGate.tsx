@@ -5,7 +5,7 @@ import type { GroupWithMembers } from '@cost-share/shared';
 import { AppNavigator } from '../navigation/AppNavigator';
 import { navigationIntegration } from '../lib/sentry';
 import { rootNavigationRef } from '../lib/rootNavigationRef';
-import { OnboardingCreateGroupScreen } from '../screens/onboarding/OnboardingCreateGroupScreen';
+import { ActivationOnboardingScreen } from '../screens/onboarding/ActivationOnboardingScreen';
 import {
     hasCompletedPostLoginOnboarding,
     markPostLoginOnboardingComplete,
@@ -91,7 +91,7 @@ export function AuthenticatedAppGate() {
     }
 
     if (gate === 'create') {
-        return <OnboardingCreateGroupScreen onDone={() => setGate('main')} />;
+        return <ActivationOnboardingScreen onDone={() => setGate('main')} />;
     }
 
     return (

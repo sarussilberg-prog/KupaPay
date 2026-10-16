@@ -47,10 +47,12 @@ import {
     identifyProductUser,
     isNewAccountSignup,
     resetProductAnalyticsUser,
+    trackSignupCompleted,
 } from './lib/productAnalytics';
 import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
+import { recoverDeferredInviteAttribution } from './lib/recoverDeferredInviteAttribution';
 import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
 import { configureRewardedAdsSdk } from './lib/configureRewardedAdsSdk';
 import { WebAlertHost } from './components/WebAlertHost';
@@ -280,6 +282,11 @@ function App() {
         const persistedInvite = await loadPersistedPendingInvite();
         if (persistedInvite) {
             store.setPendingInvite(persistedInvite);
+        } else {
+            const recovered = await recoverDeferredInviteAttribution(false);
+            if (recovered) {
+                store.setPendingInvite(recovered);
+            }
         }
 
         // supabase-js only auths Realtime on SIGNED_IN / TOKEN_REFRESHED, not on
@@ -317,9 +324,9 @@ function App() {
 
           if (event === 'SIGNED_IN') {
             if (isNewAccountSignup(nextSession.user)) {
-              void captureProductEvent('signup', {
-                provider: nextSession.user.app_metadata?.provider ?? 'unknown',
-              });
+              const provider = nextSession.user.app_metadata?.provider ?? 'unknown';
+              void captureProductEvent('signup', { provider });
+              void trackSignupCompleted({ provider });
             }
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');

@@ -183,6 +183,64 @@
                     "summarySuffix": "membres"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Trois étapes — moins d'une minute jusqu'à votre première dépense.",
+            "skipConfirm": "Passer",
+            "header": {
+                "create": "Choisir un modèle",
+                "expense": "Première dépense",
+                "invite": "Inviter votre équipe"
+            },
+            "steps": {
+                "create": "Groupe",
+                "expense": "Dépense",
+                "invite": "Inviter"
+            },
+            "fields": {
+                "groupName": "Nom du groupe"
+            },
+            "templates": {
+                "label": "Que partagez-vous ?",
+                "trip": {
+                    "label": "Voyage",
+                    "defaultName": "Week-end",
+                    "defaultExpense": "Essence ou transport"
+                },
+                "roommates": {
+                    "label": "Colocataires",
+                    "defaultName": "Notre logement",
+                    "defaultExpense": "Courses ou charges"
+                },
+                "event": {
+                    "label": "Événement",
+                    "defaultName": "Repas de groupe",
+                    "defaultExpense": "Nourriture et boissons"
+                },
+                "couple": {
+                    "label": "En couple",
+                    "defaultName": "Nous deux",
+                    "defaultExpense": "Restaurant"
+                }
+            },
+            "expense": {
+                "hint": "Notez quelque chose que vous avez déjà payé — modifiable plus tard.",
+                "amountRequired": "Saisissez un montant supérieur à zéro"
+            },
+            "invite": {
+                "title": "Faites venir d'autres personnes",
+                "body": "Partagez un lien pour que vos amis rejoignent le groupe et partagent la prochaine addition."
+            },
+            "skipExpenseTitle": "Passer la première dépense ?",
+            "skipExpenseMessage": "Ajouter une dépense maintenant est le moyen le plus rapide de voir les soldes. Vous pourrez en ajouter à tout moment depuis le groupe.",
+            "cta": {
+                "createGroup": "Continuer",
+                "addExpense": "Ajouter une dépense",
+                "skipExpense": "Passer pour l'instant",
+                "shareInvite": "Partager le lien d'invitation",
+                "shareInviteWeb": "Partager ou copier le lien",
+                "done": "Aller à mon groupe"
+            }
         }
     },
     "groups": {
@@ -1046,6 +1104,17 @@
             "rotateConfirmBody": "Les personnes qui ont le lien actuel ne pourront pas rejoindre le groupe tant que vous ne leur aurez pas envoyé le nouveau. Les membres déjà présents ne sont pas concernés.",
             "rotated": "Lien d'invitation du groupe mis à jour",
             "emptyStateLink": "ou partagez le lien du groupe"
+        },
+        "postCreate": {
+            "title": "Inviter des amis",
+            "subtitle": "Faites rejoindre « {{groupName}} » — lien, WhatsApp ou QR code.",
+            "shareSheet": "Partager…",
+            "shareSheetWeb": "Partager ou copier",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Copier le lien",
+            "qrHint": "Scannez pour rejoindre le groupe",
+            "skip": "Plus tard",
+            "continue": "Ouvrir le groupe"
         },
         "addMembers": {
             "searchOthers": "Rechercher d'autres utilisateurs",

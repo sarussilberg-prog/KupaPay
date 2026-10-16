@@ -183,6 +183,64 @@
                     "summarySuffix": "חברים"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "שלושה צעדים — פחות מדקה להוצאה הראשונה.",
+            "skipConfirm": "דלג",
+            "header": {
+                "create": "בחרו תבנית",
+                "expense": "הוצאה ראשונה",
+                "invite": "הזמינו חברים"
+            },
+            "steps": {
+                "create": "קופה",
+                "expense": "הוצאה",
+                "invite": "הזמנה"
+            },
+            "fields": {
+                "groupName": "שם הקופה"
+            },
+            "templates": {
+                "label": "על מה מחלקים?",
+                "trip": {
+                    "label": "טיול",
+                    "defaultName": "טיול סוף שבוע",
+                    "defaultExpense": "דלק או נסיעה"
+                },
+                "roommates": {
+                    "label": "שותפים לדירה",
+                    "defaultName": "הדירה שלנו",
+                    "defaultExpense": "קניות או חשבונות"
+                },
+                "event": {
+                    "label": "אירוע",
+                    "defaultName": "ארוחת קבוצה",
+                    "defaultExpense": "אוכל ושתייה"
+                },
+                "couple": {
+                    "label": "זוג",
+                    "defaultName": "אנחנו",
+                    "defaultExpense": "ארוחה בחוץ"
+                }
+            },
+            "expense": {
+                "hint": "רשמו משהו שכבר שילמתם — אפשר לערוך אחר כך.",
+                "amountRequired": "הזינו סכום גדול מאפס"
+            },
+            "invite": {
+                "title": "הביאו עוד אנשים",
+                "body": "שלחו קישור כדי שחברים יצטרפו לקופה ויחלקו את החשבון הבא."
+            },
+            "skipExpenseTitle": "לדלג על ההוצאה הראשונה?",
+            "skipExpenseMessage": "הוצאה אחת עכשיו היא הדרך המהירה לראות יתרות. אפשר להוסיף הוצאות בכל עת מהקופה.",
+            "cta": {
+                "createGroup": "המשך",
+                "addExpense": "הוסיפו הוצאה",
+                "skipExpense": "דלג לעת עתה",
+                "shareInvite": "שתפו קישור הזמנה",
+                "shareInviteWeb": "שתפו או העתיקו קישור",
+                "done": "לקופה שלי"
+            }
         }
     },
     "groups": {
@@ -1048,6 +1106,17 @@
             "rotateConfirmBody": "כל מי שיש לו את הקישור הנוכחי לא יוכל להצטרף עד שתשלח לו את החדש. חברים שכבר בקופה לא מושפעים.",
             "rotated": "קישור הקופה עודכן",
             "emptyStateLink": "או שתף קישור לקופה"
+        },
+        "postCreate": {
+            "title": "הזמינו חברים",
+            "subtitle": "הוסיפו אנשים ל«{{groupName}}» — קישור, וואטסאפ או QR.",
+            "shareSheet": "שיתוף…",
+            "shareSheetWeb": "שיתוף או העתקה",
+            "whatsapp": "WhatsApp",
+            "copyLink": "העתקת קישור",
+            "qrHint": "סרקו כדי להצטרף לקופה",
+            "skip": "לא עכשיו",
+            "continue": "פתיחת הקופה"
         },
         "addMembers": {
             "searchOthers": "חפש משתמשים אחרים",
