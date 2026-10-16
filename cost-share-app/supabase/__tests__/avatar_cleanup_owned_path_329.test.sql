@@ -6,16 +6,20 @@ DO $outer$
 DECLARE
     v_attacker CONSTANT UUID := '00000000-0000-0000-0000-000000032901';
     v_victim   CONSTANT UUID := '00000000-0000-0000-0000-000000032902';
+    v_owned    CONSTANT UUID := '00000000-0000-0000-0000-000000032903';
     v_rows     INT;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_attacker, 'av329-attacker@test.local'),
-        (v_victim,   'av329-victim@test.local');
+        (v_victim,   'av329-victim@test.local'),
+        (v_owned,    'av329-owned@test.local');
 
     INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, invite_token, avatar_url) VALUES
         (v_attacker, 'av329-attacker@test.local', 'Attacker', 'USD', 'en', TRUE, 'tt_av329_atk',
             v_victim::text || '/avatar.jpg'),
-        (v_victim,   'av329-victim@test.local',   'Victim',   'USD', 'en', TRUE, 'tt_av329_vic', NULL);
+        (v_victim,   'av329-victim@test.local',   'Victim',   'USD', 'en', TRUE, 'tt_av329_vic', NULL),
+        (v_owned,    'av329-owned@test.local',    'Owned',    'USD', 'en', TRUE, 'tt_av329_own',
+            v_owned::text || '/avatar.png');
 
     PERFORM public.test_set_authenticated(v_attacker);
     PERFORM public.delete_my_account();
@@ -29,19 +33,13 @@ BEGIN
         RAISE EXCEPTION 'Case 1 failed: foreign avatar path must not be queued (rows=%)', v_rows;
     END IF;
 
-    PERFORM set_config('role', 'service_role', TRUE);
-    UPDATE public.profiles
-        SET is_active = TRUE, deleted_at = NULL, email = 'av329-attacker@test.local', name = 'Attacker',
-            avatar_url = v_attacker::text || '/avatar.png'
-        WHERE id = v_attacker;
-
-    PERFORM public.test_set_authenticated(v_attacker);
+    PERFORM public.test_set_authenticated(v_owned);
     PERFORM public.delete_my_account();
 
     SELECT COUNT(*) INTO v_rows
     FROM public.storage_cleanup_queue
     WHERE bucket = 'profile-images'
-      AND object_path = v_attacker::text || '/avatar.png';
+      AND object_path = v_owned::text || '/avatar.png';
 
     IF v_rows <> 1 THEN
         RAISE EXCEPTION 'Case 2 failed: owned avatar path should be queued once (rows=%)', v_rows;
