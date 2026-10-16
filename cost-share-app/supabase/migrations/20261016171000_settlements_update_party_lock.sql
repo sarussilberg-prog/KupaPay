@@ -21,6 +21,7 @@ CREATE TRIGGER trg_guard_settlement_core_fields
     FOR EACH ROW
     EXECUTE FUNCTION public.guard_settlement_core_fields();
 
+DROP POLICY IF EXISTS "Either party can update settlement" ON public.settlements;
 DROP POLICY IF EXISTS "Group members can update settlements" ON public.settlements;
 CREATE POLICY "Group members can update settlements" ON public.settlements
     FOR UPDATE

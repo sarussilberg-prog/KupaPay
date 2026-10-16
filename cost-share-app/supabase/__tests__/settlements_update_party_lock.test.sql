@@ -4,6 +4,7 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
+    v_rows INT;
     v_alice CONSTANT UUID := '00000000-0000-0000-0000-000000298001';
     v_bob   CONSTANT UUID := '00000000-0000-0000-0000-000000298002';
     v_carol CONSTANT UUID := '00000000-0000-0000-0000-000000298003';
@@ -33,14 +34,11 @@ BEGIN
     SET LOCAL session_replication_role = origin;
     PERFORM public.test_set_authenticated(v_carol);
 
-    BEGIN
-        UPDATE public.settlements SET currency = 'USD' WHERE id = v_settle;
+    UPDATE public.settlements SET currency = 'USD' WHERE id = v_settle;
+    GET DIAGNOSTICS v_rows = ROW_COUNT;
+    IF v_rows > 0 THEN
         RAISE EXCEPTION 'Case A failed: non-party Carol must not update settlement';
-    EXCEPTION WHEN insufficient_privilege OR check_violation OR OTHERS THEN
-        IF SQLERRM NOT LIKE '%row-level security%' AND SQLERRM NOT LIKE '%42501%' THEN
-            RAISE;
-        END IF;
-    END;
+    END IF;
 
     PERFORM public.test_set_authenticated(v_alice);
 
