@@ -1269,6 +1269,15 @@
             "lockedBody": "Pro envía recordatorios según tu intervalo (mínimo cada 3 días).",
             "intervalDays": "Cada {{count}} días"
         },
+        "spendingInsights": {
+            "menuOption": "Resumen de gastos",
+            "sheetTitle": "Resumen de gastos",
+            "lockedBody": "Totales por categoría, pagador y semana.",
+            "upgrade": "Mejorar a Pro",
+            "empty": "Sin gastos en esta moneda.",
+            "uncategorized": "Sin categoría",
+            "tab": { "category": "Categoría", "member": "Pagó", "week": "Semanal" }
+        },
         "tripBudget": {
             "title": "Presupuesto del viaje",
             "lockedBody": "Tope de gasto y alertas al 80 % y 100 %.",

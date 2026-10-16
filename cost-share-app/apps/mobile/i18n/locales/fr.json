@@ -1267,6 +1267,15 @@
             "lockedBody": "Pro envoie des rappels selon votre intervalle (minimum 3 jours).",
             "intervalDays": "Tous les {{count}} jours"
         },
+        "spendingInsights": {
+            "menuOption": "Aperçu des dépenses",
+            "sheetTitle": "Aperçu des dépenses",
+            "lockedBody": "Totaux par catégorie, payeur et semaine.",
+            "upgrade": "Passer à Pro",
+            "empty": "Aucune dépense dans cette devise.",
+            "uncategorized": "Sans catégorie",
+            "tab": { "category": "Catégorie", "member": "Payé par", "week": "Semaines" }
+        },
         "tripBudget": {
             "title": "Budget du voyage",
             "lockedBody": "Plafond de dépenses et alertes à 80 % et 100 %.",
