@@ -71,10 +71,16 @@ import './global.css';
 import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
 import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
+import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
 
 function isGroupCardPreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
   return new URLSearchParams(globalThis.location.search).get('devGroupCardPreview') === '1';
+}
+
+function isGroupsListB2PreviewMode(): boolean {
+  if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
+  return new URLSearchParams(globalThis.location.search).get('devGroupsListB2Preview') === '1';
 }
 
 // Benign when a persisted session was revoked server-side (global sign-out, token rotation, etc.).
@@ -423,6 +429,18 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             <GroupCardListPreviewScreen />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isGroupsListB2PreviewMode()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <GroupsListB2PreviewScreen />
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>

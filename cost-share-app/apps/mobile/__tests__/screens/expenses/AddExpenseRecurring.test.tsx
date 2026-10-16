@@ -3,6 +3,7 @@ import { fireEvent } from '@testing-library/react-native';
 import { renderWithQuery } from '../../helpers/renderWithQuery';
 import { AddExpenseScreen } from '../../../screens/expenses/AddExpenseScreen';
 import { useAppStore } from '../../../store';
+import type { MyProStatus } from '../../../services/proEntitlements.service';
 
 const mockNavigate = jest.fn();
 
@@ -23,7 +24,12 @@ jest.mock('../../../lib/featureFlags', () => ({
     isProUpsellSurfaceEnabled: () => true,
 }));
 
-const proStatusMock = {
+const proStatusMock: {
+    data: Partial<MyProStatus> | undefined;
+    hasPro: boolean;
+    proPerkUnlocked: boolean;
+    isLoading: boolean;
+} = {
     data: { hasPro: false },
     hasPro: false,
     proPerkUnlocked: false,
