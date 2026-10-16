@@ -22,10 +22,7 @@ export type ProductAnalyticsEvent =
     | 'expense_added'
     | 'settle_up'
     | 'paywall_viewed'
-<<<<<<< HEAD
     | 'paywall_load_failed'
-=======
->>>>>>> origin/main
     | 'trial_started'
     | 'purchase_completed'
     | 'purchase_failed'
@@ -34,13 +31,9 @@ export type ProductAnalyticsEvent =
     | 'invite_sent'
     | 'invite_accepted'
     | 'second_group_member_joined'
-<<<<<<< HEAD
     | 'review_prompt_shown'
     | 'recurring_series_created'
     | 'recurring_series_stopped';
-=======
-    | 'review_prompt_shown';
->>>>>>> origin/main
 
 export interface ProductAnalyticsClient {
     capture: (event: string, properties?: Record<string, unknown>) => void;

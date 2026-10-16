@@ -40,10 +40,7 @@ import {
     showSuccessToast,
 } from '../lib/appToast';
 import { trackFirstGroupCreated, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
-<<<<<<< HEAD
 import { parseRpcResult } from '../lib/rpcResult';
-=======
->>>>>>> origin/main
 type GroupArchiveState = { mine: boolean; auto: boolean };
 
 async function fetchGroupsArchiveState(): Promise<Map<string, GroupArchiveState>> {
@@ -233,7 +230,7 @@ export async function fetchGroups(): Promise<GroupWithMembers[]> {
     return fetchGroupsInFlight;
 }
 
-export type ArchiveGroupError = 'has_balance' | 'not_a_member' | 'unknown';
+export type ArchiveGroupError = 'has_balance' | 'not_a_member' | 'not_authenticated' | 'unknown';
 
 export async function archiveGroup(groupId: string): Promise<ArchiveGroupError | null> {
     const { data, error } = await supabase.rpc('archive_group', { p_group_id: groupId });

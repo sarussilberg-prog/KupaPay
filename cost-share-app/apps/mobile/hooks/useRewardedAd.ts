@@ -2,13 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Platform } from 'react-native';
 import { logMonetizationEvent } from '../services/monetization.service';
 import {
-<<<<<<< HEAD
     ADMOB_REWARDED_ANDROID_UNIT_ID,
     ADMOB_REWARDED_IOS_UNIT_ID,
 } from '../lib/admobConfig';
 import {
-=======
->>>>>>> origin/main
     isRewardedAdsAllowedInRegion,
     REWARDED_AD_REQUEST_OPTIONS,
 } from '../lib/rewardedAdsCompliance';

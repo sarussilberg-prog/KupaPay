@@ -1142,11 +1142,8 @@
             "restore": "Restore Purchases",
             "manageSubscription": "Manage subscription",
             "storeNotConfigured": "Purchases are not available in this build.",
-<<<<<<< HEAD
             "loadFailed": "We couldn't load subscription prices. Check your connection or try again in a moment.",
             "retry": "Retry",
-=======
->>>>>>> origin/main
             "purchaseSuccess": "Welcome to Pro!",
             "purchaseError": "Purchase could not be completed.",
             "restoreSuccess": "Purchases restored.",
@@ -1188,12 +1185,9 @@
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
-<<<<<<< HEAD
         },
         "recurring": {
             "lockedBody": "Automate rent, subscriptions, and other repeating expenses with Pro."
-=======
->>>>>>> origin/main
         }
     },
     "remind": {

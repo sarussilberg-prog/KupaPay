@@ -1144,11 +1144,8 @@
             "restore": "שחזור רכישות",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
-<<<<<<< HEAD
             "loadFailed": "לא הצלחנו לטעון מחירי מנוי. בדקו את החיבור או נסו שוב בעוד רגע.",
             "retry": "נסו שוב",
-=======
->>>>>>> origin/main
             "purchaseSuccess": "ברוכים הבאים ל-Pro!",
             "purchaseError": "לא ניתן להשלים את הרכישה.",
             "restoreSuccess": "הרכישות שוחזרו.",
@@ -1190,12 +1187,9 @@
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
-<<<<<<< HEAD
         },
         "recurring": {
             "lockedBody": "אוטומציה לשכירות, מנויים והוצאות חוזרות — עם Pro."
-=======
->>>>>>> origin/main
         }
     },
     "remind": {

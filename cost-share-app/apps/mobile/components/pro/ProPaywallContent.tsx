@@ -29,14 +29,11 @@ import {
     type IntroEligibilityMap,
 } from '../../services/purchases.service';
 import { planShowsFreeTrial } from '../../lib/proTrialPaywall';
-<<<<<<< HEAD
 import {
     fetchPaywallOfferings,
     reportPaywallLoadFailed,
     type PaywallLoadFailureReason,
 } from '../../lib/paywallOfferingsLoad';
-=======
->>>>>>> origin/main
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
@@ -83,18 +80,14 @@ export function ProPaywallContent({
         null,
     );
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
-<<<<<<< HEAD
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
-=======
->>>>>>> origin/main
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
         void captureProductEvent('paywall_viewed', { feature_key: featureKey, group_id: groupId ?? null });
     }, [featureKey, groupId]);
 
-<<<<<<< HEAD
     const loadOfferings = useCallback(async () => {
         if (!isPurchasesConfigured()) {
             setLoading(false);
@@ -133,26 +126,6 @@ export function ProPaywallContent({
 
     const retryLoad = useCallback(() => {
         setLoadAttempt(n => n + 1);
-=======
-    useEffect(() => {
-        let cancelled = false;
-        void (async () => {
-            setLoading(true);
-            const pkgs = isPurchasesConfigured() ? await loadOfferingPackages() : null;
-            const eligibility =
-                pkgs && isPurchasesConfigured()
-                    ? await checkIntroductoryPriceEligibility(pkgs)
-                    : {};
-            if (!cancelled) {
-                setPackages(pkgs);
-                setIntroEligibility(eligibility);
-                setLoading(false);
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
->>>>>>> origin/main
     }, []);
 
     const selectedPackage = useMemo((): PurchasesPackageLike | null => {
@@ -217,12 +190,9 @@ export function ProPaywallContent({
         planShowsFreeTrial(subscriptionPlanKey, packages, introEligibility);
 
     const disclosureText = useMemo(() => {
-<<<<<<< HEAD
         if (loadFailedReason) {
             return '';
         }
-=======
->>>>>>> origin/main
         if (selected === 'trip_pass') {
             return t('pro.paywall.tripPassNoRenewal');
         }
@@ -232,11 +202,7 @@ export function ProPaywallContent({
             return t('pro.paywall.trialRenewalDisclosure', { price, period });
         }
         return t('pro.paywall.renewalDisclosure', { price, period });
-<<<<<<< HEAD
     }, [loadFailedReason, selected, selectedPackage, showFreeTrial, t]);
-=======
-    }, [selected, selectedPackage, showFreeTrial, t]);
->>>>>>> origin/main
 
     const purchaseCta = useMemo(() => {
         if (!selectedPackage) return t('pro.paywall.subscribe');
@@ -252,11 +218,7 @@ export function ProPaywallContent({
 
     const planPickerSection = useMemo(() => {
         if (loading) {
-<<<<<<< HEAD
             return <ActivityIndicator className="my-8" testID="paywall-loading" />;
-=======
-            return <ActivityIndicator className="my-8" />;
->>>>>>> origin/main
         }
         if (!storeConfigured) {
             return (
@@ -265,7 +227,6 @@ export function ProPaywallContent({
                 </Text>
             );
         }
-<<<<<<< HEAD
         if (loadFailedReason) {
             return (
                 <View className="mb-6 items-center gap-3">
@@ -282,8 +243,6 @@ export function ProPaywallContent({
                 </View>
             );
         }
-=======
->>>>>>> origin/main
         return (
             <>
                 <View className="gap-2 mb-3">
@@ -320,11 +279,7 @@ export function ProPaywallContent({
                 ) : null}
             </>
         );
-<<<<<<< HEAD
     }, [loadFailedReason, loading, packages, retryLoad, selected, showTripPass, storeConfigured, t, tripPassPrice]);
-=======
-    }, [loading, packages, selected, showTripPass, storeConfigured, t, tripPassPrice]);
->>>>>>> origin/main
 
     return (
         <ScrollView
@@ -365,11 +320,7 @@ export function ProPaywallContent({
 
             <Pressable
                 onPress={handlePurchase}
-<<<<<<< HEAD
                 disabled={busy || !storeConfigured || !selectedPackage || loading || !!loadFailedReason}
-=======
-                disabled={busy || !storeConfigured || !selectedPackage}
->>>>>>> origin/main
                 className="bg-primary rounded-2xl py-4 items-center mb-3"
                 testID="paywall-purchase-btn"
             >
