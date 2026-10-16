@@ -27,6 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_recurring_series_due
     ON public.recurring_expense_series(next_run_date)
     WHERE ended_at IS NULL;
 
+DROP TRIGGER IF EXISTS update_recurring_expense_series_updated_at ON public.recurring_expense_series;
 CREATE TRIGGER update_recurring_expense_series_updated_at
     BEFORE UPDATE ON public.recurring_expense_series
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -46,6 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_recurring_occurrences_series
 ALTER TABLE public.recurring_expense_series ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recurring_expense_occurrences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "group members read recurring series" ON public.recurring_expense_series;
 CREATE POLICY "group members read recurring series"
     ON public.recurring_expense_series FOR SELECT
     TO authenticated
@@ -58,6 +60,7 @@ CREATE POLICY "group members read recurring series"
         )
     );
 
+DROP POLICY IF EXISTS "group members read recurring occurrences" ON public.recurring_expense_occurrences;
 CREATE POLICY "group members read recurring occurrences"
     ON public.recurring_expense_occurrences FOR SELECT
     TO authenticated
