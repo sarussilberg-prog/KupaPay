@@ -35,6 +35,7 @@
     "mobile": "cd apps/mobile && npm start",
     "web": "cd apps/web && npm run dev",
     "seed": "DOTENV_CONFIG_PATH=./supabase/.env ts-node -r dotenv/config scripts/seed.ts",
+    "seed:e2e": "DOTENV_CONFIG_PATH=./supabase/.env ts-node -r dotenv/config scripts/seed-e2e-dev-user.ts",
     "supabase:fix": "bash scripts/supabase-apply-patches.sh",
     "supabase:verify": "bash scripts/verify-supabase-schema.sh",
     "supabase:link:dev": "SUPABASE_ENV=development bash scripts/supabase-link.sh",
@@ -47,7 +48,10 @@
     "size": "size-limit",
     "size:ci": "bash scripts/ci-bundle-size.sh",
     "generate:legal": "node scripts/generate-legal-bundle.mjs",
-    "check:legal": "bash scripts/ci-legal-locale-parity.sh"
+    "check:legal": "bash scripts/ci-legal-locale-parity.sh",
+    "test:coverage:ci": "bash scripts/ci-coverage-check.sh",
+    "test:e2e": "playwright test",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@lhci/cli": "^0.14.0",

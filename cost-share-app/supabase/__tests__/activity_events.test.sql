@@ -153,8 +153,8 @@ BEGIN
         RAISE EXCEPTION 'Case 6 failed: created_at bumped on status update (before=%, after=%)', v_before, v_after;
     END IF;
 
-    -- ---- CASE 7: rejoin — Bob leaves, then rejoins; fresh rows appear,
-    --             unique constraint does NOT suppress them.
+    -- ---- CASE 7: rejoin — Bob leaves, then rejoins; membership history is kept
+    --             (20260622160000: group_removed rows are NOT deleted on rejoin).
     UPDATE public.group_members
     SET is_active = false, left_at = now()
     WHERE group_id = v_group AND user_id = v_bob;
@@ -171,14 +171,14 @@ BEGIN
 
     SELECT COUNT(*) INTO v_count FROM activity_events
     WHERE kind = 'group_removed' AND user_id = v_bob;
-    IF v_count <> 0 THEN
-        RAISE EXCEPTION 'Case 7b failed: rejoin did not clear group_removed (% rows left)', v_count;
+    IF v_count <> 1 THEN
+        RAISE EXCEPTION 'Case 7b failed: rejoin should keep leave history (% group_removed rows)', v_count;
     END IF;
 
     SELECT COUNT(*) INTO v_count FROM activity_events
     WHERE kind = 'group_added' AND user_id = v_bob;
-    IF v_count <> 1 THEN
-        RAISE EXCEPTION 'Case 7c failed: rejoin produced % group_added rows', v_count;
+    IF v_count <> 2 THEN
+        RAISE EXCEPTION 'Case 7c failed: rejoin should add a second group_added (got %)', v_count;
     END IF;
 
     -- ---- CASE 8: get_activity_unread_count excludes message_posted ---

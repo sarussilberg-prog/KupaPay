@@ -42,6 +42,7 @@ import {
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
+import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
 
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
@@ -49,9 +50,11 @@ const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 type PlanKey = 'monthly' | 'yearly' | 'trip_pass';
 
-function storePriceString(pkg: PurchasesPackageLike | null | undefined): string | null {
-    const value = pkg?.product.priceString?.trim();
-    return value ? value : null;
+function planPrice(
+    pkg: PurchasesPackageLike | null | undefined,
+    plan: 'monthly' | 'yearly' | 'tripPass',
+): string | null {
+    return paywallDisplayPrice(pkg, plan);
 }
 
 function subscriptionPeriodKey(pkg: PurchasesPackageLike | null): string {
@@ -143,8 +146,13 @@ export function ProPaywallContent({
         return packages.tripPass;
     }, [packages, selected]);
 
-    const selectedPrice = storePriceString(selectedPackage);
-    const tripPassPrice = storePriceString(packages?.tripPass);
+    const selectedPrice =
+        selected === 'monthly'
+            ? planPrice(selectedPackage, 'monthly')
+            : selected === 'yearly'
+              ? planPrice(selectedPackage, 'yearly')
+              : planPrice(selectedPackage, 'tripPass');
+    const tripPassPrice = planPrice(packages?.tripPass, 'tripPass');
 
     const openLegal = useCallback(
         async (slug: 'terms' | 'privacy') => {
@@ -293,14 +301,14 @@ export function ProPaywallContent({
                 <View className="gap-2 mb-3">
                     <PlanPicker
                         label={t('pro.paywall.planMonthly')}
-                        price={storePriceString(packages?.monthly)}
+                        price={planPrice(packages?.monthly, 'monthly')}
                         selected={selected === 'monthly'}
                         onPress={() => setSelected('monthly')}
                         testID="paywall-pick-monthly"
                     />
                     <PlanPicker
                         label={t('pro.paywall.planYearly')}
-                        price={storePriceString(packages?.annual)}
+                        price={planPrice(packages?.annual, 'yearly')}
                         selected={selected === 'yearly'}
                         onPress={() => setSelected('yearly')}
                         testID="paywall-pick-yearly"

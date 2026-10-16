@@ -90,4 +90,18 @@ describe('FriendGroupBalancesSheet weighted net header', () => {
         expect(getByText('ILS')).toBeTruthy();
         expect(getByText('USD')).toBeTruthy();
     });
+
+    it('shows settle-all footer when cross-group balance is open', () => {
+        const { getByTestId } = render(
+            <FriendGroupBalancesSheet
+                visible
+                friend={friend}
+                currentUserId="u-me"
+                defaultCurrency="ILS"
+                onClose={() => {}}
+                onSelectGroup={() => {}}
+            />,
+        );
+        expect(getByTestId('friend-settle-all')).toBeTruthy();
+    });
 });

@@ -7,8 +7,10 @@
 import {
     buildInviteUrl,
     buildPublicGroupBalanceUrl,
+    buildExpenseShareUrl,
     buildSettleReminderUrl,
     buildWhatsAppShareUrl,
+    type Expense,
     type GroupWithMembers,
 } from '@cost-share/shared';
 export { buildInviteUrl, buildPublicGroupBalanceUrl, buildSettleReminderUrl };
@@ -74,6 +76,23 @@ export async function shareFriendInvite(): Promise<void> {
     const message = buildFriendInviteMessage(user.name, url);
     await openShare(message);
     void captureProductEvent('invite_sent', { kind: 'friend' });
+}
+
+export function buildExpenseShareMessage(expense: Pick<Expense, 'description' | 'amount' | 'currency'>, url: string): string {
+    return i18n.t('expenses.shareLinkMessage', {
+        description: expense.description,
+        amount: expense.amount,
+        currency: expense.currency,
+        url,
+    });
+}
+
+export async function shareExpenseLink(expense: Expense): Promise<void> {
+    if (!expense.shareToken) throw new Error('expense_share_token_unavailable');
+    const url = buildExpenseShareUrl(expense.shareToken);
+    const message = buildExpenseShareMessage(expense, url);
+    await openShare(message);
+    void captureProductEvent('expense_share_sent', { group_id: expense.groupId });
 }
 
 export async function shareGroupInvite(groupId: string): Promise<void> {

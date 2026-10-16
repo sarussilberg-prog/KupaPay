@@ -1,0 +1,49 @@
+{
+  "name": "KupaPay MAU (1000 epic)",
+  "description": "Import reference for PostHog UI (#422). Create insights manually from these specs.",
+  "tiles": [
+    {
+      "name": "DAU",
+      "insight": { "kind": "Trends", "event": "app_open", "math": "dau", "interval": "day", "breakdown": "properties.platform" }
+    },
+    {
+      "name": "WAU",
+      "insight": { "kind": "Trends", "event": "app_open", "math": "weekly_active", "interval": "week", "breakdown": "properties.platform" }
+    },
+    {
+      "name": "MAU",
+      "insight": { "kind": "Trends", "event": "app_open", "math": "monthly_active", "interval": "month", "breakdown": "properties.platform" }
+    },
+    {
+      "name": "North star groups (month)",
+      "insight": { "kind": "SQL", "file": "posthog-growth-queries.hogql", "note": "north_star_groups query" }
+    },
+    {
+      "name": "Activation funnel",
+      "insight": {
+        "kind": "Funnel",
+        "steps": ["signup", "group_created", "expense_added"],
+        "conversionWindowDays": 14,
+        "breakdown": "properties.platform"
+      }
+    },
+    {
+      "name": "Invite funnel",
+      "insight": {
+        "kind": "Funnel",
+        "steps": ["invite_sent", "invite_accepted", "expense_added"],
+        "conversionWindowDays": 14,
+        "breakdown": "properties.platform"
+      }
+    },
+    {
+      "name": "Paywall funnel",
+      "insight": {
+        "kind": "Funnel",
+        "steps": ["paywall_view", "trial_start", "purchase_completed"],
+        "conversionWindowDays": 30,
+        "breakdown": "properties.platform"
+      }
+    }
+  ]
+}

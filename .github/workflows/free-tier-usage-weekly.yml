@@ -1,0 +1,26 @@
+name: Free-tier usage weekly
+
+on:
+  schedule:
+    # Tuesday 09:00 UTC — usage headroom (#426)
+    - cron: '0 9 * * 2'
+  workflow_dispatch:
+
+jobs:
+  usage-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check configured provider quotas
+        env:
+          FREE_TIER_SENTRY_AUTH_TOKEN: ${{ secrets.FREE_TIER_SENTRY_AUTH_TOKEN }}
+          FREE_TIER_SENTRY_ORG: ${{ secrets.FREE_TIER_SENTRY_ORG }}
+          FREE_TIER_POSTHOG_PERSONAL_API_KEY: ${{ secrets.FREE_TIER_POSTHOG_PERSONAL_API_KEY }}
+          FREE_TIER_POSTHOG_PROJECT_ID: ${{ secrets.FREE_TIER_POSTHOG_PROJECT_ID }}
+          FREE_TIER_POSTHOG_HOST: ${{ secrets.FREE_TIER_POSTHOG_HOST }}
+        run: |
+          node cost-share-app/scripts/check-free-tier-usage.mjs | tee "$GITHUB_STEP_SUMMARY"

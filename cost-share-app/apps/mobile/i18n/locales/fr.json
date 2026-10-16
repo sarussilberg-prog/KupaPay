@@ -245,6 +245,8 @@
     },
     "groups": {
         "title": "Groupes",
+        "listTitle": "Mes groupes",
+        "newGroupCta": "Nouveau groupe",
         "createGroup": "Créer un groupe",
         "editGroup": "Modifier le groupe",
         "favorite": {
@@ -257,6 +259,12 @@
         },
         "noGroups": "Aucun groupe pour l'instant",
         "noGroupsMessage": "Créez votre premier groupe pour commencer à partager les dépenses",
+        "demo": {
+            "try": "Essayer un groupe démo",
+            "created": "Groupe démo prêt — voyez comment ça marche",
+            "alreadyExists": "Vous avez déjà le groupe démo",
+            "error": "Impossible de créer le groupe démo"
+        },
         "offlineMessage": "Nous ne pouvons pas charger vos groupes pour le moment. Ils apparaîtront ici automatiquement une fois que vous serez de nouveau en ligne.",
         "groupName": "Nom du groupe",
         "enterGroupName": "Entrez le nom du groupe",
@@ -393,6 +401,9 @@
             "showMore": "Afficher {{count}} de plus",
             "showLess": "Afficher moins"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} dans d'autres devises"
+        },
         "hero": {
             "spentTogether": "Dépensé ensemble",
             "leftToSettle": "Reste à régler"
@@ -405,8 +416,8 @@
             "youOweCaption": "Vous devez",
             "owedToYou": "On vous doit {{amount}}",
             "owedToYouCaption": "On vous doit",
-            "moreCurrencies": "{{plusCount}} devises",
-            "moreCurrencies_one": "{{plusCount}} devise",
+            "moreCurrencies": "{{count}} devises",
+            "moreCurrencies_one": "{{count}} devise",
             "updatedAgo": "Mis à jour {{when}}",
             "balanceUnavailable": "Solde indisponible hors ligne"
         },
@@ -547,12 +558,24 @@
             "searchPlaceholder": "Rechercher des amis",
             "noSearchResults": "Aucun ami ne correspond à votre recherche.",
             "mutualHint": "Vous ne voyez que les amis que vous vous êtes mutuellement ajoutés.",
-            "missingSomeoneCta": "Vous ne les trouvez pas ? Ajoutez des amis"
+            "missingSomeoneCta": "Vous ne les trouvez pas ? Ajoutez des amis",
+            "addGuestTitle": "Pas encore de compte ?",
+            "addGuestPlaceholder": "Nom de l'ami",
+            "addGuestButton": "Ajouter",
+            "guestAddError": "Impossible d'ajouter le membre provisoire",
+            "guestAdded": "{{name}} ajouté — il pourra se réclamer à l'inscription"
         },
         "memberCount_one": "{{count}} personne",
         "memberCount_other": "{{count}} personnes",
         "memberCount_two": "{{count}} personnes",
-        "memberCount_many": "{{count}} personnes"
+        "memberCount_many": "{{count}} personnes",
+        "monthlyBills": {
+            "title": "Factures du mois",
+            "summary": "{{count}} dépenses · {{total}} {{currency}} ce cycle",
+            "cycleDay": "Le cycle commence le {{day}} de chaque mois",
+            "automationPro": "Automatiser les factures récurrentes avec Pro",
+            "automationActive": "Automatisation Pro disponible pour ce groupe"
+        }
     },
     "expenses": {
         "title": "Dépenses",
@@ -588,6 +611,10 @@
         "recentExpenses": "Dépenses récentes",
         "deleteExpense": "Supprimer la dépense",
         "deleteExpenseConfirm": "Voulez-vous vraiment supprimer cette dépense ?",
+        "shareLink": "Partager le lien de la dépense",
+        "shareLinkMessage": "{{description}} — {{currency}} {{amount}} sur KupaPay : {{url}}",
+        "shareLinkInvalid": "Ce lien de dépense n'est plus disponible",
+        "shareLinkOpenApp": "Connectez-vous et ouvrez le groupe pour voir la dépense",
         "expenseCreated": "Dépense ajoutée avec succès",
         "expenseUpdated": "Dépense mise à jour avec succès",
         "expenseDeleted": "Dépense supprimée avec succès",
@@ -830,7 +857,19 @@
             },
             "loading": "Chargement des erreurs…",
             "empty": "Aucune erreur sur cette période",
-            "failed": "Échec du chargement. Tirez pour réessayer.",
+            "failed": "Impossible de charger les erreurs",
+            "failedHint": "Tirez vers le bas pour réessayer.",
+            "failedReasons": {
+                "forbidden": "Le serveur ne vous reconnaît pas comme administrateur de l’application.",
+                "admin_check_failed": "Impossible de vérifier le statut admin : {{detail}}",
+                "sentry_not_configured": "Secrets Sentry manquants sur admin-sentry-proxy : {{missing}}",
+                "sentry_client_error": "Sentry a rejeté la requête. Vérifiez SENTRY_API_TOKEN, SENTRY_ORG et les slugs de projet (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "Erreur serveur Sentry. Réessayez dans un instant.",
+                "sentry_unreachable": "Impossible de joindre Sentry : {{detail}}",
+                "invoke_failed": "Échec de l’appel Edge Function : {{detail}}",
+                "missing_authorization": "Session expirée — reconnectez-vous et rouvrez le portail admin.",
+                "unknown": "Erreur inconnue. Tirez pour réessayer ou consultez les logs admin-sentry-proxy."
+            },
             "occurrences": "{{count}} fois",
             "occurrences_one": "{{count}} fois",
             "affectedUsers": "{{count}} utilisateurs concernés",
@@ -945,6 +984,7 @@
         },
         "noActivity": "Aucune activité pour le moment",
         "noActivityMessage": "Vos dépenses récentes, remboursements et messages de groupe apparaîtront ici",
+        "createGroupCta": "Créer un groupe",
         "noSearchResults": "Aucune activité correspondante",
         "noSearchResultsMessage": "Aucun résultat ne correspond à votre recherche. Essayez un autre terme ou effacez la recherche.",
         "expense": "Dépense",
@@ -1136,7 +1176,26 @@
             "alreadyMember": "Vous êtes déjà membre de ce groupe",
             "selfInvite": "C'est votre propre lien d'invitation",
             "invalid": "Ce lien d'invitation n'est plus valide"
+        },
+        "guestClaim": {
+            "title": "Ajouté·e par votre nom ?",
+            "subtitle": "Choisissez votre nom pour garder les bons soldes.",
+            "confirm": "C'est moi",
+            "skip": "Ce n'est pas moi",
+            "success": "Vos dépenses partagées sont liées à votre compte",
+            "error": "Impossible de lier ce nom"
         }
+    },
+    "shareSummary": {
+        "title": "Partager le résumé du groupe",
+        "share": "Partager l'image",
+        "hideAmounts": "Masquer les montants",
+        "hiddenAmount": "***",
+        "allSettled": "Tout est réglé ✓",
+        "balancesSnapshot": "Aperçu des soldes",
+        "debtLine": "{{from}} à {{to}}",
+        "watermark": "Partagez les dépenses sur {{url}}",
+        "fallback": "Découvrez notre groupe « {{groupName}} » sur KupaPay"
     },
     "dashboard": {
         "appTitle": "KupaPay",
@@ -1237,6 +1296,12 @@
         "categoryFriends": "Demandes d'ami",
         "categoryGroups": "Groupes",
         "categoryReminders": "Rappels de solde",
+        "emailTitle": "E-mail",
+        "emailMaster": "E-mails produit",
+        "lifecycleEmail": "Bienvenue, conseils et relance",
+        "weeklyDigestTitle": "Résumé hebdo",
+        "weeklyDigestPush": "Résumé hebdo (push)",
+        "weeklyDigestEmail": "Résumé hebdo (e-mail)",
         "quietHoursTitle": "Heures calmes",
         "quietHoursEnable": "Respecter les heures calmes",
         "quietHoursSummary": "Pas de push entre {{start}}:00 et {{end}}:00 ({{tz}}).",
@@ -1397,6 +1462,13 @@
             "title": "Fin prochaine de l’essai KupaPay Pro",
             "body": "Votre essai gratuit KupaPay Pro se termine dans deux jours. Vous ne souhaitez pas continuer ? Annulez dans Réglages."
         },
+        "trialLifecycle": {
+            "day1": { "title": "Bienvenue sur Pro" },
+            "day10": { "title": "Plus que 4 jours d’essai" },
+            "day13": { "title": "Pro se renouvelle demain" },
+            "disclosure": "Le paiement commence après l’essai sauf annulation dans Réglages → Gérer l’abonnement (App Store / Google Play).",
+            "manage": "Gérer l’abonnement"
+        },
         "includedTripPass": {
             "title": "Trip Pass inclus",
             "body": "Votre abonnement annuel Pro inclut un Trip Pass. Activez Pro pour tous les membres de ce groupe pendant 30 jours.",
@@ -1471,5 +1543,24 @@
         "body": "Cette version de KupaPay n’est plus prise en charge. Installez la dernière mise à jour depuis le store pour continuer.",
         "versionLine": "Votre version : {{current}} · Requise : {{required}} ou plus récente",
         "cta": "Ouvrir le store"
+    },
+    "referral": {
+        "title": "Invitez des amis, gagnez Pro",
+        "settingsRow": "Récompenses de parrainage",
+        "body": "Partagez votre lien. Quand un ami rejoint un groupe et ajoute une dépense, vous recevez un mois Pro gratuit.",
+        "shareCta": "Partager le lien",
+        "copyLink": "Copier le lien",
+        "linkCopied": "Lien copié",
+        "capHint": "{{count}} sur {{cap}} mois gratuits cette année",
+        "statusTitle": "Vos parrainages",
+        "empty": "Aucun parrainage — partagez votre lien.",
+        "refresh": "Actualiser",
+        "disabled": "Les récompenses ne sont pas disponibles dans cette version.",
+        "status": {
+            "pending": "En attente de la première dépense de groupe",
+            "qualified": "Éligible — récompense en cours",
+            "rewarded": "Mois Pro accordé",
+            "rejected": "Récompense impossible"
+        }
     }
 }

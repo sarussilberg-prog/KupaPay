@@ -8,10 +8,11 @@ import { handleRequest, type ProxyEnv } from './handler.ts';
 const baseEnv: ProxyEnv = {
     SUPABASE_URL: 'https://example.supabase.co',
     SUPABASE_ANON_KEY: 'anon-key',
+    SENTRY_API_BASE_URL: '',
     SENTRY_API_TOKEN: 'sentry-token',
-    SENTRY_ORG: 'kupapay-hb',
-    SENTRY_PROJECT_DEV: 'kupapay-mobile-dev',
-    SENTRY_PROJECT_PROD: 'kupapay-mobile-prod',
+    SENTRY_ORG: 'kupay-hb',
+    SENTRY_PROJECT_DEV: 'copay-mobile-dev',
+    SENTRY_PROJECT_PROD: 'copay-mobile-prod',
 };
 
 // Wraps a test body with a patched globalThis.fetch that answers Supabase's
@@ -121,7 +122,7 @@ Deno.test(
         assertEquals(calls.length, 1);
         assertStringIncludes(
             calls[0].url,
-            'sentry.io/api/0/projects/kupapay-hb/kupapay-mobile-dev/issues/',
+            'de.sentry.io/api/0/projects/kupay-hb/copay-mobile-dev/issues/',
         );
         assertStringIncludes(calls[0].url, 'environment=development');
         assertStringIncludes(calls[0].url, 'limit=10');
@@ -148,7 +149,8 @@ Deno.test(
             body: JSON.stringify({ action: 'list_issues', environment: 'prod' }),
         });
         await handleRequest(req, baseEnv, sentryFetch);
-        assertStringIncludes(captured[0], '/projects/kupapay-hb/kupapay-mobile-prod/issues/');
+        assertStringIncludes(captured[0], '/projects/kupay-hb/copay-mobile-prod/issues/');
+        assertStringIncludes(captured[0], 'de.sentry.io/api/0/');
         assertStringIncludes(captured[0], 'environment=production');
     }),
 );
@@ -170,6 +172,52 @@ Deno.test(
         assertEquals(json.error, 'sentry_server_error');
         assertEquals(json.upstreamStatus, 503);
     }),
+);
+
+Deno.test(
+    'missing SENTRY_API_TOKEN returns sentry_not_configured',
+    withSupabaseAdmin(true, async () => {
+        const env: ProxyEnv = { ...baseEnv, SENTRY_API_TOKEN: '' };
+        const req = new Request('https://x/admin-sentry-proxy', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer jwt', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list_issues', environment: 'dev' }),
+        });
+        const res = await handleRequest(req, env);
+        assertEquals(res.status, 503);
+        const json = await res.json();
+        assertEquals(json.error, 'sentry_not_configured');
+        assertEquals(json.missing.includes('SENTRY_API_TOKEN'), true);
+    }),
+);
+
+Deno.test(
+    'is_app_admin RPC failure returns admin_check_failed',
+    async () => {
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = ((input: RequestInfo | URL): Promise<Response> => {
+            const url = typeof input === 'string' ? input : input.toString();
+            if (url.includes('/rest/v1/rpc/is_app_admin')) {
+                return Promise.resolve(
+                    new Response(JSON.stringify({ message: 'rpc down' }), { status: 500 }),
+                );
+            }
+            return originalFetch(input as RequestInfo);
+        }) as typeof fetch;
+        try {
+            const req = new Request('https://x/admin-sentry-proxy', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer jwt', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'list_issues', environment: 'dev' }),
+            });
+            const res = await handleRequest(req, baseEnv);
+            assertEquals(res.status, 503);
+            const json = await res.json();
+            assertEquals(json.error, 'admin_check_failed');
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    },
 );
 
 Deno.test(

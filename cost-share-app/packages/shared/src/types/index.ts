@@ -29,6 +29,8 @@ export interface User {
     defaultCurrency: string;  // 'USD', 'ILS', 'EUR', etc.
     language: Language;
     isActive: boolean;  // Soft-delete flag — false means the user has deleted their account
+    /** Placeholder member without an auth account (#395). */
+    isGuest?: boolean;
     isAdmin: boolean;   // App-admin flag (gates admin portal entry in Settings) — set by hydrateCurrentUserProfile via is_app_admin() RPC
     createdAt: Date;
     updatedAt: Date;
@@ -57,6 +59,9 @@ export interface Group {
     isActive: boolean;  // Soft delete flag
     /** Last expense, settlement, or message activity (auto-maintained in DB). */
     lastActivityAt?: Date;
+    /** Monthly roommates/bills cycle view (#407). */
+    monthlyBillsMode?: boolean;
+    billingCycleDay?: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -97,6 +102,8 @@ export interface Expense {
      */
     splitMode?: ExpenseSplitMode;
     isDeleted: boolean;  // Soft delete flag
+    /** Public web preview token (/e/<token>) for sharing outside the group (#401). */
+    shareToken?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -549,6 +556,8 @@ export interface GroupMemberLite {
     displayName: string;
     avatarUrl?: string;
     isActive: boolean;
+    /** True for name-only placeholder members (#395). */
+    isGuest?: boolean;
 }
 
 /** Group enriched with its active members. */
@@ -816,4 +825,5 @@ export type Profile = User;
  */
 export type PendingInvite =
     | { kind: 'friend'; token: string }
-    | { kind: 'group'; token: string };
+    | { kind: 'group'; token: string }
+    | { kind: 'expenseShare'; token: string };

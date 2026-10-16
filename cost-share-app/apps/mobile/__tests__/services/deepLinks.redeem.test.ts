@@ -17,6 +17,9 @@ jest.mock('../../lib/handleError', () => ({ handleError: jest.fn() }));
 jest.mock('../../store', () => ({
     useAppStore: { getState: () => ({ setPendingNavigation: jest.fn() }) },
 }));
+jest.mock('../../services/groups.service', () => ({
+    listClaimableGuestMembers: jest.fn().mockResolvedValue([]),
+}));
 
 describe('handleInviteLink concurrency dedup', () => {
     beforeEach(() => jest.clearAllMocks());

@@ -42,7 +42,7 @@ Deno.serve(async (req: Request) => {
     // cannot render a landing page or run JS here. A 302 is content-type independent
     // and survives both the gateway and the Vercel proxy, so we bounce the browser
     // to the marketing site, which owns the "no app installed" story.
-    if (/^\/(i|g|sr)\//.test(path)) {
+    if (/^\/(i|g|sr|e)\//.test(path)) {
         return redirectToSite();
     }
 

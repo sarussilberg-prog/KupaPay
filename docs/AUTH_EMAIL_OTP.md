@@ -98,3 +98,21 @@ Implementation:
 | `EXPO_PUBLIC_ENABLE_EMAIL_AUTH` | `true` (in `supabase-public.development.defaults`) | Set `true` in Vercel Production + EAS when ready |
 
 No service-role key in the client.
+
+---
+
+## Lifecycle & digest email (#404 / #405)
+
+Product lifecycle and weekly digest emails use the **same SMTP provider** as Auth (recommended: [Resend](https://resend.com) via **Authentication → SMTP**).
+
+**Edge Function:** `email-lifecycle-dispatch` sends via the **Resend HTTP API** when these Supabase function secrets are set:
+
+| Secret | Purpose |
+|--------|---------|
+| `RESEND_API_KEY` | Same key as custom SMTP / Resend dashboard |
+| `TRANSACTIONAL_EMAIL_FROM` | Optional sender (default `KupaPay <noreply@kupa-pay.com>`) |
+| `TRANSACTIONAL_EMAIL_ENABLED` | Set `false` to disable sends (cron still runs; marks skipped) |
+| `EMAIL_LIFECYCLE_WEBHOOK_SECRET` | Cron `x-webhook-secret` |
+| `PUBLIC_WEB_ORIGIN` | Unsubscribe links (default `https://kupa-pay.com`) |
+
+If `RESEND_API_KEY` is unset, lifecycle email is **built but not sent** — preferences and unsubscribe still work.

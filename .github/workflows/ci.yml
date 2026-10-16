@@ -50,20 +50,27 @@ jobs:
     name: Branch up to date with dev
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Require latest origin/dev
+      - name: Sync with origin/dev when behind (update-branch)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          git fetch origin dev --quiet
-          behind="$(git rev-list --count HEAD..origin/dev)"
-          if [[ "$behind" -gt 0 ]]; then
-            echo "::error::This branch is ${behind} commit(s) behind origin/dev. Merge or rebase latest dev so migration and CI checks run against current integration head."
+          out="$(bash cost-share-app/scripts/gh-pr-sync-with-dev.sh "$PR_NUMBER" "$REPO" "$PR_HEAD_SHA")"
+          echo "$out"
+          if grep -q '^defer_merge=true$' <<<"$out"; then
+            echo "::error::Branch sync queued — this run is stale; required checks will re-run on the updated merge commit."
             exit 1
           fi
-          echo "✅ Branch includes latest origin/dev"
 
   setup:
     name: Install dependencies
@@ -167,6 +174,29 @@ jobs:
           path: cost-share-app/node_modules
       - run: test -x node_modules/.bin/jest || npm ci
       - run: npm test --workspace=@cost-share/mobile -- --passWithNoTests --ci
+
+  coverage-ratchet:
+    name: Coverage ratchet
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/jest || npm ci
+      - run: bash scripts/ci-coverage-check.sh
 
   legal-locale-parity:
     name: Legal locale parity
@@ -302,6 +332,17 @@ jobs:
       - uses: actions/checkout@v4
       - run: bash scripts/ci-no-merge-conflicts.sh
 
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   expo-mobile-config:
     name: Expo mobile config
     needs: [ci-paths, setup]
@@ -344,6 +385,12 @@ jobs:
       - name: Lint migration filenames
         working-directory: cost-share-app
         run: bash scripts/supabase-lint-migration-filenames.sh
+      - name: Migration chain (order + newer than base)
+        working-directory: cost-share-app
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: bash scripts/supabase-migration-chain-check.sh
       - name: Unique prefixes (PR tree)
         working-directory: cost-share-app
         run: bash scripts/supabase-unique-migration-versions.sh
@@ -352,6 +399,12 @@ jobs:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
         run: bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
+
+      - name: Destructive SQL guard (new migrations)
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: bash cost-share-app/scripts/supabase-destructive-migration-check.sh
 
   ci-performance:
     name: CI performance
@@ -437,6 +490,7 @@ jobs:
         legal-locale-parity,
         deno-edge-gate,
         no-merge-conflicts,
+        secret-scan,
         expo-mobile-config,
         migration-versions,
         ci-performance,
@@ -468,6 +522,7 @@ jobs:
           check ci-paths "${{ needs.ci-paths.result }}"
           check migration-versions "${{ needs.migration-versions.result }}"
           check no-merge-conflicts "${{ needs.no-merge-conflicts.result }}"
+          check secret-scan "${{ needs.secret-scan.result }}"
           check deno-edge-gate "${{ needs.deno-edge-gate.result }}"
 
           if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "dev" ]]; then
@@ -555,50 +610,43 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Re-check migrations against latest origin/dev (pre-merge)
+      - name: Sync PR branch + migration merge guard
+        id: sync_dev
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_BASE_REF: dev
         run: |
           set -euo pipefail
           git fetch origin dev main --quiet
-          behind="$(git rev-list --count "${PR_HEAD_SHA}"..origin/dev)"
-          if [[ "$behind" -gt 0 ]]; then
-            echo "::error::origin/dev advanced during CI — update branch and re-run checks"
-            exit 1
+          sync_out="$(bash cost-share-app/scripts/gh-pr-sync-with-dev.sh "$PR_NUMBER" "$REPO" "$PR_HEAD_SHA")"
+          echo "$sync_out"
+          if grep -q '^defer_merge=true$' <<<"$sync_out"; then
+            echo "defer=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
+          echo "defer=false" >> "$GITHUB_OUTPUT"
 
-      - name: Squash-merge the PR
+      - name: Enable GitHub native auto-merge (squash)
+        if: steps.sync_dev.outputs.defer != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-        run: gh pr merge "$PR_NUMBER" --squash --repo "$REPO" --auto
-
-      - uses: actions/checkout@v4
-        with:
-          ref: dev
-          fetch-depth: 0
-
-      - name: Bump dev prerelease + changelog
-        if: >-
-          !startsWith(github.head_ref, 'chore/version-bump/') &&
-          !startsWith(github.head_ref, 'chore/dev-version/')
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO"
+          echo "✅ Auto-merge enabled — GitHub merges when required checks pass on current head"
 
-          git fetch origin dev
-          git checkout dev
-          git pull origin dev
-
-          node cost-share-app/scripts/bump-dev-prerelease.mjs
-          git add cost-share-app/packages/shared/version.json CHANGELOG.md
-          git commit -m "chore: bump dev prerelease [skip ci]"
-          git push origin dev
-          echo "✅ Dev prerelease bumped (push skipped CI/Vercel via [skip ci])"
+      - name: Wait for deferred branch sync
+        if: steps.sync_dev.outputs.defer == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO" || true
+          echo "Auto-merge armed; fresh CI run will complete merge after update-branch settles."

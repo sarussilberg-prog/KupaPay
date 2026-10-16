@@ -9,6 +9,7 @@ export const PRODUCT_ANALYTICS_FUNNEL_EVENTS = [
     'group_created',
     'expense_added',
     'invite_sent',
+    'expense_share_sent',
     'invite_accepted',
     'settle_up',
     'paywall_view',
@@ -46,6 +47,8 @@ export const PRODUCT_ANALYTICS_EXTENDED_EVENTS = [
     'trip_budget_configured',
     'trip_budget_viewed',
     'receipt_scan_applied',
+    'pro_trial_nudge_shown',
+    'pro_trial_nudge_dismissed',
 ] as const;
 
 export type ProductAnalyticsExtendedEvent = (typeof PRODUCT_ANALYTICS_EXTENDED_EVENTS)[number];

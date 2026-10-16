@@ -1,4 +1,9 @@
-import { hasProFromTimestamps, isProPerkUnlocked, shouldSkipAdGate } from '../hasPro';
+import {
+    hasProFromTimestamps,
+    isProPerkUnlocked,
+    resolveEffectiveHasPro,
+    shouldSkipAdGate,
+} from '../hasPro';
 
 describe('hasProFromTimestamps', () => {
     const now = new Date('2026-06-01T12:00:00.000Z');
@@ -29,6 +34,25 @@ describe('hasProFromTimestamps', () => {
                 now,
             ),
         ).toBe(false);
+    });
+});
+
+describe('resolveEffectiveHasPro', () => {
+    it('honors force_pro over missing subscription', () => {
+        expect(
+            resolveEffectiveHasPro({ hasPro: false, adminProViewMode: 'force_pro' }),
+        ).toBe(true);
+    });
+
+    it('honors force_free over active subscription timestamps on server', () => {
+        expect(
+            resolveEffectiveHasPro({ hasPro: true, adminProViewMode: 'force_free' }),
+        ).toBe(false);
+    });
+
+    it('uses hasPro in real mode', () => {
+        expect(resolveEffectiveHasPro({ hasPro: true, adminProViewMode: 'real' })).toBe(true);
+        expect(resolveEffectiveHasPro({ hasPro: false, adminProViewMode: 'real' })).toBe(false);
     });
 });
 

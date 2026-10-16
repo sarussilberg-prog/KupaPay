@@ -8,6 +8,9 @@ type PageProps = Readonly<{
     params: Promise<{ locale: string }>;
 }>;
 
+/** ISR: marketing landings revalidate every 5 minutes (CDN-friendly). */
+export const revalidate = 300;
+
 export function generateStaticParams() {
     return SUPPORTED_LANGUAGES.map((locale) => ({ locale }));
 }

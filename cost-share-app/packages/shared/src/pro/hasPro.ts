@@ -1,8 +1,15 @@
 /** Client/server-shared Pro entitlement evaluation (timestamps from Supabase). */
 
+export type AdminProViewMode = 'real' | 'force_pro' | 'force_free';
+
 export interface ProStatusTimestamps {
     individualProUntil?: Date | string | null;
     groupPassUntil?: Date | string | null;
+}
+
+export interface ProEntitlementInput {
+    hasPro?: boolean;
+    adminProViewMode?: AdminProViewMode;
 }
 
 function toMs(v: Date | string | null | undefined): number | null {
@@ -10,6 +17,14 @@ function toMs(v: Date | string | null | undefined): number | null {
     const d = v instanceof Date ? v : new Date(v);
     const ms = d.getTime();
     return Number.isFinite(ms) ? ms : null;
+}
+
+/** Honors admin view override (force_pro / force_free) before real entitlements. */
+export function resolveEffectiveHasPro(input: ProEntitlementInput | null | undefined): boolean {
+    if (!input) return false;
+    if (input.adminProViewMode === 'force_pro') return true;
+    if (input.adminProViewMode === 'force_free') return false;
+    return input.hasPro === true;
 }
 
 export function hasProFromTimestamps(

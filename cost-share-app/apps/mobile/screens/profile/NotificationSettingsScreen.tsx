@@ -61,6 +61,43 @@ export function NotificationSettingsScreen() {
                         value={prefs.groupsPush} disabled={masterOff} onValueChange={(v) => patch({ groupsPush: v })} />
                 </SettingsSection>
 
+                <SettingsSection title={t('notifications.emailTitle')}>
+                    <SettingsToggleRow
+                        iconName="mail-outline"
+                        label={t('notifications.emailMaster')}
+                        value={prefs.emailEnabled}
+                        onValueChange={(v) => patch({ emailEnabled: v, lifecycleEmailEnabled: v ? prefs.lifecycleEmailEnabled : false })}
+                        testID="pref-email-master"
+                    />
+                    <SettingsToggleRow
+                        iconName="paper-plane-outline"
+                        label={t('notifications.lifecycleEmail')}
+                        value={prefs.lifecycleEmailEnabled}
+                        disabled={!prefs.emailEnabled}
+                        onValueChange={(v) => patch({ lifecycleEmailEnabled: v })}
+                        testID="pref-lifecycle-email"
+                    />
+                    <SettingsToggleRow
+                        iconName="calendar-outline"
+                        label={t('notifications.weeklyDigestEmail')}
+                        value={prefs.weeklyDigestEmail}
+                        disabled={!prefs.emailEnabled}
+                        onValueChange={(v) => patch({ weeklyDigestEmail: v })}
+                        testID="pref-weekly-digest-email"
+                    />
+                </SettingsSection>
+
+                <SettingsSection title={t('notifications.weeklyDigestTitle')}>
+                    <SettingsToggleRow
+                        iconName="stats-chart-outline"
+                        label={t('notifications.weeklyDigestPush')}
+                        value={prefs.weeklyDigestPush}
+                        disabled={masterOff}
+                        onValueChange={(v) => patch({ weeklyDigestPush: v })}
+                        testID="pref-weekly-digest-push"
+                    />
+                </SettingsSection>
+
                 <SettingsSection title={t('notifications.quietHoursTitle')}>
                     <SettingsToggleRow
                         iconName="moon-outline"

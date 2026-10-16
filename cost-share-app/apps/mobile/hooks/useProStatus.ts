@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchMyProStatus, type AdminProViewMode, type MyProStatus } from '../services/proEntitlements.service';
 import { queryKeys } from './queries/keys';
+import { isProPerkUnlocked, resolveEffectiveHasPro } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 import { useAppStore } from '../store';
 
@@ -23,10 +24,16 @@ export function useProStatus(groupId?: string | null) {
     });
 
     const mode = query.data?.adminProViewMode ?? 'real';
+    const hasPro = resolveEffectiveHasPro({
+        hasPro: query.data?.hasPro,
+        adminProViewMode: mode,
+    });
+    const proPerkUnlocked = isProPerkUnlocked(hasPro, KUPAPAY_PRO_ENABLED);
 
     return {
         ...query,
-        hasPro: query.data?.hasPro === true,
+        hasPro,
+        proPerkUnlocked,
         adminProViewMode: mode,
         adminProViewOverrideActive: isAdminProViewOverrideActive(mode),
         adminProViewExpiresAt: query.data?.adminProViewExpiresAt ?? null,

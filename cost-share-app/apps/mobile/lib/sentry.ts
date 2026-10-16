@@ -18,6 +18,8 @@ Sentry.init({
     environment,
     release,
     dist,
+    /** Release Health → crash-free sessions (target ≥99.5%, #427). */
+    enableAutoSessionTracking: true,
     sendDefaultPii: false,
     sampleRate: 1.0,
     tracesSampleRate: sentryTracesSampleRate(environment),

@@ -29,6 +29,7 @@ import { AppIcon } from '../../components/AppIcon';
 import { colors } from '../../theme';
 import { getDisplayName } from '../../lib/userDisplay';
 import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
+import { shareExpenseLink } from '../../services/invite.service';
 
 const categoryEmoji: Record<string, string> = {
     food: '🍕',
@@ -208,6 +209,14 @@ export function ExpenseDetailScreen() {
 
             {/* Actions */}
             <View className="px-4 mb-8 gap-2">
+                <Button
+                    title={t('expenses.shareLink')}
+                    onPress={() => {
+                        if (expense) void shareExpenseLink(expense);
+                    }}
+                    variant="outline"
+                    testID="expense-share-link"
+                />
                 {seriesMeta && !seriesMeta.endedAt ? (
                     <Button
                         title={t('expenses.v2.recurring.stopSeries')}

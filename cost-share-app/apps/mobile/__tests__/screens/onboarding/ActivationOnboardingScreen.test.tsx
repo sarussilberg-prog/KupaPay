@@ -33,6 +33,7 @@ jest.mock('../../../lib/onboardingStorage', () => ({
 jest.mock('../../../lib/productAnalytics', () => ({
     captureProductEvent: jest.fn(),
     trackFirstExpenseAdded: jest.fn(),
+    getProductAnalyticsClient: jest.fn(() => null),
 }));
 jest.mock('../../../lib/invalidateBalanceCaches', () => ({
     invalidateBalanceCaches: jest.fn(),

@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+import { listClaimableGuestMembers } from './groups.service';
 import { INVITE_TOKEN_RE } from '../lib/inviteToken';
 
 export type InviteRedemptionResult =
@@ -25,14 +26,16 @@ export type InviteRedemptionResult =
 export type InviteLink =
     | { kind: 'friend'; token: string }
     | { kind: 'group'; token: string }
+    | { kind: 'expenseShare'; token: string }
     | { kind: 'settleReminder'; token: string }
     | { kind: 'unknown' };
 
 function inviteLinkFromPathname(pathname: string): InviteLink | null {
-    const m = pathname.match(/^\/(i|g|sr)\/([^/?#]+)\/?$/);
+    const m = pathname.match(/^\/(i|g|sr|e)\/([^/?#]+)\/?$/);
     if (!m || !INVITE_TOKEN_RE.test(m[2])) return null;
     if (m[1] === 'i') return { kind: 'friend', token: m[2] };
     if (m[1] === 'g') return { kind: 'group', token: m[2] };
+    if (m[1] === 'e') return { kind: 'expenseShare', token: m[2] };
     return { kind: 'settleReminder', token: m[2] };
 }
 
@@ -70,11 +73,12 @@ function navigateAfterFriendInvite(navigation: NavigationProp<any> | null): void
 function navigateAfterGroupInvite(
     navigation: NavigationProp<any> | null,
     groupId: string,
+    openGuestClaim = false,
 ): void {
     if (navigation) {
         (navigation.navigate as any)('Groups', {
             screen: 'GroupDetail',
-            params: { groupId },
+            params: { groupId, openGuestClaim: openGuestClaim || undefined },
         });
         return;
     }
@@ -113,6 +117,18 @@ async function redeemInviteLink(
     navigation: NavigationProp<any> | null,
     queryClient: QueryClient,
 ): Promise<InviteRedemptionResult | null> {
+    if (link.kind === 'expenseShare') {
+        const { data, error } = await supabase.rpc('get_public_expense_share_page', {
+            p_token: link.token,
+        });
+        if (error || !(data as { ok?: boolean })?.ok) {
+            showAppToast({ type: 'error', titleKey: 'expenses.shareLinkInvalid' });
+            return null;
+        }
+        showInfoToast('expenses.shareLinkOpenApp');
+        return null;
+    }
+
     if (link.kind === 'settleReminder') {
         const { data, error } = await supabase.rpc('resolve_settle_reminder_link', { p_token: link.token });
         if (error) {
@@ -166,7 +182,10 @@ async function redeemInviteLink(
     });
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
     void queryClient.invalidateQueries({ queryKey: ['groups'] });
-    navigateAfterGroupInvite(navigation, payload.group_id);
+    const claimable = !payload.already_member
+        ? await listClaimableGuestMembers(payload.group_id)
+        : [];
+    navigateAfterGroupInvite(navigation, payload.group_id, claimable.length > 0);
     if (!payload.already_member) {
         void captureProductEvent('invite_accepted', { kind: 'group' });
         void trackSecondGroupMemberJoined(payload.group_id);

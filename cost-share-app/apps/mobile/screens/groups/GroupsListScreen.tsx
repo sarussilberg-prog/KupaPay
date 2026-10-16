@@ -11,18 +11,19 @@ import {
     FlatList,
     RefreshControl,
     TouchableOpacity,
-    TextInput,
     ListRenderItem,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { GroupWithMembers } from '@cost-share/shared';
+import { deriveBalanceSummary, GroupWithMembers } from '@cost-share/shared';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
+import { createDemoGroup } from '../../services/groups.service';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
 import { useGroupUnreadCounts } from '../../hooks/queries/useGroupUnreadCounts';
+import { ProTrialLifecycleBanner } from '../../components/pro/ProTrialLifecycleBanner';
 import { prefetchGroupDetail } from '../../hooks/queries/prefetchGroupDetail';
 import { prefetchAddExpensePrerequisitesBatched } from '../../hooks/queries/prefetchAddExpenseForAllGroups';
 import { useSimplifiedDebts } from '../../hooks/useSimplifiedDebts';
@@ -30,7 +31,14 @@ import { useNetworkStatus } from '../../lib/networkStatus';
 import { resolveEmptyStateVariant } from '../../lib/offlineEmptyState';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupCard } from '../../components/GroupCard';
-import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { useAppStore } from '../../store';
+import { useAuthUserId } from '../../hooks/useAuthUserId';
+import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
+import { useProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
+import { collectProfileFxCurrencies } from '../../lib/collectProfileFxCurrencies';
+import { GroupsListHeader } from '../../components/groups/GroupsListHeader';
+import { GroupsListSummaryCard } from '../../components/groups/GroupsListSummaryCard';
 import {
     BalanceState,
     DEFAULT_FILTERS,
@@ -115,6 +123,7 @@ export function GroupsListScreen() {
     // instead of a bare "failed to load".
     const emptyVariant = resolveEmptyStateVariant({ online, hasError: loadError });
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchExpanded, setSearchExpanded] = useState(false);
     const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [archivedExpanded, setArchivedExpanded] = useState(false);
@@ -161,6 +170,35 @@ export function GroupsListScreen() {
     const handleCreateGroup = useCallback(
         () => navigation.navigate('CreateGroup'),
         [navigation],
+    );
+
+    const handleTryDemo = useCallback(() => {
+        void createDemoGroup().then(groupId => {
+            if (groupId) navigation.navigate('GroupDetail', { groupId });
+        });
+    }, [navigation]);
+
+    const currentUser = useAppStore(s => s.currentUser);
+    const authUserId = useAuthUserId() ?? '';
+    const baseCurrency = currentUser?.defaultCurrency ?? 'ILS';
+
+    const rawBalanceSummary = useMemo(
+        () =>
+            simplified && authUserId
+                ? deriveBalanceSummary(simplified, authUserId, baseCurrency)
+                : undefined,
+        [simplified, authUserId, baseCurrency],
+    );
+
+    const fxSymbols = useMemo(
+        () => collectProfileFxCurrencies(rawBalanceSummary, [], baseCurrency),
+        [rawBalanceSummary, baseCurrency],
+    );
+
+    const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
+    const { summary: balanceSummary, conversion } = useProfileBalanceSummary(
+        rawBalanceSummary,
+        ratesQuery,
     );
 
     const availableCurrencies = useMemo(
@@ -236,6 +274,17 @@ export function GroupsListScreen() {
         [renderGroupRow],
     );
 
+    const listSummaryHeader = useMemo(() => {
+        if (groups.length === 0) return null;
+        return (
+            <GroupsListSummaryCard
+                summary={balanceSummary}
+                conversion={conversion}
+                balanceUnknown={balanceUnknown}
+            />
+        );
+    }, [groups.length, balanceSummary, conversion, balanceUnknown]);
+
     const archivedFooter = useMemo(() => {
         if (archivedRows.length === 0) return null;
         return (
@@ -275,67 +324,17 @@ export function GroupsListScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
-            <View className="flex-row items-center px-4 py-2">
-                <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
-                    <AppIcon name="search" size={18} color={colors.gray500} />
-                    <TextInput
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder={t('groups.search.placeholder')}
-                        placeholderTextColor={colors.gray400}
-                        className={[
-                            'flex-1 text-sm text-gray-900 mx-2',
-                            rtlTextClassName(isRtl),
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
-                        autoCorrect={false}
-                        autoCapitalize="none"
-                        returnKeyType="search"
-                        style={resolveCompactTextInputStyle(isRtl)}
-                        testID="groups-search-input"
-                    />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity
-                            onPress={() => setSearchQuery('')}
-                            accessibilityRole="button"
-                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                            <AppIcon
-                                name="close-circle"
-                                size={18}
-                                color={colors.gray400}
-                            />
-                        </TouchableOpacity>
-                    )}
-                </View>
-                <TouchableOpacity
-                    onPress={() => setFiltersOpen(true)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('groups.filters.title')}
-                    className="ml-2 h-9 w-9 items-center justify-center relative"
-                    testID="groups-filter-btn"
-                >
-                    <AppIcon
-                        name="options-outline"
-                        size={22}
-                        color={colors.gray500}
-                    />
-                    {filterActive && (
-                        <View className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
-                    )}
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={handleCreateGroup}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('groups.createGroup')}
-                    className="ml-2 h-9 px-4 items-center justify-center rounded-full bg-primary"
-                    testID="groups-create-btn"
-                >
-                    <Text className="text-sm font-semibold text-white">{t('groups.createGroup')}</Text>
-                </TouchableOpacity>
-            </View>
+        <SafeAreaView className="flex-1 bg-slate-50 dark:bg-gray-900" edges={['top']}>
+            <ProTrialLifecycleBanner />
+            <GroupsListHeader
+                searchQuery={searchQuery}
+                onSearchQueryChange={setSearchQuery}
+                searchExpanded={searchExpanded}
+                onSearchExpandedChange={setSearchExpanded}
+                filterActive={filterActive}
+                onOpenFilters={() => setFiltersOpen(true)}
+                onCreateGroup={handleCreateGroup}
+            />
 
             <View className="flex-1">
                 <FlatList
@@ -351,6 +350,7 @@ export function GroupsListScreen() {
                         paddingHorizontal: 16,
                         paddingBottom: listBottomPadding,
                     }}
+                    ListHeaderComponent={listSummaryHeader}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -378,11 +378,14 @@ export function GroupsListScreen() {
                             />
                         ) : (
                             <EmptyState
+                                illustrationEmoji="🧳"
                                 iconName="people-outline"
                                 title={t('groups.noGroups')}
                                 message={t('groups.noGroupsMessage')}
                                 actionTitle={t('groups.createGroup')}
                                 onAction={handleCreateGroup}
+                                secondaryActionTitle={t('groups.demo.try')}
+                                onSecondaryAction={handleTryDemo}
                             />
                         )
                     }

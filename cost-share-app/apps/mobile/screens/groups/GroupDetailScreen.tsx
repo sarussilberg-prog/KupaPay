@@ -53,11 +53,11 @@ import {
 import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
 import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
-import { isProPerkUnlocked } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
 import { TripBudgetSection } from '../../components/budget/TripBudgetSection';
+import { MonthlyBillsCycleSection } from '../../components/groups/MonthlyBillsCycleSection';
 import { shareGroupBalanceLink, shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
@@ -87,6 +87,7 @@ import { useNetworkStatus } from '../../lib/networkStatus';
 import { EmptyState } from '../../components/EmptyState';
 import { GroupSummaryCard } from '../../components/groupDetail/GroupSummaryCard';
 import { GroupMembersSheet } from '../../components/groupDetail/GroupMembersSheet';
+import { ClaimGuestMembersSheet } from '../../components/guest/ClaimGuestMembersSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedItemRow } from '../../components/FeedItemRow';
 import {
@@ -229,12 +230,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         editSettlementId: editSettlementIdParam,
         openNote: openNoteParam,
         openSettleUp: openSettleUpParam,
+        openGuestClaim: openGuestClaimParam,
     } = route.params as {
         groupId: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
         openNote?: boolean;
         openSettleUp?: boolean;
+        openGuestClaim?: boolean;
     };
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
@@ -319,6 +322,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [composer, setComposer] = useState<ComposerState>({ open: false });
     const [addMembersOpen, setAddMembersOpen] = useState(false);
+    const [guestClaimOpen, setGuestClaimOpen] = useState(false);
     const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
     const [feedDetailItem, setFeedDetailItem] = useState<
         | { kind: 'expense'; expense: ExpenseWithDelta }
@@ -336,16 +340,10 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
     const [exporting, setExporting] = useState(false);
     const [pendingExport, setPendingExport] = useState(false);
     const [exportSheetOpen, setExportSheetOpen] = useState(false);
-    const { data: proStatus } = useProStatusQuery(groupId);
-    const exportProLocked = KUPAPAY_PRO_ENABLED && proStatus?.hasPro !== true;
-    const insightsUnlocked = isProPerkUnlocked(
-        proStatus?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
-    const tripBudgetUnlocked = isProPerkUnlocked(
-        proStatus?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
+    const { hasPro, proPerkUnlocked } = useProStatusQuery(groupId);
+    const exportProLocked = KUPAPAY_PRO_ENABLED && !hasPro;
+    const insightsUnlocked = proPerkUnlocked;
+    const tripBudgetUnlocked = proPerkUnlocked;
 
     const { data: settlements = [] } = useGroupSettlementsQuery(groupId);
     const updateSettlementMutation = useUpdateSettlementMutation(groupId);
@@ -587,6 +585,12 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         navigation.setParams({ groupId, openSettleUp: undefined });
         navigation.navigate('SettleUpList', { groupId });
     }, [openSettleUpParam, navigation, groupId]);
+
+    useEffect(() => {
+        if (!openGuestClaimParam) return;
+        navigation.setParams({ groupId, openGuestClaim: undefined });
+        setGuestClaimOpen(true);
+    }, [openGuestClaimParam, navigation, groupId]);
 
     const handleClearFeedSearchAndFilters = useCallback(() => {
         setSearchQuery('');
@@ -1004,6 +1008,14 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                                 })
                             }
                         />
+                        {displayGroup.monthlyBillsMode ? (
+                            <MonthlyBillsCycleSection
+                                groupId={groupId}
+                                cycleDay={displayGroup.billingCycleDay ?? 1}
+                                expenses={groupExpenses}
+                                currency={displayGroup.defaultCurrency}
+                            />
+                        ) : null}
                         <View className="px-4 mt-3 mb-2 flex-row items-center">
                             <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
                                 <AppIcon name="search" size={18} color={colors.gray500} />
@@ -1234,6 +1246,16 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                     groupName={displayGroup?.name}
                 />
             )}
+
+            <ClaimGuestMembersSheet
+                visible={guestClaimOpen}
+                groupId={groupId}
+                onClose={() => setGuestClaimOpen(false)}
+                onClaimed={() => {
+                    void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
+                    void queryClient.invalidateQueries({ queryKey: ['groupFeed', groupId] });
+                }}
+            />
 
             <GroupMembersSheet
                 visible={membersSheetOpen}
