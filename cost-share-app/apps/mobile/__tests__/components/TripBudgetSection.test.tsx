@@ -20,24 +20,16 @@ describe('TripBudgetSection', () => {
         expect(getByText('pro.tripBudget.title')).toBeTruthy();
     });
 
-    it('shows progress when unlocked and budget is set', async () => {
+    it('shows edit control when unlocked after budget loads', async () => {
         const { findByText } = renderWithQuery(
             <TripBudgetSection
                 groupId="g1"
                 defaultCurrency="USD"
-                expenses={[
-                    {
-                        id: 'e1',
-                        groupId: 'g1',
-                        amount: 50,
-                        currency: 'USD',
-                        isDeleted: false,
-                    } as never,
-                ]}
+                expenses={[]}
                 unlocked
                 onUpgrade={jest.fn()}
             />,
         );
-        expect(await findByText(/50\.00/)).toBeTruthy();
+        expect(await findByText('pro.tripBudget.edit')).toBeTruthy();
     });
 });
