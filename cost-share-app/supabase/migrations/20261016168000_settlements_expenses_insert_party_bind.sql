@@ -9,7 +9,7 @@ CREATE POLICY "Users can create expenses in their groups" ON public.expenses
         AND created_by = (SELECT auth.uid())
         AND EXISTS (
             SELECT 1 FROM public.group_members gm
-            WHERE gm.group_id = expenses.group_id
+            WHERE gm.group_id = group_id
               AND gm.user_id = paid_by
               AND gm.is_active = TRUE
         )
@@ -32,7 +32,7 @@ CREATE POLICY "Users can insert expense splits" ON public.expense_splits
             FROM public.expenses e
             JOIN public.group_members gm
               ON gm.group_id = e.group_id
-             AND gm.user_id = expense_splits.user_id
+             AND gm.user_id = user_id
              AND gm.is_active = TRUE
             WHERE e.id = expense_id
         )
@@ -51,13 +51,13 @@ CREATE POLICY "Users can create settlements in their groups" ON public.settlemen
         )
         AND EXISTS (
             SELECT 1 FROM public.group_members gm
-            WHERE gm.group_id = settlements.group_id
+            WHERE gm.group_id = group_id
               AND gm.user_id = from_user_id
               AND gm.is_active = TRUE
         )
         AND EXISTS (
             SELECT 1 FROM public.group_members gm
-            WHERE gm.group_id = settlements.group_id
+            WHERE gm.group_id = group_id
               AND gm.user_id = to_user_id
               AND gm.is_active = TRUE
         )
