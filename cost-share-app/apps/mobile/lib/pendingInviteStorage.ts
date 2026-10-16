@@ -5,6 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { PendingInvite } from '@cost-share/shared';
+import { isValidInviteToken } from './inviteToken';
 
 const STORAGE_KEY = '@kupapay/pending_invite_v1';
 
@@ -20,9 +21,7 @@ export async function loadPersistedPendingInvite(): Promise<PendingInvite | null
         if (
             (parsed.kind === 'friend' || parsed.kind === 'group') &&
             typeof parsed.token === 'string' &&
-            parsed.token.length >= 12 &&
-            parsed.token.length <= 14 &&
-            /^[A-Za-z0-9_-]+$/.test(parsed.token)
+            isValidInviteToken(parsed.token)
         ) {
             return parsed;
         }
