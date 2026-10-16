@@ -20,7 +20,8 @@ import { CurrencyPicker } from '../../components/CurrencyPicker';
 import { showAppToast, showSuccessMessage } from '../../lib/appToast';
 import { handleError } from '../../lib/handleError';
 import { deleteMyAccount, getMyOpenBalances, type OpenBalancesSummary } from '../../services/account.service';
-import { useNavigation } from '@react-navigation/native';
+import { refreshCurrentUserAdminFlag } from '../../services/users.service';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { DeleteAccountWarningSheet } from '../../components/settings/DeleteAccountWarningSheet';
 import { DeleteAccountConfirmSheet } from '../../components/settings/DeleteAccountConfirmSheet';
 import currencyCodes from 'currency-codes';
@@ -61,6 +62,12 @@ export function SettingsScreen() {
         isInFreeTrial: boolean;
         trialEndsAt: string | null;
     }>({ isInFreeTrial: false, trialEndsAt: null });
+
+    useFocusEffect(
+        useCallback(() => {
+            void refreshCurrentUserAdminFlag();
+        }, []),
+    );
 
     useEffect(() => {
         if (!KUPAPAY_PRO_ENABLED || !isPurchasesConfigured()) return;
