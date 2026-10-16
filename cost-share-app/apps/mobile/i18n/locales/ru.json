@@ -770,6 +770,13 @@
         "deleteAccount": "Удалить аккаунт",
         "adminPortal": "Портал администратора"
     },
+    "appReview": {
+        "notNow": "Не сейчас",
+        "webTitle": "Как вам KupaPay?",
+        "webMessage": "Мы ещё улучшаем веб-версию. Ваш отзыв сразу попадает команде.",
+        "webFeedbackCta": "Оставить отзыв",
+        "webStoreHint": "Чтобы оценить в App Store или Google Play, откройте KupaPay на телефоне."
+    },
     "admin": {
         "portal": {
             "title": "Портал администратора",

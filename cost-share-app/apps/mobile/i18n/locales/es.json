@@ -761,6 +761,13 @@
         "deleteAccount": "Eliminar cuenta",
         "adminPortal": "Portal de administración"
     },
+    "appReview": {
+        "notNow": "Ahora no",
+        "webTitle": "¿Cómo te va con KupaPay?",
+        "webMessage": "Seguimos puliendo la versión web. Tu opinión llega directo al equipo.",
+        "webFeedbackCta": "Enviar comentarios",
+        "webStoreHint": "Para valorar en App Store o Google Play, usa KupaPay en el móvil."
+    },
     "admin": {
         "portal": {
             "title": "Portal de administración",

@@ -760,6 +760,13 @@
         "deleteAccount": "Konto löschen",
         "adminPortal": "Admin-Portal"
     },
+    "appReview": {
+        "notNow": "Nicht jetzt",
+        "webTitle": "Wie läuft KupaPay für dich?",
+        "webMessage": "Wir verbessern noch die Web-Version. Dein Feedback geht direkt ans Team.",
+        "webFeedbackCta": "Feedback senden",
+        "webStoreHint": "Für App-Store- oder Play-Store-Bewertungen nutze KupaPay auf dem Handy."
+    },
     "admin": {
         "portal": {
             "title": "Admin-Portal",
