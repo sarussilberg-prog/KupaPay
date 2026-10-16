@@ -40,6 +40,6 @@ describe('GroupTripCurrencySection', () => {
                 onUpgrade={jest.fn()}
             />,
         );
-        expect(getByText('Trip currency view')).toBeTruthy();
+        expect(getByText('pro.tripCurrency.title')).toBeTruthy();
     });
 });
