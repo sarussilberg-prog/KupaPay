@@ -570,7 +570,21 @@
                 "amountUnder": "{{currency}} {{value}} fehlen auf {{currency}} {{total}}",
                 "amountOver": "{{currency}} {{value}} über {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} von {{total}} · je {{currency}} {{each}}"
+            "splitMeta": "{{selected}} von {{total}} · je {{currency}} {{each}}",
+            "recurring": {
+                "label": "Wiederkehrend",
+                "sheetTitle": "Wiederholung",
+                "seriesBadge": "Wiederkehrend",
+                "stopSeries": "Wiederholung stoppen",
+                "stopConfirmTitle": "Wiederkehrende Ausgaben stoppen?",
+                "stopConfirmBody": "Bisherige Ausgaben bleiben. Es werden keine neuen Wiederholungen erstellt.",
+                "stopped": "Wiederkehrende Serie gestoppt",
+                "frequency": {
+                    "weekly": "Wöchentlich",
+                    "monthly": "Monatlich",
+                    "yearly": "Jährlich"
+                }
+            }
         }
     },
     "balances": {
@@ -1240,6 +1254,9 @@
             "pickerLabel": "Beträge in {{currency}}",
             "ratesMissing": "Wechselkurse sind derzeit nicht verfügbar.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (war {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "Automatisieren Sie Miete, Abos und andere wiederkehrende Ausgaben mit Pro."
         }
     },
     "updateRequired": {

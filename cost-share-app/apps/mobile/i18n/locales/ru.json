@@ -577,7 +577,21 @@
                 "amountUnder": "Не хватает {{currency}} {{value}} до {{currency}} {{total}}",
                 "amountOver": "Превышение {{currency}} {{total}} на {{currency}} {{value}}"
             },
-            "splitMeta": "{{selected}} из {{total}} · по {{currency}} {{each}}"
+            "splitMeta": "{{selected}} из {{total}} · по {{currency}} {{each}}",
+            "recurring": {
+                "label": "Повтор",
+                "sheetTitle": "Периодичность",
+                "seriesBadge": "Повторяющийся",
+                "stopSeries": "Остановить повтор",
+                "stopConfirmTitle": "Остановить повторяющиеся расходы?",
+                "stopConfirmBody": "Уже созданные расходы останутся. Новые повторы создаваться не будут.",
+                "stopped": "Серия повторов остановлена",
+                "frequency": {
+                    "weekly": "Еженедельно",
+                    "monthly": "Ежемесячно",
+                    "yearly": "Ежегодно"
+                }
+            }
         }
     },
     "balances": {
@@ -1258,6 +1272,9 @@
             "pickerLabel": "Суммы в {{currency}}",
             "ratesMissing": "Курсы валют сейчас недоступны.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (было {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "Автоматизируйте аренду, подписки и другие повторяющиеся расходы с Pro."
         }
     },
     "updateRequired": {

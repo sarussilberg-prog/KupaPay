@@ -572,7 +572,21 @@
             },
             "splitMeta": "{{selected}} מתוך {{total}} · {{currency}} {{each}} לאחד",
             "splitMetaPercent": "{{selected}} מתוך {{total}} · {{allocated}}% מוקצים",
-            "splitMetaExact": "{{selected}} מתוך {{total}} · {{currency}} {{allocated}} מוקצים"
+            "splitMetaExact": "{{selected}} מתוך {{total}} · {{currency}} {{allocated}} מוקצים",
+            "recurring": {
+                "label": "קבועה",
+                "sheetTitle": "תדירות",
+                "seriesBadge": "הוצאה קבועה",
+                "stopSeries": "הפסקת חזרה",
+                "stopConfirmTitle": "להפסיק הוצאה קבועה?",
+                "stopConfirmBody": "הוצאות שכבר נוצרו נשארות. לא ייווצרו הוצאות חדשות.",
+                "stopped": "סדרת ההוצאות הקבועה הופסקה",
+                "frequency": {
+                    "weekly": "שבועי",
+                    "monthly": "חודשי",
+                    "yearly": "שנתי"
+                }
+            }
         }
     },
     "balances": {
@@ -1173,6 +1187,9 @@
             "pickerLabel": "סכומים ב-{{currency}}",
             "ratesMissing": "שערי המרה לא זמינים כרגע.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (היה {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "אוטומציה לשכירות, מנויים והוצאות חוזרות — עם Pro."
         }
     },
     "remind": {

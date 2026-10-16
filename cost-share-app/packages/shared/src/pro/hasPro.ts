@@ -28,3 +28,8 @@ export function hasProFromTimestamps(
 export function shouldSkipAdGate(hasPro: boolean, proFeatureEnabled: boolean): boolean {
     return proFeatureEnabled && hasPro;
 }
+
+/** Pro perk is usable when the master flag is off (dev) or the user has Pro. */
+export function isProPerkUnlocked(hasPro: boolean, proFeatureEnabled: boolean): boolean {
+    return !proFeatureEnabled || hasPro;
+}

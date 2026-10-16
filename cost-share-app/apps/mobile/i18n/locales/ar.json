@@ -596,7 +596,21 @@
                 "amountUnder": "ينقص {{currency}} {{value}} للوصول إلى {{currency}} {{total}}",
                 "amountOver": "يزيد {{currency}} {{value}} عن {{currency}} {{total}}"
             },
-            "splitMeta": "{{selected}} من {{total}} · {{currency}} {{each}} للفرد"
+            "splitMeta": "{{selected}} من {{total}} · {{currency}} {{each}} للفرد",
+            "recurring": {
+                "label": "متكرر",
+                "sheetTitle": "التكرار",
+                "seriesBadge": "مصروف متكرر",
+                "stopSeries": "إيقاف التكرار",
+                "stopConfirmTitle": "إيقاف المصروفات المتكررة؟",
+                "stopConfirmBody": "المصروفات السابقة تبقى. لن تُنشأ تكرارات جديدة.",
+                "stopped": "تم إيقاف السلسلة المتكررة",
+                "frequency": {
+                    "weekly": "أسبوعي",
+                    "monthly": "شهري",
+                    "yearly": "سنوي"
+                }
+            }
         }
     },
     "balances": {
@@ -1322,6 +1336,9 @@
             "pickerLabel": "المبالغ بـ {{currency}}",
             "ratesMissing": "أسعار الصرف غير متاحة حاليًا.",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (كان {{original}})"
+        },
+        "recurring": {
+            "lockedBody": "أتمتة الإيجار والاشتراكات والمصروفات المتكررة الأخرى مع Pro."
         }
     },
     "updateRequired": {
