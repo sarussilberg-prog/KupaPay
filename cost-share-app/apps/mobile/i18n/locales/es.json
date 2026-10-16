@@ -1357,6 +1357,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Divide en equidad y liquida más rápido con Pro",
             "feature1": "Sin anuncios",
             "feature2": "Conversión automática de moneda para viajes",
             "feature3": "Informe PDF claro para cada grupo",

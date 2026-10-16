@@ -1437,6 +1437,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "قسّم بعدالة وسوِّ الحسابات أسرع مع Pro",
             "feature1": "بدون إعلانات",
             "feature2": "تحويل تلقائي للعملات في الرحلات",
             "feature3": "تقرير PDF منظم لكل مجموعة",
