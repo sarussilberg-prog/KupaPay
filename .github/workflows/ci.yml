@@ -3,14 +3,81 @@ name: CI
 on:
   pull_request:
     branches: [dev, main, 'cursor/**']
+  merge_group:
+    branches: [dev]
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number }}
+  group: ci-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
   cancel-in-progress: true
 
 jobs:
+  ci-paths:
+    name: CI path plan
+    runs-on: ubuntu-latest
+    outputs:
+      full_suite: ${{ steps.parse.outputs.full_suite }}
+      mobile: ${{ steps.parse.outputs.mobile }}
+      web: ${{ steps.parse.outputs.web }}
+      supabase: ${{ steps.parse.outputs.supabase }}
+      edge: ${{ steps.parse.outputs.edge }}
+      performance: ${{ steps.parse.outputs.performance }}
+      docs_only: ${{ steps.parse.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: plan
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          json="$(bash cost-share-app/scripts/ci-paths-plan.sh)"
+          echo "plan=$json" >> "$GITHUB_OUTPUT"
+          echo "$json" | jq .
+      - id: parse
+        env:
+          PLAN: ${{ steps.plan.outputs.plan }}
+        run: |
+          set -euo pipefail
+          for key in full_suite mobile web supabase edge performance docs_only; do
+            if [[ "$key" == "docs_only" ]]; then
+              docs=$(echo "$PLAN" | jq -r '.docs')
+              mobile=$(echo "$PLAN" | jq -r '.mobile')
+              if [[ "$docs" == "true" && "$mobile" == "false" ]]; then
+                echo "docs_only=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "docs_only=false" >> "$GITHUB_OUTPUT"
+              fi
+              continue
+            fi
+            val=$(echo "$PLAN" | jq -r ".${key}")
+            echo "${key}=${val}" >> "$GITHUB_OUTPUT"
+          done
+
+  branch-up-to-date:
+    name: Branch up to date with dev
+    if: github.event_name == 'pull_request' && github.base_ref == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require latest origin/dev
+        run: |
+          set -euo pipefail
+          git fetch origin dev --quiet
+          behind="$(git rev-list --count HEAD..origin/dev)"
+          if [[ "$behind" -gt 0 ]]; then
+            echo "::error::This branch is ${behind} commit(s) behind origin/dev. Merge or rebase latest dev so migration and CI checks run against current integration head."
+            exit 1
+          fi
+          echo "✅ Branch includes latest origin/dev"
+
   setup:
     name: Install dependencies
+    needs: ci-paths
+    if: needs.ci-paths.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,6 +89,14 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
+      - name: Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: cost-share-app/.turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('cost-share-app/package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ hashFiles('cost-share-app/package-lock.json') }}-
+            turbo-${{ runner.os }}-
       - run: npm ci
       - run: npm run audit:ci
       - uses: actions/upload-artifact@v4
@@ -33,7 +108,12 @@ jobs:
 
   lint:
     name: Lint
-    needs: setup
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true' ||
+        needs.ci-paths.outputs.web == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -52,7 +132,12 @@ jobs:
 
   typecheck:
     name: Typecheck
-    needs: setup
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true' ||
+        needs.ci-paths.outputs.web == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -71,7 +156,11 @@ jobs:
 
   test:
     name: Mobile tests
-    needs: setup
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -90,7 +179,11 @@ jobs:
 
   legal-locale-parity:
     name: Legal locale parity
-    needs: setup
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -107,28 +200,109 @@ jobs:
       - run: test -x node_modules/.bin/jest || npm ci --ignore-scripts
       - run: bash scripts/ci-legal-locale-parity.sh
 
+  deno-edge-plan:
+    name: Deno edge plan
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite == 'true' ||
+      needs.ci-paths.outputs.edge == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.plan.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: plan
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          functions="$(bash cost-share-app/scripts/ci-deno-matrix-plan.sh)"
+          {
+            echo 'functions<<EOF'
+            echo "$functions"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          echo "Planned Deno matrix: ${functions}"
+
+  deno-edge-plan-skipped:
+    name: Deno edge plan (skipped)
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite != 'true' &&
+      needs.ci-paths.outputs.edge != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No edge paths — Deno plan skipped."
+
   deno-edge-functions:
     name: Deno edge (${{ matrix.function }})
+    needs: deno-edge-plan
+    if: needs.deno-edge-plan.outputs.functions != '[]'
     strategy:
       fail-fast: true
       matrix:
-        function:
-          - revenuecat-webhook
-          - send-push
-          - pro-trial-reminder-dispatch
-          - storage-cleanup-dispatch
+        function: ${{ fromJSON(needs.deno-edge-plan.outputs.functions) }}
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: cost-share-app/supabase/functions/${{ matrix.function }}
+        working-directory: cost-share-app
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
-      - run: deno test --allow-env
-      - name: Deploy bundle check (no import map)
-        run: deno check --no-config index.ts
+      - run: bash scripts/ci-deno-edge-function.sh "${{ matrix.function }}"
+
+  deno-edge-functions-skipped:
+    name: Deno edge (skipped — no function paths changed)
+    needs: deno-edge-plan
+    if: >-
+      always() &&
+      needs.deno-edge-plan.result == 'success' &&
+      needs.deno-edge-plan.outputs.functions == '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No edge-function paths changed on this PR; Deno matrix skipped."
+
+  deno-edge-gate:
+    name: Deno edge gate
+    needs:
+      [ci-paths, deno-edge-plan, deno-edge-plan-skipped, deno-edge-functions, deno-edge-functions-skipped]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Deno matrix result
+        run: |
+          set -euo pipefail
+          if [[ "${{ needs.ci-paths.outputs.edge }}" != "true" && "${{ needs.ci-paths.outputs.full_suite }}" != "true" ]]; then
+            if [[ "${{ needs.deno-edge-plan-skipped.result }}" != "success" ]]; then
+              echo "::error::Expected Deno plan skip job to succeed"
+              exit 1
+            fi
+            echo "Deno edge checks skipped (path filter)."
+            exit 0
+          fi
+          if [[ "${{ needs.deno-edge-plan.result }}" != "success" ]]; then
+            echo "::error::Deno edge plan failed"
+            exit 1
+          fi
+          functions='${{ needs.deno-edge-plan.outputs.functions }}'
+          if [[ "$functions" == "[]" ]]; then
+            if [[ "${{ needs.deno-edge-functions-skipped.result }}" != "success" ]]; then
+              echo "::error::expected skipped Deno job to succeed"
+              exit 1
+            fi
+            echo "Deno edge checks skipped (no path changes)."
+            exit 0
+          fi
+          if [[ "${{ needs.deno-edge-functions.result }}" != "success" ]]; then
+            echo "::error::Deno edge matrix failed"
+            exit 1
+          fi
+          echo "Deno edge matrix passed."
 
   no-merge-conflicts:
     name: No merge conflict markers
@@ -139,7 +313,11 @@ jobs:
 
   expo-mobile-config:
     name: Expo mobile config
-    needs: setup
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -149,6 +327,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Restore Expo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            cost-share-app/apps/mobile/.expo
+            ~/.expo
+          key: expo-${{ runner.os }}-${{ hashFiles('cost-share-app/apps/mobile/package.json', 'cost-share-app/package-lock.json') }}
+          restore-keys: |
+            expo-${{ runner.os }}-
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
@@ -157,25 +344,66 @@ jobs:
       - run: bash scripts/ci-expo-mobile-config.sh
 
   migration-versions:
-    name: Supabase migration version uniqueness
+    name: Supabase migration guard
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cost-share-app
     steps:
       - uses: actions/checkout@v4
-      - run: bash scripts/supabase-unique-migration-versions.sh
+        with:
+          fetch-depth: 0
+      - name: Lint migration filenames
+        working-directory: cost-share-app
+        run: bash scripts/supabase-lint-migration-filenames.sh
+      - name: Unique prefixes (PR tree)
+        working-directory: cost-share-app
+        run: bash scripts/supabase-unique-migration-versions.sh
+      - name: Unique prefixes vs latest dev/main (merge simulation)
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
 
   ci-performance:
     name: CI performance
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite == 'true' ||
+      needs.ci-paths.outputs.performance == 'true'
     uses: ./.github/workflows/ci-performance.yml
+
+  ci-performance-skipped:
+    name: CI performance (skipped)
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite != 'true' &&
+      needs.ci-paths.outputs.performance != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "CI performance skipped (path filter)."
 
   supabase-sql-integration:
     name: Supabase SQL integration
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite == 'true' ||
+      needs.ci-paths.outputs.supabase == 'true'
     uses: ./.github/workflows/supabase-sql-integration.yml
+
+  supabase-sql-skipped:
+    name: Supabase SQL integration (skipped)
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite != 'true' &&
+      needs.ci-paths.outputs.supabase != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Supabase SQL integration skipped (path filter)."
 
   deno-edge-bundle-check:
     name: Deno edge bundle (all functions)
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite == 'true' ||
+      needs.ci-paths.outputs.edge == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -187,27 +415,117 @@ jobs:
           deno-version: v2.x
       - run: bash scripts/ci-deno-check-edge-bundle.sh
 
-  auto-merge:
-    name: Auto-merge to dev
+  deno-edge-bundle-skipped:
+    name: Deno edge bundle (skipped)
+    needs: ci-paths
+    if: >-
+      needs.ci-paths.outputs.full_suite != 'true' &&
+      needs.ci-paths.outputs.edge != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deno edge bundle check skipped (path filter)."
+
+  docs-only-gate:
+    name: Docs-only gate
+    needs: ci-paths
+    if: needs.ci-paths.outputs.docs_only == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Docs-only change — application CI jobs skipped by path filter."
+
+  ci-gate:
+    name: CI gate
     needs:
       [
+        ci-paths,
+        branch-up-to-date,
+        setup,
         lint,
         typecheck,
         test,
         legal-locale-parity,
-        deno-edge-functions,
-        deno-edge-bundle-check,
-        migration-versions,
+        deno-edge-gate,
         no-merge-conflicts,
         expo-mobile-config,
+        migration-versions,
         ci-performance,
+        ci-performance-skipped,
         supabase-sql-integration,
+        supabase-sql-skipped,
+        deno-edge-bundle-check,
+        deno-edge-bundle-skipped,
+        docs-only-gate,
       ]
-    # Only run for PRs targeting dev — PRs to main are reviewed and merged manually.
-    if: github.event.pull_request.draft == false && github.base_ref == 'dev'
+    if: always() && !cancelled()
     runs-on: ubuntu-latest
-    # Serialize merge + bump across PRs so two concurrent merges can't race on
-    # version.json (each PR merge produces exactly one patch bump).
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aggregate required checks
+        env:
+          DOCS_ONLY: ${{ needs.ci-paths.outputs.docs_only }}
+          FULL: ${{ needs.ci-paths.outputs.full_suite }}
+          MOBILE: ${{ needs.ci-paths.outputs.mobile }}
+          WEB: ${{ needs.ci-paths.outputs.web }}
+          SUPABASE: ${{ needs.ci-paths.outputs.supabase }}
+          EDGE: ${{ needs.ci-paths.outputs.edge }}
+          PERF: ${{ needs.ci-paths.outputs.performance }}
+        run: |
+          set -euo pipefail
+          args=()
+          check() { args+=("$1" "$2"); }
+
+          check ci-paths "${{ needs.ci-paths.result }}"
+          check migration-versions "${{ needs.migration-versions.result }}"
+          check no-merge-conflicts "${{ needs.no-merge-conflicts.result }}"
+          check deno-edge-gate "${{ needs.deno-edge-gate.result }}"
+
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "dev" ]]; then
+            check branch-up-to-date "${{ needs.branch-up-to-date.result }}"
+          fi
+
+          if [[ "$DOCS_ONLY" == "true" ]]; then
+            check docs-only-gate "${{ needs.docs-only-gate.result }}"
+            bash cost-share-app/scripts/ci-gate-verify.sh "${args[@]}"
+            exit 0
+          fi
+
+          check setup "${{ needs.setup.result }}"
+          if [[ "$FULL" == "true" || "$MOBILE" == "true" || "$WEB" == "true" ]]; then
+            check lint "${{ needs.lint.result }}"
+            check typecheck "${{ needs.typecheck.result }}"
+          fi
+          if [[ "$FULL" == "true" || "$MOBILE" == "true" ]]; then
+            check test "${{ needs.test.result }}"
+            check legal-locale-parity "${{ needs.legal-locale-parity.result }}"
+            check expo-mobile-config "${{ needs.expo-mobile-config.result }}"
+          fi
+          if [[ "$FULL" == "true" || "$PERF" == "true" ]]; then
+            check ci-performance "${{ needs.ci-performance.result }}"
+          else
+            check ci-performance-skipped "${{ needs.ci-performance-skipped.result }}"
+          fi
+          if [[ "$FULL" == "true" || "$SUPABASE" == "true" ]]; then
+            check supabase-sql-integration "${{ needs.supabase-sql-integration.result }}"
+          else
+            check supabase-sql-skipped "${{ needs.supabase-sql-skipped.result }}"
+          fi
+          if [[ "$FULL" == "true" || "$EDGE" == "true" ]]; then
+            check deno-edge-bundle-check "${{ needs.deno-edge-bundle-check.result }}"
+          else
+            check deno-edge-bundle-skipped "${{ needs.deno-edge-bundle-skipped.result }}"
+          fi
+
+          bash cost-share-app/scripts/ci-gate-verify.sh "${args[@]}"
+
+  auto-merge:
+    name: Auto-merge to dev
+    needs: [ci-gate, migration-versions]
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false &&
+      github.base_ref == 'dev' &&
+      needs.ci-gate.result == 'success'
+    runs-on: ubuntu-latest
     concurrency:
       group: dev-merge-and-bump
       cancel-in-progress: false
@@ -235,6 +553,24 @@ jobs:
           done
           echo "::error::Timed out waiting for SonarCloud"
           exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Re-check migrations against latest origin/dev (pre-merge)
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_BASE_REF: dev
+        run: |
+          set -euo pipefail
+          git fetch origin dev main --quiet
+          behind="$(git rev-list --count "${PR_HEAD_SHA}"..origin/dev)"
+          if [[ "$behind" -gt 0 ]]; then
+            echo "::error::origin/dev advanced during CI — update branch and re-run checks"
+            exit 1
+          fi
+          bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
 
       - name: Squash-merge the PR
         env:

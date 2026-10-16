@@ -18,6 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Lint migration filenames
+        run: bash scripts/supabase-lint-migration-filenames.sh
+
       - name: Check unique migration timestamp prefixes
         run: bash scripts/supabase-unique-migration-versions.sh
 
