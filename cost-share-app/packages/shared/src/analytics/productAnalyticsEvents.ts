@@ -9,6 +9,7 @@ export const PRODUCT_ANALYTICS_FUNNEL_EVENTS = [
     'group_created',
     'expense_added',
     'invite_sent',
+    'expense_share_sent',
     'invite_accepted',
     'settle_up',
     'paywall_view',

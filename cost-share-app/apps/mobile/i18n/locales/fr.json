@@ -1166,10 +1166,10 @@
         "title": "Partager le résumé du groupe",
         "share": "Partager l'image",
         "hideAmounts": "Masquer les montants",
-        "hiddenAmount": "•••",
+        "hiddenAmount": "***",
         "allSettled": "Tout est réglé ✓",
         "balancesSnapshot": "Aperçu des soldes",
-        "debtLine": "{{from}} → {{to}}",
+        "debtLine": "{{from}} à {{to}}",
         "watermark": "Partagez les dépenses sur {{url}}",
         "fallback": "Découvrez notre groupe « {{groupName}} » sur KupaPay"
     },

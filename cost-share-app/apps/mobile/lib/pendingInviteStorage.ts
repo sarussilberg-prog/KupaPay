@@ -20,7 +20,7 @@ export async function loadPersistedPendingInvite(): Promise<PendingInvite | null
     try {
         const parsed = JSON.parse(raw) as PendingInvite;
         if (
-            (parsed.kind === 'friend' || parsed.kind === 'group') &&
+            (parsed.kind === 'friend' || parsed.kind === 'group' || parsed.kind === 'expenseShare') &&
             typeof parsed.token === 'string' &&
             isValidInviteToken(parsed.token)
         ) {

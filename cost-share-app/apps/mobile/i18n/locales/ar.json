@@ -1220,10 +1220,10 @@
         "title": "مشاركة ملخص المجموعة",
         "share": "مشاركة صورة",
         "hideAmounts": "إخفاء المبالغ",
-        "hiddenAmount": "•••",
+        "hiddenAmount": "***",
         "allSettled": "تمت التسوية بالكامل ✓",
         "balancesSnapshot": "لقطة للأرصدة",
-        "debtLine": "{{from}} → {{to}}",
+        "debtLine": "{{from}} إلى {{to}}",
         "watermark": "قسّم المصروفات على {{url}}",
         "fallback": "انضم إلى مجموعتنا \"{{groupName}}\" على KupaPay"
     },

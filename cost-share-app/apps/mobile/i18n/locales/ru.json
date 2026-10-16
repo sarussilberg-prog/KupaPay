@@ -1182,10 +1182,10 @@
         "title": "Поделиться сводкой группы",
         "share": "Поделиться изображением",
         "hideAmounts": "Скрыть суммы",
-        "hiddenAmount": "•••",
+        "hiddenAmount": "***",
         "allSettled": "Все рассчитались ✓",
         "balancesSnapshot": "Снимок балансов",
-        "debtLine": "{{from}} → {{to}}",
+        "debtLine": "{{from}} → {{to}} (долг)",
         "watermark": "Делите расходы на {{url}}",
         "fallback": "Наша группа «{{groupName}}» в KupaPay"
     },
