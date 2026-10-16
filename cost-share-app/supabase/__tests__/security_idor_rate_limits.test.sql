@@ -38,9 +38,7 @@ BEGIN
     INSERT INTO public.expense_splits (expense_id, user_id, amount)
         VALUES (v_exp, v_bob, 100);
 
-    PERFORM set_config('request.jwt.claim.sub', v_alice::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_alice::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM public.test_set_authenticated(v_alice);
 
     -- Carol: no shared group → denied
     BEGIN

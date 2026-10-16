@@ -17,9 +17,7 @@ BEGIN
     INSERT INTO public.group_members (group_id, user_id, is_active)
         VALUES (v_group, v_user, TRUE);
 
-    PERFORM set_config('request.jwt.claim.sub', v_user::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_user::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM public.test_set_authenticated(v_user);
 
     v_result := public.archive_group(v_group);
     IF v_result->>'ok' IS DISTINCT FROM 'true' THEN
