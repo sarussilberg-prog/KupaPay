@@ -3,7 +3,8 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { AppIcon, AppIconName } from '../AppIcon';
 import { colors } from '../../theme';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { settingsRowContainerStyle } from './settingsRowLayout';
 
 type Variant = 'chevron' | 'value' | 'danger';
 
@@ -29,13 +30,20 @@ export function SettingsRow(props: Props) {
     return (
         <TouchableOpacity onPress={props.onPress} testID={testID} disabled={disabled}>
             <View
-                className="flex-row items-center bg-white px-4 py-3.5 min-h-[52px]"
-                style={disabled ? { opacity: 0.45 } : undefined}
+                className="bg-white px-4 py-3.5 min-h-[52px]"
+                style={[
+                    settingsRowContainerStyle(isRtl),
+                    disabled ? { opacity: 0.45 } : undefined,
+                ]}
             >
                 <AppIcon name={iconName} size={22} color={iconColor} />
-                <Text className={`flex-1 ms-3 text-base ${textColor}`}>{label}</Text>
+                <Text
+                    className={`flex-1 min-w-0 text-base ${textColor} ${rtlTextClassName(isRtl, `text-base ${textColor}`)}`}
+                >
+                    {label}
+                </Text>
                 {props.variant === 'value' ? (
-                    <Text className="text-sm text-gray-500 me-2">{props.valueText}</Text>
+                    <Text className="text-sm text-gray-500 shrink-0">{props.valueText}</Text>
                 ) : null}
                 <AppIcon
                     name={isRtl ? 'chevron-back' : 'chevron-forward'}
