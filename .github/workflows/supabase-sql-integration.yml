@@ -9,7 +9,7 @@ on:
       - 'cost-share-app/supabase/config.toml'
       - 'cost-share-app/supabase/schema.sql'
       - 'cost-share-app/scripts/ci-supabase-sql-tests.sh'
-      - 'cost-share-app/scripts/ci-migration-prefix-check.sh'
+      - 'cost-share-app/scripts/supabase-unique-migration-versions.sh'
       - 'cost-share-app/supabase/ci-local-postgres-bootstrap.sql'
       - '.github/workflows/supabase-sql-integration.yml'
 
@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check unique migration timestamp prefixes
-        run: bash scripts/ci-migration-prefix-check.sh
+        run: bash scripts/supabase-unique-migration-versions.sh
 
       - name: Run SQL regression suite (local stack)
         run: bash scripts/ci-supabase-sql-tests.sh
