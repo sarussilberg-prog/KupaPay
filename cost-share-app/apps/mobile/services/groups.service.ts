@@ -13,6 +13,7 @@ import {
     CreateGroupDto,
     UpdateGroupDto,
     DEFAULT_CURRENCY,
+    PROFILE_DISPLAY_COLUMNS,
 } from '@cost-share/shared';
 import type {
     MemberContributionsResult,
@@ -470,7 +471,7 @@ export async function fetchProfilesByUserIds(
 
     const { data, error } = await supabase
         .from('profiles')
-        .select('id, name, avatar_url, is_active')
+        .select(PROFILE_DISPLAY_COLUMNS)
         .in('id', unique);
 
     if (error) {

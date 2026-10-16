@@ -2,8 +2,7 @@
  * Users Service — Supabase direct (profiles table)
  */
 
-import { User, UpdateProfileDto } from '@cost-share/shared';
-import { profileFromRow } from '@cost-share/shared';
+import { User, UpdateProfileDto, profileFromRow, PROFILE_SELECT_COLUMNS } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { clearLocalAuthSession } from './auth.service';
@@ -11,8 +10,6 @@ import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { HEBREW_APP_DEFAULT_CURRENCY } from '../lib/appDefaultCurrency';
-import { PROFILE_SELECT_COLUMNS } from '../lib/profileColumns';
-
 export type ProfileHydrationResult = 'active' | 'deactivated' | 'unknown';
 
 /** Client read path for app_admins — profiles table does not expose admin flag. */
@@ -120,7 +117,7 @@ export async function updateUser(id: string, dto: UpdateProfileDto): Promise<Use
         .from('profiles')
         .update(patch)
         .eq('id', id)
-        .select()
+        .select(PROFILE_SELECT_COLUMNS)
         .maybeSingle();
 
     if (error || !data) return null;
