@@ -257,6 +257,12 @@
         },
         "noGroups": "Aún no hay grupos",
         "noGroupsMessage": "Crea tu primer grupo para empezar a compartir gastos",
+        "demo": {
+            "try": "Probar grupo demo",
+            "created": "Grupo demo listo — mira cómo funciona",
+            "alreadyExists": "Ya tienes el grupo demo",
+            "error": "No se pudo crear el grupo demo"
+        },
         "offlineMessage": "Ahora mismo no podemos cargar tus grupos. Aparecerán aquí automáticamente cuando recuperes la conexión.",
         "groupName": "Nombre del grupo",
         "enterGroupName": "Introduce el nombre del grupo",
@@ -951,6 +957,7 @@
         },
         "noActivity": "Aún no hay actividad",
         "noActivityMessage": "Tus gastos, pagos y mensajes de grupo recientes aparecerán aquí",
+        "createGroupCta": "Crear un grupo",
         "noSearchResults": "No hay actividad que coincida",
         "noSearchResultsMessage": "Ningún resultado coincide con tu búsqueda. Prueba con otro término o borra la búsqueda.",
         "expense": "Gasto",

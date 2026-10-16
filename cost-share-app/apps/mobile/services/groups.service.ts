@@ -560,6 +560,26 @@ export async function addGroupMember(groupId: string, userId: string): Promise<G
 
 export type ClaimableGuest = { userId: string; displayName: string };
 
+export async function createDemoGroup(): Promise<string | null> {
+    const { data, error } = await supabase.rpc('create_demo_group');
+    if (error) {
+        handleError(error, {
+            toast: { titleKey: 'groups.demo.error' },
+            tags: { service: 'groups', op: 'createDemo' },
+        });
+        return null;
+    }
+    const payload = data as { ok?: boolean; group_id?: string; error_code?: string };
+    if (payload.error_code === 'demo_exists') {
+        showAppToast({ type: 'info', titleKey: 'groups.demo.alreadyExists' });
+        return null;
+    }
+    if (!payload.ok || !payload.group_id) return null;
+    await fetchGroups();
+    showSuccessMessage('groups.demo.created');
+    return payload.group_id;
+}
+
 export async function addGuestGroupMember(
     groupId: string,
     displayName: string,

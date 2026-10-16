@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { GroupWithMembers } from '@cost-share/shared';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
+import { createDemoGroup } from '../../services/groups.service';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
 import { prefetchActivityFeed } from '../../hooks/queries/useActivityQuery';
@@ -162,6 +163,12 @@ export function GroupsListScreen() {
         () => navigation.navigate('CreateGroup'),
         [navigation],
     );
+
+    const handleTryDemo = useCallback(() => {
+        void createDemoGroup().then(groupId => {
+            if (groupId) navigation.navigate('GroupDetail', { groupId });
+        });
+    }, [navigation]);
 
     const availableCurrencies = useMemo(
         () => unique(groups.map(g => g.defaultCurrency)),
@@ -378,11 +385,14 @@ export function GroupsListScreen() {
                             />
                         ) : (
                             <EmptyState
+                                illustrationEmoji="🧳"
                                 iconName="people-outline"
                                 title={t('groups.noGroups')}
                                 message={t('groups.noGroupsMessage')}
                                 actionTitle={t('groups.createGroup')}
                                 onAction={handleCreateGroup}
+                                secondaryActionTitle={t('groups.demo.try')}
+                                onSecondaryAction={handleTryDemo}
                             />
                         )
                     }
