@@ -97,12 +97,7 @@ Source spec: `docs/superpowers/specs/2026-05-20-invites-and-sharing-design.md`
 - **Why deferred:** Multi-use is simpler and matches the WhatsApp share use-case. Adds value mostly under security review.
 - **Revisit when:** Security review flags rotation alone as insufficient, OR user request volume justifies it.
 
-### 2. Deferred / hybrid deep linking on iOS install
-- **What:** When user installs the app via a link, the link target is remembered post-install (no manual click needed).
-- **Why deferred:** Universal Links handle the "already installed" case. Install-then-link requires either Branch.io or custom server-side device fingerprinting.
-- **Revisit when:** App Store install conversion is < 30% from invite links.
-
-### 3. Push notification for pending invites
+### 2. Push notification for pending invites
 - **What:** Push to inviter when their invite is redeemed.
 - **Why deferred:** Folded into the notifications spec — implemented there as `member_joined`.
 - **Status:** Resolved by notifications spec (Phase 2).

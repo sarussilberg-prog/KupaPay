@@ -1,6 +1,7 @@
 /**
  * Persists a group/friend invite across fresh install → first sign-in (deferred deep link).
- * Only stores { kind, token } — no clipboard or third-party attribution SDKs.
+ * Stores { kind, token } from Universal Links, custom scheme, or deferred attribution
+ * (clipboard / Play Install Referrer) on first launch after install.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
