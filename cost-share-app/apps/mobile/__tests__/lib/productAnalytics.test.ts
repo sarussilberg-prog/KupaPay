@@ -114,4 +114,47 @@ describe('productAnalytics', () => {
             }),
         ).toBe(false);
     });
+
+    it('fires signup_completed once and stores signup timestamp', async () => {
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = 'phc_test';
+        const store = new Map<string, string>();
+        const AsyncStorage = require('@react-native-async-storage/async-storage');
+        AsyncStorage.getItem.mockImplementation(async (key: string) => store.get(key) ?? null);
+        AsyncStorage.setItem.mockImplementation(async (key: string, value: string) => {
+            store.set(key, value);
+        });
+        const {
+            trackSignupCompleted,
+            readSignupCompletedAtMs,
+            setProductAnalyticsClient,
+        } = require('../../lib/productAnalytics');
+        setProductAnalyticsClient(mockClient);
+        await trackSignupCompleted({ provider: 'google' });
+        expect(mockClient.capture).toHaveBeenCalledWith(
+            'signup_completed',
+            expect.objectContaining({ provider: 'google' }),
+        );
+        const at = await readSignupCompletedAtMs();
+        expect(at).toEqual(expect.any(Number));
+        mockClient.capture.mockClear();
+        await trackSignupCompleted({ provider: 'google' });
+        expect(mockClient.capture).not.toHaveBeenCalled();
+    });
+
+    it('fires first_expense_added once with seconds_since_signup when timestamp exists', async () => {
+        process.env.EXPO_PUBLIC_POSTHOG_KEY = 'phc_test';
+        const AsyncStorage = require('@react-native-async-storage/async-storage');
+        AsyncStorage.getItem.mockImplementation(async (key: string) => {
+            if (key.includes('signup_completed_at')) return String(Date.now() - 5000);
+            return null;
+        });
+        const { trackFirstExpenseAdded, setProductAnalyticsClient } =
+            require('../../lib/productAnalytics');
+        setProductAnalyticsClient(mockClient);
+        await trackFirstExpenseAdded('g1');
+        expect(mockClient.capture).toHaveBeenCalledWith(
+            'first_expense_added',
+            expect.objectContaining({ group_id: 'g1', seconds_since_signup: 5 }),
+        );
+    });
 });

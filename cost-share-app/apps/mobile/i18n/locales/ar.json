@@ -183,6 +183,64 @@
                     "summarySuffix": "أعضاء"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "ثلاث خطوات — أقل من دقيقة لأول مصروف.",
+            "skipConfirm": "تخطّي",
+            "header": {
+                "create": "اختر قالبًا",
+                "expense": "أول مصروف",
+                "invite": "ادعُ أصدقاءك"
+            },
+            "steps": {
+                "create": "مجموعة",
+                "expense": "مصروف",
+                "invite": "دعوة"
+            },
+            "fields": {
+                "groupName": "اسم المجموعة"
+            },
+            "templates": {
+                "label": "ماذا تتقاسمون؟",
+                "trip": {
+                    "label": "رحلة",
+                    "defaultName": "رحلة نهاية الأسبوع",
+                    "defaultExpense": "وقود أو مواصلات"
+                },
+                "roommates": {
+                    "label": "زملاء السكن",
+                    "defaultName": "بيتنا",
+                    "defaultExpense": "بقالة أو فواتير"
+                },
+                "event": {
+                    "label": "مناسبة",
+                    "defaultName": "عشاء جماعي",
+                    "defaultExpense": "طعام ومشروبات"
+                },
+                "couple": {
+                    "label": "زوجان",
+                    "defaultName": "نحن اثنان",
+                    "defaultExpense": "عشاء خارجًا"
+                }
+            },
+            "expense": {
+                "hint": "سجّل ما دفعته بالفعل — يمكنك التعديل لاحقًا.",
+                "amountRequired": "أدخل مبلغًا أكبر من صفر"
+            },
+            "invite": {
+                "title": "أضف آخرين",
+                "body": "شارك رابطًا لينضم الأصدقاء إلى المجموعة ويقسموا الفاتورة التالية."
+            },
+            "skipExpenseTitle": "تخطي أول مصروف؟",
+            "skipExpenseMessage": "إضافة مصروف الآن أسرع طريقة لرؤية الأرصدة. يمكنك الإضافة لاحقًا من المجموعة.",
+            "cta": {
+                "createGroup": "متابعة",
+                "addExpense": "إضافة مصروف",
+                "skipExpense": "تخطّي الآن",
+                "shareInvite": "مشاركة رابط الدعوة",
+                "shareInviteWeb": "مشاركة أو نسخ الرابط",
+                "done": "إلى مجموعتي"
+            }
         }
     },
     "groups": {

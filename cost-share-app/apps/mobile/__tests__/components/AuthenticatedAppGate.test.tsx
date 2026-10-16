@@ -22,8 +22,8 @@ jest.mock('../../navigation/AppNavigator', () => ({
     },
 }));
 
-jest.mock('../../screens/onboarding/OnboardingCreateGroupScreen', () => ({
-    OnboardingCreateGroupScreen: ({ onDone }: { onDone: () => void }) => {
+jest.mock('../../screens/onboarding/ActivationOnboardingScreen', () => ({
+    ActivationOnboardingScreen: ({ onDone }: { onDone: () => void }) => {
         const { Text, TouchableOpacity } = require('react-native');
         return (
             <TouchableOpacity testID="create-done" onPress={onDone}>
@@ -71,7 +71,7 @@ describe('AuthenticatedAppGate', () => {
         });
     });
 
-    it('transitions from create to main after OnboardingCreateGroupScreen completes', async () => {
+    it('transitions from create to main after activation onboarding completes', async () => {
         mockRunGate.mockResolvedValue('create');
         const { getByTestId, queryByTestId } = render(<AuthenticatedAppGate />);
         await waitFor(() => expect(getByTestId('create-screen')).toBeTruthy());

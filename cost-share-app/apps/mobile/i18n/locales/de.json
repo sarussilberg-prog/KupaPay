@@ -183,6 +183,64 @@
                     "summarySuffix": "Mitglieder"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Drei Schritte — in unter einer Minute zur ersten Ausgabe.",
+            "skipConfirm": "Überspringen",
+            "header": {
+                "create": "Vorlage wählen",
+                "expense": "Erste Ausgabe",
+                "invite": "Freunde einladen"
+            },
+            "steps": {
+                "create": "Gruppe",
+                "expense": "Ausgabe",
+                "invite": "Einladen"
+            },
+            "fields": {
+                "groupName": "Gruppenname"
+            },
+            "templates": {
+                "label": "Wofür teilt ihr?",
+                "trip": {
+                    "label": "Reise",
+                    "defaultName": "Wochenendtrip",
+                    "defaultExpense": "Benzin oder Mitfahrgelegenheit"
+                },
+                "roommates": {
+                    "label": "Mitbewohner",
+                    "defaultName": "Unsere Wohnung",
+                    "defaultExpense": "Einkauf oder Nebenkosten"
+                },
+                "event": {
+                    "label": "Veranstaltung",
+                    "defaultName": "Gruppenessen",
+                    "defaultExpense": "Essen & Getränke"
+                },
+                "couple": {
+                    "label": "Paar",
+                    "defaultName": "Wir zwei",
+                    "defaultExpense": "Essen gehen"
+                }
+            },
+            "expense": {
+                "hint": "Tragt etwas ein, das ihr schon bezahlt habt — Details später änderbar.",
+                "amountRequired": "Betrag größer als null eingeben"
+            },
+            "invite": {
+                "title": "Andere dazu holen",
+                "body": "Link teilen, damit Freunde der Gruppe beitreten und die nächste Rechnung teilen."
+            },
+            "skipExpenseTitle": "Erste Ausgabe überspringen?",
+            "skipExpenseMessage": "Eine Ausgabe jetzt ist der schnellste Weg zu Salden. Später jederzeit in der Gruppe möglich.",
+            "cta": {
+                "createGroup": "Weiter",
+                "addExpense": "Ausgabe hinzufügen",
+                "skipExpense": "Vorerst überspringen",
+                "shareInvite": "Einladungslink teilen",
+                "shareInviteWeb": "Teilen oder Link kopieren",
+                "done": "Zu meiner Gruppe"
+            }
         }
     },
     "groups": {
