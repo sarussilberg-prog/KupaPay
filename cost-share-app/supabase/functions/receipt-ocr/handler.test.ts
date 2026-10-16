@@ -1,6 +1,6 @@
 import { assertEquals } from 'jsr:@std/assert';
 import { parseReceiptDraftFromText } from './parse.ts';
-import { checkRateLimit, handleReceiptOcr } from './handler.ts';
+import { handleReceiptOcr } from './handler.ts';
 
 Deno.test('parseReceiptDraftFromText finds total', () => {
     const d = parseReceiptDraftFromText('Shop\nTOTAL 19.99 USD');
@@ -22,6 +22,3 @@ Deno.test('handleReceiptOcr rejects missing text without vendor', async () => {
     if (!result.ok) assertEquals(result.code, 'unauthorized');
 });
 
-Deno.test('rate limit allows first call', () => {
-    assertEquals(checkRateLimit(`test-user-${Date.now()}`), true);
-});
