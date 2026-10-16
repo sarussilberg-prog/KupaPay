@@ -24,11 +24,15 @@ BEGIN
     SET LOCAL session_replication_role = origin;
     PERFORM public.test_set_authenticated(v_mem);
 
-    UPDATE public.groups SET is_active = FALSE WHERE id = v_group;
-    GET DIAGNOSTICS v_rows = ROW_COUNT;
-    IF v_rows > 0 THEN
+    BEGIN
+        UPDATE public.groups SET is_active = FALSE WHERE id = v_group;
         RAISE EXCEPTION 'Case A failed: member must not deactivate group';
-    END IF;
+    EXCEPTION WHEN insufficient_privilege OR check_violation OR OTHERS THEN
+        IF SQLERRM NOT LIKE '%group_deactivate_creator_only%'
+           AND SQLERRM NOT LIKE '%42501%' THEN
+            RAISE;
+        END IF;
+    END;
 
     PERFORM public.test_set_authenticated(v_owner);
     UPDATE public.groups SET is_active = FALSE WHERE id = v_group;
