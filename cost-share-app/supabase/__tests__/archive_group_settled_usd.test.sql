@@ -25,6 +25,10 @@ DECLARE
     v_payload JSONB;
     v_group_rows INT;
     v_legacy_payer_net NUMERIC;
+    k_jwt_sub CONSTANT text := 'request.jwt.claim.sub';
+    k_jwt_claims CONSTANT text := 'request.jwt.claims';
+    k_role CONSTANT text := 'role';
+    k_authenticated CONSTANT text := 'authenticated';
 BEGIN
     INSERT INTO auth.users (id, email) VALUES (v_payer, 'arch-usd-p@test.local');
 
@@ -68,9 +72,9 @@ BEGIN
         RAISE EXCEPTION 'Sanity failed: legacy formula should show open balance, got %', v_legacy_payer_net;
     END IF;
 
-    PERFORM set_config('request.jwt.claim.sub', v_payer::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_payer::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM set_config(k_jwt_sub, v_payer::text, TRUE);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_payer::text)::text, TRUE);
+    PERFORM set_config(k_role, k_authenticated, TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_payer);
     SELECT COUNT(*) INTO v_group_rows
@@ -81,8 +85,8 @@ BEGIN
         RAISE EXCEPTION 'Canonical inputs: payer should be settled (group omitted), got % rows', v_group_rows;
     END IF;
 
-    PERFORM set_config('request.jwt.claim.sub', v_payer::text, true);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_payer::text)::text, true);
+    PERFORM set_config(k_jwt_sub, v_payer::text, true);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_payer::text)::text, true);
 
     PERFORM public.archive_group(v_group);
 
@@ -93,8 +97,8 @@ BEGIN
         RAISE EXCEPTION 'archive_group did not insert archive row for payer';
     END IF;
 
-    PERFORM set_config('request.jwt.claim.sub', v_borrow::text, true);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_borrow::text)::text, true);
+    PERFORM set_config(k_jwt_sub, v_borrow::text, true);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_borrow::text)::text, true);
     PERFORM public.archive_group(v_group);
 
     RAISE NOTICE 'archive_group_settled_usd.test.sql — all cases passed';

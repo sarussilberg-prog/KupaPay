@@ -28,6 +28,10 @@ DECLARE
     v_b       CONSTANT UUID := '00000000-0000-0000-0000-0000005317b2';
     v_expense CONSTANT UUID := '00000000-0000-0000-0000-0000005317e1';
     v_sum NUMERIC; v_a_net NUMERIC; v_b_net NUMERIC; v_payload JSONB;
+    k_jwt_sub CONSTANT text := 'request.jwt.claim.sub';
+    k_jwt_claims CONSTANT text := 'request.jwt.claims';
+    k_role CONSTANT text := 'role';
+    k_authenticated CONSTANT text := 'authenticated';
 BEGIN
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Ari', 'ILS', TRUE, 'tt_ov_a'), (v_b, 'Bar', 'ILS', TRUE, 'tt_ov_b');
@@ -42,9 +46,9 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
-    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM set_config(k_jwt_sub, v_a::text, TRUE);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config(k_role, k_authenticated, TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT COALESCE(SUM((n->>'net')::numeric),0) INTO v_sum
@@ -84,6 +88,10 @@ DECLARE
     v_b       CONSTANT UUID := '00000000-0000-0000-0000-0000005417b2';
     v_expense CONSTANT UUID := '00000000-0000-0000-0000-0000005417e1';
     v_group_present BOOLEAN; v_payload JSONB;
+    k_jwt_sub CONSTANT text := 'request.jwt.claim.sub';
+    k_jwt_claims CONSTANT text := 'request.jwt.claims';
+    k_role CONSTANT text := 'role';
+    k_authenticated CONSTANT text := 'authenticated';
 BEGIN
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Ari', 'ILS', TRUE, 'tt_or_a'), (v_b, 'Bar', 'ILS', TRUE, 'tt_or_b');
@@ -96,9 +104,9 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
-    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM set_config(k_jwt_sub, v_a::text, TRUE);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config(k_role, k_authenticated, TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT EXISTS(
@@ -131,6 +139,10 @@ DECLARE
     v_c       CONSTANT UUID := '00000000-0000-0000-0000-0000005517c3';
     v_expense CONSTANT UUID := '00000000-0000-0000-0000-0000005517e1';
     v_sum NUMERIC; v_c_net NUMERIC; v_a_net NUMERIC; v_c_in_members BOOLEAN; v_payload JSONB;
+    k_jwt_sub CONSTANT text := 'request.jwt.claim.sub';
+    k_jwt_claims CONSTANT text := 'request.jwt.claims';
+    k_role CONSTANT text := 'role';
+    k_authenticated CONSTANT text := 'authenticated';
 BEGIN
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Ari', 'ILS', TRUE,  'tt_dp_a'),
@@ -146,9 +158,9 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
-    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM set_config(k_jwt_sub, v_a::text, TRUE);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config(k_role, k_authenticated, TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT COALESCE(SUM((n->>'net')::numeric),0) INTO v_sum
@@ -194,6 +206,10 @@ DECLARE
     v_e1    CONSTANT UUID := '00000000-0000-0000-0000-0000005617e1';
     v_e2    CONSTANT UUID := '00000000-0000-0000-0000-0000005617e2';
     v_ils_sum NUMERIC; v_usd_sum NUMERIC; v_a_ils NUMERIC; v_a_usd NUMERIC; v_b_ils NUMERIC; v_b_usd NUMERIC; v_payload JSONB;
+    k_jwt_sub CONSTANT text := 'request.jwt.claim.sub';
+    k_jwt_claims CONSTANT text := 'request.jwt.claims';
+    k_role CONSTANT text := 'role';
+    k_authenticated CONSTANT text := 'authenticated';
 BEGIN
     INSERT INTO public.profiles (id, name, default_currency, is_active, invite_token) VALUES
         (v_a, 'Ari', 'ILS', TRUE, 'tt_mc_a'), (v_b, 'Bar', 'ILS', TRUE, 'tt_mc_b');
@@ -209,9 +225,9 @@ BEGIN
 
     INSERT INTO auth.users (id, email) VALUES (v_a, 'adv-' || replace(v_a::text, '-', '') || '@test.local')
         ON CONFLICT DO NOTHING;
-    PERFORM set_config('request.jwt.claim.sub', v_a::text, TRUE);
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text)::text, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    PERFORM set_config(k_jwt_sub, v_a::text, TRUE);
+    PERFORM set_config(k_jwt_claims, json_build_object('sub', v_a::text)::text, TRUE);
+    PERFORM set_config(k_role, k_authenticated, TRUE);
 
     v_payload := public.get_user_simplified_inputs(v_a);
     SELECT COALESCE(SUM((n->>'net')::numeric),0) INTO v_ils_sum FROM jsonb_array_elements(v_payload->'groups') grp,
