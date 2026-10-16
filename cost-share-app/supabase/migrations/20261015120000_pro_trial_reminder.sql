@@ -33,5 +33,5 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.register_pro_trial_reminder(TIMESTAMPTZ) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.register_pro_trial_reminder(TIMESTAMPTZ) FROM PUBLIC; -- safe-breaking: new RPC; no shipped app calls it yet
 GRANT EXECUTE ON FUNCTION public.register_pro_trial_reminder(TIMESTAMPTZ) TO authenticated;
