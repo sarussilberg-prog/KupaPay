@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, Modal, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import { View, Modal, ScrollView, TouchableOpacity, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
+import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { colors } from '../../theme';
 import type { OpenBalancesSummary } from '../../services/account.service';
 
@@ -30,6 +32,7 @@ export function DeleteAccountWarningSheet({
     openBalances,
 }: Props) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     if (!visible) return null;
 
     const showBalanceBanner = openBalances?.hasOpenBalances === true;
@@ -45,7 +48,7 @@ export function DeleteAccountWarningSheet({
                     <View className="items-center pt-2 pb-1">
                         <View className="w-10 h-1 bg-gray-300 rounded-full" />
                     </View>
-                    <Text className="text-xl font-bold text-red-600 px-5 mt-2 mb-3 text-start">
+                    <Text className="text-xl font-bold text-red-600 px-5 mt-2 mb-3">
                         {t('deleteAccount.warningTitle')}
                     </Text>
 
@@ -54,10 +57,10 @@ export function DeleteAccountWarningSheet({
                             className="mx-5 mb-3 p-3 rounded-xl bg-red-50 border border-red-200"
                             testID="delete-account-balance-banner"
                         >
-                            <Text className="text-sm font-semibold text-red-700 mb-1 text-start">
+                            <Text className="text-sm font-semibold text-red-700 mb-1">
                                 {t('deleteAccount.openBalancesWarningTitle')}
                             </Text>
-                            <Text className="text-sm text-red-700 leading-5 text-start">
+                            <Text className="text-sm text-red-700 leading-5">
                                 {t('deleteAccount.openBalancesWarningBody')}
                             </Text>
                             <TouchableOpacity
@@ -74,9 +77,9 @@ export function DeleteAccountWarningSheet({
 
                     <ScrollView className="px-5">
                         {BULLET_KEYS.map((key) => (
-                            <View key={key} className="flex-row items-start mb-3">
+                            <View key={key} style={rtlRowStyle(isRtl)} className="items-start mb-3">
                                 <AppIcon name="alert-circle-outline" size={18} color={colors.error} />
-                                <Text className="flex-1 ms-2 text-base text-gray-700 leading-6 text-start">
+                                <Text className="flex-1 ms-2 text-base text-gray-700 leading-6">
                                     {t(key, { email: SUPPORT_EMAIL })}
                                 </Text>
                             </View>
