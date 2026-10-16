@@ -12,3 +12,8 @@ export function buildInviteUrl(kind: InviteLinkKind, token: string): string {
 export function buildSettleReminderUrl(token: string): string {
     return `${APP_WEB_ORIGIN}/sr/${token}`;
 }
+
+/** Public read-only balance page (`/b/<public_balance_token>` — not a join link). */
+export function buildPublicGroupBalanceUrl(publicBalanceToken: string): string {
+    return `${APP_WEB_ORIGIN}/b/${publicBalanceToken}`;
+}

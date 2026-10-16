@@ -22,7 +22,7 @@ on:
         type: boolean
         default: true
       mobile_cd_sha:
-        description: origin/dev SHA recorded in mobile-cd-baseline after success
+        description: origin/dev SHA recorded in MOBILE_CD_BASELINE after success
         type: string
         default: ''
 
@@ -35,7 +35,8 @@ jobs:
     name: Build & submit to TestFlight
     runs-on: macos-latest
     permissions:
-      contents: write
+      contents: read
+      actions: write
     defaults:
       run:
         working-directory: cost-share-app/apps/mobile
@@ -50,12 +51,14 @@ jobs:
         id: preflight
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
         run: |
           set -euo pipefail
-          if [ -z "${EXPO_TOKEN:-}" ] || [ -z "${ASC_API_KEY_P8:-}" ]; then
+          if [ -z "${EXPO_TOKEN:-}" ] || [ -z "${ASC_API_KEY_ID:-}" ] || [ -z "${ASC_API_KEY_ISSUER_ID:-}" ] || [ -z "${ASC_API_KEY_P8:-}" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping TestFlight — set EXPO_TOKEN and ASC_API_KEY_P8"
+            echo "::notice::Skipping TestFlight — set EXPO_TOKEN, ASC_API_KEY_ID, ASC_API_KEY_ISSUER_ID, and ASC_API_KEY_P8"
             exit 0
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -127,19 +130,46 @@ jobs:
           bash scripts/eas-submit-testflight.sh ./build-kupapay.ipa
           EXPECTED="$(eas build:version:get -p ios 2>/dev/null | grep -oE '[0-9]+$' || jq -r '.expo.ios.buildNumber' app.json)"
           node scripts/asc-poll-build.mjs "$EXPECTED"
-          NOTES="$(node scripts/changelog-testflight-notes.mjs)"
-          node scripts/asc-set-testflight-notes.mjs "$EXPECTED" "$NOTES"
-          node scripts/record-testflight-version.mjs
-          node scripts/record-mobile-cd-baseline.mjs ios "${{ inputs.mobile_cd_sha }}"
+          echo "Verified build ${EXPECTED} in App Store Connect (TestFlight processing pipeline)"
 
-      - name: Commit mobile CD baselines
+      - name: TestFlight release notes (since last baseline)
         if: steps.preflight.outputs.ready == 'true'
-        working-directory: ${{ github.workspace }}
+        id: tf_notes
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cost-share-app/packages/shared/version.json cost-share-app/apps/mobile/mobile-cd-baseline.json
-          if git diff --staged --quiet; then exit 0; fi
-          git commit -m "chore: record TestFlight + mobile CD baseline [skip ci]"
-          git push origin HEAD:"${{ inputs.git_ref || github.ref_name }}"
+          chmod +x scripts/ci-mobile-cd-load-baseline.sh
+          export MOBILE_CD_BASELINE_JSON="$(bash scripts/ci-mobile-cd-load-baseline.sh)"
+          NOTES="$(node scripts/changelog-testflight-notes.mjs)"
+          {
+            echo 'notes<<EOF'
+            printf '%s\n' "$NOTES"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          EXPECTED="$(eas build:version:get -p ios 2>/dev/null | grep -oE '[0-9]+$' || jq -r '.expo.ios.buildNumber' app.json)"
+          echo "build_number=${EXPECTED}" >> "$GITHUB_OUTPUT"
+
+      - name: Apply TestFlight “What to Test”
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: |
+          source scripts/ci-export-asc-env.sh
+          node scripts/asc-set-testflight-notes.mjs "${{ steps.tf_notes.outputs.build_number }}" "${{ steps.tf_notes.outputs.notes }}"
+
+      - name: Persist mobile CD baseline (non-fatal)
+        if: steps.preflight.outputs.ready == 'true'
+        continue-on-error: true
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          MOBILE_CD_SHA: ${{ inputs.mobile_cd_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/persist-mobile-cd-baseline.sh
+          RELEASE_VER="$(jq -r .version ../../packages/shared/version.json)"
+          bash scripts/persist-mobile-cd-baseline.sh ios "${MOBILE_CD_SHA}" "$RELEASE_VER"

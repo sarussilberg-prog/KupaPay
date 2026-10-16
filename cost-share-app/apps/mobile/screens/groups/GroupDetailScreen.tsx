@@ -58,7 +58,7 @@ import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
 import { TripBudgetSection } from '../../components/budget/TripBudgetSection';
-import { shareGroupInvite } from '../../services/invite.service';
+import { shareGroupBalanceLink, shareGroupInvite } from '../../services/invite.service';
 import { buildFeed } from '../../services/feed';
 import { useGroupMessagesRealtime } from '../../hooks/useGroupMessagesRealtime';
 import { useGroupExpensesRealtime } from '../../hooks/useGroupExpensesRealtime';
@@ -745,6 +745,11 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         void shareGroupInvite(groupId);
     }, [groupId]);
 
+    const handleShareBalanceFromMenu = useCallback(() => {
+        setMenuOpen(false);
+        void shareGroupBalanceLink(groupId);
+    }, [groupId]);
+
     const handleMembersPress = useCallback(() => setMembersSheetOpen(true), []);
 
     const handleMessageEdit = useCallback(
@@ -1281,6 +1286,11 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             label={t('groups.share.inviteOption')}
                             onPress={handleShareFromMenu}
                             testID="group-menu-share"
+                        />
+                        <DetailMenuRow
+                            label={t('groups.share.balanceLinkOption')}
+                            onPress={handleShareBalanceFromMenu}
+                            testID="group-menu-share-balance"
                         />
                         <DetailMenuRow
                             label={t('groups.share.exportOption')}

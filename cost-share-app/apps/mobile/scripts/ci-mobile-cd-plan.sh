@@ -4,7 +4,7 @@ set -euo pipefail
 
 MOBILE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$MOBILE_ROOT/../.." && pwd)"
-BASELINE="$MOBILE_ROOT/mobile-cd-baseline.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WATCH=(
   cost-share-app/apps/mobile
   cost-share-app/packages/shared
@@ -20,11 +20,13 @@ git fetch origin "$GIT_REF" --quiet
 HEAD_SHA="$(git rev-parse "origin/${GIT_REF}")"
 TODAY="$(TZ=Asia/Jerusalem date +%Y-%m-%d)"
 
+BASELINE_JSON="$(MOBILE_CD_BASELINE_JSON="${MOBILE_CD_BASELINE_JSON:-}" bash "$SCRIPT_DIR/ci-mobile-cd-load-baseline.sh")"
+
 should_run_platform() {
   local platform=$1
   local last_sha last_date
-  last_sha="$(jq -r ".${platform}.lastSuccessfulSha // empty" "$BASELINE")"
-  last_date="$(jq -r ".${platform}.lastSuccessfulDateJerusalem // empty" "$BASELINE")"
+  last_sha="$(echo "$BASELINE_JSON" | jq -r ".${platform}.lastSuccessfulSha // empty")"
+  last_date="$(echo "$BASELINE_JSON" | jq -r ".${platform}.lastSuccessfulDateJerusalem // empty")"
 
   if [[ "$ENFORCE_DAILY_LIMIT" == "true" && -n "$last_date" && "$last_date" == "$TODAY" ]]; then
     echo "::notice::Skip ${platform} — already built successfully on ${TODAY} (Asia/Jerusalem)"
@@ -33,7 +35,7 @@ should_run_platform() {
   fi
 
   if [[ -z "$last_sha" || "$last_sha" == "null" ]]; then
-    echo "::notice::Skip ${platform} — no prior successful build in mobile-cd-baseline.json (use manual TestFlight / Play workflow once)"
+    echo "::notice::Skip ${platform} — no prior successful build in MOBILE_CD_BASELINE (run TestFlight / Play workflow once to seed variable)"
     echo false
     return 0
   fi

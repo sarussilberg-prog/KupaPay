@@ -25,7 +25,7 @@ import { IconLabel } from './primitives/IconLabel';
 import { GroupCardMetaLine } from './GroupCardMetaLine';
 import { ListRow } from './primitives/ListRow';
 import { colors } from '../theme';
-import { shareGroupInvite } from '../services/invite.service';
+import { shareGroupBalanceLink, shareGroupInvite } from '../services/invite.service';
 import {
     archiveGroup,
     unarchiveGroup,
@@ -78,6 +78,11 @@ function GroupCardBase({
     const handleShare = useCallback(() => {
         closeMenu();
         void shareGroupInvite(group.id);
+    }, [closeMenu, group.id]);
+
+    const handleShareBalance = useCallback(() => {
+        closeMenu();
+        void shareGroupBalanceLink(group.id);
     }, [closeMenu, group.id]);
 
     const handleEdit = useCallback(() => {
@@ -323,6 +328,11 @@ function GroupCardBase({
                                 label={t('groups.share.inviteOption')}
                                 onPress={handleShare}
                                 testID="group-card-menu-share"
+                            />
+                            <MenuRow
+                                label={t('groups.share.balanceLinkOption')}
+                                onPress={handleShareBalance}
+                                testID="group-card-menu-share-balance"
                             />
                             <MenuRow
                                 label={t('groups.share.exportOption')}

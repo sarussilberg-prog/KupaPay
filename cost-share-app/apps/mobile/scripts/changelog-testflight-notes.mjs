@@ -59,7 +59,28 @@ function formatNotes(entries, maxChars = 4000) {
 const sinceField =
   process.env.MOBILE_RELEASE_NOTES_SINCE_FIELD?.trim() || 'lastTestFlightInternalVersion';
 const versionJson = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
+
+function sinceFromBaseline() {
+  const raw = process.env.MOBILE_CD_BASELINE_JSON?.trim();
+  if (!raw) return null;
+  try {
+    const baseline = JSON.parse(raw);
+    const platform =
+      sinceField === 'lastPlayInternalVersion'
+        ? 'android'
+        : sinceField === 'lastTestFlightInternalVersion'
+          ? 'ios'
+          : null;
+    if (!platform) return null;
+    const v = baseline[platform]?.lastReleaseNotesVersion;
+    return typeof v === 'string' && v.trim() ? v.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
 const since =
+  sinceFromBaseline() ||
   (typeof versionJson[sinceField] === 'string' && versionJson[sinceField].trim()) ||
   versionJson.version;
 const markdown = fs.readFileSync(changelogPath, 'utf8');
