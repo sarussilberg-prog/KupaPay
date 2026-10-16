@@ -1189,6 +1189,12 @@
         },
         "recurring": {
             "lockedBody": "Automate rent, subscriptions, and other repeating expenses with Pro."
+        },
+        "smartReminder": {
+            "sheetTitle": "Smart reminders",
+            "enable": "Automatic settle-up reminders",
+            "lockedBody": "Pro can nudge members to settle on a schedule you choose (minimum every 3 days).",
+            "intervalDays": "Every {{count}} days"
         }
     },
     "remind": {

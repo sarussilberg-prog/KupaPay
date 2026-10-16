@@ -1258,6 +1258,12 @@
         },
         "recurring": {
             "lockedBody": "Automatisieren Sie Miete, Abos und andere wiederkehrende Ausgaben mit Pro."
+        },
+        "smartReminder": {
+            "sheetTitle": "Intelligente Erinnerungen",
+            "enable": "Automatische Ausgleichs-Erinnerungen",
+            "lockedBody": "Pro sendet Erinnerungen nach Ihrem Intervall (mindestens alle 3 Tage).",
+            "intervalDays": "Alle {{count}} Tage"
         }
     },
     "updateRequired": {

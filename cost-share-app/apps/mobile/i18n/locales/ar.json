@@ -1340,6 +1340,12 @@
         },
         "recurring": {
             "lockedBody": "أتمتة الإيجار والاشتراكات والمصروفات المتكررة الأخرى مع Pro."
+        },
+        "smartReminder": {
+            "sheetTitle": "تذكيرات ذكية",
+            "enable": "تذكيرات تلقائية للتسوية",
+            "lockedBody": "Pro يرسل تذكيرات حسب الجدول (3 أيام كحد أدنى).",
+            "intervalDays": "كل {{count}} أيام"
         }
     },
     "updateRequired": {

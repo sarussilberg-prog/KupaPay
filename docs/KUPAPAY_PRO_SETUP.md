@@ -91,3 +91,14 @@ Deploy `pro-recurring-expense-dispatch` and call it daily (same `PUSH_WEBHOOK_SE
 | Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
 
 Apply migration `20261016120000_recurring_expenses.sql` on dev before production.
+
+### Smart payment reminders cron (Pro v2)
+
+Deploy `pro-smart-reminder-dispatch` and call it daily (same `PUSH_WEBHOOK_SECRET`):
+
+| Item | Value |
+|---|---|
+| URL | `https://<project-ref>.supabase.co/functions/v1/pro-smart-reminder-dispatch` |
+| Header | `x-webhook-secret: <PUSH_WEBHOOK_SECRET>` |
+
+Apply migration `20261016130000_smart_payment_reminders.sql` on dev before production.
