@@ -131,7 +131,7 @@ BEGIN
     DELETE FROM auth.sessions WHERE user_id = v_user_id;
 
     UPDATE public.device_tokens
-        SET disabled_at = NOW(), updated_at = NOW()
+        SET disabled_at = NOW()
         WHERE user_id = v_user_id
           AND disabled_at IS NULL;
 
