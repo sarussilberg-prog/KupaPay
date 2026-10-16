@@ -40,16 +40,17 @@ jest.mock('../../../services/settlements.service', () => ({
 }));
 
 jest.mock('../../../hooks/useSimplifiedDebts', () => ({
-    useSimplifiedDebts: () => ({
-        data: {
-            byGroupCurrency: new Map(),
-            transfers: [],
-            userTransfers: [],
-            groupRollups: new Map(),
-            friendBalances: new Map(),
-            unbalanced: [],
-        },
+    useSimplifiedDebts: jest.fn(() => ({
+        data: undefined,
         isLoading: false,
+        isError: false,
+    })),
+}));
+
+jest.mock('../../../lib/platformAlert', () => ({
+    platformAlert: jest.fn((_title: string, _msg: unknown, buttons: any[]) => {
+        const destructive = (buttons ?? []).find((b) => b.style === 'destructive');
+        destructive?.onPress?.();
     }),
 }));
 
