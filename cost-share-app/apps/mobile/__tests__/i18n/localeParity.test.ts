@@ -27,6 +27,15 @@ describe('mobile locale files', () => {
     });
 
     const baseFlat = flattenLocale(loadLocale(BASE_LOCALE));
+    const heFlat = flattenLocale(loadLocale('he'));
+
+    it('English includes Hebrew _two/_many plural keys (KI-013)', () => {
+        const pluralSuffix = /_(two|many)$/;
+        const missingInEn = Object.keys(heFlat).filter(
+            (key) => pluralSuffix.test(key) && !(key in baseFlat),
+        );
+        expect(missingInEn).toEqual([]);
+    });
 
     it.each(SUPPORTED_LANGUAGES.filter((l) => l !== BASE_LOCALE))(
         '%s has all base keys and matching interpolation placeholders',
