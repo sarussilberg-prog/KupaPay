@@ -17,3 +17,8 @@ export function buildSettleReminderUrl(token: string): string {
 export function buildPublicGroupBalanceUrl(publicBalanceToken: string): string {
     return `${APP_WEB_ORIGIN}/b/${publicBalanceToken}`;
 }
+
+/** Single-expense share preview for non-members (#401). */
+export function buildExpenseShareUrl(shareToken: string): string {
+    return `${APP_WEB_ORIGIN}/e/${shareToken}`;
+}

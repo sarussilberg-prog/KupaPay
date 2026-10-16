@@ -121,6 +121,7 @@ export const expenseFromRow = (r: Row): Expense => ({
     // to inference when this is undefined.
     splitMode: isExpenseSplitMode(r.split_mode) ? r.split_mode : undefined,
     isDeleted: r.is_deleted as boolean,
+    shareToken: (r.share_token as string) ?? undefined,
     createdAt: toDate(r.created_at),
     updatedAt: toDate(r.updated_at),
 });
