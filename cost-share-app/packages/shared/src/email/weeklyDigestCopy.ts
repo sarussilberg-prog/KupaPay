@@ -1,4 +1,5 @@
-import type { Language } from '../i18n/languages';
+/** Mirror {@link ../i18n/languages#Language} — inlined for Deno edge bundles. */
+type Language = 'en' | 'he' | 'ru' | 'ar' | 'fr' | 'es' | 'de';
 
 export type WeeklyDigestCopy = { subject: string; pushTitle: string; pushBody: string; bodyHtml: string };
 
