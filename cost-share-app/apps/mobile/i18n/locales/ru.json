@@ -1271,6 +1271,7 @@
             "upgrade": "Перейти на Pro",
             "pickerLabel": "Суммы в {{currency}}",
             "ratesMissing": "Курсы валют сейчас недоступны.",
+            "ratesAsOf": "Курсы на {{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (было {{original}})"
         },
         "recurring": {

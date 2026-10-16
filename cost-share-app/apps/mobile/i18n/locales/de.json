@@ -1253,6 +1253,7 @@
             "upgrade": "Auf Pro upgraden",
             "pickerLabel": "Beträge in {{currency}}",
             "ratesMissing": "Wechselkurse sind derzeit nicht verfügbar.",
+            "ratesAsOf": "Kurse vom {{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (war {{original}})"
         },
         "recurring": {

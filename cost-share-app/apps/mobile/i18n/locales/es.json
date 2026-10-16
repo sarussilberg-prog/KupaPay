@@ -1255,6 +1255,7 @@
             "upgrade": "Mejorar a Pro",
             "pickerLabel": "Importes en {{currency}}",
             "ratesMissing": "Los tipos de cambio no están disponibles ahora.",
+            "ratesAsOf": "Tipos de cambio al {{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (antes {{original}})"
         },
         "recurring": {

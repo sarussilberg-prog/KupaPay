@@ -1184,6 +1184,7 @@
             "upgrade": "Upgrade to Pro",
             "pickerLabel": "Showing amounts in {{currency}}",
             "ratesMissing": "Exchange rates are unavailable right now.",
+            "ratesAsOf": "Rates as of {{date}}",
             "row": "{{from}} → {{to}}: {{amount}} {{currency}} (was {{original}})"
         },
         "recurring": {
