@@ -68,7 +68,7 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 | KI-031 | resolved | supabase | **`admin_list_support_messages` / `admin_update_support_message_status` missing admin gate** | Any authenticated user could read/update all support tickets via RPC. Fixed in `20261010230000_security_hardening.sql` + regression SQL test. |
 | KI-032 | resolved | supabase | **Friend `profiles.invite_token` enumerable via public SELECT** | PostgREST returned `invite_token` for every profile row. Fixed: column ACL hides token; `get_my_invite_token()` for self; new tokens 14 chars (`generate_invite_token`). |
 | KI-033 | resolved | supabase | **`expense-receipts` Storage bucket is public read** | Fixed 2026-10-11: private bucket + member SELECT RLS (`20261011011000`), DB URL→path migration, signed URLs in mobile + `apps/web/utils/expenseReceiptSignedUrl.ts`. Guard test: `apps/mobile/__tests__/guards/expenseReceiptsMigration.guard.test.ts`. |
-| KI-034 | open | supabase | **Account deletion: verify `auth.refresh_tokens.user_id` type on prod** | `20261010220000_delete_my_account_sessions.sql` deletes with `user_id::text`; confirm matches prod `auth` schema after deploy (Supabase version drift). |
+| KI-034 | partial | supabase | **Account deletion: verify `auth.refresh_tokens.user_id` type on prod** | Session revocation covered by `delete_my_account.test.sql` + [DELETE_ACCOUNT_SESSION_REVOCATION.md](./DELETE_ACCOUNT_SESSION_REVOCATION.md). **Remaining:** run prod `information_schema` check after deploy. |
 
 ---
 
