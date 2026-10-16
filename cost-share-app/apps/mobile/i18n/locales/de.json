@@ -64,6 +64,9 @@
             "balances": "Salden"
         },
         "signInError": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+        "signInWithEmailMagicLink": "Mit E-Mail fortfahren",
+        "emailMagicLinkStubHint": "Anmeldung per E-Mail-Link kommt demnächst.",
+        "emailPlaceholder": "deine@email.de",
         "googleSignInSheetTitle": "Mit Google anmelden",
         "googleSignInSheetHint": "Tippe unten – die Kontoauswahl öffnet sich über diesem Fenster.",
         "signInWithEmailMagicLink": "Mit E-Mail fortfahren",

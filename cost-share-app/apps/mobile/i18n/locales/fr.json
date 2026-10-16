@@ -64,6 +64,9 @@
             "balances": "Soldes"
         },
         "signInError": "Échec de la connexion. Veuillez réessayer.",
+        "signInWithEmailMagicLink": "Continuer avec l'e-mail",
+        "emailMagicLinkStubHint": "La connexion par lien e-mail arrive bientôt.",
+        "emailPlaceholder": "vous@exemple.com",
         "googleSignInSheetTitle": "Se connecter avec Google",
         "googleSignInSheetHint": "Appuyez ci-dessous : la sélection du compte s'ouvre par-dessus cette fenêtre.",
         "signInWithEmailMagicLink": "Continuer avec e-mail",

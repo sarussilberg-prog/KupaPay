@@ -64,6 +64,9 @@
             "balances": "יתרות"
         },
         "signInError": "הכניסה נכשלה. אנא נסו שוב.",
+        "signInWithEmailMagicLink": "המשך עם אימייל",
+        "emailMagicLinkStubHint": "כניסה בקישור לאימייל תגיע בקרוב.",
+        "emailPlaceholder": "you@example.com",
         "googleSignInSheetTitle": "התחברות עם Google",
         "googleSignInSheetHint": "לחצו למטה — בחירת החשבון תיפתח מעל המסך הזה.",
         "signInWithEmailMagicLink": "המשך עם אימייל",

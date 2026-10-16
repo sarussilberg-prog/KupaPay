@@ -64,6 +64,9 @@
             "balances": "الأرصدة"
         },
         "signInError": "فشل تسجيل الدخول. يُرجى المحاولة مرة أخرى.",
+        "signInWithEmailMagicLink": "المتابعة بالبريد الإلكتروني",
+        "emailMagicLinkStubHint": "تسجيل الدخول برابط البريد قادم قريبًا.",
+        "emailPlaceholder": "you@example.com",
         "googleSignInSheetTitle": "تسجيل الدخول باستخدام Google",
         "googleSignInSheetHint": "اضغط أدناه — ستظهر شاشة اختيار الحساب فوق هذه النافذة.",
         "signInWithEmailMagicLink": "المتابعة بالبريد",

@@ -64,6 +64,9 @@
             "balances": "Балансы"
         },
         "signInError": "Не удалось войти. Попробуйте ещё раз.",
+        "signInWithEmailMagicLink": "Продолжить с email",
+        "emailMagicLinkStubHint": "Вход по ссылке на email скоро появится.",
+        "emailPlaceholder": "you@example.com",
         "googleSignInSheetTitle": "Вход через Google",
         "googleSignInSheetHint": "Нажмите ниже — выбор аккаунта откроется поверх этого окна.",
         "signInWithEmailMagicLink": "Продолжить с email",
