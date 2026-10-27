@@ -16,6 +16,7 @@ import {
 } from '../services/deepLinks.service';
 import { isAuthCallbackUrl } from '../services/auth.service';
 import { persistPendingInvite, clearPersistedPendingInvite } from '../lib/pendingInviteStorage';
+import { shouldClearPendingInviteAfterRedemption } from '../lib/inviteRedemptionClear';
 
 export function useInviteRedemption(): void {
     const incomingUrl = Linking.useURL();
@@ -35,6 +36,10 @@ export function useInviteRedemption(): void {
         if (link.kind === 'settleReminder') {
             if (session) {
                 void handleInviteLink(link, navigation, queryClient);
+            } else {
+                const pending = { kind: link.kind, token: link.token };
+                setPendingInvite(pending);
+                void persistPendingInvite(pending);
             }
             return;
         }
@@ -51,9 +56,11 @@ export function useInviteRedemption(): void {
     // Replay pending invite once signed in (AppNavigator mounted — navigation available)
     useEffect(() => {
         if (!session || !pendingInvite) return;
-        void handleInviteLink(pendingInvite, navigation, queryClient).finally(() => {
-            setPendingInvite(null);
-            void clearPersistedPendingInvite();
+        void handleInviteLink(pendingInvite, navigation, queryClient).then(result => {
+            if (shouldClearPendingInviteAfterRedemption(result)) {
+                setPendingInvite(null);
+                void clearPersistedPendingInvite();
+            }
         });
         // Intentionally only re-run when session flips on or pendingInvite changes.
     }, [session, pendingInvite, navigation, queryClient, setPendingInvite]);

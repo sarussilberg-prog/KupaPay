@@ -826,4 +826,5 @@ export type Profile = User;
 export type PendingInvite =
     | { kind: 'friend'; token: string }
     | { kind: 'group'; token: string }
-    | { kind: 'expenseShare'; token: string };
+    | { kind: 'expenseShare'; token: string }
+    | { kind: 'settleReminder'; token: string };

@@ -21,7 +21,8 @@ import { INVITE_TOKEN_RE } from '../lib/inviteToken';
 export type InviteRedemptionResult =
     | { kind: 'friend' }
     | { kind: 'group'; groupId: string }
-    | { kind: 'settleReminder' };
+    | { kind: 'settleReminder' }
+    | { kind: 'expenseShare' };
 
 export type InviteLink =
     | { kind: 'friend'; token: string }
@@ -126,7 +127,7 @@ async function redeemInviteLink(
             return null;
         }
         showInfoToast('expenses.shareLinkOpenApp');
-        return null;
+        return { kind: 'expenseShare' as const };
     }
 
     if (link.kind === 'settleReminder') {

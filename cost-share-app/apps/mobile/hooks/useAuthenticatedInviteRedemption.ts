@@ -13,6 +13,7 @@ import {
 } from '../services/deepLinks.service';
 import { isAuthCallbackUrl } from '../services/auth.service';
 import { clearPersistedPendingInvite } from '../lib/pendingInviteStorage';
+import { shouldClearPendingInviteAfterRedemption } from '../lib/inviteRedemptionClear';
 
 type Options = {
     /** Called after a group invite is redeemed (user now has a group). */
@@ -39,13 +40,12 @@ export function useAuthenticatedInviteRedemption({ onGroupRedeemed }: Options = 
 
     useEffect(() => {
         if (!session || !pendingInvite) return;
-        void handleInviteLink(pendingInvite, null, queryClient)
-            .then(result => {
-                if (result?.kind === 'group') onGroupRedeemed?.();
-            })
-            .finally(() => {
+        void handleInviteLink(pendingInvite, null, queryClient).then(result => {
+            if (result?.kind === 'group') onGroupRedeemed?.();
+            if (shouldClearPendingInviteAfterRedemption(result)) {
                 setPendingInvite(null);
                 void clearPersistedPendingInvite();
-            });
+            }
+        });
     }, [session, pendingInvite, queryClient, setPendingInvite, onGroupRedeemed]);
 }
