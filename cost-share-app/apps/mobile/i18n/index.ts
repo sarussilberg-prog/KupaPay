@@ -116,14 +116,9 @@ async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
 
     const applied = await AsyncStorage.getItem(RTL_NATIVE_APPLIED_KEY);
     if (applied === language) {
-        // forceRTL + reload already ran for this language but native isRTL can stay
-        // wrong on Android dev builds — RtlLayoutProvider still mirrors from store.
-        if (__DEV__) {
-            console.warn(
-                '[i18n] Native I18nManager.isRTL still mismatched after reload; using logical RTL.',
-            );
-        }
-        return;
+        // Stale @rtl_native_applied: reload ran but native isRTL can stay wrong (Android dev).
+        // Clear the flag and retry forceRTL + reload so Settings toggle can recover without restart.
+        await AsyncStorage.removeItem(RTL_NATIVE_APPLIED_KEY);
     }
 
     I18nManager.forceRTL(desiredRTL);
