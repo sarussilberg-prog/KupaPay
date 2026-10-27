@@ -44,6 +44,14 @@ jest.mock('../../components/admin/AdminProViewBanner', () => ({
     AdminProViewBanner: () => null,
 }));
 
+jest.mock('../../components/NetworkOfflineBanner', () => ({
+    NetworkOfflineBanner: () => null,
+}));
+
+jest.mock('../../components/appReview/AppReviewPromptHost', () => ({
+    AppReviewPromptHost: () => null,
+}));
+
 jest.mock('../../hooks/useSubscriptionRefreshOnForeground', () => ({
     useSubscriptionRefreshOnForeground: jest.fn(),
 }));
