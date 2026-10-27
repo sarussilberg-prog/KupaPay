@@ -99,7 +99,7 @@ describe('SettingsScreen Pro section', () => {
             },
             isLoading: false,
             refetch: jest.fn(),
-        } as ReturnType<typeof useMySubscription>);
+        } as unknown as ReturnType<typeof useMySubscription>);
         useAppStore.setState({
             language: 'he',
             currentUser: {
