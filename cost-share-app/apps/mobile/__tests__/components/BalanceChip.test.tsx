@@ -98,6 +98,20 @@ describe('BalanceChip', () => {
         expect(queryByTestId('balance-chip-others')).toBeNull();
     });
 
+    it('hides extra-currency link when FX total includes every leg', () => {
+        const { queryByTestId } = render(
+            <BalanceChip
+                defaultCurrency="USD"
+                displayCurrency="ILS"
+                ratesFromBase={{ USD: 0.27, EUR: 0.25 }}
+                rollup={rollupOf({ currency: 'ILS', net: -100 }, [
+                    { currency: 'USD', net: -27 },
+                ])}
+            />,
+        );
+        expect(queryByTestId('balance-chip-others')).toBeNull();
+    });
+
     it('ignores others in the same currency as primary', () => {
         const { queryByTestId } = render(
             <BalanceChip

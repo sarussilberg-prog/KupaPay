@@ -19,7 +19,8 @@ export const GROUP_CARD_UPDATED_META_MIN_AGE_MS = 90_000;
 
 const META_SEPARATOR = '\u00A0·\u00A0';
 
-const metaTextClass = 'text-xs text-gray-500 dark:text-gray-400 leading-4';
+const memberMetaClass = 'text-xs text-gray-500 dark:text-gray-400 leading-4';
+const updatedMetaClass = 'text-[10px] text-gray-400 dark:text-gray-500 leading-3';
 
 type Props = {
     group: GroupWithMembers;
@@ -31,7 +32,8 @@ type Props = {
 export function GroupCardMetaLine({ group, memberCount, language, testID = 'group-card-meta' }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
-    const metaAlignClass = rtlTextClassName(isRtl, metaTextClass);
+    const memberAlignClass = rtlTextClassName(isRtl, memberMetaClass);
+    const updatedAlignClass = rtlTextClassName(isRtl, updatedMetaClass);
 
     const { memberLabel, updatedLabel } = useMemo(() => {
         const activityAt = group.lastActivityAt ?? group.updatedAt;
@@ -64,12 +66,12 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
 
     return (
         <View testID={testID} style={{ minWidth: 0, alignSelf: 'stretch' }}>
-            <Text className={metaAlignClass} style={{ flexShrink: 1 }} numberOfLines={1}>
-                <Text className={metaAlignClass}>{memberLabel}</Text>
+            <Text className={memberAlignClass} style={{ flexShrink: 1 }} numberOfLines={1}>
+                <Text className={memberAlignClass}>{memberLabel}</Text>
                 {updatedLabel ? (
                     <>
-                        <Text className={metaAlignClass}>{META_SEPARATOR}</Text>
-                        <Text className={metaAlignClass}>{updatedLabel}</Text>
+                        <Text className={updatedMetaClass}>{META_SEPARATOR}</Text>
+                        <Text className={updatedAlignClass}>{updatedLabel}</Text>
                     </>
                 ) : null}
             </Text>

@@ -256,6 +256,8 @@ export function GroupsListScreen() {
             <GroupCard
                 group={item.group}
                 rollup={simplified?.groupRollups.get(item.group.id)}
+                displayCurrency={baseCurrency}
+                ratesFromBase={ratesQuery.data?.rates}
                 groupHasOpenDebts={groupHasOpenDebts[item.group.id] === true}
                 balanceUnknown={balanceUnknown}
                 searchQuery={trimmedQuery || undefined}
@@ -266,7 +268,16 @@ export function GroupsListScreen() {
                 onPress={handleGroupPress}
             />
         ),
-        [simplified, balanceUnknown, groupHasOpenDebts, unreadByGroup, trimmedQuery, handleGroupPress],
+        [
+            simplified,
+            balanceUnknown,
+            baseCurrency,
+            ratesQuery.data?.rates,
+            groupHasOpenDebts,
+            unreadByGroup,
+            trimmedQuery,
+            handleGroupPress,
+        ],
     );
 
     const renderItem = useCallback<ListRenderItem<FilteredRow>>(

@@ -16,7 +16,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
-import { GroupRollup, GroupWithMembers } from '@cost-share/shared';
+import { GroupRollup, GroupWithMembers, type RatesFromBase } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
 import { GroupAvatar } from './GroupAvatar';
 import { BalanceChip } from './BalanceChip';
@@ -55,6 +55,8 @@ interface GroupCardProps {
     searchQuery?: string;
     matchedMemberNames?: string[];
     unreadCount?: number;
+    displayCurrency?: string;
+    ratesFromBase?: RatesFromBase;
     onPress: (groupId: string) => void;
 }
 
@@ -66,6 +68,8 @@ function GroupCardBase({
     searchQuery,
     matchedMemberNames,
     unreadCount,
+    displayCurrency,
+    ratesFromBase,
     onPress,
 }: GroupCardProps) {
     const { t, i18n } = useTranslation();
@@ -202,6 +206,8 @@ function GroupCardBase({
         <BalanceChip
             rollup={rollup}
             defaultCurrency={group.defaultCurrency}
+            displayCurrency={displayCurrency}
+            ratesFromBase={ratesFromBase}
             groupHasOpenDebts={groupHasOpenDebts}
             balanceUnknown={balanceUnknown}
             onPressExtraCurrencies={openBalances}

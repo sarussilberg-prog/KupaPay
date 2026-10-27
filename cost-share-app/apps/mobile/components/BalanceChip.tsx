@@ -12,12 +12,18 @@ import {
     countNonZeroCurrencyOthers,
     formatExtraCurrenciesChipLabel,
     formatGroupsListAmount,
+    resolveGroupRollupTotalDisplay,
+    type RatesFromBase,
 } from '@cost-share/shared';
 import { Text } from './AppText';
 
 interface BalanceChipProps {
     rollup?: GroupRollup;
+    /** Group default currency (fallback when display currency omitted). */
     defaultCurrency: string;
+    /** User profile / list display currency for FX totals. */
+    displayCurrency?: string;
+    ratesFromBase?: RatesFromBase;
     groupHasOpenDebts?: boolean;
     balanceUnknown?: boolean;
     onPressExtraCurrencies?: () => void;
@@ -79,14 +85,25 @@ function ChipText({
 export function BalanceChip({
     rollup,
     defaultCurrency,
+    displayCurrency,
+    ratesFromBase,
     groupHasOpenDebts,
     balanceUnknown,
     onPressExtraCurrencies,
 }: BalanceChipProps) {
     const { t, i18n } = useTranslation();
     const primary = rollup?.primary;
+    const userDisplayCurrency = displayCurrency ?? defaultCurrency;
+    const totalDisplay = useMemo(
+        () => resolveGroupRollupTotalDisplay(rollup, userDisplayCurrency, ratesFromBase),
+        [rollup, userDisplayCurrency, ratesFromBase],
+    );
+    const displayNet = totalDisplay?.net ?? primary?.net;
+    const displayCurrencyCode = totalDisplay?.currency ?? userDisplayCurrency;
     const extraCount = countNonZeroCurrencyOthers(rollup?.others, primary?.currency);
-    const hasRealBalance = primary && Math.abs(primary.net) >= 0.01;
+    const showExtraCurrenciesLink =
+        totalDisplay?.conversionFailed === true && extraCount > 0;
+    const hasRealBalance = displayNet !== undefined && Math.abs(displayNet) >= 0.01;
 
     const columnStyle = useMemo<ViewStyle>(
         () => ({
@@ -115,7 +132,7 @@ export function BalanceChip({
     }
 
     const tone: keyof typeof toneStyles = hasRealBalance
-        ? classifyUserNetBalance(primary!.net)
+        ? classifyUserNetBalance(displayNet!)
         : 'settled';
     const styles = toneStyles[tone === 'unknown' ? 'settled' : tone];
     const captionKey = balanceChipLabelKey(tone, groupHasOpenDebts);
@@ -130,18 +147,16 @@ export function BalanceChip({
         );
     }
 
-    const currency = primary?.currency || defaultCurrency;
-    const amountText = formatGroupsListAmount(primary!.net, currency, {
+    const amountText = formatGroupsListAmount(displayNet!, displayCurrencyCode, {
         language: i18n.language,
     });
 
-    const extraLabel =
-        extraCount > 0
-            ? formatExtraCurrenciesChipLabel(
-                  extraCount,
-                  t('groups.card.moreCurrenciesNoun', { count: extraCount }),
-              )
-            : null;
+    const extraLabel = showExtraCurrenciesLink
+        ? formatExtraCurrenciesChipLabel(
+              extraCount,
+              t('groups.card.moreCurrenciesNoun', { count: extraCount }),
+          )
+        : null;
 
     return (
         <View className={styles.container} style={columnStyle} testID="balance-chip-active">
