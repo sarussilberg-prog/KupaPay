@@ -12,7 +12,7 @@ import {
 } from '../lib/onboardingStorage';
 import { runAuthenticatedGate } from '../lib/authenticatedGateResolve';
 import { useAuthenticatedInviteRedemption } from '../hooks/useAuthenticatedInviteRedemption';
-import { fetchGroups } from '../services/groups.service';
+import { groupsQueryOptions } from '../hooks/queries/groupsQueryOptions';
 import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
 import { useSubscriptionRefreshOnForeground } from '../hooks/useSubscriptionRefreshOnForeground';
 import { queryClient } from '../lib/queryClient';
@@ -77,7 +77,11 @@ export function AuthenticatedAppGate() {
             getCachedGroupsCount: () =>
                 (queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? []).length,
             isOnline: () => onlineManager.isOnline(),
-            fetchGroups: () => withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS),
+            fetchGroups: () =>
+                withTimeout(
+                    queryClient.fetchQuery(groupsQueryOptions()),
+                    GATE_FETCH_TIMEOUT_MS,
+                ),
             seedGroups: (groups) => queryClient.setQueryData(queryKeys.groups, groups),
             hasPendingInvite: () => Boolean(useAppStore.getState().pendingInvite),
         });

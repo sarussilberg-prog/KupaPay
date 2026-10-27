@@ -44,6 +44,28 @@ beforeEach(() => {
 });
 
 describe('groups.service fetchGroups', () => {
+    it('deduplicates concurrent fetchGroups calls into one membership query', async () => {
+        let membershipSelectCalls = 0;
+        mockFrom.mockImplementation((table: string) => {
+            if (table === 'group_members') {
+                membershipSelectCalls += 1;
+                return {
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({ data: [], error: null }),
+                };
+            }
+            return {
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({ data: [], error: null }),
+            };
+        });
+
+        await Promise.all([fetchGroups(), fetchGroups(), fetchGroups()]);
+        expect(membershipSelectCalls).toBe(1);
+    });
+
     it('returns empty array when user has no active memberships', async () => {
         mockFrom.mockReturnValue({
             select: jest.fn().mockReturnThis(),

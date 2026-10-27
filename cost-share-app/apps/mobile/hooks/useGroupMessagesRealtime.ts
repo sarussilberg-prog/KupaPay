@@ -12,6 +12,7 @@ import { groupMessageFromRow, type GroupMessage } from '@cost-share/shared';
 import { queryClient } from '../lib/queryClient';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
+import { invalidateQueriesUnlessRecentlyFetched } from '../lib/realtimeSnapshotRefetch';
 
 function upsertMessageInCache(groupId: string, message: GroupMessage): void {
     queryClient.setQueryData<GroupMessage[]>(
@@ -86,9 +87,9 @@ export function useGroupMessagesRealtime(groupId: string | undefined | null): vo
             )
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
-                    void queryClient.invalidateQueries({
-                        queryKey: queryKeys.groupMessages(groupId),
-                    });
+                    invalidateQueriesUnlessRecentlyFetched(
+                        queryKeys.groupMessages(groupId),
+                    );
                 }
             });
 

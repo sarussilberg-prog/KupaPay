@@ -193,7 +193,7 @@ async function redeemInviteLink(
         titleParams: payload.already_member ? undefined : { groupName: payload.group_name },
     });
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
-    void queryClient.invalidateQueries({ queryKey: ['groups'] });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
     const claimable = !payload.already_member
         ? await listClaimableGuestMembers(payload.group_id)
         : [];
