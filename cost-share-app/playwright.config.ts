@@ -12,7 +12,12 @@ export default defineConfig({
     expect: { timeout: 15_000 },
     fullyParallel: false,
     retries: process.env.CI ? 1 : 0,
-    reporter: process.env.CI ? 'github' : 'list',
+    reporter: process.env.CI
+        ? [
+              ['github'],
+              ['json', { outputFile: 'playwright-report/results.json' }],
+          ]
+        : 'list',
     use: {
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
