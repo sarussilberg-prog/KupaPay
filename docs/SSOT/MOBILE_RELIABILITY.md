@@ -1,6 +1,6 @@
 # Mobile reliability (#427)
 
-**Platforms:** iOS, Android, and Expo Web (shared React Native tree). Next.js marketing site uses the same Sentry release-health pattern in `apps/web/lib/sentryInit.ts`.
+**Platforms:** iOS, Android, and Expo Web (shared React Native tree). The Next.js marketing site uses the same Sentry release-health pattern in `apps/web/lib/sentryInit.ts`.
 
 ## Crash-free sessions (Sentry Release Health)
 
