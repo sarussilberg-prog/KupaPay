@@ -2,7 +2,7 @@
  * Web-only dev preview: groups list rows for screenshot / visual QA (no auth).
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { isLanguage, type Language, type RatesFromBase } from '@cost-share/shared';
@@ -41,9 +41,16 @@ export function GroupCardListPreviewScreen() {
     }, [previewParams.lang]);
 
     const allGroups = buildGroupCardPreviewGroups();
-    const groups = previewParams.hero
-        ? allGroups.filter(g => g.id === 'g-trip' || g.id === 'g-multi')
-        : allGroups;
+    const groups = useMemo(() => {
+        const filtered = previewParams.hero
+            ? allGroups.filter(g => g.id === 'g-trip' || g.id === 'g-multi')
+            : allGroups;
+        if (!previewParams.hero) return filtered;
+        const twoHoursAgo = new Date(Date.now() - 2 * 3_600_000);
+        return filtered.map(g =>
+            g.id === 'g-multi' ? { ...g, lastActivityAt: twoHoursAgo, updatedAt: twoHoursAgo } : g,
+        );
+    }, [allGroups, previewParams.hero]);
     const rollups = previewParams.hero
         ? buildGroupCardHeroPreviewRollups()
         : buildGroupCardPreviewRollups();

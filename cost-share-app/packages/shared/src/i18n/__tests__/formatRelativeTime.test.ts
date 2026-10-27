@@ -1,4 +1,8 @@
-import { formatRelativeTimeShort, pickRelativeTimeUnit } from '../formatRelativeTime';
+import {
+    formatRelativeTimeCompact,
+    formatRelativeTimeShort,
+    pickRelativeTimeUnit,
+} from '../formatRelativeTime';
 
 describe('pickRelativeTimeUnit', () => {
     it('uses negative values for past timestamps (Intl past tense)', () => {
@@ -31,5 +35,24 @@ describe('formatRelativeTimeShort', () => {
 
     it('returns empty string for invalid dates', () => {
         expect(formatRelativeTimeShort(null, now, 'en')).toBe('');
+    });
+});
+
+describe('formatRelativeTimeCompact', () => {
+    const now = Date.UTC(2026, 9, 16, 12, 0, 0);
+
+    it('formats English hours compactly', () => {
+        const when = new Date(now - 2 * 3_600_000);
+        expect(formatRelativeTimeCompact(when, now, 'en')).toBe('2h ago');
+    });
+
+    it('formats Hebrew hours compactly', () => {
+        const when = new Date(now - 2 * 3_600_000);
+        expect(formatRelativeTimeCompact(when, now, 'he')).toBe('לפני 2\u00A0ש׳');
+    });
+
+    it('formats Hebrew days compactly', () => {
+        const when = new Date(now - 6 * 86_400_000);
+        expect(formatRelativeTimeCompact(when, now, 'he')).toBe('לפני 6\u00A0י׳');
     });
 });
