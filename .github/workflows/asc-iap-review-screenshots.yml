@@ -1,9 +1,11 @@
 # Admin: upload IAP / subscription App Review paywall screenshots to ASC.
-# workflow_dispatch only — does NOT submit for review.
+# workflow_dispatch or push to ops/asc-screenshots — does NOT submit for review.
 name: ASC IAP review screenshots
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ops/asc-screenshots]
 
 concurrency:
   group: asc-iap-review-screenshots
