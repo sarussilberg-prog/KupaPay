@@ -30,19 +30,4 @@ export type ProTrialFeatureUsage = {
     spendingInsights?: boolean;
 };
 
-export function proTrialValueSummary(usage: ProTrialFeatureUsage, locale: string): string {
-    const used: string[] = [];
-    if (usage.receiptScan) used.push('receipt');
-    if (usage.recurring) used.push('recurring');
-    if (usage.smartReminder) used.push('reminders');
-    if (usage.tripBudget) used.push('budget');
-    if (usage.spendingInsights) used.push('insights');
-    if (used.length === 0) {
-        return locale === 'he'
-            ? 'נסו סריקת קבלות, הוצאות חוזרות ותזכורות חכמות.'
-            : 'Try receipt scan, recurring expenses, and smart reminders.';
-    }
-    return locale === 'he'
-        ? `כבר השתמשתם ב: ${used.join(', ')}.`
-        : `You’ve used: ${used.join(', ')}.`;
-}
+export { proTrialFeatureUsageLine, renderProTrialLifecyclePush } from './proTrialLifecycleMessages';

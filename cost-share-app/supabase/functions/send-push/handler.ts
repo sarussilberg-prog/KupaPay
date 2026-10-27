@@ -72,9 +72,12 @@ const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     group_note_changed: 'groups_push',
     settle_up_reminder: 'settlements_push',
     unsettled_balance_nudge: 'reminders_push',
+    pro_trial_lifecycle_nudge: 'reminders_push',
     consolidation_batch_added: 'settlements_push',
     trip_budget_alert: 'groups_push',
 };
+
+const SELF_TARGETED_KINDS: ReadonlySet<ActivityKind> = new Set(['pro_trial_lifecycle_nudge']);
 
 const DEFAULT_PREFS: PrefsRow = {
     push_enabled: true, expenses_push: true, settlements_push: true,
@@ -88,7 +91,10 @@ export async function processActivityEvent(
     deps: SendPushDeps,
     options: ProcessPushOptions = {},
 ): Promise<PushOutcome> {
-    if (!record.actor_user_id || record.actor_user_id === record.user_id) {
+    if (
+        !SELF_TARGETED_KINDS.has(record.kind)
+        && (!record.actor_user_id || record.actor_user_id === record.user_id)
+    ) {
         await deps.markSkipped(record.id, 'self');
         return 'skipped_self';
     }
@@ -146,6 +152,8 @@ export async function processActivityEvent(
         isEdited: md.is_edited === true,
         isDeleted: md.is_deleted === true,
         status: (md.status as string | undefined) ?? null,
+        touchDay: typeof md.touch_day === 'number' ? md.touch_day : Number(md.touch_day) || undefined,
+        featureUsage: (md.feature_usage as Record<string, unknown> | undefined) ?? undefined,
     });
 
     const messages: ExpoMessage[] = tokens.map((t) => ({

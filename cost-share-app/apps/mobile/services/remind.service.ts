@@ -34,6 +34,7 @@ export async function sendSettleReminder({
     }
 
     void logMonetizationEvent(featureKey, 'remind_sent');
+    void import('./proTrialFeatureTouch.service').then(m => m.touchProTrialFeature({ smartReminder: true }));
     showSuccessMessage('remind.sent');
     return true;
 }

@@ -127,6 +127,42 @@ Deno.test('skips unsettled nudge when reminders preference is off', async () => 
     assertEquals(await processActivityEvent(record, deps), 'skipped_prefs');
 });
 
+Deno.test('sends pro trial lifecycle nudge for self-targeted event', async () => {
+    const sentTitles: string[] = [];
+    const deps = fakeDeps({
+        sendExpo: (msgs) => {
+            for (const m of msgs) sentTitles.push(m.title);
+            return Promise.resolve({ ticketIds: ['t-1'], invalidTokens: [] });
+        },
+    });
+    const record = baseRecord({
+        kind: 'pro_trial_lifecycle_nudge',
+        actor_user_id: 'u-recipient',
+        group_id: null,
+        metadata: { touch_day: 1, feature_usage: { receiptScan: true } },
+    });
+    assertEquals(await processActivityEvent(record, deps), 'sent');
+    assertEquals(sentTitles[0], 'Your Pro trial is active');
+});
+
+Deno.test('skips pro trial lifecycle nudge when reminders preference is off', async () => {
+    const deps = fakeDeps({
+        loadPreferences: () => Promise.resolve({
+            push_enabled: true, expenses_push: true, settlements_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: false,
+            quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+            timezone: 'UTC', daily_push_cap: 8,
+        }),
+    });
+    const record = baseRecord({
+        kind: 'pro_trial_lifecycle_nudge',
+        actor_user_id: 'u-recipient',
+        group_id: null,
+        metadata: { touch_day: 10 },
+    });
+    assertEquals(await processActivityEvent(record, deps), 'skipped_prefs');
+});
+
 Deno.test('sends unsettled balance nudge when reminders enabled', async () => {
     const sentBodies: string[] = [];
     const deps = fakeDeps({

@@ -65,6 +65,9 @@ export function TripBudgetSection({
             group_id: groupId,
             percent_used: pct,
         });
+        void import('../../services/proTrialFeatureTouch.service').then(m =>
+            m.touchProTrialFeature({ tripBudget: true }),
+        );
     }, [unlocked, budgetAmount, groupId, pct]);
 
     if (!unlocked) {

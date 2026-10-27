@@ -66,6 +66,7 @@ export const KIND_TO_CATEGORY: Record<ActivityEventKind, ActivityCategory> = {
     group_note_changed: 'groups',
     settle_up_reminder: 'settlements',
     unsettled_balance_nudge: 'reminders',
+    pro_trial_lifecycle_nudge: 'reminders',
     trip_budget_alert: 'groups',
 };
 

@@ -88,6 +88,9 @@ export function SpendingInsightsSheet({
                 currency,
                 category_rows: c.length,
             });
+            void import('../../services/proTrialFeatureTouch.service').then(m =>
+                m.touchProTrialFeature({ spendingInsights: true }),
+            );
         });
     }, [visible, unlocked, groupId, currency]);
 

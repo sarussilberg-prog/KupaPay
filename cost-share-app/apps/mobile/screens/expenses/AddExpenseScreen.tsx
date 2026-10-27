@@ -571,6 +571,9 @@ export function AddExpenseScreen() {
             const parsed = new Date(`${draft.expenseDate}T12:00:00`);
             if (!Number.isNaN(parsed.getTime())) setDate(parsed);
         }
+        void import('../../services/proTrialFeatureTouch.service').then(m =>
+            m.touchProTrialFeature({ receiptScan: true }),
+        );
     }, []);
 
     const handleReceiptPress = useCallback(() => {

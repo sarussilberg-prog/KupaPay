@@ -6,6 +6,8 @@ import es from './locales/es.json' with { type: 'json' };
 import fr from './locales/fr.json' with { type: 'json' };
 import ru from './locales/ru.json' with { type: 'json' };
 import { normalizePushLocale, type PushLocale } from '../../../packages/shared/src/notifications/pushPolicy.ts';
+import { renderProTrialLifecyclePush } from '../../../packages/shared/src/pro/proTrialLifecycleMessages.ts';
+import type { ProTrialFeatureUsage, ProTrialLifecycleTouchDay } from '../../../packages/shared/src/pro/proTrialLifecycle.ts';
 
 export type Lang = PushLocale;
 
@@ -14,6 +16,7 @@ export type ActivityKind =
     | 'friend_request_received' | 'group_added' | 'group_member_joined' | 'group_removed'
     | 'group_created' | 'group_deleted' | 'group_note_changed' | 'settle_up_reminder'
     | 'unsettled_balance_nudge'
+    | 'pro_trial_lifecycle_nudge'
     | 'consolidation_batch_added' | 'trip_budget_alert';
 
 export interface RenderParams {
@@ -27,6 +30,8 @@ export interface RenderParams {
     isEdited?: boolean;
     isDeleted?: boolean;
     status?: string | null;
+    touchDay?: number;
+    featureUsage?: ProTrialFeatureUsage;
 }
 
 export interface Rendered { title: string; body: string; }
@@ -140,6 +145,11 @@ export function renderNotification(kind: ActivityKind, lang: Lang, p: RenderPara
                 title: p.groupName,
                 body: interpolate(t.unsettled_balance_nudge, vars),
             };
+        case 'pro_trial_lifecycle_nudge': {
+            const day = (p.touchDay ?? 1) as ProTrialLifecycleTouchDay;
+            const rendered = renderProTrialLifecyclePush(day, p.featureUsage ?? {}, lang);
+            return { title: rendered.title, body: rendered.body };
+        }
         case 'trip_budget_alert':
             return {
                 title: p.groupName,

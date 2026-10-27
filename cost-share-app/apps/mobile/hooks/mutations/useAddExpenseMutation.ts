@@ -139,6 +139,8 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
                     group_id: groupId,
                     frequency: recurringFrequency,
                 });
+                const { touchProTrialFeature } = await import('../../services/proTrialFeatureTouch.service');
+                touchProTrialFeature({ recurring: true });
                 return expense;
             }
             return createExpense(dto);
