@@ -74,7 +74,7 @@ export function MemberStack({
                 <View
                     key={m.userId}
                     style={{
-                        marginLeft: i === 0 ? 0 : -overlap,
+                        marginStart: i === 0 ? 0 : -overlap,
                         borderRadius: 9999,
                         borderWidth: size >= 24 ? 2 : 1,
                         borderColor: '#fff',
@@ -91,7 +91,7 @@ export function MemberStack({
             {showAddAvatar && (
                 <View
                     style={{
-                        marginLeft: -overlap,
+                        marginStart: -overlap,
                         width: size,
                         height: size,
                         borderRadius: 9999,

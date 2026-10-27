@@ -521,6 +521,7 @@ jobs:
         lint,
         typecheck,
         test,
+        coverage-ratchet,
         legal-locale-parity,
         deno-edge-gate,
         no-merge-conflicts,
@@ -576,6 +577,7 @@ jobs:
           fi
           if [[ "$FULL" == "true" || "$MOBILE" == "true" ]]; then
             check test "${{ needs.test.result }}"
+            check coverage-ratchet "${{ needs.coverage-ratchet.result }}"
             check legal-locale-parity "${{ needs.legal-locale-parity.result }}"
             check expo-mobile-config "${{ needs.expo-mobile-config.result }}"
           fi
