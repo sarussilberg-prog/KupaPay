@@ -19,6 +19,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
+    "analyze:web": "EXPO_ATLAS=true expo export --platform web",
+    "analyze:atlas": "expo-atlas .expo/atlas.jsonl",
     "dev": "expo start --dev-client",
     "eas:init": "eas init",
     "eas:secrets": "bash scripts/eas-sync-secrets.sh",
@@ -113,7 +115,8 @@
     "playwright": "^1.51.1",
     "react-test-renderer": "19.1.0",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "expo-atlas": "^0.4.0"
   },
   "private": true
 }
