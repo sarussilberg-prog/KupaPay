@@ -1,6 +1,6 @@
-✅ Wrote supabase/ci/schema-contract.snapshot.json (39 tables, 154 functions)
-to post-bootstrap Postgres.",
-  "generated_at": "2026-10-27T08:27:40Z",
+{
+  "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
+  "generated_at": "2026-10-27T08:35:36Z",
   "tables": [
     {
       "name": "account_deletions_audit",
