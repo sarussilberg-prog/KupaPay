@@ -10,8 +10,8 @@ import {
     balanceChipLabelKey,
     classifyUserNetBalance,
     countNonZeroCurrencyOthers,
-    formatExtraCurrenciesChipLabel,
     formatGroupsListAmount,
+    formatSubtleExtraCurrenciesHint,
     resolveGroupRollupTotalDisplay,
     type RatesFromBase,
 } from '@cost-share/shared';
@@ -152,7 +152,7 @@ export function BalanceChip({
     });
 
     const extraLabel = showExtraCurrenciesLink
-        ? formatExtraCurrenciesChipLabel(
+        ? formatSubtleExtraCurrenciesHint(
               extraCount,
               t('groups.card.moreCurrenciesNoun', { count: extraCount }),
           )
@@ -163,11 +163,7 @@ export function BalanceChip({
             <ChipText className={styles.label} numberOfLines={2}>
                 {t(captionKey)}
             </ChipText>
-            <ChipText
-                className={styles.amount}
-                testID="balance-chip-amount"
-                writingDirection="ltr"
-            >
+            <ChipText className={styles.amount} testID="balance-chip-amount">
                 {amountText}
             </ChipText>
             {extraLabel ? (
@@ -177,12 +173,19 @@ export function BalanceChip({
                         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                         testID="balance-chip-others"
                     >
-                        <ChipText className={`${styles.label} underline`} numberOfLines={1}>
+                        <ChipText
+                            className={`${styles.label} opacity-80`}
+                            numberOfLines={1}
+                        >
                             {extraLabel}
                         </ChipText>
                     </TouchableOpacity>
                 ) : (
-                    <ChipText className={styles.label} testID="balance-chip-others" numberOfLines={1}>
+                    <ChipText
+                        className={`${styles.label} opacity-80`}
+                        testID="balance-chip-others"
+                        numberOfLines={1}
+                    >
                         {extraLabel}
                     </ChipText>
                 )

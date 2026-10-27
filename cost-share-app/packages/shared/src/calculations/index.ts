@@ -37,6 +37,7 @@ export {
 export {
     collectGroupFxCurrencies,
     collectGroupListFxBases,
+    collectGroupRollupFxCurrencies,
     resolveGroupBalanceDisplay,
     resolveGroupBalanceDisplayBundle,
     resolveGroupRollupTotalDisplay,

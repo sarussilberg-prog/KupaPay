@@ -414,7 +414,9 @@
             "showLess": "عرض أقل"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى",
+            "otherCurrenciesHint": "({{count}} عملات)",
+            "otherCurrenciesHint_one": "({{count}} عملة)"
         },
         "hero": {
             "spentTogether": "المصروف معًا",

@@ -16,7 +16,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { deriveBalanceSummary, GroupWithMembers } from '@cost-share/shared';
+import {
+    collectGroupRollupFxCurrencies,
+    deriveBalanceSummary,
+    GroupWithMembers,
+} from '@cost-share/shared';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { createDemoGroup } from '../../services/groups.service';
 import { queryClient } from '../../lib/queryClient';
@@ -190,10 +194,18 @@ export function GroupsListScreen() {
         [simplified, authUserId, baseCurrency],
     );
 
-    const fxSymbols = useMemo(
-        () => collectProfileFxCurrencies(rawBalanceSummary, [], baseCurrency),
-        [rawBalanceSummary, baseCurrency],
-    );
+    const fxSymbols = useMemo(() => {
+        const set = new Set(
+            collectProfileFxCurrencies(rawBalanceSummary, [], baseCurrency),
+        );
+        for (const c of collectGroupRollupFxCurrencies(
+            simplified?.groupRollups,
+            baseCurrency,
+        )) {
+            set.add(c);
+        }
+        return [...set].sort((a, b) => a.localeCompare(b));
+    }, [rawBalanceSummary, baseCurrency, simplified?.groupRollups]);
 
     const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
     const { summary: balanceSummary, conversion } = useProfileBalanceSummary(

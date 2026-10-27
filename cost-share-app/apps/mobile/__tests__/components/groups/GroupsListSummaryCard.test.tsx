@@ -21,13 +21,26 @@ describe('GroupsListSummaryCard', () => {
         expect(toJSON()).toBeNull();
     });
 
-    it('renders headline amount and foreign currency line', () => {
-        const { getByTestId, getByText } = render(
-            <GroupsListSummaryCard summary={baseSummary} />,
+    it('renders a single converted headline without a foreign amount line', () => {
+        const { getByTestId, queryByTestId } = render(
+            <GroupsListSummaryCard
+                summary={baseSummary}
+                conversion={{ isConverted: true, ratesDate: '2026-01-01', isLoading: false, failed: false }}
+            />,
         );
         expect(getByTestId('groups-list-summary-card')).toBeTruthy();
         expect(getByTestId('groups-list-summary-amount')).toBeTruthy();
-        expect(getByTestId('groups-list-summary-foreign')).toBeTruthy();
-        expect(getByText(/groups\.listSummary\.otherCurrenciesLine/)).toBeTruthy();
+        expect(queryByTestId('groups-list-summary-foreign-hint')).toBeNull();
+    });
+
+    it('shows a subtle FX-failure hint without raw foreign amounts', () => {
+        const { getByTestId, getByText } = render(
+            <GroupsListSummaryCard
+                summary={baseSummary}
+                conversion={{ isConverted: false, ratesDate: null, isLoading: false, failed: true }}
+            />,
+        );
+        expect(getByTestId('groups-list-summary-foreign-hint')).toBeTruthy();
+        expect(getByText(/groups\.listSummary\.otherCurrenciesHint/)).toBeTruthy();
     });
 });

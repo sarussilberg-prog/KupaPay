@@ -2,6 +2,7 @@ import { BIDI_LRI, BIDI_PDI } from '../formatMoney';
 import {
     countNonZeroCurrencyOthers,
     formatExtraCurrenciesChipLabel,
+    formatSubtleExtraCurrenciesHint,
 } from '../balanceSemantics';
 
 describe('balanceSemantics', () => {
@@ -36,6 +37,16 @@ describe('balanceSemantics', () => {
         it('uses plural word unchanged', () => {
             const out = formatExtraCurrenciesChipLabel(2, 'currencies');
             expect(out).toBe(`${BIDI_LRI}+2${BIDI_PDI} currencies`);
+        });
+    });
+
+    describe('formatSubtleExtraCurrenciesHint', () => {
+        it('formats a parenthetical count in English', () => {
+            expect(formatSubtleExtraCurrenciesHint(2, 'currencies')).toBe('(2 currencies)');
+        });
+
+        it('formats a parenthetical count in Hebrew', () => {
+            expect(formatSubtleExtraCurrenciesHint(2, 'מטבעות')).toBe('(2 מטבעות)');
         });
     });
 });

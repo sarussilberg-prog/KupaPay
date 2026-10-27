@@ -71,7 +71,7 @@ describe('BalanceChip', () => {
         expect(String(amount.props.children)).not.toMatch(/\+/);
     });
 
-    it('shows +N extra-currency hint when other currencies have non-zero net', () => {
+    it('shows a subtle extra-currency hint when FX conversion failed', () => {
         const { getByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
@@ -82,7 +82,7 @@ describe('BalanceChip', () => {
             />,
         );
         const others = getByTestId('balance-chip-others');
-        expect(String(others.props.children)).toMatch(/\+2/);
+        expect(String(others.props.children)).toMatch(/\(2/);
         expect(String(others.props.children)).toMatch(/groups\.card\.moreCurrenciesNoun/);
     });
 

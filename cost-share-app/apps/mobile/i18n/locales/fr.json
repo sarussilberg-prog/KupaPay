@@ -402,7 +402,9 @@
             "showLess": "Afficher moins"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} dans d'autres devises"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} dans d'autres devises",
+            "otherCurrenciesHint": "({{count}} devises)",
+            "otherCurrenciesHint_one": "({{count}} devise)"
         },
         "hero": {
             "spentTogether": "Dépensé ensemble",

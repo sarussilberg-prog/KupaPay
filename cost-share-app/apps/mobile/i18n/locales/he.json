@@ -402,7 +402,9 @@
             "showLess": "הצג פחות"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} במטבעות נוספים"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} במטבעות נוספים",
+            "otherCurrenciesHint": "({{count}} מטבעות)",
+            "otherCurrenciesHint_one": "({{count}} מטבע)"
         },
         "hero": {
             "spentTogether": "הוציאו ביחד",
