@@ -11,7 +11,7 @@ on:
       pro_enabled:
         description: Enable KupaPay Pro (RevenueCat) for this TestFlight build
         type: boolean
-        default: true
+        default: false
   workflow_call:
     inputs:
       git_ref:
@@ -20,7 +20,7 @@ on:
         default: dev
       pro_enabled:
         type: boolean
-        default: true
+        default: false
       mobile_cd_sha:
         description: origin/dev SHA recorded in MOBILE_CD_BASELINE after success
         type: string
