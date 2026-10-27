@@ -484,6 +484,33 @@ jobs:
     steps:
       - run: echo "Docs-only change — application CI jobs skipped by path filter."
 
+  knip-report:
+    name: Knip (dead code report)
+    needs: [ci-paths, setup]
+    if: >-
+      always() && needs.setup.result == 'success' &&
+      (needs.ci-paths.outputs.full_suite == 'true' ||
+        needs.ci-paths.outputs.mobile == 'true' ||
+        needs.ci-paths.outputs.web == 'true')
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-node-modules
+          path: cost-share-app/node_modules
+      - name: Report unused exports, files, and dependencies
+        run: npm run knip:ci
+
   ci-gate:
     name: CI gate
     needs:
