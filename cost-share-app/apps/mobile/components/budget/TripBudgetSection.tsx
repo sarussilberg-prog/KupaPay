@@ -11,6 +11,7 @@ import { Text } from '../AppText';
 import { fetchGroupTripBudget, type TripBudgetSettings } from '../../services/tripBudget.service';
 import { TripBudgetSheet } from './TripBudgetSheet';
 import { captureProductEvent } from '../../lib/productAnalytics';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 
 interface TripBudgetSectionProps {
     groupId: string;
@@ -65,9 +66,7 @@ export function TripBudgetSection({
             group_id: groupId,
             percent_used: pct,
         });
-        void import('../../services/proTrialFeatureTouch.service').then(m =>
-            m.touchProTrialFeature({ tripBudget: true }),
-        );
+        touchProTrialFeature({ tripBudget: true });
     }, [unlocked, budgetAmount, groupId, pct]);
 
     if (!unlocked) {

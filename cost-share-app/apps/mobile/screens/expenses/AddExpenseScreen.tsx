@@ -108,6 +108,7 @@ import {
 } from '@cost-share/shared';
 import { ReceiptTextScanSheet } from '../../components/receipt/ReceiptTextScanSheet';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 import { formatAppDateShort } from '../../lib/formatAppDate';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import {
@@ -571,9 +572,7 @@ export function AddExpenseScreen() {
             const parsed = new Date(`${draft.expenseDate}T12:00:00`);
             if (!Number.isNaN(parsed.getTime())) setDate(parsed);
         }
-        void import('../../services/proTrialFeatureTouch.service').then(m =>
-            m.touchProTrialFeature({ receiptScan: true }),
-        );
+        touchProTrialFeature({ receiptScan: true });
     }, []);
 
     const handleReceiptPress = useCallback(() => {

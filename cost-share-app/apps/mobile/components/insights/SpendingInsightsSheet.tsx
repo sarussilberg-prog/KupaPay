@@ -14,6 +14,7 @@ import {
     type WeekSpendRow,
 } from '../../services/spendingInsights.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 
 type Tab = 'category' | 'member' | 'week';
 
@@ -88,9 +89,7 @@ export function SpendingInsightsSheet({
                 currency,
                 category_rows: c.length,
             });
-            void import('../../services/proTrialFeatureTouch.service').then(m =>
-                m.touchProTrialFeature({ spendingInsights: true }),
-            );
+            touchProTrialFeature({ spendingInsights: true });
         });
     }, [visible, unlocked, groupId, currency]);
 

@@ -17,6 +17,7 @@ import {
     updateExpense,
 } from '../../services/expenses.service';
 import { createRecurringExpenseSeries } from '../../services/recurringExpenses.service';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 import { queryKeys } from '../queries/keys';
 import {
     addExpenseMutationKey,
@@ -139,7 +140,6 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
                     group_id: groupId,
                     frequency: recurringFrequency,
                 });
-                const { touchProTrialFeature } = await import('../../services/proTrialFeatureTouch.service');
                 touchProTrialFeature({ recurring: true });
                 return expense;
             }

@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import { showSuccessMessage, showErrorToast } from '../lib/appToast';
 import { shareTextMessage } from '../lib/platformShare';
 import { logMonetizationEvent } from './monetization.service';
+import { touchProTrialFeature } from './proTrialFeatureTouch.service';
 import { buildSettleReminderUrl } from './invite.service';
 
 export interface SendReminderParams {
@@ -34,7 +35,7 @@ export async function sendSettleReminder({
     }
 
     void logMonetizationEvent(featureKey, 'remind_sent');
-    void import('./proTrialFeatureTouch.service').then(m => m.touchProTrialFeature({ smartReminder: true }));
+    touchProTrialFeature({ smartReminder: true });
     showSuccessMessage('remind.sent');
     return true;
 }
