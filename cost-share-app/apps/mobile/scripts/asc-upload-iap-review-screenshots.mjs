@@ -19,6 +19,14 @@ const IAP_PRODUCT_IDS = ["kupapay_trip_pass", "trip_pass"];
 
 const token = getAscToken();
 
+function screenshotFileAttributes(screenshotPath) {
+  const st = fs.statSync(screenshotPath);
+  return {
+    fileName: path.basename(screenshotPath),
+    fileSize: st.size,
+  };
+}
+
 function readBundleId() {
   const appJson = JSON.parse(fs.readFileSync(appJsonPath, "utf8"));
   const bundleId = appJson.expo?.ios?.bundleIdentifier;
@@ -116,6 +124,7 @@ async function uploadSubscriptionReviewScreenshot(subscriptionId, screenshotPath
       body: {
         data: {
           type: "subscriptionAppStoreReviewScreenshots",
+          attributes: screenshotFileAttributes(screenshotPath),
           relationships: {
             subscription: { data: { type: "subscriptions", id: subscriptionId } },
           },
@@ -177,6 +186,7 @@ async function uploadIapReviewScreenshot(inAppPurchaseId, screenshotPath) {
       body: {
         data: {
           type: "inAppPurchaseAppStoreReviewScreenshots",
+          attributes: screenshotFileAttributes(screenshotPath),
           relationships: {
             inAppPurchaseV2: { data: { type: "inAppPurchases", id: inAppPurchaseId } },
           },
