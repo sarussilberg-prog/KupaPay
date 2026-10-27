@@ -1,0 +1,51 @@
+# Admin: set branch protection on dev (workflow_dispatch only).
+# Does not modify main or other branches.
+name: Admin branch protection
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: admin-branch-protection
+  cancel-in-progress: false
+
+jobs:
+  set-dev-ci-gate:
+    name: Require CI gate on dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply dev branch protection
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${GH_TOKEN}" ]]; then
+            echo "::error::ADMIN_PAT secret is not configured"
+            exit 1
+          fi
+          payload="$(jq -n \
+            --arg ctx "CI gate" \
+            '{
+              required_status_checks: {
+                strict: false,
+                checks: [{ context: $ctx }]
+              },
+              enforce_admins: false,
+              required_pull_request_reviews: null,
+              restrictions: null,
+              allow_force_pushes: false,
+              allow_deletions: false,
+              block_creations: false,
+              required_linear_history: false,
+              required_conversation_resolution: false
+            }')"
+          echo "$payload" | jq .
+          gh api --method PUT "repos/${REPO}/branches/dev/protection" --input - <<<"$payload"
+      - name: Print required status checks
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${REPO}/branches/dev/protection/required_status_checks" | jq .
