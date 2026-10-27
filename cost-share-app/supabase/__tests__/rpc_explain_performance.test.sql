@@ -13,6 +13,7 @@ DECLARE
     v_ms     DOUBLE PRECISION;
     v_simplified_ms DOUBLE PRECISION;
     v_archive_ms    DOUBLE PRECISION;
+    v_unread_ms     DOUBLE PRECISION;
     v_groups_ms     DOUBLE PRECISION;
     v_expenses_ms   DOUBLE PRECISION;
     v_expense_id UUID;
@@ -20,6 +21,7 @@ DECLARE
     -- ms budgets (local docker; generous for CI variance)
     c_simplified_ms CONSTANT DOUBLE PRECISION := 800;
     c_archive_ms    CONSTANT DOUBLE PRECISION := 400;
+    c_unread_ms     CONSTANT DOUBLE PRECISION := 200;
     c_groups_ms     CONSTANT DOUBLE PRECISION := 400;
     c_expenses_ms   CONSTANT DOUBLE PRECISION := 400;
 BEGIN
@@ -69,6 +71,13 @@ BEGIN
     v_archive_ms := EXTRACT(EPOCH FROM (clock_timestamp() - v_start)) * 1000;
     IF v_archive_ms > c_archive_ms THEN
         RAISE EXCEPTION 'get_user_groups_archive_state exceeded budget: % ms > % ms', v_archive_ms, c_archive_ms;
+    END IF;
+
+    v_start := clock_timestamp();
+    PERFORM public.get_activity_unread_count();
+    v_unread_ms := EXTRACT(EPOCH FROM (clock_timestamp() - v_start)) * 1000;
+    IF v_unread_ms > c_unread_ms THEN
+        RAISE EXCEPTION 'get_activity_unread_count exceeded budget: % ms > % ms', v_unread_ms, c_unread_ms;
     END IF;
 
     -- Groups list path (membership → groups join, mirrors mobile fetchGroups)
@@ -133,9 +142,10 @@ BEGIN
         RAISE EXCEPTION 'expenses list query exceeded budget: % ms > % ms', v_expenses_ms, c_expenses_ms;
     END IF;
 
-    RAISE NOTICE 'rpc_explain_performance timings_ms simplified=% archive=% groups=% expenses=%',
+    RAISE NOTICE 'rpc_explain_performance timings_ms simplified=% archive=% unread=% groups=% expenses=%',
         round(v_simplified_ms::numeric, 2),
         round(v_archive_ms::numeric, 2),
+        round(v_unread_ms::numeric, 2),
         round(v_groups_ms::numeric, 2),
         round(v_expenses_ms::numeric, 2);
     RAISE NOTICE 'rpc_explain_performance.test.sql — all checks passed';
