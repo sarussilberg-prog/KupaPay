@@ -111,6 +111,38 @@ Deno.test('defers during quiet hours', async () => {
     assertEquals(deferred, true);
 });
 
+Deno.test('skips unsettled nudge when reminders preference is off', async () => {
+    const deps = fakeDeps({
+        loadPreferences: () => Promise.resolve({
+            push_enabled: true, expenses_push: true, settlements_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: false,
+            quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+            timezone: 'UTC', daily_push_cap: 8,
+        }),
+    });
+    const record = baseRecord({
+        kind: 'unsettled_balance_nudge',
+        metadata: { amount: 42, currency: 'ILS' },
+    });
+    assertEquals(await processActivityEvent(record, deps), 'skipped_prefs');
+});
+
+Deno.test('sends unsettled balance nudge when reminders enabled', async () => {
+    const sentBodies: string[] = [];
+    const deps = fakeDeps({
+        sendExpo: (msgs) => {
+            for (const m of msgs) sentBodies.push(m.body);
+            return Promise.resolve({ ticketIds: ['t-1'], invalidTokens: [] });
+        },
+    });
+    const record = baseRecord({
+        kind: 'unsettled_balance_nudge',
+        metadata: { amount: 42, currency: 'ILS' },
+    });
+    assertEquals(await processActivityEvent(record, deps), 'sent');
+    assertEquals(sentBodies[0], 'You still owe Dana · ₪42');
+});
+
 Deno.test('skips when daily cap reached', async () => {
     const deps = fakeDeps({
         countSentLast24h: () => Promise.resolve(8),

@@ -158,3 +158,22 @@ Deno.test('consolidation_batch_added new with unknown currency falls back to cod
     });
     assertEquals(r.body, 'New payment from Avi · 50 CHF');
 });
+
+const nudgeVars = { actorName: 'Dana', groupName: 'Trip', amount: 42, currency: 'ILS' };
+
+Deno.test('unsettled_balance_nudge renders all 7 push locales', () => {
+    const expected: Record<string, string> = {
+        en: 'You still owe Dana · ₪42',
+        he: 'עדיין חייבים ל-Dana · ₪42',
+        ar: 'ما زلت مدينًا لـ Dana · ₪42',
+        de: 'Du schuldest Dana noch · ₪42',
+        es: 'Aún debes a Dana · ₪42',
+        fr: 'Vous devez encore à Dana · ₪42',
+        ru: 'Вы всё ещё должны Dana · ₪42',
+    };
+    for (const [lang, body] of Object.entries(expected)) {
+        const r = renderNotification('unsettled_balance_nudge', lang as 'en', nudgeVars);
+        assertEquals(r.title, 'Trip');
+        assertEquals(r.body, body);
+    }
+});

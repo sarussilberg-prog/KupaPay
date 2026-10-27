@@ -10,6 +10,7 @@ describe('notification content mapping', () => {
         const kinds: ActivityEventKind[] = [
             'expense_added', 'settlement_added', 'message_posted',
             'friend_request_received', 'group_added', 'group_member_joined', 'group_removed',
+            'unsettled_balance_nudge',
         ];
         for (const k of kinds) {
             expect(KIND_TO_CATEGORY[k]).toBeDefined();
@@ -24,6 +25,8 @@ describe('notification content mapping', () => {
     it('maps every category to a preference key', () => {
         expect(CATEGORY_TO_PREF_KEY.expenses).toBe('expensesPush');
         expect(CATEGORY_TO_PREF_KEY.groups).toBe('groupsPush');
+        expect(KIND_TO_CATEGORY.unsettled_balance_nudge).toBe('reminders');
+        expect(CATEGORY_TO_PREF_KEY.reminders).toBe('remindersPush');
     });
 
     it('defaults all preferences to true', () => {
