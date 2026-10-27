@@ -83,14 +83,18 @@ export {
     type BalanceSettlementRowWithCurrency,
 } from './memberContributions';
 
+/** Equal split in integer cents; last member absorbs the remainder penny (or pennies). */
 export function calculateEqualSplit(totalAmount: number, numPeople: number): number[] {
-    const baseAmount = Math.floor((totalAmount * 100) / numPeople) / 100;
-    const remainder = Number((totalAmount - baseAmount * numPeople).toFixed(2));
-    const splits = new Array(numPeople).fill(baseAmount);
-    if (remainder > 0) {
-        splits[splits.length - 1] = Number((splits[splits.length - 1] + remainder).toFixed(2));
+    if (!Number.isFinite(totalAmount) || numPeople <= 0) {
+        return [];
     }
-    return splits;
+    const totalCents = Math.round(totalAmount * 100);
+    const baseCents = Math.floor(totalCents / numPeople);
+    const leftoverCents = totalCents - baseCents * numPeople;
+    return Array.from({ length: numPeople }, (_, i) => {
+        const cents = baseCents + (i === numPeople - 1 ? leftoverCents : 0);
+        return cents / 100;
+    });
 }
 
 export function validateExpenseSplits(
