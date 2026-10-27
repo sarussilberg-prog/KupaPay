@@ -71,7 +71,9 @@ import './global.css';
 import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
 import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
+import { GroupCardOptionsPreviewScreen } from './screens/dev/GroupCardOptionsPreviewScreen';
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
+import { readGroupCardPreviewParams } from './dev/groupCardPreviewParams';
 import { SettingsRowLayoutPreviewScreen } from './screens/dev/SettingsRowLayoutPreviewScreen';
 import { readGroupsListPreviewParams } from './dev/groupsListPreviewParams';
 
@@ -83,6 +85,11 @@ function isGroupCardPreviewMode(): boolean {
 function isGroupsListB2PreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
   return new URLSearchParams(globalThis.location.search).get('devGroupsListB2Preview') === '1';
+}
+
+function isGroupCardOptionsPreviewMode(): boolean {
+  if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
+  return new URLSearchParams(globalThis.location.search).get('devGroupCardOptionsPreview') === '1';
 }
 
 function isSettingsRowPreviewMode(): boolean {
@@ -100,9 +107,15 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 function WebFrame({ children }: { children: React.ReactNode }) {
   if (Platform.OS !== 'web') return <>{children}</>;
   const b2Preview = isGroupsListB2PreviewMode();
-  const preview = b2Preview ? readGroupsListPreviewParams() : null;
+  const cardOptionsPreview = isGroupCardOptionsPreviewMode();
+  const preview = b2Preview
+    ? readGroupsListPreviewParams()
+    : cardOptionsPreview
+      ? readGroupCardPreviewParams()
+      : null;
   const isDark = preview?.theme === 'dark';
-  const maxWidth = preview?.narrow ? 320 : 430;
+  const maxWidth =
+    b2Preview && preview && 'narrow' in preview && preview.narrow ? 320 : 430;
   return (
     <View
       style={{
@@ -469,6 +482,18 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             <GroupsListB2PreviewScreen />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isGroupCardOptionsPreviewMode()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <GroupCardOptionsPreviewScreen />
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>
