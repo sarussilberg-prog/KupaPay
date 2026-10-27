@@ -1,9 +1,11 @@
-# Admin: set branch protection on dev (workflow_dispatch only).
+# Admin: set branch protection on dev (workflow_dispatch or push to ops/admin-run).
 # Does not modify main or other branches.
 name: Admin branch protection
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ops/admin-run]
 
 concurrency:
   group: admin-branch-protection

@@ -44,7 +44,7 @@ async function findSubscriptionId(productId) {
   return sub.id;
 }
 
-async function findInAppPurchaseV2Id(appId, productId) {
+async function findInAppPurchaseV2Id(appId) {
   for (const pid of IAP_PRODUCT_IDS) {
     const hits = await ascGetAll(
       `/v1/apps/${appId}/inAppPurchasesV2?filter[productId]=${encodeURIComponent(pid)}&limit=10`,
@@ -53,8 +53,39 @@ async function findInAppPurchaseV2Id(appId, productId) {
     const iap = hits.find((h) => h.attributes?.productId === pid);
     if (iap?.id) return { id: iap.id, productId: pid };
   }
+  return null;
+}
+
+async function uploadTripPassReviewScreenshot(appId, screenshotPath) {
+  const iap = await findInAppPurchaseV2Id(appId);
+  if (iap) {
+    const upload = await uploadIapReviewScreenshot(iap.id, screenshotPath);
+    return {
+      productId: iap.productId,
+      kind: "inAppPurchase",
+      ascId: iap.id,
+      upload,
+    };
+  }
+
+  for (const productId of IAP_PRODUCT_IDS) {
+    try {
+      const subscriptionId = await findSubscriptionId(productId);
+      const upload = await uploadSubscriptionReviewScreenshot(subscriptionId, screenshotPath);
+      return {
+        productId,
+        kind: "subscription",
+        ascId: subscriptionId,
+        upload,
+        fallback: "subscriptionAppStoreReviewScreenshots",
+      };
+    } catch {
+      /* try next product id */
+    }
+  }
+
   throw new Error(
-    `In-app purchase not found for productId in ${IAP_PRODUCT_IDS.join(", ")} (app ${appId})`,
+    `Trip Pass not found as IAP or subscription (tried ${IAP_PRODUCT_IDS.join(", ")}, app ${appId})`,
   );
 }
 
@@ -194,14 +225,7 @@ async function main() {
     });
   }
 
-  const iap = await findInAppPurchaseV2Id(appId, "trip_pass");
-  const iapUpload = await uploadIapReviewScreenshot(iap.id, reviewShot);
-  report.products.push({
-    productId: iap.productId,
-    kind: "inAppPurchase",
-    ascId: iap.id,
-    upload: iapUpload,
-  });
+  report.products.push(await uploadTripPassReviewScreenshot(appId, reviewShot));
 
   console.log(JSON.stringify({ ok: true, ...report }, null, 2));
 }
