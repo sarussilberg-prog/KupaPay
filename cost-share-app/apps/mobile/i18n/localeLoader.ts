@@ -5,24 +5,27 @@
 import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, type Language } from '@cost-share/shared';
 import en from './locales/en.json';
 
-const localeImporters: Record<
-    Exclude<Language, typeof DEFAULT_LANGUAGE>,
-    () => Promise<{ default: object }>
-> = {
-    he: () => import('./locales/he.json'),
-    ru: () => import('./locales/ru.json'),
-    ar: () => import('./locales/ar.json'),
-    fr: () => import('./locales/fr.json'),
-    es: () => import('./locales/es.json'),
-    de: () => import('./locales/de.json'),
-};
-
 export async function loadMobileLocaleTranslation(language: Language): Promise<object> {
-    if (language === DEFAULT_LANGUAGE) {
-        return en;
+    switch (language) {
+        case 'en':
+            return en;
+        case 'he':
+            return (await import('./locales/he.json')).default;
+        case 'ru':
+            return (await import('./locales/ru.json')).default;
+        case 'ar':
+            return (await import('./locales/ar.json')).default;
+        case 'fr':
+            return (await import('./locales/fr.json')).default;
+        case 'es':
+            return (await import('./locales/es.json')).default;
+        case 'de':
+            return (await import('./locales/de.json')).default;
+        default: {
+            const _exhaustive: never = language;
+            return _exhaustive;
+        }
     }
-    const mod = await localeImporters[language]();
-    return mod.default;
 }
 
 export const MOBILE_I18N_EAGER_RESOURCES = {

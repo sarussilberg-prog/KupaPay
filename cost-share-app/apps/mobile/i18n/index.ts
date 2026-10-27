@@ -47,9 +47,9 @@ async function ensureMobileLocaleBundle(language: SupportedLanguage): Promise<vo
 
 async function resourcesForStartupLanguage(
     language: SupportedLanguage,
-): Promise<typeof mobileI18nResources> {
+): Promise<Record<string, { translation: object }>> {
     if (language === DEFAULT_LANGUAGE) {
-        return mobileI18nResources;
+        return { ...mobileI18nResources };
     }
     const translation = await loadMobileLocaleTranslation(language);
     loadedLocaleBundles.add(language);
