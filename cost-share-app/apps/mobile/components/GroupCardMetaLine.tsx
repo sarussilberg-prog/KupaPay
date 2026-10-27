@@ -11,6 +11,7 @@ import {
     type GroupWithMembers,
 } from '@cost-share/shared';
 import { Text } from './AppText';
+import { rtlTextClassName, useRtlLayout } from '../hooks/useRtlLayout';
 import { toDate } from '../lib/dateUtils';
 
 /** Skip "Updated now" noise on list rows (Splitwise-style). */
@@ -29,6 +30,8 @@ type Props = {
 
 export function GroupCardMetaLine({ group, memberCount, language, testID = 'group-card-meta' }: Props) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
+    const metaAlignClass = rtlTextClassName(isRtl, metaTextClass);
 
     const { memberLabel, updatedLabel } = useMemo(() => {
         const activityAt = group.lastActivityAt ?? group.updatedAt;
@@ -61,12 +64,12 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
 
     return (
         <View testID={testID} style={{ minWidth: 0, alignSelf: 'stretch' }}>
-            <Text className={metaTextClass} style={{ flexShrink: 1 }}>
-                <Text className={metaTextClass}>{memberLabel}</Text>
+            <Text className={metaAlignClass} style={{ flexShrink: 1 }}>
+                <Text className={metaAlignClass}>{memberLabel}</Text>
                 {updatedLabel ? (
                     <>
-                        <Text className={metaTextClass}>{META_SEPARATOR}</Text>
-                        <Text className={metaTextClass}>{updatedLabel}</Text>
+                        <Text className={metaAlignClass}>{META_SEPARATOR}</Text>
+                        <Text className={metaAlignClass}>{updatedLabel}</Text>
                     </>
                 ) : null}
             </Text>

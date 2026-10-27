@@ -14,7 +14,7 @@ import {
     useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
+import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
 import { GroupRollup, GroupWithMembers } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
@@ -215,35 +215,38 @@ function GroupCardBase({
                   android: { elevation: 2 },
               });
 
+    const titleClassName = isArchived
+        ? 'text-[17px] font-semibold text-gray-600 dark:text-gray-300 leading-5'
+        : 'text-[17px] font-semibold text-gray-900 dark:text-gray-50 leading-5';
+    const titleAlignClass = rtlTextClassName(isRtl, titleClassName);
+
     return (
         <>
             <View
                 className={cardClass}
-                style={[rtlRowStyle(isRtl), { alignItems: 'stretch' }, cardShadow]}
+                style={[rtlRowStyle(isRtl), { alignItems: 'center' }, cardShadow]}
             >
                 <ListRow
                     onPress={() => onPress(group.id)}
                     testID={`group-card-${group.id}`}
-                    style={{ flex: 1, alignItems: 'center', gap: 14 }}
+                    style={{ flex: 1, alignItems: 'center', gap: 12, minWidth: 0 }}
                 >
                     <GroupAvatar
                         imageUrl={group.imageUrl}
                         groupType={group.groupType}
                         name={group.name}
                         size="sm"
+                        style={{ flexShrink: 0, alignSelf: 'center' }}
                     />
 
-                    <View style={{ flex: 1, minWidth: 0, alignSelf: 'stretch', gap: 6 }}>
+                    <View style={{ flex: 1, minWidth: 0, gap: 4, justifyContent: 'center' }}>
                         <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
-                            <View style={{ flexShrink: 1, minWidth: 0 }}>
+                            <View style={{ flexShrink: 1, minWidth: 0, flexGrow: 1 }}>
                                 <HighlightedText
-                                    className={
-                                        isArchived
-                                            ? 'text-[17px] font-semibold text-gray-600 dark:text-gray-300 leading-5'
-                                            : 'text-[17px] font-semibold text-gray-900 dark:text-gray-50 leading-5'
-                                    }
+                                    className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
                                     query={searchQuery}
+                                    numberOfLines={2}
                                 />
                             </View>
                             {!isArchived && (unreadCount ?? 0) > 0 && (
@@ -296,7 +299,7 @@ function GroupCardBase({
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
                     testID={`group-card-menu-${group.id}`}
-                    style={{ marginStart: 4, padding: 6, alignSelf: 'center' }}
+                    style={{ marginStart: 2, padding: 6, alignSelf: 'center', flexShrink: 0 }}
                 >
                     <AppIcon name="ellipsis-vertical" size={16} color={colors.gray400} />
                 </TouchableOpacity>

@@ -1,13 +1,15 @@
 /**
- * GroupAvatar — cover image, or type-colored tile with emoji / initials fallback.
+ * GroupAvatar — cover image, or type-colored tile with icon / initials fallback.
  */
 
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GroupType } from '@cost-share/shared';
 import { getGroupTypeVisual, groupInitialsFromName } from '../lib/groupTypeVisuals';
+import { centeredTextStyle } from '../hooks/useRtlLayout';
+import { AppIcon } from './AppIcon';
 import { Text } from './AppText';
 
 interface GroupAvatarProps {
@@ -17,12 +19,13 @@ interface GroupAvatarProps {
     name?: string;
     size?: 'sm' | 'md' | 'lg';
     testID?: string;
+    style?: StyleProp<ViewStyle>;
 }
 
 const sizeStyles = {
-    sm: { className: 'w-12 h-12 rounded-xl', iconSize: 22, emoji: 22, initials: 'text-sm' },
-    md: { className: 'w-14 h-14 rounded-2xl', iconSize: 26, emoji: 26, initials: 'text-base' },
-    lg: { className: 'w-24 h-24 rounded-2xl', iconSize: 40, emoji: 40, initials: 'text-xl' },
+    sm: { width: 48, height: 48, borderRadius: 12, iconSize: 22, initials: 'text-sm' },
+    md: { width: 56, height: 56, borderRadius: 16, iconSize: 26, initials: 'text-base' },
+    lg: { width: 96, height: 96, borderRadius: 16, iconSize: 40, initials: 'text-xl' },
 } as const;
 
 const MAX_AVATAR_RETRIES = 2;
@@ -33,9 +36,11 @@ export function GroupAvatar({
     name,
     size = 'sm',
     testID = 'group-avatar',
+    style,
 }: GroupAvatarProps) {
-    const { className, emoji, initials } = sizeStyles[size];
+    const { width, height, borderRadius, iconSize, initials } = sizeStyles[size];
     const visual = getGroupTypeVisual(groupType);
+    const boxStyle: ViewStyle = { width, height, borderRadius, overflow: 'hidden' };
 
     const [attempt, setAttempt] = useState(0);
     useEffect(() => setAttempt(0), [imageUrl]);
@@ -44,7 +49,7 @@ export function GroupAvatar({
 
     if (showImage && imageUrl) {
         return (
-            <View className={`${className} overflow-hidden`} testID={testID}>
+            <View style={[boxStyle, style]} testID={testID}>
                 <Image
                     recyclingKey={`${imageUrl}#${attempt}`}
                     source={imageUrl}
@@ -62,13 +67,14 @@ export function GroupAvatar({
     const initialsText = name ? groupInitialsFromName(name) : '';
 
     return (
-        <View className={`${className} overflow-hidden`} testID={testID}>
+        <View style={[boxStyle, style]} testID={testID}>
             <LinearGradient
                 colors={visual.gradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
-                    flex: 1,
+                    width: '100%',
+                    height: '100%',
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}
@@ -77,13 +83,20 @@ export function GroupAvatar({
                     <Text
                         className={`${initials} font-bold text-white`}
                         testID={`${testID}-initials`}
+                        style={{
+                            ...centeredTextStyle,
+                            ...(Platform.OS === 'android' && { includeFontPadding: false }),
+                        }}
                     >
                         {initialsText}
                     </Text>
                 ) : (
-                    <Text style={{ fontSize: emoji }} testID={`${testID}-emoji`}>
-                        {visual.emoji}
-                    </Text>
+                    <AppIcon
+                        name={visual.icon}
+                        size={iconSize}
+                        color="rgba(255,255,255,0.95)"
+                        testID={`${testID}-icon`}
+                    />
                 )}
             </LinearGradient>
         </View>
