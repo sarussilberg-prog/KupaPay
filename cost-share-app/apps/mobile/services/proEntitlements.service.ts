@@ -63,29 +63,16 @@ export async function fetchMyProStatus(groupId?: string | null): Promise<MyProSt
     const { data, error } = await supabase.rpc('get_my_pro_status', {
         p_group_id: groupId ?? null,
     });
-    if (error || data == null) {
-        return {
-            hasPro: false,
-            individualProUntil: null,
-            groupPassUntil: null,
-            includedTripPassCredits: 0,
-            unassignedTripPassCount: 0,
-            adminProViewMode: 'real',
-            adminProViewExpiresAt: null,
-        };
+    if (error) {
+        throw error;
+    }
+    if (data == null) {
+        throw new Error('get_my_pro_status returned null');
     }
     if (typeof data === 'object') {
         return parseProStatusRpcRow(data as Record<string, unknown>);
     }
-    return {
-        hasPro: false,
-        individualProUntil: null,
-        groupPassUntil: null,
-        includedTripPassCredits: 0,
-        unassignedTripPassCount: 0,
-        adminProViewMode: 'real',
-        adminProViewExpiresAt: null,
-    };
+    throw new Error('get_my_pro_status returned unexpected payload');
 }
 
 export async function setMyAdminProViewMode(
