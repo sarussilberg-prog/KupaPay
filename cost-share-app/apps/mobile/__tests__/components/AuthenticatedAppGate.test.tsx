@@ -44,6 +44,10 @@ jest.mock('../../components/admin/AdminProViewBanner', () => ({
     AdminProViewBanner: () => null,
 }));
 
+jest.mock('../../hooks/useSubscriptionRefreshOnForeground', () => ({
+    useSubscriptionRefreshOnForeground: jest.fn(),
+}));
+
 jest.mock('../../lib/sentry', () => ({
     navigationIntegration: { registerNavigationContainer: jest.fn() },
 }));

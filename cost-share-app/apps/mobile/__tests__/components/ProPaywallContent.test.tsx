@@ -33,6 +33,23 @@ jest.mock('../../lib/paywallOfferingsLoad', () => ({
     reportPaywallLoadFailed: jest.fn(),
 }));
 
+jest.mock('../../hooks/useProStatus', () => ({
+    useProStatus: jest.fn(() => ({
+        hasPro: false,
+        proPerkUnlocked: false,
+        isLoading: false,
+        isError: false,
+        data: undefined,
+        adminProViewMode: 'real' as const,
+        adminProViewOverrideActive: false,
+        adminProViewExpiresAt: null,
+    })),
+}));
+
+jest.mock('../../lib/featureFlags', () => ({
+    KUPAPAY_PRO_ENABLED: true,
+}));
+
 jest.mock('../../services/purchases.service', () => ({
     isPurchasesConfigured: jest.fn(() => true),
     loadOfferingPackages: jest.fn(),

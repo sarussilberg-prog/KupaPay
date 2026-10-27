@@ -1451,12 +1451,52 @@
             "trialFreePeriodHeading": "Essai gratuit de {{trialDays}} jours",
             "trialFreePeriodBody": "Essayez toutes les fonctions Pro gratuitement pendant {{trialDays}} jours. Annulez dans Réglages avant la fin de l'essai si vous ne souhaitez pas continuer.",
             "trialRenewalDisclosure": "Après {{trialDays}} jours, {{price}}/{{period}} seront facturés sauf annulation dans Réglages.",
-            "havePromoCode": "Vous avez un code ?"
+            "havePromoCode": "Vous avez un code ?",
+            "alreadyProTitle": "Vous êtes sur Pro",
+            "alreadyProBody": "Votre abonnement est actif. Gérez la facturation sur l’App Store ou Google Play et profitez des fonctionnalités Pro."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Gérer l’abonnement",
-            "freeTrialUntil": "Essai gratuit jusqu’au {{date}}"
+            "freeTrialUntil": "Essai gratuit jusqu’au {{date}}",
+            "activeUntil": "Pro actif jusqu’au {{date}}",
+            "activeIndividualAndGroup": "Abonnement Pro actif ; ce groupe a aussi Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Mon abonnement",
+            "openDetails": "Détails de l'abonnement",
+            "screenIntro": "Forfait, renouvellement et facturation se gèrent dans l'App Store ou Google Play. Trip Pass est indiqué par groupe ci-dessous.",
+            "disabled": "Les abonnements ne sont pas disponibles dans cette version.",
+            "empty": "Aucun abonnement actif sur ce compte.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Promotionnel",
+            "storeStripe": "Facturation web",
+            "storeUnknown": "Votre store",
+            "renewsOn": "Renouvellement le {{date}}",
+            "expiresOn": "Accès jusqu'au {{date}}",
+            "expiredOn": "Expiré le {{date}}",
+            "autoRenewOn": "Renouvellement auto activé",
+            "autoRenewOff": "Renouvellement auto désactivé",
+            "trialActive": "Essai gratuit en cours",
+            "purchasedVia": "Acheté via {{store}}",
+            "billingIssueBody": "Un problème de paiement est survenu. Mettez à jour votre moyen de paiement pour garder Pro.",
+            "fixPayment": "Corriger le paiement",
+            "tripPassSection": "Groupes Trip Pass",
+            "tripPassUntil": "Pro pour ce groupe jusqu'au {{date}}",
+            "renewalDisclosureShort": "Les abonnements se renouvellent automatiquement jusqu'à annulation dans le store au moins 24 h avant. Voir Conditions et Confidentialité.",
+            "status": {
+                "active": "Actif",
+                "cancelled_until_expiry": "Annulé — actif jusqu'à expiration",
+                "billing_issue": "Problème de facturation",
+                "expired": "Expiré",
+                "none": "Pas d'abonnement"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro pour ce groupe",
+            "activeUntil": "Pro pour tous les membres jusqu’au {{date}}."
         },
         "trialReminder": {
             "title": "Fin prochaine de l’essai KupaPay Pro",

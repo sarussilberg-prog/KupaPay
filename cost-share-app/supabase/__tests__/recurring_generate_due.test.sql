@@ -85,16 +85,23 @@ BEGIN
         RAISE EXCEPTION 'Case idempotency failed: occurrence count changed after second run';
     END IF;
 
-    -- Currency + splits on a generated expense (not the first occurrence).
+    -- Currency + splits on one generated expense (not the anchor occurrence).
     SELECT e.currency, COALESCE(SUM(es.amount), 0)
       INTO v_currency, v_split_sum
       FROM public.recurring_expense_occurrences ro
       JOIN public.expenses e ON e.id = ro.expense_id
       JOIN public.expense_splits es ON es.expense_id = e.id
-     WHERE ro.series_id = v_series
-       AND ro.scheduled_for <> (SELECT start_date FROM public.recurring_expense_series WHERE id = v_series)
-     GROUP BY e.currency
-     LIMIT 1;
+     WHERE ro.id = (
+         SELECT ro2.id
+           FROM public.recurring_expense_occurrences ro2
+          WHERE ro2.series_id = v_series
+            AND ro2.scheduled_for <> (
+                SELECT start_date FROM public.recurring_expense_series WHERE id = v_series
+            )
+          ORDER BY ro2.scheduled_for
+          LIMIT 1
+       )
+     GROUP BY e.id, e.currency;
     IF v_currency IS DISTINCT FROM 'ILS' OR abs(v_split_sum - 100) > 0.01 THEN
         RAISE EXCEPTION 'Case template failed: currency=% split_sum=%', v_currency, v_split_sum;
     END IF;
