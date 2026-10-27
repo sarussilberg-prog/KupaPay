@@ -3,10 +3,7 @@ import * as Sentry from '@sentry/react-native';
 import { sweepIfOnline } from './zombieSweep';
 import { SENTRY_TAGS } from './sentryTags';
 
-/**
- * After connectivity returns (or when the user taps Retry on the offline banner),
- * resume paused mutations and refetch active queries.
- */
+/** After connectivity returns (or the offline banner Retry tap), resume paused mutations and refetch active queries. */
 export async function retryConnectivitySync(client: QueryClient): Promise<void> {
     if (!onlineManager.isOnline()) {
         return;
