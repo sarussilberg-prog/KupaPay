@@ -39,7 +39,12 @@ describe('handleInviteLink concurrency dedup', () => {
         const p2 = handleInviteLink(link, null, queryClient);
 
         resolveRpc({
-            data: { group_id: 'g1', group_name: 'G', already_member: false },
+            data: {
+                ok: true,
+                group_id: 'g1',
+                group_name: 'G',
+                already_member: false,
+            },
             error: null,
         });
         await Promise.all([p1, p2]);

@@ -9,6 +9,7 @@ DECLARE
     v_out   CONSTANT UUID := '00000000-0000-0000-0000-000000297099';
     v_group CONSTANT UUID := '00000000-0000-0000-0000-000000297010';
     v_exp   CONSTANT UUID := '00000000-0000-0000-0000-000000297020';
+    v_res   jsonb;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_alice, 'ex297-alice@test.local'),
@@ -41,20 +42,17 @@ BEGIN
         END IF;
     END;
 
-    BEGIN
-        PERFORM public.update_expense_with_splits(
-            v_exp,
-            NULL,
-            jsonb_build_array(
-                jsonb_build_object('user_id', v_out, 'amount', 30)
-            )
-        );
-        RAISE EXCEPTION 'Case B failed: RPC must reject outsider split user';
-    EXCEPTION WHEN OTHERS THEN
-        IF SQLERRM NOT LIKE '%split_user_not_group_member%' THEN
-            RAISE;
-        END IF;
-    END;
+    v_res := public.update_expense_with_splits(
+        v_exp,
+        NULL,
+        jsonb_build_array(
+            jsonb_build_object('user_id', v_out, 'amount', 30)
+        )
+    );
+    IF (v_res->>'ok')::boolean IS NOT FALSE
+        OR v_res->>'error_code' IS DISTINCT FROM 'split_user_not_group_member' THEN
+        RAISE EXCEPTION 'Case B failed: RPC must reject outsider split user, got %', v_res;
+    END IF;
 
     PERFORM public.update_expense_with_splits(
         v_exp,
