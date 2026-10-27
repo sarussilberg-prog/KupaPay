@@ -86,7 +86,7 @@ describe('initializeLanguage', () => {
             expect(await AsyncStorage.getItem('@rtl_native_applied')).toBe('he');
         });
 
-        it('does not reload again when native RTL stays wrong after a prior reload for he', async () => {
+        it('retries forceRTL + reload when native RTL stays wrong after a prior reload for he', async () => {
             await AsyncStorage.multiSet([
                 ['@app_language', 'he'],
                 ['@rtl_native_applied', 'he'],
@@ -95,9 +95,10 @@ describe('initializeLanguage', () => {
             await initializeLanguage();
 
             expect(i18n.language).toBe('he');
-            expect(i18nMgr.forceRTL).not.toHaveBeenCalled();
+            expect(i18nMgr.forceRTL).toHaveBeenCalledWith(true);
+            expect(devReloadMock).toHaveBeenCalledTimes(1);
             expect(reloadAsyncMock).not.toHaveBeenCalled();
-            expect(devReloadMock).not.toHaveBeenCalled();
+            expect(await AsyncStorage.getItem('@rtl_native_applied')).toBe('he');
         });
 
         it('uses saved en without reading device locale when native is already LTR', async () => {
