@@ -5,11 +5,12 @@ import * as Clipboard from 'expo-clipboard';
 import { Text } from '../../components/AppText';
 import { useAdminSupportMessagesQuery } from '../../hooks/queries/useAdminSupportMessagesQuery';
 import { toDate } from '../../lib/dateUtils';
+import { formatAppDate } from '../../lib/formatAppDate';
 import { showSuccessMessage } from '../../lib/appToast';
 import { updateSupportMessageStatus, type SupportMessage } from '../../services/admin.service';
 
 export function AdminSupportMessagesScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const query = useAdminSupportMessagesQuery();
     const [selected, setSelected] = useState<SupportMessage | null>(null);
     const [toggling, setToggling] = useState(false);
@@ -60,7 +61,9 @@ export function AdminSupportMessagesScreen() {
                                     </Text>
                                 </View>
                             </View>
-                            <Text className="text-xs text-gray-400 mb-1">{toDate(item.createdAt).toLocaleDateString()}</Text>
+                            <Text className="text-xs text-gray-400 mb-1">
+                                {formatAppDate(item.createdAt, i18n.language)}
+                            </Text>
                             <Text className="text-xs text-primary mb-2">{item.email}</Text>
                             <Text className="text-sm text-gray-700" numberOfLines={2}>{item.message}</Text>
                         </View>
@@ -81,7 +84,7 @@ export function AdminSupportMessagesScreen() {
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Text className="text-base font-semibold text-gray-900">{selected?.name}</Text>
                                 <Text className="text-xs text-gray-400">
-                                    {selected ? toDate(selected.createdAt).toLocaleDateString() : ''}
+                                    {selected ? formatAppDate(selected.createdAt, i18n.language) : ''}
                                 </Text>
                             </View>
                         </View>

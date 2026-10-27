@@ -130,7 +130,8 @@ async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
     await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
     if (__DEV__) {
         // Updates.reloadAsync() in a dev client can leave the splash stuck.
-        DevSettings.reload();
+        // DevSettings is undefined on web (Expo web dev) — logical RTL still applies via RtlLayoutProvider.
+        DevSettings?.reload?.();
     } else {
         await Updates.reloadAsync();
     }
