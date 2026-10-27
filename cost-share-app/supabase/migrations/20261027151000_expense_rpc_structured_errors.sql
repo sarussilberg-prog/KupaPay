@@ -232,3 +232,15 @@ BEGIN
     RETURN jsonb_build_object('ok', true, 'expense', to_jsonb(v_expense));
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.create_expense_with_splits(
+    uuid, text, numeric, text, text, date, text, uuid, text, jsonb
+) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.create_expense_with_splits(
+    uuid, text, numeric, text, text, date, text, uuid, text, jsonb
+) TO authenticated;
+
+REVOKE EXECUTE ON FUNCTION public.update_expense_with_splits(uuid, jsonb, jsonb)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.update_expense_with_splits(uuid, jsonb, jsonb)
+    TO authenticated;
