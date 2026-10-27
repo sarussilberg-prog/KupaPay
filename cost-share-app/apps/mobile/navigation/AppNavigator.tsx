@@ -90,6 +90,7 @@ import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen'
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
 import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
+import { AdminGrowthMetricsScreen } from '../screens/admin/AdminGrowthMetricsScreen';
 import { PaywallScreen } from '../screens/pro/PaywallScreen';
 import { boundScreen } from './boundScreen';
 
@@ -124,6 +125,7 @@ const Screen = {
     AdminErrorEvent: boundScreen(AdminErrorEventScreen, 'AdminErrorEvent'),
     AdminSupportMessages: boundScreen(AdminSupportMessagesScreen, 'AdminSupportMessages'),
     AdminMonetization: boundScreen(AdminMonetizationScreen, 'AdminMonetization'),
+    AdminGrowthMetrics: boundScreen(AdminGrowthMetricsScreen, 'AdminGrowthMetrics'),
     CreateGroup: boundScreen(CreateGroupScreen, 'CreateGroup'),
     GroupPostCreateInvite: boundScreen(GroupPostCreateInviteScreen, 'GroupPostCreateInvite'),
     EditGroup: boundScreen(CreateGroupScreen, 'EditGroup'),
@@ -495,6 +497,11 @@ export function AppNavigator() {
                 name="AdminMonetization"
                 component={Screen.AdminMonetization}
                 options={{ title: t('admin.monetization.portalRow') }}
+            />
+            <RootStack.Screen
+                name="AdminGrowthMetrics"
+                component={Screen.AdminGrowthMetrics}
+                options={{ title: t('admin.growth.screenTitle') }}
             />
 
             <RootStack.Screen

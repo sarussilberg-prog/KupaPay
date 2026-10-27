@@ -68,6 +68,7 @@ Example HogQL snippets live in `cost-share-app/analytics/posthog-growth-queries.
 
 ## Dashboard checklist (#422)
 
+- [x] In-app admin: **Admin portal → MAU & north star** (`get_growth_metrics()`; RLS via `is_app_admin()`)
 - [x] Insight: MAU / WAU / DAU from `app_open` or `signup` — see `cost-share-app/analytics/posthog-dashboard-mau-tiles.json`
 - [x] Insight: North-star groups/month from `expense_added` (HogQL) or Postgres RPC — HogQL in `posthog-growth-queries.hogql`; Postgres via `get_growth_metrics()`
 - [x] Breakdowns: `platform`, `locale`

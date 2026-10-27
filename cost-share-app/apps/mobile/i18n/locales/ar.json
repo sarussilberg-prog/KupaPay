@@ -944,6 +944,26 @@
             "last7Days": "آخر 7 أيام",
             "noData": "لا توجد أحداث في هذه الفترة بعد"
         },
+        "growth": {
+            "portalRow": "MAU والمؤشر الشمالي",
+            "screenTitle": "مقاييس النمو",
+            "asOf": "تم التحديث {{when}} (UTC)",
+            "northStarTitle": "المؤشر الشمالي",
+            "northStarDefinition": "مجموعات أضاف فيها عضوان على الأقل مصروفًا واحدًا في الشهر التقويمي الحالي.",
+            "northStarCurrent": "هذا الشهر ({{month}})",
+            "northStarPrevious": "الشهر السابق ({{month}})",
+            "activeAuthorsTitle": "منشئو المصروفات النشطون",
+            "activeAuthorsNote": "مستخدمون فريدون أنشأوا مصروفًا غير محذوف في النافذة الزمنية. استخدم PostHog لـ MAU/WAU/DAU من فتح التطبيق.",
+            "dau": "نشطون يوميًا",
+            "wau": "نشطون أسبوعيًا",
+            "mau": "نشطون شهريًا (تقريبي)",
+            "mauEpicProgress": "{{percent}}% نحو هدف {{target}} MAU",
+            "seriesTitle": "المؤشر الشمالي — آخر 12 شهرًا",
+            "openPostHogDashboard": "فتح لوحة MAU في PostHog",
+            "postHogDashboardHint": "عيّن EXPO_PUBLIC_POSTHOG_PROJECT_ID (ومعرّف لوحة MAU اختياريًا) للربط مع PostHog من هنا.",
+            "webOnlyNote": "التفصيل حسب المنصة واللغة في لوحة PostHog المرتبطة.",
+            "analyticsUnavailableBody": "دالة مقاييس النمو مفقودة أو غير ممنوحة في مشروع Supabase. طبّق أحدث migrations على dev ثم حدّث."
+        },
         "supportMessages": {
             "title": "رسائل الدعم",
             "portalRow": "رسائل الدعم",

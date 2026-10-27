@@ -904,6 +904,26 @@
             "last7Days": "7 ימים אחרונים",
             "noData": "אין אירועים בתקופה זו עדיין"
         },
+        "growth": {
+            "portalRow": "MAU ומדד צפון",
+            "screenTitle": "מדדי צמיחה",
+            "asOf": "עודכן {{when}} (UTC)",
+            "northStarTitle": "מדד צפון",
+            "northStarDefinition": "קבוצות שבהן לפחות שני חברים הוסיפו הוצאה בחודש הקלנדרי הנוכחי.",
+            "northStarCurrent": "החודש הנוכחי ({{month}})",
+            "northStarPrevious": "החודש הקודם ({{month}})",
+            "activeAuthorsTitle": "יוצרי הוצאות פעילים",
+            "activeAuthorsNote": "משתמשים ייחודיים שיצרו הוצאה שלא נמחקה בחלון הזמן. ל-MAU/WAU/DAU מפתיחות אפליקציה השתמשו ב-PostHog.",
+            "dau": "פעילים יומיים",
+            "wau": "פעילים שבועיים",
+            "mau": "פעילים חודשיים (פרוקסי)",
+            "mauEpicProgress": "{{percent}}% ליעד {{target}} MAU",
+            "seriesTitle": "מדד צפון — 12 חודשים אחרונים",
+            "openPostHogDashboard": "פתח לוח MAU ב-PostHog",
+            "postHogDashboardHint": "הגדר EXPO_PUBLIC_POSTHOG_PROJECT_ID (ואופציונלית מזהה לוח MAU) לקישור ל-PostHog מכאן.",
+            "webOnlyNote": "פילוח לפי פלטפורמה ושפה נמצא בלוח PostHog המקושר.",
+            "analyticsUnavailableBody": "פונקציית מדדי הצמיחה חסרה או ללא הרשאה בפרויקט Supabase. יישמו את המיגרציות האחרונות ב-dev ורעננו."
+        },
         "supportMessages": {
             "title": "הודעות תמיכה",
             "portalRow": "הודעות תמיכה",
