@@ -30,6 +30,10 @@ export async function waitForPurchasesReady(): Promise<boolean> {
     return false;
 }
 
+export async function fetchPurchasesCustomerInfo(): Promise<null> {
+    return null;
+}
+
 export async function logOutPurchases(): Promise<void> {}
 
 function capturePackages(): PaywallPackages {
