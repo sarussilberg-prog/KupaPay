@@ -55,10 +55,17 @@ Configured in [`cost-share-app/.size-limit.json`](../../cost-share-app/.size-lim
 
 | Artifact | Limit |
 |----------|--------|
-| Expo web `index-*.js` | 2800 KB (measured ~1760 KB gzip, Oct 2026) |
-| Next.js `main-app-*.js` | 180 KB (measured ~0.4 KB gzip for app shell chunk; limit guards regressions) |
+| Expo web `index-*.js` | 2500 KB gzip (entry chunk; non-English locales and `xlsx` load on demand) |
+| Next.js `main-app-*.js` | 180 KB (measured ~1.5 KB gzip for app shell chunk; limit guards regressions) |
 
 Run locally: `cd cost-share-app && npm run size:ci`.
+
+**Bundle analysis (local, optional):**
+
+| Target | Command |
+|--------|---------|
+| Expo / Metro (web export) | `npm run analyze:mobile` then `npm run analyze:atlas -w @cost-share/mobile` |
+| Next.js marketing site | `npm run analyze:web` (opens webpack report when `ANALYZE=true`) |
 
 ### Lighthouse
 

@@ -5,10 +5,8 @@ import {
     collectStaticI18nKeysFromSource,
     GROUP_TYPES,
 } from '@cost-share/shared';
-import {
-    mobileI18nResources,
-    MOBILE_I18N_LOCALE_CODES,
-} from '../../i18n/localeConfig';
+import { MOBILE_I18N_LOCALE_CODES } from '../../i18n/localeConfig';
+import { mobileI18nResourcesAllLocales } from '../../i18n/testLocaleResources';
 
 const MOBILE_APP_ROOT = path.join(__dirname, '../..');
 const SCAN_DIRS = ['components', 'screens', 'lib', 'hooks', 'dev'] as const;
@@ -75,7 +73,7 @@ describe('mobile used i18n keys exist in every locale', () => {
 
     beforeAll(async () => {
         await i18n.init({
-            resources: mobileI18nResources,
+            resources: mobileI18nResourcesAllLocales,
             lng: 'en',
             fallbackLng: 'en',
             interpolation: { escapeValue: false },

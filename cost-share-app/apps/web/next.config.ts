@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import bundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from '@sentry/nextjs/config';
 import { sentryReleaseMetadata } from '@cost-share/shared';
 import { CONTENT_SECURITY_POLICY } from '../../packages/shared/src/security/contentSecurityPolicy';
@@ -46,6 +47,10 @@ const securityHeaders = [
     value: CONTENT_SECURITY_POLICY,
   },
 ];
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@cost-share/shared'],
@@ -100,7 +105,7 @@ const { release, dist } = sentryReleaseMetadata({
   buildNumber: vercelSha || null,
 });
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   org: process.env.SENTRY_ORG?.trim() || 'kupay-hb',
   project: process.env.SENTRY_PROJECT?.trim() || 'kupapay-web',
   authToken: sentryAuthToken,

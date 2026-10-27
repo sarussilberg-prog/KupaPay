@@ -9,11 +9,7 @@ import {
     isRtlLanguage,
     runLocaleParityForApp,
 } from '@cost-share/shared';
-import {
-    getMobileI18nBundles,
-    MOBILE_I18N_BASE_LOCALE,
-    MOBILE_I18N_LOCALE_CODES,
-} from '../../i18n/localeConfig';
+import { MOBILE_I18N_BASE_LOCALE, MOBILE_I18N_LOCALE_CODES } from '../../i18n/localeConfig';
 import {
     getWebI18nBundles,
     WEB_I18N_BASE_LOCALE,
@@ -44,7 +40,7 @@ function formatParityIssues(
 }
 
 describe('i18n locale parity (config-driven)', () => {
-    it('mobile locale codes come from mobileI18nResources registry', () => {
+    it('mobile locale codes match APP_I18N_LOCALE_CODES registry', () => {
         expect(MOBILE_I18N_LOCALE_CODES).toEqual(
             expect.arrayContaining(['en', 'he', 'ru', 'ar', 'fr', 'es', 'de']),
         );
@@ -57,10 +53,13 @@ describe('i18n locale parity (config-driven)', () => {
     });
 
     it('mobile: every configured locale matches en keys (no missing/empty/placeholder drift)', () => {
+        const bundles = Object.fromEntries(
+            MOBILE_I18N_LOCALE_CODES.map(code => [code, loadLocaleFile(MOBILE_LOCALES_DIR, code)]),
+        );
         const issues = runLocaleParityForApp({
             appLabel: 'mobile',
             baseLocale: MOBILE_I18N_BASE_LOCALE,
-            bundles: getMobileI18nBundles(),
+            bundles,
             allowExtraKeys: true,
         });
         expect(issues).toEqual([]);
