@@ -2,6 +2,7 @@ import {
     advanceRecurringDate,
     formatIsoDateOnly,
     parseIsoDateOnly,
+    recurringLocalTodayIso,
 } from '../recurringDates';
 
 describe('recurringDates', () => {
@@ -18,5 +19,13 @@ describe('recurringDates', () => {
     it('advances yearly', () => {
         const start = parseIsoDateOnly('2024-02-29');
         expect(formatIsoDateOnly(advanceRecurringDate(start, 'yearly'))).toBe('2025-02-28');
+    });
+
+    it('recurringLocalTodayIso uses IANA timezone (Asia/Jerusalem)', () => {
+        const iso = recurringLocalTodayIso(
+            'Asia/Jerusalem',
+            new Date('2026-03-27T21:30:00.000Z'),
+        );
+        expect(iso).toBe('2026-03-28');
     });
 });
