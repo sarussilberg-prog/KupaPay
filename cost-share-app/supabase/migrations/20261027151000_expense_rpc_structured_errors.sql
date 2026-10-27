@@ -1,6 +1,6 @@
 -- #533 — create/update expense RPCs return jsonb { ok, expense? | error_code }.
 
-DROP FUNCTION IF EXISTS public.create_expense_with_splits(
+DROP FUNCTION IF EXISTS public.create_expense_with_splits( -- safe-breaking: return type changes to jsonb (#533)
     uuid, text, numeric, text, text, date, text, uuid, text, jsonb
 );
 
