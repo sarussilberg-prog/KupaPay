@@ -1,5 +1,5 @@
--- Re-apply archive_group JSONB RPC (prod recorded 20261016120000 as pro_trial_reminder_cron, so archive SQL never ran there).
--- Idempotent: identical to 20261016120000_archive_group_rpc_result.sql; safe on dev (already JSONB).
+-- Canonical archive_group JSONB RPC for prod (20261016120000 history slot is pro_trial_reminder_cron on production).
+-- Idempotent: DROP IF EXISTS + CREATE OR REPLACE; safe on dev where archive JSONB may already exist.
 
 DROP FUNCTION IF EXISTS public.archive_group(UUID); -- safe-breaking: mobile ships JSONB archive_group before prod deploy
 
