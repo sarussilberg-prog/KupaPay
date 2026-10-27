@@ -80,7 +80,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
             style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
         >
             <Text
-                style={[MEMBER_META_STYLE, { textAlign, flexShrink: 0 }]}
+                style={[MEMBER_META_STYLE, { textAlign, flexShrink: 1, minWidth: 0 }]}
                 numberOfLines={1}
                 testID="group-card-meta-members"
             >
@@ -90,7 +90,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
                 <>
                     <Text style={[UPDATED_META_STYLE, { flexShrink: 0 }]}>{META_SEPARATOR}</Text>
                     <Text
-                        style={[UPDATED_META_STYLE, { textAlign, flexShrink: 1, minWidth: 0 }]}
+                        style={[UPDATED_META_STYLE, { textAlign, flexShrink: 0 }]}
                         numberOfLines={1}
                         testID="group-card-meta-updated"
                     >

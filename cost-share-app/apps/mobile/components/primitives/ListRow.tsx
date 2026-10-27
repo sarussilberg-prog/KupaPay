@@ -21,6 +21,8 @@ export function ListRow({ children, onPress, testID, style, className }: Props) 
     const rowStyle: ViewStyle = {
         alignItems: 'center',
         minWidth: 0,
+        flex: 1,
+        alignSelf: 'stretch',
         ...(Platform.OS !== 'web'
             ? { flexDirection: isRtl ? 'row-reverse' : 'row' }
             : rtlRowStyle(isRtl)),

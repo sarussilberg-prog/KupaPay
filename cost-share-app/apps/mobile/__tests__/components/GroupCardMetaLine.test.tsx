@@ -52,5 +52,16 @@ describe('GroupCardMetaLine', () => {
         const updated = getByTestId('group-card-meta-updated');
         expect(String(updated.props.children)).toContain('לפני');
         expect(String(updated.props.children)).not.toMatch(/י׳/);
+        expect(String(updated.props.children)).toMatch(/6/);
+    });
+
+    it('does not shrink the updated-time segment when space is tight', () => {
+        const sixDaysAgo = new Date(Date.now() - GROUP_CARD_UPDATED_META_MIN_AGE_MS - 6 * 86_400_000);
+        const { getByTestId } = render(
+            <GroupCardMetaLine group={baseGroup(sixDaysAgo)} memberCount={2} language="he" />,
+        );
+        const style = getByTestId('group-card-meta-updated').props.style;
+        const flat = Array.isArray(style) ? Object.assign({}, ...style) : style;
+        expect(flat.flexShrink).toBe(0);
     });
 });
