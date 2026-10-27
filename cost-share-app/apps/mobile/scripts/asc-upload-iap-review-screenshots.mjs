@@ -97,11 +97,20 @@ async function uploadTripPassReviewScreenshot(appId, screenshotPath) {
   );
 }
 
+async function listSubscriptionReviewScreenshots(subscriptionId) {
+  try {
+    return await ascGetAll(
+      `/v1/subscriptionAppStoreReviewScreenshots?filter[subscription]=${subscriptionId}&limit=5`,
+      token,
+    );
+  } catch (e) {
+    if (e.status === 404) return [];
+    throw e;
+  }
+}
+
 async function uploadSubscriptionReviewScreenshot(subscriptionId, screenshotPath) {
-  const existing = await ascGetAll(
-    `/v1/subscriptions/${subscriptionId}/appStoreReviewScreenshots?limit=5`,
-    token,
-  );
+  const existing = await listSubscriptionReviewScreenshots(subscriptionId);
   let shotId = existing[0]?.id;
   if (!shotId) {
     const created = await ascRequest("/v1/subscriptionAppStoreReviewScreenshots", {
