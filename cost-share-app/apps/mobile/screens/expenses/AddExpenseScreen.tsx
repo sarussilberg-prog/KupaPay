@@ -120,6 +120,10 @@ import {
     uiToStoredSplitMode,
 } from '../../lib/expenseSplitForm';
 import { colors } from '../../theme';
+import {
+    isKnownGroupId,
+    resolveAddExpenseGroupId,
+} from '../../lib/favoriteGroup';
 
 function uiToUnequalMode(mode: UiSplitMode): UnequalSplitMode {
     return mode === 'percent' ? 'percent' : 'amount';
@@ -185,7 +189,9 @@ export function AddExpenseScreen() {
     const groupId = resolvedGroupId ?? '';
     const { isLoading, startLoading, stopLoading } = useLoading();
     const currentUser = useAppStore(state => state.currentUser);
+    const favoriteGroupId = useAppStore(state => state.favoriteGroupId);
     const groupsQuery = useGroupsQuery();
+    const groups = groupsQuery.data ?? [];
     const storeGroup = groupId
         ? groupsQuery.data?.find(g => g.id === groupId)
         : undefined;
@@ -237,6 +243,7 @@ export function AddExpenseScreen() {
     const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('monthly');
     const [recurringSheetVisible, setRecurringSheetVisible] = useState(false);
     const [groupPickerVisible, setGroupPickerVisible] = useState(false);
+    const groupPickerAutoOpenedRef = useRef(false);
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
@@ -269,6 +276,30 @@ export function AddExpenseScreen() {
     useLayoutEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
+
+    // When the route seed or persisted favorite is stale, re-resolve once groups
+    // are known. Do not override a valid in-screen pick (see handleSelectGroup).
+    useEffect(() => {
+        if (isEditMode || groups.length === 0) return;
+        if (isKnownGroupId(resolvedGroupId, groups)) return;
+        const next = resolveAddExpenseGroupId({
+            routeGroupId,
+            favoriteGroupId,
+            groups,
+        });
+        if (next && next !== resolvedGroupId) {
+            setResolvedGroupId(next);
+        }
+    }, [isEditMode, routeGroupId, favoriteGroupId, groups, resolvedGroupId]);
+
+    // Create mode with no valid group yet: require an explicit pick via the sheet.
+    useEffect(() => {
+        if (isEditMode || groupPickerAutoOpenedRef.current) return;
+        if (groupsQuery.isLoading || groups.length === 0) return;
+        if (isKnownGroupId(resolvedGroupId, groups)) return;
+        groupPickerAutoOpenedRef.current = true;
+        setGroupPickerVisible(true);
+    }, [isEditMode, groupsQuery.isLoading, groups, resolvedGroupId]);
 
     useEffect(() => {
         if (!isEditMode && storeGroup?.defaultCurrency) {
@@ -469,11 +500,26 @@ export function AddExpenseScreen() {
     const hasDescription = description.trim().length > 0;
     const hasValidAmount =
         amount.length > 0 && Number.isFinite(parsedAmount) && parsedAmount > 0;
+    const hasValidGroup = isKnownGroupId(groupId, groups);
+
     const canSave = useMemo(() => {
         const hasMembers = selectedMemberIds.length > 0;
         const unequalReady = splitMode === 'equal' || unequalCheck.isValid;
-        return hasDescription && hasValidAmount && hasMembers && unequalReady;
-    }, [hasDescription, hasValidAmount, selectedMemberIds.length, splitMode, unequalCheck.isValid]);
+        return (
+            hasValidGroup &&
+            hasDescription &&
+            hasValidAmount &&
+            hasMembers &&
+            unequalReady
+        );
+    }, [
+        hasValidGroup,
+        hasDescription,
+        hasValidAmount,
+        selectedMemberIds.length,
+        splitMode,
+        unequalCheck.isValid,
+    ]);
 
     const editChanged = useMemo(() => {
         if (!isEditMode) return true;
@@ -871,12 +917,15 @@ export function AddExpenseScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.heroTop}>
-                    {!isEditMode && storeGroup ? (
+                    {!isEditMode ? (
                         <>
                             <GroupSelectPill
-                                groupName={storeGroup.name}
-                                groupType={storeGroup.groupType}
-                                imageUrl={storeGroup.imageUrl}
+                                groupName={
+                                    storeGroup?.name ?? t('expenses.v2.selectGroup')
+                                }
+                                groupType={storeGroup?.groupType}
+                                imageUrl={storeGroup?.imageUrl}
+                                placeholder={!storeGroup}
                                 onPress={() => setGroupPickerVisible(true)}
                             />
                             <View style={{ height: 16 }} />

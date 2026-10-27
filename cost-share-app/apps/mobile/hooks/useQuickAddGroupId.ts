@@ -3,9 +3,10 @@
  * Prefer the group currently being viewed; never rely on a second Zustand store.
  */
 import type { NavigationState, PartialState } from '@react-navigation/native';
+import type { GroupWithMembers } from '@cost-share/shared';
 import { useAppStore } from '../store';
-import { queryClient } from '../lib/queryClient';
-import { queryKeys } from '../hooks/queries/keys';
+import { isKnownGroupId, resolveFavoriteGroupId } from '../lib/favoriteGroup';
+import { useGroupsQuery } from './queries/useGroupsQuery';
 
 type NestedState = NavigationState | PartialState<NavigationState> | undefined;
 
@@ -47,11 +48,13 @@ export function groupIdFromGroupsTabState(nestedState: NestedState): string | un
 export function resolveQuickAddGroupId(input: {
     tabState: NavigationState | undefined;
     favoriteGroupId: string | null | undefined;
-    groups: Array<{ id: string }>;
+    groups: GroupWithMembers[];
 }): string | undefined {
     const { tabState, favoriteGroupId, groups } = input;
+    const effectiveFavorite = resolveFavoriteGroupId(favoriteGroupId ?? null, groups);
+
     if (!tabState?.routes?.length) {
-        return favoriteGroupId ?? groups[0]?.id;
+        return effectiveFavorite ?? undefined;
     }
 
     const focused = focusedRoute(tabState);
@@ -59,26 +62,25 @@ export function resolveQuickAddGroupId(input: {
 
     if (focusedTab === 'Groups') {
         const fromGroups = groupIdFromGroupsTabState(focused?.state);
-        if (fromGroups) return fromGroups;
+        if (isKnownGroupId(fromGroups, groups)) return fromGroups;
     }
 
     if (focusedTab === 'FavoriteGroup') {
         const nested = focusedRoute(focused?.state);
         const fromParams = nested?.params?.groupId;
-        if (typeof fromParams === 'string' && fromParams.length > 0) {
+        if (typeof fromParams === 'string' && isKnownGroupId(fromParams, groups)) {
             return fromParams;
         }
-        if (favoriteGroupId) return favoriteGroupId;
+        if (effectiveFavorite) return effectiveFavorite;
     }
 
-    return favoriteGroupId ?? groups[0]?.id;
+    return effectiveFavorite ?? undefined;
 }
 
 export function useQuickAddGroupId(
     tabState: NavigationState | undefined,
 ): string | undefined {
     const favoriteGroupId = useAppStore((s) => s.favoriteGroupId);
-    const groups =
-        queryClient.getQueryData<Array<{ id: string }>>(queryKeys.groups) ?? [];
+    const { data: groups = [] } = useGroupsQuery();
     return resolveQuickAddGroupId({ tabState, favoriteGroupId, groups });
 }

@@ -1471,12 +1471,52 @@
             "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
             "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
             "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
-            "havePromoCode": "Есть код?"
+            "havePromoCode": "Есть код?",
+            "alreadyProTitle": "У вас Pro",
+            "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Управление подпиской",
-            "freeTrialUntil": "Бесплатный период до {{date}}"
+            "freeTrialUntil": "Бесплатный период до {{date}}",
+            "activeUntil": "Pro активен до {{date}}",
+            "activeIndividualAndGroup": "Подписка Pro активна; у этой группы также Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Моя подписка",
+            "openDetails": "Детали подписки",
+            "screenIntro": "План, продление и оплата управляются в App Store или Google Play. Trip Pass показан по группам ниже.",
+            "disabled": "Подписки недоступны в этой сборке.",
+            "empty": "На этом аккаунте нет активной подписки.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Промо",
+            "storeStripe": "Оплата на сайте",
+            "storeUnknown": "Магазин приложений",
+            "renewsOn": "Продление {{date}}",
+            "expiresOn": "Доступ до {{date}}",
+            "expiredOn": "Истекла {{date}}",
+            "autoRenewOn": "Автопродление включено",
+            "autoRenewOff": "Автопродление выключено",
+            "trialActive": "Идёт бесплатный пробный период",
+            "purchasedVia": "Куплено через {{store}}",
+            "billingIssueBody": "Проблема с оплатой. Обновите способ оплаты, чтобы сохранить Pro.",
+            "fixPayment": "Исправить оплату",
+            "tripPassSection": "Группы Trip Pass",
+            "tripPassUntil": "Pro для группы до {{date}}",
+            "renewalDisclosureShort": "Подписки продлеваются автоматически, пока вы не отмените их в магазине минимум за 24 часа. См. Условия и Конфиденциальность.",
+            "status": {
+                "active": "Активна",
+                "cancelled_until_expiry": "Отменена — активна до конца периода",
+                "billing_issue": "Проблема с оплатой",
+                "expired": "Истекла",
+                "none": "Нет подписки"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro для этой группы",
+            "activeUntil": "Pro для всех участников группы до {{date}}."
         },
         "trialReminder": {
             "title": "Пробный период KupaPay Pro скоро закончится",

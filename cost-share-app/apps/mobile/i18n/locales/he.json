@@ -1398,12 +1398,52 @@
             "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
             "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
             "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
-            "havePromoCode": "יש לכם קוד?"
+            "havePromoCode": "יש לכם קוד?",
+            "alreadyProTitle": "אתם ב-Pro",
+            "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "ניהול מנוי",
-            "freeTrialUntil": "ניסיון חינם עד {{date}}"
+            "freeTrialUntil": "ניסיון חינם עד {{date}}",
+            "activeUntil": "Pro פעיל עד {{date}}",
+            "activeIndividualAndGroup": "מנוי Pro פעיל; לקבוצה זו יש גם Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "המנוי שלי",
+            "openDetails": "פרטי מנוי",
+            "screenIntro": "תוכנית, תאריך חידוש וחיוב מנוהלים ב-App Store או Google Play. גישת Trip Pass מוצגת לפי קבוצה.",
+            "disabled": "מנויים אינם זמינים בגרסה זו.",
+            "empty": "אין מנוי פעיל בחשבון זה.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "קידום",
+            "storeStripe": "חיוב באינטרנט",
+            "storeUnknown": "חנות האפליקציות",
+            "renewsOn": "מתחדש ב-{{date}}",
+            "expiresOn": "גישה עד {{date}}",
+            "expiredOn": "פג תוקף ב-{{date}}",
+            "autoRenewOn": "חידוש אוטומטי פעיל",
+            "autoRenewOff": "חידוש אוטומטי כבוי",
+            "trialActive": "ניסיון חינם פעיל",
+            "purchasedVia": "נרכש דרך {{store}}",
+            "billingIssueBody": "יש בעיה בתשלום. עדכנו אמצעי תשלום כדי להמשיך ב-Pro.",
+            "fixPayment": "תיקון תשלום",
+            "tripPassSection": "קבוצות Trip Pass",
+            "tripPassUntil": "Pro לקבוצה עד {{date}}",
+            "renewalDisclosureShort": "מנויים מתחדשים אוטומטית עד לביטול בחשבון החנות לפחות 24 שעות לפני החידוש. ראו תנאים ופרטיות.",
+            "status": {
+                "active": "פעיל",
+                "cancelled_until_expiry": "בוטל — פעיל עד תום התקופה",
+                "billing_issue": "בעיית חיוב",
+                "expired": "פג תוקף",
+                "none": "אין מנוי"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro לקבוצה זו",
+            "activeUntil": "Pro לכל חברי הקבוצה עד {{date}}."
         },
         "trialReminder": {
             "title": "ניסיון KupaPay Pro מסתיים בקרוב",

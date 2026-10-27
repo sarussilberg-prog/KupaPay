@@ -9,6 +9,10 @@ jest.mock('../../hooks/queries/useExchangeRatesQuery', () => ({
     }),
 }));
 
+jest.mock('../../hooks/useShowProUpsell', () => ({
+    useShowProUpsell: jest.fn(() => true),
+}));
+
 describe('GroupTripCurrencySection', () => {
     const debts = [
         { fromUserId: 'a', toUserId: 'b', currency: 'USD', amount: 10 },

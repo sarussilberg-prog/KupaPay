@@ -4,7 +4,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { ProUpgradeButton } from '../ProUpgradeButton';
+import { ProUpsellButton } from '../pro/ProUpsellButton';
 import { useTranslation } from 'react-i18next';
 import type { PairwiseDebt } from '@cost-share/shared';
 import { Text } from '../AppText';
@@ -14,6 +14,7 @@ import { convertDebtsToTripCurrency } from '../../lib/tripCurrencyConversion';
 import { captureProductEvent } from '../../lib/productAnalytics';
 
 interface GroupTripCurrencySectionProps {
+    groupId?: string;
     defaultCurrency: string;
     debts: PairwiseDebt[];
     memberNames: Record<string, string>;
@@ -22,6 +23,7 @@ interface GroupTripCurrencySectionProps {
 }
 
 export function GroupTripCurrencySection({
+    groupId,
     defaultCurrency,
     debts,
     memberNames,
@@ -62,7 +64,8 @@ export function GroupTripCurrencySection({
             <View className="mx-4 mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-100">
                 <Text className="text-gray-800 font-semibold mb-1">{t('pro.tripCurrency.title')}</Text>
                 <Text className="text-gray-600 text-sm mb-3">{t('pro.tripCurrency.lockedBody')}</Text>
-                <ProUpgradeButton
+                <ProUpsellButton
+                    groupId={groupId}
                     title={t('pro.tripCurrency.upgrade')}
                     onPress={onUpgrade}
                     testID="trip-currency-upgrade"

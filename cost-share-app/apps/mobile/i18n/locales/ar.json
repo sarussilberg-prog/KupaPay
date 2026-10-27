@@ -1535,12 +1535,52 @@
             "trialFreePeriodHeading": "تجربة مجانية {{trialDays}} أيام",
             "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
             "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
-            "havePromoCode": "لديك رمز؟"
+            "havePromoCode": "لديك رمز؟",
+            "alreadyProTitle": "أنت مشترك في Pro",
+            "alreadyProBody": "اشتراكك نشط. أدر الفوترة من App Store أو Google Play، واستمر في استخدام ميزات Pro في التطبيق."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "إدارة الاشتراك",
-            "freeTrialUntil": "تجربة مجانية حتى {{date}}"
+            "freeTrialUntil": "تجربة مجانية حتى {{date}}",
+            "activeUntil": "Pro نشط حتى {{date}}",
+            "activeIndividualAndGroup": "اشتراك Pro نشط؛ هذه المجموعة لديها أيضًا Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "اشتراكي",
+            "openDetails": "تفاصيل الاشتراك",
+            "screenIntro": "تُدار الخطة وتاريخ التجديد والفوترة من App Store أو Google Play. يُعرض Trip Pass لكل مجموعة أدناه.",
+            "disabled": "الاشتراكات غير متاحة في هذا الإصدار.",
+            "empty": "لا يوجد اشتراك نشط على هذا الحساب.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "ترويجي",
+            "storeStripe": "فوترة ويب",
+            "storeUnknown": "متجر التطبيقات",
+            "renewsOn": "يتجدد في {{date}}",
+            "expiresOn": "الوصول حتى {{date}}",
+            "expiredOn": "انتهى في {{date}}",
+            "autoRenewOn": "التجديد التلقائي مفعّل",
+            "autoRenewOff": "التجديد التلقائي متوقف",
+            "trialActive": "تجربة مجانية جارية",
+            "purchasedVia": "تم الشراء عبر {{store}}",
+            "billingIssueBody": "حدثت مشكلة في الدفع. حدّث طريقة الدفع للاحتفاظ بـ Pro.",
+            "fixPayment": "إصلاح الدفع",
+            "tripPassSection": "مجموعات Trip Pass",
+            "tripPassUntil": "Pro للمجموعة حتى {{date}}",
+            "renewalDisclosureShort": "تتجدد الاشتراكات تلقائيًا حتى الإلغاء من حساب المتجر قبل 24 ساعة على الأقل من التجديد. راجع الشروط والخصوصية.",
+            "status": {
+                "active": "نشط",
+                "cancelled_until_expiry": "ملغى — نشط حتى الانتهاء",
+                "billing_issue": "مشكلة فوترة",
+                "expired": "منتهٍ",
+                "none": "لا اشتراك"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro لهذه المجموعة",
+            "activeUntil": "Pro لجميع أعضاء المجموعة حتى {{date}}."
         },
         "trialReminder": {
             "title": "تجربة KupaPay Pro تنتهي قريبًا",

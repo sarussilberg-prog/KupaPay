@@ -1453,12 +1453,52 @@
             "trialFreePeriodHeading": "{{trialDays}} Tage kostenlos testen",
             "trialFreePeriodBody": "{{trialDays}} Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
             "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
-            "havePromoCode": "Code vorhanden?"
+            "havePromoCode": "Code vorhanden?",
+            "alreadyProTitle": "Du hast Pro",
+            "alreadyProBody": "Dein Abo ist aktiv. Verwalte die Abrechnung im App Store oder bei Google Play und nutze weiter alle Pro-Funktionen."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Abo verwalten",
-            "freeTrialUntil": "Kostenlose Testphase bis {{date}}"
+            "freeTrialUntil": "Kostenlose Testphase bis {{date}}",
+            "activeUntil": "Pro aktiv bis {{date}}",
+            "activeIndividualAndGroup": "Pro-Abo aktiv; diese Gruppe hat zusätzlich Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Mein Abo",
+            "openDetails": "Abo-Details",
+            "screenIntro": "Plan, Verlängerung und Abrechnung verwaltest du im App Store oder Google Play. Trip Pass pro Gruppe siehst du unten.",
+            "disabled": "Abos sind in diesem Build nicht verfügbar.",
+            "empty": "Kein aktives Abo auf diesem Konto.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Werbeaktion",
+            "storeStripe": "Web-Abrechnung",
+            "storeUnknown": "App-Store",
+            "renewsOn": "Verlängert am {{date}}",
+            "expiresOn": "Zugang bis {{date}}",
+            "expiredOn": "Abgelaufen am {{date}}",
+            "autoRenewOn": "Automatische Verlängerung an",
+            "autoRenewOff": "Automatische Verlängerung aus",
+            "trialActive": "Kostenlose Testphase läuft",
+            "purchasedVia": "Gekauft über {{store}}",
+            "billingIssueBody": "Beim Zahlen ist ein Problem aufgetreten. Aktualisiere die Zahlungsmethode, um Pro zu behalten.",
+            "fixPayment": "Zahlung beheben",
+            "tripPassSection": "Trip-Pass-Gruppen",
+            "tripPassUntil": "Pro für diese Gruppe bis {{date}}",
+            "renewalDisclosureShort": "Abos verlängern sich automatisch, bis du im Store-Konto spätestens 24 Stunden vorher kündigst. Siehe AGB und Datenschutz.",
+            "status": {
+                "active": "Aktiv",
+                "cancelled_until_expiry": "Gekündigt — aktiv bis Ablauf",
+                "billing_issue": "Zahlungsproblem",
+                "expired": "Abgelaufen",
+                "none": "Kein Abo"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro für diese Gruppe",
+            "activeUntil": "Pro für alle Gruppenmitglieder bis {{date}}."
         },
         "trialReminder": {
             "title": "KupaPay-Pro-Testphase endet bald",
