@@ -170,16 +170,28 @@ function classifyMonetizationRpcError(error: { message?: string; code?: string; 
     return 'unknown';
 }
 
-export async function fetchAdminMonetizationMetrics(): Promise<MonetizationMetrics> {
-    const { data, error } = await supabase.rpc('get_monetization_metrics');
+async function fetchAdminAnalyticsRpc<T>(
+    rpcName: string,
+    parse: (data: unknown) => T,
+    ErrorClass: typeof AdminMonetizationMetricsError,
+): Promise<T> {
+    const { data, error } = await supabase.rpc(rpcName);
     if (error) {
-        console.warn('fetchAdminMonetizationMetrics: RPC failed', error);
-        throw new AdminMonetizationMetricsError(classifyMonetizationRpcError(error), error.message);
+        console.warn(`${rpcName}: RPC failed`, error);
+        throw new ErrorClass(classifyMonetizationRpcError(error), error.message);
     }
     if (!data) {
-        throw new AdminMonetizationMetricsError('unknown', 'empty_response');
+        throw new ErrorClass('unknown', 'empty_response');
     }
-    return data as MonetizationMetrics;
+    return parse(data);
+}
+
+export async function fetchAdminMonetizationMetrics(): Promise<MonetizationMetrics> {
+    return fetchAdminAnalyticsRpc(
+        'get_monetization_metrics',
+        (data) => data as MonetizationMetrics,
+        AdminMonetizationMetricsError,
+    );
 }
 
 import {
@@ -195,28 +207,19 @@ type MetricsRow = {
     groups: AdminPlatformMetrics['groups'];
 };
 
-export type AdminGrowthMetricsFailure = AdminMonetizationMetricsFailure;
-
-export class AdminGrowthMetricsError extends Error {
-    readonly code: AdminGrowthMetricsFailure;
-
-    constructor(code: AdminGrowthMetricsFailure, message?: string) {
-        super(message ?? code);
+export class AdminGrowthMetricsError extends AdminMonetizationMetricsError {
+    constructor(code: AdminMonetizationMetricsFailure, message?: string) {
+        super(code, message);
         this.name = 'AdminGrowthMetricsError';
-        this.code = code;
     }
 }
 
 export async function fetchAdminGrowthMetrics(): Promise<AdminGrowthMetrics> {
-    const { data, error } = await supabase.rpc('get_growth_metrics');
-    if (error) {
-        console.warn('fetchAdminGrowthMetrics: RPC failed', error);
-        throw new AdminGrowthMetricsError(classifyMonetizationRpcError(error), error.message);
-    }
-    if (!data) {
-        throw new AdminGrowthMetricsError('unknown', 'empty_response');
-    }
-    return parseGrowthMetricsRpc(data as Record<string, unknown>);
+    return fetchAdminAnalyticsRpc(
+        'get_growth_metrics',
+        (data) => parseGrowthMetricsRpc(data as Record<string, unknown>),
+        AdminGrowthMetricsError,
+    );
 }
 
 export async function fetchAdminPlatformMetrics(): Promise<AdminPlatformMetrics | null> {
