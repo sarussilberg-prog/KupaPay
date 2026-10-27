@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Optional: Lighthouse on locally built Next.js (no deploy). Non-blocking warnings only in CI job config.
+# Optional: Lighthouse on locally built Next.js (no deploy).
+# Retries once on failure (cold start / LHCI flake). Score assertions are advisory in CI (see ci-performance.yml).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -13,20 +14,45 @@ npm run build -w @cost-share/shared
 npm run build -w @cost-share/web
 
 SESSION_NAME="lighthouse-next-ci"
-tmux -f /exec-daemon/tmux.portal.conf has-session -t "=$SESSION_NAME" 2>/dev/null || \
-  tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION_NAME" -c "$ROOT/apps/web" -- "${SHELL:-bash}" -l
+LHCI="$ROOT/node_modules/.bin/lhci"
 
-tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" 'npm run start -- --hostname 127.0.0.1 --port 3000' C-m
+stop_server() {
+  tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" C-c 2>/dev/null || true
+}
 
-for _ in $(seq 1 60); do
-  if curl -sf http://127.0.0.1:3000/ >/dev/null; then
-    break
+start_server() {
+  tmux -f /exec-daemon/tmux.portal.conf has-session -t "=$SESSION_NAME" 2>/dev/null || \
+    tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION_NAME" -c "$ROOT/apps/web" -- "${SHELL:-bash}" -l
+  tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" 'npm run start -- --hostname 127.0.0.1 --port 3000' C-m
+  for _ in $(seq 1 60); do
+    if curl -sf http://127.0.0.1:3000/ >/dev/null; then
+      return 0
+    fi
+    sleep 2
+  done
+  echo "::error::Next.js server did not become ready on :3000" >&2
+  return 1
+}
+
+run_lhci() {
+  start_server
+  "$LHCI" autorun --config="$ROOT/lighthouserc.cjs"
+}
+
+last_exit=0
+for attempt in 1 2; do
+  if run_lhci; then
+    stop_server
+    echo "✅ Lighthouse CI finished (attempt ${attempt})"
+    exit 0
   fi
-  sleep 2
+  last_exit=$?
+  stop_server
+  if [[ "$attempt" -eq 1 ]]; then
+    echo "::warning::Lighthouse attempt 1 failed — retrying once after server restart"
+    sleep 5
+  fi
 done
 
-"$ROOT/node_modules/.bin/lhci" autorun --config="$ROOT/lighthouserc.cjs"
-
-tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" C-c
-
-echo "✅ Lighthouse CI finished"
+echo "::error::Lighthouse failed after 2 attempts (advisory in CI — see Lighthouse job; bundle size + query budgets still gate merges)" >&2
+exit "$last_exit"
