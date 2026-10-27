@@ -183,10 +183,70 @@
                     "summarySuffix": "חברים"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "שלושה צעדים — פחות מדקה להוצאה הראשונה.",
+            "skipConfirm": "דלג",
+            "header": {
+                "create": "בחרו תבנית",
+                "expense": "הוצאה ראשונה",
+                "invite": "הזמינו חברים"
+            },
+            "steps": {
+                "create": "קופה",
+                "expense": "הוצאה",
+                "invite": "הזמנה"
+            },
+            "fields": {
+                "groupName": "שם הקופה"
+            },
+            "templates": {
+                "label": "על מה מחלקים?",
+                "trip": {
+                    "label": "טיול",
+                    "defaultName": "טיול סוף שבוע",
+                    "defaultExpense": "דלק או נסיעה"
+                },
+                "roommates": {
+                    "label": "שותפים לדירה",
+                    "defaultName": "הדירה שלנו",
+                    "defaultExpense": "קניות או חשבונות"
+                },
+                "event": {
+                    "label": "אירוע",
+                    "defaultName": "ארוחת קבוצה",
+                    "defaultExpense": "אוכל ושתייה"
+                },
+                "couple": {
+                    "label": "זוג",
+                    "defaultName": "אנחנו",
+                    "defaultExpense": "ארוחה בחוץ"
+                }
+            },
+            "expense": {
+                "hint": "רשמו משהו שכבר שילמתם — אפשר לערוך אחר כך.",
+                "amountRequired": "הזינו סכום גדול מאפס"
+            },
+            "invite": {
+                "title": "הביאו עוד אנשים",
+                "body": "שלחו קישור כדי שחברים יצטרפו לקופה ויחלקו את החשבון הבא."
+            },
+            "skipExpenseTitle": "לדלג על ההוצאה הראשונה?",
+            "skipExpenseMessage": "הוצאה אחת עכשיו היא הדרך המהירה לראות יתרות. אפשר להוסיף הוצאות בכל עת מהקופה.",
+            "cta": {
+                "createGroup": "המשך",
+                "addExpense": "הוסיפו הוצאה",
+                "skipExpense": "דלג לעת עתה",
+                "shareInvite": "שתפו קישור הזמנה",
+                "shareInviteWeb": "שתפו או העתיקו קישור",
+                "done": "לקופה שלי"
+            }
         }
     },
     "groups": {
         "title": "קופות",
+        "listTitle": "הקופות שלי",
+        "newGroupCta": "קופה חדשה",
         "createGroup": "יצירת קופה",
         "editGroup": "ערוך קופה",
         "favorite": {
@@ -199,6 +259,12 @@
         },
         "noGroups": "אין קופות עדיין",
         "noGroupsMessage": "פתח את הקופה הראשונה שלך כדי להתחיל לשתף הוצאות",
+        "demo": {
+            "try": "נסו קופת הדגמה",
+            "created": "קופת הדגמה מוכנה — כך זה עובד",
+            "alreadyExists": "כבר יש לכם את קופת הדגמה",
+            "error": "לא הצלחנו ליצור קופת דגמה"
+        },
         "offlineMessage": "לא ניתן לטעון את הקופות שלך כרגע. הן יופיעו כאן אוטומטית כשהחיבור יחזור.",
         "groupName": "שם הקופה",
         "enterGroupName": "הזן שם קופה",
@@ -335,6 +401,9 @@
             "showMore": "הצג עוד {{count}}",
             "showLess": "הצג פחות"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} במטבעות נוספים"
+        },
         "hero": {
             "spentTogether": "הוציאו ביחד",
             "leftToSettle": "נשאר לסגור"
@@ -347,8 +416,10 @@
             "youOweCaption": "את/ה חייב/ת",
             "owedToYou": "מגיע לך {{amount}}",
             "owedToYouCaption": "מגיע לך",
-            "moreCurrencies": "{{plusCount}} מטבעות",
-            "moreCurrencies_one": "{{plusCount}} מטבע",
+            "moreCurrencies": "{{count}} מטבעות",
+            "moreCurrencies_one": "{{count}} מטבע",
+            "moreCurrenciesNoun": "מטבעות",
+            "moreCurrenciesNoun_one": "מטבע",
             "updatedAgo": "עודכן {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
@@ -382,6 +453,9 @@
             "menuTitle": "שיתוף קופה",
             "inviteOption": "הזמנת חבר להצטרפות",
             "inviteDescription": "שלח קישור להוספת חבר לקופה",
+            "balanceLinkOption": "שיתוף יתרות באתר",
+            "balanceLinkDescription": "כל מי שיש לו את הקישור יכול לראות מי חייב למי — בלי התקנה",
+            "balanceLinkMessage": "ראו מי חייב למי ב«{{groupName}}» ב-KupaPay (בלי אפליקציה): {{url}}",
             "exportOption": "ייצוא דוח קופה",
             "exportDescription": "שמור את פעילות הקופה והיתרות כקובץ CSV (פתיחה באקסל / Google Sheets)",
             "exportCsv": "CSV (חינם)",
@@ -486,12 +560,24 @@
             "searchPlaceholder": "חיפוש חברים",
             "noSearchResults": "אין חברים התואמים לחיפוש.",
             "mutualHint": "מוצגים רק חברים שאתם הוספתם זה את זה.",
-            "missingSomeoneCta": "לא מוצאים? הוסיפו חברים"
+            "missingSomeoneCta": "לא מוצאים? הוסיפו חברים",
+            "addGuestTitle": "עדיין בלי אפליקציה?",
+            "addGuestPlaceholder": "שם החבר/ה",
+            "addGuestButton": "הוסף",
+            "guestAddError": "לא הצלחנו להוסיף חבר זמני",
+            "guestAdded": "נוסף/ה {{name}} — יוכל/תה לקשר בכניסה לקופה"
         },
         "memberCount_one": "{{count}} חבר",
         "memberCount_two": "{{count}} חברים",
         "memberCount_many": "{{count}} חברים",
-        "memberCount_other": "{{count}} חברים"
+        "memberCount_other": "{{count}} חברים",
+        "monthlyBills": {
+            "title": "חשבונות החודש",
+            "summary": "{{count}} הוצאות · {{total}} {{currency}} במחזור",
+            "cycleDay": "המחזור מתחיל ב-{{day}} לכל חודש",
+            "automationPro": "אוטומציה של חשבונות חוזרים עם Pro",
+            "automationActive": "אוטומציית Pro זמינה לקבוצה"
+        }
     },
     "expenses": {
         "title": "הוצאות",
@@ -527,6 +613,10 @@
         "recentExpenses": "הוצאות אחרונות",
         "deleteExpense": "מחק הוצאה",
         "deleteExpenseConfirm": "למחוק את ההוצאה הזו?",
+        "shareLink": "שתף קישור להוצאה",
+        "shareLinkMessage": "{{description}} — {{currency}} {{amount}} ב-KupaPay: {{url}}",
+        "shareLinkInvalid": "קישור ההוצאה כבר לא זמין",
+        "shareLinkOpenApp": "התחבר/י ופתח/י את הקופה כדי לראות את ההוצאה",
         "expenseCreated": "ההוצאה נוספה בהצלחה",
         "expenseUpdated": "ההוצאה עודכנה בהצלחה",
         "expenseDeleted": "ההוצאה נמחקה בהצלחה",
@@ -704,6 +794,13 @@
         "deleteAccount": "מחק חשבון",
         "adminPortal": "פורטל מנהלים"
     },
+    "appReview": {
+        "notNow": "לא עכשיו",
+        "webTitle": "איך KupaPay עובד עבורך?",
+        "webMessage": "אנחנו עדיין משפרים את גרסת האינטרנט. המשוב שלך מגיע ישירות לצוות.",
+        "webFeedbackCta": "שליחת משוב",
+        "webStoreHint": "לדירוג ב-App Store או Google Play, השתמשו ב-KupaPay בטלפון."
+    },
     "admin": {
         "portal": {
             "title": "פורטל מנהלים",
@@ -764,7 +861,19 @@
             },
             "loading": "טוען שגיאות…",
             "empty": "אין שגיאות בטווח הזה",
-            "failed": "טעינה נכשלה. משכו לרענון.",
+            "failed": "טעינת השגיאות נכשלה",
+            "failedHint": "משכו למטה לרענון.",
+            "failedReasons": {
+                "forbidden": "השרת לא זיהה אתכם כמנהלי אפליקציה.",
+                "admin_check_failed": "לא ניתן לאמת הרשאות מנהל: {{detail}}",
+                "sentry_not_configured": "חסרים מפתחות Sentry ב-admin-sentry-proxy: {{missing}}",
+                "sentry_client_error": "Sentry דחה את הבקשה. בדקו SENTRY_API_TOKEN, SENTRY_ORG ושמות הפרויקט (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "שגיאת שרת ב-Sentry. נסו שוב בעוד רגע.",
+                "sentry_unreachable": "לא ניתן להגיע ל-Sentry: {{detail}}",
+                "invoke_failed": "קריאה ל-Edge Function נכשלה: {{detail}}",
+                "missing_authorization": "פג תוקף ההתחברות — התחברו מחדש ופתחו את פורטל הניהול.",
+                "unknown": "שגיאה לא ידועה. משכו לרענון או בדקו את לוגי admin-sentry-proxy."
+            },
             "occurrences": "{{count}} מקרים",
             "occurrences_one": "{{count}} מקרה",
             "affectedUsers": "{{count}} משתמשים נפגעו",
@@ -879,6 +988,7 @@
         },
         "noActivity": "אין פעילות עדיין",
         "noActivityMessage": "הוצאות, תשלומים והודעות מקופות יופיעו כאן",
+        "createGroupCta": "צרו קופה",
         "noSearchResults": "לא נמצאו תוצאות",
         "noSearchResultsMessage": "אין פעילות שמתאימה לחיפוש שלך. נסו מונח אחר או נקו את החיפוש.",
         "expense": "הוצאה",
@@ -920,6 +1030,7 @@
             "noteChangedBy": "הפתק שונה על ידי {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} דחה/תה את בקשת החברות שלך",
             "settleReminder": "{{name}} שלח לך תזכורת להסדיר חוב ב-{{group}}",
+            "unsettledBalanceNudge": "עדיין חייבים ל-{{name}} ב-{{group}}",
             "tripBudgetAlert": "התראת תקציב טיול ב-{{group}}"
         },
         "addedExpense": "הוסיף הוצאה",
@@ -1033,6 +1144,12 @@
             "findEmptyCta": "הזמן חבר חדש דרך קישור",
             "findInviteName": "הזמן את {{name}} ל-KupaPay"
         },
+        "publicBalance": {
+            "title": "דף יתרות ציבורי",
+            "toggleLabel": "מי שיש לו את הקישור יכול לראות יתרות באינטרנט",
+            "toggleHint": "משתמש בקישור /b/ של היתרות. אפשר לכבות או לסובב קישור כדי לבטל גישה.",
+            "privacyNote": "מציג שמות ויתרות בלבד — בלי אימייל או קבלות."
+        },
         "group": {
             "title": "שתף קישור לקופה",
             "shareMessage": "הוספתי אותך לקופת '{{groupName}}' ב-KupaPay. הצטרף/י דרך הקישור: {{url}}",
@@ -1041,6 +1158,17 @@
             "rotateConfirmBody": "כל מי שיש לו את הקישור הנוכחי לא יוכל להצטרף עד שתשלח לו את החדש. חברים שכבר בקופה לא מושפעים.",
             "rotated": "קישור הקופה עודכן",
             "emptyStateLink": "או שתף קישור לקופה"
+        },
+        "postCreate": {
+            "title": "הזמינו חברים",
+            "subtitle": "הוסיפו אנשים ל«{{groupName}}» — קישור, וואטסאפ או QR.",
+            "shareSheet": "שיתוף…",
+            "shareSheetWeb": "שיתוף או העתקה",
+            "whatsapp": "WhatsApp",
+            "copyLink": "העתקת קישור",
+            "qrHint": "סרקו כדי להצטרף לקופה",
+            "skip": "לא עכשיו",
+            "continue": "פתיחת הקופה"
         },
         "addMembers": {
             "searchOthers": "חפש משתמשים אחרים",
@@ -1052,7 +1180,26 @@
             "alreadyMember": "את/ה כבר חבר/ה בקופה הזו",
             "selfInvite": "זה הקישור שלך",
             "invalid": "קישור ההזמנה כבר לא תקף"
+        },
+        "guestClaim": {
+            "title": "הוספתם אתכם בשם?",
+            "subtitle": "בחרו את השם שלכם כדי לשמור על יתרות נכונות.",
+            "confirm": "זה אני",
+            "skip": "לא אני",
+            "success": "ההוצאות המשותפות מקושרות לחשבון שלכם",
+            "error": "לא הצלחנו לקשר את השם לחשבון"
         }
+    },
+    "shareSummary": {
+        "title": "שיתוף סיכום קופה",
+        "share": "שתף תמונה",
+        "hideAmounts": "הסתר סכומים",
+        "hiddenAmount": "***",
+        "allSettled": "הכל מסולק ✓",
+        "balancesSnapshot": "תמונת מצב יתרות",
+        "debtLine": "{{from}} ל-{{to}}",
+        "watermark": "חלוקת הוצאות ב-{{url}}",
+        "fallback": "הצטרפו לקופה \"{{groupName}}\" ב-KupaPay"
     },
     "dashboard": {
         "appTitle": "KupaPay",
@@ -1152,6 +1299,23 @@
         "categoryMessages": "הודעות צ'אט",
         "categoryFriends": "בקשות חברות",
         "categoryGroups": "קבוצות",
+        "categoryReminders": "תזכורות יתרה",
+        "emailTitle": "דוא\"ל",
+        "emailMaster": "דוא\"ל מהמוצר",
+        "lifecycleEmail": "ברוכים הבאים, טיפים וחזרה",
+        "weeklyDigestTitle": "סיכום שבועי",
+        "weeklyDigestPush": "סיכום שבועי (push)",
+        "weeklyDigestEmail": "סיכום שבועי (דוא\"ל)",
+        "quietHoursTitle": "שעות שקט",
+        "quietHoursEnable": "שעות שקט להתראות",
+        "quietHoursSummary": "ללא התראות בין {{start}}:00 ל-{{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "עד {{count}} התראות push ביום.",
+        "webFallback": {
+            "default": "פעילות חדשה ב-KupaPay",
+            "expense_added": "הוצאה חדשה בקבוצה",
+            "settlement_added": "מישהו הסדיר איתך חוב",
+            "unsettled_balance_nudge": "תזכורת: יש יתרה פתוחה לסגירה"
+        },
         "systemDisabled": "ההתראות כבויות עבור האפליקציה",
         "openSettings": "פתח הגדרות",
         "systemDisabledHint": "כדי לעדכן הגדרות אלו, יש להפעיל תחילה התראות בהגדרות המכשיר.",
@@ -1160,6 +1324,25 @@
         "primingBody": "קבל עדכון כשחבר מוסיף הוצאה או משלם לך.",
         "primingEnable": "הפעל התראות",
         "primingLater": "לא עכשיו"
+    },
+    "referral": {
+        "title": "הזמינו חברים — Pro במתנה",
+        "settingsRow": "תגמולי הפניה",
+        "body": "שתפו קישור הזמנה. כשחבר מצטרף לקבוצה ומוסיף הוצאה, תקבלו חודש Pro חינם.",
+        "shareCta": "שתף קישור",
+        "copyLink": "העתק קישור",
+        "linkCopied": "הקישור הועתק",
+        "capHint": "{{count}} מתוך {{cap}} חודשי Pro השנה",
+        "statusTitle": "ההפניות שלך",
+        "empty": "עדיין אין הפניות — שתפו את הקישור.",
+        "refresh": "רענון",
+        "disabled": "תגמולי הפניה לא זמינים בגרסה זו.",
+        "status": {
+            "pending": "ממתין להוצאה ראשונה בקבוצה",
+            "qualified": "זכאי — תגמול בדרך",
+            "rewarded": "חודש Pro ניתן",
+            "rejected": "לא ניתן לתגמל"
+        }
     },
     "monetization": {
         "adGateTitle": "פתח את התכונה",
@@ -1184,6 +1367,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "הקופה, בלי הגבלות",
+            "titleValueFocus": "לחלק הוגן, לסגור חובות מהר יותר עם Pro",
             "feature1": "בלי פרסומות",
             "feature2": "המרת מטבע אוטומטית לטיול",
             "feature3": "דוח PDF מסודר לכל קבוצה",
@@ -1214,16 +1398,63 @@
             "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
             "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
             "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
-            "havePromoCode": "יש לכם קוד?"
+            "havePromoCode": "יש לכם קוד?",
+            "alreadyProTitle": "אתם ב-Pro",
+            "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "ניהול מנוי",
-            "freeTrialUntil": "ניסיון חינם עד {{date}}"
+            "freeTrialUntil": "ניסיון חינם עד {{date}}",
+            "activeUntil": "Pro פעיל עד {{date}}",
+            "activeIndividualAndGroup": "מנוי Pro פעיל; לקבוצה זו יש גם Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "המנוי שלי",
+            "openDetails": "פרטי מנוי",
+            "screenIntro": "תוכנית, תאריך חידוש וחיוב מנוהלים ב-App Store או Google Play. גישת Trip Pass מוצגת לפי קבוצה.",
+            "disabled": "מנויים אינם זמינים בגרסה זו.",
+            "empty": "אין מנוי פעיל בחשבון זה.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "קידום",
+            "storeStripe": "חיוב באינטרנט",
+            "storeUnknown": "חנות האפליקציות",
+            "renewsOn": "מתחדש ב-{{date}}",
+            "expiresOn": "גישה עד {{date}}",
+            "expiredOn": "פג תוקף ב-{{date}}",
+            "autoRenewOn": "חידוש אוטומטי פעיל",
+            "autoRenewOff": "חידוש אוטומטי כבוי",
+            "trialActive": "ניסיון חינם פעיל",
+            "purchasedVia": "נרכש דרך {{store}}",
+            "billingIssueBody": "יש בעיה בתשלום. עדכנו אמצעי תשלום כדי להמשיך ב-Pro.",
+            "fixPayment": "תיקון תשלום",
+            "tripPassSection": "קבוצות Trip Pass",
+            "tripPassUntil": "Pro לקבוצה עד {{date}}",
+            "renewalDisclosureShort": "מנויים מתחדשים אוטומטית עד לביטול בחשבון החנות לפחות 24 שעות לפני החידוש. ראו תנאים ופרטיות.",
+            "status": {
+                "active": "פעיל",
+                "cancelled_until_expiry": "בוטל — פעיל עד תום התקופה",
+                "billing_issue": "בעיית חיוב",
+                "expired": "פג תוקף",
+                "none": "אין מנוי"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro לקבוצה זו",
+            "activeUntil": "Pro לכל חברי הקבוצה עד {{date}}."
         },
         "trialReminder": {
             "title": "ניסיון KupaPay Pro מסתיים בקרוב",
             "body": "הניסיון החינמי שלך ב-KupaPay Pro מסתיים בעוד יומיים. לא רוצה להמשיך? אפשר לבטל בהגדרות."
+        },
+        "trialLifecycle": {
+            "day1": { "title": "ברוכים הבאים ל-Pro" },
+            "day10": { "title": "נותרו 4 ימים בניסיון" },
+            "day13": { "title": "Pro מתחדש מחר" },
+            "disclosure": "החיוב מתחיל אחרי הניסיון אלא אם תבטל/י בהגדרות → ניהול מנוי (App Store / Google Play).",
+            "manage": "ניהול מנוי"
         },
         "includedTripPass": {
             "title": "Trip Pass מהמנוי השנתי",

@@ -1,12 +1,13 @@
 import i18n from 'i18next';
-import { mobileI18nResources, MOBILE_I18N_LOCALE_CODES } from '../../i18n/localeConfig';
+import { MOBILE_I18N_LOCALE_CODES } from '../../i18n/localeConfig';
+import { mobileI18nResourcesAllLocales } from '../../i18n/testLocaleResources';
 
 const RESOLVE_SPOT_CHECK_KEYS = ['groups.card.updatedAgo', 'groups.memberCount'] as const;
 
 describe('i18n resolves UI keys (not raw key paths)', () => {
     beforeAll(async () => {
         await i18n.init({
-            resources: mobileI18nResources,
+            resources: mobileI18nResourcesAllLocales,
             lng: 'en',
             fallbackLng: 'en',
             interpolation: { escapeValue: false },

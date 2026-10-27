@@ -31,6 +31,7 @@ export const profileFromRow = (r: Row): User => ({
     // should not accidentally render every user as "Deleted". Once Phase E
     // rolls out every select includes `is_active` and this default never kicks in.
     isActive: r.is_active === undefined ? true : (r.is_active as boolean),
+    isGuest: r.is_guest === undefined ? false : (r.is_guest as boolean),
     isAdmin: false,  // The profiles table does NOT carry admin status; populated by hydrateCurrentUserProfile via is_app_admin() RPC.
     createdAt: toDate(r.created_at),
     updatedAt: toDate(r.updated_at),
@@ -46,9 +47,15 @@ export const groupFromRow = (r: Row): Group => ({
     groupType: r.group_type as Group['groupType'],
     defaultCurrency: r.default_currency as string,
     inviteToken: (r.invite_token as string) ?? '',
+    publicBalanceToken: (r.public_balance_token as string) ?? '',
+    publicBalanceSharingEnabled: r.public_balance_sharing_enabled === true,
     createdBy: r.created_by as string,
     isActive: r.is_active as boolean,
     lastActivityAt: r.last_activity_at ? toDate(r.last_activity_at) : undefined,
+    monthlyBillsMode: r.monthly_bills_mode === true,
+    billingCycleDay: typeof r.billing_cycle_day === 'number'
+        ? (r.billing_cycle_day as number)
+        : Number(r.billing_cycle_day ?? 1) || 1,
     createdAt: toDate(r.created_at),
     updatedAt: toDate(r.updated_at),
 });
@@ -65,7 +72,13 @@ export const groupMemberFromRow = (r: Row): GroupMember => ({
 type MemberJoinRow = {
     user_id: unknown;
     is_active?: unknown;
-    profiles?: { id?: unknown; name?: unknown; avatar_url?: unknown; is_active?: unknown } | null;
+    profiles?: {
+        id?: unknown;
+        name?: unknown;
+        avatar_url?: unknown;
+        is_active?: unknown;
+        is_guest?: unknown;
+    } | null;
 };
 
 export const groupWithMembersFromRow = (
@@ -81,6 +94,7 @@ export const groupWithMembersFromRow = (
             displayName: String(m.profiles?.name ?? ''),
             avatarUrl: (m.profiles?.avatar_url as string | undefined) ?? undefined,
             isActive: m.profiles?.is_active === undefined ? true : (m.profiles?.is_active as boolean),
+            isGuest: m.profiles?.is_guest === undefined ? false : (m.profiles?.is_guest as boolean),
         }))
         .filter(m => m.userId.length > 0);
     return {
@@ -111,6 +125,7 @@ export const expenseFromRow = (r: Row): Expense => ({
     // to inference when this is undefined.
     splitMode: isExpenseSplitMode(r.split_mode) ? r.split_mode : undefined,
     isDeleted: r.is_deleted as boolean,
+    shareToken: (r.share_token as string) ?? undefined,
     createdAt: toDate(r.created_at),
     updatedAt: toDate(r.updated_at),
 });

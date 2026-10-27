@@ -183,10 +183,70 @@
                     "summarySuffix": "miembros"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Tres pasos — menos de un minuto hasta tu primer gasto.",
+            "skipConfirm": "Omitir",
+            "header": {
+                "create": "Elige una plantilla",
+                "expense": "Primer gasto",
+                "invite": "Invita a tu grupo"
+            },
+            "steps": {
+                "create": "Grupo",
+                "expense": "Gasto",
+                "invite": "Invitar"
+            },
+            "fields": {
+                "groupName": "Nombre del grupo"
+            },
+            "templates": {
+                "label": "¿Qué están repartiendo?",
+                "trip": {
+                    "label": "Viaje",
+                    "defaultName": "Viaje de fin de semana",
+                    "defaultExpense": "Gasolina o transporte"
+                },
+                "roommates": {
+                    "label": "Compañeros de piso",
+                    "defaultName": "Nuestro piso",
+                    "defaultExpense": "Compra o suministros"
+                },
+                "event": {
+                    "label": "Evento",
+                    "defaultName": "Cena en grupo",
+                    "defaultExpense": "Comida y bebida"
+                },
+                "couple": {
+                    "label": "Pareja",
+                    "defaultName": "Los dos",
+                    "defaultExpense": "Cena fuera"
+                }
+            },
+            "expense": {
+                "hint": "Anota algo que ya pagaste — puedes editarlo después.",
+                "amountRequired": "Introduce un importe mayor que cero"
+            },
+            "invite": {
+                "title": "Trae a más gente",
+                "body": "Comparte un enlace para que tus amigos se unan al grupo y repartan la próxima cuenta."
+            },
+            "skipExpenseTitle": "¿Omitir el primer gasto?",
+            "skipExpenseMessage": "Añadir un gasto ahora es la forma más rápida de ver saldos. Siempre puedes añadir gastos desde el grupo.",
+            "cta": {
+                "createGroup": "Continuar",
+                "addExpense": "Añadir gasto",
+                "skipExpense": "Omitir por ahora",
+                "shareInvite": "Compartir enlace de invitación",
+                "shareInviteWeb": "Compartir o copiar enlace",
+                "done": "Ir a mi grupo"
+            }
         }
     },
     "groups": {
         "title": "Grupos",
+        "listTitle": "Mis grupos",
+        "newGroupCta": "Grupo nuevo",
         "createGroup": "Crear grupo",
         "editGroup": "Editar grupo",
         "favorite": {
@@ -199,6 +259,12 @@
         },
         "noGroups": "Aún no hay grupos",
         "noGroupsMessage": "Crea tu primer grupo para empezar a compartir gastos",
+        "demo": {
+            "try": "Probar grupo demo",
+            "created": "Grupo demo listo — mira cómo funciona",
+            "alreadyExists": "Ya tienes el grupo demo",
+            "error": "No se pudo crear el grupo demo"
+        },
         "offlineMessage": "Ahora mismo no podemos cargar tus grupos. Aparecerán aquí automáticamente cuando recuperes la conexión.",
         "groupName": "Nombre del grupo",
         "enterGroupName": "Introduce el nombre del grupo",
@@ -335,6 +401,9 @@
             "showMore": "Mostrar {{count}} más",
             "showLess": "Mostrar menos"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} en otras monedas"
+        },
         "hero": {
             "spentTogether": "Gastado en conjunto",
             "leftToSettle": "Pendiente de saldar"
@@ -347,8 +416,10 @@
             "youOweCaption": "Debes",
             "owedToYou": "Te deben {{amount}}",
             "owedToYouCaption": "Te deben",
-            "moreCurrencies": "{{plusCount}} monedas",
-            "moreCurrencies_one": "{{plusCount}} moneda",
+            "moreCurrencies": "{{count}} monedas",
+            "moreCurrencies_one": "{{count}} moneda",
+            "moreCurrenciesNoun": "monedas",
+            "moreCurrenciesNoun_one": "moneda",
             "updatedAgo": "Actualizado {{when}}",
             "balanceUnavailable": "Saldo no disponible sin conexión"
         },
@@ -382,6 +453,9 @@
             "menuTitle": "Compartir grupo",
             "inviteOption": "Invitar a un amigo a unirse",
             "inviteDescription": "Envía un enlace para añadir a alguien a este grupo",
+            "balanceLinkOption": "Compartir saldos en la web",
+            "balanceLinkDescription": "Quien tenga el enlace ve quién debe a quién — sin instalar la app",
+            "balanceLinkMessage": "Mira quién debe a quién en «{{groupName}}» en KupaPay (sin app): {{url}}",
             "exportOption": "Exportar a Excel / CSV",
             "exportDescription": "Guarda la actividad y los saldos del grupo como archivo CSV (se abre en Excel / Google Sheets)",
             "exportTitle": "Compartir informe del grupo",
@@ -486,12 +560,24 @@
             "searchPlaceholder": "Buscar amigos",
             "noSearchResults": "Ningún amigo coincide con tu búsqueda.",
             "mutualHint": "Solo ves a los amigos que os habéis añadido mutuamente.",
-            "missingSomeoneCta": "¿No los encuentras? Añade amigos"
+            "missingSomeoneCta": "¿No los encuentras? Añade amigos",
+            "addGuestTitle": "¿Aún sin cuenta?",
+            "addGuestPlaceholder": "Nombre del amigo",
+            "addGuestButton": "Añadir",
+            "guestAddError": "No se pudo añadir el miembro provisional",
+            "guestAdded": "Se añadió a {{name}} — lo vinculará al unirse"
         },
         "memberCount_one": "{{count}} persona",
         "memberCount_many": "{{count}} de personas",
         "memberCount_other": "{{count}} personas",
-        "memberCount_two": "{{count}} personas"
+        "memberCount_two": "{{count}} personas",
+        "monthlyBills": {
+            "title": "Gastos del mes",
+            "summary": "{{count}} gastos · {{total}} {{currency}} en el ciclo",
+            "cycleDay": "El ciclo empieza el día {{day}} de cada mes",
+            "automationPro": "Automatiza facturas recurrentes con Pro",
+            "automationActive": "Automatización Pro disponible para este grupo"
+        }
     },
     "expenses": {
         "title": "Gastos",
@@ -527,6 +613,10 @@
         "recentExpenses": "Gastos recientes",
         "deleteExpense": "Eliminar gasto",
         "deleteExpenseConfirm": "¿Seguro que quieres eliminar este gasto?",
+        "shareLink": "Compartir enlace del gasto",
+        "shareLinkMessage": "{{description}} — {{currency}} {{amount}} en KupaPay: {{url}}",
+        "shareLinkInvalid": "Este enlace de gasto ya no está disponible",
+        "shareLinkOpenApp": "Inicia sesión y abre el grupo para ver el gasto",
         "expenseCreated": "Gasto añadido correctamente",
         "expenseUpdated": "Gasto actualizado correctamente",
         "expenseDeleted": "Gasto eliminado correctamente",
@@ -703,6 +793,13 @@
         "deleteAccount": "Eliminar cuenta",
         "adminPortal": "Portal de administración"
     },
+    "appReview": {
+        "notNow": "Ahora no",
+        "webTitle": "¿Cómo te va con KupaPay?",
+        "webMessage": "Seguimos puliendo la versión web. Tu opinión llega directo al equipo.",
+        "webFeedbackCta": "Enviar comentarios",
+        "webStoreHint": "Para valorar en App Store o Google Play, usa KupaPay en el móvil."
+    },
     "admin": {
         "portal": {
             "title": "Portal de administración",
@@ -763,7 +860,19 @@
             },
             "loading": "Cargando errores…",
             "empty": "No hay errores en este periodo",
-            "failed": "No se pudo cargar. Desliza hacia abajo para reintentar.",
+            "failed": "No se pudieron cargar los errores",
+            "failedHint": "Desliza hacia abajo para reintentar.",
+            "failedReasons": {
+                "forbidden": "El servidor no le reconoce como administrador de la app.",
+                "admin_check_failed": "No se pudo verificar el estado de administrador: {{detail}}",
+                "sentry_not_configured": "Faltan secretos de Sentry en admin-sentry-proxy: {{missing}}",
+                "sentry_client_error": "Sentry rechazó la solicitud. Revise SENTRY_API_TOKEN, SENTRY_ORG y los slugs del proyecto (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "Error del servidor de Sentry. Inténtelo de nuevo en un momento.",
+                "sentry_unreachable": "No se pudo contactar con Sentry: {{detail}}",
+                "invoke_failed": "Falló la llamada a la Edge Function: {{detail}}",
+                "missing_authorization": "Sesión caducada — inicie sesión de nuevo y abra el portal de administración.",
+                "unknown": "Error desconocido. Desliza para reintentar o revise los logs de admin-sentry-proxy."
+            },
             "occurrences": "{{count}} ocurrencias",
             "occurrences_one": "{{count}} ocurrencia",
             "affectedUsers": "{{count}} usuarios afectados",
@@ -878,6 +987,7 @@
         },
         "noActivity": "Aún no hay actividad",
         "noActivityMessage": "Tus gastos, pagos y mensajes de grupo recientes aparecerán aquí",
+        "createGroupCta": "Crear un grupo",
         "noSearchResults": "No hay actividad que coincida",
         "noSearchResultsMessage": "Ningún resultado coincide con tu búsqueda. Prueba con otro término o borra la búsqueda.",
         "expense": "Gasto",
@@ -919,6 +1029,7 @@
             "noteChangedBy": "{{name}} cambió la nota · {{group}}",
             "friendRequestRejectedByThem": "{{name}} rechazó tu solicitud de amistad",
             "settleReminder": "{{name}} te envió un recordatorio para saldar cuentas en {{group}}",
+            "unsettledBalanceNudge": "Aún debes a {{name}} en {{group}}",
             "tripBudgetAlert": "Alerta de presupuesto del viaje en {{group}}"
         },
         "addedExpense": "añadió un gasto",
@@ -1032,6 +1143,12 @@
             "findEmptyCta": "Invitar a un amigo nuevo por enlace",
             "findInviteName": "Invitar a {{name}} a KupaPay"
         },
+        "publicBalance": {
+            "title": "Página pública de saldos",
+            "toggleLabel": "Quien tenga el enlace puede ver saldos en la web",
+            "toggleHint": "Usa tu enlace /b/ de saldos. Desactívalo o rota el enlace para revocar acceso.",
+            "privacyNote": "Solo nombres y saldos — sin correo ni recibos."
+        },
         "group": {
             "title": "Compartir enlace del grupo",
             "shareMessage": "Te añadí al grupo '{{groupName}}' en KupaPay. Únete con este enlace: {{url}}",
@@ -1040,6 +1157,17 @@
             "rotateConfirmBody": "Quien tenga el enlace actual no podrá unirse hasta que le envíes el nuevo. Los miembros que ya están en el grupo no se verán afectados.",
             "rotated": "Enlace de invitación del grupo actualizado",
             "emptyStateLink": "o comparte el enlace del grupo"
+        },
+        "postCreate": {
+            "title": "Invitar amigos",
+            "subtitle": "Trae gente a «{{groupName}}» — enlace, WhatsApp o código QR.",
+            "shareSheet": "Compartir…",
+            "shareSheetWeb": "Compartir o copiar",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Copiar enlace",
+            "qrHint": "Escanea para unirte al grupo",
+            "skip": "Ahora no",
+            "continue": "Abrir grupo"
         },
         "addMembers": {
             "searchOthers": "Buscar a otros usuarios",
@@ -1051,7 +1179,26 @@
             "alreadyMember": "Ya eres miembro de este grupo",
             "selfInvite": "Ese es tu propio enlace de invitación",
             "invalid": "Este enlace de invitación ya no es válido"
+        },
+        "guestClaim": {
+            "title": "¿Te añadieron por nombre?",
+            "subtitle": "Elige tu nombre para mantener los saldos correctos.",
+            "confirm": "Soy yo",
+            "skip": "No soy yo",
+            "success": "Tus gastos compartidos están en tu cuenta",
+            "error": "No se pudo vincular ese nombre"
         }
+    },
+    "shareSummary": {
+        "title": "Compartir resumen del grupo",
+        "share": "Compartir imagen",
+        "hideAmounts": "Ocultar importes",
+        "hiddenAmount": "***",
+        "allSettled": "Todo saldado ✓",
+        "balancesSnapshot": "Instantánea de saldos",
+        "debtLine": "{{from}} a {{to}}",
+        "watermark": "Divide gastos en {{url}}",
+        "fallback": "Mira nuestro grupo \"{{groupName}}\" en KupaPay"
     },
     "dashboard": {
         "appTitle": "KupaPay",
@@ -1151,6 +1298,23 @@
         "categoryMessages": "Chat del grupo",
         "categoryFriends": "Solicitudes de amistad",
         "categoryGroups": "Grupos",
+        "categoryReminders": "Recordatorios de saldo",
+        "emailTitle": "Correo",
+        "emailMaster": "Correos del producto",
+        "lifecycleEmail": "Bienvenida, consejos y regreso",
+        "weeklyDigestTitle": "Resumen semanal",
+        "weeklyDigestPush": "Resumen semanal (push)",
+        "weeklyDigestEmail": "Resumen semanal (correo)",
+        "quietHoursTitle": "Horas de silencio",
+        "quietHoursEnable": "Respetar horas de silencio",
+        "quietHoursSummary": "Sin push entre {{start}}:00 y {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "Como máximo {{count}} notificaciones push al día.",
+        "webFallback": {
+            "default": "Nueva actividad en KupaPay",
+            "expense_added": "Nuevo gasto en tu grupo",
+            "settlement_added": "Alguien saldó contigo",
+            "unsettled_balance_nudge": "Recordatorio: saldo pendiente"
+        },
         "systemDisabled": "Las notificaciones están desactivadas para esta aplicación",
         "openSettings": "Abrir ajustes",
         "systemDisabledHint": "Para cambiar estos ajustes, primero activa las notificaciones en los ajustes de tu dispositivo.",
@@ -1260,6 +1424,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Divide en equidad y liquida más rápido con Pro",
             "feature1": "Sin anuncios",
             "feature2": "Conversión automática de moneda para viajes",
             "feature3": "Informe PDF claro para cada grupo",
@@ -1290,16 +1455,63 @@
             "trialFreePeriodHeading": "Prueba gratis de {{trialDays}} días",
             "trialFreePeriodBody": "Prueba todas las funciones Pro gratis durante {{trialDays}} días. Cancela en Ajustes antes de que termine la prueba si no quieres continuar.",
             "trialRenewalDisclosure": "Tras {{trialDays}} días se cobrará {{price}}/{{period}} salvo que canceles en Ajustes.",
-            "havePromoCode": "¿Tienes un código?"
+            "havePromoCode": "¿Tienes un código?",
+            "alreadyProTitle": "Ya tienes Pro",
+            "alreadyProBody": "Tu suscripción está activa. Gestiona la facturación en App Store o Google Play y sigue usando las funciones Pro."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Gestionar suscripción",
-            "freeTrialUntil": "Prueba gratis hasta {{date}}"
+            "freeTrialUntil": "Prueba gratis hasta {{date}}",
+            "activeUntil": "Pro activo hasta {{date}}",
+            "activeIndividualAndGroup": "Suscripción Pro activa; este grupo también tiene Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Mi suscripción",
+            "openDetails": "Detalles de la suscripción",
+            "screenIntro": "El plan, la renovación y la facturación se gestionan en App Store o Google Play. Trip Pass se muestra por grupo abajo.",
+            "disabled": "Las suscripciones no están disponibles en esta versión.",
+            "empty": "No hay suscripción activa en esta cuenta.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Promocional",
+            "storeStripe": "Facturación web",
+            "storeUnknown": "Tu tienda de apps",
+            "renewsOn": "Se renueva el {{date}}",
+            "expiresOn": "Acceso hasta el {{date}}",
+            "expiredOn": "Caducó el {{date}}",
+            "autoRenewOn": "Renovación automática activada",
+            "autoRenewOff": "Renovación automática desactivada",
+            "trialActive": "Prueba gratuita en curso",
+            "purchasedVia": "Comprado en {{store}}",
+            "billingIssueBody": "Hubo un problema con el pago. Actualiza el método de pago para mantener Pro.",
+            "fixPayment": "Corregir pago",
+            "tripPassSection": "Grupos Trip Pass",
+            "tripPassUntil": "Pro para este grupo hasta el {{date}}",
+            "renewalDisclosureShort": "Las suscripciones se renuevan solas hasta que canceles en la tienda al menos 24 h antes. Ver Términos y Privacidad.",
+            "status": {
+                "active": "Activa",
+                "cancelled_until_expiry": "Cancelada — activa hasta el fin",
+                "billing_issue": "Problema de pago",
+                "expired": "Caducada",
+                "none": "Sin suscripción"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro para este grupo",
+            "activeUntil": "Pro para todos los miembros hasta {{date}}."
         },
         "trialReminder": {
             "title": "La prueba de KupaPay Pro termina pronto",
             "body": "Tu prueba gratis de KupaPay Pro termina en dos días. ¿No quieres continuar? Cancela en Ajustes."
+        },
+        "trialLifecycle": {
+            "day1": { "title": "Bienvenido a Pro" },
+            "day10": { "title": "Quedan 4 días de prueba" },
+            "day13": { "title": "Pro se renueva mañana" },
+            "disclosure": "El pago comienza después de la prueba salvo que canceles en Ajustes → Gestionar suscripción (App Store / Google Play).",
+            "manage": "Gestionar suscripción"
         },
         "includedTripPass": {
             "title": "Trip Pass incluido",
@@ -1375,5 +1587,24 @@
         "body": "Esta versión de KupaPay ya no es compatible. Instala la última actualización desde la tienda para continuar.",
         "versionLine": "Tu versión: {{current}} · Requerida: {{required}} o superior",
         "cta": "Abrir tienda"
+    },
+    "referral": {
+        "title": "Invita amigos, gana Pro",
+        "settingsRow": "Recompensas por invitación",
+        "body": "Comparte tu enlace. Cuando un amigo se una a un grupo y añada un gasto, recibes un mes de Pro gratis.",
+        "shareCta": "Compartir enlace",
+        "copyLink": "Copiar enlace",
+        "linkCopied": "Enlace copiado",
+        "capHint": "{{count}} de {{cap}} meses gratis este año",
+        "statusTitle": "Tus invitaciones",
+        "empty": "Aún no hay invitaciones — comparte tu enlace.",
+        "refresh": "Actualizar",
+        "disabled": "Las recompensas no están disponibles en esta versión.",
+        "status": {
+            "pending": "Esperando el primer gasto en grupo",
+            "qualified": "Calificado — recompensa pendiente",
+            "rewarded": "Mes Pro concedido",
+            "rejected": "No se pudo conceder"
+        }
     }
 }

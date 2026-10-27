@@ -24,7 +24,7 @@ import { IconLabel } from './ui/IconLabel';
 import { ListRow } from './ui/ListRow';
 import { colors } from '../theme';
 import { useFriendsQuery } from '../hooks/queries/useFriendsQueries';
-import { addGroupMember } from '../services/groups.service';
+import { addGroupMember, addGuestGroupMember } from '../services/groups.service';
 import { shareGroupInvite } from '../services/invite.service';
 import { getDisplayEmail, getDisplayName, isDeleted } from '../lib/userDisplay';
 import { useRtlLayout } from '../hooks/useRtlLayout';
@@ -60,15 +60,33 @@ function AddMembersSheetView({
     const { data: friends, isLoading, refetch } = useFriendsQuery();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
+    const [guestName, setGuestName] = useState('');
+    const [guestSubmitting, setGuestSubmitting] = useState(false);
     const [query, setQuery] = useState('');
 
     useEffect(() => {
         if (visible) {
             setSelectedIds([]);
             setQuery('');
+            setGuestName('');
             void refetch();
         }
     }, [visible, refetch]);
+
+    const handleAddGuest = useCallback(async () => {
+        const name = guestName.trim();
+        if (!groupId || !name || guestSubmitting) return;
+        setGuestSubmitting(true);
+        try {
+            const added = await addGuestGroupMember(groupId, name);
+            if (added) {
+                setGuestName('');
+                onAdded?.();
+            }
+        } finally {
+            setGuestSubmitting(false);
+        }
+    }, [groupId, guestName, guestSubmitting, onAdded]);
 
     const memberSet = useMemo(() => new Set(currentMemberIds), [currentMemberIds]);
     const eligible = useMemo<User[]>(
@@ -233,6 +251,38 @@ function AddMembersSheetView({
                     </ScrollView>
 
                     <View className="px-4 pb-4">
+                        {groupId && (
+                            <View className="mb-3 rounded-xl border border-slate-200/80 px-3 py-3">
+                                <Text className="text-sm font-semibold text-gray-800 mb-2">
+                                    {t('groups.members.addGuestTitle')}
+                                </Text>
+                                <View className="flex-row items-center gap-2">
+                                    <TextInput
+                                        value={guestName}
+                                        onChangeText={setGuestName}
+                                        placeholder={t('groups.members.addGuestPlaceholder')}
+                                        placeholderTextColor={colors.gray400}
+                                        className="flex-1 h-11 rounded-xl border border-slate-200 px-3 text-sm text-gray-900"
+                                        testID="add-guest-name-input"
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => void handleAddGuest()}
+                                        disabled={!guestName.trim() || guestSubmitting}
+                                        className="h-11 rounded-xl bg-primary px-4 items-center justify-center"
+                                        style={{ opacity: !guestName.trim() || guestSubmitting ? 0.5 : 1 }}
+                                        testID="add-guest-confirm"
+                                    >
+                                        {guestSubmitting ? (
+                                            <ActivityIndicator color="#fff" />
+                                        ) : (
+                                            <Text className="text-sm font-semibold text-white">
+                                                {t('groups.members.addGuestButton')}
+                                            </Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )}
                         {groupId && (
                             <ListRow
                                 onPress={() => { void shareGroupInvite(groupId); }}

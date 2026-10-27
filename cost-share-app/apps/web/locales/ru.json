@@ -8,6 +8,18 @@
     "toggle": "English",
     "chooseLanguage": "Язык"
   },
+  "seo": {
+    "title": "KupaPay — делите счета и расходы в поездках",
+    "description": "Делите групповые счета, расходы в поездках и с соседями. Бесплатная альтернатива Splitwise с упрощением долгов и RTL.",
+    "ogTitle": "KupaPay — делите расходы с друзьями",
+    "ogDescription": "Автоматическое упрощение долгов для поездок, аренды и ужинов. Бесплатно на iPhone, Android и в вебе.",
+    "appStoreBadgeTop": "Загрузить в",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "Загрузить KupaPay в App Store",
+    "playStoreBadgeTop": "Доступно в",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "Скачать KupaPay в Google Play"
+  },
   "hero": {
     "headline": "Делите расходы с друзьями — без лишних хлопот",
     "subheadline": "KupaPay автоматически упрощает долги — меньше переводов, меньше стресса",

@@ -29,11 +29,14 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     const centerIndex = Math.floor(state.routes.length / 2);
 
     const onQuickAdd = () => {
-        if (!quickAddGroupId) return;
         // AddExpense lives on the RootStack (above the tab navigator); resolve
-        // up to the parent so navigate finds the modal route.
+        // up to the parent so navigate finds the modal route. When no group can
+        // be inferred yet, open the screen anyway — it requires picking a group.
         const parent = navigation.getParent?.() ?? navigation;
-        parent.navigate('AddExpense', { groupId: quickAddGroupId });
+        parent.navigate(
+            'AddExpense',
+            quickAddGroupId ? { groupId: quickAddGroupId } : {},
+        );
     };
 
     const renderTab = (route: (typeof state.routes)[number], routeIndex: number) => {

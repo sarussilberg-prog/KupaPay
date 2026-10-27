@@ -43,7 +43,7 @@ export function SummaryFooter({
                     : t('balances.paymentsToSettle', { count: settlementCount })}
             </Text>
 
-            <View style={styles.pillGroup}>
+            <View style={styles.pillGroup} testID="summary-pill-group">
                 <TouchableOpacity
                     onPress={onOpenNote}
                     activeOpacity={0.7}
@@ -62,14 +62,20 @@ export function SummaryFooter({
                         {t('groups.actions.note')}
                     </Text>
                     {noteHasUnread ? (
-                        <View style={styles.noteUnreadDot} testID="summary-note-unread-dot" />
+                        <View
+                            style={[
+                                styles.noteUnreadDot,
+                                isRtl ? styles.noteUnreadDotRtl : styles.noteUnreadDotLtr,
+                            ]}
+                            testID="summary-note-unread-dot"
+                        />
                     ) : null}
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={onOpenSettleUp}
                     activeOpacity={0.7}
-                    testID="summary-settle-pill"
+                    testID="group-detail-settle-up"
                     style={[
                         styles.settlePill,
                         { backgroundColor: colors.primaryExtraLight },
@@ -132,13 +138,18 @@ const styles = StyleSheet.create({
     noteUnreadDot: {
         position: 'absolute',
         top: -2,
-        right: -2,
         width: 9,
         height: 9,
         borderRadius: 9999,
         backgroundColor: colors.warning,
         borderWidth: 1.5,
         borderColor: '#fff',
+    },
+    noteUnreadDotLtr: {
+        right: -2,
+    },
+    noteUnreadDotRtl: {
+        left: -2,
     },
     settlePill: {
         borderRadius: 9999,

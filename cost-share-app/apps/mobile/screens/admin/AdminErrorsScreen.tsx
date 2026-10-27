@@ -1,5 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, FlatList, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+    View,
+    FlatList,
+    RefreshControl,
+    TouchableOpacity,
+    ActivityIndicator,
+    ScrollView,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../components/AppText';
@@ -12,6 +19,7 @@ import type {
     SentryTimeRange,
     SentryIssueSummary,
 } from '../../services/adminSentry.service';
+import { formatAdminSentryErrorMessage } from '../../lib/adminSentryErrorMessage';
 
 function levelIcon(level: string): { name: AppIconName; color: string } {
     switch (level) {
@@ -187,11 +195,26 @@ export function AdminErrorsScreen() {
                     <Text className="text-xs text-gray-500 mt-2">{t('admin.errors.loading')}</Text>
                 </View>
             ) : query.isError ? (
-                <View className="flex-1 items-center justify-center px-8">
-                    <Text testID="admin-errors-failed" className="text-gray-500 text-center">
+                <ScrollView
+                    className="flex-1"
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 32 }}
+                    refreshControl={
+                        <RefreshControl refreshing={query.isRefetching} onRefresh={onRefresh} />
+                    }
+                >
+                    <Text testID="admin-errors-failed" className="text-gray-700 text-center text-sm">
                         {t('admin.errors.failed')}
                     </Text>
-                </View>
+                    <Text
+                        testID="admin-errors-failed-reason"
+                        className="text-gray-500 text-center text-xs mt-2"
+                    >
+                        {formatAdminSentryErrorMessage(t, query.error)}
+                    </Text>
+                    <Text className="text-gray-400 text-center text-xs mt-3">
+                        {t('admin.errors.failedHint')}
+                    </Text>
+                </ScrollView>
             ) : issues.length === 0 ? (
                 <View className="flex-1 items-center justify-center px-8">
                     <Text testID="admin-errors-empty" className="text-gray-500 text-center">

@@ -1,4 +1,29 @@
-import { parseProStatusRpcRow } from '../../services/proEntitlements.service';
+import { fetchMyProStatus, parseProStatusRpcRow } from '../../services/proEntitlements.service';
+
+jest.mock('../../lib/supabase', () => ({
+    supabase: {
+        rpc: jest.fn(),
+    },
+}));
+
+jest.mock('../../lib/ascScreenshotDemo', () => ({
+    isAscScreenshotDemo: () => false,
+}));
+
+import { supabase } from '../../lib/supabase';
+
+const rpcMock = supabase.rpc as jest.Mock;
+
+describe('fetchMyProStatus', () => {
+    beforeEach(() => {
+        rpcMock.mockReset();
+    });
+
+    it('throws on RPC error instead of returning hasPro false', async () => {
+        rpcMock.mockResolvedValue({ data: null, error: { message: 'timeout' } });
+        await expect(fetchMyProStatus()).rejects.toEqual({ message: 'timeout' });
+    });
+});
 
 describe('parseProStatusRpcRow', () => {
     it('trusts server hasPro false over active timestamps (force_free)', () => {

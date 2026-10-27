@@ -24,6 +24,8 @@ import { colors } from '../theme';
 import { useInviteRedemption } from '../hooks/useInviteRedemption';
 import { usePendingNavigationFlush } from '../hooks/usePendingNavigationFlush';
 import { usePushNotificationListeners } from '../hooks/usePushNotificationListeners';
+import { useWebInAppPushFallback } from '../hooks/useWebInAppPushFallback';
+import { useAuthUserId } from '../hooks/useAuthUserId';
 import { prefetchGroupsList } from '../hooks/queries/prefetchGroupsList';
 import { prefetchProfileWarmup } from '../hooks/queries/prefetchProfileWarmup';
 import { prefetchAddExpensePrerequisitesForAllGroups } from '../hooks/queries/prefetchAddExpenseForAllGroups';
@@ -60,6 +62,7 @@ import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
 import { FavoriteGroupScreen } from '../screens/favoriteGroup/FavoriteGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
+import { GroupPostCreateInviteScreen } from '../screens/groups/GroupPostCreateInviteScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
 import { ExpenseListScreen } from '../screens/expenses/ExpenseListScreen';
@@ -75,6 +78,8 @@ import { SettingsScreen } from '../screens/profile/SettingsScreen';
 import { ContactUsScreen } from '../screens/profile/ContactUsScreen';
 import { FriendsScreen } from '../screens/profile/FriendsScreen';
 import { FindFriendsScreen } from '../screens/profile/FindFriendsScreen';
+import { ReferralProgramScreen } from '../screens/profile/ReferralProgramScreen';
+import { MySubscriptionScreen } from '../screens/profile/MySubscriptionScreen';
 import { NotificationSettingsScreen } from '../screens/profile/NotificationSettingsScreen';
 import { AdminPortalScreen } from '../screens/admin/AdminPortalScreen';
 import { AdminOnboardingPreviewScreen } from '../screens/admin/AdminOnboardingPreviewScreen';
@@ -348,6 +353,8 @@ export function AppNavigator() {
     useInviteRedemption();
     usePendingNavigationFlush();
     usePushNotificationListeners();
+    const userId = useAuthUserId();
+    useWebInAppPushFallback(userId);
 
     useEffect(() => {
         prefetchGroupsList();
@@ -387,6 +394,16 @@ export function AppNavigator() {
                 name="NotificationSettings"
                 component={NotificationSettingsScreen}
                 options={{ title: t('notifications.title') }}
+            />
+            <RootStack.Screen
+                name="ReferralProgram"
+                component={ReferralProgramScreen}
+                options={{ title: t('referral.title') }}
+            />
+            <RootStack.Screen
+                name="MySubscription"
+                component={MySubscriptionScreen}
+                options={{ title: t('pro.subscription.sectionTitle') }}
             />
             <RootStack.Screen
                 name="ContactUs"
@@ -442,6 +459,11 @@ export function AppNavigator() {
                 name="CreateGroup"
                 component={CreateGroupScreen}
                 options={{ headerShown: false }}
+            />
+            <RootStack.Screen
+                name="GroupPostCreateInvite"
+                component={GroupPostCreateInviteScreen}
+                options={{ headerShown: false, presentation: 'modal' }}
             />
             <RootStack.Screen
                 name="EditGroup"

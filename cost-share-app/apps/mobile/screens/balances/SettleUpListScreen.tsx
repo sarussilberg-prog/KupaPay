@@ -8,7 +8,6 @@
 
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { View, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
-import { isProPerkUnlocked } from '@cost-share/shared';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -61,6 +60,7 @@ import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import { getAvatarUrl, getAvatarUrlForMember, getDisplayName } from '../../lib/userDisplay';
 import { joinAmounts, owedDebts } from '../../lib/reminderMessage';
+import { ShareGroupSummarySheet } from '../../components/share/ShareGroupSummarySheet';
 
 interface SortedDebts {
     youInvolved: PairwiseDebt[];
@@ -93,27 +93,33 @@ export function SettleUpListScreen() {
     const group = groupsQuery.data?.find(g => g.id === groupId);
     const groupName = group?.name;
     const groupDefaultCurrency = group?.defaultCurrency ?? 'USD';
-    const proStatusQuery = useProStatusQuery(groupId);
-    const smartReminderUnlocked = isProPerkUnlocked(
-        proStatusQuery.data?.hasPro === true,
-        KUPAPAY_PRO_ENABLED,
-    );
+    const { proPerkUnlocked: smartReminderUnlocked } = useProStatusQuery(groupId);
     const [smartReminderSheetVisible, setSmartReminderSheetVisible] = useState(false);
+    const [shareSummaryVisible, setShareSummaryVisible] = useState(false);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             ...(groupName ? { title: groupName } : {}),
-            headerRight: KUPAPAY_PRO_ENABLED
-                ? () => (
-                      <TouchableOpacity
-                          onPress={() => setSmartReminderSheetVisible(true)}
-                          className="px-3 py-2"
-                          testID="smart-reminder-settings"
-                      >
-                          <AppIcon name="notifications-outline" size={22} color={colors.primaryDark} />
-                      </TouchableOpacity>
-                  )
-                : undefined,
+            headerRight: () => (
+                <View className="flex-row items-center">
+                    <TouchableOpacity
+                        onPress={() => setShareSummaryVisible(true)}
+                        className="px-2 py-2"
+                        testID="share-group-summary"
+                    >
+                        <AppIcon name="share-outline" size={22} color={colors.primaryDark} />
+                    </TouchableOpacity>
+                    {KUPAPAY_PRO_ENABLED ? (
+                        <TouchableOpacity
+                            onPress={() => setSmartReminderSheetVisible(true)}
+                            className="px-2 py-2"
+                            testID="smart-reminder-settings"
+                        >
+                            <AppIcon name="notifications-outline" size={22} color={colors.primaryDark} />
+                        </TouchableOpacity>
+                    ) : null}
+                </View>
+            ),
         });
     }, [navigation, groupName]);
 
@@ -128,6 +134,14 @@ export function SettleUpListScreen() {
             })),
         [members, t],
     );
+
+    const nameById = useMemo(() => {
+        const map: Record<string, string> = {};
+        memberLites.forEach(m => {
+            map[m.userId] = m.displayName;
+        });
+        return map;
+    }, [memberLites]);
 
     const { data: simplified, isLoading } = useSimplifiedDebts();
     const isFetching = isLoading;
@@ -529,7 +543,7 @@ export function SettleUpListScreen() {
     const seenConvertOthers = new Set<string>();
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']}>
+        <SafeAreaView className="flex-1 bg-slate-50" edges={['bottom']} testID="settle-up-list-screen">
             <FlatList
                 data={involvedGroups}
                 keyExtractor={item => item.pairKey}
@@ -800,6 +814,17 @@ export function SettleUpListScreen() {
                         groupId,
                     });
                 }}
+            />
+
+            <ShareGroupSummarySheet
+                visible={shareSummaryVisible}
+                onClose={() => setShareSummaryVisible(false)}
+                groupId={groupId}
+                groupName={groupName ?? t('groups.title')}
+                inviteToken={group?.inviteToken}
+                debts={debts}
+                nameById={nameById}
+                settled={debts.length === 0}
             />
 
             <ConsolidateCurrencySheet

@@ -183,10 +183,70 @@
                     "summarySuffix": "members"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Three quick steps — under a minute to your first expense.",
+            "skipConfirm": "Skip",
+            "header": {
+                "create": "Pick a template",
+                "expense": "First expense",
+                "invite": "Invite your crew"
+            },
+            "steps": {
+                "create": "Group",
+                "expense": "Expense",
+                "invite": "Invite"
+            },
+            "fields": {
+                "groupName": "Group name"
+            },
+            "templates": {
+                "label": "What are you splitting?",
+                "trip": {
+                    "label": "Trip",
+                    "defaultName": "Weekend trip",
+                    "defaultExpense": "Gas or rideshare"
+                },
+                "roommates": {
+                    "label": "Roommates",
+                    "defaultName": "Our place",
+                    "defaultExpense": "Groceries or utilities"
+                },
+                "event": {
+                    "label": "Event",
+                    "defaultName": "Group dinner",
+                    "defaultExpense": "Food & drinks"
+                },
+                "couple": {
+                    "label": "Couple",
+                    "defaultName": "Us two",
+                    "defaultExpense": "Dinner out"
+                }
+            },
+            "expense": {
+                "hint": "Log something you already paid — you can edit details later.",
+                "amountRequired": "Enter an amount greater than zero"
+            },
+            "invite": {
+                "title": "Bring others in",
+                "body": "Share a link so friends can join this group and split the next bill."
+            },
+            "skipExpenseTitle": "Skip the first expense?",
+            "skipExpenseMessage": "Adding one expense now is the fastest way to see balances. You can add expenses anytime from the group.",
+            "cta": {
+                "createGroup": "Continue",
+                "addExpense": "Add expense",
+                "skipExpense": "Skip for now",
+                "shareInvite": "Share invite link",
+                "shareInviteWeb": "Share or copy link",
+                "done": "Go to my group"
+            }
         }
     },
     "groups": {
         "title": "Groups",
+        "listTitle": "My groups",
+        "newGroupCta": "New group",
         "createGroup": "Create group",
         "editGroup": "Edit Group",
         "favorite": {
@@ -199,6 +259,12 @@
         },
         "noGroups": "No groups yet",
         "noGroupsMessage": "Create your first group to start sharing expenses",
+        "demo": {
+            "try": "Try a demo group",
+            "created": "Demo group ready — explore how splitting works",
+            "alreadyExists": "You already have the demo group",
+            "error": "Couldn't create the demo group"
+        },
         "offlineMessage": "We can't load your groups right now. They'll appear here automatically once you're back online.",
         "groupName": "Group Name",
         "enterGroupName": "Enter group name",
@@ -335,6 +401,9 @@
             "showMore": "Show {{count}} more",
             "showLess": "Show less"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}}"
+        },
         "hero": {
             "spentTogether": "Spent together",
             "leftToSettle": "Left to settle"
@@ -347,8 +416,10 @@
             "youOweCaption": "You owe",
             "owedToYou": "Owed to you {{amount}}",
             "owedToYouCaption": "Owed to you",
-            "moreCurrencies": "{{plusCount}} currencies",
-            "moreCurrencies_one": "{{plusCount}} currency",
+            "moreCurrencies": "{{count}} currencies",
+            "moreCurrencies_one": "{{count}} currency",
+            "moreCurrenciesNoun": "currencies",
+            "moreCurrenciesNoun_one": "currency",
             "updatedAgo": "Updated {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },
@@ -378,10 +449,20 @@
             "saveError": "Couldn't save",
             "titleFor": "Group note for"
         },
+        "monthlyBills": {
+            "title": "This month's bills",
+            "summary": "{{count}} expenses · {{total}} {{currency}} this cycle",
+            "cycleDay": "Cycle starts on day {{day}} of each month",
+            "automationPro": "Automate recurring bills with Pro",
+            "automationActive": "Pro recurring automation available for this group"
+        },
         "share": {
             "menuTitle": "Share group",
             "inviteOption": "Invite a friend to join",
             "inviteDescription": "Send a link to add someone to this group",
+            "balanceLinkOption": "Share balances on the web",
+            "balanceLinkDescription": "Anyone with the link can view who owes what — no install required",
+            "balanceLinkMessage": "See who owes what in \"{{groupName}}\" on KupaPay (no app needed): {{url}}",
             "exportOption": "Export group report",
             "exportDescription": "Save group activity and balances as a CSV file (opens in Excel / Google Sheets)",
             "exportCsv": "CSV (free)",
@@ -486,7 +567,12 @@
             "searchPlaceholder": "Search friends",
             "noSearchResults": "No friends match your search.",
             "mutualHint": "You only see friends you've added each other.",
-            "missingSomeoneCta": "Can't find them? Add friends"
+            "missingSomeoneCta": "Can't find them? Add friends",
+            "addGuestTitle": "No account yet?",
+            "addGuestPlaceholder": "Friend's name",
+            "addGuestButton": "Add",
+            "guestAddError": "Couldn't add placeholder member",
+            "guestAdded": "Added {{name}} — they'll claim this when they join"
         },
         "memberCount_one": "{{count}} person",
         "memberCount_two": "{{count}} people",
@@ -527,6 +613,10 @@
         "recentExpenses": "Recent Expenses",
         "deleteExpense": "Delete Expense",
         "deleteExpenseConfirm": "Are you sure you want to delete this expense?",
+        "shareLink": "Share expense link",
+        "shareLinkMessage": "{{description}} — {{currency}} {{amount}} on KupaPay: {{url}}",
+        "shareLinkInvalid": "This expense link is no longer available",
+        "shareLinkOpenApp": "Sign in and open the group to see this expense",
         "expenseCreated": "Expense added successfully",
         "expenseUpdated": "Expense updated successfully",
         "expenseDeleted": "Expense deleted successfully",
@@ -702,6 +792,13 @@
         "deleteAccount": "Delete account",
         "adminPortal": "Admin Portal"
     },
+    "appReview": {
+        "notNow": "Not now",
+        "webTitle": "How is KupaPay working for you?",
+        "webMessage": "We are still polishing the web experience. Your feedback goes straight to the team.",
+        "webFeedbackCta": "Share feedback",
+        "webStoreHint": "For App Store or Google Play ratings, use KupaPay on your phone."
+    },
     "admin": {
         "portal": {
             "title": "Admin Portal",
@@ -762,7 +859,19 @@
             },
             "loading": "Loading errors…",
             "empty": "No errors in this window",
-            "failed": "Failed to load. Pull to retry.",
+            "failed": "Failed to load errors",
+            "failedHint": "Pull down to retry.",
+            "failedReasons": {
+                "forbidden": "You are not recognized as an app admin on the server.",
+                "admin_check_failed": "Could not verify admin status: {{detail}}",
+                "sentry_not_configured": "Sentry secrets are missing on admin-sentry-proxy: {{missing}}",
+                "sentry_client_error": "Sentry rejected the request. Check SENTRY_API_TOKEN, SENTRY_ORG, and project slugs (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "Sentry returned a server error. Try again shortly.",
+                "sentry_unreachable": "Could not reach Sentry: {{detail}}",
+                "invoke_failed": "Edge Function call failed: {{detail}}",
+                "missing_authorization": "Session expired — sign in again and reopen the admin portal.",
+                "unknown": "Unknown error. Pull to retry or inspect admin-sentry-proxy logs."
+            },
             "occurrences": "{{count}} occurrences",
             "occurrences_one": "{{count}} occurrence",
             "affectedUsers": "{{count}} users affected",
@@ -877,6 +986,7 @@
         },
         "noActivity": "No activity yet",
         "noActivityMessage": "Your recent expenses, settlements, and group messages will appear here",
+        "createGroupCta": "Create a group",
         "noSearchResults": "No matching activity",
         "noSearchResultsMessage": "No results match your search. Try a different term or clear the search.",
         "expense": "Expense",
@@ -918,6 +1028,7 @@
             "noteChangedBy": "Note changed by {{name}} · {{group}}",
             "friendRequestRejectedByThem": "{{name}} declined your friend request",
             "settleReminder": "{{name}} sent you a reminder to settle up in {{group}}",
+            "unsettledBalanceNudge": "You still owe {{name}} in {{group}}",
             "tripBudgetAlert": "Trip budget alert in {{group}}"
         },
         "addedExpense": "added an expense",
@@ -1031,6 +1142,12 @@
             "findEmptyCta": "Invite a new friend by link",
             "findInviteName": "Invite {{name}} to KupaPay"
         },
+        "publicBalance": {
+            "title": "Public balance page",
+            "toggleLabel": "Anyone with the link can view balances on the web",
+            "toggleHint": "Uses your /b/ balance link. Turn off anytime or rotate the link to revoke access.",
+            "privacyNote": "Shows display names and balances only — no email or receipts."
+        },
         "group": {
             "title": "Share group link",
             "shareMessage": "I added you to the '{{groupName}}' group on KupaPay. Join via this link: {{url}}",
@@ -1039,6 +1156,17 @@
             "rotateConfirmBody": "Anyone holding the current link won't be able to join until you send them the new one. Members already in the group are unaffected.",
             "rotated": "Group invite link updated",
             "emptyStateLink": "or share group link"
+        },
+        "postCreate": {
+            "title": "Invite friends",
+            "subtitle": "Bring people into «{{groupName}}» — share a link, WhatsApp, or scan a QR code.",
+            "shareSheet": "Share…",
+            "shareSheetWeb": "Share or copy",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Copy link",
+            "qrHint": "Scan to join the group",
+            "skip": "Not now",
+            "continue": "Open group"
         },
         "addMembers": {
             "searchOthers": "Search other users",
@@ -1050,7 +1178,26 @@
             "alreadyMember": "You're already a member of this group",
             "selfInvite": "That's your own invite link",
             "invalid": "This invite link is no longer valid"
+        },
+        "guestClaim": {
+            "title": "Were you added by name?",
+            "subtitle": "Pick your name so balances stay correct.",
+            "confirm": "That's me",
+            "skip": "Not me",
+            "success": "Your shared expenses are on your account now",
+            "error": "Couldn't link that name to your account"
         }
+    },
+    "shareSummary": {
+        "title": "Share group summary",
+        "share": "Share image",
+        "hideAmounts": "Hide amounts",
+        "hiddenAmount": "•••",
+        "allSettled": "All settled ✓",
+        "balancesSnapshot": "Balance snapshot",
+        "debtLine": "{{from}} → {{to}}",
+        "watermark": "Split expenses on {{url}}",
+        "fallback": "Check out our group \"{{groupName}}\" on KupaPay"
     },
     "dashboard": {
         "appTitle": "KupaPay",
@@ -1150,6 +1297,23 @@
         "categoryMessages": "Group chat",
         "categoryFriends": "Friend requests",
         "categoryGroups": "Groups",
+        "categoryReminders": "Balance reminders",
+        "emailTitle": "Email",
+        "emailMaster": "Product email",
+        "lifecycleEmail": "Tips, welcome & win-back",
+        "weeklyDigestTitle": "Weekly summary",
+        "weeklyDigestPush": "Weekly summary push",
+        "weeklyDigestEmail": "Weekly summary email",
+        "quietHoursTitle": "Quiet hours",
+        "quietHoursEnable": "Respect quiet hours",
+        "quietHoursSummary": "No pushes between {{start}}:00 and {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "At most {{count}} push notifications per day.",
+        "webFallback": {
+            "default": "New activity in KupaPay",
+            "expense_added": "New expense in your group",
+            "settlement_added": "Someone settled up with you",
+            "unsettled_balance_nudge": "Reminder: open balance to settle"
+        },
         "systemDisabled": "Notifications are turned off for this app",
         "openSettings": "Open settings",
         "systemDisabledHint": "To update these settings, first turn on notifications in your device settings.",
@@ -1158,6 +1322,25 @@
         "primingBody": "Get notified when a friend adds an expense or pays you back.",
         "primingEnable": "Enable notifications",
         "primingLater": "Not now"
+    },
+    "referral": {
+        "title": "Invite friends, earn Pro",
+        "settingsRow": "Referral rewards",
+        "body": "Share your invite link. When a friend joins a group and adds an expense, you get one free month of Pro.",
+        "shareCta": "Share invite link",
+        "copyLink": "Copy link",
+        "linkCopied": "Invite link copied",
+        "capHint": "{{count}} of {{cap}} free months claimed this year",
+        "statusTitle": "Your referrals",
+        "empty": "No referrals yet — share your link to get started.",
+        "refresh": "Refresh status",
+        "disabled": "Referral rewards are not available in this build.",
+        "status": {
+            "pending": "Waiting for their first group expense",
+            "qualified": "Qualified — reward pending",
+            "rewarded": "Pro month granted",
+            "rejected": "Could not grant reward"
+        }
     },
     "monetization": {
         "adGateTitle": "Unlock this feature",
@@ -1182,6 +1365,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Split fairly, settle faster with Pro",
             "feature1": "No ads",
             "feature2": "Auto currency conversion for trips",
             "feature3": "Clean PDF report for every group",
@@ -1212,16 +1396,63 @@
             "trialFreePeriodHeading": "{{trialDays}}-day free trial",
             "trialFreePeriodBody": "Try every Pro feature free for {{trialDays}} days. Cancel in Settings before the trial ends if you don't want to continue.",
             "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
-            "havePromoCode": "Have a code?"
+            "havePromoCode": "Have a code?",
+            "alreadyProTitle": "You're on Pro",
+            "alreadyProBody": "Your subscription is active. Manage billing in the App Store or Google Play, or keep enjoying Pro features in the app."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Manage subscription",
-            "freeTrialUntil": "Free trial until {{date}}"
+            "freeTrialUntil": "Free trial until {{date}}",
+            "activeUntil": "Pro active until {{date}}",
+            "activeIndividualAndGroup": "Pro subscription active; this group also has Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "My subscription",
+            "openDetails": "Subscription details",
+            "screenIntro": "Plan, renewal date, and billing are managed in the App Store or Google Play. Trip Pass access is shown per group below.",
+            "disabled": "Subscriptions are not available in this build.",
+            "empty": "No active subscription on this account.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Promotional",
+            "storeStripe": "Web billing",
+            "storeUnknown": "Your app store",
+            "renewsOn": "Renews on {{date}}",
+            "expiresOn": "Access until {{date}}",
+            "expiredOn": "Expired on {{date}}",
+            "autoRenewOn": "Auto-renew is on",
+            "autoRenewOff": "Auto-renew is off",
+            "trialActive": "Free trial in progress",
+            "purchasedVia": "Purchased via {{store}}",
+            "billingIssueBody": "There was a problem with your payment. Update your payment method to keep Pro.",
+            "fixPayment": "Fix payment",
+            "tripPassSection": "Trip Pass groups",
+            "tripPassUntil": "Pro for this group until {{date}}",
+            "renewalDisclosureShort": "Subscriptions renew automatically until you cancel in your app store account at least 24 hours before renewal. See Terms and Privacy.",
+            "status": {
+                "active": "Active",
+                "cancelled_until_expiry": "Canceled — active until expiry",
+                "billing_issue": "Billing issue",
+                "expired": "Expired",
+                "none": "No subscription"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro for this group",
+            "activeUntil": "Everyone in this group has Pro until {{date}}."
         },
         "trialReminder": {
             "title": "KupaPay Pro trial ending soon",
             "body": "Your free KupaPay Pro trial ends in two days. Don't want to continue? You can cancel in Settings."
+        },
+        "trialLifecycle": {
+            "day1": { "title": "Welcome to Pro" },
+            "day10": { "title": "4 days left in your trial" },
+            "day13": { "title": "Pro renews tomorrow" },
+            "disclosure": "Payment begins after the trial unless you cancel in Settings → Manage subscription (App Store / Google Play).",
+            "manage": "Manage subscription"
         },
         "includedTripPass": {
             "title": "Included Trip Pass",

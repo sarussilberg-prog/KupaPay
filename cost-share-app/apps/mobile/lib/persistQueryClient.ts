@@ -41,6 +41,8 @@ export const PERSIST_ALLOWLIST_PREFIXES = [
     'activity',
     'friends',
     'friend-requests',
+    // Last-known Pro entitlement for offline cold start (recurring, OCR, trip currency gates).
+    'proStatus',
 ] as const;
 
 const ALLOWLIST = new Set<string>(PERSIST_ALLOWLIST_PREFIXES as readonly string[]);

@@ -29,6 +29,8 @@ export interface User {
     defaultCurrency: string;  // 'USD', 'ILS', 'EUR', etc.
     language: Language;
     isActive: boolean;  // Soft-delete flag — false means the user has deleted their account
+    /** Placeholder member without an auth account (#395). */
+    isGuest?: boolean;
     isAdmin: boolean;   // App-admin flag (gates admin portal entry in Settings) — set by hydrateCurrentUserProfile via is_app_admin() RPC
     createdAt: Date;
     updatedAt: Date;
@@ -48,11 +50,18 @@ export interface Group {
     imageUrl?: string;
     groupType: GroupType;
     defaultCurrency: string;
-    inviteToken: string;  // 10-char URL-safe slug; used with APP_WEB_ORIGIN + /g/<token>
+    inviteToken: string;  // URL-safe slug; join link APP_WEB_ORIGIN + /g/<token>
+    /** Separate revocable token for read-only web balance page /b/<token>. */
+    publicBalanceToken?: string;
+    /** Opt-in gate for get_public_group_balance_page (#398). */
+    publicBalanceSharingEnabled?: boolean;
     createdBy: string;  // Profile ID
     isActive: boolean;  // Soft delete flag
     /** Last expense, settlement, or message activity (auto-maintained in DB). */
     lastActivityAt?: Date;
+    /** Monthly roommates/bills cycle view (#407). */
+    monthlyBillsMode?: boolean;
+    billingCycleDay?: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -93,6 +102,8 @@ export interface Expense {
      */
     splitMode?: ExpenseSplitMode;
     isDeleted: boolean;  // Soft delete flag
+    /** Public web preview token (/e/<token>) for sharing outside the group (#401). */
+    shareToken?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -278,6 +289,7 @@ export type ActivityEventKind =
     | 'group_deleted'
     | 'group_note_changed'
     | 'settle_up_reminder'
+    | 'unsettled_balance_nudge'
     | 'trip_budget_alert';
 
 /**
@@ -544,6 +556,8 @@ export interface GroupMemberLite {
     displayName: string;
     avatarUrl?: string;
     isActive: boolean;
+    /** True for name-only placeholder members (#395). */
+    isGuest?: boolean;
 }
 
 /** Group enriched with its active members. */
@@ -811,4 +825,6 @@ export type Profile = User;
  */
 export type PendingInvite =
     | { kind: 'friend'; token: string }
-    | { kind: 'group'; token: string };
+    | { kind: 'group'; token: string }
+    | { kind: 'expenseShare'; token: string }
+    | { kind: 'settleReminder'; token: string };

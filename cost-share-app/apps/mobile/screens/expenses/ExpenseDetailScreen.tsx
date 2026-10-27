@@ -28,7 +28,9 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { AppIcon } from '../../components/AppIcon';
 import { colors } from '../../theme';
 import { getDisplayName } from '../../lib/userDisplay';
+import { formatAppDate } from '../../lib/formatAppDate';
 import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
+import { shareExpenseLink } from '../../services/invite.service';
 
 const categoryEmoji: Record<string, string> = {
     food: '🍕',
@@ -42,7 +44,7 @@ const categoryEmoji: Record<string, string> = {
 };
 
 export function ExpenseDetailScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { expenseId, groupId } = route.params;
@@ -116,7 +118,7 @@ export function ExpenseDetailScreen() {
         );
     }
 
-    const formattedDate = new Date(expense.expenseDate).toLocaleDateString();
+    const formattedDate = formatAppDate(expense.expenseDate, i18n.language);
     const emoji = categoryEmoji[expense.category || 'other'] || '📦';
 
     return (
@@ -208,6 +210,14 @@ export function ExpenseDetailScreen() {
 
             {/* Actions */}
             <View className="px-4 mb-8 gap-2">
+                <Button
+                    title={t('expenses.shareLink')}
+                    onPress={() => {
+                        if (expense) void shareExpenseLink(expense);
+                    }}
+                    variant="outline"
+                    testID="expense-share-link"
+                />
                 {seriesMeta && !seriesMeta.endedAt ? (
                     <Button
                         title={t('expenses.v2.recurring.stopSeries')}

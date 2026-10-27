@@ -1,0 +1,93 @@
+name: E2E smoke (Playwright + Maestro)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_dev_stack:
+        description: Run authenticated dev-stack Playwright flows
+        type: boolean
+        default: false
+  schedule:
+    - cron: '0 5 * * 1'
+
+concurrency:
+  group: e2e-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Playwright (on-demand)
+    if: github.event_name == 'workflow_dispatch' && !inputs.run_dev_stack
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - run: npm ci
+      - run: npx playwright install chromium
+      - name: Run Playwright (requires E2E_BASE_URL / E2E_EXPO_WEB_URL secrets)
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_EXPO_WEB_URL: ${{ secrets.E2E_EXPO_WEB_URL }}
+        run: npx playwright test
+      - name: Playwright flaky summary
+        if: always()
+        run: bash scripts/ci-playwright-flaky-summary.sh playwright-report/results.json
+
+  playwright-dev-stack:
+    name: Playwright dev stack
+    if: github.event_name == 'workflow_dispatch' && inputs.run_dev_stack
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - run: npm ci
+      - run: npx playwright install chromium
+      - name: Seed E2E user (dev Supabase)
+        env:
+          SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] || [ -z "$E2E_TEST_PASSWORD" ]; then
+            echo "::notice::Skipping E2E seed — dev Supabase service-role secrets not configured"
+            exit 0
+          fi
+          npm run seed:e2e
+      - name: Playwright dev flows
+        env:
+          E2E_EXPO_WEB_URL: ${{ secrets.E2E_EXPO_WEB_URL }}
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: npx playwright test --project=expo-web-authenticated --project=next-site
+      - name: Playwright flaky summary
+        if: always()
+        run: bash scripts/ci-playwright-flaky-summary.sh playwright-report/results.json
+
+  maestro-smoke:
+    name: Maestro (scaffold / nightly)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Maestro flows registered
+        run: |
+          echo "Maestro flows live under apps/mobile/.maestro/"
+          echo "Use workflow_dispatch on a macOS runner or Maestro Cloud for device E2E."
+          test -f apps/mobile/.maestro/asc/capture-all-screens.yaml

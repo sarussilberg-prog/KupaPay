@@ -5,10 +5,8 @@ import {
     collectStaticI18nKeysFromSource,
     GROUP_TYPES,
 } from '@cost-share/shared';
-import {
-    mobileI18nResources,
-    MOBILE_I18N_LOCALE_CODES,
-} from '../../i18n/localeConfig';
+import { MOBILE_I18N_LOCALE_CODES } from '../../i18n/localeConfig';
+import { mobileI18nResourcesAllLocales } from '../../i18n/testLocaleResources';
 
 const MOBILE_APP_ROOT = path.join(__dirname, '../..');
 const SCAN_DIRS = ['components', 'screens', 'lib', 'hooks', 'dev'] as const;
@@ -22,7 +20,6 @@ const DEFAULT_T_OPTS: Record<string, unknown> = {
     name: 'Noa',
     email: 'x@y.z',
     seconds: 30,
-    plusCount: 2,
     plus: '+1',
     currency: 'ILS',
     groupName: 'Test',
@@ -76,15 +73,15 @@ describe('mobile used i18n keys exist in every locale', () => {
 
     beforeAll(async () => {
         await i18n.init({
-            resources: mobileI18nResources,
+            resources: mobileI18nResourcesAllLocales,
             lng: 'en',
             fallbackLng: 'en',
             interpolation: { escapeValue: false },
         });
     });
 
-    it('includes groups.card.updatedAgo (GroupCard meta regression)', () => {
-        expect(usedKeys).toContain('groups.card.updatedAgo');
+    it('includes groups.card.moreCurrenciesNoun (GroupCard balance chip regression)', () => {
+        expect(usedKeys).toContain('groups.card.moreCurrenciesNoun');
     });
 
     it.each(MOBILE_I18N_LOCALE_CODES)('%s resolves every key used in mobile UI code', locale => {

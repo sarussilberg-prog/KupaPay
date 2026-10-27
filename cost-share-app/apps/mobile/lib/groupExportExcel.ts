@@ -1,7 +1,11 @@
-import * as XLSX from 'xlsx';
 import { buildGroupExportCsv, type GroupExportInput } from './groupExportCsv';
 
-export function buildGroupExportExcelBuffer(params: GroupExportInput): ArrayBuffer {
+async function loadXlsx() {
+    return import('xlsx');
+}
+
+export async function buildGroupExportExcelBuffer(params: GroupExportInput): Promise<ArrayBuffer> {
+    const XLSX = await loadXlsx();
     const csv = buildGroupExportCsv(params);
     const rows = csv.split(/\r?\n/).filter(Boolean).map(line => line.split(','));
     const sheet = XLSX.utils.aoa_to_sheet(rows);
@@ -10,8 +14,8 @@ export function buildGroupExportExcelBuffer(params: GroupExportInput): ArrayBuff
     return XLSX.write(book, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer;
 }
 
-export function buildGroupExportExcelBase64(params: GroupExportInput): string {
-    const buf = buildGroupExportExcelBuffer(params);
+export async function buildGroupExportExcelBase64(params: GroupExportInput): Promise<string> {
+    const buf = await buildGroupExportExcelBuffer(params);
     const bytes = new Uint8Array(buf);
     let binary = '';
     for (const byte of bytes) {

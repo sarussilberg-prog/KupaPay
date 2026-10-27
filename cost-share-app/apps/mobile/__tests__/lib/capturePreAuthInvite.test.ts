@@ -7,6 +7,11 @@ describe('inviteLinkFromUrl', () => {
             'com.kupapay.mobile://invite/i/AbCdEfGhIjKl',
             { kind: 'friend', token: 'AbCdEfGhIjKl' },
         ],
+        ['https://kupa-pay.com/e/AbCdEfGhIjKl', { kind: 'expenseShare', token: 'AbCdEfGhIjKl' }],
+        [
+            'https://kupa-pay.com/sr/AbCdEfGhIjKl',
+            { kind: 'settleReminder', token: 'AbCdEfGhIjKl' },
+        ],
     ] as const)('parses %s', (url, expected) => {
         expect(inviteLinkFromUrl(url)).toEqual(expected);
     });

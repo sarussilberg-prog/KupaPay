@@ -52,12 +52,14 @@ Source spec: `docs/superpowers/specs/2026-05-20-notifications-design.md`
 ## Observability & ops (deferred from 2026-06-02 pre-Play audit)
 
 ### 1. Crash & error reporting (Sentry / Crashlytics)
-- **Status (2026-10-15):** **Shipped** — `@sentry/react-native` (EU DSN), release/dist tagging, `sendDefaultPii: false`, user id only. Source-map upload runs on EAS when `SENTRY_AUTH_TOKEN` is set; otherwise `SENTRY_DISABLE_AUTO_UPLOAD=true` from `app.config.ts`.
+- **Status (2026-10-15):** **Shipped (mobile)** — `@sentry/react-native` (EU DSN), release/dist tagging, `sendDefaultPii: false`, user id only. Source-map upload runs on EAS when `SENTRY_AUTH_TOKEN` is set; otherwise `SENTRY_DISABLE_AUTO_UPLOAD=true` from `app.config.ts`.
+- **Status (2026-10-16):** **Shipped (Next.js marketing / proxy)** — `@sentry/nextjs` via `instrumentation.ts` + `instrumentation-client.ts`, release `kupapay-web@…`, `withSentryConfig` uploads source maps on Vercel when `SENTRY_AUTH_TOKEN` is set; runtime no-ops when `NEXT_PUBLIC_SENTRY_DSN` is unset. Sentry project `kupapay-web` must exist in org (owner: [#149](https://github.com/sarussilberg-prog/KupaPay/issues/149)).
 - **Revisit when:** First prod crash where stack is still minified (verify token + upload).
 
 ### 2. Product analytics (PostHog / Amplitude / similar)
 - **Status (2026-10-15):** **Shipped (Phase 1)** — `posthog-react-native` + `productAnalytics.ts` wrapper (EU host, no replay/autocapture/PII); funnel events through paywall/purchases/invites. Privacy policy (`20261010210000`+).
-- **Revisit when:** PostHog dashboards for install → signup → group → expense → invite → settle → Pro trial/purchase.
+- **Status (2026-10-16):** Funnel taxonomy + cross-platform context tags (#421); north-star SQL + HogQL templates (#422). See [POSTHOG_EVENT_TAXONOMY.md](./POSTHOG_EVENT_TAXONOMY.md).
+- **Revisit when:** PostHog UI dashboards manually duplicated from HogQL templates if not yet created in EU project.
 
 ### 3. CI: TypeScript strict gate + workspace `tsc` in `ci.yml`
 - **Status (2026-10-11):** **Done** — KI-015 resolved; `npm run typecheck` in CI (see security stack PR).
@@ -97,12 +99,7 @@ Source spec: `docs/superpowers/specs/2026-05-20-invites-and-sharing-design.md`
 - **Why deferred:** Multi-use is simpler and matches the WhatsApp share use-case. Adds value mostly under security review.
 - **Revisit when:** Security review flags rotation alone as insufficient, OR user request volume justifies it.
 
-### 2. Deferred / hybrid deep linking on iOS install
-- **What:** When user installs the app via a link, the link target is remembered post-install (no manual click needed).
-- **Why deferred:** Universal Links handle the "already installed" case. Install-then-link requires either Branch.io or custom server-side device fingerprinting.
-- **Revisit when:** App Store install conversion is < 30% from invite links.
-
-### 3. Push notification for pending invites
+### 2. Push notification for pending invites
 - **What:** Push to inviter when their invite is redeemed.
 - **Why deferred:** Folded into the notifications spec — implemented there as `member_joined`.
 - **Status:** Resolved by notifications spec (Phase 2).

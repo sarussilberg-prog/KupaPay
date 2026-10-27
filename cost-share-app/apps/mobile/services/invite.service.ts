@@ -4,31 +4,26 @@
  * writes via SECURITY DEFINER RPCs.
  */
 
-import { APP_WEB_ORIGIN, type GroupWithMembers } from '@cost-share/shared';
+import {
+    buildInviteUrl,
+    buildPublicGroupBalanceUrl,
+    buildExpenseShareUrl,
+    buildSettleReminderUrl,
+    buildWhatsAppShareUrl,
+    type Expense,
+    type GroupWithMembers,
+} from '@cost-share/shared';
+export { buildInviteUrl, buildPublicGroupBalanceUrl, buildSettleReminderUrl };
+import * as Clipboard from 'expo-clipboard';
+import { Linking } from 'react-native';
 import i18n from '../i18n';
 import { shareTextMessage } from '../lib/platformShare';
+import { showSuccessMessage } from '../lib/appToast';
 import { supabase } from '../lib/supabase';
 import { useAppStore } from '../store';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { captureProductEvent } from '../lib/productAnalytics';
-
-/** Universal Links / App Links must always use the production host, not web dev origins. */
-const INVITE_ORIGIN = APP_WEB_ORIGIN;
-
-export function buildInviteUrl(kind: 'friend' | 'group', token: string): string {
-    const prefix = kind === 'friend' ? '/i/' : '/g/';
-    return `${INVITE_ORIGIN}${prefix}${token}`;
-}
-
-/**
- * Build the settle-up reminder share link (/sr/<group invite token>).
- * Uses the same env-based origin as invite links so it stays on the canonical
- * web host that deepLinks.service recognises — never a hardcoded domain.
- */
-export function buildSettleReminderUrl(token: string): string {
-    return `${INVITE_ORIGIN}/sr/${token}`;
-}
 
 export function buildFriendInviteMessage(inviterName: string, url: string): string {
     return i18n.t('invite.friend.shareMessage', { inviterName, url });
@@ -42,8 +37,36 @@ export function buildGroupInviteMessage(
     return i18n.t('invite.group.shareMessage', { inviterName, groupName, url });
 }
 
+export function buildGroupBalanceShareMessage(groupName: string, url: string): string {
+    return i18n.t('groups.share.balanceLinkMessage', { groupName, url });
+}
+
+type GroupInviteContext = {
+    groupId: string;
+    group: GroupWithMembers;
+    user: NonNullable<ReturnType<typeof useAppStore.getState>['currentUser']>;
+    url: string;
+    message: string;
+};
+
+function resolveGroupInviteContext(groupId: string): GroupInviteContext {
+    const user = useAppStore.getState().currentUser;
+    const groups = queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? [];
+    const group = groups.find(g => g.id === groupId);
+    if (!user) throw new Error('not_authenticated');
+    if (!group || !group.inviteToken) throw new Error('group_invite_token_unavailable');
+    const url = buildInviteUrl('group', group.inviteToken);
+    const message = buildGroupInviteMessage(user.name, group.name, url);
+    return { groupId, group, user, url, message };
+}
+
 async function openShare(message: string): Promise<void> {
     await shareTextMessage(message);
+}
+
+export function getGroupInviteSharePayload(groupId: string): { url: string; message: string } {
+    const { url, message } = resolveGroupInviteContext(groupId);
+    return { url, message };
 }
 
 export async function shareFriendInvite(): Promise<void> {
@@ -55,16 +78,95 @@ export async function shareFriendInvite(): Promise<void> {
     void captureProductEvent('invite_sent', { kind: 'friend' });
 }
 
+export function buildExpenseShareMessage(expense: Pick<Expense, 'description' | 'amount' | 'currency'>, url: string): string {
+    return i18n.t('expenses.shareLinkMessage', {
+        description: expense.description,
+        amount: expense.amount,
+        currency: expense.currency,
+        url,
+    });
+}
+
+export async function shareExpenseLink(expense: Expense): Promise<void> {
+    if (!expense.shareToken) throw new Error('expense_share_token_unavailable');
+    const url = buildExpenseShareUrl(expense.shareToken);
+    const message = buildExpenseShareMessage(expense, url);
+    await openShare(message);
+    void captureProductEvent('expense_share_sent', { group_id: expense.groupId });
+}
+
 export async function shareGroupInvite(groupId: string): Promise<void> {
+    const { message } = resolveGroupInviteContext(groupId);
+    await openShare(message);
+    void captureProductEvent('invite_sent', { kind: 'group', channel: 'share_sheet', group_id: groupId });
+}
+
+function resolveGroupBalanceShareContext(groupId: string): {
+    group: GroupWithMembers;
+    url: string;
+    message: string;
+} {
     const user = useAppStore.getState().currentUser;
     const groups = queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? [];
     const group = groups.find(g => g.id === groupId);
     if (!user) throw new Error('not_authenticated');
-    if (!group || !group.inviteToken) throw new Error('group_invite_token_unavailable');
-    const url = buildInviteUrl('group', group.inviteToken);
-    const message = buildGroupInviteMessage(user.name, group.name, url);
+    if (!group?.publicBalanceToken) throw new Error('group_public_balance_token_unavailable');
+    if (group.publicBalanceSharingEnabled !== true) {
+        throw new Error('group_public_balance_sharing_disabled');
+    }
+    const url = buildPublicGroupBalanceUrl(group.publicBalanceToken);
+    const message = buildGroupBalanceShareMessage(group.name, url);
+    return { group, url, message };
+}
+
+export async function shareGroupBalanceLink(groupId: string): Promise<void> {
+    const { message } = resolveGroupBalanceShareContext(groupId);
     await openShare(message);
-    void captureProductEvent('invite_sent', { kind: 'group', group_id: groupId });
+    void captureProductEvent('invite_sent', {
+        kind: 'group',
+        channel: 'public_balance_link',
+        group_id: groupId,
+    });
+}
+
+export async function setGroupPublicBalanceSharing(
+    groupId: string,
+    enabled: boolean,
+): Promise<boolean> {
+    const { data, error } = await supabase.rpc('set_group_public_balance_sharing', {
+        p_group_id: groupId,
+        p_enabled: enabled,
+    });
+    if (error) throw error;
+    return Boolean(data);
+}
+
+export async function rotateGroupPublicBalanceLink(groupId: string): Promise<string> {
+    const { data, error } = await supabase.rpc('rotate_group_public_balance', {
+        p_group_id: groupId,
+    });
+    if (error) throw error;
+    const newToken = data as string;
+    queryClient.setQueryData<GroupWithMembers[]>(queryKeys.groups, (prev) =>
+        (prev ?? []).map((g) =>
+            g.id === groupId ? { ...g, publicBalanceToken: newToken } : g,
+        ),
+    );
+    return newToken;
+}
+
+export async function shareGroupInviteViaWhatsApp(groupId: string): Promise<void> {
+    const { message } = resolveGroupInviteContext(groupId);
+    const waUrl = buildWhatsAppShareUrl(message);
+    await Linking.openURL(waUrl);
+    void captureProductEvent('invite_sent', { kind: 'group', channel: 'whatsapp', group_id: groupId });
+}
+
+export async function copyGroupInviteLink(groupId: string): Promise<void> {
+    const { url } = resolveGroupInviteContext(groupId);
+    await Clipboard.setStringAsync(url);
+    showSuccessMessage('common.linkCopied');
+    void captureProductEvent('invite_sent', { kind: 'group', channel: 'copy_link', group_id: groupId });
 }
 
 export async function rotateFriendInvite(): Promise<string> {

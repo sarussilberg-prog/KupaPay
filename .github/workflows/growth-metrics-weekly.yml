@@ -1,0 +1,28 @@
+name: Growth metrics weekly
+
+on:
+  schedule:
+    # Monday 08:00 UTC — MAU / north-star snapshot for #422
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  postgres-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print growth metrics (optional secrets)
+        env:
+          SUPABASE_URL: ${{ secrets.GROWTH_METRICS_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.GROWTH_METRICS_SUPABASE_ANON_KEY }}
+          GROWTH_METRICS_ADMIN_JWT: ${{ secrets.GROWTH_METRICS_ADMIN_JWT }}
+        run: |
+          if [[ -z "${SUPABASE_URL:-}" || -z "${SUPABASE_ANON_KEY:-}" || -z "${GROWTH_METRICS_ADMIN_JWT:-}" ]]; then
+            echo "Skipping RPC call: set GROWTH_METRICS_* repository secrets to enable weekly Postgres snapshot."
+            echo "See docs/SSOT/POSTHOG_EVENT_TAXONOMY.md and cost-share-app/analytics/growth-metrics-snapshot.sql"
+            exit 0
+          fi
+          cd cost-share-app
+          node scripts/print-growth-metrics.mjs | tee "$GITHUB_STEP_SUMMARY"

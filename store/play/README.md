@@ -1,5 +1,7 @@
 # Google Play store listing assets (KupaPay)
 
+ASO research, iOS keyword drafts, and rank tracking: [`../aso/README.md`](../aso/README.md).
+
 | Path | Purpose |
 |------|---------|
 | `<locale>/title.txt` | Store title (≤30 chars recommended) |

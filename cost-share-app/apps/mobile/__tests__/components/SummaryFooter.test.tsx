@@ -2,7 +2,23 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SummaryFooter } from '../../components/groupDetail/SummaryFooter';
 
+jest.mock('../../hooks/useRtlLayout', () => {
+    const actual = jest.requireActual('../../hooks/useRtlLayout');
+    return {
+        ...actual,
+        useRtlLayout: jest.fn(() => false),
+    };
+});
+
+const { useRtlLayout } = jest.requireMock('../../hooks/useRtlLayout') as {
+    useRtlLayout: jest.Mock;
+};
+
 describe('SummaryFooter', () => {
+  beforeEach(() => {
+    useRtlLayout.mockReturnValue(false);
+  });
+
   const base = {
     settlementCount: 1,
     onOpenNote: jest.fn(),
@@ -26,7 +42,7 @@ describe('SummaryFooter', () => {
     const { getByTestId } = render(
       <SummaryFooter {...base} settlementCount={0} onOpenSettleUp={onOpenSettleUp} />,
     );
-    fireEvent.press(getByTestId('summary-settle-pill'));
+    fireEvent.press(getByTestId('group-detail-settle-up'));
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
   });
 
@@ -41,7 +57,7 @@ describe('SummaryFooter', () => {
       />,
     );
     fireEvent.press(getByTestId('summary-note-pill'));
-    fireEvent.press(getByTestId('summary-settle-pill'));
+    fireEvent.press(getByTestId('group-detail-settle-up'));
     expect(onOpenNote).toHaveBeenCalledTimes(1);
     expect(onOpenSettleUp).toHaveBeenCalledTimes(1);
   });
@@ -58,5 +74,30 @@ describe('SummaryFooter', () => {
       <SummaryFooter settlementCount={0} onOpenNote={jest.fn()} onOpenSettleUp={jest.fn()} />,
     );
     expect(queryByTestId('summary-note-unread-dot')).toBeNull();
+  });
+
+  it('keeps Note and Settle-up pills grouped in RTL (#234)', () => {
+    useRtlLayout.mockReturnValue(true);
+    const { getByTestId } = render(
+      <SummaryFooter settlementCount={2} onOpenNote={jest.fn()} onOpenSettleUp={jest.fn()} />,
+    );
+    const pillGroup = getByTestId('summary-pill-group');
+    expect(pillGroup.props.style.direction).toBe('ltr');
+  });
+
+  it('places the unread dot on the leading corner in RTL', () => {
+    useRtlLayout.mockReturnValue(true);
+    const { getByTestId } = render(
+      <SummaryFooter
+        settlementCount={0}
+        onOpenNote={jest.fn()}
+        onOpenSettleUp={jest.fn()}
+        noteHasUnread
+      />,
+    );
+    const dot = getByTestId('summary-note-unread-dot');
+    expect(dot.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ left: -2 })]),
+    );
   });
 });

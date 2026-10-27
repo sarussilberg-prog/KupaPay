@@ -1,0 +1,86 @@
+# At most one iOS + one Android staging build per day (EAS free-plan friendly).
+# Upload only — TestFlight + Play internal; never store review.
+name: Mobile staging nightly
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+      timezone: Asia/Jerusalem
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Build iOS and Android even if paths unchanged (still respects daily cap unless force_all)
+        type: boolean
+        default: false
+      force_all:
+        description: Ignore daily cap (manual recovery only)
+        type: boolean
+        default: false
+
+concurrency:
+  group: mobile-staging-nightly
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan nightly mobile CD
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      ios: ${{ steps.plan.outputs.ios }}
+      android: ${{ steps.plan.outputs.android }}
+      head_sha: ${{ steps.plan.outputs.head_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - id: plan
+        env:
+          ENFORCE_DAILY_LIMIT: ${{ inputs.force_all != true && 'true' || 'false' }}
+          MOBILE_CD_GIT_REF: dev
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+        run: |
+          set -euo pipefail
+          chmod +x cost-share-app/apps/mobile/scripts/ci-mobile-cd-plan.sh
+          chmod +x cost-share-app/apps/mobile/scripts/ci-mobile-cd-load-baseline.sh
+          git fetch origin dev --quiet
+          HEAD_SHA="$(git rev-parse origin/dev)"
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+
+          ios="$(cost-share-app/apps/mobile/scripts/ci-mobile-cd-plan.sh ios)"
+          android="$(cost-share-app/apps/mobile/scripts/ci-mobile-cd-plan.sh android)"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force }}" == "true" ]]; then
+            ios=true
+            android=true
+          fi
+
+          echo "ios=${ios}" >> "$GITHUB_OUTPUT"
+          echo "android=${android}" >> "$GITHUB_OUTPUT"
+          echo "Nightly plan: ios=${ios} android=${android} head=${HEAD_SHA:0:7}"
+
+  ios-testflight:
+    name: iOS → TestFlight
+    needs: plan
+    if: needs.plan.outputs.ios == 'true'
+    uses: ./.github/workflows/testflight-ios.yml
+    secrets: inherit
+    with:
+      git_ref: dev
+      pro_enabled: true
+      mobile_cd_sha: ${{ needs.plan.outputs.head_sha }}
+
+  android-play-internal:
+    name: Android → Play internal
+    needs: plan
+    if: needs.plan.outputs.android == 'true'
+    uses: ./.github/workflows/play-internal.yml
+    secrets: inherit
+    with:
+      git_ref: dev
+      pro_enabled: true
+      mobile_cd_sha: ${{ needs.plan.outputs.head_sha }}

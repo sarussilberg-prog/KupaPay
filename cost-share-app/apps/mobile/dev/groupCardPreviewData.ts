@@ -33,7 +33,25 @@ function makePreviewGroup(spec: PreviewGroupSpec, createdAt: Date): GroupWithMem
     };
 }
 
-export function buildGroupCardPreviewRollups(): Record<string, GroupRollup> {
+/** Two-card hero (owe + owed) without extra-currency lines — screenshot / design QA. */
+export function buildGroupCardHeroPreviewRollups(): Record<string, GroupRollup> {
+    return {
+        'g-trip': rollupOf({ currency: 'ILS', net: -761.5 }),
+        'g-multi': rollupOf({ currency: 'EUR', net: 42.5 }),
+    };
+}
+
+export function buildGroupCardPreviewRollups(options?: { stress?: boolean }): Record<string, GroupRollup> {
+    if (options?.stress) {
+        return {
+            'g-trip': rollupOf({ currency: 'ILS', net: -12_345.67 }, [
+                { currency: 'AFN', net: 138.75 },
+                { currency: 'EUR', net: 90.25 },
+            ]),
+            'g-multi': rollupOf({ currency: 'EUR', net: 42_500.5 }, [{ currency: 'USD', net: 30 }]),
+            'g-settled': rollupOf({ currency: 'USD', net: 0 }),
+        };
+    }
     return {
         'g-trip': rollupOf({ currency: 'ILS', net: -761.5 }, [{ currency: 'AFN', net: 138.75 }]),
         'g-multi': rollupOf({ currency: 'EUR', net: 42.5 }, [{ currency: 'USD', net: 30 }]),
@@ -41,13 +59,16 @@ export function buildGroupCardPreviewRollups(): Record<string, GroupRollup> {
     };
 }
 
-export function buildGroupCardPreviewGroups(): GroupWithMembers[] {
+const STRESS_GROUP_NAME =
+    'Very long shared household name for layout stress testing across locales';
+
+export function buildGroupCardPreviewGroups(options?: { stress?: boolean }): GroupWithMembers[] {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 6 * 86_400_000);
     const specs: PreviewGroupSpec[] = [
         {
             id: 'g-trip',
-            name: 'דירת שותפים',
+            name: options?.stress ? STRESS_GROUP_NAME : 'דירת שותפים',
             groupType: 'home',
             defaultCurrency: 'ILS',
             memberNames: ['Noa', 'Yoni', 'Maya'],

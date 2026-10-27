@@ -15,6 +15,7 @@ const PRO_UPGRADE_TITLE_MARKERS = [
 
 const ALLOWLIST = new Set([
     path.join(COMPONENTS_DIR, 'ProUpgradeButton.tsx'),
+    path.join(COMPONENTS_DIR, 'pro/ProUpsellButton.tsx'),
     path.join(COMPONENTS_DIR, 'Button.tsx'),
 ]);
 
@@ -33,7 +34,7 @@ function walkTsx(dir: string, out: string[] = []): string[] {
 
 function isRawPrimaryCtaWithUpgradeMarker(content: string, marker: string): boolean {
     if (!content.includes(marker)) return false;
-    if (content.includes('ProUpgradeButton')) return false;
+    if (content.includes('ProUpgradeButton') || content.includes('ProUpsellButton')) return false;
     const hasRawTouchable =
         /TouchableOpacity[\s\S]{0,400}/.test(content) || /Pressable[\s\S]{0,400}/.test(content);
     const hasPrimaryShell = /bg-primary rounded/.test(content);

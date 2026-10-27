@@ -15,8 +15,7 @@ import { registerTripPassPurchaseIntent } from './proEntitlements.service';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 import { logMonetizationEvent } from './monetization.service';
 import { captureProductEvent } from '../lib/productAnalytics';
-import { queryClient } from '../lib/queryClient';
-import { queryKeys } from '../hooks/queries/keys';
+import { applyOptimisticProPurchaseCache, refreshProStatusQueries } from '../lib/proStatusCache';
 import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
 import {
     collectSubscriptionProductIds,
@@ -24,6 +23,8 @@ import {
 } from '../lib/proTrialPaywall';
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
+import { supabase } from '../lib/supabase';
+import { useAppStore } from '../store';
 
 export type { PaywallPackages, PurchasesPackageLike };
 export type { IntroEligibilityMap };
@@ -32,10 +33,13 @@ export interface ProSubscriptionUiState {
     isInFreeTrial: boolean;
     trialEndsAt: string | null;
     manageSubscriptionsAvailable: boolean;
+    trialLifecycleSent?: number[];
+    trialFeatureUsage?: Record<string, boolean>;
 }
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesPackage = import('react-native-purchases').PurchasesPackage;
+type PurchasesCustomerInfo = import('react-native-purchases').CustomerInfo;
 
 let purchasesMod: PurchasesModule | null = null;
 let configured = false;
@@ -82,6 +86,13 @@ async function configurePurchasesForUserInner(userId: string): Promise<void> {
                 entitlementId: REVENUECAT_ENTITLEMENT_PRO,
                 customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
             });
+            const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
+            if (active) {
+                applyOptimisticProPurchaseCache({
+                    individualUntil: active.expirationDate ?? undefined,
+                });
+            }
+            void refreshProStatusQueries();
         });
         customerInfoListenerAttached = true;
     }
@@ -110,12 +121,31 @@ export async function configurePurchasesForUser(userId: string): Promise<void> {
 /** Await SDK configure+logIn before getOfferings/getCustomerInfo (avoids RC singleton crash). */
 export async function waitForPurchasesReady(): Promise<boolean> {
     if (!isPurchasesConfigured()) return false;
+    const userId = useAppStore.getState().currentUser?.id;
+    if (!configurePromise && userId) {
+        try {
+            await configurePurchasesForUser(userId);
+        } catch {
+            return false;
+        }
+    }
     if (!configurePromise) return configured;
     try {
         await configurePromise;
         return configured;
     } catch {
         return false;
+    }
+}
+
+/** Safe CustomerInfo read — never touches the RC singleton before configure+logIn. */
+export async function fetchPurchasesCustomerInfo(): Promise<PurchasesCustomerInfo | null> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return null;
+    try {
+        return await Purchases.default.getCustomerInfo();
+    } catch {
+        return null;
     }
 }
 
@@ -136,7 +166,7 @@ export async function checkIntroductoryPriceEligibility(
     packages: PaywallPackages | null,
 ): Promise<IntroEligibilityMap> {
     const Purchases = await getPurchases();
-    if (!Purchases || !packages) return {};
+    if (!Purchases || !packages || !(await waitForPurchasesReady())) return {};
     const productIds = collectSubscriptionProductIds(packages);
     try {
         return await Purchases.default.checkTrialOrIntroductoryPriceEligibility(productIds);
@@ -161,10 +191,36 @@ export async function fetchProSubscriptionUiState(): Promise<ProSubscriptionUiSt
 
         const periodType = ent.periodType;
         const inTrial = periodType === 'TRIAL' || periodType === 'INTRO';
+        let trialLifecycleSent: number[] = [];
+        let trialFeatureUsage: Record<string, boolean> = {};
+        const userId = useAppStore.getState().currentUser?.id;
+        if (userId) {
+            const { data: profileRow } = await supabase
+                .from('profiles')
+                .select('pro_trial_lifecycle_sent, pro_trial_feature_usage')
+                .eq('id', userId)
+                .maybeSingle();
+            const sentRaw = profileRow?.pro_trial_lifecycle_sent;
+            if (Array.isArray(sentRaw)) {
+                trialLifecycleSent = sentRaw.map(v => Number(v)).filter(n => Number.isFinite(n));
+            } else if (typeof sentRaw === 'string') {
+                try {
+                    const parsed = JSON.parse(sentRaw) as unknown[];
+                    trialLifecycleSent = parsed.map(v => Number(v)).filter(n => Number.isFinite(n));
+                } catch {
+                    trialLifecycleSent = [];
+                }
+            }
+            if (profileRow?.pro_trial_feature_usage && typeof profileRow.pro_trial_feature_usage === 'object') {
+                trialFeatureUsage = profileRow.pro_trial_feature_usage as Record<string, boolean>;
+            }
+        }
         return {
             isInFreeTrial: inTrial,
             trialEndsAt: inTrial ? (ent.expirationDate ?? null) : null,
             manageSubscriptionsAvailable: true,
+            trialLifecycleSent,
+            trialFeatureUsage,
         };
     } catch {
         return empty;
@@ -260,7 +316,7 @@ export async function purchasePackage(
                 !isTripPassPkg &&
                 (periodType === 'TRIAL' || periodType === 'INTRO')
             ) {
-                await captureProductEvent('trial_started', {
+                await captureProductEvent('trial_start', {
                     package_id: pkg.identifier,
                     feature_key: opts.featureKey,
                 });
@@ -273,7 +329,12 @@ export async function purchasePackage(
                     >[0]['customerInfo'],
                 });
             }
-            await invalidateProQueries(opts.groupId);
+            applyOptimisticProPurchaseCache({
+                groupId: opts.groupId,
+                tripPassOnly: tripPassPurchased && !active,
+                individualUntil: active?.expirationDate ?? undefined,
+            });
+            await refreshProStatusQueries(opts.groupId);
             return { ok: true };
         }
         await trackPurchaseEvent('purchase_failed', opts.featureKey, {
@@ -309,7 +370,11 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
                 entitlementId: REVENUECAT_ENTITLEMENT_PRO,
                 customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
             });
-            await invalidateProQueries(groupId);
+            applyOptimisticProPurchaseCache({
+                groupId,
+                individualUntil: active.expirationDate ?? undefined,
+            });
+            await refreshProStatusQueries(groupId);
             return true;
         }
         await trackPurchaseEvent('restore_failed', featureKey);
@@ -317,13 +382,6 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
     } catch {
         await trackPurchaseEvent('restore_failed', featureKey);
         return false;
-    }
-}
-
-async function invalidateProQueries(groupId?: string): Promise<void> {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
-    if (groupId) {
-        await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus(groupId) });
     }
 }
 

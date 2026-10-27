@@ -1,0 +1,780 @@
+{
+  "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
+  "generated_at": "2026-10-27T08:40:00Z",
+  "tables": [
+    {
+      "name": "account_deletions_audit",
+      "columns": []
+    },
+    {
+      "name": "activity_events",
+      "columns": []
+    },
+    {
+      "name": "activity_group_last_seen",
+      "columns": []
+    },
+    {
+      "name": "admin_pro_view_overrides",
+      "columns": []
+    },
+    {
+      "name": "analytics_north_star_groups",
+      "columns": []
+    },
+    {
+      "name": "app_admins",
+      "columns": []
+    },
+    {
+      "name": "app_client_config",
+      "columns": []
+    },
+    {
+      "name": "consolidation_batches",
+      "columns": []
+    },
+    {
+      "name": "deleted_account_emails",
+      "columns": []
+    },
+    {
+      "name": "device_tokens",
+      "columns": []
+    },
+    {
+      "name": "email_lifecycle_deliveries",
+      "columns": []
+    },
+    {
+      "name": "expense_splits",
+      "columns": []
+    },
+    {
+      "name": "expenses",
+      "columns": []
+    },
+    {
+      "name": "friend_blocks",
+      "columns": []
+    },
+    {
+      "name": "friend_requests",
+      "columns": []
+    },
+    {
+      "name": "friendships",
+      "columns": []
+    },
+    {
+      "name": "group_members",
+      "columns": []
+    },
+    {
+      "name": "group_messages",
+      "columns": []
+    },
+    {
+      "name": "group_passes",
+      "columns": []
+    },
+    {
+      "name": "group_smart_reminder_recipient_state",
+      "columns": []
+    },
+    {
+      "name": "group_user_archive",
+      "columns": []
+    },
+    {
+      "name": "groups",
+      "columns": []
+    },
+    {
+      "name": "invite_preview_rate_limits",
+      "columns": []
+    },
+    {
+      "name": "legal_documents",
+      "columns": []
+    },
+    {
+      "name": "monetization_events",
+      "columns": []
+    },
+    {
+      "name": "notification_preferences",
+      "columns": []
+    },
+    {
+      "name": "profiles",
+      "columns": []
+    },
+    {
+      "name": "push_deliveries",
+      "columns": []
+    },
+    {
+      "name": "receipt_ocr_daily_usage",
+      "columns": []
+    },
+    {
+      "name": "recurring_expense_occurrences",
+      "columns": []
+    },
+    {
+      "name": "recurring_expense_series",
+      "columns": []
+    },
+    {
+      "name": "referral_rewards",
+      "columns": []
+    },
+    {
+      "name": "retention_unsettled_nudge_state",
+      "columns": []
+    },
+    {
+      "name": "revenuecat_webhook_events",
+      "columns": []
+    },
+    {
+      "name": "settlements",
+      "columns": []
+    },
+    {
+      "name": "storage_cleanup_queue",
+      "columns": []
+    },
+    {
+      "name": "support_messages",
+      "columns": []
+    },
+    {
+      "name": "trip_pass_purchase_intents",
+      "columns": []
+    },
+    {
+      "name": "unassigned_trip_passes",
+      "columns": []
+    },
+    {
+      "name": "weekly_digest_deliveries",
+      "columns": []
+    }
+  ],
+  "functions": [
+    {
+      "name": "_advance_recurring_next_date",
+      "args": ""
+    },
+    {
+      "name": "_attribute_referral",
+      "args": ""
+    },
+    {
+      "name": "_get_group_pairwise_debts_core",
+      "args": ""
+    },
+    {
+      "name": "_insert_expense_from_recurring_series",
+      "args": ""
+    },
+    {
+      "name": "_insert_trip_budget_alert_events",
+      "args": ""
+    },
+    {
+      "name": "_profile_last_active_at",
+      "args": ""
+    },
+    {
+      "name": "_recurring_local_today",
+      "args": ""
+    },
+    {
+      "name": "_recurring_series_has_invalid_members",
+      "args": ""
+    },
+    {
+      "name": "_weekly_digest_stats",
+      "args": ""
+    },
+    {
+      "name": "accept_friend_request",
+      "args": ""
+    },
+    {
+      "name": "account_deletion_grace_interval",
+      "args": ""
+    },
+    {
+      "name": "add_guest_group_member",
+      "args": ""
+    },
+    {
+      "name": "admin_active_pro_view_mode",
+      "args": ""
+    },
+    {
+      "name": "admin_get_platform_metrics",
+      "args": ""
+    },
+    {
+      "name": "admin_list_deleted_accounts",
+      "args": ""
+    },
+    {
+      "name": "admin_list_support_messages",
+      "args": ""
+    },
+    {
+      "name": "admin_restore_deleted_account",
+      "args": ""
+    },
+    {
+      "name": "admin_update_support_message_status",
+      "args": ""
+    },
+    {
+      "name": "archive_group",
+      "args": ""
+    },
+    {
+      "name": "assign_purchased_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "auto_friend_on_group_member_insert",
+      "args": ""
+    },
+    {
+      "name": "auto_friend_on_group_member_update",
+      "args": ""
+    },
+    {
+      "name": "bump_group_last_activity",
+      "args": ""
+    },
+    {
+      "name": "check_email_not_deleted",
+      "args": ""
+    },
+    {
+      "name": "claim_guest_group_member",
+      "args": ""
+    },
+    {
+      "name": "clear_archive_for_expense",
+      "args": ""
+    },
+    {
+      "name": "clear_archive_for_expense_split",
+      "args": ""
+    },
+    {
+      "name": "clear_archive_for_settlement",
+      "args": ""
+    },
+    {
+      "name": "consume_receipt_ocr_quota_for_user",
+      "args": ""
+    },
+    {
+      "name": "count_push_sent_last_24h",
+      "args": ""
+    },
+    {
+      "name": "create_consolidation_batch",
+      "args": ""
+    },
+    {
+      "name": "create_demo_group",
+      "args": ""
+    },
+    {
+      "name": "create_expense_with_splits",
+      "args": ""
+    },
+    {
+      "name": "create_group_message",
+      "args": ""
+    },
+    {
+      "name": "create_recurring_expense_series",
+      "args": ""
+    },
+    {
+      "name": "default_email_unsubscribe_token",
+      "args": ""
+    },
+    {
+      "name": "default_expense_share_token",
+      "args": ""
+    },
+    {
+      "name": "default_group_invite_token",
+      "args": ""
+    },
+    {
+      "name": "default_group_public_balance_token",
+      "args": ""
+    },
+    {
+      "name": "default_home_monthly_bills_mode",
+      "args": ""
+    },
+    {
+      "name": "default_profile_invite_token",
+      "args": ""
+    },
+    {
+      "name": "delete_consolidation_batch",
+      "args": ""
+    },
+    {
+      "name": "delete_group_message",
+      "args": ""
+    },
+    {
+      "name": "delete_my_account",
+      "args": ""
+    },
+    {
+      "name": "emit_expense_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_expense_split_viewer_delta",
+      "args": ""
+    },
+    {
+      "name": "emit_friend_request_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_group_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_group_membership_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_message_activity_events",
+      "args": ""
+    },
+    {
+      "name": "emit_settlement_activity_events",
+      "args": ""
+    },
+    {
+      "name": "enforce_invite_preview_rate_limit",
+      "args": ""
+    },
+    {
+      "name": "enforce_support_message_rate_limit",
+      "args": ""
+    },
+    {
+      "name": "evaluate_trip_budget_alerts",
+      "args": ""
+    },
+    {
+      "name": "expense_receipt_object_path_for_user",
+      "args": ""
+    },
+    {
+      "name": "generate_due_recurring_expenses",
+      "args": ""
+    },
+    {
+      "name": "generate_invite_token",
+      "args": ""
+    },
+    {
+      "name": "get_activity_unread_count",
+      "args": ""
+    },
+    {
+      "name": "get_app_client_config",
+      "args": ""
+    },
+    {
+      "name": "get_group_messages",
+      "args": ""
+    },
+    {
+      "name": "get_group_pairwise_debts",
+      "args": ""
+    },
+    {
+      "name": "get_group_spending_by_category",
+      "args": ""
+    },
+    {
+      "name": "get_group_spending_by_member",
+      "args": ""
+    },
+    {
+      "name": "get_group_spending_by_week",
+      "args": ""
+    },
+    {
+      "name": "get_group_unread_counts",
+      "args": ""
+    },
+    {
+      "name": "get_growth_metrics",
+      "args": ""
+    },
+    {
+      "name": "get_invite_preview",
+      "args": ""
+    },
+    {
+      "name": "get_monetization_metrics",
+      "args": ""
+    },
+    {
+      "name": "get_my_account_deletion_state",
+      "args": ""
+    },
+    {
+      "name": "get_my_invite_token",
+      "args": ""
+    },
+    {
+      "name": "get_my_open_balances",
+      "args": ""
+    },
+    {
+      "name": "get_my_pro_status",
+      "args": ""
+    },
+    {
+      "name": "get_my_referral_status",
+      "args": ""
+    },
+    {
+      "name": "get_public_expense_share_page",
+      "args": ""
+    },
+    {
+      "name": "get_public_group_balance_page",
+      "args": ""
+    },
+    {
+      "name": "get_recurring_series_for_expense",
+      "args": ""
+    },
+    {
+      "name": "get_user_groups_archive_state",
+      "args": ""
+    },
+    {
+      "name": "get_user_simplified_inputs",
+      "args": ""
+    },
+    {
+      "name": "grant_included_trip_pass_credit",
+      "args": ""
+    },
+    {
+      "name": "group_is_auto_archived",
+      "args": ""
+    },
+    {
+      "name": "guard_groups_is_active_deactivate",
+      "args": ""
+    },
+    {
+      "name": "guard_groups_pro_columns",
+      "args": ""
+    },
+    {
+      "name": "guard_settlement_core_fields",
+      "args": ""
+    },
+    {
+      "name": "handle_consolidation_batch_activity_event",
+      "args": ""
+    },
+    {
+      "name": "handle_consolidation_batch_delete",
+      "args": ""
+    },
+    {
+      "name": "handle_new_user",
+      "args": ""
+    },
+    {
+      "name": "handle_revenuecat_webhook",
+      "args": ""
+    },
+    {
+      "name": "handle_settlement_activity_event",
+      "args": ""
+    },
+    {
+      "name": "hard_purge_expired_deleted_accounts",
+      "args": ""
+    },
+    {
+      "name": "has_pro",
+      "args": ""
+    },
+    {
+      "name": "increment_push_attempt",
+      "args": ""
+    },
+    {
+      "name": "invite_preview_client_key",
+      "args": ""
+    },
+    {
+      "name": "is_active_group_member",
+      "args": ""
+    },
+    {
+      "name": "is_app_admin",
+      "args": ""
+    },
+    {
+      "name": "is_caller_active",
+      "args": ""
+    },
+    {
+      "name": "is_group_creator",
+      "args": ""
+    },
+    {
+      "name": "is_group_member",
+      "args": ""
+    },
+    {
+      "name": "list_claimable_guest_members",
+      "args": ""
+    },
+    {
+      "name": "list_deferred_push_deliveries",
+      "args": ""
+    },
+    {
+      "name": "mark_activity_seen",
+      "args": ""
+    },
+    {
+      "name": "mark_email_lifecycle_sent",
+      "args": ""
+    },
+    {
+      "name": "mark_group_activity_seen",
+      "args": ""
+    },
+    {
+      "name": "mark_group_note_seen",
+      "args": ""
+    },
+    {
+      "name": "mark_pro_trial_lifecycle_sent",
+      "args": ""
+    },
+    {
+      "name": "mark_pro_trial_lifecycle_sent_service",
+      "args": ""
+    },
+    {
+      "name": "mark_referral_rewarded",
+      "args": ""
+    },
+    {
+      "name": "mark_weekly_summary_sent",
+      "args": ""
+    },
+    {
+      "name": "profile_images_object_path_for_user",
+      "args": ""
+    },
+    {
+      "name": "profile_is_active_for_group_insert",
+      "args": ""
+    },
+    {
+      "name": "profile_visible_to_viewer",
+      "args": ""
+    },
+    {
+      "name": "redeem_friend_invite",
+      "args": ""
+    },
+    {
+      "name": "redeem_group_invite",
+      "args": ""
+    },
+    {
+      "name": "redeem_included_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "referral_on_expense_created",
+      "args": ""
+    },
+    {
+      "name": "register_device_token",
+      "args": ""
+    },
+    {
+      "name": "register_pro_trial_feature_usage",
+      "args": ""
+    },
+    {
+      "name": "register_pro_trial_reminder",
+      "args": ""
+    },
+    {
+      "name": "register_trip_pass_purchase_intent",
+      "args": ""
+    },
+    {
+      "name": "reject_friend_request",
+      "args": ""
+    },
+    {
+      "name": "remove_friend",
+      "args": ""
+    },
+    {
+      "name": "resolve_settle_reminder_link",
+      "args": ""
+    },
+    {
+      "name": "restore_deleted_account",
+      "args": ""
+    },
+    {
+      "name": "restore_my_account",
+      "args": ""
+    },
+    {
+      "name": "rotate_friend_invite",
+      "args": ""
+    },
+    {
+      "name": "rotate_group_invite",
+      "args": ""
+    },
+    {
+      "name": "rotate_group_public_balance",
+      "args": ""
+    },
+    {
+      "name": "run_email_lifecycle_dispatch",
+      "args": ""
+    },
+    {
+      "name": "run_pro_trial_lifecycle_dispatch",
+      "args": ""
+    },
+    {
+      "name": "run_referral_reward_dispatch",
+      "args": ""
+    },
+    {
+      "name": "run_retention_unsettled_nudges",
+      "args": ""
+    },
+    {
+      "name": "run_smart_payment_reminders",
+      "args": ""
+    },
+    {
+      "name": "run_weekly_summary_dispatch",
+      "args": ""
+    },
+    {
+      "name": "search_users",
+      "args": ""
+    },
+    {
+      "name": "send_friend_request",
+      "args": ""
+    },
+    {
+      "name": "send_settle_reminder",
+      "args": ""
+    },
+    {
+      "name": "service_sentry_api_token",
+      "args": ""
+    },
+    {
+      "name": "set_group_public_balance_sharing",
+      "args": ""
+    },
+    {
+      "name": "set_group_smart_reminder",
+      "args": ""
+    },
+    {
+      "name": "set_group_trip_budget",
+      "args": ""
+    },
+    {
+      "name": "set_my_admin_pro_view_mode",
+      "args": ""
+    },
+    {
+      "name": "stamp_group_note_updated_at",
+      "args": ""
+    },
+    {
+      "name": "stop_recurring_expense_series",
+      "args": ""
+    },
+    {
+      "name": "test_set_authenticated",
+      "args": ""
+    },
+    {
+      "name": "test_set_jwt_sub",
+      "args": ""
+    },
+    {
+      "name": "trg_evaluate_trip_budget_on_expense",
+      "args": ""
+    },
+    {
+      "name": "unarchive_group",
+      "args": ""
+    },
+    {
+      "name": "unregister_device_token",
+      "args": ""
+    },
+    {
+      "name": "unsubscribe_email_by_token",
+      "args": ""
+    },
+    {
+      "name": "update_expense_with_splits",
+      "args": ""
+    },
+    {
+      "name": "update_group_message",
+      "args": ""
+    },
+    {
+      "name": "update_notification_preferences",
+      "args": ""
+    },
+    {
+      "name": "update_recurring_expense_series",
+      "args": ""
+    },
+    {
+      "name": "update_updated_at_column",
+      "args": ""
+    }
+  ]
+}

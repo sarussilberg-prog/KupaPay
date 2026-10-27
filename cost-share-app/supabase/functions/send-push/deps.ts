@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import type { ActivityRecord, ResolvedNames, PrefsRow, SendPushDeps } from './handler.ts';
 import { sendExpoPush } from './expo.ts';
 import { classifyDelivery, type ExistingDelivery } from './dedup.ts';
+import { resolveLang } from './render.ts';
 
 export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): SendPushDeps {
     const sb: SupabaseClient = createClient(opts.url, opts.serviceRole, {
@@ -33,7 +34,16 @@ export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): Se
         },
         async markSkipped(eventId, reason) {
             await sb.from('push_deliveries')
-                .update({ status: 'skipped', last_error: reason })
+                .update({ status: 'skipped', last_error: reason, deliver_after: null })
+                .eq('activity_event_id', eventId);
+        },
+        async markDeferred(eventId, deliverAfter) {
+            await sb.from('push_deliveries')
+                .update({
+                    status: 'skipped',
+                    deliver_after: deliverAfter,
+                    last_error: 'quiet_hours_deferred',
+                })
                 .eq('activity_event_id', eventId);
         },
         async markSent(eventId, ticketIds) {
@@ -47,9 +57,18 @@ export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): Se
         },
         async loadPreferences(userId): Promise<PrefsRow | null> {
             const { data } = await sb.from('notification_preferences')
-                .select('push_enabled, expenses_push, settlements_push, messages_push, friends_push, groups_push')
+                .select(`push_enabled, expenses_push, settlements_push, messages_push, friends_push, groups_push,
+                    reminders_push, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, timezone, daily_push_cap`)
                 .eq('user_id', userId).maybeSingle();
             return (data as PrefsRow | null) ?? null;
+        },
+        async countSentLast24h(userId) {
+            const { data, error } = await sb.rpc('count_push_sent_last_24h', { p_user_id: userId });
+            if (error) {
+                console.error('countSentLast24h', error);
+                return 0;
+            }
+            return typeof data === 'number' ? data : 0;
         },
         async loadActiveTokens(userId) {
             const { data } = await sb.from('device_tokens')
@@ -80,7 +99,7 @@ export function makeSupabaseDeps(opts: { url: string; serviceRole: string }): Se
         },
         async recipientLanguage(userId) {
             const { data } = await sb.from('profiles').select('language').eq('id', userId).maybeSingle();
-            return (data?.language as string) === 'he' ? 'he' : 'en';
+            return resolveLang(data?.language as string | undefined);
         },
         async unreadCount(userId) {
             const { data: p } = await sb.from('profiles')

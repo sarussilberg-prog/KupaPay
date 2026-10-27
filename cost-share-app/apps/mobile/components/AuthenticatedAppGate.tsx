@@ -5,20 +5,22 @@ import type { GroupWithMembers } from '@cost-share/shared';
 import { AppNavigator } from '../navigation/AppNavigator';
 import { navigationIntegration } from '../lib/sentry';
 import { rootNavigationRef } from '../lib/rootNavigationRef';
-import { OnboardingCreateGroupScreen } from '../screens/onboarding/OnboardingCreateGroupScreen';
+import { ActivationOnboardingScreen } from '../screens/onboarding/ActivationOnboardingScreen';
 import {
     hasCompletedPostLoginOnboarding,
     markPostLoginOnboardingComplete,
 } from '../lib/onboardingStorage';
 import { runAuthenticatedGate } from '../lib/authenticatedGateResolve';
 import { useAuthenticatedInviteRedemption } from '../hooks/useAuthenticatedInviteRedemption';
-import { fetchGroups } from '../services/groups.service';
+import { groupsQueryOptions } from '../hooks/queries/groupsQueryOptions';
 import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
+import { useSubscriptionRefreshOnForeground } from '../hooks/useSubscriptionRefreshOnForeground';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
 import { useAppStore } from '../store';
 import { AdminProViewBanner } from './admin/AdminProViewBanner';
+import { AppReviewPromptHost } from './appReview/AppReviewPromptHost';
 import { View } from 'react-native';
 
 /**
@@ -61,6 +63,7 @@ export function AuthenticatedAppGate() {
     // member/friend/group avatars render instantly and work offline. Single
     // mount, debounced, deduped — runs for the whole authenticated session.
     useAvatarPrefetcher();
+    useSubscriptionRefreshOnForeground();
 
     const resolveGate = useCallback(async () => {
         // Seeds the groups cache before mounting the navigator so GroupsListScreen
@@ -74,7 +77,11 @@ export function AuthenticatedAppGate() {
             getCachedGroupsCount: () =>
                 (queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? []).length,
             isOnline: () => onlineManager.isOnline(),
-            fetchGroups: () => withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS),
+            fetchGroups: () =>
+                withTimeout(
+                    queryClient.fetchQuery(groupsQueryOptions()),
+                    GATE_FETCH_TIMEOUT_MS,
+                ),
             seedGroups: (groups) => queryClient.setQueryData(queryKeys.groups, groups),
             hasPendingInvite: () => Boolean(useAppStore.getState().pendingInvite),
         });
@@ -90,7 +97,7 @@ export function AuthenticatedAppGate() {
     }
 
     if (gate === 'create') {
-        return <OnboardingCreateGroupScreen onDone={() => setGate('main')} />;
+        return <ActivationOnboardingScreen onDone={() => setGate('main')} />;
     }
 
     return (
@@ -103,6 +110,7 @@ export function AuthenticatedAppGate() {
                 <View style={{ flex: 1 }}>
                     <AppNavigator />
                 </View>
+                <AppReviewPromptHost />
             </View>
         </NavigationContainer>
     );

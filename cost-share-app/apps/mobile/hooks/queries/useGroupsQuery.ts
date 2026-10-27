@@ -1,18 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchGroups } from '../../services/groups.service';
-import { queryKeys } from './keys';
+import { groupsQueryOptions } from './groupsQueryOptions';
 
 export function useGroupsQuery() {
     return useQuery({
-        queryKey: queryKeys.groups,
-        queryFn: () => fetchGroups(),
-        // staleTime: 0 + refetchOnMount: 'always' = stale-while-revalidate.
-        // The screen renders the persisted cache instantly on cold boot, and
-        // a background refetch reconciles any drift (e.g., changes made on
-        // another device while this one was offline). Realtime keeps the
-        // cache fresh after the initial reconcile.
-        staleTime: 0,
-        refetchOnMount: 'always',
+        ...groupsQueryOptions(),
+        // Gate + prefetch warm this key via fetchQuery; app-level realtime
+        // invalidates on membership/metadata changes and on reconnect.
+        refetchOnMount: false,
         refetchOnWindowFocus: false,
         retry: false,
     });

@@ -12,7 +12,7 @@
 | Supabase SQL + DB lints + RPC EXPLAIN | [supabase-sql-integration.yml](../../.github/workflows/supabase-sql-integration.yml) | Splinter-style lints (baseline-gated), hot-path RPC timing / plan guards |
 | Mobile Supabase budgets | [ci-performance.yml](../../.github/workflows/ci-performance.yml) | Mocked per-screen Supabase call counts |
 | Bundle size | `ci-performance` → `scripts/ci-bundle-size.sh` | `size-limit` on Expo web export + Next.js chunks |
-| Lighthouse (optional) | `ci-performance` job `lighthouse-next` | Local `next start` + LHCI (`continue-on-error: true`) |
+| Lighthouse (Next.js) | `ci-performance` job `lighthouse-next` | Local `next start` + LHCI; **performance score ≥ 0.85 required** |
 
 No Vercel deploys are required for these jobs.
 
@@ -55,14 +55,32 @@ Configured in [`cost-share-app/.size-limit.json`](../../cost-share-app/.size-lim
 
 | Artifact | Limit |
 |----------|--------|
-| Expo web `index-*.js` | 2800 KB (measured ~1760 KB gzip, Oct 2026) |
-| Next.js `main-app-*.js` | 180 KB (measured ~0.4 KB gzip for app shell chunk; limit guards regressions) |
+| Expo web `index-*.js` | 2500 KB gzip (entry chunk; non-English locales and `xlsx` load on demand) |
+| Next.js `main-app-*.js` | 180 KB (measured ~1.5 KB gzip for app shell chunk; limit guards regressions) |
 
 Run locally: `cd cost-share-app && npm run size:ci`.
 
+**Bundle analysis (local, optional):**
+
+| Target | Command |
+|--------|---------|
+| Expo / Metro (web export) | `npm run analyze:mobile` then `npm run analyze:atlas -w @cost-share/mobile` |
+| Next.js marketing site | `npm run analyze:web` (opens webpack report when `ANALYZE=true`) |
+
 ### Lighthouse
 
-`scripts/ci-lighthouse-next.sh` serves the built Next app on `127.0.0.1:3000` and runs LHCI with performance/accessibility warn thresholds (0.85 / 0.9). Job is informational (`continue-on-error: true`).
+`scripts/ci-lighthouse-next.sh` serves the built Next app on `127.0.0.1:3000` and runs LHCI with **performance error** at 0.85 and accessibility warn at 0.9.
+
+### Next.js caching
+
+- Marketing routes use `export const revalidate = 300` on `[locale]/page.tsx`.
+- `next.config.ts` sets `experimental.staleTimes` for router cache (dev/preview friendly, fewer origin hits on Vercel free tier).
+
+### Edge function cold starts
+
+- Keep Deno entrypoints thin: lazy-import heavy modules inside the handler, not at top level.
+- Cron/dispatch functions share `_shared/` helpers; avoid pulling the full Supabase client into invite-landing-sized handlers.
+- CI **Deno edge bundle** job (`ci-deno-check-edge-bundle.sh`) guards bundle size regressions that correlate with cold-start latency.
 
 ---
 
@@ -76,7 +94,7 @@ Run locally: `cd cost-share-app && npm run size:ci`.
 | `development` / previews | **1.0** |
 
 - **Mobile:** `EXPO_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/mobile/lib/sentry.ts`](../../cost-share-app/apps/mobile/lib/sentry.ts)
-- **Next.js site:** `NEXT_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/web/instrumentation-client.ts`](../../cost-share-app/apps/web/instrumentation-client.ts)
+- **Next.js site:** `NEXT_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/web/lib/sentryInit.ts`](../../cost-share-app/apps/web/lib/sentryInit.ts) (client + server). Source maps: Vercel env `SENTRY_AUTH_TOKEN` + `SENTRY_PROJECT=kupapay-web` during `next build` ([`next.config.ts`](../../cost-share-app/apps/web/next.config.ts)).
 
 Error `sampleRate` remains **1.0** (errors are not subsampled).
 

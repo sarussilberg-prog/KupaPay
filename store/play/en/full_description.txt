@@ -1,4 +1,4 @@
-KupaPay makes group expense splitting simple — trips, roommates, events, and more.
+KupaPay makes group expense splitting simple — split bills for trips, roommates, events, and more. A free Splitwise alternative with automatic debt simplification.
 
 • Create groups and invite friends
 • Add expenses with equal, weighted, or multi-currency splits

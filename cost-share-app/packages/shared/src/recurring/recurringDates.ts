@@ -21,6 +21,21 @@ export function formatIsoDateOnly(date: Date): string {
     return `${y}-${m}-${d}`;
 }
 
+/** Calendar today in an IANA timezone as YYYY-MM-DD (used for recurring schedule hints). */
+export function recurringLocalTodayIso(timeZone: string, now = new Date()): string {
+    const tz = timeZone.trim() || 'UTC';
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).formatToParts(now);
+    const y = parts.find(p => p.type === 'year')?.value ?? '1970';
+    const m = parts.find(p => p.type === 'month')?.value ?? '01';
+    const d = parts.find(p => p.type === 'day')?.value ?? '01';
+    return `${y}-${m}-${d}`;
+}
+
 /** Advance one period from a calendar date (UTC components). */
 export function advanceRecurringDate(from: Date, frequency: RecurringFrequency): Date {
     const y = from.getUTCFullYear();

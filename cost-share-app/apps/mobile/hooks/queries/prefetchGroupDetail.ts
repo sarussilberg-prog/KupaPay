@@ -4,24 +4,20 @@
  * the React Query cache, so callers don't need to gate.
  */
 
-import { fetchExpenses } from '../../services/expenses.service';
-import { fetchMessages } from '../../services/messages.service';
 import { fetchGroupUsers } from '../../services/users.service';
 import { fetchSettlements } from '../../services/settlements.service';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from './keys';
+import {
+    groupExpensesQueryOptions,
+    groupMessagesQueryOptions,
+} from './groupDetailQueryOptions';
 
 export function prefetchGroupDetail(groupId: string): void {
     if (!groupId) return;
 
-    void queryClient.prefetchQuery({
-        queryKey: queryKeys.groupExpenses(groupId),
-        queryFn: () => fetchExpenses(groupId),
-    });
-    void queryClient.prefetchQuery({
-        queryKey: queryKeys.groupMessages(groupId),
-        queryFn: () => fetchMessages(groupId),
-    });
+    void queryClient.prefetchQuery(groupExpensesQueryOptions(groupId));
+    void queryClient.prefetchQuery(groupMessagesQueryOptions(groupId));
     void queryClient.prefetchQuery({
         queryKey: queryKeys.groupUsers(groupId),
         queryFn: () => fetchGroupUsers(groupId),

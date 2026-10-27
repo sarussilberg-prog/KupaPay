@@ -1,0 +1,3 @@
+{
+  "_comment": "SQL tests listed here are excluded from the local Docker CI stack. Each entry must reference a GitHub issue. All other *.test.sql files must run in CI."
+}

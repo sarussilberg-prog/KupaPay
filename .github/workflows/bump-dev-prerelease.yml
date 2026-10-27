@@ -1,0 +1,48 @@
+# After a PR lands on dev, bump packages/shared/version.json without re-running full CI/Vercel.
+name: Bump dev prerelease
+
+on:
+  push:
+    branches: [dev]
+
+concurrency:
+  group: dev-merge-and-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Dev prerelease + changelog
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !startsWith(github.event.head_commit.message, 'chore: bump dev prerelease')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Bump dev prerelease + changelog
+        env:
+          PR_TITLE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin dev
+
+          node cost-share-app/scripts/bump-dev-prerelease.mjs
+          git add cost-share-app/packages/shared/version.json CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No version bump needed"
+            exit 0
+          fi
+          git commit -m "chore: bump dev prerelease [skip ci]"
+          git push origin dev
+          echo "✅ Dev prerelease bumped"

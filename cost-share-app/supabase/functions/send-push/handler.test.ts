@@ -16,9 +16,11 @@ function fakeDeps(over: Partial<SendPushDeps> = {}): SendPushDeps & { sent: stri
         sent: sentTickets,
         recordPending: () => Promise.resolve('new'),
         markSkipped: () => Promise.resolve(),
+        markDeferred: () => Promise.resolve(),
         markSent: (_id, tickets) => { sentTickets.push(tickets); return Promise.resolve(); },
         markFailed: () => Promise.resolve(),
         loadPreferences: () => Promise.resolve(null),
+        countSentLast24h: () => Promise.resolve(0),
         loadActiveTokens: () => Promise.resolve([{ token: 'ExponentPushToken[a]' }]),
         resolveNames: () => Promise.resolve({ actorName: 'Dana', groupName: 'Trip' }),
         recipientLanguage: () => Promise.resolve('en'),
@@ -44,7 +46,9 @@ Deno.test('skips when category preference is off', async () => {
     const deps = fakeDeps({
         loadPreferences: () => Promise.resolve({
             push_enabled: true, expenses_push: false, settlements_push: true,
-            messages_push: true, friends_push: true, groups_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
+            quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+            timezone: 'UTC', daily_push_cap: 8,
         }),
     });
     const out = await processActivityEvent(baseRecord(), deps);
@@ -55,7 +59,9 @@ Deno.test('skips when master switch is off', async () => {
     const deps = fakeDeps({
         loadPreferences: () => Promise.resolve({
             push_enabled: false, expenses_push: true, settlements_push: true,
-            messages_push: true, friends_push: true, groups_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
+            quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+            timezone: 'UTC', daily_push_cap: 8,
         }),
     });
     assertEquals(await processActivityEvent(baseRecord(), deps), 'skipped_prefs');
@@ -87,6 +93,35 @@ Deno.test('disables tokens flagged invalid by Expo', async () => {
 Deno.test('returns duplicate when delivery already recorded', async () => {
     const deps = fakeDeps({ recordPending: () => Promise.resolve('duplicate') });
     assertEquals(await processActivityEvent(baseRecord(), deps), 'duplicate');
+});
+
+Deno.test('defers during quiet hours', async () => {
+    let deferred = false;
+    const deps = fakeDeps({
+        loadPreferences: () => Promise.resolve({
+            push_enabled: true, expenses_push: true, settlements_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
+            quiet_hours_enabled: true, quiet_hours_start: 0, quiet_hours_end: 24,
+            timezone: 'UTC', daily_push_cap: 8,
+        }),
+        markDeferred: () => { deferred = true; return Promise.resolve(); },
+    });
+    const out = await processActivityEvent(baseRecord(), deps);
+    assertEquals(out, 'deferred');
+    assertEquals(deferred, true);
+});
+
+Deno.test('skips when daily cap reached', async () => {
+    const deps = fakeDeps({
+        countSentLast24h: () => Promise.resolve(8),
+        loadPreferences: () => Promise.resolve({
+            push_enabled: true, expenses_push: true, settlements_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
+            quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+            timezone: 'UTC', daily_push_cap: 8,
+        }),
+    });
+    assertEquals(await processActivityEvent(baseRecord(), deps), 'skipped_rate_limit');
 });
 
 Deno.test('returns failed and calls markFailed when sendExpo throws', async () => {

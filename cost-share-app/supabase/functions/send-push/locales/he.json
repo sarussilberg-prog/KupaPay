@@ -33,5 +33,6 @@
     "group_deleted": "נמחקה על ידי {actor}",
     "group_note_changed": "הפתק שונה על ידי {actor}",
     "settle_up_reminder": "תזכורת מ-{actor}",
+    "unsettled_balance_nudge": "עדיין חייבים ל-{actor} · {money}",
     "trip_budget_alert": "עדכון תקציב טיול"
 }

@@ -17,6 +17,9 @@ jest.mock('../../lib/handleError', () => ({ handleError: jest.fn() }));
 jest.mock('../../store', () => ({
     useAppStore: { getState: () => ({ setPendingNavigation: jest.fn() }) },
 }));
+jest.mock('../../services/groups.service', () => ({
+    listClaimableGuestMembers: jest.fn().mockResolvedValue([]),
+}));
 
 describe('handleInviteLink concurrency dedup', () => {
     beforeEach(() => jest.clearAllMocks());
@@ -36,7 +39,12 @@ describe('handleInviteLink concurrency dedup', () => {
         const p2 = handleInviteLink(link, null, queryClient);
 
         resolveRpc({
-            data: { group_id: 'g1', group_name: 'G', already_member: false },
+            data: {
+                ok: true,
+                group_id: 'g1',
+                group_name: 'G',
+                already_member: false,
+            },
             error: null,
         });
         await Promise.all([p1, p2]);

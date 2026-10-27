@@ -2,7 +2,7 @@
   {
     "name": "Expo web export (entry chunk)",
     "path": "apps/mobile/dist/_expo/static/js/web/index-*.js",
-    "limit": "2800 KB",
+    "limit": "2500 KB",
     "gzip": true
   },
   {

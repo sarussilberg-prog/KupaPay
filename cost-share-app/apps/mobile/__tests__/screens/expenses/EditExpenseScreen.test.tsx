@@ -74,6 +74,28 @@ import {
     updateExpense,
 } from '../../../services/expenses.service';
 import { useAppStore } from '../../../store';
+import { queryClient } from '../../../lib/queryClient';
+import { queryKeys } from '../../../hooks/queries/keys';
+
+const mockGroupsSeed = [
+    {
+        id: 'g1',
+        name: 'Test Group',
+        defaultCurrency: 'USD',
+        groupType: 'general',
+        inviteToken: 'test1234567',
+        createdBy: 'u1',
+        isActive: true,
+        isArchivedByMe: false,
+        isAutoArchived: false,
+        createdAt: new Date('2026-03-01'),
+        updatedAt: new Date('2026-03-01'),
+        members: [
+            { userId: 'u1', displayName: 'Alice', isActive: true },
+            { userId: 'u2', displayName: 'Bob', isActive: true },
+        ],
+    },
+];
 
 const mockGet = getExpenseWithSplits as jest.MockedFunction<typeof getExpenseWithSplits>;
 const mockUpdate = updateExpense as jest.MockedFunction<typeof updateExpense>;
@@ -97,6 +119,8 @@ const expense = {
 beforeEach(() => {
     mockNavigate.mockClear();
     mockGoBack.mockClear();
+    queryClient.clear();
+    queryClient.setQueryData(queryKeys.groups, mockGroupsSeed);
     mockGet.mockReset();
     mockUpdate.mockReset();
     mockGet.mockResolvedValue({

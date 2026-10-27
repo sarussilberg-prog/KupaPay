@@ -1,0 +1,42 @@
+# Admin: upload IAP / subscription App Review paywall screenshots to ASC.
+# workflow_dispatch or push to ops/asc-screenshots — does NOT submit for review.
+name: ASC IAP review screenshots
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ops/asc-screenshots]
+
+concurrency:
+  group: asc-iap-review-screenshots
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: Upload paywall review screenshots
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app/apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert paywall PNG exists
+        run: test -f ../../../store/asc/review-screenshots/paywall-en-US.png
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci --ignore-scripts
+      - name: Write ASC API key
+        env:
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: bash scripts/ci-write-asc-key.sh
+      - name: Upload subscription & IAP review screenshots
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+        run: node scripts/asc-upload-iap-review-screenshots.mjs

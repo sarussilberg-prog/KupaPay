@@ -31,8 +31,25 @@ describe('persistQueryClient helpers', () => {
                 'activity',
                 'friends',
                 'friend-requests',
+                'proStatus',
             ]),
         );
+    });
+
+    it('persists proStatus for offline Pro gating', () => {
+        const fn = shouldDehydrateQueryFactory();
+        expect(
+            fn({
+                queryKey: ['proStatus'],
+                state: { status: 'success', data: { hasPro: true } },
+            } as any),
+        ).toBe(true);
+        expect(
+            fn({
+                queryKey: ['proStatus', 'group-1'],
+                state: { status: 'success', data: { hasPro: true } },
+            } as any),
+        ).toBe(true);
     });
 
     it('persists the canonical simplifiedDebts balance query (needed for offline balances)', () => {

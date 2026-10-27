@@ -8,6 +8,18 @@
     "toggle": "English",
     "chooseLanguage": "Sprache"
   },
+  "seo": {
+    "title": "KupaPay — Rechnungen & Reisekosten teilen",
+    "description": "Gruppenkosten, Reisen und WG teilen. Kostenlose Splitwise-Alternative mit Schuldenvereinfachung und RTL-Sprachen.",
+    "ogTitle": "KupaPay — Ausgaben mit Freunden teilen",
+    "ogDescription": "Automatische Schuldenvereinfachung für Reisen, Miete und Essen. Kostenlos für iPhone, Android und Web.",
+    "appStoreBadgeTop": "Laden im",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "KupaPay im App Store laden",
+    "playStoreBadgeTop": "Jetzt bei",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "KupaPay bei Google Play holen"
+  },
   "hero": {
     "headline": "Ausgaben mit Freunden teilen — mühelos",
     "subheadline": "KupaPay vereinfacht Schulden automatisch — weniger Überweisungen, weniger Stress",

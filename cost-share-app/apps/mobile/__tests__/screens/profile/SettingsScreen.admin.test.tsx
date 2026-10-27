@@ -32,6 +32,10 @@ jest.mock('../../../components/admin/AdminProViewModeControl', () => ({
     AdminProViewModeControl: () => null,
 }));
 
+jest.mock('../../../components/pro/ProSettingsSection', () => ({
+    ProSettingsSection: () => null,
+}));
+
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';

@@ -1,5 +1,6 @@
 import { renderNotification, type ActivityKind, type Lang } from './render.ts';
 import type { ExpoMessage, ExpoSendResult } from './expo.ts';
+import { isInQuietHours, nextAllowedAfterQuietHours } from '../../../packages/shared/src/notifications/pushPolicy.ts';
 
 export interface ActivityRecord {
     id: string;
@@ -19,6 +20,12 @@ export interface PrefsRow {
     messages_push: boolean;
     friends_push: boolean;
     groups_push: boolean;
+    reminders_push: boolean;
+    quiet_hours_enabled: boolean;
+    quiet_hours_start: number;
+    quiet_hours_end: number;
+    timezone: string;
+    daily_push_cap: number;
 }
 
 export interface ResolvedNames {
@@ -30,9 +37,11 @@ export interface ResolvedNames {
 export interface SendPushDeps {
     recordPending(eventId: string, recipientId: string, eventCreatedAt: string): Promise<'new' | 'duplicate'>;
     markSkipped(eventId: string, reason: string): Promise<void>;
+    markDeferred(eventId: string, deliverAfter: string): Promise<void>;
     markSent(eventId: string, ticketIds: string[]): Promise<void>;
     markFailed(eventId: string, error: string): Promise<void>;
     loadPreferences(userId: string): Promise<PrefsRow | null>;
+    countSentLast24h(userId: string): Promise<number>;
     loadActiveTokens(userId: string): Promise<Array<{ token: string }>>;
     resolveNames(record: ActivityRecord): Promise<ResolvedNames>;
     recipientLanguage(userId: string): Promise<Lang>;
@@ -42,7 +51,13 @@ export interface SendPushDeps {
 }
 
 export type PushOutcome =
-    | 'sent' | 'skipped_self' | 'skipped_prefs' | 'skipped_no_tokens' | 'duplicate' | 'failed';
+    | 'sent' | 'skipped_self' | 'skipped_prefs' | 'skipped_no_tokens' | 'skipped_rate_limit'
+    | 'duplicate' | 'failed' | 'deferred';
+
+export interface ProcessPushOptions {
+    /** Used when flushing pushes deferred for quiet hours. */
+    bypassQuietHours?: boolean;
+}
 
 const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     expense_added: 'expenses_push',
@@ -56,17 +71,23 @@ const KIND_TO_PREF: Record<ActivityKind, keyof PrefsRow> = {
     group_deleted: 'groups_push',
     group_note_changed: 'groups_push',
     settle_up_reminder: 'settlements_push',
+    unsettled_balance_nudge: 'reminders_push',
     consolidation_batch_added: 'settlements_push',
     trip_budget_alert: 'groups_push',
 };
 
 const DEFAULT_PREFS: PrefsRow = {
     push_enabled: true, expenses_push: true, settlements_push: true,
-    messages_push: true, friends_push: true, groups_push: true,
+    messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
+    quiet_hours_enabled: true, quiet_hours_start: 22, quiet_hours_end: 8,
+    timezone: 'UTC', daily_push_cap: 8,
 };
 
-export async function processActivityEvent(record: ActivityRecord, deps: SendPushDeps): Promise<PushOutcome> {
-    // Defensive: the DB trigger filters these, but never notify on a user's own / actor-less event.
+export async function processActivityEvent(
+    record: ActivityRecord,
+    deps: SendPushDeps,
+    options: ProcessPushOptions = {},
+): Promise<PushOutcome> {
     if (!record.actor_user_id || record.actor_user_id === record.user_id) {
         await deps.markSkipped(record.id, 'self');
         return 'skipped_self';
@@ -77,9 +98,28 @@ export async function processActivityEvent(record: ActivityRecord, deps: SendPus
     }
 
     const prefs = (await deps.loadPreferences(record.user_id)) ?? DEFAULT_PREFS;
-    if (!prefs.push_enabled || !prefs[KIND_TO_PREF[record.kind]]) {
+    const prefKey = KIND_TO_PREF[record.kind];
+    if (!prefs.push_enabled || !prefs[prefKey]) {
         await deps.markSkipped(record.id, 'prefs');
         return 'skipped_prefs';
+    }
+
+    const sent24h = await deps.countSentLast24h(record.user_id);
+    if (sent24h >= prefs.daily_push_cap) {
+        await deps.markSkipped(record.id, 'rate_limit');
+        return 'skipped_rate_limit';
+    }
+
+    const now = new Date();
+    if (
+        !options.bypassQuietHours
+        && isInQuietHours(now, prefs.timezone, prefs.quiet_hours_start, prefs.quiet_hours_end, prefs.quiet_hours_enabled)
+    ) {
+        const deliverAfter = nextAllowedAfterQuietHours(
+            now, prefs.timezone, prefs.quiet_hours_start, prefs.quiet_hours_end,
+        ).toISOString();
+        await deps.markDeferred(record.id, deliverAfter);
+        return 'deferred';
     }
 
     const tokens = await deps.loadActiveTokens(record.user_id);

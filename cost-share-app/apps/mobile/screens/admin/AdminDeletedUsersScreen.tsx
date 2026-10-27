@@ -7,9 +7,10 @@ import { Text } from '../../components/AppText';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { listDeletedAccounts, restoreDeletedAccount, type DeletedAccount } from '../../services/admin.service';
 import { toDate } from '../../lib/dateUtils';
+import { formatAppDate } from '../../lib/formatAppDate';
 
 export function AdminDeletedUsersScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [rows, setRows] = useState<DeletedAccount[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -70,7 +71,7 @@ export function AdminDeletedUsersScreen() {
                             <Text className="text-base text-gray-900">{item.email}</Text>
                             <Text className="text-xs text-gray-500 mt-0.5">
                                 {t('admin.deletedUsers.deletedAtRelative', {
-                                    when: toDate(item.deletedAt).toLocaleDateString(),
+                                    when: formatAppDate(item.deletedAt, i18n.language),
                                 })}
                             </Text>
                         </View>

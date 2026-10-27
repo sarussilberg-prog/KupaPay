@@ -10,7 +10,8 @@ export function proTrialLengthDays(os: typeof Platform.OS = Platform.OS): number
     return os === 'android' ? PRO_TRIAL_LENGTH_DAYS_ANDROID : PRO_TRIAL_LENGTH_DAYS_IOS;
 }
 
-/** @deprecated Apple/Google are merchant of record — no in-app EU withdrawal waiver. */
+/** Apple/Google are merchant of record — no in-app EU withdrawal waiver on the paywall. */
 export function paywallRequiresEuDigitalWithdrawalAck(_os: typeof Platform.OS = Platform.OS): boolean {
+    void _os;
     return false;
 }

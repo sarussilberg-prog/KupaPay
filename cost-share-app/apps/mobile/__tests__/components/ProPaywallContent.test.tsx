@@ -1,11 +1,11 @@
 import React from 'react';
-import { Platform } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({
-        t: (key: string) => key,
+        t: (key: string, opts?: { trialDays?: number }) =>
+            opts?.trialDays != null ? `${key}:${opts.trialDays}` : key,
         i18n: { language: 'en' },
     }),
 }));
@@ -23,12 +23,30 @@ jest.mock('../../services/monetization.service', () => ({
 
 jest.mock('../../lib/productAnalytics', () => ({
     captureProductEvent: jest.fn(),
+    getProductAnalyticsClient: jest.fn(() => null),
 }));
 
 jest.mock('../../lib/paywallOfferingsLoad', () => ({
     ...jest.requireActual('../../lib/paywallOfferingsLoad'),
     fetchPaywallOfferings: jest.fn(),
     reportPaywallLoadFailed: jest.fn(),
+}));
+
+jest.mock('../../hooks/useProStatus', () => ({
+    useProStatus: jest.fn(() => ({
+        hasPro: false,
+        proPerkUnlocked: false,
+        isLoading: false,
+        isError: false,
+        data: undefined,
+        adminProViewMode: 'real' as const,
+        adminProViewOverrideActive: false,
+        adminProViewExpiresAt: null,
+    })),
+}));
+
+jest.mock('../../lib/featureFlags', () => ({
+    KUPAPAY_PRO_ENABLED: true,
 }));
 
 jest.mock('../../services/purchases.service', () => ({
@@ -80,6 +98,51 @@ describe('ProPaywallContent offerings load', () => {
         expect(queryByTestId('paywall-loading')).toBeNull();
     });
 
+    it('renders Trip Pass as third plan picker when showTripPass is default', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
+
+        const { findByTestId } = render(<ProPaywallContent featureKey="export_pdf" />);
+
+        expect(await findByTestId('paywall-pick-trip-pass')).toBeTruthy();
+    });
+
+    it('shows ILS fallback prices when RevenueCat omits priceString', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: {
+                    identifier: 'monthly',
+                    product: { identifier: 'kupapay_pro_monthly', priceString: '' },
+                },
+                annual: {
+                    identifier: 'annual',
+                    product: { identifier: 'kupapay_pro_yearly', priceString: '' },
+                },
+                tripPass: {
+                    identifier: 'trip_pass',
+                    product: { identifier: 'kupapay_trip_pass', priceString: '' },
+                },
+            },
+            introEligibility: {},
+        });
+
+        const { findByText, getByText } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass />,
+        );
+
+        expect(await findByText('₪12.90')).toBeTruthy();
+        expect(getByText('₪69.90')).toBeTruthy();
+        expect(getByText('₪19.90')).toBeTruthy();
+    });
+
     it('shows localized store prices from RevenueCat packages', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
@@ -99,10 +162,7 @@ describe('ProPaywallContent offerings load', () => {
         expect(getByText('₪69.90')).toBeTruthy();
     });
 
-    it('never shows EU withdrawal acknowledgement', async () => {
-        const os = Platform.OS;
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
-
+    it('shows 14-day free trial CTA for eligible yearly plan', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
             packages: {
@@ -114,6 +174,24 @@ describe('ProPaywallContent offerings load', () => {
                 kupapay_pro_yearly: { status: 2 },
             },
         });
+
+        const { findByText } = render(
+            <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
+        );
+
+        expect(await findByText('pro.paywall.tryFreeTrialCta:14')).toBeTruthy();
+    });
+
+    it('does not show EU withdrawal acknowledgement on the paywall', async () => {
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: null,
+            },
+            introEligibility: {},
+        });
         purchaseMock.mockResolvedValue({ ok: true });
 
         const { queryByTestId, getByTestId } = render(
@@ -122,7 +200,6 @@ describe('ProPaywallContent offerings load', () => {
 
         await waitFor(() => {
             expect(queryByTestId('paywall-loading')).toBeNull();
-            expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
         });
         expect(queryByTestId('paywall-eu-withdrawal-ack')).toBeNull();
 
@@ -130,7 +207,5 @@ describe('ProPaywallContent offerings load', () => {
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
         });
-
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
     });
 });

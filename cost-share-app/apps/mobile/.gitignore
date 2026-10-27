@@ -47,6 +47,9 @@ play-service-account*.json
 # typescript
 *.tsbuildinfo
 
+# CI-local Jest JSON / flake reports
+.ci-artifacts/
+
 # generated native folders
 /ios
 /android

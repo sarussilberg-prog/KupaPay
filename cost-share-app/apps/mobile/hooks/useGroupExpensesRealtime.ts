@@ -15,6 +15,7 @@ import {
 } from '../lib/applyExpenseRealtimeEvent';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
+import { invalidateQueriesUnlessRecentlyFetched } from '../lib/realtimeSnapshotRefetch';
 
 export function useGroupExpensesRealtime(groupId: string | undefined | null): void {
     const instanceId = useId();
@@ -65,9 +66,9 @@ export function useGroupExpensesRealtime(groupId: string | undefined | null): vo
             )
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
-                    void queryClient.invalidateQueries({
-                        queryKey: queryKeys.groupExpenses(groupId),
-                    });
+                    invalidateQueriesUnlessRecentlyFetched(
+                        queryKeys.groupExpenses(groupId),
+                    );
                 }
             });
 

@@ -8,6 +8,18 @@
     "toggle": "עברית",
     "chooseLanguage": "Language"
   },
+  "seo": {
+    "title": "KupaPay — Split bills & trip expenses with friends",
+    "description": "Split group bills, trip expenses, and roommate costs. A free Splitwise alternative with debt simplification, Hebrew RTL, and settle-up links.",
+    "ogTitle": "KupaPay — Split bills with friends",
+    "ogDescription": "Automatic debt simplification for trips, rent, and dinners. Free on iPhone, Android, and web.",
+    "appStoreBadgeTop": "Download on the",
+    "appStoreBadgeBottom": "App Store",
+    "appStoreBadgeAria": "Download KupaPay on the App Store",
+    "playStoreBadgeTop": "Get it on",
+    "playStoreBadgeBottom": "Google Play",
+    "playStoreBadgeAria": "Get KupaPay on Google Play"
+  },
   "hero": {
     "headline": "Split expenses with friends, effortlessly",
     "subheadline": "KupaPay automatically simplifies debts — fewer transfers, less stress",

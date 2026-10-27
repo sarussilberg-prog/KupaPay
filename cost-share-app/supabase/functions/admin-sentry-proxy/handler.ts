@@ -9,10 +9,30 @@ import { jsonResponse, preflight } from './cors.ts';
 export interface ProxyEnv {
     SUPABASE_URL: string;
     SUPABASE_ANON_KEY: string;
+    SUPABASE_SERVICE_ROLE_KEY: string;
+    /** Regional Sentry API host, e.g. https://de.sentry.io for EU orgs. */
+    SENTRY_API_BASE_URL: string;
     SENTRY_API_TOKEN: string;
     SENTRY_ORG: string;
     SENTRY_PROJECT_DEV: string;
     SENTRY_PROJECT_PROD: string;
+}
+
+export const DEFAULT_SENTRY_ORG = 'kupay-hb';
+export const DEFAULT_SENTRY_PROJECT_DEV = 'copay-mobile-dev';
+export const DEFAULT_SENTRY_PROJECT_PROD = 'copay-mobile-prod';
+
+/** EU org kupay-hb lives on de.sentry.io — sentry.io does not return EU project data. */
+export function normalizeSentryApiBase(raw: string | undefined): string {
+    const trimmed = raw?.trim();
+    if (!trimmed) return 'https://de.sentry.io';
+    return trimmed.replace(/\/$/, '');
+}
+
+export function buildSentryApiUrl(env: ProxyEnv, path: string): string {
+    const base = normalizeSentryApiBase(env.SENTRY_API_BASE_URL);
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return `${base}/api/0${suffix}`;
 }
 
 export type FetchFn = typeof fetch;
@@ -71,10 +91,83 @@ interface ActionIssueDetail {
 }
 type ProxyAction = ActionListIssues | ActionIssueEvents | ActionIssueDetail;
 
-async function isCallerAdmin(client: SupabaseClient): Promise<boolean> {
+type AdminVerdict =
+    | { ok: true; isAdmin: boolean }
+    | { ok: false; detail: string };
+
+async function verifyCallerAdmin(client: SupabaseClient): Promise<AdminVerdict> {
     const { data, error } = await client.rpc('is_app_admin');
-    if (error) return false;
-    return data === true;
+    if (error) return { ok: false, detail: error.message };
+    return { ok: true, isAdmin: data === true };
+}
+
+function missingSentryCoreConfig(env: ProxyEnv): string[] {
+    const missing: string[] = [];
+    if (!env.SENTRY_ORG.trim()) missing.push('SENTRY_ORG');
+    return missing;
+}
+
+type TokenResolveResult =
+    | { ok: true; token: string }
+    | { ok: false; response: Response };
+
+function makeServiceClient(env: ProxyEnv): SupabaseClient {
+    return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+    });
+}
+
+/** Env var first; else Vault secret `sentry_api_token` via service_sentry_api_token RPC. */
+export async function resolveSentryApiToken(env: ProxyEnv): Promise<TokenResolveResult> {
+    const fromEnv = env.SENTRY_API_TOKEN.trim();
+    if (fromEnv) return { ok: true, token: fromEnv };
+
+    if (!env.SUPABASE_SERVICE_ROLE_KEY.trim()) {
+        return {
+            ok: false,
+            response: jsonResponse({
+                ok: false,
+                error: 'sentry_not_configured',
+                missing: ['SENTRY_API_TOKEN', 'SUPABASE_SERVICE_ROLE_KEY'],
+            }, 503),
+        };
+    }
+
+    const serviceClient = makeServiceClient(env);
+    const { data, error } = await serviceClient.rpc('service_sentry_api_token');
+    if (error) {
+        return {
+            ok: false,
+            response: jsonResponse({
+                ok: false,
+                error: 'sentry_token_lookup_failed',
+                detail: error.message,
+            }, 503),
+        };
+    }
+
+    const fromVault = typeof data === 'string' ? data.trim() : '';
+    if (!fromVault) {
+        return {
+            ok: false,
+            response: jsonResponse({
+                ok: false,
+                error: 'sentry_not_configured',
+                missing: ['SENTRY_API_TOKEN', 'vault:sentry_api_token'],
+            }, 503),
+        };
+    }
+
+    return { ok: true, token: fromVault };
+}
+
+function missingSentryConfig(env: ProxyEnv, environment: 'dev' | 'prod'): string[] {
+    const missing = missingSentryCoreConfig(env);
+    const project = environment === 'prod' ? env.SENTRY_PROJECT_PROD : env.SENTRY_PROJECT_DEV;
+    if (!project.trim()) {
+        missing.push(environment === 'prod' ? 'SENTRY_PROJECT_PROD' : 'SENTRY_PROJECT_DEV');
+    }
+    return missing;
 }
 
 function makeAuthedClient(env: ProxyEnv, jwt: string): SupabaseClient {
@@ -90,14 +183,14 @@ type SentryCallResult =
 
 async function callSentry(
     url: string,
-    env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<SentryCallResult> {
     let upstream: Response;
     try {
         upstream = await fetchFn(url, {
             headers: {
-                Authorization: `Bearer ${env.SENTRY_API_TOKEN}`,
+                Authorization: `Bearer ${apiToken}`,
                 Accept: 'application/json',
             },
         });
@@ -163,7 +256,14 @@ export async function handleRequest(
     }
 
     const client = makeAuthedClient(env, jwt);
-    if (!(await isCallerAdmin(client))) {
+    const adminVerdict = await verifyCallerAdmin(client);
+    if (!adminVerdict.ok) {
+        return jsonResponse(
+            { ok: false, error: 'admin_check_failed', detail: adminVerdict.detail },
+            503,
+        );
+    }
+    if (!adminVerdict.isAdmin) {
         return jsonResponse({ ok: false, error: 'forbidden' }, 403);
     }
 
@@ -176,14 +276,29 @@ export async function handleRequest(
 
     switch (body.action) {
         case 'list_issues':
-            return await proxyListIssues(body, env, fetchFn);
+            return await withSentryApiToken(env, (apiToken) =>
+                proxyListIssues(body, env, apiToken, fetchFn)
+            );
         case 'issue_events':
-            return await proxyIssueEvents(body, env, fetchFn);
+            return await withSentryApiToken(env, (apiToken) =>
+                proxyIssueEvents(body, env, apiToken, fetchFn)
+            );
         case 'issue_detail':
-            return await proxyIssueDetail(body, env, fetchFn);
+            return await withSentryApiToken(env, (apiToken) =>
+                proxyIssueDetail(body, env, apiToken, fetchFn)
+            );
         default:
             return jsonResponse({ ok: false, error: 'invalid_action' }, 400);
     }
+}
+
+async function withSentryApiToken(
+    env: ProxyEnv,
+    run: (apiToken: string) => Promise<Response>,
+): Promise<Response> {
+    const tokenResult = await resolveSentryApiToken(env);
+    if (!tokenResult.ok) return tokenResult.response;
+    return run(tokenResult.token);
 }
 
 // ---------- list_issues ----------
@@ -225,10 +340,18 @@ function trimIssue(raw: SentryListIssueRaw): IssueSummary {
 async function proxyListIssues(
     body: ActionListIssues,
     env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<Response> {
     if (body.environment !== 'dev' && body.environment !== 'prod') {
         return jsonResponse({ ok: false, error: 'invalid_environment' }, 400);
+    }
+    const configGaps = missingSentryConfig(env, body.environment);
+    if (configGaps.length > 0) {
+        return jsonResponse(
+            { ok: false, error: 'sentry_not_configured', missing: configGaps },
+            503,
+        );
     }
     const project = projectSlug(env, body.environment);
     const statusFilter = body.status === 'all' ? '' : 'is:unresolved';
@@ -241,9 +364,9 @@ async function proxyListIssues(
         limit: String(limit),
         sort: 'date',
     });
-    const url = `https://sentry.io/api/0/projects/${env.SENTRY_ORG}/${project}/issues/?${params.toString()}`;
+    const url = `${buildSentryApiUrl(env, `/projects/${env.SENTRY_ORG}/${project}/issues/`)}?${params.toString()}`;
 
-    const result = await callSentry(url, env, fetchFn);
+    const result = await callSentry(url, apiToken, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryListIssueRaw[];
     const issues = Array.isArray(data) ? data.map(trimIssue) : [];
@@ -330,13 +453,21 @@ function trimEvent(raw: SentryEventRaw): SlimEvent {
 async function proxyIssueEvents(
     body: ActionIssueEvents,
     env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<Response> {
     if (!body.issueId || typeof body.issueId !== 'string') {
         return jsonResponse({ ok: false, error: 'invalid_issue_id' }, 400);
     }
-    const url = `https://sentry.io/api/0/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/events/?limit=20`;
-    const result = await callSentry(url, env, fetchFn);
+    const configGaps = missingSentryCoreConfig(env);
+    if (configGaps.length > 0) {
+        return jsonResponse(
+            { ok: false, error: 'sentry_not_configured', missing: configGaps },
+            503,
+        );
+    }
+    const url = `${buildSentryApiUrl(env, `/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/events/`)}?limit=20`;
+    const result = await callSentry(url, apiToken, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryEventRaw[];
     const events = Array.isArray(data) ? data.map(trimEvent) : [];
@@ -384,13 +515,24 @@ function trimDetail(raw: SentryIssueDetailRaw): IssueDetail {
 async function proxyIssueDetail(
     body: ActionIssueDetail,
     env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<Response> {
     if (!body.issueId || typeof body.issueId !== 'string') {
         return jsonResponse({ ok: false, error: 'invalid_issue_id' }, 400);
     }
-    const url = `https://sentry.io/api/0/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/`;
-    const result = await callSentry(url, env, fetchFn);
+    const configGaps = missingSentryCoreConfig(env);
+    if (configGaps.length > 0) {
+        return jsonResponse(
+            { ok: false, error: 'sentry_not_configured', missing: configGaps },
+            503,
+        );
+    }
+    const url = buildSentryApiUrl(
+        env,
+        `/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/`,
+    );
+    const result = await callSentry(url, apiToken, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryIssueDetailRaw;
     return jsonResponse({ ok: true, data: trimDetail(data) }, 200);

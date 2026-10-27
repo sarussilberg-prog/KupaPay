@@ -22,6 +22,7 @@ const STALE_MS = 60 * 1000;
 export function useSimplifiedDebts(): {
     data: SimplifiedDebts | undefined;
     isLoading: boolean;
+    isFetching: boolean;
     isError: boolean;
 } {
     const currentUserId = useAuthUserId() ?? '';
@@ -58,5 +59,10 @@ export function useSimplifiedDebts(): {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unbalancedSig]);
 
-    return { data, isLoading: query.isLoading, isError: query.isError };
+    return {
+        data,
+        isLoading: query.isLoading,
+        isFetching: query.isFetching,
+        isError: query.isError,
+    };
 }

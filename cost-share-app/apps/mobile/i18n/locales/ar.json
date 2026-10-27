@@ -183,10 +183,70 @@
                     "summarySuffix": "أعضاء"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "ثلاث خطوات — أقل من دقيقة لأول مصروف.",
+            "skipConfirm": "تخطّي",
+            "header": {
+                "create": "اختر قالبًا",
+                "expense": "أول مصروف",
+                "invite": "ادعُ أصدقاءك"
+            },
+            "steps": {
+                "create": "مجموعة",
+                "expense": "مصروف",
+                "invite": "دعوة"
+            },
+            "fields": {
+                "groupName": "اسم المجموعة"
+            },
+            "templates": {
+                "label": "ماذا تتقاسمون؟",
+                "trip": {
+                    "label": "رحلة",
+                    "defaultName": "رحلة نهاية الأسبوع",
+                    "defaultExpense": "وقود أو مواصلات"
+                },
+                "roommates": {
+                    "label": "زملاء السكن",
+                    "defaultName": "بيتنا",
+                    "defaultExpense": "بقالة أو فواتير"
+                },
+                "event": {
+                    "label": "مناسبة",
+                    "defaultName": "عشاء جماعي",
+                    "defaultExpense": "طعام ومشروبات"
+                },
+                "couple": {
+                    "label": "زوجان",
+                    "defaultName": "نحن اثنان",
+                    "defaultExpense": "عشاء خارجًا"
+                }
+            },
+            "expense": {
+                "hint": "سجّل ما دفعته بالفعل — يمكنك التعديل لاحقًا.",
+                "amountRequired": "أدخل مبلغًا أكبر من صفر"
+            },
+            "invite": {
+                "title": "أضف آخرين",
+                "body": "شارك رابطًا لينضم الأصدقاء إلى المجموعة ويقسموا الفاتورة التالية."
+            },
+            "skipExpenseTitle": "تخطي أول مصروف؟",
+            "skipExpenseMessage": "إضافة مصروف الآن أسرع طريقة لرؤية الأرصدة. يمكنك الإضافة لاحقًا من المجموعة.",
+            "cta": {
+                "createGroup": "متابعة",
+                "addExpense": "إضافة مصروف",
+                "skipExpense": "تخطّي الآن",
+                "shareInvite": "مشاركة رابط الدعوة",
+                "shareInviteWeb": "مشاركة أو نسخ الرابط",
+                "done": "إلى مجموعتي"
+            }
         }
     },
     "groups": {
         "title": "المجموعات",
+        "listTitle": "مجموعاتي",
+        "newGroupCta": "مجموعة جديدة",
         "createGroup": "إنشاء مجموعة",
         "editGroup": "تعديل المجموعة",
         "favorite": {
@@ -199,6 +259,12 @@
         },
         "noGroups": "لا توجد مجموعات بعد",
         "noGroupsMessage": "أنشئ مجموعتك الأولى لتبدأ بمشاركة المصروفات",
+        "demo": {
+            "try": "جرّب مجموعة تجريبية",
+            "created": "المجموعة التجريبية جاهزة — اكتشف كيف يعمل التقسيم",
+            "alreadyExists": "لديك بالفعل المجموعة التجريبية",
+            "error": "تعذّر إنشاء المجموعة التجريبية"
+        },
         "offlineMessage": "لا يمكننا تحميل مجموعاتك الآن. ستظهر هنا تلقائيًا فور عودة الاتصال بالإنترنت.",
         "groupName": "اسم المجموعة",
         "enterGroupName": "أدخل اسم المجموعة",
@@ -347,6 +413,9 @@
             "showMore_other": "عرض المزيد ({{count}})",
             "showLess": "عرض أقل"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى"
+        },
         "hero": {
             "spentTogether": "المصروف معًا",
             "leftToSettle": "المتبقي للتسوية"
@@ -359,8 +428,10 @@
             "youOweCaption": "أنت مدين",
             "owedToYou": "مستحق لك {{amount}}",
             "owedToYouCaption": "مستحق لك",
-            "moreCurrencies": "{{plusCount}} عملات",
-            "moreCurrencies_one": "{{plusCount}} عملة",
+            "moreCurrencies": "{{count}} عملات",
+            "moreCurrencies_one": "{{count}} عملة",
+            "moreCurrenciesNoun": "عملات",
+            "moreCurrenciesNoun_one": "عملة",
             "updatedAgo": "تم التحديث {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
@@ -394,6 +465,9 @@
             "menuTitle": "مشاركة المجموعة",
             "inviteOption": "دعوة صديق للانضمام",
             "inviteDescription": "أرسل رابطًا لإضافة شخص إلى هذه المجموعة",
+            "balanceLinkOption": "مشاركة الأرصدة على الويب",
+            "balanceLinkDescription": "أي شخص لديه الرابط يرى من يدين لمن — دون تثبيت التطبيق",
+            "balanceLinkMessage": "اطّلع على من يدين لمن في «{{groupName}}» على KupaPay (بدون تطبيق): {{url}}",
             "exportOption": "تصدير إلى Excel / CSV",
             "exportDescription": "احفظ نشاط المجموعة وأرصدتها كملف CSV (يُفتح في Excel / Google Sheets)",
             "exportTitle": "مشاركة تقرير المجموعة",
@@ -510,14 +584,26 @@
             "searchPlaceholder": "البحث عن الأصدقاء",
             "noSearchResults": "لا يوجد أصدقاء مطابقون لبحثك.",
             "mutualHint": "تظهر لك فقط الصداقات المتبادلة بينكما.",
-            "missingSomeoneCta": "لا تجده؟ أضف أصدقاء"
+            "missingSomeoneCta": "لا تجده؟ أضف أصدقاء",
+            "addGuestTitle": "ليس لديه حساب بعد؟",
+            "addGuestPlaceholder": "اسم الصديق",
+            "addGuestButton": "إضافة",
+            "guestAddError": "تعذّر إضافة عضو مؤقت",
+            "guestAdded": "تمت إضافة {{name}} — سيربط حسابه عند الانضمام"
         },
         "memberCount_zero": "لا أحد",
         "memberCount_one": "{{count}} شخص",
         "memberCount_two": "شخصان",
         "memberCount_few": "{{count}} أشخاص",
         "memberCount_many": "{{count}} شخصًا",
-        "memberCount_other": "{{count}} شخص"
+        "memberCount_other": "{{count}} شخص",
+        "monthlyBills": {
+            "title": "فواتير هذا الشهر",
+            "summary": "{{count}} مصروفات · {{total}} {{currency}} في الدورة",
+            "cycleDay": "تبدأ الدورة في يوم {{day}} من كل شهر",
+            "automationPro": "أتمتة الفواتير المتكررة مع Pro",
+            "automationActive": "أتمتة Pro متاحة لهذه المجموعة"
+        }
     },
     "expenses": {
         "title": "المصروفات",
@@ -553,6 +639,10 @@
         "recentExpenses": "أحدث المصروفات",
         "deleteExpense": "حذف المصروف",
         "deleteExpenseConfirm": "هل أنت متأكد أنك تريد حذف هذا المصروف؟",
+        "shareLink": "مشاركة رابط المصروف",
+        "shareLinkMessage": "{{description}} — {{currency}} {{amount}} على KupaPay: {{url}}",
+        "shareLinkInvalid": "رابط المصروف لم يعد متاحًا",
+        "shareLinkOpenApp": "سجّل الدخول وافتح المجموعة لعرض المصروف",
         "expenseCreated": "تمت إضافة المصروف بنجاح",
         "expenseUpdated": "تم تحديث المصروف بنجاح",
         "expenseDeleted": "تم حذف المصروف بنجاح",
@@ -734,6 +824,13 @@
         "deleteAccount": "حذف الحساب",
         "adminPortal": "بوابة المشرف"
     },
+    "appReview": {
+        "notNow": "ليس الآن",
+        "webTitle": "كيف تجربة KupaPay لديك؟",
+        "webMessage": "ما زلنا نطوّر نسخة الويب. ملاحظاتك تصل مباشرة إلى الفريق.",
+        "webFeedbackCta": "إرسال ملاحظات",
+        "webStoreHint": "للتقييم في App Store أو Google Play، استخدم KupaPay على هاتفك."
+    },
     "admin": {
         "portal": {
             "title": "بوابة المشرف",
@@ -794,7 +891,19 @@
             },
             "loading": "جارٍ تحميل الأخطاء…",
             "empty": "لا توجد أخطاء في هذه الفترة",
-            "failed": "تعذّر التحميل. اسحب للأسفل لإعادة المحاولة.",
+            "failed": "تعذّر تحميل الأخطاء",
+            "failedHint": "اسحب للأسفل لإعادة المحاولة.",
+            "failedReasons": {
+                "forbidden": "الخادم لا يعرفك كمسؤول للتطبيق.",
+                "admin_check_failed": "تعذّر التحقق من صلاحيات المسؤول: {{detail}}",
+                "sentry_not_configured": "أسرار Sentry مفقودة في admin-sentry-proxy: {{missing}}",
+                "sentry_client_error": "رفض Sentry الطلب. تحقق من SENTRY_API_TOKEN وSENTRY_ORG وأسماء المشاريع (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "خطأ في خادم Sentry. حاول مرة أخرى بعد قليل.",
+                "sentry_unreachable": "تعذّر الوصول إلى Sentry: {{detail}}",
+                "invoke_failed": "فشل استدعاء Edge Function: {{detail}}",
+                "missing_authorization": "انتهت الجلسة — سجّل الدخول مجدداً وافتح بوابة الإدارة.",
+                "unknown": "خطأ غير معروف. اسحب لإعادة المحاولة أو راجع سجلات admin-sentry-proxy."
+            },
             "occurrences": "{{count}} حالة",
             "occurrences_zero": "لا توجد حالات",
             "occurrences_one": "{{count}} حالة",
@@ -919,6 +1028,7 @@
         },
         "noActivity": "لا يوجد نشاط بعد",
         "noActivityMessage": "ستظهر هنا أحدث مصروفاتك وتسوياتك ورسائل مجموعاتك",
+        "createGroupCta": "أنشئ مجموعة",
         "noSearchResults": "لا يوجد نشاط مطابق",
         "noSearchResultsMessage": "لا توجد نتائج مطابقة لبحثك. جرّب عبارة أخرى أو امسح البحث.",
         "expense": "مصروف",
@@ -960,6 +1070,7 @@
             "noteChangedBy": "عدّل {{name}} الملاحظة · {{group}}",
             "friendRequestRejectedByThem": "رفض {{name}} طلب صداقتك",
             "settleReminder": "أرسل لك {{name}} تذكيرًا بتسوية الحساب في {{group}}",
+            "unsettledBalanceNudge": "ما زلت مدينًا لـ {{name}} في {{group}}",
             "tripBudgetAlert": "تنبيه ميزانية الرحلة في {{group}}"
         },
         "addedExpense": "أضاف مصروفًا",
@@ -1085,6 +1196,12 @@
             "findEmptyCta": "دعوة صديق جديد عبر رابط",
             "findInviteName": "دعوة {{name}} إلى KupaPay"
         },
+        "publicBalance": {
+            "title": "صفحة أرصدة عامة",
+            "toggleLabel": "من لديه الرابط يمكنه عرض الأرصدة على الويب",
+            "toggleHint": "يستخدم رابط /b/ للأرصدة. أوقفه أو دوّر الرابط لإلغاء الوصول.",
+            "privacyNote": "يعرض الأسماء والأرصدة فقط — بدون بريد أو إيصالات."
+        },
         "group": {
             "title": "مشاركة رابط المجموعة",
             "shareMessage": "أضفتك إلى مجموعة «{{groupName}}» على KupaPay. انضم عبر هذا الرابط: {{url}}",
@@ -1093,6 +1210,17 @@
             "rotateConfirmBody": "لن يتمكن من يملك الرابط الحالي من الانضمام حتى ترسل له الرابط الجديد. لا يتأثر الأعضاء الموجودون في المجموعة بالفعل.",
             "rotated": "تم تحديث رابط دعوة المجموعة",
             "emptyStateLink": "أو شارك رابط المجموعة"
+        },
+        "postCreate": {
+            "title": "ادعُ الأصدقاء",
+            "subtitle": "أضِف أشخاصًا إلى «{{groupName}}» — عبر رابط أو WhatsApp أو رمز QR.",
+            "shareSheet": "مشاركة…",
+            "shareSheetWeb": "مشاركة أو نسخ",
+            "whatsapp": "WhatsApp",
+            "copyLink": "نسخ الرابط",
+            "qrHint": "امسح الرمز للانضمام إلى المجموعة",
+            "skip": "ليس الآن",
+            "continue": "فتح المجموعة"
         },
         "addMembers": {
             "searchOthers": "البحث عن مستخدمين آخرين",
@@ -1104,7 +1232,26 @@
             "alreadyMember": "أنت عضو في هذه المجموعة بالفعل",
             "selfInvite": "هذا هو رابط الدعوة الخاص بك",
             "invalid": "رابط الدعوة هذا لم يعد صالحًا"
+        },
+        "guestClaim": {
+            "title": "هل أُضفتَ بالاسم؟",
+            "subtitle": "اختر اسمك للحفاظ على الأرصدة الصحيحة.",
+            "confirm": "هذا أنا",
+            "skip": "ليس أنا",
+            "success": "تم ربط نفقاتك المشتركة بحسابك",
+            "error": "تعذّر ربط الاسم بحسابك"
         }
+    },
+    "shareSummary": {
+        "title": "مشاركة ملخص المجموعة",
+        "share": "مشاركة صورة",
+        "hideAmounts": "إخفاء المبالغ",
+        "hiddenAmount": "***",
+        "allSettled": "تمت التسوية بالكامل ✓",
+        "balancesSnapshot": "لقطة للأرصدة",
+        "debtLine": "{{from}} إلى {{to}}",
+        "watermark": "قسّم المصروفات على {{url}}",
+        "fallback": "انضم إلى مجموعتنا \"{{groupName}}\" على KupaPay"
     },
     "dashboard": {
         "appTitle": "KupaPay",
@@ -1210,6 +1357,23 @@
         "categoryMessages": "دردشة المجموعة",
         "categoryFriends": "طلبات الصداقة",
         "categoryGroups": "المجموعات",
+        "categoryReminders": "تذكيرات الرصيد",
+        "emailTitle": "البريد الإلكتروني",
+        "emailMaster": "رسائل المنتج",
+        "lifecycleEmail": "ترحيب ونصائح وتذكير بالعودة",
+        "weeklyDigestTitle": "ملخص أسبوعي",
+        "weeklyDigestPush": "ملخص أسبوعي (إشعار)",
+        "weeklyDigestEmail": "ملخص أسبوعي (بريد)",
+        "quietHoursTitle": "ساعات الهدوء",
+        "quietHoursEnable": "احترام ساعات الهدوء",
+        "quietHoursSummary": "لا إشعارات بين {{start}}:00 و{{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "بحد أقصى {{count}} إشعار push يوميًا.",
+        "webFallback": {
+            "default": "نشاط جديد في KupaPay",
+            "expense_added": "مصروف جديد في مجموعتك",
+            "settlement_added": "قام شخص بتسوية حساب معك",
+            "unsettled_balance_nudge": "تذكير: رصيد مفتوح للتسوية"
+        },
         "systemDisabled": "الإشعارات متوقفة لهذا التطبيق",
         "openSettings": "فتح الإعدادات",
         "systemDisabledHint": "لتعديل هذه الإعدادات، فعّل الإشعارات أولًا من إعدادات جهازك.",
@@ -1340,6 +1504,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "قسّم بعدالة وسوِّ الحسابات أسرع مع Pro",
             "feature1": "بدون إعلانات",
             "feature2": "تحويل تلقائي للعملات في الرحلات",
             "feature3": "تقرير PDF منظم لكل مجموعة",
@@ -1370,16 +1535,63 @@
             "trialFreePeriodHeading": "تجربة مجانية {{trialDays}} أيام",
             "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
             "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
-            "havePromoCode": "لديك رمز؟"
+            "havePromoCode": "لديك رمز؟",
+            "alreadyProTitle": "أنت مشترك في Pro",
+            "alreadyProBody": "اشتراكك نشط. أدر الفوترة من App Store أو Google Play، واستمر في استخدام ميزات Pro في التطبيق."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "إدارة الاشتراك",
-            "freeTrialUntil": "تجربة مجانية حتى {{date}}"
+            "freeTrialUntil": "تجربة مجانية حتى {{date}}",
+            "activeUntil": "Pro نشط حتى {{date}}",
+            "activeIndividualAndGroup": "اشتراك Pro نشط؛ هذه المجموعة لديها أيضًا Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "اشتراكي",
+            "openDetails": "تفاصيل الاشتراك",
+            "screenIntro": "تُدار الخطة وتاريخ التجديد والفوترة من App Store أو Google Play. يُعرض Trip Pass لكل مجموعة أدناه.",
+            "disabled": "الاشتراكات غير متاحة في هذا الإصدار.",
+            "empty": "لا يوجد اشتراك نشط على هذا الحساب.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "ترويجي",
+            "storeStripe": "فوترة ويب",
+            "storeUnknown": "متجر التطبيقات",
+            "renewsOn": "يتجدد في {{date}}",
+            "expiresOn": "الوصول حتى {{date}}",
+            "expiredOn": "انتهى في {{date}}",
+            "autoRenewOn": "التجديد التلقائي مفعّل",
+            "autoRenewOff": "التجديد التلقائي متوقف",
+            "trialActive": "تجربة مجانية جارية",
+            "purchasedVia": "تم الشراء عبر {{store}}",
+            "billingIssueBody": "حدثت مشكلة في الدفع. حدّث طريقة الدفع للاحتفاظ بـ Pro.",
+            "fixPayment": "إصلاح الدفع",
+            "tripPassSection": "مجموعات Trip Pass",
+            "tripPassUntil": "Pro للمجموعة حتى {{date}}",
+            "renewalDisclosureShort": "تتجدد الاشتراكات تلقائيًا حتى الإلغاء من حساب المتجر قبل 24 ساعة على الأقل من التجديد. راجع الشروط والخصوصية.",
+            "status": {
+                "active": "نشط",
+                "cancelled_until_expiry": "ملغى — نشط حتى الانتهاء",
+                "billing_issue": "مشكلة فوترة",
+                "expired": "منتهٍ",
+                "none": "لا اشتراك"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro لهذه المجموعة",
+            "activeUntil": "Pro لجميع أعضاء المجموعة حتى {{date}}."
         },
         "trialReminder": {
             "title": "تجربة KupaPay Pro تنتهي قريبًا",
             "body": "تنتهي تجربة KupaPay Pro المجانية خلال يومين. لا ترغب في الاستمرار؟ يمكنك الإلغاء من الإعدادات."
+        },
+        "trialLifecycle": {
+            "day1": { "title": "مرحبًا بك في Pro" },
+            "day10": { "title": "متبقٍ 4 أيام من التجربة" },
+            "day13": { "title": "يتجدد Pro غدًا" },
+            "disclosure": "يبدأ الدفع بعد التجربة ما لم تلغِ من الإعدادات → إدارة الاشتراك (App Store / Google Play).",
+            "manage": "إدارة الاشتراك"
         },
         "includedTripPass": {
             "title": "Trip Pass مضمّن",
@@ -1455,5 +1667,24 @@
         "body": "لم يعد هذا الإصدار من KupaPay مدعومًا. ثبّت آخر تحديث من المتجر للمتابعة.",
         "versionLine": "إصدارك: {{current}} · المطلوب: {{required}} أو أحدث",
         "cta": "فتح المتجر"
+    },
+    "referral": {
+        "title": "ادعُ الأصدقاء واربح Pro",
+        "settingsRow": "مكافآت الإحالة",
+        "body": "شارك رابط الدعوة. عندما ينضم صديق إلى مجموعة ويضيف مصروفًا، تحصل على شهر Pro مجانًا.",
+        "shareCta": "مشاركة الرابط",
+        "copyLink": "نسخ الرابط",
+        "linkCopied": "تم نسخ الرابط",
+        "capHint": "{{count}} من {{cap}} أشهر Pro هذا العام",
+        "statusTitle": "إحالاتك",
+        "empty": "لا إحالات بعد — شارك الرابط.",
+        "refresh": "تحديث",
+        "disabled": "المكافآت غير متاحة في هذا الإصدار.",
+        "status": {
+            "pending": "بانتظار أول مصروف في مجموعة",
+            "qualified": "مؤهل — المكافأة قريبًا",
+            "rewarded": "تم منح شهر Pro",
+            "rejected": "تعذر منح المكافأة"
+        }
     }
 }

@@ -43,7 +43,12 @@ describe('groupIdFromGroupsTabState', () => {
 });
 
 describe('resolveQuickAddGroupId', () => {
-    const groups = [{ id: 'g-first' }, { id: 'g-second' }];
+    const groups = [
+        { id: 'g-first', updatedAt: new Date('2026-01-01') },
+        { id: 'g-second', updatedAt: new Date('2026-03-01') },
+        { id: 'g-viewing', updatedAt: new Date('2026-02-15') },
+        { id: 'g-fav', updatedAt: new Date('2026-02-01') },
+    ] as any;
 
     it('prefers GroupDetail on the focused Groups tab', () => {
         expect(
@@ -116,6 +121,16 @@ describe('resolveQuickAddGroupId', () => {
         ).toBe('g-fav');
     });
 
+    it('ignores a stale favorite id and uses the first known group', () => {
+        expect(
+            resolveQuickAddGroupId({
+                favoriteGroupId: 'g-deleted',
+                groups,
+                tabState: undefined,
+            }),
+        ).toBe('g-second');
+    });
+
     it('falls back to favorite then first group', () => {
         expect(
             resolveQuickAddGroupId({
@@ -143,6 +158,6 @@ describe('resolveQuickAddGroupId', () => {
                 groups,
                 tabState: undefined,
             }),
-        ).toBe('g-first');
+        ).toBe('g-second');
     });
 });

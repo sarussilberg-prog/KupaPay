@@ -41,3 +41,27 @@ verify_jwt = false
 # Daily cron (x-webhook-secret) — smart payment reminder batch.
 [functions.pro-smart-reminder-dispatch]
 verify_jwt = false
+
+# Hourly cron (#402) — free retention unsettled-balance nudges.
+[functions.retention-unsettled-nudge-dispatch]
+verify_jwt = false
+
+# Every 15m cron (#402) — deliver pushes deferred for quiet hours.
+[functions.flush-deferred-push]
+verify_jwt = false
+
+# Daily cron (#404) — lifecycle email (Resend / Auth SMTP provider).
+[functions.email-lifecycle-dispatch]
+verify_jwt = false
+
+# Weekly cron (#405) — activity digest push + email.
+[functions.weekly-summary-dispatch]
+verify_jwt = false
+
+# Daily cron (#406) — Pro trial day 1/10/13 push nudges.
+[functions.pro-trial-lifecycle-dispatch]
+verify_jwt = false
+
+# Hourly cron (#400) — RevenueCat promotional Pro for qualified referrals.
+[functions.referral-reward-dispatch]
+verify_jwt = false

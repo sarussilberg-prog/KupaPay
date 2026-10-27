@@ -101,7 +101,9 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 | ID | Status | Requirement | Acceptance criteria |
 |----|--------|-------------|---------------------|
 | REQ-NFR-01 | ✅ | Monetary precision | `DECIMAL(12,2)` in DB; no float money in domain |
-| REQ-NFR-02 | ✅ | i18n — no hardcoded UI strings | `t('key')` + `en.json` / `he.json` |
+| REQ-NFR-02 | ✅ | i18n — no hardcoded UI strings | `t('key')` + all 7 app locales (`en`, `he`, `ar`, `de`, `es`, `fr`, `ru`); RTL for `he` / `ar` |
+| REQ-GROW-01 | ✅ | Post-login activation onboarding | Guided flow: template → create group → first expense → invite; PostHog `signup_completed` → `group_created` → `first_expense_added` |
+| REQ-GROW-02 | ✅ | Public web group balance page | Opt-in `public_balance_sharing_enabled`; `/b/<public_balance_token>` shows privacy-scoped balances + recent expenses (separate from `/g/<invite_token>` join links); rate-limited `get_public_group_balance_page` RPC; noindex + OG; mobile toggle + rotate revoke (#398) |
 | REQ-NFR-03 | ✅ | Consistent domain types | `@cost-share/shared` types and mappers |
 | REQ-NFR-04 | ✅ | Row Level Security (Supabase) | RLS enabled; mobile uses anon key + user JWT |
 | REQ-NFR-05 | ⬜ | Offline support | Local queue + sync without screen refactor |
@@ -157,6 +159,8 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 
 | Date | Change |
 |------|--------|
+| 2026-10-16 | REQ-GROW-02 — public web group balance page (#398): `/b/<public_balance_token>`, SECURITY DEFINER RPC, 7 locales + RTL |
+| 2026-10-16 | REQ-GROW-01 — activation onboarding (#392): shared templates, 3-step guided flow on iOS/Android/Expo web |
 | 2026-05-20 | REQ-BAL-02 / REQ-BAL-03 — hybrid debt simplification (exact ≤10, greedy >10) + Balances summary line and Minimum badge. Spec: `docs/superpowers/specs/2026-05-20-debt-simplification-design.md`. Plan: `docs/superpowers/plans/2026-05-20-debt-simplification.md`. |
 | 2026-05-19 | Add REQ-PROF-06 — account self-deletion (soft, type-to-confirm) |
 | 2026-05-19 | Add REQ-PROF-04/05 for profile dashboard & settings redesign (direct-Supabase, no notifications) |

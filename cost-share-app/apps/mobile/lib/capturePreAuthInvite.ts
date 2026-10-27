@@ -6,7 +6,12 @@ import { persistPendingInvite } from './pendingInviteStorage';
 export function inviteLinkFromUrl(url: string): PendingInvite | null {
     if (!url || isAuthCallbackUrl(url)) return null;
     const link = parseIncomingUrl(url);
-    if (link.kind === 'friend' || link.kind === 'group') {
+    if (
+        link.kind === 'friend' ||
+        link.kind === 'group' ||
+        link.kind === 'expenseShare' ||
+        link.kind === 'settleReminder'
+    ) {
         return { kind: link.kind, token: link.token };
     }
     return null;

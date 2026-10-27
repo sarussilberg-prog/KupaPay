@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Button } from '../Button';
-import { ProUpgradeButton } from '../ProUpgradeButton';
+import { ProUpsellButton } from '../pro/ProUpsellButton';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { shouldSkipAdGate } from '@cost-share/shared';
@@ -35,8 +35,8 @@ const PRO_PROMO_EVERY_N = 4;
 export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateStepProps) {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
-    const { data: proStatus } = useProStatusQuery(groupId);
-    const skipAds = shouldSkipAdGate(proStatus?.hasPro === true, KUPAPAY_PRO_ENABLED);
+    const { hasPro } = useProStatusQuery(groupId);
+    const skipAds = shouldSkipAdGate(hasPro, KUPAPAY_PRO_ENABLED);
     const { show, earned, loading, unavailable } = useRewardedAd(featureKey);
     const [proMessageShown, setProMessageShown] = useState(false);
 
@@ -87,6 +87,7 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
         return (
             <ProPromoInterstitial
                 visible={active}
+                groupId={groupId}
                 onDismiss={() => {
                     void logMonetizationEvent(featureKey, 'pro_promo_dismissed');
                     onCompleted();
@@ -118,6 +119,7 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
         return (
             <ProPromoInterstitial
                 visible={active}
+                groupId={groupId}
                 onDismiss={() => {
                     void logMonetizationEvent(featureKey, 'pro_promo_dismissed');
                     onCompleted();
@@ -160,7 +162,8 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
             />
 
             {isProUpsellSurfaceEnabled() && (
-                <ProUpgradeButton
+                <ProUpsellButton
+                    groupId={groupId}
                     title={t('monetization.goProButton')}
                     onPress={handleGoPro}
                     appearance="outline"

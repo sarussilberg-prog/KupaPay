@@ -183,10 +183,70 @@
                     "summarySuffix": "участников"
                 }
             }
+        },
+        "activation": {
+            "subtitle": "Три шага — меньше минуты до первого расхода.",
+            "skipConfirm": "Пропустить",
+            "header": {
+                "create": "Выберите шаблон",
+                "expense": "Первый расход",
+                "invite": "Пригласите друзей"
+            },
+            "steps": {
+                "create": "Группа",
+                "expense": "Расход",
+                "invite": "Приглашение"
+            },
+            "fields": {
+                "groupName": "Название группы"
+            },
+            "templates": {
+                "label": "На что делите?",
+                "trip": {
+                    "label": "Поездка",
+                    "defaultName": "Поездка на выходные",
+                    "defaultExpense": "Бензин или такси"
+                },
+                "roommates": {
+                    "label": "Соседи",
+                    "defaultName": "Наша квартира",
+                    "defaultExpense": "Продукты или коммуналка"
+                },
+                "event": {
+                    "label": "Событие",
+                    "defaultName": "Общий ужин",
+                    "defaultExpense": "Еда и напитки"
+                },
+                "couple": {
+                    "label": "Пара",
+                    "defaultName": "Мы вдвоём",
+                    "defaultExpense": "Ужин вне дома"
+                }
+            },
+            "expense": {
+                "hint": "Запишите то, что уже оплатили — детали можно изменить позже.",
+                "amountRequired": "Введите сумму больше нуля"
+            },
+            "invite": {
+                "title": "Добавьте других",
+                "body": "Поделитесь ссылкой, чтобы друзья вступили в группу и делили следующий счёт."
+            },
+            "skipExpenseTitle": "Пропустить первый расход?",
+            "skipExpenseMessage": "Один расход сейчас — самый быстрый способ увидеть балансы. Добавлять расходы можно в любое время в группе.",
+            "cta": {
+                "createGroup": "Продолжить",
+                "addExpense": "Добавить расход",
+                "skipExpense": "Пропустить сейчас",
+                "shareInvite": "Поделиться ссылкой",
+                "shareInviteWeb": "Поделиться или скопировать",
+                "done": "Перейти в группу"
+            }
         }
     },
     "groups": {
         "title": "Группы",
+        "listTitle": "Мои группы",
+        "newGroupCta": "Новая группа",
         "createGroup": "Создать группу",
         "editGroup": "Редактировать группу",
         "favorite": {
@@ -199,6 +259,12 @@
         },
         "noGroups": "Групп пока нет",
         "noGroupsMessage": "Создайте первую группу, чтобы начать делить расходы",
+        "demo": {
+            "try": "Попробовать демо-группу",
+            "created": "Демо-группа готова — посмотрите, как это работает",
+            "alreadyExists": "Демо-группа у вас уже есть",
+            "error": "Не удалось создать демо-группу"
+        },
         "offlineMessage": "Сейчас не удаётся загрузить ваши группы. Они появятся здесь автоматически, как только подключение восстановится.",
         "groupName": "Название группы",
         "enterGroupName": "Введите название группы",
@@ -335,6 +401,9 @@
             "showMore": "Показать ещё {{count}}",
             "showLess": "Свернуть"
         },
+        "listSummary": {
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} в других валютах"
+        },
         "hero": {
             "spentTogether": "Потрачено вместе",
             "leftToSettle": "Осталось погасить"
@@ -347,8 +416,10 @@
             "youOweCaption": "Вы должны",
             "owedToYou": "Вам должны {{amount}}",
             "owedToYouCaption": "Вам должны",
-            "moreCurrencies": "{{plusCount}} валют",
-            "moreCurrencies_one": "{{plusCount}} валюта",
+            "moreCurrencies": "{{count}} валют",
+            "moreCurrencies_one": "{{count}} валюта",
+            "moreCurrenciesNoun": "валют",
+            "moreCurrenciesNoun_one": "валюта",
             "updatedAgo": "Обновлено {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
@@ -382,6 +453,9 @@
             "menuTitle": "Поделиться группой",
             "inviteOption": "Пригласить друга",
             "inviteDescription": "Отправьте ссылку, чтобы добавить кого-нибудь в эту группу",
+            "balanceLinkOption": "Поделиться балансами в вебе",
+            "balanceLinkDescription": "По ссылке можно посмотреть, кто кому должен — без установки приложения",
+            "balanceLinkMessage": "Кто кому должен в «{{groupName}}» в KupaPay (без приложения): {{url}}",
             "exportOption": "Экспорт в Excel / CSV",
             "exportDescription": "Сохраните активность и балансы группы в файле CSV (открывается в Excel / Google Таблицах)",
             "exportTitle": "Отправить отчёт по группе",
@@ -492,13 +566,25 @@
             "searchPlaceholder": "Поиск друзей",
             "noSearchResults": "Среди друзей нет совпадений с вашим запросом.",
             "mutualHint": "Показаны только друзья, которые добавили друг друга.",
-            "missingSomeoneCta": "Не нашли нужного человека? Добавьте друзей"
+            "missingSomeoneCta": "Не нашли нужного человека? Добавьте друзей",
+            "addGuestTitle": "Ещё без аккаунта?",
+            "addGuestPlaceholder": "Имя друга",
+            "addGuestButton": "Добавить",
+            "guestAddError": "Не удалось добавить участника-заглушку",
+            "guestAdded": "Добавлен {{name}} — привяжет себя при входе"
         },
         "memberCount_one": "{{count}} участник",
         "memberCount_few": "{{count}} участника",
         "memberCount_many": "{{count}} участников",
         "memberCount_other": "{{count}} участника",
-        "memberCount_two": "{{count}} участника"
+        "memberCount_two": "{{count}} участника",
+        "monthlyBills": {
+            "title": "Счета этого месяца",
+            "summary": "{{count}} расходов · {{total}} {{currency}} за цикл",
+            "cycleDay": "Цикл начинается {{day}}-го числа каждого месяца",
+            "automationPro": "Автоматизируйте регулярные счета с Pro",
+            "automationActive": "Pro-автоматизация доступна для группы"
+        }
     },
     "expenses": {
         "title": "Расходы",
@@ -534,6 +620,10 @@
         "recentExpenses": "Последние расходы",
         "deleteExpense": "Удалить расход",
         "deleteExpenseConfirm": "Вы уверены, что хотите удалить этот расход?",
+        "shareLink": "Поделиться ссылкой на расход",
+        "shareLinkMessage": "{{description}} — {{currency}} {{amount}} в KupaPay: {{url}}",
+        "shareLinkInvalid": "Ссылка на расход больше недоступна",
+        "shareLinkOpenApp": "Войдите и откройте группу, чтобы увидеть расход",
         "expenseCreated": "Расход успешно добавлен",
         "expenseUpdated": "Расход успешно обновлён",
         "expenseDeleted": "Расход успешно удалён",
@@ -712,6 +802,13 @@
         "deleteAccount": "Удалить аккаунт",
         "adminPortal": "Портал администратора"
     },
+    "appReview": {
+        "notNow": "Не сейчас",
+        "webTitle": "Как вам KupaPay?",
+        "webMessage": "Мы ещё улучшаем веб-версию. Ваш отзыв сразу попадает команде.",
+        "webFeedbackCta": "Оставить отзыв",
+        "webStoreHint": "Чтобы оценить в App Store или Google Play, откройте KupaPay на телефоне."
+    },
     "admin": {
         "portal": {
             "title": "Портал администратора",
@@ -772,7 +869,19 @@
             },
             "loading": "Загрузка ошибок…",
             "empty": "За этот период ошибок нет",
-            "failed": "Не удалось загрузить. Потяните вниз, чтобы повторить.",
+            "failed": "Не удалось загрузить ошибки",
+            "failedHint": "Потяните вниз, чтобы повторить.",
+            "failedReasons": {
+                "forbidden": "Сервер не считает вас администратором приложения.",
+                "admin_check_failed": "Не удалось проверить права администратора: {{detail}}",
+                "sentry_not_configured": "На admin-sentry-proxy не заданы секреты Sentry: {{missing}}",
+                "sentry_client_error": "Sentry отклонил запрос. Проверьте SENTRY_API_TOKEN, SENTRY_ORG и slug проектов (copay-mobile-dev / copay-mobile-prod). {{detail}}",
+                "sentry_server_error": "Ошибка сервера Sentry. Повторите попытку позже.",
+                "sentry_unreachable": "Не удалось связаться с Sentry: {{detail}}",
+                "invoke_failed": "Сбой вызова Edge Function: {{detail}}",
+                "missing_authorization": "Сессия истекла — войдите снова и откройте портал администратора.",
+                "unknown": "Неизвестная ошибка. Потяните для повтора или проверьте логи admin-sentry-proxy."
+            },
             "occurrences": "{{count}} случая",
             "occurrences_one": "{{count}} случай",
             "occurrences_few": "{{count}} случая",
@@ -893,6 +1002,7 @@
         },
         "noActivity": "Активности пока нет",
         "noActivityMessage": "Здесь появятся ваши последние расходы, расчёты и сообщения групп",
+        "createGroupCta": "Создать группу",
         "noSearchResults": "Ничего не найдено",
         "noSearchResultsMessage": "По вашему запросу ничего нет. Попробуйте другие слова или сбросьте поиск.",
         "expense": "Расход",
@@ -934,6 +1044,7 @@
             "noteChangedBy": "{{name}} изменил(а) заметку · {{group}}",
             "friendRequestRejectedByThem": "{{name}} отклонил(а) ваш запрос в друзья",
             "settleReminder": "{{name}} напоминает вам о расчёте в группе {{group}}",
+            "unsettledBalanceNudge": "Вы всё ещё должны {{name}} в группе {{group}}",
             "tripBudgetAlert": "Оповещение о бюджете поездки в {{group}}"
         },
         "addedExpense": "добавил(а) расход",
@@ -1047,6 +1158,12 @@
             "findEmptyCta": "Пригласить нового друга по ссылке",
             "findInviteName": "Пригласить в KupaPay: {{name}}"
         },
+        "publicBalance": {
+            "title": "Публичная страница балансов",
+            "toggleLabel": "У кого есть ссылка — видит балансы в вебе",
+            "toggleHint": "Используется ссылка /b/ на балансы. Отключите или смените ссылку, чтобы отозвать доступ.",
+            "privacyNote": "Только имена и балансы — без почты и чеков."
+        },
         "group": {
             "title": "Поделиться ссылкой на группу",
             "shareMessage": "Я добавил(а) тебя в группу «{{groupName}}» в KupaPay. Присоединяйся по ссылке: {{url}}",
@@ -1055,6 +1172,17 @@
             "rotateConfirmBody": "Те, у кого осталась текущая ссылка, не смогут вступить в группу, пока вы не отправите им новую. Тех, кто уже в группе, это не затронет.",
             "rotated": "Ссылка на группу обновлена",
             "emptyStateLink": "или поделитесь ссылкой на группу"
+        },
+        "postCreate": {
+            "title": "Пригласить друзей",
+            "subtitle": "Добавьте людей в «{{groupName}}» — ссылка, WhatsApp или QR-код.",
+            "shareSheet": "Поделиться…",
+            "shareSheetWeb": "Поделиться или скопировать",
+            "whatsapp": "WhatsApp",
+            "copyLink": "Скопировать ссылку",
+            "qrHint": "Отсканируйте, чтобы вступить в группу",
+            "skip": "Не сейчас",
+            "continue": "Открыть группу"
         },
         "addMembers": {
             "searchOthers": "Найти других пользователей",
@@ -1066,7 +1194,26 @@
             "alreadyMember": "Вы уже состоите в этой группе",
             "selfInvite": "Это ваша собственная ссылка-приглашение",
             "invalid": "Эта ссылка-приглашение больше не действует"
+        },
+        "guestClaim": {
+            "title": "Вас добавили по имени?",
+            "subtitle": "Выберите своё имя, чтобы балансы остались верными.",
+            "confirm": "Это я",
+            "skip": "Не я",
+            "success": "Общие расходы привязаны к вашему аккаунту",
+            "error": "Не удалось привязать имя"
         }
+    },
+    "shareSummary": {
+        "title": "Поделиться сводкой группы",
+        "share": "Поделиться изображением",
+        "hideAmounts": "Скрыть суммы",
+        "hiddenAmount": "***",
+        "allSettled": "Все рассчитались ✓",
+        "balancesSnapshot": "Снимок балансов",
+        "debtLine": "{{from}} → {{to}} (долг)",
+        "watermark": "Делите расходы на {{url}}",
+        "fallback": "Наша группа «{{groupName}}» в KupaPay"
     },
     "dashboard": {
         "appTitle": "KupaPay",
@@ -1166,6 +1313,23 @@
         "categoryMessages": "Чат группы",
         "categoryFriends": "Запросы в друзья",
         "categoryGroups": "Группы",
+        "categoryReminders": "Напоминания о балансе",
+        "emailTitle": "Эл. почта",
+        "emailMaster": "Письма от сервиса",
+        "lifecycleEmail": "Приветствие, советы и возврат",
+        "weeklyDigestTitle": "Недельная сводка",
+        "weeklyDigestPush": "Недельная сводка (push)",
+        "weeklyDigestEmail": "Недельная сводка (почта)",
+        "quietHoursTitle": "Тихие часы",
+        "quietHoursEnable": "Соблюдать тихие часы",
+        "quietHoursSummary": "Без push с {{start}}:00 до {{end}}:00 ({{tz}}).",
+        "frequencyCapHint": "Не более {{count}} push-уведомлений в день.",
+        "webFallback": {
+            "default": "Новая активность в KupaPay",
+            "expense_added": "Новый расход в группе",
+            "settlement_added": "Кто-то рассчитался с вами",
+            "unsettled_balance_nudge": "Напоминание: открытый баланс"
+        },
         "systemDisabled": "Уведомления для этого приложения отключены",
         "openSettings": "Открыть настройки",
         "systemDisabledHint": "Чтобы изменить эти настройки, сначала включите уведомления в настройках устройства.",
@@ -1276,6 +1440,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Делите честно и закрывайте долги быстрее с Pro",
             "feature1": "Без рекламы",
             "feature2": "Автоконвертация валют для поездок",
             "feature3": "Аккуратный PDF-отчёт для каждой группы",
@@ -1306,16 +1471,63 @@
             "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
             "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
             "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
-            "havePromoCode": "Есть код?"
+            "havePromoCode": "Есть код?",
+            "alreadyProTitle": "У вас Pro",
+            "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Управление подпиской",
-            "freeTrialUntil": "Бесплатный период до {{date}}"
+            "freeTrialUntil": "Бесплатный период до {{date}}",
+            "activeUntil": "Pro активен до {{date}}",
+            "activeIndividualAndGroup": "Подписка Pro активна; у этой группы также Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Моя подписка",
+            "openDetails": "Детали подписки",
+            "screenIntro": "План, продление и оплата управляются в App Store или Google Play. Trip Pass показан по группам ниже.",
+            "disabled": "Подписки недоступны в этой сборке.",
+            "empty": "На этом аккаунте нет активной подписки.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Промо",
+            "storeStripe": "Оплата на сайте",
+            "storeUnknown": "Магазин приложений",
+            "renewsOn": "Продление {{date}}",
+            "expiresOn": "Доступ до {{date}}",
+            "expiredOn": "Истекла {{date}}",
+            "autoRenewOn": "Автопродление включено",
+            "autoRenewOff": "Автопродление выключено",
+            "trialActive": "Идёт бесплатный пробный период",
+            "purchasedVia": "Куплено через {{store}}",
+            "billingIssueBody": "Проблема с оплатой. Обновите способ оплаты, чтобы сохранить Pro.",
+            "fixPayment": "Исправить оплату",
+            "tripPassSection": "Группы Trip Pass",
+            "tripPassUntil": "Pro для группы до {{date}}",
+            "renewalDisclosureShort": "Подписки продлеваются автоматически, пока вы не отмените их в магазине минимум за 24 часа. См. Условия и Конфиденциальность.",
+            "status": {
+                "active": "Активна",
+                "cancelled_until_expiry": "Отменена — активна до конца периода",
+                "billing_issue": "Проблема с оплатой",
+                "expired": "Истекла",
+                "none": "Нет подписки"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro для этой группы",
+            "activeUntil": "Pro для всех участников группы до {{date}}."
         },
         "trialReminder": {
             "title": "Пробный период KupaPay Pro скоро закончится",
             "body": "Бесплатный период KupaPay Pro заканчивается через два дня. Не хотите продолжать? Отмените в настройках."
+        },
+        "trialLifecycle": {
+            "day1": { "title": "Добро пожаловать в Pro" },
+            "day10": { "title": "Осталось 4 дня пробного периода" },
+            "day13": { "title": "Pro продлится завтра" },
+            "disclosure": "Оплата начнётся после пробного периода, если не отмените в Настройки → Управление подпиской (App Store / Google Play).",
+            "manage": "Управление подпиской"
         },
         "includedTripPass": {
             "title": "Trip Pass в подарок",
@@ -1391,5 +1603,24 @@
         "body": "Эта версия KupaPay больше не поддерживается. Установите последнее обновление из магазина, чтобы продолжить.",
         "versionLine": "Ваша версия: {{current}} · Требуется: {{required}} или новее",
         "cta": "Открыть магазин"
+    },
+    "referral": {
+        "title": "Пригласите друзей — Pro в подарок",
+        "settingsRow": "Реферальные награды",
+        "body": "Поделитесь ссылкой. Когда друг вступит в группу и добавит расход, вы получите месяц Pro бесплатно.",
+        "shareCta": "Поделиться ссылкой",
+        "copyLink": "Копировать ссылку",
+        "linkCopied": "Ссылка скопирована",
+        "capHint": "{{count}} из {{cap}} бесплатных месяцев в этом году",
+        "statusTitle": "Ваши приглашения",
+        "empty": "Пока нет приглашений — поделитесь ссылкой.",
+        "refresh": "Обновить",
+        "disabled": "Награды недоступны в этой сборке.",
+        "status": {
+            "pending": "Ждём первый расход в группе",
+            "qualified": "Подтверждено — награда в очереди",
+            "rewarded": "Месяц Pro начислен",
+            "rejected": "Не удалось начислить"
+        }
     }
 }

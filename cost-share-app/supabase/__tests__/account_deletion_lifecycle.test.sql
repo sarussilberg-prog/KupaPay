@@ -9,10 +9,10 @@ SET LOCAL session_replication_role = replica;
 
 DO $outer$
 DECLARE
-    v_a       CONSTANT UUID := '00000000-0000-0000-0000-000000adl001';
-    v_b       CONSTANT UUID := '00000000-0000-0000-0000-000000adl002';
-    v_c       CONSTANT UUID := '00000000-0000-0000-0000-000000adl003';
-    v_grp     CONSTANT UUID := '00000000-0000-0000-0000-000000adl010';
+    v_a       CONSTANT UUID := '00000000-0000-0000-0000-000000ad1001';
+    v_b       CONSTANT UUID := '00000000-0000-0000-0000-000000ad1002';
+    v_c       CONSTANT UUID := '00000000-0000-0000-0000-000000ad1003';
+    v_grp     CONSTANT UUID := '00000000-0000-0000-0000-000000ad1010';
     v_caught  BOOLEAN;
     v_state   JSONB;
     v_active  BOOLEAN;
@@ -38,13 +38,14 @@ BEGIN
         (v_grp, v_b, TRUE);
 
     INSERT INTO public.expenses (id, group_id, paid_by, amount, currency, description, expense_date, created_by)
-        VALUES ('00000000-0000-0000-0000-000000adl020', v_grp, v_a, 100, 'USD', 'dinner', CURRENT_DATE, v_a);
+        VALUES ('00000000-0000-0000-0000-000000ad1020', v_grp, v_a, 100, 'USD', 'dinner', CURRENT_DATE, v_a);
 
     INSERT INTO public.expense_splits (expense_id, user_id, amount) VALUES
-        ('00000000-0000-0000-0000-000000adl020', v_a, 50),
-        ('00000000-0000-0000-0000-000000adl020', v_b, 50);
+        ('00000000-0000-0000-0000-000000ad1020', v_a, 50),
+        ('00000000-0000-0000-0000-000000ad1020', v_b, 50);
 
     -- ---- CASE 1: delete_my_account scrubs profile, keeps grace (no ban) ----
+    PERFORM public.test_set_authenticated(v_a);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text, 'iat', EXTRACT(EPOCH FROM NOW())::bigint)::text, TRUE);
     PERFORM public.delete_my_account();
 
@@ -64,7 +65,7 @@ BEGIN
     END IF;
 
     -- ---- CASE 2: cross-user restore via restore_deleted_account denied ----
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_b::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_b);
     SET LOCAL ROLE authenticated;
     v_caught := FALSE;
     BEGIN
@@ -78,6 +79,7 @@ BEGIN
     END IF;
 
     -- ---- CASE 3: self restore within grace (fresh JWT) -------------------
+    PERFORM public.test_set_authenticated(v_a);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text, 'iat', EXTRACT(EPOCH FROM NOW())::bigint)::text, TRUE);
     PERFORM public.restore_my_account();
 
@@ -92,19 +94,33 @@ BEGIN
     END IF;
 
     -- Re-delete Alice for hard-purge case
+    PERFORM public.test_set_authenticated(v_a);
     PERFORM public.delete_my_account();
 
     -- ---- CASE 4: Bob balances still include Alice split ------------------
-    PERFORM set_config('request.jwt.claims', json_build_object('sub', v_b::text)::text, TRUE);
+    PERFORM public.test_set_authenticated(v_b);
     IF public.get_user_simplified_inputs(v_b) IS NULL THEN
         RAISE EXCEPTION 'Case 4 failed: balance RPC returned NULL';
     END IF;
 
     -- ---- CASE 5: hard purge after grace ----------------------------------
-    UPDATE profiles SET deleted_at = NOW() - INTERVAL '31 days' WHERE id = v_a;
-    UPDATE account_deletions_audit
-        SET deleted_at = NOW() - INTERVAL '31 days'
-        WHERE user_id = v_a AND restored_at IS NULL;
+    RESET ROLE;
+    SET LOCAL session_replication_role = replica;
+    UPDATE profiles
+        SET is_active = FALSE,
+            deleted_at = NOW() - INTERVAL '31 days'
+        WHERE id = v_a;
+    UPDATE auth.users
+        SET email = 'adl-a@test.local'
+        WHERE id = v_a;
+    DELETE FROM account_deletions_audit WHERE user_id = v_a;
+    INSERT INTO account_deletions_audit (
+        user_id, email_hash, reason, deleted_at, restored_at, hard_purged_at, recovery_email
+    )
+    VALUES (
+        v_a, 'case5_ci_hash', 'self_service',
+        NOW() - INTERVAL '31 days', NULL, NULL, 'adl-a@test.local'
+    );
 
     SELECT public.hard_purge_expired_deleted_accounts(10) INTO v_purged;
     IF v_purged < 1 THEN
@@ -124,6 +140,7 @@ BEGIN
         RAISE EXCEPTION 'Case 5c failed: banned_until should be set after hard purge';
     END IF;
 
+    PERFORM public.test_set_authenticated(v_a);
     PERFORM set_config('request.jwt.claims', json_build_object('sub', v_a::text, 'iat', EXTRACT(EPOCH FROM NOW())::bigint)::text, TRUE);
     SELECT public.get_my_account_deletion_state() INTO v_state;
     IF (v_state->>'canRestore')::boolean IS DISTINCT FROM FALSE THEN

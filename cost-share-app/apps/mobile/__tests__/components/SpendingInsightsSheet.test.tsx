@@ -8,6 +8,10 @@ jest.mock('../../services/spendingInsights.service', () => ({
     fetchGroupSpendingByWeek: jest.fn().mockResolvedValue([]),
 }));
 
+jest.mock('../../hooks/useShowProUpsell', () => ({
+    useShowProUpsell: jest.fn(() => true),
+}));
+
 describe('SpendingInsightsSheet', () => {
     it('shows locked upsell when Pro is locked', () => {
         const { getByText } = renderWithQuery(

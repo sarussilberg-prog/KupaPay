@@ -30,10 +30,10 @@ import {
 } from '../../lib/pendingFollowUps';
 import { invalidateBalanceCaches } from '../../lib/invalidateBalanceCaches';
 import { SENTRY_TAGS } from '../../lib/sentryTags';
-import { captureProductEvent } from '../../lib/productAnalytics';
+import { captureProductEvent, trackFirstExpenseAdded } from '../../lib/productAnalytics';
 import {
     incrementExpenseCountForStoreReview,
-    maybeRequestStoreReview,
+    maybePromptForAppReview,
 } from '../../lib/storeReviewPrompt';
 
 /**
@@ -187,8 +187,9 @@ export function registerAddExpenseMutationDefaults(client: QueryClient): void {
             invalidateBalanceCaches(groupId);
             if (serverRow?.id) {
                 void captureProductEvent('expense_added', { group_id: groupId });
+                void trackFirstExpenseAdded(groupId);
                 void incrementExpenseCountForStoreReview().then((n) => {
-                    if (n === 3) void maybeRequestStoreReview('third_expense');
+                    if (n === 3) void maybePromptForAppReview('third_expense');
                 });
             }
 

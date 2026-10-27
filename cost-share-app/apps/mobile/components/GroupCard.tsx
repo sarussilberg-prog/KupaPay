@@ -11,11 +11,12 @@ import {
     Pressable,
     Platform,
     ScrollView,
+    useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
+import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
-import { GroupRollup, GroupWithMembers } from '@cost-share/shared';
+import { GroupRollup, GroupWithMembers, type RatesFromBase } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
 import { GroupAvatar } from './GroupAvatar';
 import { BalanceChip } from './BalanceChip';
@@ -25,7 +26,7 @@ import { IconLabel } from './primitives/IconLabel';
 import { GroupCardMetaLine } from './GroupCardMetaLine';
 import { ListRow } from './primitives/ListRow';
 import { colors } from '../theme';
-import { shareGroupInvite } from '../services/invite.service';
+import { shareGroupBalanceLink, shareGroupInvite } from '../services/invite.service';
 import {
     archiveGroup,
     unarchiveGroup,
@@ -37,6 +38,14 @@ import { useAppStore } from '../store';
 import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
+import {
+    GROUP_CARD_MENU_HIT,
+    GROUP_CARD_MENU_ICON,
+    GROUP_CARD_PAD,
+    GROUP_CARD_ROW_GAP,
+    GROUP_CARD_STACK_GAP,
+    GROUP_CARD_TEXT_GAP,
+} from './groupCardLayout';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -46,6 +55,8 @@ interface GroupCardProps {
     searchQuery?: string;
     matchedMemberNames?: string[];
     unreadCount?: number;
+    displayCurrency?: string;
+    ratesFromBase?: RatesFromBase;
     onPress: (groupId: string) => void;
 }
 
@@ -57,6 +68,8 @@ function GroupCardBase({
     searchQuery,
     matchedMemberNames,
     unreadCount,
+    displayCurrency,
+    ratesFromBase,
     onPress,
 }: GroupCardProps) {
     const { t, i18n } = useTranslation();
@@ -67,6 +80,8 @@ function GroupCardBase({
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
+    const { width: windowWidth } = useWindowDimensions();
+    const stackBalanceChip = windowWidth < 360;
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
     const isArchived = group.isArchivedByMe || group.isAutoArchived;
@@ -78,6 +93,11 @@ function GroupCardBase({
     const handleShare = useCallback(() => {
         closeMenu();
         void shareGroupInvite(group.id);
+    }, [closeMenu, group.id]);
+
+    const handleShareBalance = useCallback(() => {
+        closeMenu();
+        void shareGroupBalanceLink(group.id);
     }, [closeMenu, group.id]);
 
     const handleEdit = useCallback(() => {
@@ -179,8 +199,20 @@ function GroupCardBase({
     }, [navigation, group.id]);
 
     const cardClass = isArchived
-        ? 'bg-slate-50 rounded-2xl px-4 py-3 mb-3 border border-dashed border-gray-300'
-        : 'bg-white rounded-2xl px-4 py-3 mb-3 border border-gray-100';
+        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-2xl mb-2 border border-dashed border-gray-300 dark:border-gray-600'
+        : 'bg-white dark:bg-gray-800 rounded-2xl mb-2 border border-gray-100 dark:border-gray-700';
+
+    const balanceChipNode = (
+        <BalanceChip
+            rollup={rollup}
+            defaultCurrency={group.defaultCurrency}
+            displayCurrency={displayCurrency}
+            ratesFromBase={ratesFromBase}
+            groupHasOpenDebts={groupHasOpenDebts}
+            balanceUnknown={balanceUnknown}
+            onPressExtraCurrencies={openBalances}
+        />
+    );
 
     const cardShadow =
         isArchived || Platform.OS === 'web'
@@ -197,33 +229,55 @@ function GroupCardBase({
                   android: { elevation: 2 },
               });
 
+    const titleClassName = isArchived
+        ? 'text-[17px] font-semibold text-gray-600 dark:text-gray-300 leading-5'
+        : 'text-[17px] font-semibold text-gray-900 dark:text-gray-50 leading-5';
+    const titleAlignClass = rtlTextClassName(isRtl, titleClassName);
+
     return (
         <>
             <View
                 className={cardClass}
-                style={[rtlRowStyle(isRtl), { alignItems: 'stretch' }, cardShadow]}
+                style={[
+                    rtlRowStyle(isRtl),
+                    {
+                        alignItems: 'center',
+                        padding: GROUP_CARD_PAD,
+                        gap: GROUP_CARD_STACK_GAP,
+                    },
+                    cardShadow,
+                ]}
             >
                 <ListRow
                     onPress={() => onPress(group.id)}
                     testID={`group-card-${group.id}`}
-                    style={{ flex: 1, alignItems: 'center', gap: 14 }}
+                    style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        gap: GROUP_CARD_ROW_GAP,
+                        minWidth: 0,
+                    }}
                 >
                     <GroupAvatar
                         imageUrl={group.imageUrl}
                         groupType={group.groupType}
                         name={group.name}
                         size="sm"
+                        style={{ flexShrink: 0 }}
                     />
 
-                    <View className="flex-1 self-stretch" style={{ minWidth: 0, gap: 6 }}>
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
-                            <View style={{ flexShrink: 1, minWidth: 0 }}>
+                    <View
+                        style={{
+                            flex: 1,
+                            minWidth: 0,
+                            gap: GROUP_CARD_TEXT_GAP,
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 8 }]}>
+                            <View style={{ flexShrink: 1, minWidth: 0, flexGrow: 1 }}>
                                 <HighlightedText
-                                    className={
-                                        isArchived
-                                            ? 'text-[17px] font-semibold text-gray-600 leading-5'
-                                            : 'text-[17px] font-semibold text-gray-900 leading-5'
-                                    }
+                                    className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
                                     query={searchQuery}
                                     numberOfLines={1}
@@ -258,26 +312,39 @@ function GroupCardBase({
                                 tone="default"
                             />
                         )}
+                        {stackBalanceChip ? (
+                            <View
+                                style={{
+                                    alignSelf: isRtl ? 'flex-start' : 'flex-end',
+                                    marginTop: 2,
+                                }}
+                            >
+                                {balanceChipNode}
+                            </View>
+                        ) : null}
                     </View>
 
-                    <BalanceChip
-                        rollup={rollup}
-                        defaultCurrency={group.defaultCurrency}
-                        groupHasOpenDebts={groupHasOpenDebts}
-                        balanceUnknown={balanceUnknown}
-                        onPressExtraCurrencies={openBalances}
-                    />
+                    {!stackBalanceChip ? balanceChipNode : null}
                 </ListRow>
 
                 <TouchableOpacity
                     onPress={() => setMenuOpen(true)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
                     testID={`group-card-menu-${group.id}`}
-                    style={{ marginStart: 4, padding: 6, alignSelf: 'center' }}
+                    style={{
+                        width: GROUP_CARD_MENU_HIT,
+                        height: GROUP_CARD_MENU_HIT,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                    }}
                 >
-                    <AppIcon name="ellipsis-vertical" size={16} color={colors.gray400} />
+                    <AppIcon
+                        name="ellipsis-vertical"
+                        size={GROUP_CARD_MENU_ICON}
+                        color={colors.gray400}
+                    />
                 </TouchableOpacity>
             </View>
 
@@ -323,6 +390,11 @@ function GroupCardBase({
                                 label={t('groups.share.inviteOption')}
                                 onPress={handleShare}
                                 testID="group-card-menu-share"
+                            />
+                            <MenuRow
+                                label={t('groups.share.balanceLinkOption')}
+                                onPress={handleShareBalance}
+                                testID="group-card-menu-share-balance"
                             />
                             <MenuRow
                                 label={t('groups.share.exportOption')}

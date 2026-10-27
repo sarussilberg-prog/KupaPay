@@ -1,8 +1,8 @@
-# Manual Google Play Internal upload: EAS cloud Android AAB (production profile) + internal track submit.
+# Google Play Internal upload: EAS cloud Android AAB + internal track submit.
 # Does not promote to production review.
 #
-# Secrets: EXPO_TOKEN, GOOGLE_PLAY_SERVICE_ACCOUNT_JSON (eas-play-submit@kupa-496716.iam.gserviceaccount.com)
-# See docs/PLAY_INTERNAL_GITHUB_ACTIONS.md
+# Triggers: manual workflow_dispatch; called from mobile-staging-nightly.yml.
+# Secrets: see docs/PLAY_INTERNAL_GITHUB_ACTIONS.md
 name: Play Internal Android
 
 on:
@@ -12,6 +12,17 @@ on:
         description: Enable KupaPay Pro (RevenueCat) for this Play internal build
         type: boolean
         default: true
+  workflow_call:
+    inputs:
+      git_ref:
+        type: string
+        default: dev
+      pro_enabled:
+        type: boolean
+        default: true
+      mobile_cd_sha:
+        type: string
+        default: ''
 
 concurrency:
   group: play-internal-android
@@ -21,12 +32,18 @@ jobs:
   play-internal:
     name: Build AAB & submit to Play internal
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     defaults:
       run:
         working-directory: cost-share-app/apps/mobile
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref || github.ref }}
+          fetch-depth: 0
 
       - name: Preflight secrets (skip gracefully when unset)
         id: preflight
@@ -37,11 +54,10 @@ jobs:
           set -euo pipefail
           if [ -z "${EXPO_TOKEN:-}" ] || [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping Play internal build/submit — set repository secrets EXPO_TOKEN and GOOGLE_PLAY_SERVICE_ACCOUNT_JSON to enable this workflow."
+            echo "::notice::Skipping Play internal — set EXPO_TOKEN and GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
             exit 0
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
-          echo "Play internal secrets present (GOOGLE_PLAY_SERVICE_ACCOUNT_JSON → eas submit)."
 
       - name: Verify Play service account identity
         if: steps.preflight.outputs.ready == 'true'
@@ -72,6 +88,28 @@ jobs:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: bash scripts/ci-write-google-play-key.sh
 
+      - name: Release notes (since last Play internal build)
+        if: steps.preflight.outputs.ready == 'true'
+        id: release_notes
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/ci-mobile-cd-load-baseline.sh
+          export MOBILE_CD_BASELINE_JSON="$(bash scripts/ci-mobile-cd-load-baseline.sh)"
+          NOTES="$(MOBILE_RELEASE_NOTES_SINCE_FIELD=lastPlayInternalVersion node scripts/changelog-testflight-notes.mjs)"
+          {
+            echo 'notes<<EOF'
+            printf '%s\n' "$NOTES"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Play internal release notes"
+            echo '```'
+            echo "$NOTES"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Require RevenueCat Android key when Pro enabled
         if: steps.preflight.outputs.ready == 'true' && inputs.pro_enabled == true
         env:
@@ -79,10 +117,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${EXPO_PUBLIC_REVENUECAT_ANDROID_KEY:-}" ]; then
-            echo "::error::EXPO_PUBLIC_REVENUECAT_ANDROID_KEY is required when pro_enabled=true (GitHub Actions secret goog_…)"
+            echo "::error::EXPO_PUBLIC_REVENUECAT_ANDROID_KEY is required when pro_enabled=true"
             exit 1
           fi
-          echo "RevenueCat Android key present (${#EXPO_PUBLIC_REVENUECAT_ANDROID_KEY} chars)"
 
       - name: Build Android AAB on EAS & submit to Play internal
         if: steps.preflight.outputs.ready == 'true'
@@ -108,4 +145,16 @@ jobs:
             echo "::error::Could not read EAS remote Android versionCode after build"
             exit 1
           fi
-          echo "EAS remote Android versionCode: $EXPECTED"
+          echo "Play internal upload complete (versionCode ${EXPECTED})"
+
+      - name: Persist mobile CD baseline (non-fatal)
+        if: steps.preflight.outputs.ready == 'true'
+        continue-on-error: true
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          MOBILE_CD_SHA: ${{ inputs.mobile_cd_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/persist-mobile-cd-baseline.sh
+          RELEASE_VER="$(jq -r .version ../../packages/shared/version.json)"
+          bash scripts/persist-mobile-cd-baseline.sh android "${MOBILE_CD_SHA}" "$RELEASE_VER"
