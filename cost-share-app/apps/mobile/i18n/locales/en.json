@@ -1398,7 +1398,8 @@
             "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
             "havePromoCode": "Have a code?",
             "alreadyProTitle": "You're on Pro",
-            "alreadyProBody": "Your subscription is active. Manage billing in the App Store or Google Play, or keep enjoying Pro features in the app."
+            "alreadyProBody": "Your subscription is active. Manage billing in the App Store or Google Play, or keep enjoying Pro features in the app.",
+            "euWithdrawalAck": "I request immediate access to Pro and understand that I lose my 14-day right of withdrawal once delivery begins."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

@@ -4,6 +4,7 @@ import {
     paywallRequiresEuDigitalWithdrawalAck,
     proTrialLengthDays,
 } from '../../lib/proSubscriptionStorePolicy';
+import * as euDigitalPurchaseAck from '../../lib/euDigitalPurchaseAck';
 
 describe('proSubscriptionStorePolicy', () => {
     it('uses 14-day trial scheduling fallback on iOS and Android', () => {
@@ -13,8 +14,12 @@ describe('proSubscriptionStorePolicy', () => {
         expect(PRO_TRIAL_LENGTH_DAYS_ANDROID).toBe(14);
     });
 
-    it('does not require EU withdrawal ack on the paywall', () => {
+    it('follows device region for EU withdrawal ack on the paywall', () => {
+        const spy = jest.spyOn(euDigitalPurchaseAck, 'requiresEuDigitalWithdrawalAck');
+        spy.mockReturnValue(false);
         expect(paywallRequiresEuDigitalWithdrawalAck('ios')).toBe(false);
-        expect(paywallRequiresEuDigitalWithdrawalAck('android')).toBe(false);
+        spy.mockReturnValue(true);
+        expect(paywallRequiresEuDigitalWithdrawalAck('android')).toBe(true);
+        spy.mockRestore();
     });
 });

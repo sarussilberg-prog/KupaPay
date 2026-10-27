@@ -45,6 +45,7 @@ import { showAppToast } from '../../lib/appToast';
 import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
 import { useProStatus } from '../../hooks/useProStatus';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { paywallRequiresEuDigitalWithdrawalAck } from '../../lib/proSubscriptionStorePolicy';
 import { ProMemberPaywallPanel } from './ProMemberPaywallPanel';
 
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
@@ -96,6 +97,8 @@ export function ProPaywallContent({
     const [introEligibility, setIntroEligibility] = useState<IntroEligibilityMap | null>(null);
     const [loadFailedReason, setLoadFailedReason] = useState<PaywallLoadFailureReason | null>(null);
     const [loadAttempt, setLoadAttempt] = useState(0);
+    const [euWithdrawalAck, setEuWithdrawalAck] = useState(false);
+    const requiresEuWithdrawalAck = paywallRequiresEuDigitalWithdrawalAck();
 
     useEffect(() => {
         void logMonetizationEvent(featureKey, 'paywall_viewed');
@@ -167,6 +170,7 @@ export function ProPaywallContent({
     const handlePurchase = useCallback(async () => {
         const pkg = selectedPackage;
         if (!pkg || busy) return;
+        if (requiresEuWithdrawalAck && !euWithdrawalAck) return;
         if (selected === 'trip_pass' && !groupId) {
             showAppToast({ type: 'info', titleKey: 'pro.paywall.tripPassNeedsGroup' });
             return;
@@ -180,7 +184,16 @@ export function ProPaywallContent({
         } else if (!result.userCancelled) {
             showAppToast({ type: 'error', titleKey: 'pro.paywall.purchaseError' });
         }
-    }, [busy, featureKey, groupId, onPurchaseSuccess, selected, selectedPackage]);
+    }, [
+        busy,
+        euWithdrawalAck,
+        featureKey,
+        groupId,
+        onPurchaseSuccess,
+        requiresEuWithdrawalAck,
+        selected,
+        selectedPackage,
+    ]);
 
     const storeConfigured = isPurchasesConfigured();
 
@@ -262,7 +275,8 @@ export function ProPaywallContent({
         !storeConfigured ||
         !selectedPackage ||
         loading ||
-        !!loadFailedReason;
+        !!loadFailedReason ||
+        (requiresEuWithdrawalAck && !euWithdrawalAck);
 
     const planPickerSection = useMemo(() => {
         if (loading) {
@@ -405,6 +419,27 @@ export function ProPaywallContent({
                         {t('pro.paywall.trialFreePeriodBody', { trialDays })}
                     </Text>
                 </View>
+            ) : null}
+
+            {requiresEuWithdrawalAck && pricesReady ? (
+                <Pressable
+                    onPress={() => setEuWithdrawalAck(v => !v)}
+                    className="flex-row items-start gap-3 mb-4 px-1"
+                    testID="paywall-eu-withdrawal-ack"
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: euWithdrawalAck }}
+                >
+                    <View
+                        className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${euWithdrawalAck ? 'border-primary bg-primary' : 'border-gray-400 bg-white'}`}
+                    >
+                        {euWithdrawalAck ? (
+                            <AppIcon name="checkmark" size={14} color="#fff" />
+                        ) : null}
+                    </View>
+                    <Text className="flex-1 text-xs text-gray-700 leading-5">
+                        {t('pro.paywall.euWithdrawalAck')}
+                    </Text>
+                </Pressable>
             ) : null}
 
             <Button
