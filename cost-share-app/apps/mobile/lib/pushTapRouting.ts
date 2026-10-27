@@ -30,6 +30,7 @@ export function notificationDataToPendingNavigation(data: NotificationData): Pen
             return groupId ? { target: 'groupDetail', groupId } : null;
         case 'pro_trial_reminder':
         case 'pro_trial_lifecycle':
+        case 'pro_trial_lifecycle_nudge':
             return { target: 'manageSubscription' };
         case 'weekly_summary':
             return { target: 'groupsList' };

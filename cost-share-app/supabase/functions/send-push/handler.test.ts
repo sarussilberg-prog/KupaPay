@@ -1,5 +1,5 @@
 import { assertEquals } from '@std/assert';
-import { processActivityEvent, type ActivityRecord, type SendPushDeps } from './handler.ts';
+import { processActivityEvent, type ActivityRecord, type PrefsRow, type SendPushDeps } from './handler.ts';
 import { classifyDelivery, type DeliveryStatus } from './dedup.ts';
 
 function baseRecord(over: Partial<ActivityRecord> = {}): ActivityRecord {
@@ -7,6 +7,16 @@ function baseRecord(over: Partial<ActivityRecord> = {}): ActivityRecord {
         id: 'evt-1', user_id: 'u-recipient', kind: 'expense_added', group_id: 'g-1',
         ref_id: 'x-1', actor_user_id: 'u-actor', metadata: { description: 'Lunch', amount: 50, currency: 'ILS' },
         created_at: '2026-06-11T10:00:00Z', ...over,
+    };
+}
+
+function testPrefs(over: Partial<PrefsRow> = {}): PrefsRow {
+    return {
+        push_enabled: true, expenses_push: true, settlements_push: true,
+        messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
+        quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+        timezone: 'UTC', daily_push_cap: 8,
+        ...over,
     };
 }
 
@@ -19,7 +29,7 @@ function fakeDeps(over: Partial<SendPushDeps> = {}): SendPushDeps & { sent: stri
         markDeferred: () => Promise.resolve(),
         markSent: (_id, tickets) => { sentTickets.push(tickets); return Promise.resolve(); },
         markFailed: () => Promise.resolve(),
-        loadPreferences: () => Promise.resolve(null),
+        loadPreferences: () => Promise.resolve(testPrefs()),
         countSentLast24h: () => Promise.resolve(0),
         loadActiveTokens: () => Promise.resolve([{ token: 'ExponentPushToken[a]' }]),
         resolveNames: () => Promise.resolve({ actorName: 'Dana', groupName: 'Trip' }),
@@ -96,14 +106,16 @@ Deno.test('returns duplicate when delivery already recorded', async () => {
 });
 
 Deno.test('defers during quiet hours', async () => {
+    const hour = new Date().getUTCHours();
+    const nextHour = (hour + 1) % 24;
     let deferred = false;
     const deps = fakeDeps({
-        loadPreferences: () => Promise.resolve({
-            push_enabled: true, expenses_push: true, settlements_push: true,
-            messages_push: true, friends_push: true, groups_push: true, reminders_push: true,
-            quiet_hours_enabled: true, quiet_hours_start: 0, quiet_hours_end: 24,
-            timezone: 'UTC', daily_push_cap: 8,
-        }),
+        loadPreferences: () => Promise.resolve(testPrefs({
+            quiet_hours_enabled: true,
+            quiet_hours_start: hour,
+            quiet_hours_end: nextHour,
+            timezone: 'UTC',
+        })),
         markDeferred: () => { deferred = true; return Promise.resolve(); },
     });
     const out = await processActivityEvent(baseRecord(), deps);
@@ -123,6 +135,42 @@ Deno.test('skips unsettled nudge when reminders preference is off', async () => 
     const record = baseRecord({
         kind: 'unsettled_balance_nudge',
         metadata: { amount: 42, currency: 'ILS' },
+    });
+    assertEquals(await processActivityEvent(record, deps), 'skipped_prefs');
+});
+
+Deno.test('sends pro trial lifecycle nudge for self-targeted event', async () => {
+    const sentTitles: string[] = [];
+    const deps = fakeDeps({
+        sendExpo: (msgs) => {
+            for (const m of msgs) sentTitles.push(m.title);
+            return Promise.resolve({ ticketIds: ['t-1'], invalidTokens: [] });
+        },
+    });
+    const record = baseRecord({
+        kind: 'pro_trial_lifecycle_nudge',
+        actor_user_id: 'u-recipient',
+        group_id: null,
+        metadata: { touch_day: 1, feature_usage: { receiptScan: true } },
+    });
+    assertEquals(await processActivityEvent(record, deps), 'sent');
+    assertEquals(sentTitles[0], 'Your Pro trial is active');
+});
+
+Deno.test('skips pro trial lifecycle nudge when reminders preference is off', async () => {
+    const deps = fakeDeps({
+        loadPreferences: () => Promise.resolve({
+            push_enabled: true, expenses_push: true, settlements_push: true,
+            messages_push: true, friends_push: true, groups_push: true, reminders_push: false,
+            quiet_hours_enabled: false, quiet_hours_start: 22, quiet_hours_end: 8,
+            timezone: 'UTC', daily_push_cap: 8,
+        }),
+    });
+    const record = baseRecord({
+        kind: 'pro_trial_lifecycle_nudge',
+        actor_user_id: 'u-recipient',
+        group_id: null,
+        metadata: { touch_day: 10 },
     });
     assertEquals(await processActivityEvent(record, deps), 'skipped_prefs');
 });

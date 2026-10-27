@@ -161,6 +161,16 @@ Deno.test('consolidation_batch_added new with unknown currency falls back to cod
 
 const nudgeVars = { actorName: 'Dana', groupName: 'Trip', amount: 42, currency: 'ILS' };
 
+Deno.test('pro_trial_lifecycle_nudge renders all 7 push locales', () => {
+    for (const lang of ['en', 'he', 'ar', 'de', 'es', 'fr', 'ru']) {
+        const r = renderNotification('pro_trial_lifecycle_nudge', lang as 'en', {
+            actorName: '', groupName: '', touchDay: 13, featureUsage: { recurring: true },
+        });
+        assertEquals(r.title.length > 5, true);
+        assertEquals(r.body.length > 20, true);
+    }
+});
+
 Deno.test('unsettled_balance_nudge renders all 7 push locales', () => {
     const expected: Record<string, string> = {
         en: 'You still owe Dana · ₪42',

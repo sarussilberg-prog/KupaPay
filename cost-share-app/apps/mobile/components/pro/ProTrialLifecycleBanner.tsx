@@ -2,9 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
-import { fetchProSubscriptionUiState, openSubscriptionManagement } from '../../services/purchases.service';
 import {
-    markProTrialLifecycleTouchShown,
+    fetchProSubscriptionUiState,
+    openSubscriptionManagement,
+    syncProTrialNudgeToRevenueCat,
+} from '../../services/purchases.service';
+import {
+    markProTrialLifecycleTouchDismissed,
     resolveInAppProTrialTouch,
 } from '../../services/proTrialLifecycle.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
@@ -31,10 +35,17 @@ export function ProTrialLifecycleBanner() {
         };
     }, [i18n.language]);
 
+    useEffect(() => {
+        if (!touch) return;
+        void captureProductEvent('pro_trial_nudge_shown', { touch_day: touch.day });
+        void syncProTrialNudgeToRevenueCat(touch.day, 'shown');
+    }, [touch?.day]);
+
     const dismiss = useCallback(async () => {
         if (!touch) return;
-        await markProTrialLifecycleTouchShown(touch.day);
+        await markProTrialLifecycleTouchDismissed(touch.day);
         void captureProductEvent('pro_trial_nudge_dismissed', { touch_day: touch.day });
+        void syncProTrialNudgeToRevenueCat(touch.day, 'dismissed');
         setTouch(null);
     }, [touch]);
 
@@ -42,7 +53,7 @@ export function ProTrialLifecycleBanner() {
 
     return (
         <View className="mx-4 mt-2 rounded-xl bg-indigo-50 border border-indigo-100 px-4 py-3" testID="pro-trial-lifecycle-banner">
-            <Text className="text-indigo-950 font-semibold text-base">{t(touch.titleKey)}</Text>
+            <Text className="text-indigo-950 font-semibold text-base">{touch.title}</Text>
             <Text className="text-indigo-900 text-sm mt-1">{touch.body}</Text>
             <Text className="text-indigo-700 text-xs mt-2">{t('pro.trialLifecycle.disclosure')}</Text>
             <View className="flex-row gap-3 mt-3">

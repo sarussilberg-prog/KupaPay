@@ -35,6 +35,7 @@ export * from './pro/hasPro';
 export * from './pro/proMembership';
 export * from './pro/subscriptionSnapshot';
 export * from './pro/proTrialLifecycle';
+export * from './pro/proTrialLifecycleMessages';
 export * from './groups/monthlyBillsCycle';
 export * from './recurring/recurringDates';
 export * from './appReview';

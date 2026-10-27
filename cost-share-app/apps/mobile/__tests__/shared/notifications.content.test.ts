@@ -11,6 +11,7 @@ describe('notification content mapping', () => {
             'expense_added', 'settlement_added', 'message_posted',
             'friend_request_received', 'group_added', 'group_member_joined', 'group_removed',
             'unsettled_balance_nudge',
+            'pro_trial_lifecycle_nudge',
         ];
         for (const k of kinds) {
             expect(KIND_TO_CATEGORY[k]).toBeDefined();
