@@ -418,6 +418,8 @@
             "owedToYouCaption": "Вам должны",
             "moreCurrencies": "{{count}} валют",
             "moreCurrencies_one": "{{count}} валюта",
+            "moreCurrenciesNoun": "валют",
+            "moreCurrenciesNoun_one": "валюта",
             "updatedAgo": "Обновлено {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },

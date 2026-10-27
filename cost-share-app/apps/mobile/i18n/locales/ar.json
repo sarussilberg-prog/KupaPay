@@ -430,6 +430,8 @@
             "owedToYouCaption": "مستحق لك",
             "moreCurrencies": "{{count}} عملات",
             "moreCurrencies_one": "{{count}} عملة",
+            "moreCurrenciesNoun": "عملات",
+            "moreCurrenciesNoun_one": "عملة",
             "updatedAgo": "تم التحديث {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },

@@ -418,6 +418,8 @@
             "owedToYouCaption": "מגיע לך",
             "moreCurrencies": "{{count}} מטבעות",
             "moreCurrencies_one": "{{count}} מטבע",
+            "moreCurrenciesNoun": "מטבעות",
+            "moreCurrenciesNoun_one": "מטבע",
             "updatedAgo": "עודכן {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },

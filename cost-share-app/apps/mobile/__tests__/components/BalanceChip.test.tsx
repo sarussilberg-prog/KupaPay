@@ -71,8 +71,8 @@ describe('BalanceChip', () => {
         expect(String(amount.props.children)).not.toMatch(/\+/);
     });
 
-    it('shows localized multi-currency label without a leading plus', () => {
-        const { getByText } = render(
+    it('shows +N extra-currency hint when other currencies have non-zero net', () => {
+        const { getByTestId } = render(
             <BalanceChip
                 defaultCurrency="USD"
                 rollup={rollupOf({ currency: 'USD', net: 50 }, [
@@ -81,7 +81,9 @@ describe('BalanceChip', () => {
                 ])}
             />,
         );
-        expect(getByText(/groups\.card\.moreCurrencies/)).toBeTruthy();
+        const others = getByTestId('balance-chip-others');
+        expect(String(others.props.children)).toMatch(/\+2/);
+        expect(String(others.props.children)).toMatch(/groups\.card\.moreCurrenciesNoun/);
     });
 
     it('ignores zero-net others when counting extra currencies', () => {
@@ -89,6 +91,19 @@ describe('BalanceChip', () => {
             <BalanceChip
                 defaultCurrency="USD"
                 rollup={rollupOf({ currency: 'USD', net: 50 }, [
+                    { currency: 'EUR', net: 0 },
+                ])}
+            />,
+        );
+        expect(queryByTestId('balance-chip-others')).toBeNull();
+    });
+
+    it('ignores others in the same currency as primary', () => {
+        const { queryByTestId } = render(
+            <BalanceChip
+                defaultCurrency="USD"
+                rollup={rollupOf({ currency: 'USD', net: 50 }, [
+                    { currency: 'USD', net: 20 },
                     { currency: 'EUR', net: 0 },
                 ])}
             />,

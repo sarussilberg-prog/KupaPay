@@ -10,8 +10,8 @@ import {
     balanceChipLabelKey,
     classifyUserNetBalance,
     countNonZeroCurrencyOthers,
+    formatExtraCurrenciesChipLabel,
     formatGroupsListAmount,
-    wrapLtrForBidi,
 } from '@cost-share/shared';
 import { Text } from './AppText';
 import { useRtlLayout } from '../hooks/useRtlLayout';
@@ -95,7 +95,7 @@ export function BalanceChip({
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const primary = rollup?.primary;
-    const extraCount = countNonZeroCurrencyOthers(rollup?.others);
+    const extraCount = countNonZeroCurrencyOthers(rollup?.others, primary?.currency);
     const hasRealBalance = primary && Math.abs(primary.net) >= 0.01;
 
     const columnStyle = useMemo<ViewStyle>(
@@ -150,10 +150,9 @@ export function BalanceChip({
 
     const extraLabel =
         extraCount > 0
-            ? wrapLtrForBidi(
-                  t('groups.card.moreCurrencies', {
-                      count: extraCount,
-                  }),
+            ? formatExtraCurrenciesChipLabel(
+                  extraCount,
+                  t('groups.card.moreCurrenciesNoun', { count: extraCount }),
               )
             : null;
 

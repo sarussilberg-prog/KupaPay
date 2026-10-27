@@ -84,7 +84,7 @@ describe('GroupCard', () => {
     });
 
     it('shows localized multi-currency affordance', () => {
-        const { getByText } = render(
+        const { getByTestId } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'EUR', net: 50 }, [
@@ -93,7 +93,7 @@ describe('GroupCard', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByText(/groups\.card\.moreCurrencies/)).toBeTruthy();
+        expect(getByTestId('balance-chip-others')).toBeTruthy();
     });
 
     it('shows matched members subtitle when matchedMemberNames is set', () => {

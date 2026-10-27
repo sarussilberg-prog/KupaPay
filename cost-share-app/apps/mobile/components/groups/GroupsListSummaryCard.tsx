@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 import {
     classifyUserNetBalance,
     deriveGroupsListSummaryParts,
+    formatExtraCurrenciesChipLabel,
+    formatExtraCurrenciesChipLabel,
     formatGroupsListAmount,
-    wrapLtrForBidi,
     type BalanceSummary,
 } from '@cost-share/shared';
 import { Text } from '../AppText';
@@ -71,8 +72,9 @@ export function GroupsListSummaryCard({
         parts.foreignHint && !isLoading
             ? t('groups.listSummary.otherCurrenciesLine', {
                   count: parts.foreignHint.count,
-                  countLabel: wrapLtrForBidi(
-                      t('groups.card.moreCurrencies', {
+                  countLabel: formatExtraCurrenciesChipLabel(
+                      parts.foreignHint.count,
+                      t('groups.card.moreCurrenciesNoun', {
                           count: parts.foreignHint.count,
                       }),
                   ),

@@ -418,6 +418,8 @@
             "owedToYouCaption": "Dir zustehend",
             "moreCurrencies": "{{count}} Währungen",
             "moreCurrencies_one": "{{count}} Währung",
+            "moreCurrenciesNoun": "Währungen",
+            "moreCurrenciesNoun_one": "Währung",
             "updatedAgo": "Aktualisiert {{when}}",
             "balanceUnavailable": "Saldo offline nicht verfügbar"
         },
