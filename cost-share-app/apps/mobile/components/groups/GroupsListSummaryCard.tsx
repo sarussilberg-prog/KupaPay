@@ -9,7 +9,6 @@ import {
     classifyUserNetBalance,
     deriveGroupsListSummaryParts,
     formatExtraCurrenciesChipLabel,
-    formatExtraCurrenciesChipLabel,
     formatGroupsListAmount,
     type BalanceSummary,
 } from '@cost-share/shared';

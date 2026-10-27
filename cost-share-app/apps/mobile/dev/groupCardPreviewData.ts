@@ -33,6 +33,14 @@ function makePreviewGroup(spec: PreviewGroupSpec, createdAt: Date): GroupWithMem
     };
 }
 
+/** Two-card hero (owe + owed) without extra-currency lines — screenshot / design QA. */
+export function buildGroupCardHeroPreviewRollups(): Record<string, GroupRollup> {
+    return {
+        'g-trip': rollupOf({ currency: 'ILS', net: -761.5 }),
+        'g-multi': rollupOf({ currency: 'EUR', net: 42.5 }),
+    };
+}
+
 export function buildGroupCardPreviewRollups(options?: { stress?: boolean }): Record<string, GroupRollup> {
     if (options?.stress) {
         return {

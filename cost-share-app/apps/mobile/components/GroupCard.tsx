@@ -38,6 +38,14 @@ import { useAppStore } from '../store';
 import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
+import {
+    GROUP_CARD_MENU_HIT,
+    GROUP_CARD_MENU_ICON,
+    GROUP_CARD_PAD,
+    GROUP_CARD_ROW_GAP,
+    GROUP_CARD_STACK_GAP,
+    GROUP_CARD_TEXT_GAP,
+} from './groupCardLayout';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -187,8 +195,8 @@ function GroupCardBase({
     }, [navigation, group.id]);
 
     const cardClass = isArchived
-        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-2xl px-4 py-3 mb-3 border border-dashed border-gray-300 dark:border-gray-600'
-        : 'bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 mb-3 border border-gray-100 dark:border-gray-700';
+        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-2xl mb-2 border border-dashed border-gray-300 dark:border-gray-600'
+        : 'bg-white dark:bg-gray-800 rounded-2xl mb-2 border border-gray-100 dark:border-gray-700';
 
     const balanceChipNode = (
         <BalanceChip
@@ -224,29 +232,49 @@ function GroupCardBase({
         <>
             <View
                 className={cardClass}
-                style={[rtlRowStyle(isRtl), { alignItems: 'center' }, cardShadow]}
+                style={[
+                    rtlRowStyle(isRtl),
+                    {
+                        alignItems: 'center',
+                        padding: GROUP_CARD_PAD,
+                        gap: GROUP_CARD_STACK_GAP,
+                    },
+                    cardShadow,
+                ]}
             >
                 <ListRow
                     onPress={() => onPress(group.id)}
                     testID={`group-card-${group.id}`}
-                    style={{ flex: 1, alignItems: 'center', gap: 12, minWidth: 0 }}
+                    style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        gap: GROUP_CARD_ROW_GAP,
+                        minWidth: 0,
+                    }}
                 >
                     <GroupAvatar
                         imageUrl={group.imageUrl}
                         groupType={group.groupType}
                         name={group.name}
                         size="sm"
-                        style={{ flexShrink: 0, alignSelf: 'center' }}
+                        style={{ flexShrink: 0 }}
                     />
 
-                    <View style={{ flex: 1, minWidth: 0, gap: 4, justifyContent: 'center' }}>
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6 }]}>
+                    <View
+                        style={{
+                            flex: 1,
+                            minWidth: 0,
+                            gap: GROUP_CARD_TEXT_GAP,
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 8 }]}>
                             <View style={{ flexShrink: 1, minWidth: 0, flexGrow: 1 }}>
                                 <HighlightedText
                                     className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
                                     query={searchQuery}
-                                    numberOfLines={2}
+                                    numberOfLines={1}
                                 />
                             </View>
                             {!isArchived && (unreadCount ?? 0) > 0 && (
@@ -295,13 +323,22 @@ function GroupCardBase({
 
                 <TouchableOpacity
                     onPress={() => setMenuOpen(true)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
                     testID={`group-card-menu-${group.id}`}
-                    style={{ marginStart: 2, padding: 6, alignSelf: 'center', flexShrink: 0 }}
+                    style={{
+                        width: GROUP_CARD_MENU_HIT,
+                        height: GROUP_CARD_MENU_HIT,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                    }}
                 >
-                    <AppIcon name="ellipsis-vertical" size={16} color={colors.gray400} />
+                    <AppIcon
+                        name="ellipsis-vertical"
+                        size={GROUP_CARD_MENU_ICON}
+                        color={colors.gray400}
+                    />
                 </TouchableOpacity>
             </View>
 

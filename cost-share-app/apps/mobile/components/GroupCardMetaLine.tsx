@@ -64,7 +64,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
 
     return (
         <View testID={testID} style={{ minWidth: 0, alignSelf: 'stretch' }}>
-            <Text className={metaAlignClass} style={{ flexShrink: 1 }}>
+            <Text className={metaAlignClass} style={{ flexShrink: 1 }} numberOfLines={1}>
                 <Text className={metaAlignClass}>{memberLabel}</Text>
                 {updatedLabel ? (
                     <>
