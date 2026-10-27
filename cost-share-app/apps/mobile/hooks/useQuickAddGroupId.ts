@@ -68,7 +68,9 @@ export function resolveQuickAddGroupId(input: {
     if (focusedTab === 'FavoriteGroup') {
         const nested = focusedRoute(focused?.state);
         const fromParams = nested?.params?.groupId;
-        if (isKnownGroupId(fromParams, groups)) return fromParams;
+        if (typeof fromParams === 'string' && isKnownGroupId(fromParams, groups)) {
+            return fromParams;
+        }
         if (effectiveFavorite) return effectiveFavorite;
     }
 
