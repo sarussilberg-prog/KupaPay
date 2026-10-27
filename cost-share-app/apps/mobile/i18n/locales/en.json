@@ -402,7 +402,9 @@
             "showLess": "Show less"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}}"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}}",
+            "otherCurrenciesHint": "({{count}} currencies)",
+            "otherCurrenciesHint_one": "({{count}} currency)"
         },
         "hero": {
             "spentTogether": "Spent together",

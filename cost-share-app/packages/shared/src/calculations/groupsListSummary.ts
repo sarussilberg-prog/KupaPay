@@ -1,16 +1,10 @@
 import type { BalanceSummary } from '../types';
 
-export type GroupsListForeignBalanceHint = {
-    /** Foreign currencies with a non-zero net (excluding default). */
-    count: number;
-    net: number;
-    currency: string;
-};
-
 export type GroupsListSummaryParts = {
     primaryNet: number | null;
     primaryCurrency: string;
-    foreignHint?: GroupsListForeignBalanceHint;
+    /** Non-default currencies with a non-zero net in `byCurrency` (for FX-failure hint only). */
+    foreignCurrencyCount: number;
 };
 
 function round2(n: number): number {
@@ -22,8 +16,9 @@ function currencyRowNet(owed: number, owedToUser: number): number {
 }
 
 /**
- * Headline + secondary-currency hint for the groups list summary card (mockup B2).
- * `primaryNet` mirrors profile headline math: owedToUser − owed in default currency.
+ * Headline totals for the groups list summary card (mockup B2).
+ * `primaryNet` mirrors profile headline math: owedToUser − owed in `defaultCurrency`
+ * after FX aggregation (see `deriveProfileBalanceSummary`).
  */
 export function deriveGroupsListSummaryParts(
     summary: BalanceSummary | undefined,
@@ -36,29 +31,11 @@ export function deriveGroupsListSummaryParts(
         primaryNet = round2(summary.totalOwedToUser - summary.totalOwed);
     }
 
-    const foreignRows = summary.byCurrency
-        .filter(row => row.currency !== primaryCurrency)
-        .map(row => ({
-            currency: row.currency,
-            net: currencyRowNet(row.owed, row.owedToUser),
-        }))
-        .filter(row => Math.abs(row.net) >= 0.01);
+    const foreignCurrencyCount = summary.byCurrency.filter(row => {
+        if (row.currency === primaryCurrency) return false;
+        const net = currencyRowNet(row.owed, row.owedToUser);
+        return Math.abs(net) >= 0.01;
+    }).length;
 
-    if (foreignRows.length === 0) {
-        return { primaryNet, primaryCurrency };
-    }
-
-    const highlight = [...foreignRows].sort(
-        (a, b) => Math.abs(b.net) - Math.abs(a.net),
-    )[0];
-
-    return {
-        primaryNet,
-        primaryCurrency,
-        foreignHint: {
-            count: foreignRows.length,
-            net: highlight.net,
-            currency: highlight.currency,
-        },
-    };
+    return { primaryNet, primaryCurrency, foreignCurrencyCount };
 }

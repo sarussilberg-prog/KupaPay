@@ -7,7 +7,7 @@ import { Platform, View, type TextStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
     bindCountLabelNoBreak,
-    formatRelativeTimeCompact,
+    formatRelativeTimeShort,
     type GroupWithMembers,
 } from '@cost-share/shared';
 import { Text } from './AppText';
@@ -61,7 +61,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
             return { memberLabel, updatedWhen: null as string | null };
         }
 
-        const when = formatRelativeTimeCompact(activityAt, Date.now(), language);
+        const when = formatRelativeTimeShort(activityAt, Date.now(), language);
         if (!when) return { memberLabel, updatedWhen: null };
 
         return { memberLabel, updatedWhen: when };

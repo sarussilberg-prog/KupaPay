@@ -136,7 +136,7 @@ export type GroupRollupTotalDisplay = {
     conversionFailed?: boolean;
 };
 
-function rollupCurrencyLegs(rollup: GroupRollup): { currency: string; net: number }[] {
+export function rollupCurrencyLegs(rollup: GroupRollup): { currency: string; net: number }[] {
     const legs: { currency: string; net: number }[] = [];
     if (Math.abs(rollup.primary.net) >= 0.01) {
         legs.push({ currency: rollup.primary.currency, net: rollup.primary.net });
@@ -191,6 +191,22 @@ export function resolveGroupRollupTotalDisplay(
         currency: displayCurrency,
         isConverted: anyConverted,
     };
+}
+
+/** Foreign currencies appearing in group rollups that need FX into `displayCurrency`. */
+export function collectGroupRollupFxCurrencies(
+    rollups: Map<string, GroupRollup> | undefined,
+    displayCurrency: string,
+): string[] {
+    const set = new Set<string>();
+    rollups?.forEach(rollup => {
+        for (const leg of rollupCurrencyLegs(rollup)) {
+            if (leg.currency !== displayCurrency && Math.abs(leg.net) >= 0.01) {
+                set.add(leg.currency);
+            }
+        }
+    });
+    return [...set].sort((a, b) => a.localeCompare(b));
 }
 
 export function collectGroupListFxBases(

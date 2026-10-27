@@ -1,8 +1,10 @@
 import {
     collectGroupListFxBases,
+    collectGroupRollupFxCurrencies,
     resolveGroupBalanceDisplay,
     resolveGroupRollupTotalDisplay,
     type GroupBalance,
+    type GroupRollup,
 } from '@cost-share/shared';
 
 describe('groupBalanceDisplay', () => {
@@ -77,6 +79,20 @@ describe('groupBalanceDisplay', () => {
             currency: 'EUR',
             isConverted: false,
         });
+    });
+
+    it('collectGroupRollupFxCurrencies lists foreign legs for the user display currency', () => {
+        const rollups = new Map<string, GroupRollup>([
+            [
+                'g1',
+                {
+                    groupId: 'g1',
+                    primary: { currency: 'ILS', net: -100 },
+                    others: [{ currency: 'USD', net: -27 }, { currency: 'AFN', net: 50 }],
+                },
+            ],
+        ]);
+        expect(collectGroupRollupFxCurrencies(rollups, 'ILS')).toEqual(['AFN', 'USD']);
     });
 
     it('collectGroupListFxBases groups foreign currencies by group default', () => {

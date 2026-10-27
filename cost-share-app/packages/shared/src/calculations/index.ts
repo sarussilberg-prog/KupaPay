@@ -37,6 +37,7 @@ export {
 export {
     collectGroupFxCurrencies,
     collectGroupListFxBases,
+    collectGroupRollupFxCurrencies,
     resolveGroupBalanceDisplay,
     resolveGroupBalanceDisplayBundle,
     resolveGroupRollupTotalDisplay,
@@ -59,7 +60,6 @@ export {
 
 export {
     deriveGroupsListSummaryParts,
-    type GroupsListForeignBalanceHint,
     type GroupsListSummaryParts,
 } from './groupsListSummary';
 
