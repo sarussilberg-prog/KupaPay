@@ -114,7 +114,7 @@ export function CurrencyPicker({
                         >
                             {selectedCurrency?.code ?? value ?? '—'}
                         </Text>
-                        <View style={{ marginLeft: 4 }}>
+                        <View style={{ marginStart: 4 }}>
                             <AppIcon
                                 name="chevron-down"
                                 size={14}
