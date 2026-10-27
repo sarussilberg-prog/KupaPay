@@ -38,7 +38,7 @@ export async function fetchSettlements(groupId?: string): Promise<Settlement[]> 
             tags: { service: 'settlements', op: 'fetch' },
             extra: { groupId },
         });
-        throw error;
+        return [];
     }
 }
 
