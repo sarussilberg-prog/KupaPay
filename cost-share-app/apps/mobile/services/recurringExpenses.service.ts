@@ -92,3 +92,38 @@ export async function stopRecurringExpenseSeries(seriesId: string): Promise<bool
     });
     return !error;
 }
+
+export interface UpdateRecurringSeriesDto {
+    description: string;
+    amount: number;
+    currency: string;
+    category: string | null;
+    paidBy: string;
+    splitMode: string;
+    splits: ExpenseSplitInput[];
+    frequency?: RecurringFrequency;
+}
+
+export async function updateRecurringExpenseSeries(
+    seriesId: string,
+    dto: UpdateRecurringSeriesDto,
+): Promise<boolean> {
+    const splits = resolveSplitAmounts(dto.amount, dto.splits);
+    const validation = validateExpenseSplits(dto.amount, splits);
+    if (!validation.valid) {
+        throw new Error('updateRecurringExpenseSeries: invalid splits');
+    }
+
+    const { error } = await supabase.rpc('update_recurring_expense_series', {
+        p_series_id: seriesId,
+        p_description: dto.description,
+        p_amount: dto.amount,
+        p_currency: dto.currency,
+        p_category: dto.category,
+        p_paid_by: dto.paidBy,
+        p_split_mode: dto.splitMode,
+        p_splits: splits.map(s => ({ user_id: s.userId, amount: s.amount })),
+        p_frequency: dto.frequency ?? null,
+    });
+    return !error;
+}

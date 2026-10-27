@@ -695,6 +695,10 @@
                 "stopConfirmTitle": "¿Detener gastos recurrentes?",
                 "stopConfirmBody": "Los gastos pasados se mantienen. No se crearán nuevas repeticiones.",
                 "stopped": "Serie recurrente detenida",
+                "editScopeTitle": "¿Actualizar gasto recurrente?",
+                "editScopeBody": "Aplicar cambios a repeticiones futuras o solo a este gasto.",
+                "editScopeSeries": "También repeticiones futuras",
+                "editScopeOccurrence": "Solo este gasto",
                 "frequency": {
                     "weekly": "Semanal",
                     "monthly": "Mensual",

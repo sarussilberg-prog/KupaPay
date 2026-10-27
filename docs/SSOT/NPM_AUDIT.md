@@ -9,8 +9,8 @@
 
 ## Known transitive highs (not CI-blocking)
 
-- **Next.js bundled `postcss@8.4.x`** — pinned inside `next` until a patch release bumps it; marketing site uses patched top-level `postcss` for Tailwind builds.
 - **Tailwind CSS 3 dev toolchain** (`braces`, `micromatch`, etc.) — address with a Tailwind 4 migration, not a drive-by bump.
+- **Lighthouse / `@lhci/cli` dev tree** — transitive highs (e.g. `basic-ftp`, `extract-zip`, nested tooling) until Lighthouse major upgrades; dev-only, not shipped to mobile or web runtime.
 
 ## Monorepo overrides
 

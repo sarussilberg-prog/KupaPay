@@ -26,7 +26,7 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 
 | Input | Default | Effect |
 |-------|---------|--------|
-| `pro_enabled` | `true` | Sets `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED` for **this build only**. When `true`, `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` must be configured. |
+| `pro_enabled` | `false` | Sets `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED` for **this build only**. When `true`, `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` must be configured. Opt in explicitly for Pro sandbox builds. |
 
 ## Version / versionCode
 

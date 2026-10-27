@@ -695,6 +695,10 @@
                 "stopConfirmTitle": "Arrêter les dépenses récurrentes ?",
                 "stopConfirmBody": "Les dépenses passées restent. Aucune nouvelle répétition ne sera créée.",
                 "stopped": "Série récurrente arrêtée",
+                "editScopeTitle": "Mettre à jour la dépense récurrente ?",
+                "editScopeBody": "Appliquer les changements aux répétitions futures ou seulement à cette dépense.",
+                "editScopeSeries": "Répétitions futures aussi",
+                "editScopeOccurrence": "Cette dépense seulement",
                 "frequency": {
                     "weekly": "Hebdomadaire",
                     "monthly": "Mensuel",
