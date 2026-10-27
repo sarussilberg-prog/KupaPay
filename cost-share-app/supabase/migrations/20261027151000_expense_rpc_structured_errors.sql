@@ -1,5 +1,9 @@
 -- #533 — create/update expense RPCs return jsonb { ok, expense? | error_code }.
 
+DROP FUNCTION IF EXISTS public.create_expense_with_splits(
+    uuid, text, numeric, text, text, date, text, uuid, text, jsonb
+);
+
 CREATE OR REPLACE FUNCTION public.create_expense_with_splits(
     p_group_id     uuid,
     p_description  text,
@@ -105,6 +109,8 @@ BEGIN
     RETURN jsonb_build_object('ok', true, 'expense', to_jsonb(v_expense));
 END;
 $$;
+
+DROP FUNCTION IF EXISTS public.update_expense_with_splits(uuid, jsonb, jsonb);
 
 CREATE OR REPLACE FUNCTION public.update_expense_with_splits(
     p_expense_id    uuid,
