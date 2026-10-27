@@ -58,7 +58,7 @@ describe('updateExpense', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockExpenseSelect();
-        mockRpc.mockResolvedValue({ data: expenseRow, error: null });
+        mockRpc.mockResolvedValue({ data: { ok: true, expense: expenseRow }, error: null });
     });
 
     it('calls update_expense_with_splits RPC with resolved equal splits', async () => {

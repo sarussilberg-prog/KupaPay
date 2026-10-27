@@ -17,6 +17,7 @@ import {
     validateExpenseSplits,
 } from '@cost-share/shared';
 import { handleError } from '../lib/handleError';
+import { assertRpcSuccess, unwrapExpenseRpcRow } from '../lib/rpcResult';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { queryClient } from '../lib/queryClient';
@@ -144,9 +145,13 @@ export async function createExpense(dto: CreateExpenseDto): Promise<ExpenseWithS
         },
     );
     if (expenseErr) throw expenseErr;
-    if (!expenseRow) throw new Error('createExpense: rpc returned no row');
+    assertRpcSuccess(expenseRow);
+    const expensePayload = unwrapExpenseRpcRow(expenseRow) ?? expenseRow;
+    if (!expensePayload || typeof expensePayload !== 'object') {
+        throw new Error('createExpense: rpc returned no row');
+    }
 
-    const expense = expenseFromRow(expenseRow);
+    const expense = expenseFromRow(expensePayload as Record<string, unknown>);
     const splitsForCache: ExpenseSplit[] = splits.map(s => ({
         id: '',
         expenseId: expense.id,
@@ -202,8 +207,12 @@ export async function updateExpense(id: string, dto: UpdateExpenseDto): Promise<
                 : null,
         });
         if (rpcErr) throw rpcErr;
-        if (!expenseRow) throw new Error('updateExpense: rpc returned no row');
-        const baseExpense = expenseFromRow(expenseRow);
+        assertRpcSuccess(expenseRow);
+        const expensePayload = unwrapExpenseRpcRow(expenseRow) ?? expenseRow;
+        if (!expensePayload || typeof expensePayload !== 'object') {
+            throw new Error('updateExpense: rpc returned no row');
+        }
+        const baseExpense = expenseFromRow(expensePayload as Record<string, unknown>);
 
         const groupId = baseExpense.groupId;
         const cachedExpenses =

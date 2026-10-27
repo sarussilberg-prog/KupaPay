@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+import { parseRpcResult } from '../lib/rpcResult';
 import { listClaimableGuestMembers } from './groups.service';
 import { INVITE_TOKEN_RE } from '../lib/inviteToken';
 
@@ -155,6 +156,11 @@ async function redeemInviteLink(
             handleRedemptionError(error, 'friend');
             return null;
         }
+        const failure = parseRpcResult(data);
+        if (failure && !failure.ok) {
+            handleRedemptionErrorCode(failure.error_code, 'friend');
+            return null;
+        }
         const payload = data as { friend_id: string; friend_name: string };
         showAppToast({
             type: 'success',
@@ -171,6 +177,11 @@ async function redeemInviteLink(
     const { data, error } = await supabase.rpc('redeem_group_invite', { p_token: link.token });
     if (error) {
         handleRedemptionError(error, 'group');
+        return null;
+    }
+    const failure = parseRpcResult(data);
+    if (failure && !failure.ok) {
+        handleRedemptionErrorCode(failure.error_code, 'group');
         return null;
     }
     const payload = data as { group_id: string; group_name: string; already_member: boolean };
@@ -194,14 +205,31 @@ async function redeemInviteLink(
     return { kind: 'group', groupId: payload.group_id };
 }
 
-function handleRedemptionError(error: { message: string }, kind: 'friend' | 'group' | 'settleReminder'): void {
-    const message = error.message;
-    // cannot_self_invite is pure UX guidance, not a bug — info toast, no Sentry.
-    if (message.includes('cannot_self_invite')) {
+function handleRedemptionErrorCode(
+    errorCode: string,
+    kind: 'friend' | 'group' | 'settleReminder',
+): void {
+    if (errorCode === 'cannot_self_invite') {
         showInfoToast('invite.redemption.selfInvite');
         return;
     }
-    if (message.includes('invite_not_found')) {
+    if (errorCode === 'invite_not_found') {
+        handleError(new Error(errorCode), {
+            toast: { titleKey: 'invite.redemption.invalid' },
+            tags: { service: 'deepLinks', op: 'redeem', kind, reason: 'invite_not_found' },
+        });
+        return;
+    }
+    handleRedemptionError({ message: errorCode }, kind);
+}
+
+function handleRedemptionError(error: { message: string }, kind: 'friend' | 'group' | 'settleReminder'): void {
+    const message = error.message;
+    if (message === 'cannot_self_invite' || message.includes('cannot_self_invite')) {
+        showInfoToast('invite.redemption.selfInvite');
+        return;
+    }
+    if (message === 'invite_not_found' || message.includes('invite_not_found')) {
         handleError(error, {
             toast: { titleKey: 'invite.redemption.invalid' },
             tags: { service: 'deepLinks', op: 'redeem', kind, reason: 'invite_not_found' },
