@@ -1,5 +1,5 @@
-import { normalizePushLocale, type PushLocale } from '../notifications/pushPolicy';
-import type { ProTrialFeatureUsage, ProTrialLifecycleTouchDay } from './proTrialLifecycle';
+import { normalizePushLocale, type PushLocale } from '../notifications/pushPolicy.ts';
+import type { ProTrialFeatureUsage, ProTrialLifecycleTouchDay } from './proTrialLifecycle.ts';
 
 type DayCopy = { title: string; body: string };
 
