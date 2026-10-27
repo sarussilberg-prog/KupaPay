@@ -14,6 +14,29 @@
 import { GroupWithMembers } from '@cost-share/shared';
 import { isGroupArchived, sortGroups } from './groupListQuery';
 
+export function isKnownGroupId(
+    groupId: string | undefined | null,
+    groups: GroupWithMembers[],
+): groupId is string {
+    return Boolean(groupId && groups.some((g) => g.id === groupId));
+}
+
+/**
+ * Resolves the group context for Add Expense: honor an explicit route/context id
+ * when it is still in the user's list, otherwise fall back to the effective
+ * favorite (same rules as the Favorite Group tab).
+ */
+export function resolveAddExpenseGroupId(input: {
+    routeGroupId: string | undefined;
+    favoriteGroupId: string | null;
+    groups: GroupWithMembers[];
+}): string | undefined {
+    const { routeGroupId, favoriteGroupId, groups } = input;
+    if (isKnownGroupId(routeGroupId, groups)) return routeGroupId;
+    const fallback = resolveFavoriteGroupId(favoriteGroupId, groups);
+    return fallback ?? undefined;
+}
+
 export function resolveFavoriteGroupId(
     storedId: string | null,
     groups: GroupWithMembers[],

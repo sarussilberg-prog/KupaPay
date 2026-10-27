@@ -18,10 +18,12 @@ interface GroupSelectPillProps {
     groupName: string;
     groupType?: GroupType;
     imageUrl?: string | null;
+    /** When true, styles the name as a required placeholder (no group chosen yet). */
+    placeholder?: boolean;
     onPress: () => void;
 }
 
-export function GroupSelectPill({ groupName, onPress }: GroupSelectPillProps) {
+export function GroupSelectPill({ groupName, placeholder, onPress }: GroupSelectPillProps) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     return (
@@ -37,7 +39,10 @@ export function GroupSelectPill({ groupName, onPress }: GroupSelectPillProps) {
                 accessibilityLabel={t('expenses.v2.changeGroup')}
                 style={[styles.pill, rtlRowStyle(isRtl)]}
             >
-                <Text style={styles.name} numberOfLines={1}>
+                <Text
+                    style={[styles.name, placeholder ? styles.namePlaceholder : null]}
+                    numberOfLines={1}
+                >
                     {groupName}
                 </Text>
                 <AppIcon name="chevron-down" size={16} color={colors.gray400} />
@@ -77,5 +82,9 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.text.primary,
         marginHorizontal: 6,
+    },
+    namePlaceholder: {
+        color: colors.text.tertiary,
+        fontWeight: '500',
     },
 });
