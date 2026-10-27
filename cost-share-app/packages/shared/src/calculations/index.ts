@@ -60,7 +60,6 @@ export {
 
 export {
     deriveGroupsListSummaryParts,
-    type GroupsListForeignBalanceHint,
     type GroupsListSummaryParts,
 } from './groupsListSummary';
 
