@@ -12,8 +12,9 @@
 
 | RPC | p95 (ms) | Error rate |
 |-----|----------|------------|
-| get_user_dashboard | | |
 | get_user_simplified_inputs | | |
+| get_user_groups_archive_state | | |
+| get_activity_unread_count | | |
 
 ## Verdict
 
@@ -22,4 +23,4 @@
 
 ## Free-tier headroom notes
 
-(Supabase connections, REST requests/month, Vercel invocations — see FREE_TIER_LIMITS.md)
+See [HEADROOM.md](./HEADROOM.md) and [FREE_TIER_LIMITS.md](../../../docs/SSOT/FREE_TIER_LIMITS.md).

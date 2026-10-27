@@ -1,6 +1,8 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
+const manifest = JSON.parse(open('./load-test-manifest.json'));
+
 const supabaseUrl = (__ENV.SUPABASE_URL || '').replace(/\/$/, '');
 const anonKey = __ENV.SUPABASE_ANON_KEY || '';
 const userJwt = __ENV.K6_USER_JWT || '';
@@ -13,25 +15,37 @@ if (!supabaseUrl || !anonKey || !userJwt || !userId) {
         'Set SUPABASE_URL, SUPABASE_ANON_KEY, K6_USER_JWT, and K6_USER_ID before running k6.',
     );
 }
+if (!supabaseUrl.includes(manifest.supabaseProjectRef)) {
+    throw new Error(`Load test is dev-only (expected ref ${manifest.supabaseProjectRef}).`);
+}
+
+const p95Ms = manifest.passCriteria.p95RpcMs;
+const thresholds = {
+    http_req_failed: [`rate<${manifest.passCriteria.maxErrorRate}`],
+};
+for (const rpc of manifest.rpcs) {
+    thresholds[`http_req_duration{rpc:${rpc.name}}`] = [`p(95)<${p95Ms}`];
+}
 
 export const options = {
     scenarios: {
-        dashboard_rpc: {
+        groups_list_hot_path: {
             executor: 'constant-vus',
             vus,
             duration,
         },
     },
-    thresholds: {
-        http_req_failed: ['rate<0.005'],
-        'http_req_duration{rpc:get_user_dashboard}': ['p(95)<300'],
-        'http_req_duration{rpc:get_user_simplified_inputs}': ['p(95)<300'],
-    },
+    thresholds,
 };
+
+function substituteBody(body) {
+    const raw = JSON.stringify(body);
+    return raw.replaceAll('{{userId}}', userId);
+}
 
 function rpc(name, body) {
     const url = `${supabaseUrl}/rest/v1/rpc/${name}`;
-    const res = http.post(url, JSON.stringify(body), {
+    const res = http.post(url, substituteBody(body), {
         headers: {
             apikey: anonKey,
             Authorization: `Bearer ${userJwt}`,
@@ -46,8 +60,9 @@ function rpc(name, body) {
 }
 
 export default function () {
-    rpc('get_user_dashboard', { p_user_id: userId });
+    for (const entry of manifest.rpcs) {
+        rpc(entry.name, entry.body);
+        sleep(0.15);
+    }
     sleep(0.2);
-    rpc('get_user_simplified_inputs', { p_user_id: userId });
-    sleep(0.3);
 }

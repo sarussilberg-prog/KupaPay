@@ -24,6 +24,19 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run test:performance
 
+  load-test-manifest:
+    name: MAU load-test manifest (#425)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cost-share-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm run test:load-test
+
   bundle-size:
     name: Bundle size budgets
     runs-on: ubuntu-latest
