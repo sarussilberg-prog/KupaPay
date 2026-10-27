@@ -418,6 +418,8 @@
             "owedToYouCaption": "Owed to you",
             "moreCurrencies": "{{count}} currencies",
             "moreCurrencies_one": "{{count}} currency",
+            "moreCurrenciesNoun": "currencies",
+            "moreCurrenciesNoun_one": "currency",
             "updatedAgo": "Updated {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },

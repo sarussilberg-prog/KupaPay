@@ -3,14 +3,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { View } from 'react-native';
+import { Platform, View, type TextStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
     bindCountLabelNoBreak,
-    formatRelativeTimeShort,
+    formatRelativeTimeCompact,
     type GroupWithMembers,
 } from '@cost-share/shared';
 import { Text } from './AppText';
+import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
+import { colors } from '../theme';
 import { toDate } from '../lib/dateUtils';
 
 /** Skip "Updated now" noise on list rows (Splitwise-style). */
@@ -18,7 +20,19 @@ export const GROUP_CARD_UPDATED_META_MIN_AGE_MS = 90_000;
 
 const META_SEPARATOR = '\u00A0·\u00A0';
 
-const metaTextClass = 'text-xs text-gray-500 dark:text-gray-400 leading-4';
+const MEMBER_META_STYLE: TextStyle = {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.gray500,
+    ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+};
+
+const UPDATED_META_STYLE: TextStyle = {
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.gray400,
+    ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+};
 
 type Props = {
     group: GroupWithMembers;
@@ -29,8 +43,10 @@ type Props = {
 
 export function GroupCardMetaLine({ group, memberCount, language, testID = 'group-card-meta' }: Props) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
+    const textAlign = rtlTextAlign(isRtl);
 
-    const { memberLabel, updatedLabel } = useMemo(() => {
+    const { memberLabel, updatedWhen } = useMemo(() => {
         const activityAt = group.lastActivityAt ?? group.updatedAt;
         const activityTime = toDate(activityAt).getTime();
         const ageMs = Number.isFinite(activityTime) ? Date.now() - activityTime : Number.NaN;
@@ -42,14 +58,13 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
         const memberLabel = bindCountLabelNoBreak(memberRaw);
 
         if (!Number.isFinite(ageMs) || ageMs < GROUP_CARD_UPDATED_META_MIN_AGE_MS) {
-            return { memberLabel, updatedLabel: null as string | null };
+            return { memberLabel, updatedWhen: null as string | null };
         }
 
-        const when = formatRelativeTimeShort(activityAt, Date.now(), language);
-        if (!when) return { memberLabel, updatedLabel: null };
+        const when = formatRelativeTimeCompact(activityAt, Date.now(), language);
+        if (!when) return { memberLabel, updatedWhen: null };
 
-        const updatedLabel = t('groups.card.updatedAgo', { when });
-        return { memberLabel, updatedLabel };
+        return { memberLabel, updatedWhen: when };
     }, [
         group.groupType,
         group.lastActivityAt,
@@ -60,16 +75,29 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
     ]);
 
     return (
-        <View testID={testID} style={{ minWidth: 0, alignSelf: 'stretch' }}>
-            <Text className={metaTextClass} style={{ flexShrink: 1 }}>
-                <Text className={metaTextClass}>{memberLabel}</Text>
-                {updatedLabel ? (
-                    <>
-                        <Text className={metaTextClass}>{META_SEPARATOR}</Text>
-                        <Text className={metaTextClass}>{updatedLabel}</Text>
-                    </>
-                ) : null}
+        <View
+            testID={testID}
+            style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
+        >
+            <Text
+                style={[MEMBER_META_STYLE, { textAlign, flexShrink: 0 }]}
+                numberOfLines={1}
+                testID="group-card-meta-members"
+            >
+                {memberLabel}
             </Text>
+            {updatedWhen ? (
+                <>
+                    <Text style={[UPDATED_META_STYLE, { flexShrink: 0 }]}>{META_SEPARATOR}</Text>
+                    <Text
+                        style={[UPDATED_META_STYLE, { textAlign, flexShrink: 1, minWidth: 0 }]}
+                        numberOfLines={1}
+                        testID="group-card-meta-updated"
+                    >
+                        {updatedWhen}
+                    </Text>
+                </>
+            ) : null}
         </View>
     );
 }

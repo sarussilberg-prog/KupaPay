@@ -418,6 +418,8 @@
             "owedToYouCaption": "On vous doit",
             "moreCurrencies": "{{count}} devises",
             "moreCurrencies_one": "{{count}} devise",
+            "moreCurrenciesNoun": "devises",
+            "moreCurrenciesNoun_one": "devise",
             "updatedAgo": "Mis à jour {{when}}",
             "balanceUnavailable": "Solde indisponible hors ligne"
         },

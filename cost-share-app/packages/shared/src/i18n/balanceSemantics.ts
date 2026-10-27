@@ -1,3 +1,5 @@
+import { wrapLtrForBidi } from './formatMoney';
+
 export type UserBalanceTone = 'settled' | 'owe' | 'owed' | 'unknown';
 
 const SETTLED_EPSILON = 0.01;
@@ -23,7 +25,18 @@ export function balanceChipLabelKey(
 }
 
 export function countNonZeroCurrencyOthers(
-    others: { net: number }[] | undefined,
+    others: { currency: string; net: number }[] | undefined,
+    primaryCurrency?: string,
 ): number {
-    return (others ?? []).filter(o => Math.abs(o.net) >= SETTLED_EPSILON).length;
+    return (others ?? []).filter(o => {
+        if (Math.abs(o.net) < SETTLED_EPSILON) return false;
+        if (primaryCurrency && o.currency === primaryCurrency) return false;
+        return true;
+    }).length;
+}
+
+/** Chip / link hint: "+2 currencies" with LTR-isolated "+N" for RTL UI. */
+export function formatExtraCurrenciesChipLabel(count: number, currencyWord: string): string {
+    if (count <= 0 || !currencyWord.trim()) return '';
+    return `${wrapLtrForBidi(`+${count}`)} ${currencyWord.trim()}`;
 }

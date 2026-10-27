@@ -39,8 +39,10 @@ export {
     collectGroupListFxBases,
     resolveGroupBalanceDisplay,
     resolveGroupBalanceDisplayBundle,
+    resolveGroupRollupTotalDisplay,
     type GroupBalanceDisplay,
     type GroupBalanceDisplayBundle,
+    type GroupRollupTotalDisplay,
 } from './groupBalanceDisplay';
 
 export {

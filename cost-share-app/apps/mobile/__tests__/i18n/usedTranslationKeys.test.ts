@@ -82,8 +82,8 @@ describe('mobile used i18n keys exist in every locale', () => {
         });
     });
 
-    it('includes groups.card.updatedAgo (GroupCard meta regression)', () => {
-        expect(usedKeys).toContain('groups.card.updatedAgo');
+    it('includes groups.card.moreCurrenciesNoun (GroupCard balance chip regression)', () => {
+        expect(usedKeys).toContain('groups.card.moreCurrenciesNoun');
     });
 
     it.each(MOBILE_I18N_LOCALE_CODES)('%s resolves every key used in mobile UI code', locale => {
