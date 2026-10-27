@@ -1,27 +1,26 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
 import { Text } from './AppText';
 import { useNetworkStatus } from '../lib/networkStatus';
 import { retryConnectivitySync } from '../lib/reconnectSync';
+import { queryClient } from '../lib/queryClient';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 
 export function NetworkOfflineBanner() {
     const { t } = useTranslation();
     const { online } = useNetworkStatus();
-    const client = useQueryClient();
     const isRtl = useRtlLayout();
     const [retrying, setRetrying] = useState(false);
 
     const onRetry = useCallback(async () => {
         setRetrying(true);
         try {
-            await retryConnectivitySync(client);
+            await retryConnectivitySync(queryClient);
         } finally {
             setRetrying(false);
         }
-    }, [client]);
+    }, []);
 
     if (online) {
         return null;

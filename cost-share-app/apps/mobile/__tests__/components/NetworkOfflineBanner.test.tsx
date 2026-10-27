@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NetworkOfflineBanner } from '../../components/NetworkOfflineBanner';
 
 const mockUseNetworkStatus = jest.fn();
@@ -14,8 +13,7 @@ jest.mock('../../lib/reconnectSync', () => ({
 }));
 
 function wrap(ui: React.ReactElement) {
-    const client = new QueryClient();
-    return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+    return render(ui);
 }
 
 describe('NetworkOfflineBanner', () => {

@@ -1,19 +1,12 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
-import { useEffect } from 'react';
-
+/** Route-level error UI (#427). Unhandled errors still reach Sentry via instrumentation. */
 export default function GlobalRouteError({
-    error,
     reset,
 }: {
     error: Error & { digest?: string };
     reset: () => void;
 }) {
-    useEffect(() => {
-        Sentry.captureException(error);
-    }, [error]);
-
     return (
         <main style={{ maxWidth: 480, margin: '4rem auto', padding: '0 1.5rem', fontFamily: 'system-ui' }}>
             <h1 style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>Something went wrong</h1>
