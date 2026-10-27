@@ -91,12 +91,16 @@ export function GroupAvatar({
                         {initialsText}
                     </Text>
                 ) : (
-                    <AppIcon
-                        name={visual.icon}
-                        size={iconSize}
-                        color="rgba(255,255,255,0.95)"
+                    <View
                         testID={`${testID}-icon`}
-                    />
+                        style={{ justifyContent: 'center', alignItems: 'center' }}
+                    >
+                        <AppIcon
+                            name={visual.icon}
+                            size={iconSize}
+                            color="rgba(255,255,255,0.95)"
+                        />
+                    </View>
                 )}
             </LinearGradient>
         </View>
