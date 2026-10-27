@@ -1394,12 +1394,20 @@
             "trialFreePeriodHeading": "{{trialDays}}-day free trial",
             "trialFreePeriodBody": "Try every Pro feature free for {{trialDays}} days. Cancel in Settings before the trial ends if you don't want to continue.",
             "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
-            "havePromoCode": "Have a code?"
+            "havePromoCode": "Have a code?",
+            "alreadyProTitle": "You're on Pro",
+            "alreadyProBody": "Your subscription is active. Manage billing in the App Store or Google Play, or keep enjoying Pro features in the app."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Manage subscription",
-            "freeTrialUntil": "Free trial until {{date}}"
+            "freeTrialUntil": "Free trial until {{date}}",
+            "activeUntil": "Pro active until {{date}}",
+            "activeIndividualAndGroup": "Pro subscription active; this group also has Trip Pass Pro."
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro for this group",
+            "activeUntil": "Everyone in this group has Pro until {{date}}."
         },
         "trialReminder": {
             "title": "KupaPay Pro trial ending soon",

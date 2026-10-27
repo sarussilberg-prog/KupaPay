@@ -8,6 +8,7 @@ import { initializeLanguageForCapture } from '../i18n';
 import { ascLocaleToAppLanguage } from '../lib/ascCaptureLocale';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
+import type { MyProStatus } from '../services/proEntitlements.service';
 import { useAppStore } from '../store';
 import { RtlLayoutProvider } from '../hooks/useRtlLayout';
 import { readAscCaptureParams } from '../lib/ascCaptureParams';
@@ -22,12 +23,29 @@ function seedCaptureCache() {
     queryClient.setQueryData(queryKeys.simplifiedDebts, captureSimplifiedInputs);
     queryClient.setQueryData(queryKeys.groupUnreadCounts, {});
     queryClient.setQueryData(queryKeys.activityUnreadCount, 0);
+    const proCaptureStatus: MyProStatus = {
+        hasPro: true,
+        individualProUntil: '2027-01-15T00:00:00.000Z',
+        groupPassUntil: null,
+        includedTripPassCredits: 0,
+        unassignedTripPassCount: 0,
+        adminProViewMode: 'real',
+        adminProViewExpiresAt: null,
+    };
+    queryClient.setQueryData(queryKeys.proStatus(), proCaptureStatus);
     useAppStore.setState({
         session: { user: { id: CAPTURE_USER_ID } } as never,
         currentUser: {
             id: CAPTURE_USER_ID,
             displayName: 'Capture',
             email: 'capture@kupapay.local',
+            inviteToken: 'capture123456',
+            defaultCurrency: 'ILS',
+            language: 'he',
+            isActive: true,
+            isAdmin: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         } as never,
     });
 }

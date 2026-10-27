@@ -1451,12 +1451,20 @@
             "trialFreePeriodHeading": "{{trialDays}} Tage kostenlos testen",
             "trialFreePeriodBody": "{{trialDays}} Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
             "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
-            "havePromoCode": "Code vorhanden?"
+            "havePromoCode": "Code vorhanden?",
+            "alreadyProTitle": "Du hast Pro",
+            "alreadyProBody": "Dein Abo ist aktiv. Verwalte die Abrechnung im App Store oder bei Google Play und nutze weiter alle Pro-Funktionen."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Abo verwalten",
-            "freeTrialUntil": "Kostenlose Testphase bis {{date}}"
+            "freeTrialUntil": "Kostenlose Testphase bis {{date}}",
+            "activeUntil": "Pro aktiv bis {{date}}",
+            "activeIndividualAndGroup": "Pro-Abo aktiv; diese Gruppe hat zusätzlich Trip Pass Pro."
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro für diese Gruppe",
+            "activeUntil": "Pro für alle Gruppenmitglieder bis {{date}}."
         },
         "trialReminder": {
             "title": "KupaPay-Pro-Testphase endet bald",

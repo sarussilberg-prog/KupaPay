@@ -43,6 +43,9 @@ import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
 import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
+import { useProStatus } from '../../hooks/useProStatus';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { ProMemberPaywallPanel } from './ProMemberPaywallPanel';
 
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
 const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
@@ -84,6 +87,8 @@ export function ProPaywallContent({
     const paywallTitleKey = paywallTitleKeyForVariant(paywallHeadlineVariant);
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
+    const { hasPro } = useProStatus(groupId);
+    const showMemberPanel = KUPAPAY_PRO_ENABLED && hasPro;
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [selected, setSelected] = useState<PlanKey>('yearly');
@@ -333,6 +338,27 @@ export function ProPaywallContent({
             </>
         );
     }, [loadFailedReason, loading, packages, retryLoad, selected, showTripPass, storeConfigured, t, tripPassPrice]);
+
+    if (showMemberPanel) {
+        return (
+            <View
+                className="flex-1 bg-slate-50"
+                style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }}
+            >
+                {onClose ? (
+                    <Pressable
+                        onPress={onClose}
+                        className="self-end p-2 mr-4 mb-2"
+                        hitSlop={12}
+                        testID="paywall-close"
+                    >
+                        <AppIcon name="close" size={24} color={colors.gray500} />
+                    </Pressable>
+                ) : null}
+                <ProMemberPaywallPanel onClose={onClose} />
+            </View>
+        );
+    }
 
     return (
         <ScrollView

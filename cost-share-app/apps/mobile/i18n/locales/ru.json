@@ -1469,12 +1469,20 @@
             "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
             "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
             "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
-            "havePromoCode": "Есть код?"
+            "havePromoCode": "Есть код?",
+            "alreadyProTitle": "У вас Pro",
+            "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Управление подпиской",
-            "freeTrialUntil": "Бесплатный период до {{date}}"
+            "freeTrialUntil": "Бесплатный период до {{date}}",
+            "activeUntil": "Pro активен до {{date}}",
+            "activeIndividualAndGroup": "Подписка Pro активна; у этой группы также Trip Pass Pro."
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro для этой группы",
+            "activeUntil": "Pro для всех участников группы до {{date}}."
         },
         "trialReminder": {
             "title": "Пробный период KupaPay Pro скоро закончится",

@@ -1451,12 +1451,20 @@
             "trialFreePeriodHeading": "Essai gratuit de {{trialDays}} jours",
             "trialFreePeriodBody": "Essayez toutes les fonctions Pro gratuitement pendant {{trialDays}} jours. Annulez dans Réglages avant la fin de l'essai si vous ne souhaitez pas continuer.",
             "trialRenewalDisclosure": "Après {{trialDays}} jours, {{price}}/{{period}} seront facturés sauf annulation dans Réglages.",
-            "havePromoCode": "Vous avez un code ?"
+            "havePromoCode": "Vous avez un code ?",
+            "alreadyProTitle": "Vous êtes sur Pro",
+            "alreadyProBody": "Votre abonnement est actif. Gérez la facturation sur l’App Store ou Google Play et profitez des fonctionnalités Pro."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Gérer l’abonnement",
-            "freeTrialUntil": "Essai gratuit jusqu’au {{date}}"
+            "freeTrialUntil": "Essai gratuit jusqu’au {{date}}",
+            "activeUntil": "Pro actif jusqu’au {{date}}",
+            "activeIndividualAndGroup": "Abonnement Pro actif ; ce groupe a aussi Trip Pass Pro."
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro pour ce groupe",
+            "activeUntil": "Pro pour tous les membres jusqu’au {{date}}."
         },
         "trialReminder": {
             "title": "Fin prochaine de l’essai KupaPay Pro",

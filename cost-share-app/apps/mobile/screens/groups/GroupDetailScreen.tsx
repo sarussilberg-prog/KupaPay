@@ -53,6 +53,7 @@ import {
 import { GroupExportSheet, type GroupExportFormat } from '../../components/groups/GroupExportSheet';
 import { IncludedTripPassBanner } from '../../components/groups/IncludedTripPassBanner';
 import { UnassignedTripPassBanner } from '../../components/groups/UnassignedTripPassBanner';
+import { GroupProPassBanner } from '../../components/groups/GroupProPassBanner';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import { SpendingInsightsSheet } from '../../components/insights/SpendingInsightsSheet';
@@ -994,6 +995,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
                             onSwitcherPress={onSwitcherPress}
                             onMembersPress={handleMembersPress}
                         />
+                        <GroupProPassBanner groupId={groupId} />
                         <UnassignedTripPassBanner groupId={groupId} />
                         <IncludedTripPassBanner groupId={groupId} />
                         <TripBudgetSection

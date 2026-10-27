@@ -7,7 +7,8 @@ export type AscCaptureScreen =
     | 'add-expense'
     | 'simplified-debts'
     | 'pro-currency'
-    | 'pro-paywall';
+    | 'pro-paywall'
+    | 'settings-pro';
 
 export function readAscCaptureParams(): { screen: AscCaptureScreen; locale: string } | null {
     if (!isAscScreenshotDemo()) return null;

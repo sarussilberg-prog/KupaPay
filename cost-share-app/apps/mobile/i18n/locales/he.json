@@ -1396,12 +1396,20 @@
             "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
             "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
             "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
-            "havePromoCode": "יש לכם קוד?"
+            "havePromoCode": "יש לכם קוד?",
+            "alreadyProTitle": "אתם ב-Pro",
+            "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "ניהול מנוי",
-            "freeTrialUntil": "ניסיון חינם עד {{date}}"
+            "freeTrialUntil": "ניסיון חינם עד {{date}}",
+            "activeUntil": "Pro פעיל עד {{date}}",
+            "activeIndividualAndGroup": "מנוי Pro פעיל; לקבוצה זו יש גם Trip Pass Pro."
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro לקבוצה זו",
+            "activeUntil": "Pro לכל חברי הקבוצה עד {{date}}."
         },
         "trialReminder": {
             "title": "ניסיון KupaPay Pro מסתיים בקרוב",
