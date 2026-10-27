@@ -51,8 +51,9 @@
     "analyze:web": "npm run analyze -w @cost-share/web",
     "generate:legal": "node scripts/generate-legal-bundle.mjs",
     "check:legal": "bash scripts/ci-legal-locale-parity.sh",
+    "knip": "knip",
+    "knip:ci": "bash scripts/ci-knip.sh",
     "test:coverage:ci": "bash scripts/ci-coverage-check.sh",
-    "test:e2e": "playwright test",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
@@ -62,6 +63,7 @@
     "@supabase/supabase-js": "^2.45.0",
     "@types/ws": "^8.18.1",
     "dotenv": "^16.4.5",
+    "knip": "^5.88.1",
     "sharp": "^0.35.5",
     "size-limit": "^11.2.0",
     "ts-node": "^10.9.2",
