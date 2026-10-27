@@ -21,6 +21,9 @@
     },
     "web_unit_tests": {
       "min_test_files": 1
+    },
+    "mobile_jest_tests": {
+      "max_quarantined": 5
     }
   }
 }

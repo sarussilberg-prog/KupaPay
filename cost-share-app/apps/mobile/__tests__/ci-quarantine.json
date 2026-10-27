@@ -1,0 +1,3 @@
+{
+  "_comment": "Jest test files listed here are excluded from the blocking Mobile tests job. Each entry must reference a GitHub issue. Quarantined files still run in the same job (non-blocking). Optional tag @quarantine in the test title is documentation-only — CI uses this manifest."
+}

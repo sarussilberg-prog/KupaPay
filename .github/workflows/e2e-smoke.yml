@@ -36,6 +36,9 @@ jobs:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
           E2E_EXPO_WEB_URL: ${{ secrets.E2E_EXPO_WEB_URL }}
         run: npx playwright test
+      - name: Playwright flaky summary
+        if: always()
+        run: bash scripts/ci-playwright-flaky-summary.sh playwright-report/results.json
 
   playwright-dev-stack:
     name: Playwright dev stack
@@ -74,6 +77,9 @@ jobs:
           E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
           E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
         run: npx playwright test --project=expo-web-authenticated --project=next-site
+      - name: Playwright flaky summary
+        if: always()
+        run: bash scripts/ci-playwright-flaky-summary.sh playwright-report/results.json
 
   maestro-smoke:
     name: Maestro (scaffold / nightly)

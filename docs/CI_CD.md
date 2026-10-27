@@ -109,6 +109,18 @@ Path-filtered matrix ([#140](https://github.com/sarussilberg-prog/KupaPay/issues
 
 Flaky SQL tests: quarantine manifest ([#138](https://github.com/sarussilberg-prog/KupaPay/issues/138)) — each `*.test.sql` runs or is quarantined with a tracking issue.
 
+### Jest (mobile) + Playwright flaky handling ([#510](https://github.com/sarussilberg-prog/KupaPay/issues/510))
+
+**Mobile unit tests (blocking CI gate):** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) job **Mobile tests** runs [`ci-jest-run-tests.sh`](../cost-share-app/scripts/ci-jest-run-tests.sh):
+
+1. All Jest files **except** those in [`apps/mobile/__tests__/ci-quarantine.json`](../cost-share-app/apps/mobile/__tests__/ci-quarantine.json).
+2. On failure, **one** `--onlyFailures` retry; tests that pass only on retry are reported as **flaky** (`::warning` + job summary + `jest-flaky-report` artifact).
+3. Quarantined files run afterward **non-blocking** (failures are warnings; CI gate still passes).
+
+Add a quarantine entry with `issue` + `reason` (path relative to `apps/mobile/`, e.g. `__tests__/foo.test.ts`). Optional `@quarantine` in a test title is for humans only — CI reads the manifest. **Coverage ratchet** skips quarantined paths and caps manifest size via [`ci-coverage-baseline.json`](../cost-share-app/scripts/ci-coverage-baseline.json) (`mobile_jest_tests.max_quarantined`).
+
+**Playwright (on-demand / scheduled, not CI gate):** [`playwright.config.ts`](../cost-share-app/playwright.config.ts) sets `retries: 1` in CI and writes `playwright-report/results.json`. E2E workflows call [`ci-playwright-flaky-summary.sh`](../cost-share-app/scripts/ci-playwright-flaky-summary.sh) to list tests that passed on retry in the job summary.
+
 ### Performance / budgets
 
 [`.github/workflows/ci-performance.yml`](../.github/workflows/ci-performance.yml) — path-filtered when mobile/web change.
