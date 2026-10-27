@@ -108,6 +108,7 @@ import {
 } from '@cost-share/shared';
 import { ReceiptTextScanSheet } from '../../components/receipt/ReceiptTextScanSheet';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { formatAppDateShort } from '../../lib/formatAppDate';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import {
     UnequalSplitMode,
@@ -141,9 +142,6 @@ function isSameDay(a: Date, b: Date): boolean {
     );
 }
 
-function formatShortDate(date: Date): string {
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 /**
  * Stable string representation of the form's edit-relevant state, used to detect
@@ -177,7 +175,7 @@ function snapshotKey(s: {
 }
 
 export function AddExpenseScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const insets = useSafeAreaInsets();
@@ -868,7 +866,7 @@ export function AddExpenseScreen() {
         : t('expenses.v2.recurring.label');
     const dateLabel = isSameDay(date, new Date())
         ? t('expenses.v2.today')
-        : formatShortDate(date);
+        : formatAppDateShort(date, i18n.language);
     const headerTitle = isEditMode ? t('expenses.v2.headerEdit') : t('expenses.v2.headerNew');
 
     const editorInitial: EditPayerSplitDraft = {
