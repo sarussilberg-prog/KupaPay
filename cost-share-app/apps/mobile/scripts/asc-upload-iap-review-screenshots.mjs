@@ -10,7 +10,9 @@ import { ascGetAll, ascRequest, ascUploadBinary, getAscToken } from "./asc-api-c
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const appJsonPath = path.join(repoRoot, "cost-share-app/apps/mobile/app.json");
+const metaPath = path.join(repoRoot, "store/asc/iap-metadata.json");
 const reviewShot = path.join(repoRoot, "store/asc/review-screenshots/paywall-en-US.png");
+const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
 
 const SUBSCRIPTION_PRODUCT_IDS = ["kupapay_pro_monthly", "kupapay_pro_yearly"];
 const IAP_PRODUCT_IDS = ["kupapay_trip_pass", "trip_pass"];
@@ -34,14 +36,20 @@ async function findAppIdByBundleId(bundleId) {
   return app.id;
 }
 
+function subscriptionAscId(productId) {
+  const hit = meta.products.find((p) => p.productId === productId);
+  if (!hit?.ascId) throw new Error(`Missing ascId for ${productId} in store/asc/iap-metadata.json`);
+  return hit.ascId;
+}
+
 async function findSubscriptionId(productId) {
-  const hits = await ascGetAll(
-    `/v1/subscriptions?filter[productId]=${encodeURIComponent(productId)}&limit=5`,
-    token,
-  );
-  const sub = hits.find((h) => h.attributes?.productId === productId);
-  if (!sub?.id) throw new Error(`Subscription not found for productId=${productId}`);
-  return sub.id;
+  const ascId = subscriptionAscId(productId);
+  const sub = await ascRequest(`/v1/subscriptions/${ascId}`, { token });
+  const wireProductId = sub.data?.attributes?.productId;
+  if (wireProductId && wireProductId !== productId) {
+    throw new Error(`ASC subscription ${ascId} productId mismatch: ${wireProductId} != ${productId}`);
+  }
+  return ascId;
 }
 
 async function findInAppPurchaseV2Id(appId) {
