@@ -110,7 +110,7 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS public.update_expense_with_splits(uuid, jsonb, jsonb);
+DROP FUNCTION IF EXISTS public.update_expense_with_splits(uuid, jsonb, jsonb); -- safe-breaking: return type jsonb (#533)
 
 CREATE OR REPLACE FUNCTION public.update_expense_with_splits(
     p_expense_id    uuid,
