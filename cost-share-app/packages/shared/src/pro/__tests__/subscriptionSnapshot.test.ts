@@ -12,21 +12,27 @@ describe('subscriptionSnapshot', () => {
 
     it('derives billing and cancelled states', () => {
         expect(
-            deriveSubscriptionLifecycle({
-                isActive: true,
-                willRenew: true,
-                expirationDate: '2027-01-01T00:00:00.000Z',
-                productIdentifier: 'kupapay_pro_monthly',
-                billingIssueDetectedAt: '2026-06-01T00:00:00.000Z',
-            }),
+            deriveSubscriptionLifecycle(
+                {
+                    isActive: true,
+                    willRenew: true,
+                    expirationDate: '2027-01-01T00:00:00.000Z',
+                    productIdentifier: 'kupapay_pro_monthly',
+                    billingIssueDetectedAt: '2026-06-01T00:00:00.000Z',
+                },
+                null,
+            ),
         ).toBe('billing_issue');
         expect(
-            deriveSubscriptionLifecycle({
-                isActive: true,
-                willRenew: false,
-                expirationDate: '2027-01-01T00:00:00.000Z',
-                productIdentifier: 'kupapay_pro_yearly',
-            }),
+            deriveSubscriptionLifecycle(
+                {
+                    isActive: true,
+                    willRenew: false,
+                    expirationDate: '2027-01-01T00:00:00.000Z',
+                    productIdentifier: 'kupapay_pro_yearly',
+                },
+                null,
+            ),
         ).toBe('cancelled_until_expiry');
     });
 
