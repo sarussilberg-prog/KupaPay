@@ -695,6 +695,10 @@
                 "stopConfirmTitle": "Stop recurring expenses?",
                 "stopConfirmBody": "Past expenses stay in the group. No new repeats will be created.",
                 "stopped": "Recurring series stopped",
+                "editScopeTitle": "Update recurring expense?",
+                "editScopeBody": "Apply changes to future repeats or only this expense.",
+                "editScopeSeries": "Future repeats too",
+                "editScopeOccurrence": "This expense only",
                 "frequency": {
                     "weekly": "Weekly",
                     "monthly": "Monthly",
