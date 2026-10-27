@@ -27,6 +27,7 @@ export const queryKeys = {
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
     adminMonetizationMetrics: ['admin', 'monetization-metrics'] as const,
+    adminGrowthMetrics: ['admin', 'growth-metrics'] as const,
     adminSupportMessages: ['admin', 'support-messages'] as const,
     adminSentryIssues: (params: {
         environment: 'dev' | 'prod';

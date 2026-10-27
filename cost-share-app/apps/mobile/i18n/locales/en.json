@@ -902,6 +902,26 @@
             "last7Days": "Last 7 days",
             "noData": "No events in this period yet"
         },
+        "growth": {
+            "portalRow": "MAU & north star",
+            "screenTitle": "Growth metrics",
+            "asOf": "Updated {{when}} (UTC)",
+            "northStarTitle": "North star",
+            "northStarDefinition": "Groups where at least two members each added an expense this calendar month.",
+            "northStarCurrent": "This month ({{month}})",
+            "northStarPrevious": "Previous month ({{month}})",
+            "activeAuthorsTitle": "Active expense authors",
+            "activeAuthorsNote": "Distinct users who created a non-deleted expense in the window. Use PostHog for MAU/WAU/DAU from app opens.",
+            "dau": "DAU",
+            "wau": "WAU",
+            "mau": "MAU (proxy)",
+            "mauEpicProgress": "{{percent}}% toward {{target}} MAU epic",
+            "seriesTitle": "North star — last 12 months",
+            "openPostHogDashboard": "Open PostHog MAU dashboard",
+            "postHogDashboardHint": "Set EXPO_PUBLIC_POSTHOG_PROJECT_ID (and optional MAU dashboard id) to link PostHog from here.",
+            "webOnlyNote": "PostHog breakdowns by platform and locale live in the linked dashboard.",
+            "analyticsUnavailableBody": "The growth metrics function is missing or not granted on this Supabase project. Apply the latest migrations to dev, then refresh."
+        },
         "supportMessages": {
             "title": "Support Messages",
             "portalRow": "Support messages",

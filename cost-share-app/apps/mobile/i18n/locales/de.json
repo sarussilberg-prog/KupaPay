@@ -902,6 +902,26 @@
             "last7Days": "Letzte 7 Tage",
             "noData": "In diesem Zeitraum noch keine Ereignisse"
         },
+        "growth": {
+            "portalRow": "MAU & North Star",
+            "screenTitle": "Wachstumsmetriken",
+            "asOf": "Aktualisiert {{when}} (UTC)",
+            "northStarTitle": "North Star",
+            "northStarDefinition": "Gruppen, in denen mindestens zwei Mitglieder im laufenden Kalendermonat jeweils eine Ausgabe erfasst haben.",
+            "northStarCurrent": "Dieser Monat ({{month}})",
+            "northStarPrevious": "Vormonat ({{month}})",
+            "activeAuthorsTitle": "Aktive Ausgaben-Erfasser",
+            "activeAuthorsNote": "Eindeutige Nutzer mit nicht gelöschter Ausgabe im Zeitraum. MAU/WAU/DAU aus App-Starts siehe PostHog.",
+            "dau": "DAU",
+            "wau": "WAU",
+            "mau": "MAU (Proxy)",
+            "mauEpicProgress": "{{percent}} % zum {{target}}-MAU-Ziel",
+            "seriesTitle": "North Star — letzte 12 Monate",
+            "openPostHogDashboard": "PostHog-MAU-Dashboard öffnen",
+            "postHogDashboardHint": "EXPO_PUBLIC_POSTHOG_PROJECT_ID (optional MAU-Dashboard-ID) setzen, um PostHog zu verlinken.",
+            "webOnlyNote": "Aufschlüsselung nach Plattform und Sprache im verlinkten PostHog-Dashboard.",
+            "analyticsUnavailableBody": "Die Wachstumsmetrik-Funktion fehlt oder ist auf diesem Supabase-Projekt nicht freigegeben. Neueste Migrationen auf dev anwenden und aktualisieren."
+        },
         "supportMessages": {
             "title": "Support-Nachrichten",
             "portalRow": "Support-Nachrichten",

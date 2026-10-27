@@ -2,9 +2,18 @@
 
 PostHog project (EU): `https://eu.i.posthog.com`
 
+## In-app admin (Postgres)
+
+App admins: **Settings → Admin portal → MAU & north star** calls `get_growth_metrics()` (same payload as weekly CI). Non-admins receive `not_admin` from the RPC.
+
+Optional deep link env (Expo web / mobile):
+
+- `EXPO_PUBLIC_POSTHOG_PROJECT_ID`
+- `EXPO_PUBLIC_POSTHOG_MAU_DASHBOARD_ID` or `EXPO_PUBLIC_POSTHOG_MAU_DASHBOARD_URL`
+
 ## Dashboard: MAU / WAU / DAU + north star
 
-1. In PostHog → **Dashboards** → **New dashboard** → name it `KupaPay MAU (1000 epic)`.
+1. Run `node scripts/posthog-ensure-mau-dashboard.mjs` (with PostHog personal API key) **or** in PostHog → **Dashboards** → **New dashboard** → name it `KupaPay MAU (1000 epic)`.
 2. Add insights from `posthog-growth-queries.hogql` and the funnel steps in [docs/SSOT/POSTHOG_EVENT_TAXONOMY.md](../../docs/SSOT/POSTHOG_EVENT_TAXONOMY.md).
 3. Optional: import tile definitions from `posthog-dashboard-mau-tiles.json` (copy event/interval/breakdown into the UI — PostHog free tier has no bulk JSON import API).
 
