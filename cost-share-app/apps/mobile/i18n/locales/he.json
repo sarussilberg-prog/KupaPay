@@ -697,6 +697,10 @@
                 "stopConfirmTitle": "להפסיק הוצאה קבועה?",
                 "stopConfirmBody": "הוצאות שכבר נוצרו נשארות. לא ייווצרו הוצאות חדשות.",
                 "stopped": "סדרת ההוצאות הקבועה הופסקה",
+                "editScopeTitle": "לעדכן הוצאה קבועה?",
+                "editScopeBody": "להחיל את השינויים גם על חזרות עתידיות או רק על ההוצאה הזו.",
+                "editScopeSeries": "גם חזרות עתידיות",
+                "editScopeOccurrence": "רק ההוצאה הזו",
                 "frequency": {
                     "weekly": "שבועי",
                     "monthly": "חודשי",

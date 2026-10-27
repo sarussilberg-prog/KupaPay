@@ -695,6 +695,10 @@
                 "stopConfirmTitle": "Wiederkehrende Ausgaben stoppen?",
                 "stopConfirmBody": "Bisherige Ausgaben bleiben. Es werden keine neuen Wiederholungen erstellt.",
                 "stopped": "Wiederkehrende Serie gestoppt",
+                "editScopeTitle": "Wiederkehrende Ausgabe aktualisieren?",
+                "editScopeBody": "Änderungen für künftige Wiederholungen übernehmen oder nur diese Ausgabe.",
+                "editScopeSeries": "Auch künftige Wiederholungen",
+                "editScopeOccurrence": "Nur diese Ausgabe",
                 "frequency": {
                     "weekly": "Wöchentlich",
                     "monthly": "Monatlich",
