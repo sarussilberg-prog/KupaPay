@@ -52,5 +52,7 @@ describe('GroupCardMetaLine', () => {
         const updated = getByTestId('group-card-meta-updated');
         expect(String(updated.props.children)).toContain('לפני');
         expect(String(updated.props.children)).not.toMatch(/י׳/);
+        expect(String(updated.props.children)).toMatch(/6/);
     });
+
 });

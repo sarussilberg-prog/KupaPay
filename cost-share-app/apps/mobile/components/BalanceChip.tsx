@@ -16,6 +16,7 @@ import {
     type RatesFromBase,
 } from '@cost-share/shared';
 import { Text } from './AppText';
+import { GROUP_CARD_CHIP_MAX_WIDTH } from './groupCardLayout';
 
 interface BalanceChipProps {
     rollup?: GroupRollup;
@@ -53,9 +54,6 @@ const toneStyles = {
         amount: 'text-sm font-medium text-gray-400 dark:text-gray-500 leading-tight',
     },
 } as const;
-
-const CHIP_MIN_WIDTH = 104;
-const CHIP_MAX_WIDTH = 120;
 
 function ChipText({
     className,
@@ -108,8 +106,8 @@ export function BalanceChip({
     const columnStyle = useMemo<ViewStyle>(
         () => ({
             flexShrink: 0,
-            minWidth: CHIP_MIN_WIDTH,
-            maxWidth: CHIP_MAX_WIDTH,
+            flexGrow: 0,
+            maxWidth: GROUP_CARD_CHIP_MAX_WIDTH,
             alignItems: 'center',
             justifyContent: 'center',
             alignSelf: 'center',
