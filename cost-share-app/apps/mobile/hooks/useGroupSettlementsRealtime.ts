@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from './queries/keys';
+import { invalidateQueriesUnlessRecentlyFetched } from '../lib/realtimeSnapshotRefetch';
 
 export function useGroupSettlementsRealtime(
     groupId: string | undefined | null,
@@ -43,9 +44,9 @@ export function useGroupSettlementsRealtime(
                 // Parity with the expenses/messages channels: reconcile any
                 // events missed during a disconnect when the channel (re)joins.
                 if (status === 'SUBSCRIBED') {
-                    void queryClient.invalidateQueries({
-                        queryKey: queryKeys.groupContributions(groupId),
-                    });
+                    invalidateQueriesUnlessRecentlyFetched(
+                        queryKeys.groupContributions(groupId),
+                    );
                     invalidateBalanceCaches(groupId);
                 }
             });

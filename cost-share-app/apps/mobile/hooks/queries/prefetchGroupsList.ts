@@ -4,10 +4,10 @@
  * cache is React-Query-owned and warms on first observer.
  */
 
-import { fetchGroups } from '../../services/groups.service';
 import { fetchSimplifiedInputs } from '../../services/simplifiedDebts.service';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from './keys';
+import { groupsQueryOptions } from './groupsQueryOptions';
 import { useAppStore } from '../../store';
 
 let prefetchInFlight: Promise<void> | null = null;
@@ -19,7 +19,7 @@ export function prefetchGroupsList(): void {
     if (prefetchInFlight) return;
 
     prefetchInFlight = Promise.all([
-        fetchGroups(),
+        queryClient.prefetchQuery(groupsQueryOptions()),
         queryClient.prefetchQuery({
             queryKey: queryKeys.simplifiedDebts,
             queryFn: fetchSimplifiedInputs,

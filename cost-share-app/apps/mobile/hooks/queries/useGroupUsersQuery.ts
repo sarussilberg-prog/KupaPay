@@ -7,5 +7,6 @@ export function useGroupUsersQuery(groupId: string) {
         queryKey: queryKeys.groupUsers(groupId),
         queryFn: () => fetchGroupUsers(groupId),
         enabled: Boolean(groupId),
+        staleTime: 60_000,
     });
 }
