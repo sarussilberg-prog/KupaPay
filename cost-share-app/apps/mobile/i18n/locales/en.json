@@ -1405,6 +1405,38 @@
             "activeUntil": "Pro active until {{date}}",
             "activeIndividualAndGroup": "Pro subscription active; this group also has Trip Pass Pro."
         },
+        "subscription": {
+            "sectionTitle": "My subscription",
+            "openDetails": "Subscription details",
+            "screenIntro": "Plan, renewal date, and billing are managed in the App Store or Google Play. Trip Pass access is shown per group below.",
+            "disabled": "Subscriptions are not available in this build.",
+            "empty": "No active subscription on this account.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Promotional",
+            "storeStripe": "Web billing",
+            "storeUnknown": "Your app store",
+            "renewsOn": "Renews on {{date}}",
+            "expiresOn": "Access until {{date}}",
+            "expiredOn": "Expired on {{date}}",
+            "autoRenewOn": "Auto-renew is on",
+            "autoRenewOff": "Auto-renew is off",
+            "trialActive": "Free trial in progress",
+            "purchasedVia": "Purchased via {{store}}",
+            "billingIssueBody": "There was a problem with your payment. Update your payment method to keep Pro.",
+            "fixPayment": "Fix payment",
+            "tripPassSection": "Trip Pass groups",
+            "tripPassUntil": "Pro for this group until {{date}}",
+            "renewalDisclosureShort": "Subscriptions renew automatically until you cancel in your app store account at least 24 hours before renewal. See Terms and Privacy.",
+            "status": {
+                "active": "Active",
+                "cancelled_until_expiry": "Canceled — active until expiry",
+                "billing_issue": "Billing issue",
+                "expired": "Expired",
+                "none": "No subscription"
+            }
+        },
         "groupPass": {
             "activeTitle": "Trip Pass Pro for this group",
             "activeUntil": "Everyone in this group has Pro until {{date}}."

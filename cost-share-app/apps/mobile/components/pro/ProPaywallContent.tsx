@@ -27,12 +27,12 @@ import {
     checkIntroductoryPriceEligibility,
     isPurchasesConfigured,
     loadOfferingPackages,
-    openSubscriptionManagement,
     presentOfferCodeRedemption,
     purchasePackage,
     restorePurchases,
     type IntroEligibilityMap,
 } from '../../services/purchases.service';
+import { openSubscriptionManagementForUser } from '../../lib/openSubscriptionManagement';
 import { introFreeTrialDaysForPackage, planShowsFreeTrial } from '../../lib/proTrialPaywall';
 import {
     fetchPaywallOfferings,
@@ -48,8 +48,6 @@ import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { ProMemberPaywallPanel } from './ProMemberPaywallPanel';
 
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
-const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
-const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 type PlanKey = 'monthly' | 'yearly' | 'trip_pass';
 
@@ -200,10 +198,8 @@ export function ProPaywallContent({
     }, [busy, featureKey, groupId, onPurchaseSuccess]);
 
     const handleManage = useCallback(async () => {
-        await openSubscriptionManagement();
-        const url = Platform.OS === 'ios' ? APP_STORE_URL : PLAY_STORE_URL;
-        if (url) await Linking.openURL(url);
-    }, []);
+        await openSubscriptionManagementForUser(language);
+    }, [language]);
 
     const handleRedeemCode = useCallback(() => {
         void presentOfferCodeRedemption();

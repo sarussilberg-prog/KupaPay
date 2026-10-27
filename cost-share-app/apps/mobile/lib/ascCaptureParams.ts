@@ -10,18 +10,24 @@ export type AscCaptureScreen =
     | 'pro-paywall'
     | 'settings-pro';
 
-export function readAscCaptureParams(): { screen: AscCaptureScreen; locale: string } | null {
+export function readAscCaptureParams(): {
+    screen: AscCaptureScreen;
+    locale: string;
+    phoneOnly: boolean;
+} | null {
     if (!isAscScreenshotDemo()) return null;
     const fromEnv = process.env.EXPO_PUBLIC_SCREENSHOT_LOCALE?.trim();
     const fromEnvScreen = process.env.EXPO_PUBLIC_SCREENSHOT_SCREEN?.trim() as AscCaptureScreen | undefined;
+    const fromEnvPhone = process.env.EXPO_PUBLIC_SCREENSHOT_PHONE_ONLY === '1';
     if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') {
         if (fromEnvScreen && fromEnv) {
-            return { screen: fromEnvScreen, locale: fromEnv };
+            return { screen: fromEnvScreen, locale: fromEnv, phoneOnly: fromEnvPhone };
         }
-        return { screen: 'groups', locale: fromEnv ?? 'en-US' };
+        return { screen: 'groups', locale: fromEnv ?? 'en-US', phoneOnly: fromEnvPhone };
     }
     const params = new URLSearchParams(globalThis.location.search);
     const screen = (params.get('screen') ?? fromEnvScreen ?? 'groups') as AscCaptureScreen;
     const locale = params.get('locale') ?? fromEnv ?? 'en-US';
-    return { screen, locale };
+    const phoneOnly = params.get('phone') === '1' || fromEnvPhone;
+    return { screen, locale, phoneOnly };
 }

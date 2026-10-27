@@ -18,14 +18,16 @@ const port = 4174;
 const server = await serveExpoDist(distDir, port);
 const browser = await chromium.launch();
 try {
-    const page = await browser.newPage({ viewport: { width: 1320, height: 2868 } });
-    const url = `http://127.0.0.1:${port}/?capture=1&screen=settings-pro&locale=he-IL&headline=KupaPay%20Pro`;
+    const viewport = { width: 390, height: 844 };
+    const page = await browser.newPage({ viewport });
+    const url = `http://127.0.0.1:${port}/?capture=1&phone=1&screen=settings-pro&locale=he-IL`;
     await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
     await page.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
-    await page.waitForSelector('[data-testid="settings-manage-subscription"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="my-subscription-panel"]', { timeout: 30_000 });
     await page.waitForTimeout(800);
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    await page.screenshot({ path: outPath, type: 'png' });
+    const panel = page.locator('[data-testid="my-subscription-panel"]');
+    await panel.screenshot({ path: outPath, type: 'png' });
     console.log(`Saved ${outPath} (${fs.statSync(outPath).size} bytes)`);
 } finally {
     await browser.close();

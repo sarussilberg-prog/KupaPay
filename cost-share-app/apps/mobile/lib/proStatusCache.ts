@@ -55,6 +55,7 @@ export function applyOptimisticProPurchaseCache(opts: {
 
 export async function refreshProStatusQueries(groupId?: string): Promise<void> {
     await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.mySubscription() });
     if (groupId) {
         await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus(groupId) });
     }

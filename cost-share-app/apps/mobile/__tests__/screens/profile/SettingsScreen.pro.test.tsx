@@ -57,13 +57,19 @@ jest.mock('../../../hooks/useShowProUpsell', () => ({
     useShowProUpsell: jest.fn(),
 }));
 
+jest.mock('../../../hooks/useMySubscription', () => ({
+    useMySubscription: jest.fn(),
+}));
+
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';
 import { useProStatus } from '../../../hooks/useProStatus';
 import { useShowProUpsell } from '../../../hooks/useShowProUpsell';
+import { useMySubscription } from '../../../hooks/useMySubscription';
 import { useAppStore } from '../../../store';
 
 const useProStatusMock = useProStatus as jest.MockedFunction<typeof useProStatus>;
 const useShowProUpsellMock = useShowProUpsell as jest.MockedFunction<typeof useShowProUpsell>;
+const useMySubscriptionMock = useMySubscription as jest.MockedFunction<typeof useMySubscription>;
 
 function renderSettings() {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -77,6 +83,23 @@ function renderSettings() {
 describe('SettingsScreen Pro section', () => {
     beforeEach(() => {
         mockNavigate.mockClear();
+        useMySubscriptionMock.mockReturnValue({
+            data: {
+                lifecycle: 'active',
+                planKind: 'yearly',
+                priceString: '₪69.90',
+                renewalOrExpiryIso: '2027-06-01T00:00:00.000Z',
+                autoRenew: true,
+                store: 'app_store',
+                storeProductId: 'kupapay_pro_yearly',
+                storePlanId: null,
+                isFreeTrial: false,
+                tripPasses: [],
+                serverIndividualUntil: '2027-06-01T00:00:00.000Z',
+            },
+            isLoading: false,
+            refetch: jest.fn(),
+        } as ReturnType<typeof useMySubscription>);
         useAppStore.setState({
             language: 'he',
             currentUser: {
@@ -112,6 +135,7 @@ describe('SettingsScreen Pro section', () => {
 
         const { getByTestId, queryByTestId } = renderSettings();
         expect(getByTestId('settings-manage-subscription')).toBeTruthy();
+        expect(getByTestId('my-subscription-panel')).toBeTruthy();
         expect(queryByTestId('settings-go-pro')).toBeNull();
     });
 

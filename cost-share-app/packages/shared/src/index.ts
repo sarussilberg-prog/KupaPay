@@ -33,6 +33,7 @@ export * from './sentryReleaseMetadata';
 export * from './receiptStorage';
 export * from './pro/hasPro';
 export * from './pro/proMembership';
+export * from './pro/subscriptionSnapshot';
 export * from './pro/proTrialLifecycle';
 export * from './groups/monthlyBillsCycle';
 export * from './recurring/recurringDates';
