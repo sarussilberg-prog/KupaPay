@@ -10,12 +10,22 @@ import { ascGetAll, ascRequest, ascUploadBinary, getAscToken } from "./asc-api-c
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const appJsonPath = path.join(repoRoot, "cost-share-app/apps/mobile/app.json");
+const metaPath = path.join(repoRoot, "store/asc/iap-metadata.json");
 const reviewShot = path.join(repoRoot, "store/asc/review-screenshots/paywall-en-US.png");
+const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
 
 const SUBSCRIPTION_PRODUCT_IDS = ["kupapay_pro_monthly", "kupapay_pro_yearly"];
 const IAP_PRODUCT_IDS = ["kupapay_trip_pass", "trip_pass"];
 
 const token = getAscToken();
+
+function screenshotFileAttributes(screenshotPath) {
+  const st = fs.statSync(screenshotPath);
+  return {
+    fileName: path.basename(screenshotPath),
+    fileSize: st.size,
+  };
+}
 
 function readBundleId() {
   const appJson = JSON.parse(fs.readFileSync(appJsonPath, "utf8"));
@@ -34,14 +44,20 @@ async function findAppIdByBundleId(bundleId) {
   return app.id;
 }
 
+function subscriptionAscId(productId) {
+  const hit = meta.products.find((p) => p.productId === productId);
+  if (!hit?.ascId) throw new Error(`Missing ascId for ${productId} in store/asc/iap-metadata.json`);
+  return hit.ascId;
+}
+
 async function findSubscriptionId(productId) {
-  const hits = await ascGetAll(
-    `/v1/subscriptions?filter[productId]=${encodeURIComponent(productId)}&limit=5`,
-    token,
-  );
-  const sub = hits.find((h) => h.attributes?.productId === productId);
-  if (!sub?.id) throw new Error(`Subscription not found for productId=${productId}`);
-  return sub.id;
+  const ascId = subscriptionAscId(productId);
+  const sub = await ascRequest(`/v1/subscriptions/${ascId}`, { token });
+  const wireProductId = sub.data?.attributes?.productId;
+  if (wireProductId && wireProductId !== productId) {
+    throw new Error(`ASC subscription ${ascId} productId mismatch: ${wireProductId} != ${productId}`);
+  }
+  return ascId;
 }
 
 async function findInAppPurchaseV2Id(appId) {
@@ -89,12 +105,18 @@ async function uploadTripPassReviewScreenshot(appId, screenshotPath) {
   );
 }
 
-async function uploadSubscriptionReviewScreenshot(subscriptionId, screenshotPath) {
-  const existing = await ascGetAll(
-    `/v1/subscriptions/${subscriptionId}/appStoreReviewScreenshots?limit=5`,
-    token,
+async function subscriptionReviewScreenshotId(subscriptionId) {
+  const sub = await ascRequest(
+    `/v1/subscriptions/${subscriptionId}?include=appStoreReviewScreenshot`,
+    { token },
   );
-  let shotId = existing[0]?.id;
+  const relId = sub.data?.relationships?.appStoreReviewScreenshot?.data?.id;
+  if (relId) return relId;
+  return sub.included?.find((i) => i.type === "subscriptionAppStoreReviewScreenshots")?.id ?? null;
+}
+
+async function uploadSubscriptionReviewScreenshot(subscriptionId, screenshotPath) {
+  let shotId = await subscriptionReviewScreenshotId(subscriptionId);
   if (!shotId) {
     const created = await ascRequest("/v1/subscriptionAppStoreReviewScreenshots", {
       method: "POST",
@@ -102,6 +124,7 @@ async function uploadSubscriptionReviewScreenshot(subscriptionId, screenshotPath
       body: {
         data: {
           type: "subscriptionAppStoreReviewScreenshots",
+          attributes: screenshotFileAttributes(screenshotPath),
           relationships: {
             subscription: { data: { type: "subscriptions", id: subscriptionId } },
           },
@@ -163,6 +186,7 @@ async function uploadIapReviewScreenshot(inAppPurchaseId, screenshotPath) {
       body: {
         data: {
           type: "inAppPurchaseAppStoreReviewScreenshots",
+          attributes: screenshotFileAttributes(screenshotPath),
           relationships: {
             inAppPurchaseV2: { data: { type: "inAppPurchases", id: inAppPurchaseId } },
           },
