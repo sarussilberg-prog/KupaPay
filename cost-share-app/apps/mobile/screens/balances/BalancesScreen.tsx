@@ -364,6 +364,7 @@ export function BalancesScreen() {
 
                 {KUPAPAY_PRO_ENABLED || tripCurrencyUnlocked ? (
                     <GroupTripCurrencySection
+                        groupId={groupId}
                         defaultCurrency={defaultCurrency}
                         debts={pairwiseDebts}
                         memberNames={nameById}

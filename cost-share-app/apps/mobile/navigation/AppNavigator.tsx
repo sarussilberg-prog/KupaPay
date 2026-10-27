@@ -79,6 +79,7 @@ import { ContactUsScreen } from '../screens/profile/ContactUsScreen';
 import { FriendsScreen } from '../screens/profile/FriendsScreen';
 import { FindFriendsScreen } from '../screens/profile/FindFriendsScreen';
 import { ReferralProgramScreen } from '../screens/profile/ReferralProgramScreen';
+import { MySubscriptionScreen } from '../screens/profile/MySubscriptionScreen';
 import { NotificationSettingsScreen } from '../screens/profile/NotificationSettingsScreen';
 import { AdminPortalScreen } from '../screens/admin/AdminPortalScreen';
 import { AdminOnboardingPreviewScreen } from '../screens/admin/AdminOnboardingPreviewScreen';
@@ -398,6 +399,11 @@ export function AppNavigator() {
                 name="ReferralProgram"
                 component={ReferralProgramScreen}
                 options={{ title: t('referral.title') }}
+            />
+            <RootStack.Screen
+                name="MySubscription"
+                component={MySubscriptionScreen}
+                options={{ title: t('pro.subscription.sectionTitle') }}
             />
             <RootStack.Screen
                 name="ContactUs"

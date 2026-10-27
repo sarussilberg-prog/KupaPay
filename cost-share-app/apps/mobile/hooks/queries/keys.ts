@@ -40,6 +40,7 @@ export const queryKeys = {
         ['adminSentryIssueEvents', issueId] as const,
     proStatus: (groupId?: string) =>
         groupId ? (['proStatus', groupId] as const) : (['proStatus'] as const),
+    mySubscription: () => ['mySubscription'] as const,
     exchangeRates: (base: string, symbolsKey: string) =>
         ['exchangeRates', base, symbolsKey] as const,
 };

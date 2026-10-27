@@ -15,8 +15,7 @@ import { registerTripPassPurchaseIntent } from './proEntitlements.service';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 import { logMonetizationEvent } from './monetization.service';
 import { captureProductEvent } from '../lib/productAnalytics';
-import { queryClient } from '../lib/queryClient';
-import { queryKeys } from '../hooks/queries/keys';
+import { applyOptimisticProPurchaseCache, refreshProStatusQueries } from '../lib/proStatusCache';
 import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
 import {
     collectSubscriptionProductIds,
@@ -86,6 +85,13 @@ async function configurePurchasesForUserInner(userId: string): Promise<void> {
                 entitlementId: REVENUECAT_ENTITLEMENT_PRO,
                 customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
             });
+            const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
+            if (active) {
+                applyOptimisticProPurchaseCache({
+                    individualUntil: active.expirationDate ?? undefined,
+                });
+            }
+            void refreshProStatusQueries();
         });
         customerInfoListenerAttached = true;
     }
@@ -303,7 +309,12 @@ export async function purchasePackage(
                     >[0]['customerInfo'],
                 });
             }
-            await invalidateProQueries(opts.groupId);
+            applyOptimisticProPurchaseCache({
+                groupId: opts.groupId,
+                tripPassOnly: tripPassPurchased && !active,
+                individualUntil: active?.expirationDate ?? undefined,
+            });
+            await refreshProStatusQueries(opts.groupId);
             return { ok: true };
         }
         await trackPurchaseEvent('purchase_failed', opts.featureKey, {
@@ -339,7 +350,11 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
                 entitlementId: REVENUECAT_ENTITLEMENT_PRO,
                 customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
             });
-            await invalidateProQueries(groupId);
+            applyOptimisticProPurchaseCache({
+                groupId,
+                individualUntil: active.expirationDate ?? undefined,
+            });
+            await refreshProStatusQueries(groupId);
             return true;
         }
         await trackPurchaseEvent('restore_failed', featureKey);
@@ -347,13 +362,6 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
     } catch {
         await trackPurchaseEvent('restore_failed', featureKey);
         return false;
-    }
-}
-
-async function invalidateProQueries(groupId?: string): Promise<void> {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
-    if (groupId) {
-        await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus(groupId) });
     }
 }
 

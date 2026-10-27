@@ -36,6 +36,8 @@ import { useFriendsQuery, useIncomingFriendRequestsQuery } from '../../hooks/que
 import { effectiveCurrentUser } from '../../lib/effectiveCurrentUser';
 import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 import { shareFriendInvite } from '../../services/invite.service';
+import { useProStatus } from '../../hooks/useProStatus';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 
 function SkeletonBar({ width, height = 12 }: { width: DimensionValue; height?: number }) {
     return <View className="bg-slate-100 rounded" style={{ width, height }} />;
@@ -328,6 +330,7 @@ export function ProfileScreen() {
     const handleNavigateFriends = useCallback(() => navigation.navigate('Friends'), [navigation]);
 
     const isRtl = useRtlLayout();
+    const { hasPro } = useProStatus();
 
     const showLoadingSkeletons = isLoading && !simplified;
     const showError = isError && !simplified;
@@ -349,6 +352,7 @@ export function ProfileScreen() {
                     avatarUrl={getAvatarUrl(displayUser) ?? undefined}
                     onSharePress={handleShareFriendInvite}
                     onEditPress={handleEditProfile}
+                    showProBadge={KUPAPAY_PRO_ENABLED && hasPro}
                 />
                 {showError ? (
                     <EmptyState
@@ -392,6 +396,7 @@ export function ProfileScreen() {
             handleNavigateGroups,
             handleRefresh,
             handleShareFriendInvite,
+            hasPro,
             isRtl,
             pendingCount,
             showError,

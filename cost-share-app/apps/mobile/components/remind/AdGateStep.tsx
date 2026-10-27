@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Button } from '../Button';
-import { ProUpgradeButton } from '../ProUpgradeButton';
+import { ProUpsellButton } from '../pro/ProUpsellButton';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { shouldSkipAdGate } from '@cost-share/shared';
@@ -87,6 +87,7 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
         return (
             <ProPromoInterstitial
                 visible={active}
+                groupId={groupId}
                 onDismiss={() => {
                     void logMonetizationEvent(featureKey, 'pro_promo_dismissed');
                     onCompleted();
@@ -118,6 +119,7 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
         return (
             <ProPromoInterstitial
                 visible={active}
+                groupId={groupId}
                 onDismiss={() => {
                     void logMonetizationEvent(featureKey, 'pro_promo_dismissed');
                     onCompleted();
@@ -160,7 +162,8 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
             />
 
             {isProUpsellSurfaceEnabled() && (
-                <ProUpgradeButton
+                <ProUpsellButton
+                    groupId={groupId}
                     title={t('monetization.goProButton')}
                     onPress={handleGoPro}
                     appearance="outline"

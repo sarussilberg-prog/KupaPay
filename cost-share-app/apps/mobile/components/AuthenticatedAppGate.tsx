@@ -14,6 +14,7 @@ import { runAuthenticatedGate } from '../lib/authenticatedGateResolve';
 import { useAuthenticatedInviteRedemption } from '../hooks/useAuthenticatedInviteRedemption';
 import { fetchGroups } from '../services/groups.service';
 import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
+import { useSubscriptionRefreshOnForeground } from '../hooks/useSubscriptionRefreshOnForeground';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
@@ -62,6 +63,7 @@ export function AuthenticatedAppGate() {
     // member/friend/group avatars render instantly and work offline. Single
     // mount, debounced, deduped — runs for the whole authenticated session.
     useAvatarPrefetcher();
+    useSubscriptionRefreshOnForeground();
 
     const resolveGate = useCallback(async () => {
         // Seeds the groups cache before mounting the navigator so GroupsListScreen
