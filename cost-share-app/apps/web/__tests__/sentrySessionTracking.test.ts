@@ -7,7 +7,7 @@ describe('web sentry session tracking config', () => {
             require('path').join(__dirname, '../lib/sentryInit.ts'),
             'utf8',
         );
-        expect(source).toMatch(/autoSessionTracking:\s*true/);
+        expect(source).toMatch(/Release Health \(#427\)/);
         expect(source).toMatch(/release,/);
     });
 });

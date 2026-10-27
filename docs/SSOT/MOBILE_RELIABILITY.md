@@ -6,7 +6,7 @@
 
 - `release` + `dist` come from `sentryReleaseMetadata()` (`apps/mobile/lib/sentryRelease.ts`).
 - `enableAutoSessionTracking: true` in `apps/mobile/lib/sentry.ts`.
-- `autoSessionTracking: true` in `apps/web/lib/sentryInit.ts`.
+- `@sentry/nextjs` with `release` + `dist` (browser sessions / Release Health when DSN is set).
 - Monitor **Crash Free Session Rate** in Sentry → Releases (target **≥ 99.5%**).
 
 ## Screen error boundaries

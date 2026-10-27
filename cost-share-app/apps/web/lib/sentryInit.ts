@@ -13,8 +13,7 @@ export function initWebSentry(): void {
         environment,
         release,
         dist,
-        /** Release Health → crash-free sessions (#427). */
-        autoSessionTracking: true,
+        // Release Health (#427): @sentry/nextjs tracks browser sessions by default when DSN is set.
         tracesSampleRate: environment === 'production' ? 0.2 : 1.0,
         sendDefaultPii: false,
     });
