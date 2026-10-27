@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-27T08:40:00Z",
+  "generated_at": "2026-10-27T08:43:53Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -16,10 +16,6 @@
     },
     {
       "name": "admin_pro_view_overrides",
-      "columns": []
-    },
-    {
-      "name": "analytics_north_star_groups",
       "columns": []
     },
     {
@@ -47,11 +43,11 @@
       "columns": []
     },
     {
-      "name": "expense_splits",
+      "name": "expenses",
       "columns": []
     },
     {
-      "name": "expenses",
+      "name": "expense_splits",
       "columns": []
     },
     {
@@ -79,15 +75,15 @@
       "columns": []
     },
     {
+      "name": "groups",
+      "columns": []
+    },
+    {
       "name": "group_smart_reminder_recipient_state",
       "columns": []
     },
     {
       "name": "group_user_archive",
-      "columns": []
-    },
-    {
-      "name": "groups",
       "columns": []
     },
     {
@@ -165,42 +161,6 @@
   ],
   "functions": [
     {
-      "name": "_advance_recurring_next_date",
-      "args": ""
-    },
-    {
-      "name": "_attribute_referral",
-      "args": ""
-    },
-    {
-      "name": "_get_group_pairwise_debts_core",
-      "args": ""
-    },
-    {
-      "name": "_insert_expense_from_recurring_series",
-      "args": ""
-    },
-    {
-      "name": "_insert_trip_budget_alert_events",
-      "args": ""
-    },
-    {
-      "name": "_profile_last_active_at",
-      "args": ""
-    },
-    {
-      "name": "_recurring_local_today",
-      "args": ""
-    },
-    {
-      "name": "_recurring_series_has_invalid_members",
-      "args": ""
-    },
-    {
-      "name": "_weekly_digest_stats",
-      "args": ""
-    },
-    {
       "name": "accept_friend_request",
       "args": ""
     },
@@ -237,11 +197,19 @@
       "args": ""
     },
     {
+      "name": "_advance_recurring_next_date",
+      "args": ""
+    },
+    {
       "name": "archive_group",
       "args": ""
     },
     {
       "name": "assign_purchased_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "_attribute_referral",
       "args": ""
     },
     {
@@ -274,6 +242,10 @@
     },
     {
       "name": "clear_archive_for_settlement",
+      "args": ""
+    },
+    {
+      "name": "consume_receipt_ocr_quota",
       "args": ""
     },
     {
@@ -409,6 +381,10 @@
       "args": ""
     },
     {
+      "name": "_get_group_pairwise_debts_core",
+      "args": ""
+    },
+    {
       "name": "get_group_spending_by_category",
       "args": ""
     },
@@ -469,6 +445,14 @@
       "args": ""
     },
     {
+      "name": "get_user_balance_summary",
+      "args": ""
+    },
+    {
+      "name": "get_user_dashboard",
+      "args": ""
+    },
+    {
       "name": "get_user_groups_archive_state",
       "args": ""
     },
@@ -526,6 +510,14 @@
     },
     {
       "name": "increment_push_attempt",
+      "args": ""
+    },
+    {
+      "name": "_insert_expense_from_recurring_series",
+      "args": ""
+    },
+    {
+      "name": "_insert_trip_budget_alert_events",
       "args": ""
     },
     {
@@ -601,7 +593,19 @@
       "args": ""
     },
     {
+      "name": "_profile_last_active_at",
+      "args": ""
+    },
+    {
       "name": "profile_visible_to_viewer",
+      "args": ""
+    },
+    {
+      "name": "_recurring_local_today",
+      "args": ""
+    },
+    {
+      "name": "_recurring_series_has_invalid_members",
       "args": ""
     },
     {
@@ -733,14 +737,6 @@
       "args": ""
     },
     {
-      "name": "test_set_authenticated",
-      "args": ""
-    },
-    {
-      "name": "test_set_jwt_sub",
-      "args": ""
-    },
-    {
       "name": "trg_evaluate_trip_budget_on_expense",
       "args": ""
     },
@@ -774,6 +770,10 @@
     },
     {
       "name": "update_updated_at_column",
+      "args": ""
+    },
+    {
+      "name": "_weekly_digest_stats",
       "args": ""
     }
   ]
