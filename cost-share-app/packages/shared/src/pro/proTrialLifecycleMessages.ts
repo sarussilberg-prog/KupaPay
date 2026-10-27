@@ -1,5 +1,27 @@
-import { normalizePushLocale, type PushLocale } from '../notifications/pushPolicy.ts';
-import type { ProTrialFeatureUsage, ProTrialLifecycleTouchDay } from './proTrialLifecycle.ts';
+/** Mirror {@link ./proTrialLifecycle} — inlined for Deno edge bundles (no cross-module imports). */
+type ProTrialLifecycleTouchDay = 1 | 10 | 13;
+
+type ProTrialFeatureUsage = {
+    receiptScan?: boolean;
+    recurring?: boolean;
+    smartReminder?: boolean;
+    tripBudget?: boolean;
+    spendingInsights?: boolean;
+};
+
+/** Mirror {@link ../notifications/pushPolicy#PushLocale} — inlined for Deno edge bundles. */
+type PushLocale = 'en' | 'he' | 'ru' | 'ar' | 'fr' | 'es' | 'de';
+
+function normalizePushLocale(code: string | null | undefined): PushLocale {
+    const c = (code ?? 'en').toLowerCase();
+    if (c === 'he' || c === 'iw') return 'he';
+    if (c === 'ar') return 'ar';
+    if (c === 'de') return 'de';
+    if (c === 'es') return 'es';
+    if (c === 'fr') return 'fr';
+    if (c === 'ru') return 'ru';
+    return 'en';
+}
 
 type DayCopy = { title: string; body: string };
 
