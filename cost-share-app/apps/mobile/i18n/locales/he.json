@@ -1400,8 +1400,7 @@
             "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
             "havePromoCode": "יש לכם קוד?",
             "alreadyProTitle": "אתם ב-Pro",
-            "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה.",
-            "euWithdrawalAck": "אני מבקש/ת גישה מיידית ל-Pro ומבין/ה שאבד את זכות הביטול בתוך 14 יום ברגע שהשירות מתחיל."
+            "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
