@@ -33,7 +33,7 @@ supabase functions deploy send-push --project-ref <PROJECT_REF>
 
 ## 4. Pro trial reminder cron (daily 07:00 UTC)
 
-Migration `20261016120000_pro_trial_reminder_cron.sql` schedules `pro-trial-reminder-dispatch`.
+Migration `20261016120000_pro_trial_reminder_cron.sql` (version matches production history) schedules `pro-trial-reminder-dispatch`.
 Add the function URL to Vault (same project as §1):
 
 ```sql

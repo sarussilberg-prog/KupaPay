@@ -1,5 +1,6 @@
--- Version 20261016120500 (renamed from 20261016120000 — unique schema_migrations.version).
+-- Version 20261016120000 — matches production schema_migrations (pro_trial applied before duplicate-version fix).
 -- Daily 07:00 UTC cron → pro-trial-reminder-dispatch (pg_net + Vault secrets).
+-- Idempotent: CREATE OR REPLACE; cron job unschedule by name then schedule.
 -- Vault (per project, not in git): pro_trial_reminder_dispatch_url, send_push_secret
 -- (reuse send_push_secret — same PUSH_WEBHOOK_SECRET / x-webhook-secret as send-push).
 
