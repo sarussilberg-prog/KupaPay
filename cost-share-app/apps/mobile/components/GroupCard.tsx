@@ -39,10 +39,12 @@ import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
 import {
+    GROUP_CARD_CHIP_MAX_WIDTH,
     GROUP_CARD_MENU_HIT,
     GROUP_CARD_MENU_ICON,
     GROUP_CARD_PAD,
     GROUP_CARD_ROW_GAP,
+    GROUP_CARD_STACK_CHIP_MAX_WIDTH,
     GROUP_CARD_STACK_GAP,
     GROUP_CARD_TEXT_GAP,
 } from './groupCardLayout';
@@ -81,7 +83,7 @@ function GroupCardBase({
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const { width: windowWidth } = useWindowDimensions();
-    const stackBalanceChip = windowWidth < 360;
+    const stackBalanceChip = windowWidth <= GROUP_CARD_STACK_CHIP_MAX_WIDTH;
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
     const isArchived = group.isArchivedByMe || group.isAutoArchived;
@@ -274,8 +276,8 @@ function GroupCardBase({
                             justifyContent: 'center',
                         }}
                     >
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 8 }]}>
-                            <View style={{ flexShrink: 1, minWidth: 0, flexGrow: 1 }}>
+                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 8, minWidth: 0 }]}>
+                            <View style={{ flex: 1, minWidth: 0 }}>
                                 <HighlightedText
                                     className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
@@ -324,7 +326,11 @@ function GroupCardBase({
                         ) : null}
                     </View>
 
-                    {!stackBalanceChip ? balanceChipNode : null}
+                    {!stackBalanceChip ? (
+                        <View style={{ flexShrink: 0, flexGrow: 0, maxWidth: GROUP_CARD_CHIP_MAX_WIDTH }}>
+                            {balanceChipNode}
+                        </View>
+                    ) : null}
                 </ListRow>
 
                 <TouchableOpacity

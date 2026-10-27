@@ -20,4 +20,17 @@ describe('groupsListAmount', () => {
         expect(out).not.toMatch(/\+/);
         expect(out).toMatch(/12/);
     });
+
+    it('places currency symbols via Intl for English (USD)', () => {
+        const out = formatGroupsListAmount(86419.76, 'USD', { language: 'en', bidiIsolate: false });
+        expect(out).toMatch(/\$/);
+        expect(out).toMatch(/86,419\.76|86419\.76/);
+        expect(out).not.toMatch(/86,419\.76\$$/);
+    });
+
+    it('places currency symbols via Intl for Hebrew (ILS)', () => {
+        const out = formatGroupsListAmount(761.5, 'ILS', { language: 'he', bidiIsolate: false });
+        expect(out).toMatch(/761/);
+        expect(out).toMatch(/₪|ILS/);
+    });
 });

@@ -43,4 +43,16 @@ describe('GroupCardMetaLine', () => {
         );
         expect(getByTestId('group-card-meta-updated')).toBeTruthy();
     });
+
+    it('uses full Hebrew relative day labels on the meta line', () => {
+        const sixDaysAgo = new Date(Date.now() - GROUP_CARD_UPDATED_META_MIN_AGE_MS - 6 * 86_400_000);
+        const { getByTestId } = render(
+            <GroupCardMetaLine group={baseGroup(sixDaysAgo)} memberCount={2} language="he" />,
+        );
+        const updated = getByTestId('group-card-meta-updated');
+        expect(String(updated.props.children)).toContain('לפני');
+        expect(String(updated.props.children)).not.toMatch(/י׳/);
+        expect(String(updated.props.children)).toMatch(/6/);
+    });
+
 });

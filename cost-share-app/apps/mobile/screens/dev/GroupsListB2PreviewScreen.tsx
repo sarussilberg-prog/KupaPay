@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import type { BalanceSummary } from '@cost-share/shared';
+import { deriveProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
 import {
     buildGroupCardPreviewGroups,
     buildGroupCardPreviewRollups,
@@ -67,9 +68,20 @@ export function GroupsListB2PreviewScreen() {
         () => buildGroupCardPreviewRollups({ stress: previewParams.stress }),
         [previewParams.stress],
     );
-    const mockSummary = useMemo(
-        () => buildMockSummary(previewParams.stress),
-        [previewParams.stress],
+    const mockSummary = useMemo(() => {
+        const raw = buildMockSummary(previewParams.stress);
+        const rates = { USD: 1, AFN: 70, ILS: 3.7, EUR: 0.92 };
+        return deriveProfileBalanceSummary(raw, rates).summary ?? raw;
+    }, [previewParams.stress]);
+
+    const mockConversion = useMemo(
+        () => ({
+            isConverted: true,
+            ratesDate: '2026-10-01',
+            isLoading: false,
+            failed: false,
+        }),
+        [],
     );
 
     const surfaceClass =
@@ -97,12 +109,14 @@ export function GroupsListB2PreviewScreen() {
                     onCreateGroup={() => {}}
                 />
                 <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
-                    <GroupsListSummaryCard summary={mockSummary} />
+                    <GroupsListSummaryCard summary={mockSummary} conversion={mockConversion} />
                     {groups.map(group => (
                         <GroupCard
                             key={group.id}
                             group={group}
                             rollup={rollups[group.id]}
+                            displayCurrency="USD"
+                            ratesFromBase={{ USD: 1, AFN: 70, ILS: 3.7, EUR: 0.92 }}
                             onPress={() => {}}
                         />
                     ))}

@@ -40,3 +40,9 @@ export function formatExtraCurrenciesChipLabel(count: number, currencyWord: stri
     if (count <= 0 || !currencyWord.trim()) return '';
     return `${wrapLtrForBidi(`+${count}`)} ${currencyWord.trim()}`;
 }
+
+/** Subtle FX-failure hint on list chips, e.g. "(2 currencies)" / "(2 מטבעות)". */
+export function formatSubtleExtraCurrenciesHint(count: number, currencyWord: string): string {
+    if (count <= 0 || !currencyWord.trim()) return '';
+    return `(${count} ${currencyWord.trim()})`;
+}
