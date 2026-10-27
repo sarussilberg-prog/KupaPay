@@ -13,6 +13,8 @@ export function initWebSentry(): void {
         environment,
         release,
         dist,
+        /** Release Health → crash-free sessions (#427). */
+        autoSessionTracking: true,
         tracesSampleRate: environment === 'production' ? 0.2 : 1.0,
         sendDefaultPii: false,
     });

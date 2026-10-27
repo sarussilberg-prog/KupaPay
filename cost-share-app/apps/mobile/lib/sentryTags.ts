@@ -5,6 +5,7 @@ export const SENTRY_TAGS = {
     REALTIME_ECHO: 'realtime.echo',
     SWEEP_ZOMBIE: 'sweep.zombie',
     NETWORK_TRANSITION: 'network.transition',
+    SCREEN_ERROR: 'screen.error_boundary',
 } as const;
 
 export type SentryTag = (typeof SENTRY_TAGS)[keyof typeof SENTRY_TAGS];

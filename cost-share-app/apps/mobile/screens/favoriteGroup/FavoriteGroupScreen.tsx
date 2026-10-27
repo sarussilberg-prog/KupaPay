@@ -72,7 +72,11 @@ export function FavoriteGroupScreen() {
 
     return (
         <View className="flex-1 bg-slate-50">
-            <GroupDetailScreen showBack={false} onSwitcherPress={handleSwitcherPress} />
+            <GroupDetailScreen
+                showBack={false}
+                groupId={effectiveGroupId}
+                onSwitcherPress={handleSwitcherPress}
+            />
             <GroupPickerSheet
                 visible={pickerOpen}
                 groups={groups}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { onlineManager } from '@tanstack/react-query';
 import type { GroupWithMembers } from '@cost-share/shared';
@@ -18,10 +18,13 @@ import { useSubscriptionRefreshOnForeground } from '../hooks/useSubscriptionRefr
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
+import { ScreenErrorBoundary } from './ScreenErrorBoundary';
 import { useAppStore } from '../store';
 import { AdminProViewBanner } from './admin/AdminProViewBanner';
 import { AppReviewPromptHost } from './appReview/AppReviewPromptHost';
+import { NetworkOfflineBanner } from './NetworkOfflineBanner';
 import { View } from 'react-native';
+import { retryConnectivitySync } from '../lib/reconnectSync';
 
 /**
  * Hard ceiling on how long resolveGate will wait for fetchGroups before
@@ -92,12 +95,27 @@ export function AuthenticatedAppGate() {
         void resolveGate();
     }, [resolveGate]);
 
+    const wasOnlineRef = useRef(onlineManager.isOnline());
+    useEffect(() => {
+        return onlineManager.subscribe((nextOnline) => {
+            const wasOnline = wasOnlineRef.current;
+            wasOnlineRef.current = nextOnline;
+            if (nextOnline && !wasOnline) {
+                void retryConnectivitySync(queryClient);
+            }
+        });
+    }, []);
+
     if (gate === 'loading') {
         return <AppGateSkeleton />;
     }
 
     if (gate === 'create') {
-        return <ActivationOnboardingScreen onDone={() => setGate('main')} />;
+        return (
+            <ScreenErrorBoundary screenName="ActivationOnboarding">
+                <ActivationOnboardingScreen onDone={() => setGate('main')} />
+            </ScreenErrorBoundary>
+        );
     }
 
     return (
@@ -107,6 +125,7 @@ export function AuthenticatedAppGate() {
         >
             <View style={{ flex: 1 }}>
                 <AdminProViewBanner />
+                <NetworkOfflineBanner />
                 <View style={{ flex: 1 }}>
                     <AppNavigator />
                 </View>

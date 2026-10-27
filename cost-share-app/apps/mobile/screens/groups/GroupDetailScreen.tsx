@@ -144,6 +144,8 @@ export type GroupDetailScreenProps = {
     showBack?: boolean;
     /** When provided (Favorite tab), tapping star+swap in the cover calls this. */
     onSwitcherPress?: () => void;
+    /** Favorite tab passes id explicitly — route params can lag one frame. */
+    groupId?: string;
 };
 
 const CATEGORIES: ExpenseCategory[] = [
@@ -220,13 +222,17 @@ function PendingSyncBadge({
     );
 }
 
-export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDetailScreenProps = {}) {
+export function GroupDetailScreen({
+    showBack = true,
+    onSwitcherPress,
+    groupId: groupIdProp,
+}: GroupDetailScreenProps = {}) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const {
-        groupId,
+        groupId: groupIdFromRoute,
         focusFeedItem: focusFeedItemParam,
         editSettlementId: editSettlementIdParam,
         openNote: openNoteParam,
@@ -240,6 +246,7 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         openSettleUp?: boolean;
         openGuestClaim?: boolean;
     };
+    const groupId = groupIdProp ?? groupIdFromRoute ?? '';
     const listRef = useRef<FlatList<FeedItem>>(null);
     const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
     const focusScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -886,6 +893,16 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         },
         [composer, groupId],
     );
+
+    if (!groupId) {
+        return (
+            <EmptyState
+                iconName="alert-circle-outline"
+                title={t('common.error')}
+                message={t('common.loadError')}
+            />
+        );
+    }
 
     if (isLoading && groupExpenses.length === 0 && !displayGroup) {
         return <GroupDetailSkeleton />;
