@@ -14,6 +14,7 @@ import {
 import { fetchMyProStatus } from './proEntitlements.service';
 import {
     isPurchasesConfigured,
+    fetchPurchasesCustomerInfo,
     loadOfferingPackages,
     waitForPurchasesReady,
 } from './purchases.service';
@@ -121,11 +122,19 @@ export async function fetchMySubscriptionSnapshot(
     }
 
     try {
-        const Purchases = await import('react-native-purchases');
         const [info, packages] = await Promise.all([
-            Purchases.default.getCustomerInfo(),
+            fetchPurchasesCustomerInfo(),
             loadOfferingPackages(),
         ]);
+        if (!info) {
+            if (!serverStatus.hasPro && tripPasses.length === 0) return null;
+            return buildSubscriptionSnapshot({
+                entitlement: null,
+                priceString: null,
+                serverIndividualUntil: toIsoString(serverStatus.individualProUntil),
+                tripPasses,
+            });
+        }
         const entRaw = info.entitlements.active.pro ?? info.entitlements.all.pro;
         const ent = entitlementFromRc(entRaw as unknown as Record<string, unknown> | undefined);
         const priceString = ent?.productIdentifier

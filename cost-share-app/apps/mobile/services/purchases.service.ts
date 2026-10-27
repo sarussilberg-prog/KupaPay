@@ -39,6 +39,7 @@ export interface ProSubscriptionUiState {
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesPackage = import('react-native-purchases').PurchasesPackage;
+type PurchasesCustomerInfo = import('react-native-purchases').CustomerInfo;
 
 let purchasesMod: PurchasesModule | null = null;
 let configured = false;
@@ -120,12 +121,31 @@ export async function configurePurchasesForUser(userId: string): Promise<void> {
 /** Await SDK configure+logIn before getOfferings/getCustomerInfo (avoids RC singleton crash). */
 export async function waitForPurchasesReady(): Promise<boolean> {
     if (!isPurchasesConfigured()) return false;
+    const userId = useAppStore.getState().currentUser?.id;
+    if (!configurePromise && userId) {
+        try {
+            await configurePurchasesForUser(userId);
+        } catch {
+            return false;
+        }
+    }
     if (!configurePromise) return configured;
     try {
         await configurePromise;
         return configured;
     } catch {
         return false;
+    }
+}
+
+/** Safe CustomerInfo read — never touches the RC singleton before configure+logIn. */
+export async function fetchPurchasesCustomerInfo(): Promise<PurchasesCustomerInfo | null> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return null;
+    try {
+        return await Purchases.default.getCustomerInfo();
+    } catch {
+        return null;
     }
 }
 
@@ -146,7 +166,7 @@ export async function checkIntroductoryPriceEligibility(
     packages: PaywallPackages | null,
 ): Promise<IntroEligibilityMap> {
     const Purchases = await getPurchases();
-    if (!Purchases || !packages) return {};
+    if (!Purchases || !packages || !(await waitForPurchasesReady())) return {};
     const productIds = collectSubscriptionProductIds(packages);
     try {
         return await Purchases.default.checkTrialOrIntroductoryPriceEligibility(productIds);
