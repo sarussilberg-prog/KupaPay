@@ -7,7 +7,7 @@ DECLARE
     v_alice CONSTANT UUID := '00000000-0000-0000-0000-000000521001';
     v_bob   CONSTANT UUID := '00000000-0000-0000-0000-000000521002';
     v_group CONSTANT UUID := '00000000-0000-0000-0000-000000521010';
-    v_exp   public.expenses;
+    v_res   jsonb;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_alice, 'ec521-alice@test.local'),
@@ -24,7 +24,7 @@ BEGIN
     SET LOCAL session_replication_role = origin;
     PERFORM public.test_set_authenticated(v_alice);
 
-    v_exp := public.create_expense_with_splits(
+    v_res := public.create_expense_with_splits(
         v_group,
         'Groceries',
         40,
@@ -40,8 +40,11 @@ BEGIN
         )
     );
 
-    IF v_exp.currency <> 'ILS' THEN
-        RAISE EXCEPTION 'Case A failed: expected ILS, got %', v_exp.currency;
+    IF (v_res->>'ok')::boolean IS NOT TRUE THEN
+        RAISE EXCEPTION 'Case A failed: expected ok=true, got %', v_res;
+    END IF;
+    IF v_res->'expense'->>'currency' <> 'ILS' THEN
+        RAISE EXCEPTION 'Case A failed: expected ILS, got %', v_res->'expense'->>'currency';
     END IF;
 
     RAISE NOTICE 'expense_create_group_currency.test.sql — passed';
