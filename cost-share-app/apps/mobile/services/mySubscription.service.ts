@@ -18,6 +18,13 @@ import {
     waitForPurchasesReady,
 } from './purchases.service';
 
+function toIsoString(value: string | Date | null | undefined): string | null {
+    if (value == null) return null;
+    if (typeof value === 'string') return value;
+    if (value instanceof Date) return value.toISOString();
+    return null;
+}
+
 const CAPTURE_SNAPSHOT: MySubscriptionSnapshot = {
     lifecycle: 'active',
     planKind: 'yearly',
@@ -43,13 +50,17 @@ function entitlementFromRc(ent: Record<string, unknown> | undefined): Entitlemen
     return {
         isActive: ent.isActive === true,
         willRenew: ent.willRenew !== false,
-        expirationDate: (ent.expirationDate as string | null) ?? null,
+        expirationDate: toIsoString(ent.expirationDate as string | Date | null | undefined),
         productIdentifier: String(ent.productIdentifier ?? ''),
         productPlanIdentifier: (ent.productPlanIdentifier as string | null) ?? null,
         store: (ent.store as string | null) ?? null,
         periodType: (ent.periodType as string | null) ?? null,
-        unsubscribeDetectedAt: (ent.unsubscribeDetectedAt as string | null) ?? null,
-        billingIssueDetectedAt: (ent.billingIssueDetectedAt as string | null) ?? null,
+        unsubscribeDetectedAt: toIsoString(
+            ent.unsubscribeDetectedAt as string | Date | null | undefined,
+        ),
+        billingIssueDetectedAt: toIsoString(
+            ent.billingIssueDetectedAt as string | Date | null | undefined,
+        ),
     };
 }
 
@@ -73,7 +84,9 @@ async function loadTripPassLines(groups: GroupWithMembers[]): Promise<TripPassLi
         const status = await fetchMyProStatus(group.id);
         const until = status.groupPassUntil;
         if (!until || new Date(until).getTime() <= now) continue;
-        lines.push({ groupId: group.id, groupName: group.name, expiresAt: until });
+        const expiresAt = toIsoString(until);
+        if (!expiresAt) continue;
+        lines.push({ groupId: group.id, groupName: group.name, expiresAt });
     }
     return lines;
 }
@@ -91,7 +104,7 @@ export async function fetchMySubscriptionSnapshot(
         return buildSubscriptionSnapshot({
             entitlement: null,
             priceString: null,
-            serverIndividualUntil: serverStatus.individualProUntil ?? null,
+            serverIndividualUntil: toIsoString(serverStatus.individualProUntil),
             tripPasses,
         });
     }
@@ -102,7 +115,7 @@ export async function fetchMySubscriptionSnapshot(
         return buildSubscriptionSnapshot({
             entitlement: null,
             priceString: null,
-            serverIndividualUntil: serverStatus.individualProUntil ?? null,
+            serverIndividualUntil: toIsoString(serverStatus.individualProUntil),
             tripPasses,
         });
     }
@@ -114,7 +127,7 @@ export async function fetchMySubscriptionSnapshot(
             loadOfferingPackages(),
         ]);
         const entRaw = info.entitlements.active.pro ?? info.entitlements.all.pro;
-        const ent = entitlementFromRc(entRaw as Record<string, unknown> | undefined);
+        const ent = entitlementFromRc(entRaw as unknown as Record<string, unknown> | undefined);
         const priceString = ent?.productIdentifier
             ? await priceForProduct(ent.productIdentifier, packages)
             : null;
@@ -122,7 +135,7 @@ export async function fetchMySubscriptionSnapshot(
         const snap = buildSubscriptionSnapshot({
             entitlement: ent,
             priceString,
-            serverIndividualUntil: serverStatus.individualProUntil ?? null,
+            serverIndividualUntil: toIsoString(serverStatus.individualProUntil),
             tripPasses,
         });
 
@@ -133,7 +146,7 @@ export async function fetchMySubscriptionSnapshot(
         return buildSubscriptionSnapshot({
             entitlement: null,
             priceString: null,
-            serverIndividualUntil: serverStatus.individualProUntil ?? null,
+            serverIndividualUntil: toIsoString(serverStatus.individualProUntil),
             tripPasses,
         });
     }
