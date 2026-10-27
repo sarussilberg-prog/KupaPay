@@ -1537,7 +1537,8 @@
             "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
             "havePromoCode": "لديك رمز؟",
             "alreadyProTitle": "أنت مشترك في Pro",
-            "alreadyProBody": "اشتراكك نشط. أدر الفوترة من App Store أو Google Play، واستمر في استخدام ميزات Pro في التطبيق."
+            "alreadyProBody": "اشتراكك نشط. أدر الفوترة من App Store أو Google Play، واستمر في استخدام ميزات Pro في التطبيق.",
+            "euWithdrawalAck": "أطلب الوصول الفوري إلى Pro وأفهم أنني أفقد حقي في الانسحاب خلال 14 يومًا بمجرد بدء تقديم الخدمة."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

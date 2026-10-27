@@ -1455,7 +1455,8 @@
             "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
             "havePromoCode": "Code vorhanden?",
             "alreadyProTitle": "Du hast Pro",
-            "alreadyProBody": "Dein Abo ist aktiv. Verwalte die Abrechnung im App Store oder bei Google Play und nutze weiter alle Pro-Funktionen."
+            "alreadyProBody": "Dein Abo ist aktiv. Verwalte die Abrechnung im App Store oder bei Google Play und nutze weiter alle Pro-Funktionen.",
+            "euWithdrawalAck": "Ich verlange sofortigen Zugang zu Pro und verstehe, dass ich mein 14-tägiges Widerrufsrecht verliere, sobald die Leistung beginnt."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

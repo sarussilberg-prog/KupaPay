@@ -1473,7 +1473,8 @@
             "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
             "havePromoCode": "Есть код?",
             "alreadyProTitle": "У вас Pro",
-            "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
+            "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro.",
+            "euWithdrawalAck": "Я запрашиваю немедленный доступ к Pro и понимаю, что теряю 14-дневное право на отказ после начала оказания услуги."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

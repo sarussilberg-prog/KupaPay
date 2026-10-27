@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { requiresEuDigitalWithdrawalAck } from './euDigitalPurchaseAck';
 
 /** App Store Connect intro offer length (copy + scheduling fallback on iOS). */
 export const PRO_TRIAL_LENGTH_DAYS_IOS = 14;
@@ -10,7 +11,8 @@ export function proTrialLengthDays(os: typeof Platform.OS = Platform.OS): number
     return os === 'android' ? PRO_TRIAL_LENGTH_DAYS_ANDROID : PRO_TRIAL_LENGTH_DAYS_IOS;
 }
 
-/** @deprecated Apple/Google are merchant of record — no in-app EU withdrawal waiver. */
+/** EU/EEA/UK/CH: in-app acknowledgement before immediate digital delivery (issue #222). */
 export function paywallRequiresEuDigitalWithdrawalAck(_os: typeof Platform.OS = Platform.OS): boolean {
-    return false;
+    void _os;
+    return requiresEuDigitalWithdrawalAck();
 }
