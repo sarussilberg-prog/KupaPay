@@ -65,3 +65,11 @@ verify_jwt = false
 # Hourly cron (#400) — RevenueCat promotional Pro for qualified referrals.
 [functions.referral-reward-dispatch]
 verify_jwt = false
+
+# User JWT required; handler re-checks group membership + Pro via RPC.
+[functions.receipt-ocr]
+verify_jwt = true
+
+# User JWT required; handler re-checks is_app_admin() before proxying Sentry.
+[functions.admin-sentry-proxy]
+verify_jwt = true

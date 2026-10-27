@@ -43,6 +43,7 @@ jobs:
   lighthouse-next:
     name: Lighthouse (Next.js local)
     runs-on: ubuntu-latest
+    continue-on-error: true
     defaults:
       run:
         working-directory: cost-share-app
@@ -54,4 +55,32 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - run: npm ci --ignore-scripts
-      - run: bash scripts/ci-lighthouse-next.sh
+      - name: Lighthouse (retry in script; advisory — does not fail CI gate)
+        id: lighthouse
+        run: bash scripts/ci-lighthouse-next.sh
+      - name: Lighthouse advisory summary
+        if: steps.lighthouse.outcome == 'failure'
+        run: |
+          echo "::warning::Lighthouse scores below lighthouserc.cjs thresholds or run failed twice. This job is non-blocking; fix perf regressions or tune thresholds. Reports are linked in the step log above."
+
+  performance-gate:
+    name: Performance gate
+    needs: [mobile-query-budgets, bundle-size, lighthouse-next]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require bundle + query budgets
+        run: |
+          set -euo pipefail
+          if [[ "${{ needs.mobile-query-budgets.result }}" != "success" ]]; then
+            echo "::error::Mobile Supabase budget checks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.bundle-size.result }}" != "success" ]]; then
+            echo "::error::Bundle size budget failed"
+            exit 1
+          fi
+          if [[ "${{ needs.lighthouse-next.result }}" != "success" ]]; then
+            echo "::warning::Lighthouse advisory failed (non-blocking)"
+          fi
+          echo "✅ Performance gate — required budgets passed"

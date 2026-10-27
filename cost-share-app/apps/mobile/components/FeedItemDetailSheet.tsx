@@ -1344,7 +1344,7 @@ const batchStyles = StyleSheet.create({
         paddingVertical: 10,
     },
     debtRowBorder: { borderBottomWidth: 1, borderBottomColor: '#DBEAFE' },
-    debtLeft: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 12 },
+    debtLeft: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginEnd: 12 },
     arrow: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
     arrowGreen: { backgroundColor: '#DCFCE7' },
     arrowRed: { backgroundColor: '#FEE2E2' },
