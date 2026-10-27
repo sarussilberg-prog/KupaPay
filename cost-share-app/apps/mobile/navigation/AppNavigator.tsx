@@ -32,12 +32,13 @@ import { prefetchAddExpensePrerequisitesForAllGroups } from '../hooks/queries/pr
 import { useActivityUnreadCount } from '../hooks/queries/useActivityUnreadCount';
 
 function HeaderBackButton({ onPress }: { onPress: () => void }) {
+    const { t } = useTranslation();
     const isRtl = useRtlLayout();
     return (
         <TouchableOpacity
             onPress={onPress}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('common.back')}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             style={{ paddingHorizontal: 4, paddingVertical: 4 }}
         >
@@ -452,7 +453,7 @@ export function AppNavigator() {
             <RootStack.Screen
                 name="AdminMonetization"
                 component={AdminMonetizationScreen}
-                options={{ title: 'Monetization' }}
+                options={{ title: t('admin.monetization.portalRow') }}
             />
 
             <RootStack.Screen

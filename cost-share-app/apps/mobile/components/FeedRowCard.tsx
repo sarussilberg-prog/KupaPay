@@ -99,7 +99,7 @@ export function FeedInvolvementLabel({ label }: { label: string }) {
             style={{
                 width: '100%',
                 textAlign: 'left',
-                paddingLeft: FEED_AMOUNT_CURRENCY_WIDTH,
+                paddingStart: FEED_AMOUNT_CURRENCY_WIDTH,
                 writingDirection: isRtl ? 'rtl' : 'ltr',
             }}
             numberOfLines={1}

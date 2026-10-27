@@ -21,7 +21,7 @@ function ExpenseRow() {
                     backgroundColor: SKELETON_BG,
                 }}
             />
-            <View style={{ flex: 1, marginLeft: 12 }}>
+            <View style={{ flex: 1, marginStart: 12 }}>
                 <View
                     style={{
                         height: 12,

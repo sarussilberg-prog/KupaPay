@@ -310,7 +310,7 @@ function AddMembersSheetView({
                                     testID="add-members-confirm"
                                 >
                                     {submitting && (
-                                        <ActivityIndicator color="#fff" style={{ marginRight: 8 }} />
+                                        <ActivityIndicator color="#fff" style={{ marginEnd: 8 }} />
                                     )}
                                     <Text
                                         className="text-base font-semibold text-white"
