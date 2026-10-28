@@ -70,7 +70,7 @@ VALUES
 CREATE OR REPLACE FUNCTION public.is_group_member(check_group_id uuid)
 RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
 AS 'SELECT TRUE';
-PERFORM public.test_set_authenticated('${CALLER_ID}');
+SELECT public.test_set_authenticated('${CALLER_ID}');
 COMMIT;
 `);
 }
