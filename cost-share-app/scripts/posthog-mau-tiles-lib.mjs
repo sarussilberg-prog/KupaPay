@@ -10,7 +10,7 @@ export const MAU_INSIGHT_NAME_PREFIX = 'KupaPay MAU · ';
 const ACTIVITY_TILES = new Set(['DAU', 'WAU', 'MAU']);
 
 /** @param {string | undefined} name @param {string | undefined} fallback */
-export function env(name, fallback) {
+function env(name, fallback) {
     const v = process.env[name]?.trim();
     return v || fallback?.trim() || '';
 }

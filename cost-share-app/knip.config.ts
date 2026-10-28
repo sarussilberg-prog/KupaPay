@@ -7,7 +7,12 @@ import type { KnipConfig } from 'knip';
 const config: KnipConfig = {
   // Intentional root deps: hoist patched markdown-it/linkify-it for react-native-markdown-display (#590).
   ignoreDependencies: ['markdown-it', 'linkify-it'],
-  entry: ['scripts/group-ledger-simulation-db.integration.ts'],
+  entry: [
+    'scripts/group-ledger-simulation-db.integration.ts',
+    'scripts/posthog-mau-tiles-lib.mjs',
+    'scripts/posthog-ensure-mau-dashboard-tiles.mjs',
+    'scripts/__tests__/posthog-mau-tiles-lib.test.mjs',
+  ],
   project: ['scripts/**/*.ts'],
   ignoreFiles: [
     'scripts/**',
@@ -17,6 +22,10 @@ const config: KnipConfig = {
     'supabase/functions/invite-landing/**',
   ],
   ignoreBinaries: ['python3', 'eas'],
+  // Knip does not resolve .mjs cross-imports for this script library (#584).
+  ignoreIssues: {
+    'scripts/posthog-mau-tiles-lib.mjs': ['exports'],
+  },
   workspaces: {
     '@cost-share/mobile': {
       entry: [
