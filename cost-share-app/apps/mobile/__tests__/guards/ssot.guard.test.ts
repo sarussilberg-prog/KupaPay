@@ -151,8 +151,10 @@ describe('App version — single source of truth', () => {
       expect(text).toContain('cost-share-app/packages/shared/version.json');
       expect(text).not.toContain('cost-share-app/apps/mobile/version.json');
     }
-    expect(devBump).toMatch(/^\s*push:\s*$/m);
+    expect(devBump).toMatch(/^\s*pull_request:\s*$/m);
+    expect(devBump).toContain('types: [closed]');
     expect(devBump).toContain('branches: [dev]');
+    expect(devBump).not.toMatch(/^\s*push:\s*$/m);
     expect(main).toContain('workflow_dispatch');
     expect(main).not.toMatch(/^\s*push:\s*$/m);
   });
