@@ -110,5 +110,59 @@
     "backHome": "Retour à l’accueil",
     "effectiveDate": "En vigueur depuis le ",
     "appVersion": "Version de l’app "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Calculateur de partage de dépenses gratuit — qui doit quoi | KupaPay",
+      "description": "Partagez les factures entre amis gratuitement. Saisissez les personnes et dépenses, obtenez le minimum de virements — sans inscription.",
+      "ogTitle": "Calculateur de partage — virements minimaux",
+      "ogDescription": "Calculez qui paie qui après un voyage, un dîner ou un loyer. Enregistrez ou partagez le résultat, puis suivez dans KupaPay."
+    },
+    "title": "Calculateur de partage de dépenses",
+    "subtitle": "Ajoutez des personnes et des dépenses — nous simplifions les dettes en un minimum de virements.",
+    "defaults": {
+      "personA": "Camille",
+      "personB": "Jules",
+      "newPerson": "Ami"
+    },
+    "participants": {
+      "title": "Personnes",
+      "nameLabel": "Nom",
+      "add": "Ajouter une personne",
+      "remove": "Retirer"
+    },
+    "expenses": {
+      "title": "Dépenses",
+      "currency": "Devise",
+      "currencyHint": "Code à 3 lettres, ex. EUR",
+      "amount": "Montant",
+      "paidBy": "Payé par",
+      "splitAmong": "Partager également entre",
+      "add": "Ajouter une dépense",
+      "remove": "Supprimer la dépense"
+    },
+    "results": {
+      "title": "Régler",
+      "transferLine": "{from} paie {to} {amount}",
+      "allSettled": "Tout le monde est à l’équilibre — aucun virement.",
+      "algorithmNote": "Virements minimisés ({mode}).",
+      "algorithmExact": "exacte",
+      "algorithmGreedy": "approximatif",
+      "errors": {
+        "no_participants": "Ajoutez au moins une personne.",
+        "no_expenses": "Ajoutez au moins une dépense avec un montant.",
+        "invalid_amount": "Vérifiez montants, payeur et participants de chaque dépense.",
+        "unbalanced": "Les totaux ne s’équilibrent pas — ajustez les dépenses et réessayez."
+      }
+    },
+    "share": {
+      "copy": "Copier le lien de partage",
+      "copied": "Lien copié",
+      "error": "Impossible de copier le lien"
+    },
+    "cta": {
+      "title": "Enregistrer ce partage comme groupe",
+      "body": "Téléchargez KupaPay pour suivre les dépenses, inviter des amis et régler avec des soldes en temps réel."
+    }
   }
 }

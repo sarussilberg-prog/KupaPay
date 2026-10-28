@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { isLanguage, SUPPORTED_LANGUAGES } from '@cost-share/shared';
-import { marketingLandingPath } from '@/lib/marketingSeo';
+import { marketingLandingPath, replaceLocaleInMarketingPath } from '@/lib/marketingSeo';
 
 const LOCALE_SEGMENT = new RegExp(
   `^/(${SUPPORTED_LANGUAGES.join('|')})/?$`,
@@ -22,8 +22,15 @@ export async function POST(request: NextRequest) {
           typeof locale === 'string' && isLanguage(locale)
             ? marketingLandingPath(locale)
             : '/en';
+      } else if (
+        typeof locale === 'string' &&
+        isLanguage(locale) &&
+        replaceLocaleInMarketingPath(pathname, locale)
+      ) {
+        redirectPath =
+          replaceLocaleInMarketingPath(pathname, locale)! + refererUrl.search + refererUrl.hash;
       } else {
-        redirectPath = pathname + refererUrl.search;
+        redirectPath = pathname + refererUrl.search + refererUrl.hash;
       }
     }
   } catch {

@@ -31,6 +31,13 @@ test('resolveMarketingMiddleware sets locale cookie path on marketing locale URL
         kind: 'continue_marketing_locale',
         locale: 'he',
     });
+    assert.deepEqual(
+        resolveMarketingMiddleware('/he/split-calculator', { cookieLocale: null, acceptLanguage: null }),
+        {
+            kind: 'continue_marketing_locale',
+            locale: 'he',
+        },
+    );
     assert.deepEqual(resolveMarketingMiddleware('/privacy', { cookieLocale: 'en', acceptLanguage: null }), {
         kind: 'pass_through',
     });

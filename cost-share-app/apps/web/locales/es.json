@@ -110,5 +110,59 @@
     "backHome": "Volver al inicio",
     "effectiveDate": "Vigente desde ",
     "appVersion": "Versión de la app "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Calculadora gratis para dividir gastos — quién debe a quién | KupaPay",
+      "description": "Divide cuentas con amigos gratis. Introduce personas y gastos y obtén el mínimo de transferencias — sin registro.",
+      "ogTitle": "Calculadora de división — mínimas transferencias",
+      "ogDescription": "Calcula quién paga a quién tras un viaje, cena o alquiler. Guarda o comparte el resultado y haz seguimiento en KupaPay."
+    },
+    "title": "Calculadora de división de gastos",
+    "subtitle": "Añade personas y gastos — simplificamos las deudas al mínimo de transferencias.",
+    "defaults": {
+      "personA": "Ana",
+      "personB": "Luis",
+      "newPerson": "Amigo"
+    },
+    "participants": {
+      "title": "Personas",
+      "nameLabel": "Nombre",
+      "add": "Añadir persona",
+      "remove": "Eliminar"
+    },
+    "expenses": {
+      "title": "Gastos",
+      "currency": "Moneda",
+      "currencyHint": "Código de 3 letras, p. ej. USD",
+      "amount": "Importe",
+      "paidBy": "Pagó",
+      "splitAmong": "Dividir por igual entre",
+      "add": "Añadir gasto",
+      "remove": "Eliminar gasto"
+    },
+    "results": {
+      "title": "Liquidar",
+      "transferLine": "{from} paga a {to} {amount}",
+      "allSettled": "Todos están equilibrados — no hacen falta transferencias.",
+      "algorithmNote": "Transferencias minimizadas ({mode}).",
+      "algorithmExact": "exactas",
+      "algorithmGreedy": "aproximadas",
+      "errors": {
+        "no_participants": "Añade al menos una persona.",
+        "no_expenses": "Añade al menos un gasto con importe.",
+        "invalid_amount": "Revisa importes, pagador y quién comparte cada gasto.",
+        "unbalanced": "Los totales no cuadran — ajusta los gastos e inténtalo de nuevo."
+      }
+    },
+    "share": {
+      "copy": "Copiar enlace para compartir",
+      "copied": "Enlace copiado",
+      "error": "No se pudo copiar el enlace"
+    },
+    "cta": {
+      "title": "Guardar esta división como grupo",
+      "body": "Descarga KupaPay para registrar gastos, invitar amigos y liquidar con saldos en tiempo real."
+    }
   }
 }

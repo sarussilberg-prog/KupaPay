@@ -110,5 +110,59 @@
     "backHome": "Zur Startseite",
     "effectiveDate": "Gültig ab ",
     "appVersion": "App-Version "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Kostenlos Rechnungen teilen — wer schuldet wem | KupaPay",
+      "description": "Teile Rechnungen mit Freunden kostenlos. Personen und Ausgaben eingeben, minimale Überweisungen erhalten — ohne Anmeldung.",
+      "ogTitle": "Split-Rechner — minimale Überweisungen",
+      "ogDescription": "Berechne, wer wem nach Reise, Essen oder Miete zahlt. Ergebnis speichern oder teilen und in KupaPay verfolgen."
+    },
+    "title": "Ausgaben-Split-Rechner",
+    "subtitle": "Personen und Ausgaben hinzufügen — wir vereinfachen Schulden auf wenige Überweisungen.",
+    "defaults": {
+      "personA": "Anna",
+      "personB": "Lukas",
+      "newPerson": "Freund"
+    },
+    "participants": {
+      "title": "Personen",
+      "nameLabel": "Personenname",
+      "add": "Person hinzufügen",
+      "remove": "Entfernen"
+    },
+    "expenses": {
+      "title": "Ausgaben",
+      "currency": "Währung",
+      "currencyHint": "3-Buchstaben-Code, z. B. EUR",
+      "amount": "Betrag",
+      "paidBy": "Bezahlt von",
+      "splitAmong": "Gleich aufteilen unter",
+      "add": "Ausgabe hinzufügen",
+      "remove": "Ausgabe entfernen"
+    },
+    "results": {
+      "title": "Ausgleichen",
+      "transferLine": "{from} zahlt an {to} {amount}",
+      "allSettled": "Alle sind ausgeglichen — keine Überweisungen nötig.",
+      "algorithmNote": "Überweisungen minimiert ({mode}).",
+      "algorithmExact": "exakt",
+      "algorithmGreedy": "näherungsweise",
+      "errors": {
+        "no_participants": "Mindestens eine Person hinzufügen.",
+        "no_expenses": "Mindestens eine Ausgabe mit Betrag hinzufügen.",
+        "invalid_amount": "Beträge, Zahler und Beteiligte jeder Ausgabe prüfen.",
+        "unbalanced": "Summen stimmen nicht — Ausgaben anpassen und erneut versuchen."
+      }
+    },
+    "share": {
+      "copy": "Teilen-Link kopieren",
+      "copied": "Link kopiert",
+      "error": "Link konnte nicht kopiert werden"
+    },
+    "cta": {
+      "title": "Aufteilung als Gruppe speichern",
+      "body": "Lade KupaPay herunter, um Ausgaben zu tracken, Freunde einzuladen und mit Echtzeit-Salden auszugleichen."
+    }
   }
 }
