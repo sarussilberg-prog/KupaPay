@@ -98,7 +98,7 @@ jobs:
       - run: npm ci
       - run: npm run audit:ci
       - name: Pack node_modules (preserve .bin symlinks for downstream jobs)
-        run: tar --use-compress-program='zstd -3 -T0' -cf node_modules.tar.zst node_modules
+        run: bash scripts/ci-pack-node-modules-artifact.sh
       - uses: actions/upload-artifact@v4
         with:
           name: npm-node-modules
