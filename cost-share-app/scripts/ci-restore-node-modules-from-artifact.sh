@@ -14,3 +14,6 @@ if [[ ! -d node_modules ]]; then
   echo "::error::Missing node_modules after artifact restore — Install dependencies job may have failed or artifact layout changed." >&2
   exit 1
 fi
+
+# Workspace-local installs (e.g. apps/mobile/node_modules/xlsx) are not in the root tree.
+npm install --ignore-scripts --prefer-offline --no-audit --no-fund
