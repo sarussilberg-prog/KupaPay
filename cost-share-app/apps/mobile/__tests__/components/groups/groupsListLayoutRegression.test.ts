@@ -34,6 +34,8 @@ describe('groups list layout regression (#633 responsive)', () => {
         expect(resolveGroupCardUsesStackedBalance(320)).toBe(true);
         expect(resolveGroupsListUsesStackedHeader(320)).toBe(true);
         expect(resolveGroupsListUsesStackedHeader(375)).toBe(true);
+        expect(resolveGroupCardUsesStackedBalance(375)).toBe(true);
         expect(resolveGroupsListUsesStackedHeader(430)).toBe(false);
+        expect(resolveGroupCardUsesStackedBalance(430)).toBe(false);
     });
 });

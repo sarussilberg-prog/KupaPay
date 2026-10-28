@@ -21,8 +21,8 @@ describe('groupCardLayout responsive metrics', () => {
     });
 
     it('keeps inline balance on mid and large widths', () => {
-        expect(resolveGroupCardUsesStackedBalance(375)).toBe(false);
-        expect(resolveGroupCardUsesStackedBalance(390)).toBe(false);
+        expect(resolveGroupCardUsesStackedBalance(375)).toBe(true);
+        expect(resolveGroupCardUsesStackedBalance(390)).toBe(true);
         expect(resolveGroupCardUsesStackedBalance(430)).toBe(false);
         expect(resolveGroupCardUsesStackedBalance(768)).toBe(false);
     });
