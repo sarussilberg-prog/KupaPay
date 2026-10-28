@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-28T13:43:42Z",
+  "generated_at": "2026-10-28T14:25:00Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -273,10 +273,6 @@
       "args": ""
     },
     {
-      "name": "consume_receipt_ocr_quota",
-      "args": ""
-    },
-    {
       "name": "consume_receipt_ocr_quota_for_user",
       "args": ""
     },
@@ -478,14 +474,6 @@
     },
     {
       "name": "get_recurring_series_for_expense",
-      "args": ""
-    },
-    {
-      "name": "get_user_balance_summary",
-      "args": ""
-    },
-    {
-      "name": "get_user_dashboard",
       "args": ""
     },
     {
