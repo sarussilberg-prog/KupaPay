@@ -7,6 +7,8 @@ export type GroupsListPreviewParams = {
     theme: GroupsListPreviewTheme;
     narrow: boolean;
     stress: boolean;
+    /** Viewport width for layout QA (defaults to 390). */
+    viewportWidth: number;
 };
 
 function readSearchParams(): URLSearchParams | null {
@@ -19,11 +21,18 @@ export function readGroupsListPreviewParams(): GroupsListPreviewParams {
     const rawLang = params?.get('lang');
     const lang = isLanguage(rawLang) ? rawLang : 'en';
     const theme = params?.get('theme') === 'dark' ? 'dark' : 'light';
+    const rawWidth = params?.get('width');
+    const parsedWidth = rawWidth ? Number.parseInt(rawWidth, 10) : Number.NaN;
+    const viewportWidth =
+        Number.isFinite(parsedWidth) && parsedWidth >= 280 && parsedWidth <= 1200
+            ? parsedWidth
+            : 390;
     return {
         lang,
         theme,
         narrow: params?.get('narrow') === '1',
         stress: params?.get('stress') === '1',
+        viewportWidth,
     };
 }
 

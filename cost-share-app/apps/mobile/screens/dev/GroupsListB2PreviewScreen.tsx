@@ -97,7 +97,8 @@ export function GroupsListB2PreviewScreen() {
     }
 
     return (
-        <View testID="groups-list-b2-preview-root" className={`flex-1 ${surfaceClass}`}>
+        <View testID="groups-list-b2-preview-root" className={`flex-1 ${surfaceClass} items-center`}>
+            <View style={{ width: previewParams.viewportWidth, maxWidth: '100%', flex: 1 }}>
             <NavigationContainer>
                 <GroupsListHeader
                     searchQuery={searchQuery}
@@ -122,6 +123,7 @@ export function GroupsListB2PreviewScreen() {
                     ))}
                 </ScrollView>
             </NavigationContainer>
+            </View>
         </View>
     );
 }
