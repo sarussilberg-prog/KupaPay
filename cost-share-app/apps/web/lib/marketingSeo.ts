@@ -37,8 +37,10 @@ export function buildSplitCalculatorAlternateLanguages(): Record<string, string>
 }
 
 /** Swap the locale prefix on marketing paths like `/he/split-calculator`. */
+const MARKETING_LOCALE_PREFIX = /^\/([a-z]{2})(\/.*)?$/;
+
 export function replaceLocaleInMarketingPath(pathname: string, locale: Language): string | null {
-    const match = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
+    const match = MARKETING_LOCALE_PREFIX.exec(pathname);
     if (!match) return null;
     const current = match[1];
     if (!(SUPPORTED_LANGUAGES as readonly string[]).includes(current)) {

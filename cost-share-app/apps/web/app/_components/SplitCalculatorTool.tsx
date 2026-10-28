@@ -7,6 +7,7 @@ import {
     computeSplitCalculatorTransfers,
     type SplitCalculatorExpense,
     type SplitCalculatorParticipant,
+    type SplitCalculatorResult,
 } from '@/lib/splitCalculatorLogic';
 import {
     decodeSplitCalculatorShare,
@@ -24,7 +25,12 @@ function newId(): string {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
     }
-    return `id-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        return `id-${Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')}`;
+    }
+    return `id-${Date.now()}`;
 }
 
 function defaultParticipants(t: Translations): SplitCalculatorParticipant[] {
@@ -32,6 +38,42 @@ function defaultParticipants(t: Translations): SplitCalculatorParticipant[] {
         { id: newId(), name: t.splitCalculator.defaults.personA },
         { id: newId(), name: t.splitCalculator.defaults.personB },
     ];
+}
+
+function renderCalculatorResults(
+    result: SplitCalculatorResult,
+    t: Translations,
+    money: Intl.NumberFormat,
+): React.ReactNode {
+    if (!result.ok) {
+        return (
+            <output className="block text-gray-600">
+                {t.splitCalculator.results.errors[result.error]}
+            </output>
+        );
+    }
+    if (result.transfers.length === 0) {
+        return (
+            <output className="block text-gray-600">
+                {t.splitCalculator.results.allSettled}
+            </output>
+        );
+    }
+    return (
+        <ol className="space-y-3">
+            {result.transfers.map((row) => (
+                <li
+                    key={`${row.fromUserId}-${row.toUserId}-${row.amount}`}
+                    className="rounded-lg bg-blue-50 px-4 py-3 text-gray-900"
+                >
+                    {t.splitCalculator.results.transferLine
+                        .replace('{from}', row.fromUserName)
+                        .replace('{to}', row.toUserName)
+                        .replace('{amount}', money.format(row.amount))}
+                </li>
+            ))}
+        </ol>
+    );
 }
 
 function defaultExpenses(participants: SplitCalculatorParticipant[]): SplitCalculatorExpense[] {
@@ -329,29 +371,7 @@ export default function SplitCalculatorTool({ locale, t }: Props) {
                 <h2 id="results-heading" className="text-xl font-semibold">
                     {t.splitCalculator.results.title}
                 </h2>
-                {!result.ok ? (
-                    <p className="text-gray-600" role="status">
-                        {t.splitCalculator.results.errors[result.error]}
-                    </p>
-                ) : result.transfers.length === 0 ? (
-                    <p className="text-gray-600" role="status">
-                        {t.splitCalculator.results.allSettled}
-                    </p>
-                ) : (
-                    <ol className="space-y-3">
-                        {result.transfers.map((row) => (
-                            <li
-                                key={`${row.fromUserId}-${row.toUserId}-${row.amount}`}
-                                className="rounded-lg bg-blue-50 px-4 py-3 text-gray-900"
-                            >
-                                {t.splitCalculator.results.transferLine
-                                    .replace('{from}', row.fromUserName)
-                                    .replace('{to}', row.toUserName)
-                                    .replace('{amount}', money.format(row.amount))}
-                            </li>
-                        ))}
-                    </ol>
-                )}
+                {renderCalculatorResults(result, t, money)}
                 {result.ok && result.transfers.length > 0 ? (
                     <p className="text-sm text-gray-500">
                         {t.splitCalculator.results.algorithmNote.replace(

@@ -8,20 +8,26 @@ export type SplitCalculatorSharePayload = {
 
 const SHARE_HASH_PREFIX = 'data=';
 
+function stripBase64Padding(value: string): string {
+    let end = value.length;
+    while (end > 0 && value[end - 1] === '=') {
+        end -= 1;
+    }
+    return value.slice(0, end);
+}
+
 function toBase64Url(json: string): string {
     if (typeof Buffer !== 'undefined') {
-        return Buffer.from(json, 'utf8')
-            .toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+        return stripBase64Padding(
+            Buffer.from(json, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_'),
+        );
     }
     const bytes = new TextEncoder().encode(json);
     let binary = '';
     for (const b of bytes) {
-        binary += String.fromCharCode(b);
+        binary += String.fromCodePoint(b);
     }
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return stripBase64Padding(btoa(binary).replace(/\+/g, '-').replace(/\//g, '_'));
 }
 
 function fromBase64Url(encoded: string): string {
@@ -32,7 +38,7 @@ function fromBase64Url(encoded: string): string {
         return Buffer.from(base64, 'base64').toString('utf8');
     }
     const binary = atob(base64);
-    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    const bytes = Uint8Array.from(binary, (c) => c.codePointAt(0) ?? 0);
     return new TextDecoder().decode(bytes);
 }
 
