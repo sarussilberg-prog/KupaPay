@@ -38,7 +38,7 @@ export function AdminPromoCodesScreen() {
     }, []);
 
     useEffect(() => {
-        (async () => {
+        void (async () => {
             await load();
             setLoading(false);
         })();

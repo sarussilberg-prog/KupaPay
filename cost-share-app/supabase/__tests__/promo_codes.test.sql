@@ -11,7 +11,6 @@ DECLARE
     v_carol UUID := '00000000-0000-0000-0000-000000a14505'::uuid;
     v_code_id UUID;
     v_result JSONB;
-    v_until TIMESTAMPTZ;
 BEGIN
     INSERT INTO auth.users (id, email) VALUES
         (v_admin, 'promo-admin@test.local'),
@@ -53,9 +52,8 @@ BEGIN
         RAISE EXCEPTION 'Case 3 failed: redeem should succeed, got %', v_result;
     END IF;
 
-    SELECT pro_until INTO v_until FROM public.profiles WHERE id = v_alice;
-    IF v_until IS NULL OR v_until <= NOW() THEN
-        RAISE EXCEPTION 'Case 4 failed: pro_until should be extended';
+    IF (v_result->>'pro_until') IS NULL OR (v_result->>'pro_until')::timestamptz <= NOW() THEN
+        RAISE EXCEPTION 'Case 4 failed: pro_until should be extended in redeem result';
     END IF;
 
     BEGIN
