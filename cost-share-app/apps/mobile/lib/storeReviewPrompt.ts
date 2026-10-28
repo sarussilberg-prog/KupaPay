@@ -19,8 +19,6 @@ export type StoreReviewTrigger = AppReviewTrigger;
 
 export { shouldOfferAppReview, APP_REVIEW_THROTTLE_MS } from '@cost-share/shared';
 
-export type { AppReviewEligibilityState as StoreReviewState } from '@cost-share/shared';
-
 async function readEligibilityState(nowMs: number) {
     const [launchRaw, lastRaw, settleRaw, expenseRaw] = await Promise.all([
         AsyncStorage.getItem(APP_REVIEW_STORAGE_KEYS.launchCount),
