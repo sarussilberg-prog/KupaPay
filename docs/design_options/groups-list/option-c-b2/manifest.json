@@ -1,0 +1,18 @@
+[
+  {
+    "lang": "en",
+    "theme": "light",
+    "suffix": "en-light",
+    "fileName": "groups-list-option-c-b2-en-light.png",
+    "url": "http://127.0.0.1:8081/?devGroupsListB2Preview=1&lang=en&theme=light&stress=1",
+    "filePath": "/workspace/artifacts/groups-list-options/option-c-b2/groups-list-option-c-b2-en-light.png"
+  },
+  {
+    "lang": "he",
+    "theme": "light",
+    "suffix": "he-rtl-light",
+    "fileName": "groups-list-option-c-b2-he-rtl-light.png",
+    "url": "http://127.0.0.1:8081/?devGroupsListB2Preview=1&lang=he&theme=light&stress=1",
+    "filePath": "/workspace/artifacts/groups-list-options/option-c-b2/groups-list-option-c-b2-he-rtl-light.png"
+  }
+]
