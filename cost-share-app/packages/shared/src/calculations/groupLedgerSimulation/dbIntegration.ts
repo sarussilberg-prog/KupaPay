@@ -18,8 +18,8 @@ const CALLER_ID = '00000000-0000-0000-0000-000000006410';
 
 function psql(sql: string): string {
     return execSync(
-        `docker exec -e PGPASSWORD=postgres -i ${PG_CONTAINER} psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -tA -c ${JSON.stringify(sql)}`,
-        { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+        `docker exec -i -e PGPASSWORD=postgres ${PG_CONTAINER} psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -tA`,
+        { encoding: 'utf8', input: sql, maxBuffer: 10 * 1024 * 1024 },
     ).trim();
 }
 
