@@ -311,7 +311,7 @@ All routes require auth (same guard the other controllers use). Membership check
 
 ### 6h. `ExpenseFiltersSheet`
 
-- Same pattern as the list-screen plan (`groups-screeen.md`). Check whether `@gorhom/bottom-sheet` is installed; if not, use `Modal`. No new deps just for this.
+- Same bottom-sheet pattern as the groups list filters (`FiltersSheet` / `FilterBottomSheet`). List layout spec: [groups-screeen.md](./groups-screeen.md) (canonical B2). Check whether `@gorhom/bottom-sheet` is installed; if not, use `Modal`. No new deps just for this.
 - ```ts
   type ExpenseFilters = {
     categories: string[];
