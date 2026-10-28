@@ -5,7 +5,7 @@
 import React, { forwardRef } from 'react';
 import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 
-export type HotVirtualizedListProps<T> = FlashListProps<T> & {
+type HotVirtualizedListProps<T> = FlashListProps<T> & {
     /** Regression guard in tests — do not remove from hot screens. */
     testID?: string;
 };
