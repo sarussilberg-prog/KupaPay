@@ -23,3 +23,18 @@ test('is_transient_head_ref_error matches GraphQL compare flake (#579)', () => {
 test('is_transient_head_ref_error rejects merge conflict errors', () => {
   assert.equal(bashCheck('is_transient_head_ref_error', 'merge conflict in file.ts'), 'no');
 });
+
+test('gh_pr_update_branch_with_retry returns 2 after transient exhaustion (#602)', () => {
+  const sample =
+    "GraphQL: Could not resolve head ref 'cursor/example'. (repository.pullRequest.baseRef.compare)";
+  const script = `
+    source ${JSON.stringify(helpers)};
+    gh() { echo "${sample}" >&2; return 1; }
+    export -f gh;
+    gh_pr_update_branch_with_retry 1 owner/repo 2 0;
+    echo exit:$?
+  `;
+  const result = spawnSync('bash', ['-c', script], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /exit:2/);
+});

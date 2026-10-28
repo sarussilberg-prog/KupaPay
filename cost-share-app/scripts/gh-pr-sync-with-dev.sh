@@ -27,10 +27,22 @@ if [[ "$behind" -eq 0 ]]; then
 fi
 
 echo "▶ PR is ${behind} commit(s) behind origin/dev — calling gh pr update-branch"
-if ! gh_pr_update_branch_with_retry "$PR_NUMBER" "$REPO"; then
-  echo "::error::update-branch failed (merge conflicts?). Resolve on the PR branch and re-run CI."
-  exit 1
-fi
+set +e
+gh_pr_update_branch_with_retry "$PR_NUMBER" "$REPO"
+update_rc=$?
+set -e
+case "$update_rc" in
+  0) ;;
+  2)
+    echo "::warning::update-branch still hitting head-ref flake after retries; deferring auto-merge for a fresh CI run"
+    echo "defer_merge=true"
+    exit 0
+    ;;
+  *)
+    echo "::error::update-branch failed (merge conflicts?). Resolve on the PR branch and re-run CI."
+    exit 1
+    ;;
+esac
 
 echo "::notice::Branch update queued; GitHub will re-run required checks on the new merge commit."
 echo "defer_merge=true"
