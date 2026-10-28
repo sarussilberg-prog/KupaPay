@@ -33,6 +33,7 @@ export function ReceiptTextScanSheet({ visible, onClose, onApply }: ReceiptTextS
 
     return (
         <BottomSheetShell visible={visible} onClose={onClose} label={t('pro.receiptOcr.sheetTitle')}>
+            <View className="px-4 pb-6" testID="bottom-sheet-body">
             <Text className="text-gray-600 text-sm mb-3">{t('pro.receiptOcr.sheetBody')}</Text>
             <TextInput
                 value={text}
@@ -55,6 +56,7 @@ export function ReceiptTextScanSheet({ visible, onClose, onApply }: ReceiptTextS
                 variant="pro"
                 testID="receipt-text-apply"
             />
+            </View>
         </BottomSheetShell>
     );
 }
