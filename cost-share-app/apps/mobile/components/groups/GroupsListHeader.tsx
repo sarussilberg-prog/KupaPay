@@ -76,12 +76,19 @@ export function GroupsListHeader({
                     <TouchableOpacity
                         onPress={onCreateGroup}
                         accessibilityRole="button"
-                        accessibilityLabel={t('groups.newGroupCta')}
+                        accessibilityLabel={t('groups.createGroup')}
                         testID="groups-create-btn"
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        className="h-10 w-10 items-center justify-center rounded-full bg-primary"
+                        style={[rtlRowStyle(isRtl), { maxWidth: 150 }]}
+                        className="h-10 items-center justify-center gap-1 rounded-full bg-primary px-3"
                     >
-                        <AppIcon name="add" size={22} color={colors.white} />
+                        <AppIcon name="add" size={18} color={colors.white} />
+                        <Text
+                            className="text-xs font-semibold text-white shrink"
+                            numberOfLines={1}
+                        >
+                            {t('groups.createGroup')}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
