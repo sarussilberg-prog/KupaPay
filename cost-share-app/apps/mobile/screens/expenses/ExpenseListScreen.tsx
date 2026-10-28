@@ -5,7 +5,8 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { View, FlatList, RefreshControl } from 'react-native';
+import { View, RefreshControl } from 'react-native';
+import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { Expense } from '@cost-share/shared';
@@ -54,8 +55,11 @@ export function ExpenseListScreen() {
         [navigation, groupId],
     );
 
-    const renderExpense = ({ item }: { item: Expense }) => (
-        <ExpenseCard expense={item} onPress={handleExpensePress} />
+    const renderExpense = useCallback(
+        ({ item }: { item: Expense }) => (
+            <ExpenseCard expense={item} onPress={handleExpensePress} />
+        ),
+        [handleExpensePress],
     );
 
     if (!isValid) {
@@ -68,11 +72,13 @@ export function ExpenseListScreen() {
 
     return (
         <View className="flex-1 bg-slate-50">
-            <FlatList
+            <HotVirtualizedList
+                testID="expense-list-virtualized"
                 data={expenses}
                 keyExtractor={(item) => item.id}
                 renderItem={renderExpense}
-                contentContainerClassName="p-4"
+                style={{ flex: 1 }}
+                contentContainerStyle={{ padding: 16 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}

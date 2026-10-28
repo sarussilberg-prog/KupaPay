@@ -8,11 +8,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     View,
     Text,
-    FlatList,
     RefreshControl,
     TouchableOpacity,
-    ListRenderItem,
 } from 'react-native';
+import type { ListRenderItem } from '@shopify/flash-list';
+import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -360,15 +360,12 @@ export function GroupsListScreen() {
             />
 
             <View className="flex-1">
-                <FlatList
+                <HotVirtualizedList
+                    testID="groups-list-virtualized"
                     data={activeRows}
                     keyExtractor={item => item.group.id}
                     renderItem={renderItem}
-                    initialNumToRender={12}
-                    maxToRenderPerBatch={8}
-                    windowSize={7}
-                    removeClippedSubviews
-                    className="flex-1"
+                    style={{ flex: 1 }}
                     contentContainerStyle={{
                         paddingHorizontal: 16,
                         paddingBottom: listBottomPadding,
