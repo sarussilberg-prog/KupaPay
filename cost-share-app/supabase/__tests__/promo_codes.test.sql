@@ -26,9 +26,6 @@ BEGIN
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin) ON CONFLICT DO NOTHING;
 
-    INSERT INTO public.promo_redeem_rate_limits (user_id, window_start, attempt_count)
-    VALUES (v_carol, date_trunc('hour', NOW()), 15);
-
     SET LOCAL session_replication_role = origin;
 
     PERFORM public.test_set_authenticated(v_alice);
@@ -108,10 +105,7 @@ BEGIN
             END IF;
     END;
 
-    INSERT INTO public.promo_redeem_rate_limits (user_id, window_start, attempt_count)
-    VALUES (v_carol, date_trunc('hour', NOW()), 15)
-    ON CONFLICT (user_id, window_start) DO UPDATE SET attempt_count = 15;
-
+    PERFORM public.test_seed_promo_redeem_rate_limit(v_carol, 15);
     PERFORM public.test_set_authenticated(v_carol);
     BEGIN
         PERFORM public.redeem_promo_code('ZZZ-RATE-LIMIT');
