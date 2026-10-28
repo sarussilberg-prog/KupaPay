@@ -117,7 +117,8 @@ export function assertLedgerInvariants(state: SimulationState): void {
     };
 
     const simplified = deriveSimplifiedDebts(payload, activeUserIds(state)[0] ?? 'u_0');
-    for (const u of simplified.unbalanced) {
+    if (simplified.unbalanced.length > 0) {
+        const u = simplified.unbalanced[0]!;
         throw new Error(
             `deriveSimplifiedDebts marked unbalanced ${u.groupId}/${u.currency}: residual ${u.residual}`,
         );
