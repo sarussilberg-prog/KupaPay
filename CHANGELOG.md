@@ -15,3 +15,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): stack balance chip with header through 392px (#639)
 ## [2.2.0-dev.5] — 2026-10-28
 - feat(web): split calculator Save as group import (#613) (#644)
+## [2.2.0-dev.6] — 2026-10-28
+- fix(ci): offline schema contract seed honors DROP FUNCTION (#636) (#645)
