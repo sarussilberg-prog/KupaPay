@@ -97,10 +97,12 @@ jobs:
             turbo-${{ runner.os }}-
       - run: npm ci
       - run: npm run audit:ci
+      - name: Pack node_modules (preserve .bin symlinks for downstream jobs)
+        run: tar --use-compress-program='zstd -3 -T0' -cf node_modules.tar.zst node_modules
       - uses: actions/upload-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
+          path: cost-share-app/node_modules.tar.zst
           if-no-files-found: error
           retention-days: 1
 
@@ -124,8 +126,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/turbo || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh turbo
       - run: npm run lint
 
   typecheck:
@@ -148,8 +151,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/tsc || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh tsc
       - run: npm run typecheck
 
   test:
@@ -171,8 +175,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-jest-run-tests.sh
       - name: Upload Jest flake report
         if: always()
@@ -201,8 +206,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-coverage-check.sh
 
   legal-locale-parity:
@@ -224,8 +230,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci --ignore-scripts
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-legal-locale-parity.sh
 
   deno-edge-plan:
@@ -378,8 +385,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/expo || npm ci --ignore-scripts
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh expo
       - run: bash scripts/ci-expo-mobile-config.sh
 
   migration-versions:
@@ -506,8 +514,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/knip || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh knip
       - name: Enforce dead-code ratchet
         run: npm run knip:ci
 
