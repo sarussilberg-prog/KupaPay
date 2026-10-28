@@ -1,8 +1,7 @@
-import {
-    GROUPS_LIST_CREATE_PILL_MAX_WIDTH,
-    GROUPS_LIST_CREATE_PILL_MIN_WIDTH,
-    resolveGroupsListCreatePillMaxWidth,
-} from '../../../components/groupsListLayout';
+import { resolveGroupsListCreatePillMaxWidth } from '../../../components/groupsListLayout';
+
+const CREATE_PILL_MIN = 72;
+const CREATE_PILL_MAX = 150;
 import {
     groupCardBalanceColumnStyle,
     resolveGroupCardUsesStackedBalance,
@@ -14,8 +13,8 @@ describe('groups list layout regression (#633 responsive)', () => {
     describe.each(TARGET_WIDTHS)('at %ipx width', width => {
         it('resolves create pill width within bounds', () => {
             const pill = resolveGroupsListCreatePillMaxWidth(width);
-            expect(pill).toBeGreaterThanOrEqual(GROUPS_LIST_CREATE_PILL_MIN_WIDTH);
-            expect(pill).toBeLessThanOrEqual(GROUPS_LIST_CREATE_PILL_MAX_WIDTH);
+            expect(pill).toBeGreaterThanOrEqual(CREATE_PILL_MIN);
+            expect(pill).toBeLessThanOrEqual(CREATE_PILL_MAX);
         });
 
         it('resolves balance column without zero width', () => {

@@ -5,20 +5,14 @@ export const GROUP_CARD_TEXT_GAP = 4;
 export const GROUP_CARD_STACK_GAP = 8;
 export const GROUP_CARD_MENU_HIT = 44;
 export const GROUP_CARD_MENU_ICON = 18;
-/** Matches list horizontal padding (GroupsListScreen px-4). */
-export const GROUP_CARD_LIST_HORIZONTAL_INSET = 16;
-export const GROUP_CARD_AVATAR_WIDTH = 48;
+const GROUP_CARD_LIST_HORIZONTAL_INSET = 16;
+const GROUP_CARD_AVATAR_WIDTH = 48;
 /** Minimum width reserved for title + meta in inline (side-by-side) layout. */
-export const GROUP_CARD_TEXT_MIN_WIDTH = 104;
+const GROUP_CARD_TEXT_MIN_WIDTH = 104;
 /** Lower bound for chip width — content-sized below this. */
 export const GROUP_CARD_CHIP_MIN_WIDTH = 76;
 /** Upper bound for chip width — content-sized below this. */
 export const GROUP_CARD_CHIP_MAX_WIDTH = 120;
-
-/**
- * @deprecated Use {@link resolveGroupCardUsesStackedBalance} — kept for tests/docs parity.
- */
-export const GROUP_CARD_STACK_CHIP_MAX_WIDTH = 390;
 
 function groupCardInlineRowInnerWidth(windowWidth: number): number {
     const listContentWidth = windowWidth - GROUP_CARD_LIST_HORIZONTAL_INSET * 2;
