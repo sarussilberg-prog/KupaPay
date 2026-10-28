@@ -283,7 +283,7 @@ function GroupCardBase({
                                     className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
                                     query={searchQuery}
-                                    numberOfLines={1}
+                                    numberOfLines={2}
                                     ellipsizeMode="tail"
                                 />
                             </View>
