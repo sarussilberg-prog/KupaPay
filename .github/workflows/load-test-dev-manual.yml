@@ -70,5 +70,9 @@ jobs:
           K6_DURATION: '45s'
         run: |
           cd cost-share-app/scripts/load-test
+          # Keep k6's exit code (thresholds) instead of tee's, but still publish the summary.
+          set +e
           k6 run k6-dev-rpcs.js | tee k6-summary.txt
+          rc=${PIPESTATUS[0]}
           cat k6-summary.txt >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
