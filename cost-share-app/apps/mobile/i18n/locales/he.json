@@ -819,6 +819,29 @@
             "resetOnboardingRow": "איפוס אונבורדינג",
             "previewCreateGroupRow": "תצוגה מקדימה — יצירת קופה ראשונה"
         },
+        "promoCodes": {
+            "title": "קודי קופון",
+            "portalRow": "קודי קופון",
+            "empty": "אין קודי קופון עדיין.",
+            "createCta": "יצירת קוד",
+            "createTitle": "קוד קופון חדש",
+            "codePlaceholder": "קוד (למשל SUMMER-2026)",
+            "durationPlaceholder": "משך Pro (ימים)",
+            "maxUsesPlaceholder": "מקסימום שימושים (אופציונלי)",
+            "createConfirm": "יצירה",
+            "createSuccess": "קוד הקופון נוצר",
+            "createError": "לא ניתן ליצור קוד קופון",
+            "statusActive": "פעיל",
+            "statusInactive": "לא פעיל",
+            "metaLine": "{{days}} ימים · {{uses}} / {{max}} שימושים",
+            "unlimited": "ללא הגבלה",
+            "deactivateCta": "השבתה",
+            "deactivateTitle": "להשבית את {{code}}?",
+            "deactivateMessage": "לאחר ההשבתה לא ניתן יהיה לממש את הקוד.",
+            "deactivateConfirm": "השבתה",
+            "deactivateSuccess": "הקוד הושבת",
+            "deactivateError": "לא ניתן להשבית את הקוד"
+        },
         "proView": {
             "sectionTitle": "מצב תצוגת Pro",
             "description": "תצוגה מקדימה של חוויית Free או Pro לחשבון שלך בלבד (24 שעות). לא משנה מנוי אמיתי.",
@@ -1431,6 +1454,23 @@
             "havePromoCode": "יש לכם קוד?",
             "alreadyProTitle": "אתם ב-Pro",
             "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
+        },
+        "promoCode": {
+            "sheetTitle": "מימוש קוד",
+            "kupapayHint": "הזינו קוד קופון של KupaPay כדי לפתוח Pro בחשבון שלכם.",
+            "inputPlaceholder": "קוד KupaPay",
+            "redeeming": "מממשים…",
+            "storeSection": "App Store או Google Play",
+            "playRedeem": "מימוש ב-Google Play",
+            "success": "Pro נפתח עם קוד הקופון.",
+            "errorInvalid": "הקוד אינו תקין.",
+            "errorInactive": "הקוד אינו פעיל.",
+            "errorExpired": "תוקף הקוד פג.",
+            "errorMaxUses": "הקוד הגיע למכסת המימושים.",
+            "errorAlreadyRedeemed": "כבר מימשתם קוד זה.",
+            "errorRateLimit": "יותר מדי ניסיונות. נסו שוב מאוחר יותר.",
+            "errorAuth": "התחברו כדי לממש קוד.",
+            "errorGeneric": "לא ניתן לממש את הקוד. נסו שוב."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

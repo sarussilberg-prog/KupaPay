@@ -817,6 +817,29 @@
             "resetOnboardingRow": "Réinitialiser l'accueil",
             "previewCreateGroupRow": "Aperçu de l'écran du premier groupe"
         },
+        "promoCodes": {
+            "title": "Codes promo",
+            "portalRow": "Codes promo",
+            "empty": "Aucun code promo pour l'instant.",
+            "createCta": "Créer un code",
+            "createTitle": "Nouveau code promo",
+            "codePlaceholder": "Code (ex. SUMMER-2026)",
+            "durationPlaceholder": "Durée Pro (jours)",
+            "maxUsesPlaceholder": "Utilisations max (facultatif)",
+            "createConfirm": "Créer",
+            "createSuccess": "Code promo créé",
+            "createError": "Impossible de créer le code",
+            "statusActive": "Actif",
+            "statusInactive": "Inactif",
+            "metaLine": "{{days}} j · {{uses}} / {{max}} utilisations",
+            "unlimited": "Illimité",
+            "deactivateCta": "Désactiver",
+            "deactivateTitle": "Désactiver {{code}} ?",
+            "deactivateMessage": "Les utilisateurs ne pourront plus utiliser ce code.",
+            "deactivateConfirm": "Désactiver",
+            "deactivateSuccess": "Code désactivé",
+            "deactivateError": "Impossible de désactiver le code"
+        },
         "proView": {
             "sectionTitle": "Mode d'affichage Pro",
             "description": "Aperçu Free ou Pro pour votre compte uniquement (24 h). Ne modifie pas l'abonnement réel.",
@@ -1486,6 +1509,23 @@
             "havePromoCode": "Vous avez un code ?",
             "alreadyProTitle": "Vous êtes sur Pro",
             "alreadyProBody": "Votre abonnement est actif. Gérez la facturation sur l’App Store ou Google Play et profitez des fonctionnalités Pro."
+        },
+        "promoCode": {
+            "sheetTitle": "Utiliser un code",
+            "kupapayHint": "Saisissez votre code promo KupaPay pour débloquer Pro.",
+            "inputPlaceholder": "Code KupaPay",
+            "redeeming": "Activation…",
+            "storeSection": "App Store ou Google Play",
+            "playRedeem": "Utiliser sur Google Play",
+            "success": "Pro débloqué avec votre code.",
+            "errorInvalid": "Ce code n'est pas valide.",
+            "errorInactive": "Ce code n'est plus actif.",
+            "errorExpired": "Ce code a expiré.",
+            "errorMaxUses": "Ce code a atteint sa limite d'utilisation.",
+            "errorAlreadyRedeemed": "Vous avez déjà utilisé ce code.",
+            "errorRateLimit": "Trop de tentatives. Réessayez plus tard.",
+            "errorAuth": "Connectez-vous pour utiliser un code.",
+            "errorGeneric": "Impossible d'utiliser ce code. Réessayez."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",

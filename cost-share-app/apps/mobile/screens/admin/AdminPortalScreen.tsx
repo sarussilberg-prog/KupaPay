@@ -86,6 +86,13 @@ export function AdminPortalScreen() {
                         testID="admin-portal-growth"
                     />
                     <SettingsRow
+                        iconName="pricetag-outline"
+                        label={t('admin.promoCodes.portalRow')}
+                        variant="chevron"
+                        onPress={() => navigation.navigate('AdminPromoCodes')}
+                        testID="admin-portal-promo-codes"
+                    />
+                    <SettingsRow
                         iconName="refresh-outline"
                         label={t('admin.portal.resetOnboardingRow')}
                         variant="chevron"

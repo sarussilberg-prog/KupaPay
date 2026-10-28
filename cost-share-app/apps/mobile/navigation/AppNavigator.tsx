@@ -90,6 +90,7 @@ import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen'
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
 import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
+import { AdminPromoCodesScreen } from '../screens/admin/AdminPromoCodesScreen';
 import { AdminGrowthMetricsScreen } from '../screens/admin/AdminGrowthMetricsScreen';
 import { PaywallScreen } from '../screens/pro/PaywallScreen';
 import { boundScreen } from './boundScreen';
@@ -502,6 +503,11 @@ export function AppNavigator() {
                 name="AdminGrowthMetrics"
                 component={Screen.AdminGrowthMetrics}
                 options={{ title: t('admin.growth.screenTitle') }}
+            />
+            <RootStack.Screen
+                name="AdminPromoCodes"
+                component={AdminPromoCodesScreen}
+                options={{ title: t('admin.promoCodes.title') }}
             />
 
             <RootStack.Screen

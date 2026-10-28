@@ -827,6 +827,29 @@
             "resetOnboardingRow": "Сбросить онбординг",
             "previewCreateGroupRow": "Предпросмотр экрана первой группы"
         },
+        "promoCodes": {
+            "title": "Промокоды",
+            "portalRow": "Промокоды",
+            "empty": "Промокодов пока нет.",
+            "createCta": "Создать код",
+            "createTitle": "Новый промокод",
+            "codePlaceholder": "Код (например SUMMER-2026)",
+            "durationPlaceholder": "Срок Pro (дней)",
+            "maxUsesPlaceholder": "Макс. использований (необяз.)",
+            "createConfirm": "Создать",
+            "createSuccess": "Промокод создан",
+            "createError": "Не удалось создать промокод",
+            "statusActive": "Активен",
+            "statusInactive": "Неактивен",
+            "metaLine": "{{days}} дн. · {{uses}} / {{max}} использ.",
+            "unlimited": "Без лимита",
+            "deactivateCta": "Деактивировать",
+            "deactivateTitle": "Деактивировать {{code}}?",
+            "deactivateMessage": "После деактивации код нельзя будет активировать.",
+            "deactivateConfirm": "Деактивировать",
+            "deactivateSuccess": "Код деактивирован",
+            "deactivateError": "Не удалось деактивировать код"
+        },
         "proView": {
             "sectionTitle": "Режим просмотра Pro",
             "description": "Предпросмотр Free или Pro только для вашего аккаунта (24 ч). Не меняет реальную подписку.",
@@ -1504,6 +1527,23 @@
             "havePromoCode": "Есть код?",
             "alreadyProTitle": "У вас Pro",
             "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
+        },
+        "promoCode": {
+            "sheetTitle": "Активировать код",
+            "kupapayHint": "Введите промокод KupaPay, чтобы открыть Pro на аккаунте.",
+            "inputPlaceholder": "Код KupaPay",
+            "redeeming": "Активация…",
+            "storeSection": "App Store или Google Play",
+            "playRedeem": "Активировать в Google Play",
+            "success": "Pro активирован по промокоду.",
+            "errorInvalid": "Неверный код.",
+            "errorInactive": "Код неактивен.",
+            "errorExpired": "Срок действия кода истёк.",
+            "errorMaxUses": "Достигнут лимит активаций.",
+            "errorAlreadyRedeemed": "Вы уже использовали этот код.",
+            "errorRateLimit": "Слишком много попыток. Попробуйте позже.",
+            "errorAuth": "Войдите, чтобы активировать код.",
+            "errorGeneric": "Не удалось активировать код. Попробуйте снова."
         },
         "settings": {
             "sectionTitle": "KupaPay Pro",
