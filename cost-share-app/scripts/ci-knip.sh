@@ -23,8 +23,16 @@ echo "=== knip dead-code ratchet ==="
 json="$(mktemp)"
 trap 'rm -f "$json"' EXIT
 
-if ! npx knip --reporter json --no-progress --no-exit-code --no-config-hints >"$json" 2>/dev/null; then
+knip_log="$(mktemp)"
+if ! npx knip --reporter json --no-progress --no-exit-code --no-config-hints >"$json" 2>"$knip_log"; then
   echo "::error::knip JSON reporter failed" >&2
+  tail -n 40 "$knip_log" >&2 || true
+  exit 1
+fi
+if ! jq -e '.files and .issues' "$json" >/dev/null 2>&1; then
+  echo "::error::knip JSON output missing expected shape" >&2
+  tail -n 40 "$knip_log" >&2 || true
+  head -c 500 "$json" >&2 || true
   exit 1
 fi
 

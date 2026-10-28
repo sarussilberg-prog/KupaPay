@@ -507,6 +507,7 @@ jobs:
         with:
           name: npm-node-modules
           path: cost-share-app/node_modules
+      - run: test -x node_modules/.bin/knip || npm ci
       - name: Enforce dead-code ratchet
         run: npm run knip:ci
 
