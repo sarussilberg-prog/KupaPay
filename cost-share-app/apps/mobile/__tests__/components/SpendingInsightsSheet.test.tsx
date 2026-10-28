@@ -14,7 +14,7 @@ jest.mock('../../hooks/useShowProUpsell', () => ({
 
 describe('SpendingInsightsSheet', () => {
     it('shows locked upsell when Pro is locked', () => {
-        const { getByText } = renderWithQuery(
+        const { getByText, getByTestId } = renderWithQuery(
             <SpendingInsightsSheet
                 visible
                 groupId="g1"
@@ -26,5 +26,6 @@ describe('SpendingInsightsSheet', () => {
             />,
         );
         expect(getByText('pro.spendingInsights.upgrade')).toBeTruthy();
+        expect(getByTestId('bottom-sheet-body')).toBeTruthy();
     });
 });
