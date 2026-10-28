@@ -63,10 +63,7 @@ export function SummaryFooter({
                     </Text>
                     {noteHasUnread ? (
                         <View
-                            style={[
-                                styles.noteUnreadDot,
-                                isRtl ? styles.noteUnreadDotRtl : styles.noteUnreadDotLtr,
-                            ]}
+                            style={styles.noteUnreadDot}
                             testID="summary-note-unread-dot"
                         />
                     ) : null}
@@ -138,18 +135,13 @@ const styles = StyleSheet.create({
     noteUnreadDot: {
         position: 'absolute',
         top: -2,
+        end: -2,
         width: 9,
         height: 9,
         borderRadius: 9999,
         backgroundColor: colors.warning,
         borderWidth: 1.5,
         borderColor: '#fff',
-    },
-    noteUnreadDotLtr: {
-        right: -2,
-    },
-    noteUnreadDotRtl: {
-        left: -2,
     },
     settlePill: {
         borderRadius: 9999,

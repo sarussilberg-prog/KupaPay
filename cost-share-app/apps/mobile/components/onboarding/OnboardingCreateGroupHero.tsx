@@ -89,11 +89,13 @@ export function OnboardingCreateGroupHero({
                     )}
                 </Text>
 
-                <View style={styles.track} testID="onboarding-create-group-hero-progress">
+                <View
+                    style={[styles.track, { direction: isRtl ? 'rtl' : 'ltr' }]}
+                    testID="onboarding-create-group-hero-progress"
+                >
                     <View
                         style={[
                             styles.fill,
-                            isRtl ? { right: 0 } : { left: 0 },
                             { width: `${progress * 100}%`, backgroundColor: fillColor },
                         ]}
                     />
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         bottom: 0,
+        start: 0,
         borderRadius: 3,
     },
 });

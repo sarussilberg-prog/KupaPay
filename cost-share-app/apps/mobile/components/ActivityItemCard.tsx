@@ -258,7 +258,7 @@ export function ActivityItemCard({
             style={{
                 position: 'absolute',
                 top: 8,
-                right: 10,
+                end: 10,
                 backgroundColor: '#FEE2E2',
                 borderRadius: 4,
                 paddingHorizontal: 5,
@@ -275,7 +275,7 @@ export function ActivityItemCard({
             style={{
                 position: 'absolute',
                 top: 8,
-                right: 10,
+                end: 10,
                 backgroundColor: '#F3F4F6',
                 borderRadius: 4,
                 paddingHorizontal: 5,
