@@ -207,6 +207,87 @@ type MetricsRow = {
     groups: AdminPlatformMetrics['groups'];
 };
 
+export interface AdminPromoCodeRow {
+    id: string;
+    code: string;
+    durationDays: number;
+    maxUses: number | null;
+    useCount: number;
+    expiresAt: Date | null;
+    active: boolean;
+    createdAt: Date;
+}
+
+type PromoCodeRpcRow = {
+    id: string;
+    code: string;
+    duration_days: number;
+    max_uses: number | null;
+    use_count: number;
+    expires_at: string | null;
+    active: boolean;
+    created_at: string;
+};
+
+export async function listAdminPromoCodes(): Promise<AdminPromoCodeRow[]> {
+    const { data, error } = await supabase.rpc('admin_list_promo_codes');
+    if (error || !data) {
+        if (error) console.warn('listAdminPromoCodes: RPC failed', error);
+        return [];
+    }
+    return (data as PromoCodeRpcRow[]).map(r => ({
+        id: r.id,
+        code: r.code,
+        durationDays: r.duration_days,
+        maxUses: r.max_uses,
+        useCount: Number(r.use_count ?? 0),
+        expiresAt: r.expires_at ? new Date(r.expires_at) : null,
+        active: r.active,
+        createdAt: new Date(r.created_at),
+    }));
+}
+
+export async function createAdminPromoCode(params: {
+    code: string;
+    durationDays: number;
+    maxUses?: number | null;
+    expiresAt?: Date | null;
+}): Promise<{ ok: true; id: string } | { ok: false; error: 'not_authorized' | 'invalid' | 'unknown' }> {
+    const { data, error } = await supabase.rpc('admin_create_promo_code', {
+        p_code: params.code.trim(),
+        p_duration_days: params.durationDays,
+        p_max_uses: params.maxUses ?? null,
+        p_expires_at: params.expiresAt?.toISOString() ?? null,
+    });
+    if (error) {
+        console.warn('createAdminPromoCode: RPC failed', error);
+        if (error.message?.includes('not_authorized')) return { ok: false, error: 'not_authorized' };
+        if (
+            error.message?.includes('promo_code_invalid') ||
+            error.message?.includes('promo_duration_invalid')
+        ) {
+            return { ok: false, error: 'invalid' };
+        }
+        return { ok: false, error: 'unknown' };
+    }
+    return { ok: true, id: String(data) };
+}
+
+export async function setAdminPromoCodeActive(
+    promoCodeId: string,
+    active: boolean,
+): Promise<boolean> {
+    const { error } = await supabase.rpc('admin_set_promo_code_active', {
+        p_promo_code_id: promoCodeId,
+        p_active: active,
+    });
+    if (error) {
+        console.warn('setAdminPromoCodeActive: RPC failed', error);
+        return false;
+    }
+    return true;
+}
+
 export class AdminGrowthMetricsError extends AdminMonetizationMetricsError {
     constructor(code: AdminMonetizationMetricsFailure, message?: string) {
         super(code, message);

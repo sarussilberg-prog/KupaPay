@@ -57,6 +57,11 @@ describe('AdminPortalScreen onboarding tools', () => {
         expect(getByTestId('admin-portal-preview-onboarding')).toBeTruthy();
     });
 
+    it('renders promo codes admin row', () => {
+        const { getByTestId } = render(<AdminPortalScreen />);
+        expect(getByTestId('admin-portal-promo-codes')).toBeTruthy();
+    });
+
     it('renders AdminMetricsPanel with metrics data', () => {
         const { getByTestId } = render(<AdminPortalScreen />);
         expect(getByTestId('admin-metrics-panel')).toBeTruthy();

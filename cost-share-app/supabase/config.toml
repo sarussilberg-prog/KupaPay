@@ -66,6 +66,10 @@ verify_jwt = false
 [functions.referral-reward-dispatch]
 verify_jwt = false
 
+# Client-invoked after redeem_promo_code — RevenueCat promotional Pro sync.
+[functions.promo-code-redeem]
+verify_jwt = true
+
 # User JWT required; handler re-checks group membership + Pro via RPC.
 [functions.receipt-ocr]
 verify_jwt = true
