@@ -5,6 +5,14 @@ import type { KnipConfig } from 'knip';
  * Conservative ignores: Expo config plugins, EAS/ASC scripts, i18n JSON, platform suffixes.
  */
 const config: KnipConfig = {
+  ignoreFiles: [
+    'scripts/**',
+    'lighthouserc.cjs',
+    'supabase/functions/**/index.ts',
+    'supabase/functions/**/cors.ts',
+    'supabase/functions/invite-landing/**',
+  ],
+  ignoreBinaries: ['python3', 'eas'],
   workspaces: {
     '@cost-share/mobile': {
       entry: [
@@ -17,7 +25,10 @@ const config: KnipConfig = {
       ],
       project: ['**/*.{ts,tsx}'],
       ignoreFiles: [
-        '{scripts,plugins,dev,screenshotDemo}/**',
+        'scripts/**',
+        'plugins/**',
+        'dev/**',
+        'screenshotDemo/**',
         'babel.config.js',
         'metro.config.js',
         'global.css',
