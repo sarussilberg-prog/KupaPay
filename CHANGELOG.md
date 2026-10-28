@@ -11,3 +11,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): readable groups list header on narrow screens (#637)
 ## [2.2.0-dev.3] — 2026-10-28
 - fix(mobile): BottomSheetShell body padding on Receipt OCR & Spending Insights (#640)
+## [2.2.0-dev.4] — 2026-10-28
+- fix(mobile): stack balance chip with header through 392px (#639)

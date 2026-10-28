@@ -24,8 +24,14 @@ function groupCardInlineRowInnerWidth(windowWidth: number): number {
     );
 }
 
+/** Keep chip stacked whenever the groups list header stacks (≤392px). */
+const GROUP_CARD_STACK_WITH_HEADER_MAX_WIDTH = 392;
+
 /** Stack balance chip under title when inline row cannot fit avatar + text + chip mins. */
 export function resolveGroupCardUsesStackedBalance(windowWidth: number): boolean {
+    if (windowWidth <= GROUP_CARD_STACK_WITH_HEADER_MAX_WIDTH) {
+        return true;
+    }
     const rowInner = groupCardInlineRowInnerWidth(windowWidth);
     const inlineMinimum =
         GROUP_CARD_AVATAR_WIDTH +
