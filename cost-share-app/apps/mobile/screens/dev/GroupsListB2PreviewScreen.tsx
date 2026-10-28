@@ -5,7 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { syncGroupsListPreviewDimensions } from '../../dev/syncGroupsListPreviewDimensions';
+import { LayoutWindowWidthProvider } from '../../hooks/useLayoutWindowWidth';
 import { NavigationContainer } from '@react-navigation/native';
 import type { BalanceSummary } from '@cost-share/shared';
 import { deriveProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
@@ -53,18 +53,13 @@ export function GroupsListB2PreviewScreen() {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        syncGroupsListPreviewDimensions(previewParams.viewportWidth);
-    }, [previewParams.viewportWidth]);
-
-    useEffect(() => {
         void (async () => {
             applyGroupsListPreviewDocumentTheme(previewParams.theme);
             await initializeLanguage();
             await changeLanguage(previewParams.lang);
-            syncGroupsListPreviewDimensions(previewParams.viewportWidth);
             setReady(true);
         })();
-    }, [previewParams.lang, previewParams.theme, previewParams.viewportWidth]);
+    }, [previewParams.lang, previewParams.theme]);
 
     const groups = useMemo(
         () => buildGroupCardPreviewGroups({ stress: previewParams.stress }),
@@ -109,6 +104,7 @@ export function GroupsListB2PreviewScreen() {
             nativeID={`groups-list-b2-preview-w${previewParams.viewportWidth}`}
         >
             <View style={{ width: previewParams.viewportWidth, maxWidth: '100%', flex: 1 }}>
+            <LayoutWindowWidthProvider width={previewParams.viewportWidth}>
             <NavigationContainer>
                 <GroupsListHeader
                     searchQuery={searchQuery}
@@ -133,6 +129,7 @@ export function GroupsListB2PreviewScreen() {
                     ))}
                 </ScrollView>
             </NavigationContainer>
+            </LayoutWindowWidthProvider>
             </View>
         </View>
     );

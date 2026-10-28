@@ -3,7 +3,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { useLayoutWindowWidth } from '../../hooks/useLayoutWindowWidth';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { SearchExpandable } from '../SearchExpandable';
@@ -111,7 +112,7 @@ export function GroupsListHeader({
 }: GroupsListHeaderProps) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
-    const { width: windowWidth } = useWindowDimensions();
+    const windowWidth = useLayoutWindowWidth();
     const stackedHeader = useMemo(
         () => resolveGroupsListUsesStackedHeader(windowWidth),
         [windowWidth],

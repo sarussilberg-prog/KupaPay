@@ -11,8 +11,8 @@ import {
     Pressable,
     Platform,
     ScrollView,
-    useWindowDimensions,
 } from 'react-native';
+import { useLayoutWindowWidth } from '../hooks/useLayoutWindowWidth';
 import { useNavigation } from '@react-navigation/native';
 import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +82,7 @@ function GroupCardBase({
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
-    const { width: windowWidth } = useWindowDimensions();
+    const windowWidth = useLayoutWindowWidth();
     const stackBalanceChip = resolveGroupCardUsesStackedBalance(windowWidth);
     const balanceColumnStyle = groupCardBalanceColumnStyle(windowWidth);
     const memberCount = group.members?.length ?? 0;
