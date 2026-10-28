@@ -19,3 +19,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(ci): offline schema contract seed honors DROP FUNCTION (#636) (#645)
 ## [2.2.0-dev.7] — 2026-10-28
 - docs: canonical groups list UI spec (mockup B2) (#646)
+## [2.2.0-dev.8] — 2026-10-28
+- feat(analytics): automate PostHog MAU dashboard insight tiles (#584) (#647)
