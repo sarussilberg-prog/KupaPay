@@ -692,6 +692,73 @@ jobs:
           echo "::error::gh pr merge --auto failed after retries"
           exit 1
 
+      - name: Wait for squash merge to land on dev
+        id: wait_merge
+        if: steps.sync_dev.outputs.defer != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 180); do
+            state="$(gh pr view "$PR_NUMBER" --repo "$REPO" --json state --jq .state)"
+            if [[ "$state" == "MERGED" ]]; then
+              echo "merged=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::warning::Timed out waiting for auto-merge; run Bump dev prerelease workflow_dispatch to reconcile version.json"
+          echo "merged=false" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.sync_dev.outputs.defer != 'true' && steps.wait_merge.outputs.merged == 'true'
+        with:
+          ref: dev
+          fetch-depth: 0
+          token: ${{ secrets.ADMIN_PAT }}
+
+      - uses: actions/setup-node@v4
+        if: steps.sync_dev.outputs.defer != 'true' && steps.wait_merge.outputs.merged == 'true'
+        with:
+          node-version: '20'
+
+      - name: Apply dev prerelease bump
+        if: steps.sync_dev.outputs.defer != 'true' && steps.wait_merge.outputs.merged == 'true'
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADMIN_PAT}" ]]; then
+            echo "::error::ADMIN_PAT secret is not configured — required to push chore bumps to protected dev (see docs/SSOT/CI_ADMIN_PAT.md)"
+            exit 1
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch origin dev
+            git reset --hard origin/dev
+
+            node cost-share-app/scripts/bump-dev-prerelease.mjs
+            git add cost-share-app/packages/shared/version.json CHANGELOG.md
+            if git diff --staged --quiet; then
+              echo "No version bump needed"
+              exit 0
+            fi
+            git commit -m "chore: bump dev prerelease [skip ci]"
+            if git push origin HEAD:dev; then
+              echo "✅ Dev prerelease bumped"
+              exit 0
+            fi
+            echo "dev moved during bump; retrying (${attempt}/3)"
+          done
+          echo "::error::failed to push dev prerelease bump after 3 attempts"
+          exit 1
+
       - name: Wait for deferred branch sync
         if: steps.sync_dev.outputs.defer == 'true'
         env:
