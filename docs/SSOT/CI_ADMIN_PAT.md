@@ -22,5 +22,5 @@
 
 - Confirm **`ADMIN_PAT`** is set and the token owner is still a repo **admin**.
 - Confirm dev protection still has **`enforce_admins: false`** (re-run `admin-branch-protection` workflow if needed).
-- Reconcile backlog: **Actions → Bump dev prerelease → Run workflow** (`workflow_dispatch`) after merges that skipped the push hook.
+- Reconcile backlog: **Actions → Bump dev prerelease → Run workflow** (`workflow_dispatch`) after merges that skipped the bump hook (e.g. before #605’s `pull_request` closed trigger).
 - As a one-off, bump `cost-share-app/packages/shared/version.json` on `dev` via PR (full CI) or manual admin push.

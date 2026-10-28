@@ -17,7 +17,7 @@
 
 ## Dev branch automation
 
-Each squash-merge to `dev` (via `ci.yml` auto-merge) runs `cost-share-app/scripts/bump-dev-prerelease.mjs`:
+Each squash-merge to `dev` (via `ci.yml` auto-merge) triggers [`bump-dev-prerelease.yml`](../../.github/workflows/bump-dev-prerelease.yml) on **`pull_request` closed (merged)** — not `push`, because GitHub Actions–completed merges skip push workflow dispatch. The job runs `cost-share-app/scripts/bump-dev-prerelease.mjs`:
 
 1. Increments `-dev.N` in `version.json`.
 2. Appends the merged PR title to root `CHANGELOG.md`.
