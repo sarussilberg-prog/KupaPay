@@ -2,7 +2,7 @@
  * Verifies patched markdown-it (root package.json overrides) parses legal-style
  * markdown the same way react-native-markdown-display expects (MarkdownIt + typographer).
  */
-import MarkdownIt from 'markdown-it';
+import { MarkdownIt } from 'react-native-markdown-display';
 
 const md = MarkdownIt({ typographer: true });
 

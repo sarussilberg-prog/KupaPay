@@ -5,6 +5,8 @@ import type { KnipConfig } from 'knip';
  * Conservative ignores: Expo config plugins, EAS/ASC scripts, i18n JSON, platform suffixes.
  */
 const config: KnipConfig = {
+  // Intentional root deps: hoist patched markdown-it/linkify-it for react-native-markdown-display (#590).
+  ignoreDependencies: ['markdown-it', 'linkify-it'],
   ignoreFiles: [
     'scripts/**',
     'lighthouserc.cjs',
