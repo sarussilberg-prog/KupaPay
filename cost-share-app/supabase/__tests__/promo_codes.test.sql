@@ -105,10 +105,9 @@ BEGIN
             END IF;
     END;
 
-    SET LOCAL session_replication_role = replica;
     INSERT INTO public.promo_redeem_rate_limits (user_id, window_start, attempt_count)
-    VALUES (v_carol, date_trunc('hour', NOW()), 15);
-    SET LOCAL session_replication_role = origin;
+    VALUES (v_carol, date_trunc('hour', NOW()), 15)
+    ON CONFLICT (user_id, window_start) DO UPDATE SET attempt_count = 15;
 
     PERFORM public.test_set_authenticated(v_carol);
     BEGIN
