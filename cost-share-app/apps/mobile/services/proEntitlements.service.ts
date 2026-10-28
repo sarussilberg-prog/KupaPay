@@ -1,6 +1,15 @@
 import { hasProFromTimestamps, type ProStatusTimestamps } from '@cost-share/shared';
 import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import {
+    mergeProStatusWithStoreEntitlement,
+    readActiveProExpirationFromStore,
+} from '../lib/proStatusStoreSync';
 import { supabase } from '../lib/supabase';
+import {
+    fetchPurchasesCustomerInfo,
+    isPurchasesConfigured,
+    waitForPurchasesReady,
+} from './purchases.service';
 
 export type AdminProViewMode = 'real' | 'force_pro' | 'force_free';
 
@@ -48,6 +57,28 @@ export function parseProStatusRpcRow(data: Record<string, unknown> | null): MyPr
         status.hasPro = hasProFromTimestamps(status);
     }
     return status;
+}
+
+/** Server RPC + live RevenueCat entitlement (covers webhook lag after purchase). */
+export async function fetchMyProStatusWithStoreSync(
+    groupId?: string | null,
+): Promise<MyProStatus> {
+    const status = await fetchMyProStatus(groupId);
+    if (status.adminProViewMode !== 'real') {
+        return status;
+    }
+    if (!isPurchasesConfigured()) {
+        return status;
+    }
+    const ready = await waitForPurchasesReady();
+    if (!ready) {
+        return status;
+    }
+    const info = await fetchPurchasesCustomerInfo();
+    const storeExpiration = readActiveProExpirationFromStore(
+        info as Parameters<typeof readActiveProExpirationFromStore>[0],
+    );
+    return mergeProStatusWithStoreEntitlement(status, storeExpiration);
 }
 
 export async function fetchMyProStatus(groupId?: string | null): Promise<MyProStatus> {

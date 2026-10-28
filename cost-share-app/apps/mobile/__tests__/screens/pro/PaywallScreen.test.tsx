@@ -12,9 +12,10 @@ jest.mock('../../../components/pro/ProPaywallContent', () => ({
 }));
 
 const mockGoBack = jest.fn();
+const mockNavigate = jest.fn();
 
 jest.mock('@react-navigation/native', () => ({
-    useNavigation: () => ({ goBack: mockGoBack }),
+    useNavigation: () => ({ goBack: mockGoBack, navigate: mockNavigate }),
     useRoute: jest.fn(),
 }));
 
@@ -26,6 +27,7 @@ describe('PaywallScreen Trip Pass visibility', () => {
     beforeEach(() => {
         paywallProps.length = 0;
         mockGoBack.mockClear();
+        mockNavigate.mockClear();
         useRouteMock.mockReturnValue({ params: { featureKey: 'settings' } });
     });
 
@@ -48,5 +50,13 @@ describe('PaywallScreen Trip Pass visibility', () => {
         });
         render(<PaywallScreen />);
         expect(paywallProps[paywallProps.length - 1]?.showTripPass).toBe(true);
+    });
+
+    it('navigates to subscription management after purchase success', () => {
+        render(<PaywallScreen />);
+        const onSuccess = paywallProps[paywallProps.length - 1]?.onPurchaseSuccess as () => void;
+        onSuccess();
+        expect(mockGoBack).toHaveBeenCalled();
+        expect(mockNavigate).toHaveBeenCalledWith('MySubscription', { purchaseSuccess: true });
     });
 });

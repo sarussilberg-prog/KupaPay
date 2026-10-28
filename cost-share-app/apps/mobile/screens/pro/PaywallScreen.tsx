@@ -18,7 +18,10 @@ export function PaywallScreen() {
                 groupId={groupId}
                 showTripPass={showTripPass}
                 onClose={() => navigation.goBack()}
-                onPurchaseSuccess={() => navigation.goBack()}
+                onPurchaseSuccess={() => {
+                    navigation.goBack();
+                    navigation.navigate('MySubscription', { purchaseSuccess: true });
+                }}
             />
         </View>
     );
