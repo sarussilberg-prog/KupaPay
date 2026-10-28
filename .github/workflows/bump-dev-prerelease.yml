@@ -4,6 +4,12 @@ name: Bump dev prerelease
 on:
   push:
     branches: [dev]
+  workflow_dispatch:
+    inputs:
+      pr_title:
+        description: 'Changelog line (optional; defaults to latest dev commit subject)'
+        required: false
+        type: string
 
 concurrency:
   group: dev-merge-and-bump
@@ -13,8 +19,11 @@ jobs:
   bump:
     name: Dev prerelease + changelog
     if: >-
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !startsWith(github.event.head_commit.message, 'chore: bump dev prerelease')
+      github.event_name == 'workflow_dispatch' ||
+      (
+        !contains(github.event.head_commit.message, '[skip ci]') &&
+        !startsWith(github.event.head_commit.message, 'chore: bump dev prerelease')
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -41,7 +50,7 @@ jobs:
 
       - name: Bump dev prerelease + changelog
         env:
-          PR_TITLE: ${{ github.event.head_commit.message }}
+          PR_TITLE: ${{ github.event.inputs.pr_title || github.event.head_commit.message }}
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
@@ -50,6 +59,10 @@ jobs:
           for attempt in 1 2 3; do
             git fetch origin dev
             git reset --hard origin/dev
+            if [[ -z "${PR_TITLE}" ]]; then
+              PR_TITLE="$(git log -1 --pretty=%s)"
+              export PR_TITLE
+            fi
 
             node cost-share-app/scripts/bump-dev-prerelease.mjs
             git add cost-share-app/packages/shared/version.json CHANGELOG.md
