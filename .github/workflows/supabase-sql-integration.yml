@@ -110,6 +110,9 @@ jobs:
       - name: Run SQL regression tests
         run: bash scripts/ci-supabase-sql-run-tests.sh
 
+      - name: Group ledger simulation (DB integration #641)
+        run: bash scripts/ci-group-ledger-simulation-db.sh
+
       - name: RPC/table schema contract (generated types surface)
         run: bash scripts/ci-supabase-types-contract.sh
 

@@ -34,6 +34,10 @@ jest_invocation() {
     --json --outputFile="${JEST_JSON_OUT}/${out_basename}"
 }
 
+echo "▶ Group ledger simulation (#641, blocking)"
+npm test --workspace=@cost-share/mobile -- \
+  --passWithNoTests --ci --testPathPattern=groupLedgerSimulation
+
 echo "▶ Mobile Jest (blocking, ${#QUARANTINED[@]} quarantined)"
 set +e
 jest_invocation "run-1.json"
