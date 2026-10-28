@@ -1,5 +1,9 @@
 /* eslint-disable */
-// KupaPay · GroupsListScreen — wordmark header, search row, list of GroupCards.
+// SUPERSEDED (2026-10): This prototype does not match the shipped groups list (mockup B2).
+// Canonical UI: cost-share-app/apps/mobile/screens/groups/GroupsListScreen.tsx
+// Canonical spec: docs/superpowers/plans/groups-screeen.md
+//
+// KupaPay · GroupsListScreen — wordmark header, search row, list of GroupCards (historical).
 
 function GroupsListScreen({ groups, onOpenGroup, onCreateGroup, onSearch }) {
   const [query, setQuery] = React.useState('');

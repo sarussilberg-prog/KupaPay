@@ -83,6 +83,7 @@ netBalance = totalPaid - totalOwed + totalSettledReceived - totalSettledPaid
 ### 3.3 Mobile UX stack
 
 - NativeWind, i18n (EN/HE), RTL, Toast for errors, `useLoading()` for screen loading.
+- **Groups list UI (canonical):** mockup B2 as in `apps/mobile/screens/groups/GroupsListScreen.tsx` — spec in [docs/superpowers/plans/groups-screeen.md](../superpowers/plans/groups-screeen.md) (`REQ-GRP-01`).
 
 ---
 
