@@ -1,9 +1,9 @@
 import {
-    parsePublicGroupBalancePageWire,
     renderPublicGroupNotFoundHtml,
     renderPublicGroupPageHtml,
     resolveInviteLandingLocale,
 } from '@cost-share/shared';
+import { resolvePublicGroupPageOutcome } from '@/lib/publicGroupPageOutcome';
 import { createClient } from '@/utils/supabase/server';
 
 export async function publicGroupPageHtml(
@@ -18,19 +18,15 @@ export async function publicGroupPageHtml(
         p_token: token,
     });
 
-    if (error) {
-        return renderPublicGroupNotFoundHtml(locale);
-    }
-
-    const wire = parsePublicGroupBalancePageWire(data);
-    if (!wire.ok) {
+    const outcome = resolvePublicGroupPageOutcome(error, data);
+    if (outcome.kind === 'not_found') {
         return renderPublicGroupNotFoundHtml(locale);
     }
 
     return renderPublicGroupPageHtml({
         locale,
         token,
-        wire,
+        wire: outcome.wire,
         canonicalPath: pathname,
     });
 }
