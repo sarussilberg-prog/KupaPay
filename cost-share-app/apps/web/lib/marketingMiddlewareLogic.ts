@@ -45,10 +45,7 @@ export function resolveMarketingMiddleware(
     }
 
     const segment = pathname.slice(1).split('/')[0];
-    if (
-        pathname.match(/^\/[a-z]{2}\/?$/) &&
-        (SUPPORTED_LANGUAGES as readonly string[]).includes(segment)
-    ) {
+    if ((SUPPORTED_LANGUAGES as readonly string[]).includes(segment)) {
         return { kind: 'continue_marketing_locale', locale: segment as Language };
     }
 

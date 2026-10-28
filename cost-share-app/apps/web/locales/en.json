@@ -110,5 +110,59 @@
     "backHome": "Back to home",
     "effectiveDate": "Effective from ",
     "appVersion": "App version "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Free expense split calculator — who owes whom | KupaPay",
+      "description": "Split bills with friends for free. Enter people and expenses, get the minimum transfers to settle up — no signup required.",
+      "ogTitle": "Free split calculator — minimum transfers",
+      "ogDescription": "Calculate who pays whom after a trip, dinner, or rent split. Save or share the result, then track it in KupaPay."
+    },
+    "title": "Expense split calculator",
+    "subtitle": "Add people and expenses — we simplify debts into the fewest transfers.",
+    "defaults": {
+      "personA": "Alex",
+      "personB": "Sam",
+      "newPerson": "Friend"
+    },
+    "participants": {
+      "title": "People",
+      "nameLabel": "Name",
+      "add": "Add person",
+      "remove": "Remove"
+    },
+    "expenses": {
+      "title": "Expenses",
+      "currency": "Currency",
+      "currencyHint": "3-letter code, e.g. USD",
+      "amount": "Amount",
+      "paidBy": "Paid by",
+      "splitAmong": "Split equally among",
+      "add": "Add expense",
+      "remove": "Remove expense"
+    },
+    "results": {
+      "title": "Settle up",
+      "transferLine": "{from} pays {to} {amount}",
+      "allSettled": "Everyone is even — no transfers needed.",
+      "algorithmNote": "Transfers minimized ({mode}).",
+      "algorithmExact": "exact",
+      "algorithmGreedy": "approximate",
+      "errors": {
+        "no_participants": "Add at least one person.",
+        "no_expenses": "Add at least one expense with an amount.",
+        "invalid_amount": "Check amounts, payer, and who shares each expense.",
+        "unbalanced": "Totals do not balance — adjust expenses and try again."
+      }
+    },
+    "share": {
+      "copy": "Copy share link",
+      "copied": "Link copied",
+      "error": "Could not copy link"
+    },
+    "cta": {
+      "title": "Save this split as a group",
+      "body": "Download KupaPay to track expenses, invite friends, and settle up with real-time balances."
+    }
   }
 }

@@ -1,11 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isLanguage, SUPPORTED_LANGUAGES } from '@cost-share/shared';
-import { marketingLandingPath } from '@/lib/marketingSeo';
+import { isLanguage, SUPPORTED_LANGUAGES, type Language } from '@cost-share/shared';
+import { marketingLandingPath, replaceLocaleInMarketingPath } from '@/lib/marketingSeo';
 
 const LOCALE_SEGMENT = new RegExp(
   `^/(${SUPPORTED_LANGUAGES.join('|')})/?$`,
 );
+
+function resolveLocaleRedirectPath(
+  refererUrl: URL,
+  requestUrl: URL,
+  locale: unknown,
+): string {
+  if (refererUrl.origin !== requestUrl.origin) {
+    return typeof locale === 'string' && isLanguage(locale) ? marketingLandingPath(locale) : '/en';
+  }
+
+  const pathname = refererUrl.pathname;
+  const suffix = refererUrl.search + refererUrl.hash;
+
+  if (pathname === '/' || LOCALE_SEGMENT.test(pathname)) {
+    return typeof locale === 'string' && isLanguage(locale)
+      ? marketingLandingPath(locale)
+      : '/en';
+  }
+
+  if (typeof locale === 'string' && isLanguage(locale)) {
+    const swapped = replaceLocaleInMarketingPath(pathname, locale);
+    if (swapped) {
+      return swapped + suffix;
+    }
+  }
+
+  return pathname + suffix;
+}
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -15,21 +43,11 @@ export async function POST(request: NextRequest) {
   let redirectPath = '/en';
   try {
     const refererUrl = new URL(referer);
-    if (refererUrl.origin === new URL(request.url).origin) {
-      const pathname = refererUrl.pathname;
-      if (pathname === '/' || LOCALE_SEGMENT.test(pathname)) {
-        redirectPath =
-          typeof locale === 'string' && isLanguage(locale)
-            ? marketingLandingPath(locale)
-            : '/en';
-      } else {
-        redirectPath = pathname + refererUrl.search;
-      }
-    }
+    redirectPath = resolveLocaleRedirectPath(refererUrl, new URL(request.url), locale);
   } catch {
     redirectPath =
       typeof locale === 'string' && isLanguage(locale)
-        ? marketingLandingPath(locale)
+        ? marketingLandingPath(locale as Language)
         : '/en';
   }
 

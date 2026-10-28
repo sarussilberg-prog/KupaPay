@@ -39,5 +39,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/:locale(en|he|ru|ar|fr|es|de)'],
+    matcher: [
+        '/',
+        '/:locale(en|he|ru|ar|fr|es|de)',
+        '/:locale(en|he|ru|ar|fr|es|de)/split-calculator',
+    ],
 };
