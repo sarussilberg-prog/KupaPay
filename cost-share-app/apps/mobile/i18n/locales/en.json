@@ -16,6 +16,7 @@
         "unknown": "Unknown",
         "loadError": "Failed to load data",
         "networkError": "Network error. Please check your connection.",
+        "permissionError": "You don't have permission to do this. Refresh and try again.",
         "offlineTitle": "You're offline",
         "offlineBannerMessage": "No internet connection. Saved data is still available; changes will sync when you're back online.",
         "screenErrorTitle": "Something went wrong",

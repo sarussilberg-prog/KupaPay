@@ -2,6 +2,17 @@ import { supabase } from '../lib/supabase';
 import { showSuccessToast } from '../lib/appToast';
 import { handleError } from '../lib/handleError';
 
+/** PostgREST surfaces SQLSTATE 42501 (insufficient_privilege) as HTTP 403. */
+export function isPermissionError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false;
+    const e = error as { code?: unknown; status?: unknown };
+    return e.code === '42501' || e.status === 403;
+}
+
+function failureMessageKey(error: unknown): string {
+    return isPermissionError(error) ? 'common.permissionError' : 'common.networkError';
+}
+
 export interface ConsolidationSettlementInput {
     currency: string;
     amount: number;
@@ -46,7 +57,7 @@ export async function createConsolidationBatch(
         return data as string;
     } catch (error) {
         handleError(error, {
-            toast: { titleKey: 'consolidation.recordError', messageKey: 'common.networkError' },
+            toast: { titleKey: 'consolidation.recordError', messageKey: failureMessageKey(error) },
             tags: { service: 'consolidation', op: 'create' },
             extra: { groupId: params.groupId, currencyCount: params.settlements.length },
         });
@@ -64,7 +75,7 @@ export async function deleteConsolidationBatch(batchId: string): Promise<boolean
         return true;
     } catch (error) {
         handleError(error, {
-            toast: { titleKey: 'consolidation.deleteError', messageKey: 'common.networkError' },
+            toast: { titleKey: 'consolidation.deleteError', messageKey: failureMessageKey(error) },
             tags: { service: 'consolidation', op: 'delete' },
             extra: { batchId },
         });
