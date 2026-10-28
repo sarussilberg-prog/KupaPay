@@ -56,7 +56,7 @@ describe('fetchMyProStatusWithStoreSync', () => {
         const until = new Date(Date.now() + 86400000).toISOString();
         customerInfoMock.mockResolvedValue({
             entitlements: { active: { pro: { expirationDate: until } } },
-        } as Awaited<ReturnType<typeof fetchPurchasesCustomerInfo>>);
+        } as unknown as Awaited<ReturnType<typeof fetchPurchasesCustomerInfo>>);
 
         const status = await fetchMyProStatusWithStoreSync();
         expect(status.hasPro).toBe(true);

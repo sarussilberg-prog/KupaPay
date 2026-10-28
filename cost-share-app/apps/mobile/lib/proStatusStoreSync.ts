@@ -38,6 +38,13 @@ function isFutureIso(iso: string | null): boolean {
     return Number.isFinite(ms) && ms > Date.now();
 }
 
+function toIsoOrNull(value: string | Date | null | undefined): string | null {
+    if (value == null) return null;
+    if (typeof value === 'string') return value;
+    if (value instanceof Date) return value.toISOString();
+    return null;
+}
+
 function laterIso(a: string | null, b: string | null): string | null {
     if (!a) return b;
     if (!b) return a;
@@ -58,9 +65,10 @@ export function mergeProStatusWithStoreEntitlement(
     if (storeExpirationIso != null && !isFutureIso(storeExpirationIso)) {
         return status;
     }
+    const storeUntil = storeExpirationIso ?? null;
     return {
         ...status,
         hasPro: true,
-        individualProUntil: laterIso(status.individualProUntil, storeExpirationIso),
+        individualProUntil: laterIso(toIsoOrNull(status.individualProUntil), storeUntil),
     };
 }
