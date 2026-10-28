@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-28T12:57:11Z",
+  "generated_at": "2026-10-28T13:43:42Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -16,6 +16,10 @@
     },
     {
       "name": "admin_pro_view_overrides",
+      "columns": []
+    },
+    {
+      "name": "analytics_north_star_groups",
       "columns": []
     },
     {
