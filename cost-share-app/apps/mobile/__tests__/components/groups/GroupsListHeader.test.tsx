@@ -21,8 +21,9 @@ describe('GroupsListHeader', () => {
         expect(getByTestId('groups-create-btn')).toBeTruthy();
     });
 
-    it('uses a compact round create button so the title stays on one line', () => {
-        const { getByTestId, queryByText } = render(
+    it('renders a labelled create pill and keeps the title on one line', () => {
+        const onCreate = jest.fn();
+        const { getByTestId, getByText, queryByText } = render(
             <GroupsListHeader
                 searchQuery=""
                 onSearchQueryChange={() => {}}
@@ -30,11 +31,16 @@ describe('GroupsListHeader', () => {
                 onSearchExpandedChange={() => {}}
                 filterActive={false}
                 onOpenFilters={() => {}}
-                onCreateGroup={() => {}}
+                onCreateGroup={onCreate}
             />,
         );
         expect(getByTestId('groups-list-title').props.numberOfLines).toBe(1);
         expect(queryByText('groups.newGroupCta')).toBeNull();
+        const label = getByText('groups.createGroup');
+        expect(label.props.numberOfLines).toBe(1);
+        expect(getByTestId('groups-create-btn').props.accessibilityLabel).toBe('groups.createGroup');
+        fireEvent.press(getByTestId('groups-create-btn'));
+        expect(onCreate).toHaveBeenCalledTimes(1);
     });
 
     it('expands inline search when the search button is pressed', () => {

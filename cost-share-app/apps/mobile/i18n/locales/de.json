@@ -16,6 +16,7 @@
         "unknown": "Unbekannt",
         "loadError": "Daten konnten nicht geladen werden",
         "networkError": "Netzwerkfehler. Bitte überprüfe deine Verbindung.",
+        "permissionError": "Dazu fehlt dir die Berechtigung. Aktualisiere und versuche es erneut.",
         "offlineTitle": "Du bist offline",
         "offlineBannerMessage": "Keine Internetverbindung. Gespeicherte Daten sind weiter verfügbar; Änderungen werden synchronisiert, sobald du wieder online bist.",
         "screenErrorTitle": "Etwas ist schiefgelaufen",

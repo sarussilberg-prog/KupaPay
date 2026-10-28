@@ -16,6 +16,7 @@
         "unknown": "Desconocido",
         "loadError": "No se pudieron cargar los datos",
         "networkError": "Error de red. Comprueba tu conexión.",
+        "permissionError": "No tienes permiso para hacer esto. Actualiza e inténtalo de nuevo.",
         "offlineTitle": "Sin conexión",
         "offlineBannerMessage": "Sin conexión a Internet. Los datos guardados siguen disponibles; los cambios se sincronizarán cuando vuelvas a estar en línea.",
         "screenErrorTitle": "Algo salió mal",

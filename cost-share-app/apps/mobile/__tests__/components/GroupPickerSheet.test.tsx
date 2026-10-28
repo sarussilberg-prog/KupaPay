@@ -3,6 +3,12 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
 import { GroupWithMembers } from '@cost-share/shared';
 
+const mockNavigate = jest.fn();
+jest.mock('@react-navigation/native', () => ({
+    ...jest.requireActual('@react-navigation/native'),
+    useNavigation: () => ({ navigate: mockNavigate }),
+}));
+
 function makeGroup(id: string, name: string): GroupWithMembers {
     return {
         id,
@@ -93,5 +99,41 @@ describe('GroupPickerSheet', () => {
         // default title is still driven by the favorite-group key (unchanged for
         // existing callers).
         expect(getByText('favoriteGroup.pickerTitle')).toBeTruthy();
+    });
+
+    it('renders a Create group pill at the end of the list that closes and opens CreateGroup', () => {
+        mockNavigate.mockClear();
+        const onClose = jest.fn();
+        const { getByTestId, getByText } = render(
+            <GroupPickerSheet
+                visible
+                groups={groups}
+                selectedGroupId="g1"
+                onSelectGroup={() => {}}
+                onClose={onClose}
+            />,
+        );
+        expect(getByText('groups.createGroup')).toBeTruthy();
+        fireEvent.press(getByTestId('group-picker-create-group'));
+        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(mockNavigate).toHaveBeenCalledWith('Groups', { screen: 'CreateGroup' });
+    });
+
+    it('uses onCreateGroup override instead of navigating when provided', () => {
+        mockNavigate.mockClear();
+        const onCreateGroup = jest.fn();
+        const { getByTestId } = render(
+            <GroupPickerSheet
+                visible
+                groups={groups}
+                selectedGroupId="g1"
+                onSelectGroup={() => {}}
+                onClose={() => {}}
+                onCreateGroup={onCreateGroup}
+            />,
+        );
+        fireEvent.press(getByTestId('group-picker-create-group'));
+        expect(onCreateGroup).toHaveBeenCalledTimes(1);
+        expect(mockNavigate).not.toHaveBeenCalled();
     });
 });

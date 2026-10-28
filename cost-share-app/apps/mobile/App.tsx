@@ -3,7 +3,7 @@ import { finishAppBootSpan } from './lib/appBootPerformance';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppState, type AppStateStatus, Appearance, LogBox, View, Platform } from 'react-native';
+import { AppState, type AppStateStatus, LogBox, View, Platform } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import * as SplashScreen from 'expo-splash-screen';
@@ -150,12 +150,8 @@ function App() {
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
     if (isGroupsListB2PreviewMode()) return;
-    const apply = (scheme: 'light' | 'dark' | null | undefined) => {
-      document.documentElement.classList.toggle('dark', scheme === 'dark');
-    };
-    apply(Appearance.getColorScheme());
-    const sub = Appearance.addChangeListener(({ colorScheme }) => apply(colorScheme));
-    return () => sub.remove();
+    // The app is light-only (app.json userInterfaceStyle: "light"); never follow the OS scheme on web.
+    document.documentElement.classList.remove('dark');
   }, []);
 
   useEffect(() => {

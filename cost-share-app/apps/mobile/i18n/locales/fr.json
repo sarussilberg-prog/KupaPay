@@ -16,6 +16,7 @@
         "unknown": "Inconnu",
         "loadError": "Échec du chargement des données",
         "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
+        "permissionError": "Vous n'avez pas l'autorisation d'effectuer cette action. Actualisez et réessayez.",
         "offlineTitle": "Vous êtes hors ligne",
         "offlineBannerMessage": "Pas de connexion Internet. Les données enregistrées restent disponibles ; les modifications se synchroniseront dès le retour en ligne.",
         "screenErrorTitle": "Une erreur s'est produite",
