@@ -8,7 +8,8 @@ import { Text } from '../../components/AppText';
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, FlatList } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRoute } from '@react-navigation/native';
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 import { GroupMember, User } from '@cost-share/shared';
 import { useLoading } from '../../hooks/useLoading';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
@@ -26,8 +27,8 @@ import { getAvatarUrl, getDisplayName } from '../../lib/userDisplay';
 
 export function GroupMembersScreen() {
     const { t } = useTranslation();
-    const route = useRoute<any>();
-    const { groupId } = route.params;
+    const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
+    const groupId = required?.groupId ?? '';
     const { isLoading, startLoading, stopLoading } = useLoading();
 
     const [members, setMembers] = useState<GroupMember[]>([]);
@@ -42,8 +43,9 @@ export function GroupMembersScreen() {
     }, [groupId, startLoading, stopLoading]);
 
     useEffect(() => {
+        if (!isValid) return;
         void loadData();
-    }, []);
+    }, [isValid, loadData]);
 
     const getUserForMember = (member: GroupMember): User | undefined => {
         return allUsers.find((u) => u.id === member.userId);
@@ -83,6 +85,10 @@ export function GroupMembersScreen() {
             </View>
         );
     };
+
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
 
     if (isLoading && members.length === 0) {
         return <LoadingIndicator />;

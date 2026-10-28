@@ -6,7 +6,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, FlatList, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRoute } from '@react-navigation/native';
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 import { ConsolidationBatch, DisplaySettlement, GroupMemberLite, Settlement } from '@cost-share/shared';
 import { useGroupUsersQuery } from '../../hooks/queries/useGroupUsersQuery';
 import { useDisplaySettlementsQuery } from '../../hooks/queries/useConsolidationQueries';
@@ -24,8 +25,8 @@ import { useAppStore } from '../../store';
 
 export function SettlementHistoryScreen() {
     const { t } = useTranslation();
-    const route = useRoute<any>();
-    const { groupId } = route.params;
+    const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
+    const groupId = required?.groupId ?? '';
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
 
     const { data: allUsers = [] } = useGroupUsersQuery(groupId);
@@ -129,6 +130,10 @@ export function SettlementHistoryScreen() {
         },
         [currentUserId, memberMap, t],
     );
+
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
 
     if (isLoading && displayItems.length === 0) {
         return <LoadingIndicator />;

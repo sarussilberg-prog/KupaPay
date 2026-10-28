@@ -13,7 +13,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Text } from '../../components/AppText';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { supabase } from '../../lib/supabase';
@@ -24,6 +24,8 @@ import {
     useRtlLayout,
 } from '../../hooks/useRtlLayout';
 import { colors } from '../../theme';
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 
 const AUTOSAVE_DEBOUNCE_MS = 900;
 
@@ -32,9 +34,9 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 export function GroupNoteScreen() {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
-    const route = useRoute<any>();
     const navigation = useNavigation<any>();
-    const { groupId } = route.params as { groupId: string };
+    const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
+    const groupId = required?.groupId ?? '';
 
     const [text, setText] = useState('');
     const [groupName, setGroupName] = useState('');
@@ -47,6 +49,10 @@ export function GroupNoteScreen() {
     const inFlightRef = useRef<Promise<void> | null>(null);
 
     useEffect(() => {
+        if (!isValid) {
+            setLoading(false);
+            return;
+        }
         let cancelled = false;
         void (async () => {
             const group = await getGroupById(groupId);
@@ -60,11 +66,12 @@ export function GroupNoteScreen() {
         return () => {
             cancelled = true;
         };
-    }, [groupId]);
+    }, [groupId, isValid]);
 
     useEffect(() => {
+        if (!isValid) return;
         void markGroupNoteSeen(groupId);
-    }, [groupId]);
+    }, [groupId, isValid]);
 
     // Header title: "Group note for {group}" with the group name visually
     // distinct (bold + primary color) so it reads as the group's name, not part
@@ -154,7 +161,7 @@ export function GroupNoteScreen() {
             void channel.unsubscribe();
             void supabase.removeChannel(channel);
         };
-    }, [groupId]);
+    }, [groupId, isValid]);
 
     const handleChange = useCallback(
         (next: string) => {
@@ -172,6 +179,10 @@ export function GroupNoteScreen() {
             void persist(text);
         }
     }, [persist, text]);
+
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
 
     if (loading) return <LoadingIndicator />;
 

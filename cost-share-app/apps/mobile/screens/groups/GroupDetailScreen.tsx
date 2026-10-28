@@ -238,8 +238,8 @@ export function GroupDetailScreen({
         openNote: openNoteParam,
         openSettleUp: openSettleUpParam,
         openGuestClaim: openGuestClaimParam,
-    } = route.params as {
-        groupId: string;
+    } = (route.params ?? {}) as {
+        groupId?: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
         openNote?: boolean;
