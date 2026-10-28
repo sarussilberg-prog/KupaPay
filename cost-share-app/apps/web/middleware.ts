@@ -43,5 +43,6 @@ export const config = {
         '/',
         '/:locale(en|he|ru|ar|fr|es|de)',
         '/:locale(en|he|ru|ar|fr|es|de)/split-calculator',
+        '/:locale(en|he|ru|ar|fr|es|de)/:slug(trip-expenses|roommate-bills|event-expenses|couple-expenses)',
     ],
 };

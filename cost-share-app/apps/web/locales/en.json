@@ -111,6 +111,296 @@
     "effectiveDate": "Effective from ",
     "appVersion": "App version "
   },
+  "useCaseShared": {
+    "howItWorksTitle": "How it works",
+    "faqTitle": "FAQ",
+    "exploreTitle": "Explore more",
+    "splitCalculatorLink": "Free split calculator",
+    "mainLandingLink": "KupaPay home",
+    "otherUseCasesTitle": "Other ways to split"
+  },
+  "useCases": {
+    "trip": {
+      "navLabel": "Trip expenses",
+      "seo": {
+        "title": "Split trip expenses with friends — free bill splitter | KupaPay",
+        "description": "Track flights, hotels, gas, and meals on a group trip. KupaPay simplifies who owes whom into the fewest transfers — free on iOS, Android, and web.",
+        "ogTitle": "Split trip bills without the spreadsheet",
+        "ogDescription": "One group for your trip, every expense in sync, automatic debt simplification when you settle up."
+      },
+      "hero": {
+        "headline": "Split trip expenses without the spreadsheet",
+        "subheadline": "Flights, hotels, gas, and dinners — one group, clear balances, fewer transfers when you settle up."
+      },
+      "benefits": {
+        "title": "Built for travel groups",
+        "items": [
+          {
+            "title": "One group for the whole trip",
+            "description": "Invite travel mates once and add expenses as you go — everyone sees balances update in real time."
+          },
+          {
+            "title": "Fewer payments at the end",
+            "description": "Debt simplification rolls many small debts into the minimum number of transfers between friends."
+          },
+          {
+            "title": "Works offline on the road",
+            "description": "Log expenses without signal; KupaPay syncs when you are back online."
+          },
+          {
+            "title": "Share settle-up details",
+            "description": "Use settle-up links so everyone knows exactly who to pay and how much."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Create a trip group",
+            "description": "Name your trip and invite friends with a link."
+          },
+          {
+            "title": "Add shared costs",
+            "description": "Record who paid for transport, lodging, food, or activities and who should share each bill."
+          },
+          {
+            "title": "Settle with simplified totals",
+            "description": "KupaPay shows net balances and the smallest set of transfers to close the trip."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Can we use different currencies on one trip?",
+            "answer": "Yes. Add expenses in the currency you paid in; balances stay clear per expense and group settings."
+          },
+          {
+            "question": "Do I need an account to start?",
+            "answer": "Sign in on the web app or download the mobile app to create a group and invite others."
+          },
+          {
+            "question": "How is this different from splitting manually?",
+            "answer": "KupaPay tracks every expense, recalculates balances automatically, and reduces how many bank transfers you need at the end."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Start your trip group",
+        "body": "Download KupaPay or sign in on the web to create a trip group and add your first shared expense."
+      }
+    },
+    "roommates": {
+      "navLabel": "Roommate bills",
+      "seo": {
+        "title": "Split roommate bills & rent — shared expenses app | KupaPay",
+        "description": "Split rent, utilities, groceries, and household costs with roommates. Automatic debt simplification and monthly-friendly tracking — free.",
+        "ogTitle": "Roommate bill splitting made simple",
+        "ogDescription": "Track shared home expenses, see who owes what, and settle up with fewer transfers."
+      },
+      "hero": {
+        "headline": "Split roommate bills without awkward math",
+        "subheadline": "Rent, utilities, groceries, and shared supplies — keep household costs fair and transparent."
+      },
+      "benefits": {
+        "title": "Made for shared homes",
+        "items": [
+          {
+            "title": "Recurring household costs",
+            "description": "Log rent, utilities, internet, and groceries as they happen so nothing is forgotten at month end."
+          },
+          {
+            "title": "Clear balances per person",
+            "description": "Each roommate sees their share and net balance in the group at any time."
+          },
+          {
+            "title": "Simpler settle-up",
+            "description": "When it is time to pay each other back, debt simplification cuts down extra transfers."
+          },
+          {
+            "title": "Invite via link",
+            "description": "Add roommates to the home group in seconds — no need to re-enter expenses manually."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Create a home group",
+            "description": "Set up a group for your apartment or house and invite roommates."
+          },
+          {
+            "title": "Add bills as you pay them",
+            "description": "Enter who paid rent, utilities, or groceries and split equally or by custom shares."
+          },
+          {
+            "title": "Settle monthly",
+            "description": "Use simplified totals to see who should transfer to whom."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Can one person pay rent and split it?",
+            "answer": "Yes. Record the full payment and split the amount among roommates; balances update for everyone."
+          },
+          {
+            "question": "Is KupaPay free for roommates?",
+            "answer": "Yes. Core group expense tracking and debt simplification are free."
+          },
+          {
+            "question": "Can I try a quick calculation first?",
+            "answer": "Use the free split calculator on this site for a one-off estimate, then save the group in the app to keep tracking."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Set up your home group",
+        "body": "Get KupaPay on your phone or use the web app to track roommate expenses together."
+      }
+    },
+    "event": {
+      "navLabel": "Event expenses",
+      "seo": {
+        "title": "Split event & group dinner bills — expense splitter | KupaPay",
+        "description": "Split costs for dinners, parties, tickets, and group events. Invite guests, add expenses, and settle up with automatic debt simplification.",
+        "ogTitle": "Split event costs fairly",
+        "ogDescription": "One-off dinners, celebrations, or tickets — track who paid and who owes in a single group."
+      },
+      "hero": {
+        "headline": "Split event costs before everyone leaves",
+        "subheadline": "Group dinners, tickets, decorations, or drinks — capture costs once and settle fairly."
+      },
+      "benefits": {
+        "title": "For dinners, parties, and outings",
+        "items": [
+          {
+            "title": "Fast group setup",
+            "description": "Create an event group and share an invite link while people are still together."
+          },
+          {
+            "title": "Split uneven bills",
+            "description": "Choose who shares each expense when not everyone ordered the same thing."
+          },
+          {
+            "title": "Real-time totals",
+            "description": "Balances update as expenses are added so there are no surprises later."
+          },
+          {
+            "title": "Minimum transfers",
+            "description": "Debt simplification helps you close the event with fewer payments between guests."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Open a group for the event",
+            "description": "Give it a name like “Birthday dinner” and invite participants."
+          },
+          {
+            "title": "Log what was paid",
+            "description": "Add the bill, who paid, and who should split each item or the total."
+          },
+          {
+            "title": "Share who owes what",
+            "description": "Send settle-up details so guests can pay the right person."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Does it work for one-time events?",
+            "answer": "Yes. Create a group for a single dinner or party and archive or delete it when you are done."
+          },
+          {
+            "question": "Can I use the web app at the table?",
+            "answer": "Yes. Sign in on the web or use the mobile app to add expenses on the spot."
+          },
+          {
+            "question": "What if someone did not consume equally?",
+            "answer": "When adding an expense, select which members share it so balances reflect who actually participated."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Create an event group",
+        "body": "Download the app or sign in on the web to split your next group bill in minutes."
+      }
+    },
+    "couple": {
+      "navLabel": "Couple expenses",
+      "seo": {
+        "title": "Split couple expenses & shared costs — KupaPay",
+        "description": "Track shared spending as a couple: rent, groceries, dates, and bills. See balances clearly and settle up simply — free.",
+        "ogTitle": "Shared expenses for two",
+        "ogDescription": "One small group for two people, automatic balances, and debt simplification when you settle."
+      },
+      "hero": {
+        "headline": "Track shared expenses as a couple",
+        "subheadline": "Rent, groceries, subscriptions, and nights out — keep both sides fair without constant mental math."
+      },
+      "benefits": {
+        "title": "Simple sharing for two",
+        "items": [
+          {
+            "title": "Just the two of you",
+            "description": "A dedicated group for shared costs — no need for a complicated spreadsheet."
+          },
+          {
+            "title": "Either partner can add expenses",
+            "description": "Both of you can log what was paid and how it should be split."
+          },
+          {
+            "title": "Always know the balance",
+            "description": "See net who owes whom at a glance instead of reconciling receipts later."
+          },
+          {
+            "title": "Settle up cleanly",
+            "description": "When you balance accounts, simplification shows a single clear transfer if needed."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Create a couple group",
+            "description": "Invite your partner with one link."
+          },
+          {
+            "title": "Add shared spending",
+            "description": "Record bills either of you pays and split evenly or by agreement."
+          },
+          {
+            "title": "Settle when you choose",
+            "description": "Use balances and settle-up links when you want to even out."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Do we both need the app?",
+            "answer": "One of you can add expenses, but both partners get the clearest experience with the app or web sign-in."
+          },
+          {
+            "question": "Can we split 50/50 by default?",
+            "answer": "Yes. Equal splits are the default; you can adjust per expense when needed."
+          },
+          {
+            "question": "Is our data private?",
+            "answer": "Group data is visible only to members you invite. See our Privacy Policy for details."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Start a couple group",
+        "body": "Get KupaPay free on iPhone, Android, or the web to track shared expenses together."
+      }
+    }
+  },
   "splitCalculator": {
     "seo": {
       "title": "Free expense split calculator — who owes whom | KupaPay",
