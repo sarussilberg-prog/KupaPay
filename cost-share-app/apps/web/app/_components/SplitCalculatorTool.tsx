@@ -15,6 +15,17 @@ import {
     type SplitCalculatorSharePayload,
 } from '@/lib/splitCalculatorShare';
 import StoreDownloadBadges from './StoreDownloadBadges';
+import {
+    clearSplitCalculatorImportDraft,
+    loadSplitCalculatorImportDraft,
+    persistSplitCalculatorImportDraft,
+    persistSplitCalculatorPostLoginReturn,
+    SPLIT_CALCULATOR_RESUME_IMPORT_QUERY,
+    type SplitCalculatorImportDraft,
+} from '@/lib/splitCalculatorImportDraft';
+import { validateSplitCalculatorImportDraft } from '@/lib/splitCalculatorImport';
+import { runSplitCalculatorImport } from '@/lib/splitCalculatorImportService';
+import { getBrowserSupabaseClient } from '@/utils/supabase/browser';
 
 type Props = Readonly<{
     locale: Language;
@@ -88,15 +99,24 @@ function defaultExpenses(participants: SplitCalculatorParticipant[]): SplitCalcu
     ];
 }
 
+type ImportUiState = 'idle' | 'working' | 'success' | 'error';
+
 export default function SplitCalculatorTool({ locale, t }: Props) {
+    const initialParticipants = defaultParticipants(t);
     const [participants, setParticipants] = useState<SplitCalculatorParticipant[]>(() =>
-        defaultParticipants(t),
+        initialParticipants,
     );
     const [expenses, setExpenses] = useState<SplitCalculatorExpense[]>(() =>
-        defaultExpenses(defaultParticipants(t)),
+        defaultExpenses(initialParticipants),
     );
     const [currency, setCurrency] = useState('USD');
     const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+    const [groupName, setGroupName] = useState(() => t.splitCalculator.import.defaultGroupName);
+    const [selfParticipantId, setSelfParticipantId] = useState(() => initialParticipants[0]?.id ?? '');
+    const [hasSession, setHasSession] = useState<boolean | null>(null);
+    const [importUi, setImportUi] = useState<ImportUiState>('idle');
+    const [importErrorKey, setImportErrorKey] = useState<string | null>(null);
+    const [importedGroupId, setImportedGroupId] = useState<string | null>(null);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -105,7 +125,82 @@ export default function SplitCalculatorTool({ locale, t }: Props) {
         setParticipants(shared.participants);
         setExpenses(shared.expenses);
         if (shared.currency) setCurrency(shared.currency);
+        if (shared.participants[0]) setSelfParticipantId(shared.participants[0].id);
     }, []);
+
+    useEffect(() => {
+        if (!participants.some((p) => p.id === selfParticipantId) && participants[0]) {
+            setSelfParticipantId(participants[0].id);
+        }
+    }, [participants, selfParticipantId]);
+
+    const buildImportDraft = useCallback((): SplitCalculatorImportDraft => {
+        return {
+            groupName,
+            selfParticipantId,
+            currency,
+            participants,
+            expenses,
+        };
+    }, [currency, expenses, groupName, participants, selfParticipantId]);
+
+    const formatExpenseDescription = useCallback(
+        (expenseNumber: number) =>
+            t.splitCalculator.import.expenseDescription.replace('{n}', String(expenseNumber)),
+        [t],
+    );
+
+    const runImport = useCallback(
+        async (draft: SplitCalculatorImportDraft) => {
+            setImportUi('working');
+            setImportErrorKey(null);
+            setImportedGroupId(null);
+            const outcome = await runSplitCalculatorImport(
+                getBrowserSupabaseClient(),
+                draft,
+                formatExpenseDescription,
+            );
+            if (!outcome.ok) {
+                setImportUi('error');
+                setImportErrorKey(outcome.error);
+                return;
+            }
+            clearSplitCalculatorImportDraft();
+            setImportUi('success');
+            setImportedGroupId(outcome.groupId);
+        },
+        [formatExpenseDescription],
+    );
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        let cancelled = false;
+        void (async () => {
+            try {
+                const supabase = getBrowserSupabaseClient();
+                const { data } = await supabase.auth.getSession();
+                if (cancelled) return;
+                setHasSession(Boolean(data.session));
+            } catch {
+                if (!cancelled) setHasSession(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || hasSession !== true) return;
+        const params = new URLSearchParams(window.location.search);
+        if (params.get(SPLIT_CALCULATOR_RESUME_IMPORT_QUERY) !== '1') return;
+        const draft = loadSplitCalculatorImportDraft() ?? buildImportDraft();
+        params.delete(SPLIT_CALCULATOR_RESUME_IMPORT_QUERY);
+        const nextQuery = params.toString();
+        const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
+        window.history.replaceState(null, '', nextUrl);
+        void runImport(draft);
+    }, [buildImportDraft, hasSession, runImport]);
 
     const result = useMemo(
         () => computeSplitCalculatorTransfers(participants, expenses, currency),
@@ -178,6 +273,24 @@ export default function SplitCalculatorTool({ locale, t }: Props) {
             }),
         );
     };
+
+    const startSignInForImport = useCallback(() => {
+        const validation = validateSplitCalculatorImportDraft(buildImportDraft());
+        if (validation) {
+            setImportUi('error');
+            setImportErrorKey(validation);
+            return;
+        }
+        persistSplitCalculatorImportDraft(buildImportDraft());
+        const returnUrl = new URL(window.location.href);
+        returnUrl.searchParams.set(SPLIT_CALCULATOR_RESUME_IMPORT_QUERY, '1');
+        persistSplitCalculatorPostLoginReturn(returnUrl.toString());
+        window.location.href = '/login';
+    }, [buildImportDraft]);
+
+    const saveAsGroup = useCallback(() => {
+        void runImport(buildImportDraft());
+    }, [buildImportDraft, runImport]);
 
     const copyShareLink = useCallback(async () => {
         const payload: SplitCalculatorSharePayload = { currency, participants, expenses };
@@ -400,13 +513,97 @@ export default function SplitCalculatorTool({ locale, t }: Props) {
 
             <section
                 aria-labelledby="cta-heading"
-                className="rounded-2xl bg-gray-50 px-6 py-8 text-center space-y-4"
+                className="rounded-2xl bg-gray-50 px-4 sm:px-6 py-8 space-y-5"
             >
-                <h2 id="cta-heading" className="text-2xl font-bold">
-                    {t.splitCalculator.cta.title}
-                </h2>
-                <p className="text-gray-600 max-w-xl mx-auto">{t.splitCalculator.cta.body}</p>
-                <StoreDownloadBadges t={t} />
+                <div className="space-y-2 text-center sm:text-start">
+                    <h2 id="cta-heading" className="text-2xl font-bold">
+                        {t.splitCalculator.cta.title}
+                    </h2>
+                    <p className="text-gray-600">{t.splitCalculator.cta.body}</p>
+                </div>
+                <div className="space-y-4 max-w-xl">
+                    <div>
+                        <label htmlFor="import-group-name" className="block text-sm text-gray-600 mb-1">
+                            {t.splitCalculator.import.groupNameLabel}
+                        </label>
+                        <input
+                            id="import-group-name"
+                            type="text"
+                            value={groupName}
+                            onChange={(e) => setGroupName(e.target.value)}
+                            className="w-full min-h-[44px] rounded-lg border border-gray-200 px-3 py-2 bg-white"
+                            autoComplete="off"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="import-self-participant" className="block text-sm text-gray-600 mb-1">
+                            {t.splitCalculator.import.selfLabel}
+                        </label>
+                        <select
+                            id="import-self-participant"
+                            value={selfParticipantId}
+                            onChange={(e) => setSelfParticipantId(e.target.value)}
+                            className="w-full min-h-[44px] rounded-lg border border-gray-200 px-3 bg-white"
+                        >
+                            {participants.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                    {p.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    {importUi === 'success' && importedGroupId ? (
+                        <output className="block rounded-lg bg-green-50 text-green-900 px-4 py-3 text-sm">
+                            {t.splitCalculator.import.success}
+                        </output>
+                    ) : null}
+                    {importUi === 'error' && importErrorKey ? (
+                        <output className="block rounded-lg bg-red-50 text-red-800 px-4 py-3 text-sm">
+                            {t.splitCalculator.import.errors[
+                                importErrorKey as keyof typeof t.splitCalculator.import.errors
+                            ] ?? t.splitCalculator.import.errors.import_failed}
+                        </output>
+                    ) : null}
+                    <div className="flex flex-wrap gap-3">
+                        {hasSession ? (
+                            <button
+                                type="button"
+                                onClick={saveAsGroup}
+                                disabled={importUi === 'working'}
+                                className="min-h-[44px] rounded-lg bg-blue-500 px-5 text-white font-medium hover:bg-blue-600 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                            >
+                                {importUi === 'working'
+                                    ? t.splitCalculator.import.working
+                                    : t.splitCalculator.import.saveButton}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={startSignInForImport}
+                                disabled={importUi === 'working' || hasSession === null}
+                                className="min-h-[44px] rounded-lg bg-blue-500 px-5 text-white font-medium hover:bg-blue-600 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                            >
+                                {hasSession === null
+                                    ? t.splitCalculator.import.checkingSession
+                                    : t.splitCalculator.import.signInButton}
+                            </button>
+                        )}
+                        {importUi === 'success' ? (
+                            <a
+                                href="/"
+                                className="min-h-[44px] inline-flex items-center rounded-lg border border-blue-500 px-5 text-blue-600 font-medium hover:bg-blue-50"
+                            >
+                                {t.splitCalculator.import.openApp}
+                            </a>
+                        ) : null}
+                    </div>
+                </div>
+                <p className="text-sm text-gray-500 text-center sm:text-start">
+                    {t.splitCalculator.cta.downloadHint}
+                </p>
+                <div className="flex justify-center sm:justify-start">
+                    <StoreDownloadBadges t={t} />
+                </div>
             </section>
         </div>
     );

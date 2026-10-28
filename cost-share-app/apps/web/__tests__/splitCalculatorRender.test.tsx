@@ -15,4 +15,6 @@ test('SplitCalculatorTool renders main headings and form controls', () => {
     assert.match(html, /id="expenses-heading"/);
     assert.match(html, /id="results-heading"/);
     assert.match(html, /type="number"/);
+    assert.match(html, /Checking sign-in|Save as group|Sign in to save/);
+    assert.match(html, /id="import-group-name"/);
 });

@@ -162,7 +162,30 @@
     },
     "cta": {
       "title": "Aufteilung als Gruppe speichern",
-      "body": "Lade KupaPay herunter, um Ausgaben zu tracken, Freunde einzuladen und mit Echtzeit-Salden auszugleichen."
+      "body": "Erstelle eine KupaPay-Gruppe mit diesen Personen und Ausgaben — verfolge Salden und rechne in der App ab.",
+      "downloadHint": "Lieber die Mobile-App? Lade KupaPay für iPhone oder Android herunter."
+    },
+    "import": {
+      "defaultGroupName": "Aufteilung aus dem Rechner",
+      "groupNameLabel": "Gruppenname",
+      "selfLabel": "Du bist",
+      "saveButton": "Als Gruppe speichern",
+      "signInButton": "Anmelden zum Speichern",
+      "checkingSession": "Anmeldung wird geprüft…",
+      "working": "Gruppe wird erstellt…",
+      "success": "Gruppe erstellt. Öffne KupaPay, um Salden zu sehen und Freunde einzuladen.",
+      "openApp": "KupaPay öffnen",
+      "expenseDescription": "Ausgabe {n}",
+      "errors": {
+        "no_participants": "Füge mindestens eine Person hinzu, bevor du speicherst.",
+        "no_expenses": "Füge mindestens eine Ausgabe mit Betrag hinzu, bevor du speicherst.",
+        "invalid_amount": "Prüfe Beträge, Zahler und wer jede Ausgabe teilt.",
+        "unbalanced": "Die Summen stimmen nicht — passe Ausgaben an und versuche es erneut.",
+        "empty_group_name": "Gib einen Gruppennamen ein.",
+        "self_not_in_participants": "Wähle, welche Person du in der Gruppe bist.",
+        "not_authenticated": "Melde dich an, um diese Aufteilung als Gruppe zu speichern.",
+        "import_failed": "Gruppe konnte nicht erstellt werden. Versuche es gleich erneut."
+      }
     }
   },
   "useCaseShared": {
