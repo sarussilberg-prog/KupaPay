@@ -17,12 +17,7 @@ import { useAppStore } from '../store';
 
 export type StoreReviewTrigger = AppReviewTrigger;
 
-export {
-    shouldOfferAppReview,
-    shouldOfferAppReview as shouldOfferStoreReview,
-    APP_REVIEW_THROTTLE_MS,
-    APP_REVIEW_THROTTLE_MS as STORE_REVIEW_THROTTLE_MS,
-} from '@cost-share/shared';
+export { shouldOfferAppReview, APP_REVIEW_THROTTLE_MS } from '@cost-share/shared';
 
 export type { AppReviewEligibilityState as StoreReviewState } from '@cost-share/shared';
 
