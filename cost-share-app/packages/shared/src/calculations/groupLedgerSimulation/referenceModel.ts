@@ -133,7 +133,7 @@ export function referenceSimplifiedInputNets(args: {
     }
 
     const out: NetByUserCurrency[] = [];
-    for (const currency of [...currencies].sort()) {
+    for (const currency of [...currencies].sort((a, b) => a.localeCompare(b))) {
         const rows: NetByUserCurrency[] = [];
         for (const uid of active) {
             const row = acc.get(uid)?.get(currency);

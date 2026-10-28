@@ -38,7 +38,7 @@ function expenseUuid(expenseId: string): string {
 }
 
 function esc(s: string): string {
-    return s.replace(/'/g, "''");
+    return s.replaceAll("'", "''");
 }
 
 function bootstrapDb(): void {
@@ -218,7 +218,10 @@ function assertDb(state: SimulationState, opIndex: number, opKind: SimOpKind | '
             `${userUuid(p.fromUserId)}|${userUuid(p.toUserId)}|${p.currency}|${p.amount.toFixed(2)}`,
     );
     const dbPair = fetchPairwise();
-    if (refPair.sort().join('\n') !== dbPair.sort().join('\n')) {
+    const pairKeyCompare = (a: string, b: string) => a.localeCompare(b);
+    const refPairSorted = [...refPair].sort(pairKeyCompare);
+    const dbPairSorted = [...dbPair].sort(pairKeyCompare);
+    if (refPairSorted.join('\n') !== dbPairSorted.join('\n')) {
         throw new Error(
             `DB pairwise mismatch seed=${SEED} op=${opIndex} kind=${opKind}\nref:\n${refPair.join('\n')}\ndb:\n${dbPair.join('\n')}`,
         );
