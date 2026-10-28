@@ -46,6 +46,7 @@
     "audit:ci": "bash scripts/ci-npm-audit.sh",
     "test:performance": "npm test --workspace=@cost-share/mobile -- --testPathPattern=performance --ci",
     "test:load-test": "node --test scripts/load-test/__tests__/*.test.mjs",
+    "test:posthog-mau": "node --test scripts/__tests__/posthog-mau-tiles-lib.test.mjs",
     "size": "size-limit",
     "size:ci": "bash scripts/ci-bundle-size.sh",
     "analyze:mobile": "npm run analyze:web -w @cost-share/mobile",

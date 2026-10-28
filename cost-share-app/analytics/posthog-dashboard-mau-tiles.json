@@ -1,6 +1,6 @@
 {
   "name": "KupaPay MAU (1000 epic)",
-  "description": "Import reference for PostHog UI (#422). Create insights manually from these specs.",
+  "description": "Source spec for posthog-ensure-mau-dashboard-tiles.mjs (#422 / #584). DAU/WAU/MAU expand to platform + locale breakdowns.",
   "tiles": [
     {
       "name": "DAU",
