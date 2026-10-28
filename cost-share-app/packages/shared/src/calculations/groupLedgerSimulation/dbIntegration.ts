@@ -4,7 +4,7 @@
  * in-memory reference oracle.
  */
 import { execSync } from 'node:child_process';
-import { referenceNets, referencePairwiseDebts } from './referenceModel';
+import { referencePairwiseDebts, referenceSimplifiedInputNets } from './referenceModel';
 import { CI_SIM_OPS, DEFAULT_SIM_SEED } from './runSimulation';
 import { createInitialState, replayGroupLedgerOps } from './simulator';
 import type { SimOpKind, SimulationState } from './types';
@@ -24,14 +24,17 @@ function psql(sql: string): string {
     ).trim();
 }
 
+function simUuidSuffix(label: string): string {
+    const n = label.includes('_') ? label.split('_').pop() ?? label : label;
+    return `641${n}`.padStart(12, '0').slice(-12);
+}
+
 function userUuid(userId: string): string {
-    const n = userId.replace('u_', '');
-    return `00000000-0000-0000-0000-${`00000000000${n}`.slice(-12)}`;
+    return `00000000-0000-0000-0000-${simUuidSuffix(userId)}`;
 }
 
 function expenseUuid(expenseId: string): string {
-    const n = expenseId.replace('e_', '');
-    return `00000000-0000-4000-8000-${`00000000000${n}`.slice(-12)}`;
+    return `00000000-0000-4000-8000-${simUuidSuffix(expenseId)}`;
 }
 
 function esc(s: string): string {
@@ -188,16 +191,24 @@ ORDER BY 1;
 
 function assertDb(state: SimulationState, opIndex: number, opKind: SimOpKind | 'seed'): void {
     syncStateToDb(state);
-    const ref = referenceNets(state);
+    const ref = referenceSimplifiedInputNets(state);
     const dbNets = fetchSimplifiedNets();
 
+    const refKeys = new Set<string>();
     for (const r of ref) {
-        const uid = userUuid(r.userId);
-        const key = `${uid}|${r.currency}`;
+        const key = `${userUuid(r.userId)}|${r.currency}`;
+        refKeys.add(key);
         const dbNet = dbNets.get(key);
         if (dbNet === undefined || Math.abs(Number((dbNet - r.net).toFixed(2))) > 0.01) {
             throw new Error(
                 `DB simplified net mismatch seed=${SEED} op=${opIndex} kind=${opKind} key=${key} db=${dbNet} ref=${r.net}`,
+            );
+        }
+    }
+    for (const [key, dbNet] of dbNets) {
+        if (!refKeys.has(key)) {
+            throw new Error(
+                `DB simplified net extra key seed=${SEED} op=${opIndex} kind=${opKind} key=${key} db=${dbNet}`,
             );
         }
     }

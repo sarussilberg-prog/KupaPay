@@ -115,6 +115,37 @@ export function referenceNets(args: {
     return netsForUsers(acc, active, true);
 }
 
+/**
+ * Nets aligned with get_user_simplified_inputs: every active member per currency
+ * with ledger activity, drop whole currency when max |net| < 0.01.
+ */
+export function referenceSimplifiedInputNets(args: {
+    members: SimMember[];
+    expenses: SimExpense[];
+    splits: SimSplit[];
+    settlements: SimSettlement[];
+}): NetByUserCurrency[] {
+    const acc = accumulateLedger(args);
+    const active = args.members.filter(m => m.isActive).map(m => m.userId);
+    const currencies = new Set<string>();
+    for (const per of acc.values()) {
+        for (const c of per.keys()) currencies.add(c);
+    }
+
+    const out: NetByUserCurrency[] = [];
+    for (const currency of [...currencies].sort()) {
+        const rows: NetByUserCurrency[] = [];
+        for (const uid of active) {
+            const row = acc.get(uid)?.get(currency);
+            rows.push({ userId: uid, currency, net: row ? rowToNet(row) : 0 });
+        }
+        const maxAbs = Math.max(...rows.map(r => Math.abs(r.net)), 0);
+        if (maxAbs < 0.01) continue;
+        out.push(...rows);
+    }
+    return out;
+}
+
 /** Nets for every user with ledger activity (incl. inactive members). */
 export function referenceAllUserNets(args: {
     members: SimMember[];
