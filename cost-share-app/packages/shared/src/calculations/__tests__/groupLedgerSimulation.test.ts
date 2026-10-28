@@ -4,7 +4,7 @@ import {
     DEFAULT_SIM_SEED,
     resolveSimulationOptions,
     runSimulationWithAsserts,
-} from '../groupLedgerSimulation';
+} from '../groupLedgerSimulation/runSimulation';
 
 describe('group ledger simulation (#641)', () => {
     it('long run: client nets and invariants match reference after every op', () => {

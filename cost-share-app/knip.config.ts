@@ -7,6 +7,8 @@ import type { KnipConfig } from 'knip';
 const config: KnipConfig = {
   // Intentional root deps: hoist patched markdown-it/linkify-it for react-native-markdown-display (#590).
   ignoreDependencies: ['markdown-it', 'linkify-it'],
+  entry: ['scripts/group-ledger-simulation-db.integration.ts'],
+  project: ['scripts/**/*.ts'],
   ignoreFiles: [
     'scripts/**',
     'lighthouserc.cjs',
@@ -54,8 +56,13 @@ const config: KnipConfig = {
       ignoreDependencies: ['sharp'],
     },
     '@cost-share/shared': {
-      entry: ['src/index.ts', '**/*.{test,spec}.{ts,tsx}'],
+      entry: [
+        'src/index.ts',
+        'src/calculations/groupLedgerSimulation/dbIntegration.ts',
+        '**/*.{test,spec}.{ts,tsx}',
+      ],
       project: ['src/**/*.{ts,tsx}'],
+      ignoreDependencies: ['fast-check'],
     },
   },
   ignoreWorkspaces: ['apps/mobile/modules/**'],

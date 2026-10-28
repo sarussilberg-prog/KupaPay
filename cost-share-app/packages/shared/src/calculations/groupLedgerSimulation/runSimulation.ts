@@ -1,29 +1,25 @@
-import { assertLedgerInvariants, assertPairwiseMatchesReference } from './assertInvariants';
-import { createPrng } from './prng';
-import { createInitialState, pickOpKind, tryOp } from './simulator';
-import type { SimulationRunOptions } from './types';
-import type { SimOpKind, SimulationFailure, SimulationState } from './types';
+import { assertLedgerInvariants } from './assertInvariants';
+import { createInitialState, replayGroupLedgerOps } from './simulator';
+import type { SimOpKind, SimulationFailure, SimulationRunOptions, SimulationState } from './types';
 
 export const DEFAULT_SIM_SEED = 641_641;
-export const DEFAULT_SIM_OPS = 400;
+const DEFAULT_SIM_OPS = 400;
 export const CI_SIM_OPS = 350;
 
 export function runSimulationWithAsserts(
     options: SimulationRunOptions,
 ): SimulationState {
-    const rng = createPrng(options.seed);
     const state = createInitialState(options);
 
-    const assertAt = (opIndex: number, opKind: SimOpKind | 'assert') => {
+    const assertAt = (opIndex: number, opKind: SimOpKind | 'seed') => {
         try {
             assertLedgerInvariants(state);
-            assertPairwiseMatchesReference(state);
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             const failure: SimulationFailure = {
                 seed: options.seed,
                 opIndex,
-                opKind,
+                opKind: opKind === 'seed' ? 'assert' : opKind,
                 message,
             };
             throw new Error(
@@ -32,21 +28,9 @@ export function runSimulationWithAsserts(
         }
     };
 
-    assertAt(-1, 'assert');
-
-    for (let i = 0; i < 5; i++) {
-        if (!tryOp(state, 'add_expense', rng)) i--;
-        assertAt(-1, 'add_expense');
-    }
-
-    for (let op = 0; op < options.opCount; op++) {
-        const kind = pickOpKind(rng);
-        let attempts = 0;
-        while (!tryOp(state, kind, rng) && attempts < 8) {
-            attempts++;
-        }
-        assertAt(op, kind);
-    }
+    replayGroupLedgerOps(state, options.seed, options.opCount, ({ opIndex, opKind }) =>
+        assertAt(opIndex, opKind),
+    );
 
     return state;
 }

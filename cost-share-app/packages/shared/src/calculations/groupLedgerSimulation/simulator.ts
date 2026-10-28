@@ -1,5 +1,5 @@
 import { calculateEqualSplit, validateExpenseSplits } from '../index';
-import { pickInt, pickOne, createPrng } from './prng';
+import { createPrng, pickInt, pickOne } from './prng';
 import { referenceNets } from './referenceModel';
 import type {
     SimExpense,
@@ -350,27 +350,28 @@ export function createInitialState(options: SimulationRunOptions): SimulationSta
     };
 }
 
-export function runGroupLedgerSimulation(options: SimulationRunOptions): SimulationState {
-    const rng = createPrng(options.seed);
-    const state = createInitialState(options);
-
-    // Seed a few expenses so edit/delete/settle ops have targets early.
+function seedInitialExpenses(state: SimulationState, rng: () => number): void {
     for (let i = 0; i < 5; i++) {
         if (!addExpense(state, rng)) i--;
     }
+}
 
-    const opKinds: SimOpKind[] = [];
-    for (let op = 0; op < options.opCount; op++) {
+export function replayGroupLedgerOps(
+    state: SimulationState,
+    seed: number,
+    opCount: number,
+    afterOp?: (ctx: { opIndex: number; opKind: SimOpKind | 'seed' }) => void,
+): void {
+    const rng = createPrng(seed);
+    seedInitialExpenses(state, rng);
+    afterOp?.({ opIndex: -1, opKind: 'seed' });
+
+    for (let op = 0; op < opCount; op++) {
         const kind = pickOpKind(rng);
-        opKinds.push(kind);
         let attempts = 0;
         while (!tryOp(state, kind, rng) && attempts < 8) {
             attempts++;
         }
+        afterOp?.({ opIndex: op, opKind: kind });
     }
-
-    void opKinds;
-    return state;
 }
-
-export { pickOpKind, tryOp, OP_WEIGHTS };

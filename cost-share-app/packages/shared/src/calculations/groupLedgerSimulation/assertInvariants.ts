@@ -5,11 +5,9 @@ import {
 } from '../index';
 import {
     netsMap,
-    pairwiseKey,
     referenceAllUserNets,
     referenceNetSumByCurrency,
     referenceNets,
-    referencePairwiseDebts,
 } from './referenceModel';
 import type { SimulationState } from './types';
 
@@ -99,9 +97,6 @@ export function assertLedgerInvariants(state: SimulationState): void {
         }
     }
 
-    const refPairwise = referencePairwiseDebts(state);
-    void refPairwise;
-
     const payload = {
         groups: [
             {
@@ -146,18 +141,5 @@ export function assertLedgerInvariants(state: SimulationState): void {
         if (balancesForCurrency.length === 0) continue;
         const names = new Map(activeUserIds(state).map(id => [id, id]));
         simplifyDebts(balancesForCurrency, names);
-    }
-}
-
-export function assertPairwiseMatchesReference(state: SimulationState): void {
-    const ref = referencePairwiseDebts(state);
-    const refSet = new Set(ref.map(pairwiseKey));
-    const again = referencePairwiseDebts(state);
-    const againSet = new Set(again.map(pairwiseKey));
-    if (refSet.size !== againSet.size) {
-        throw new Error('Pairwise oracle is non-deterministic');
-    }
-    for (const k of refSet) {
-        if (!againSet.has(k)) throw new Error(`Pairwise mismatch on ${k}`);
     }
 }

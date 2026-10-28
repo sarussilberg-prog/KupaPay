@@ -13,4 +13,6 @@ if ! postgres_container_running; then
 fi
 
 echo "▶ Group ledger simulation — DB integration (seed=${GROUP_LEDGER_SIM_SEED:-641641})"
-npx ts-node --transpile-only scripts/group-ledger-simulation-db.integration.ts
+npx ts-node --project packages/shared/tsconfig.json \
+  --compiler-options '{"module":"CommonJS","moduleResolution":"node"}' \
+  --transpile-only scripts/group-ledger-simulation-db.integration.ts
