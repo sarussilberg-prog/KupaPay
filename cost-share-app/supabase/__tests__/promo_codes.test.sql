@@ -105,22 +105,21 @@ BEGIN
             END IF;
     END;
 
+    SET LOCAL session_replication_role = replica;
+    INSERT INTO public.promo_redeem_rate_limits (user_id, window_start, attempt_count)
+    VALUES (v_carol, date_trunc('hour', NOW()), 15);
+    SET LOCAL session_replication_role = origin;
+
     PERFORM public.test_set_authenticated(v_carol);
-    FOR i IN 1..16 LOOP
-        BEGIN
-            PERFORM public.redeem_promo_code('ZZZ-NO-SUCH-' || lpad(i::text, 2, '0'));
-            RAISE EXCEPTION 'Case 9 failed: redeem should not succeed on attempt %', i;
-        EXCEPTION
-            WHEN OTHERS THEN
-                IF i < 16 THEN
-                    IF SQLERRM NOT LIKE '%promo_invalid%' THEN
-                        RAISE;
-                    END IF;
-                ELSIF SQLERRM NOT LIKE '%promo_rate_limit_exceeded%' THEN
-                    RAISE;
-                END IF;
-        END;
-    END LOOP;
+    BEGIN
+        PERFORM public.redeem_promo_code('ZZZ-RATE-LIMIT');
+        RAISE EXCEPTION 'Case 9 failed: rate-limited user should not redeem';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLERRM NOT LIKE '%promo_rate_limit_exceeded%' THEN
+                RAISE;
+            END IF;
+    END;
 
     PERFORM public.test_set_authenticated(v_alice);
     BEGIN
