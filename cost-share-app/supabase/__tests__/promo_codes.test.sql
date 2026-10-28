@@ -26,6 +26,9 @@ BEGIN
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin) ON CONFLICT DO NOTHING;
 
+    INSERT INTO public.promo_redeem_rate_limits (user_id, window_start, attempt_count)
+    VALUES (v_carol, date_trunc('hour', NOW()), 15);
+
     SET LOCAL session_replication_role = origin;
 
     PERFORM public.test_set_authenticated(v_alice);
