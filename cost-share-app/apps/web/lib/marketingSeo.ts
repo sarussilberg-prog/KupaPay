@@ -4,6 +4,7 @@ import {
     SUPPORTED_LANGUAGES,
     type Language,
 } from '@cost-share/shared';
+import { USE_CASE_SLUGS, type UseCaseId } from '@/lib/useCasePages';
 
 export const MARKETING_LOCALE_HEADER = 'x-kupapay-locale';
 
@@ -24,6 +25,24 @@ export function splitCalculatorPath(locale: Language): string {
 
 export function splitCalculatorUrl(locale: Language): string {
     return `${APP_WEB_ORIGIN}${splitCalculatorPath(locale)}`;
+}
+
+export function useCasePath(locale: Language, useCaseId: UseCaseId): string {
+    return `/${locale}/${USE_CASE_SLUGS[useCaseId]}`;
+}
+
+export function useCaseUrl(locale: Language, useCaseId: UseCaseId): string {
+    return `${APP_WEB_ORIGIN}${useCasePath(locale, useCaseId)}`;
+}
+
+export function buildUseCaseAlternateLanguages(useCaseId: UseCaseId): Record<string, string> {
+    const languages: Record<string, string> = {
+        'x-default': useCaseUrl('en', useCaseId),
+    };
+    for (const locale of SUPPORTED_LANGUAGES) {
+        languages[hreflangForLocale(locale)] = useCaseUrl(locale, useCaseId);
+    }
+    return languages;
 }
 
 export function buildSplitCalculatorAlternateLanguages(): Record<string, string> {

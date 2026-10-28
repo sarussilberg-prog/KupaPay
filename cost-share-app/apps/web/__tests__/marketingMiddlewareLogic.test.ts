@@ -42,3 +42,10 @@ test('resolveMarketingMiddleware sets locale cookie path on marketing locale URL
         kind: 'pass_through',
     });
 });
+
+test('resolveMarketingMiddleware sets locale on use-case landing URLs', () => {
+    assert.deepEqual(
+        resolveMarketingMiddleware('/ar/roommate-bills', { cookieLocale: null, acceptLanguage: null }),
+        { kind: 'continue_marketing_locale', locale: 'ar' },
+    );
+});
