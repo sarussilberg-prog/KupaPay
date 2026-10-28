@@ -2,7 +2,7 @@
 
 ## Policy
 
-- **PR merge to `dev`:** `GITHUB_TOKEN` only (`gh pr merge --auto` after Sonar + CI gate). Branch protection **CI gate** applies to normal PRs; do not bypass.
+- **PR merge to `dev`:** **`ADMIN_PAT`** for synchronous `gh pr merge --squash` after Sonar + CI gate (so the merge is not attributed to `github-actions[bot]` and `on: push` bump workflows run). Branch protection **CI gate** applies to PR heads; the admin PAT performs the merge once checks are green.
 - **Dev prerelease bump:** after a squash-merge lands on `dev`, [`bump-dev-prerelease.yml`](../../.github/workflows/bump-dev-prerelease.yml) commits `version.json` + `CHANGELOG.md` with **`[skip ci]`** and pushes directly to `dev`. That push must bypass required checks (no full CI/Vercel for a metadata-only commit).
 - **`ADMIN_PAT`:** fine-grained or classic PAT owned by a **repo admin**. Stored as the **`ADMIN_PAT`** Actions secret. Used only for:
   - Dev prerelease push (`bump-dev-prerelease.yml` checkout + push)

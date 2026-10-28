@@ -151,10 +151,13 @@ describe('App version — single source of truth', () => {
       expect(text).toContain('cost-share-app/packages/shared/version.json');
       expect(text).not.toContain('cost-share-app/apps/mobile/version.json');
     }
-    expect(devBump).toMatch(/^\s*pull_request:\s*$/m);
-    expect(devBump).toContain('types: [closed]');
+    expect(devBump).toMatch(/^\s*push:\s*$/m);
     expect(devBump).toContain('branches: [dev]');
-    expect(devBump).not.toMatch(/^\s*push:\s*$/m);
+    expect(devBump).toContain('ADMIN_PAT');
+
+    const ci = read(resolve(REPO_ROOT, '.github/workflows/ci.yml'));
+    expect(ci).toContain('Squash merge PR to dev (ADMIN_PAT)');
+    expect(ci).toContain('gh pr merge "$PR_NUMBER" --squash --repo "$REPO"');
     expect(main).toContain('workflow_dispatch');
     expect(main).not.toMatch(/^\s*push:\s*$/m);
   });

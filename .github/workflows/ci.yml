@@ -668,17 +668,27 @@ jobs:
           bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
           echo "defer=false" >> "$GITHUB_OUTPUT"
 
-      - name: Enable GitHub native auto-merge (squash)
+      - name: Squash merge PR to dev (ADMIN_PAT)
         if: steps.sync_dev.outputs.defer != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          GH_TOKEN: ${{ secrets.ADMIN_PAT }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          if [[ -z "${ADMIN_PAT}" ]]; then
+            echo "::error::ADMIN_PAT secret is not configured — required to squash-merge dev without github-actions[bot] (push workflows would not run; see docs/SSOT/CI_ADMIN_PAT.md)"
+            exit 1
+          fi
+          state="$(gh pr view "$PR_NUMBER" --repo "$REPO" --json state --jq .state)"
+          if [[ "$state" == "MERGED" ]]; then
+            echo "PR already merged"
+            exit 0
+          fi
           for attempt in 1 2 3; do
-            if err="$(gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO" 2>&1)"; then
-              echo "✅ Auto-merge enabled — GitHub merges when required checks pass on current head"
+            if err="$(gh pr merge "$PR_NUMBER" --squash --repo "$REPO" 2>&1)"; then
+              echo "✅ Squash-merged to dev (ADMIN_PAT — dispatches push for dev prerelease bump)"
               exit 0
             fi
             if [[ "$err" == *"not mergeable"* ]] || [[ "$err" == *"Could not resolve head ref"* ]]; then
@@ -689,7 +699,7 @@ jobs:
             echo "$err" >&2
             exit 1
           done
-          echo "::error::gh pr merge --auto failed after retries"
+          echo "::error::gh pr merge --squash failed after retries"
           exit 1
 
       - name: Wait for deferred branch sync
@@ -700,4 +710,4 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO" || true
-          echo "Auto-merge armed; fresh CI run will complete merge after update-branch settles."
+          echo "Auto-merge armed; fresh CI run will squash-merge with ADMIN_PAT after update-branch settles."
