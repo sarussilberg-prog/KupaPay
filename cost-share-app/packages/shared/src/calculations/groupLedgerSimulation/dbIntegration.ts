@@ -218,7 +218,7 @@ function assertDb(state: SimulationState, opIndex: number, opKind: SimOpKind | '
             `${userUuid(p.fromUserId)}|${userUuid(p.toUserId)}|${p.currency}|${p.amount.toFixed(2)}`,
     );
     const dbPair = fetchPairwise();
-    if (refPair.join('\n') !== dbPair.join('\n')) {
+    if (refPair.sort().join('\n') !== dbPair.sort().join('\n')) {
         throw new Error(
             `DB pairwise mismatch seed=${SEED} op=${opIndex} kind=${opKind}\nref:\n${refPair.join('\n')}\ndb:\n${dbPair.join('\n')}`,
         );
