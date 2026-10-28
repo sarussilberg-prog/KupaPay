@@ -39,8 +39,8 @@ import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
 import {
-    GROUP_CARD_CHIP_MAX_WIDTH,
     GROUP_CARD_MENU_HIT,
+    groupCardBalanceColumnStyle,
     GROUP_CARD_MENU_ICON,
     GROUP_CARD_PAD,
     GROUP_CARD_ROW_GAP,
@@ -316,7 +316,9 @@ function GroupCardBase({
                         )}
                         {stackBalanceChip ? (
                             <View
+                                testID="group-card-balance-column"
                                 style={{
+                                    ...groupCardBalanceColumnStyle,
                                     alignSelf: isRtl ? 'flex-start' : 'flex-end',
                                     marginTop: 2,
                                 }}
@@ -327,7 +329,7 @@ function GroupCardBase({
                     </View>
 
                     {!stackBalanceChip ? (
-                        <View style={{ flexShrink: 0, flexGrow: 0, maxWidth: GROUP_CARD_CHIP_MAX_WIDTH }}>
+                        <View testID="group-card-balance-column" style={groupCardBalanceColumnStyle}>
                             {balanceChipNode}
                         </View>
                     ) : null}

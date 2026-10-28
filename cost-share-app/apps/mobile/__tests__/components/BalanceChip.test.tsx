@@ -3,7 +3,25 @@ import { render } from '@testing-library/react-native';
 import { BalanceChip } from '../../components/BalanceChip';
 import { rollupOf } from '../../testUtils/groupRollup';
 
+function flattenStyle(style: unknown): Record<string, unknown> {
+    if (!style) return {};
+    if (Array.isArray(style)) {
+        return style.reduce<Record<string, unknown>>(
+            (acc, part) => ({ ...acc, ...flattenStyle(part) }),
+            {},
+        );
+    }
+    return style as Record<string, unknown>;
+}
+
 describe('BalanceChip', () => {
+    it('fills the group card balance column so settled pills share the same axis as owe/owed', () => {
+        const { getByTestId } = render(<BalanceChip defaultCurrency="USD" />);
+        const flat = flattenStyle(getByTestId('balance-chip-settled').props.style);
+        expect(flat.width).toBe('100%');
+        expect(flat.alignItems).toBe('center');
+    });
+
     it('shows Settled label when rollup is undefined', () => {
         const { getByText } = render(<BalanceChip defaultCurrency="USD" />);
         expect(getByText('groups.card.settled')).toBeTruthy();
