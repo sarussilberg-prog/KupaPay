@@ -452,7 +452,30 @@
     },
     "cta": {
       "title": "Save this split as a group",
-      "body": "Download KupaPay to track expenses, invite friends, and settle up with real-time balances."
+      "body": "Create a KupaPay group with these people and expenses — track balances and settle up in the app.",
+      "downloadHint": "Prefer the mobile app? Download KupaPay for iPhone or Android."
+    },
+    "import": {
+      "defaultGroupName": "Split from calculator",
+      "groupNameLabel": "Group name",
+      "selfLabel": "You are",
+      "saveButton": "Save as group",
+      "signInButton": "Sign in to save",
+      "checkingSession": "Checking sign-in…",
+      "working": "Creating group…",
+      "success": "Group created. Open KupaPay to view balances and invite friends.",
+      "openApp": "Open KupaPay",
+      "expenseDescription": "Expense {n}",
+      "errors": {
+        "no_participants": "Add at least one person before saving.",
+        "no_expenses": "Add at least one expense with an amount before saving.",
+        "invalid_amount": "Check amounts, payer, and who shares each expense.",
+        "unbalanced": "Totals do not balance — adjust expenses and try again.",
+        "empty_group_name": "Enter a group name.",
+        "self_not_in_participants": "Choose which person you are in the group.",
+        "not_authenticated": "Sign in to save this split as a group.",
+        "import_failed": "Could not create the group. Try again in a moment."
+      }
     }
   }
 }

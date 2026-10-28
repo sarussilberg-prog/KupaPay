@@ -162,7 +162,30 @@
     },
     "cta": {
       "title": "Guardar esta división como grupo",
-      "body": "Descarga KupaPay para registrar gastos, invitar amigos y liquidar con saldos en tiempo real."
+      "body": "Crea un grupo de KupaPay con estas personas y gastos — sigue balances y salda en la app.",
+      "downloadHint": "¿Prefieres la app móvil? Descarga KupaPay para iPhone o Android."
+    },
+    "import": {
+      "defaultGroupName": "División del calculador",
+      "groupNameLabel": "Nombre del grupo",
+      "selfLabel": "Tú eres",
+      "saveButton": "Guardar como grupo",
+      "signInButton": "Iniciar sesión para guardar",
+      "checkingSession": "Comprobando sesión…",
+      "working": "Creando grupo…",
+      "success": "Grupo creado. Abre KupaPay para ver balances e invitar amigos.",
+      "openApp": "Abrir KupaPay",
+      "expenseDescription": "Gasto {n}",
+      "errors": {
+        "no_participants": "Añade al menos una persona antes de guardar.",
+        "no_expenses": "Añade al menos un gasto con importe antes de guardar.",
+        "invalid_amount": "Revisa importes, pagador y quién comparte cada gasto.",
+        "unbalanced": "Los totales no cuadran — ajusta los gastos e inténtalo de nuevo.",
+        "empty_group_name": "Introduce un nombre de grupo.",
+        "self_not_in_participants": "Elige qué persona eres en el grupo.",
+        "not_authenticated": "Inicia sesión para guardar esta división como grupo.",
+        "import_failed": "No se pudo crear el grupo. Inténtalo de nuevo en un momento."
+      }
     }
   },
   "useCaseShared": {

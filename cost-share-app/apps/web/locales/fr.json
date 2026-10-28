@@ -162,7 +162,30 @@
     },
     "cta": {
       "title": "Enregistrer ce partage comme groupe",
-      "body": "Téléchargez KupaPay pour suivre les dépenses, inviter des amis et régler avec des soldes en temps réel."
+      "body": "Créez un groupe KupaPay avec ces personnes et dépenses — suivez les soldes et réglez dans l’app.",
+      "downloadHint": "Vous préférez l’app mobile ? Téléchargez KupaPay pour iPhone ou Android."
+    },
+    "import": {
+      "defaultGroupName": "Partage depuis le calculateur",
+      "groupNameLabel": "Nom du groupe",
+      "selfLabel": "Vous êtes",
+      "saveButton": "Enregistrer comme groupe",
+      "signInButton": "Se connecter pour enregistrer",
+      "checkingSession": "Vérification de la connexion…",
+      "working": "Création du groupe…",
+      "success": "Groupe créé. Ouvrez KupaPay pour voir les soldes et inviter des amis.",
+      "openApp": "Ouvrir KupaPay",
+      "expenseDescription": "Dépense {n}",
+      "errors": {
+        "no_participants": "Ajoutez au moins une personne avant d’enregistrer.",
+        "no_expenses": "Ajoutez au moins une dépense avec un montant avant d’enregistrer.",
+        "invalid_amount": "Vérifiez les montants, le payeur et qui partage chaque dépense.",
+        "unbalanced": "Les totaux ne correspondent pas — ajustez les dépenses et réessayez.",
+        "empty_group_name": "Saisissez un nom de groupe.",
+        "self_not_in_participants": "Choisissez quelle personne vous êtes dans le groupe.",
+        "not_authenticated": "Connectez-vous pour enregistrer ce partage comme groupe.",
+        "import_failed": "Impossible de créer le groupe. Réessayez dans un instant."
+      }
     }
   },
   "useCaseShared": {

@@ -162,7 +162,30 @@
     },
     "cta": {
       "title": "שמרו את החלוקה כקבוצה",
-      "body": "הורידו את KupaPay כדי לעקוב אחרי הוצאות, להזמין חברים ולסגור חשבונות עם יתרות בזמן אמת."
+      "body": "צרו קבוצת KupaPay עם האנשים וההוצאות האלה — עקבו אחרי יתרות וסגרו חשבון באפליקציה.",
+      "downloadHint": "מעדיפים את האפליקציה? הורידו את KupaPay ל-iPhone או Android."
+    },
+    "import": {
+      "defaultGroupName": "חלוקה מהמחשבון",
+      "groupNameLabel": "שם הקבוצה",
+      "selfLabel": "את/ה",
+      "saveButton": "שמירה כקבוצה",
+      "signInButton": "התחברות לשמירה",
+      "checkingSession": "בודקים התחברות…",
+      "working": "יוצרים קבוצה…",
+      "success": "הקבוצה נוצרה. פתחו את KupaPay לצפייה ביתרות והזמנת חברים.",
+      "openApp": "פתיחת KupaPay",
+      "expenseDescription": "הוצאה {n}",
+      "errors": {
+        "no_participants": "הוסיפו לפחות אדם אחד לפני השמירה.",
+        "no_expenses": "הוסיפו לפחות הוצאה אחת עם סכום לפני השמירה.",
+        "invalid_amount": "בדקו סכומים, משלם ומי משתתף בכל הוצאה.",
+        "unbalanced": "הסכומים לא מאוזנים — עדכנו הוצאות ונסו שוב.",
+        "empty_group_name": "הזינו שם קבוצה.",
+        "self_not_in_participants": "בחרו מי אתם בקבוצה.",
+        "not_authenticated": "התחברו כדי לשמור את החלוקה כקבוצה.",
+        "import_failed": "לא הצלחנו ליצור את הקבוצה. נסו שוב בעוד רגע."
+      }
     }
   },
   "useCaseShared": {

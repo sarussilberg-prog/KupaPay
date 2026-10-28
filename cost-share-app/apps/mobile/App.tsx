@@ -51,6 +51,7 @@ import {
 } from './lib/productAnalytics';
 import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
+import { consumeSplitCalculatorPostLoginReturn } from './lib/splitCalculatorPostLoginReturn';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
 import { recoverDeferredInviteAttribution } from './lib/recoverDeferredInviteAttribution';
 import {
@@ -364,6 +365,13 @@ function App() {
               const provider = nextSession.user.app_metadata?.provider ?? 'unknown';
               void captureProductEvent('signup', { provider });
               void trackSignupCompleted({ provider });
+            }
+            if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined') {
+              const splitCalcReturn = consumeSplitCalculatorPostLoginReturn();
+              if (splitCalcReturn) {
+                globalThis.location.href = splitCalcReturn;
+                return;
+              }
             }
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');
