@@ -104,6 +104,7 @@ export function SpendingInsightsSheet({
                 onClose={onClose}
                 label={t('pro.spendingInsights.sheetTitle')}
             >
+                <View className="px-4 pb-6" testID="bottom-sheet-body">
                 {!unlocked ? (
                     <>
                         <Text className="text-gray-600 text-sm mb-4">{t('pro.spendingInsights.lockedBody')}</Text>
@@ -184,6 +185,7 @@ export function SpendingInsightsSheet({
                         )}
                     </>
                 )}
+                </View>
             </BottomSheetShell>
             <CurrencyPicker
                 visible={pickerOpen}
