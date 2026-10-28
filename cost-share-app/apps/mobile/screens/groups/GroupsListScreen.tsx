@@ -39,10 +39,11 @@ import { useRtlLayout } from '../../hooks/useRtlLayout';
 import { useAppStore } from '../../store';
 import { useAuthUserId } from '../../hooks/useAuthUserId';
 import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
-import { useProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
 import { collectProfileFxCurrencies } from '../../lib/collectProfileFxCurrencies';
-import { GroupsListHeader } from '../../components/groups/GroupsListHeader';
-import { GroupsListSummaryCard } from '../../components/groups/GroupsListSummaryCard';
+import { BalanceSummaryHeader } from '../../components/BalanceSummaryHeader';
+import { GroupsListSpecHeader } from '../../components/groups/GroupsListSpecHeader';
+import { GroupsListBigCreateFooter } from '../../components/groups/GroupsListBigCreateFooter';
+import { balanceSummaryRowsFromSummary } from '../../lib/balanceSummaryRows';
 import {
     BalanceState,
     DEFAULT_FILTERS,
@@ -208,10 +209,6 @@ export function GroupsListScreen() {
     }, [rawBalanceSummary, baseCurrency, simplified?.groupRollups]);
 
     const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
-    const { summary: balanceSummary, conversion } = useProfileBalanceSummary(
-        rawBalanceSummary,
-        ratesQuery,
-    );
 
     const availableCurrencies = useMemo(
         () => unique(groups.map(g => g.defaultCurrency)),
@@ -297,16 +294,20 @@ export function GroupsListScreen() {
         [renderGroupRow],
     );
 
+    const summaryRows = useMemo(
+        () => balanceSummaryRowsFromSummary(rawBalanceSummary),
+        [rawBalanceSummary],
+    );
+
     const listSummaryHeader = useMemo(() => {
-        if (groups.length === 0) return null;
-        return (
-            <GroupsListSummaryCard
-                summary={balanceSummary}
-                conversion={conversion}
-                balanceUnknown={balanceUnknown}
-            />
-        );
-    }, [groups.length, balanceSummary, conversion, balanceUnknown]);
+        if (groups.length === 0 || balanceUnknown) return null;
+        return <BalanceSummaryHeader rows={summaryRows} />;
+    }, [groups.length, summaryRows, balanceUnknown]);
+
+    const listCreateFooter = useMemo(() => {
+        if (activeRows.length === 0) return null;
+        return <GroupsListBigCreateFooter onPress={handleCreateGroup} />;
+    }, [activeRows.length, handleCreateGroup]);
 
     const archivedFooter = useMemo(() => {
         if (archivedRows.length === 0) return null;
@@ -349,7 +350,7 @@ export function GroupsListScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-50 dark:bg-gray-900" edges={['top']}>
             <ProTrialLifecycleBanner />
-            <GroupsListHeader
+            <GroupsListSpecHeader
                 searchQuery={searchQuery}
                 onSearchQueryChange={setSearchQuery}
                 searchExpanded={searchExpanded}
@@ -378,7 +379,12 @@ export function GroupsListScreen() {
                             tintColor={colors.primary}
                         />
                     }
-                    ListFooterComponent={archivedFooter}
+                    ListFooterComponent={
+                        <View>
+                            {listCreateFooter}
+                            {archivedFooter}
+                        </View>
+                    }
                     ListEmptyComponent={
                         // Archived groups exist (just no active ones) → the
                         // archived footer renders them; no empty state needed.
