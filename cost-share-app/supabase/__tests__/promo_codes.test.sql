@@ -106,26 +106,21 @@ BEGIN
     END;
 
     PERFORM public.test_set_authenticated(v_carol);
-    FOR i IN 1..15 LOOP
+    FOR i IN 1..16 LOOP
         BEGIN
-            PERFORM public.redeem_promo_code('NOT-A-REAL-CODE');
-            RAISE EXCEPTION 'Case 9a failed: invalid code should not succeed on attempt %', i;
+            PERFORM public.redeem_promo_code('ZZZ-NO-SUCH-' || lpad(i::text, 2, '0'));
+            RAISE EXCEPTION 'Case 9 failed: redeem should not succeed on attempt %', i;
         EXCEPTION
             WHEN OTHERS THEN
-                IF SQLERRM NOT LIKE '%promo_invalid%' AND SQLERRM NOT LIKE '%P0002%' THEN
+                IF i < 16 THEN
+                    IF SQLERRM NOT LIKE '%promo_invalid%' THEN
+                        RAISE;
+                    END IF;
+                ELSIF SQLERRM NOT LIKE '%promo_rate_limit_exceeded%' THEN
                     RAISE;
                 END IF;
         END;
     END LOOP;
-    BEGIN
-        PERFORM public.redeem_promo_code('NOT-A-REAL-CODE');
-        RAISE EXCEPTION 'Case 9b failed: 16th attempt should hit rate limit';
-    EXCEPTION
-        WHEN OTHERS THEN
-            IF SQLERRM NOT LIKE '%promo_rate_limit_exceeded%' THEN
-                RAISE;
-            END IF;
-    END;
 
     PERFORM public.test_set_authenticated(v_alice);
     BEGIN
