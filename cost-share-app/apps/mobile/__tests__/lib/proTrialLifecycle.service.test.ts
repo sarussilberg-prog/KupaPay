@@ -10,5 +10,7 @@ describe('resolveInAppProTrialTouch', () => {
             language: 'en',
         });
         expect(touch?.day).toBe(1);
+        expect(touch?.title.length).toBeGreaterThan(0);
+        expect(touch?.body.length).toBeGreaterThan(0);
     });
 });

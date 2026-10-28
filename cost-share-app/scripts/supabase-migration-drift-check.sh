@@ -49,6 +49,32 @@ for ver in "${LOCAL_VERSIONS[@]}"; do
   local_only+=("$ver")
 done
 
+# One-time dev transition while 20261016320100_reconcile_16120000_migration_history is pending.
+pending_reconcile=0
+if [[ -f "$MIGRATIONS_DIR/20261016320100_reconcile_16120000_migration_history.sql" ]] \
+  && [[ -z "${REMOTE_NAME[20261016320100]:-}" ]]; then
+  pending_reconcile=1
+fi
+
+if [[ "$pending_reconcile" -eq 1 ]]; then
+  filtered_remote_only=()
+  for entry in "${remote_only[@]}"; do
+    [[ "$entry" == "20261016120500 (pro_trial_reminder_cron)" ]] && continue
+    filtered_remote_only+=("$entry")
+  done
+  remote_only=("${filtered_remote_only[@]}")
+
+  filtered_mismatch=()
+  for entry in "${name_mismatch[@]}"; do
+    if [[ "$entry" == "20261016120000 remote='archive_group_rpc_result' local='20261016120000_pro_trial_reminder_cron.sql'" ]]; then
+      echo "ℹ️  Transitional drift at 20261016120000 — will reconcile via 20261016320100 on push."
+      continue
+    fi
+    filtered_mismatch+=("$entry")
+  done
+  name_mismatch=("${filtered_mismatch[@]}")
+fi
+
 failed=0
 if [[ ${#remote_only[@]} -gt 0 ]]; then
   echo "::error::Remote-only migration versions (not in repo):"

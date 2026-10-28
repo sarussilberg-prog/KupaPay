@@ -17,6 +17,9 @@
         "loadError": "Не удалось загрузить данные",
         "networkError": "Ошибка сети. Проверьте подключение к интернету.",
         "offlineTitle": "Нет подключения к сети",
+        "offlineBannerMessage": "Нет подключения к интернету. Сохранённые данные доступны; изменения синхронизируются после восстановления связи.",
+        "screenErrorTitle": "Что-то пошло не так",
+        "screenErrorMessage": "На этом экране произошла непредвиденная ошибка. Повторите попытку или вернитесь назад.",
         "retry": "Повторить",
         "search": "Поиск",
         "submit": "Отправить",
@@ -402,7 +405,9 @@
             "showLess": "Свернуть"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} в других валютах"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} в других валютах",
+            "otherCurrenciesHint": "({{count}} валют)",
+            "otherCurrenciesHint_one": "({{count}} валюта)"
         },
         "hero": {
             "spentTogether": "Потрачено вместе",
@@ -418,6 +423,8 @@
             "owedToYouCaption": "Вам должны",
             "moreCurrencies": "{{count}} валют",
             "moreCurrencies_one": "{{count}} валюта",
+            "moreCurrenciesNoun": "валют",
+            "moreCurrenciesNoun_one": "валюта",
             "updatedAgo": "Обновлено {{when}}",
             "balanceUnavailable": "Баланс недоступен без сети"
         },
@@ -695,6 +702,10 @@
                 "stopConfirmTitle": "Остановить повторяющиеся расходы?",
                 "stopConfirmBody": "Уже созданные расходы останутся. Новые повторы создаваться не будут.",
                 "stopped": "Серия повторов остановлена",
+                "editScopeTitle": "Обновить повторяющийся расход?",
+                "editScopeBody": "Применить изменения к будущим повторениям или только к этому расходу.",
+                "editScopeSeries": "И будущие повторения",
+                "editScopeOccurrence": "Только этот расход",
                 "frequency": {
                     "weekly": "Еженедельно",
                     "monthly": "Ежемесячно",
@@ -830,7 +841,7 @@
             "statusActive": "Активен",
             "statusInactive": "Неактивен",
             "metaLine": "{{days}} дн. · {{uses}} / {{max}} использ.",
-            "unlimited": "∞",
+            "unlimited": "Без лимита",
             "deactivateCta": "Деактивировать",
             "deactivateTitle": "Деактивировать {{code}}?",
             "deactivateMessage": "После деактивации код нельзя будет активировать.",
@@ -933,6 +944,26 @@
             "byPlatform": "По платформе",
             "last7Days": "Последние 7 дней",
             "noData": "За этот период событий пока нет"
+        },
+        "growth": {
+            "portalRow": "MAU и north star",
+            "screenTitle": "Метрики роста",
+            "asOf": "Обновлено {{when}} (UTC)",
+            "northStarTitle": "Ключевая метрика",
+            "northStarDefinition": "Группы, где минимум два участника добавили расход в текущем календарном месяце.",
+            "northStarCurrent": "Текущий месяц ({{month}})",
+            "northStarPrevious": "Прошлый месяц ({{month}})",
+            "activeAuthorsTitle": "Активные авторы расходов",
+            "activeAuthorsNote": "Уникальные пользователи, создавшие неудалённый расход в окне. MAU/WAU/DAU по открытиям приложения — в PostHog.",
+            "dau": "Дневная активность",
+            "wau": "Недельная активность",
+            "mau": "Месячная активность (прокси)",
+            "mauEpicProgress": "{{percent}} % к цели {{target}} MAU",
+            "seriesTitle": "North star — последние 12 месяцев",
+            "openPostHogDashboard": "Открыть дашборд MAU в PostHog",
+            "postHogDashboardHint": "Задайте EXPO_PUBLIC_POSTHOG_PROJECT_ID (и опционально id дашборда MAU) для ссылки на PostHog.",
+            "webOnlyNote": "Разбивка по платформе и языку — в связанном дашборде PostHog.",
+            "analyticsUnavailableBody": "Функция метрик роста отсутствует или не выдана в этом проекте Supabase. Примените последние миграции на dev и обновите."
         },
         "supportMessages": {
             "title": "Обращения в поддержку",
@@ -1461,6 +1492,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Делите честно и закрывайте долги быстрее с Pro",
             "feature1": "Без рекламы",
             "feature2": "Автоконвертация валют для поездок",
             "feature3": "Аккуратный PDF-отчёт для каждой группы",
@@ -1491,7 +1523,9 @@
             "trialFreePeriodHeading": "{{trialDays}} дней бесплатно",
             "trialFreePeriodBody": "Все функции Pro бесплатно {{trialDays}} дн. Отмените в настройках до конца пробного периода, если не хотите продолжать.",
             "trialRenewalDisclosure": "Через {{trialDays}} дн. спишется {{price}}/{{period}}, если не отменить в настройках.",
-            "havePromoCode": "Есть код?"
+            "havePromoCode": "Есть код?",
+            "alreadyProTitle": "У вас Pro",
+            "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
         },
         "promoCode": {
             "sheetTitle": "Активировать код",
@@ -1513,7 +1547,45 @@
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Управление подпиской",
-            "freeTrialUntil": "Бесплатный период до {{date}}"
+            "freeTrialUntil": "Бесплатный период до {{date}}",
+            "activeUntil": "Pro активен до {{date}}",
+            "activeIndividualAndGroup": "Подписка Pro активна; у этой группы также Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Моя подписка",
+            "openDetails": "Детали подписки",
+            "screenIntro": "План, продление и оплата управляются в App Store или Google Play. Trip Pass показан по группам ниже.",
+            "disabled": "Подписки недоступны в этой сборке.",
+            "empty": "На этом аккаунте нет активной подписки.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Промо",
+            "storeStripe": "Оплата на сайте",
+            "storeUnknown": "Магазин приложений",
+            "renewsOn": "Продление {{date}}",
+            "expiresOn": "Доступ до {{date}}",
+            "expiredOn": "Истекла {{date}}",
+            "autoRenewOn": "Автопродление включено",
+            "autoRenewOff": "Автопродление выключено",
+            "trialActive": "Идёт бесплатный пробный период",
+            "purchasedVia": "Куплено через {{store}}",
+            "billingIssueBody": "Проблема с оплатой. Обновите способ оплаты, чтобы сохранить Pro.",
+            "fixPayment": "Исправить оплату",
+            "tripPassSection": "Группы Trip Pass",
+            "tripPassUntil": "Pro для группы до {{date}}",
+            "renewalDisclosureShort": "Подписки продлеваются автоматически, пока вы не отмените их в магазине минимум за 24 часа. См. Условия и Конфиденциальность.",
+            "status": {
+                "active": "Активна",
+                "cancelled_until_expiry": "Отменена — активна до конца периода",
+                "billing_issue": "Проблема с оплатой",
+                "expired": "Истекла",
+                "none": "Нет подписки"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro для этой группы",
+            "activeUntil": "Pro для всех участников группы до {{date}}."
         },
         "trialReminder": {
             "title": "Пробный период KupaPay Pro скоро закончится",

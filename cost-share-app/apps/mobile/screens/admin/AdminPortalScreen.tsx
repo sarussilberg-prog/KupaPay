@@ -79,6 +79,13 @@ export function AdminPortalScreen() {
                         testID="admin-portal-monetization"
                     />
                     <SettingsRow
+                        iconName="pulse-outline"
+                        label={t('admin.growth.portalRow')}
+                        variant="chevron"
+                        onPress={() => navigation.navigate('AdminGrowthMetrics')}
+                        testID="admin-portal-growth"
+                    />
+                    <SettingsRow
                         iconName="pricetag-outline"
                         label={t('admin.promoCodes.portalRow')}
                         variant="chevron"

@@ -11,6 +11,7 @@ import { invalidateBalanceCaches } from '../lib/invalidateBalanceCaches';
 import { queryClient } from '../lib/queryClient';
 import { SENTRY_TAGS } from '../lib/sentryTags';
 import { queryKeys } from './queries/keys';
+import { REALTIME_SUBSCRIBE_REFETCH_GRACE_MS } from '../lib/realtimeSnapshotRefetch';
 
 /** Invalidate caches that drive the cover member stack and balances. */
 export function invalidateGroupMembersCaches(groupId: string): void {
@@ -47,9 +48,18 @@ export function useGroupMembersRealtime(groupId: string | undefined | null): voi
                 },
             )
             .subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    invalidateGroupMembersCaches(groupId);
+                if (status !== 'SUBSCRIBED') return;
+                const usersKey = queryKeys.groupUsers(groupId);
+                const state = queryClient.getQueryState(usersKey);
+                if (
+                    state?.fetchStatus === 'fetching' ||
+                    (state?.dataUpdatedAt != null &&
+                        Date.now() - state.dataUpdatedAt <
+                            REALTIME_SUBSCRIBE_REFETCH_GRACE_MS)
+                ) {
+                    return;
                 }
+                invalidateGroupMembersCaches(groupId);
             });
 
         return () => {

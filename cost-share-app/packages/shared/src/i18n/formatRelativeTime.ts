@@ -51,3 +51,48 @@ export function formatRelativeTimeShort(
         return '';
     }
 }
+
+const COMPACT_HE_SUFFIX: Record<RelativeTimeUnit, string> = {
+    second: 'שנ׳',
+    minute: 'ד׳',
+    hour: 'ש׳',
+    day: 'י׳',
+    week: 'שב׳',
+    month: 'ח׳',
+    year: 'שנ׳',
+};
+
+const COMPACT_EN_SUFFIX: Record<RelativeTimeUnit, string> = {
+    second: 's',
+    minute: 'm',
+    hour: 'h',
+    day: 'd',
+    week: 'w',
+    month: 'mo',
+    year: 'y',
+};
+
+/**
+ * Ultra-compact relative time for tight list rows (e.g. group card meta).
+ * English: "2h ago". Hebrew: "לפני 2 ש׳". Other locales fall back to `formatRelativeTimeShort`.
+ */
+export function formatRelativeTimeCompact(
+    when: Date | string | number | null | undefined,
+    nowMs: number = Date.now(),
+    language?: Language | string,
+): string {
+    const t = when instanceof Date ? when.getTime() : new Date(when ?? 0).getTime();
+    if (!Number.isFinite(t) || t <= 0) return '';
+
+    const primary = String(language ?? 'en').split('-')[0];
+    const { value, unit } = pickRelativeTimeUnit(t - nowMs);
+    const n = Math.abs(value);
+
+    if (primary === 'he') {
+        return `לפני ${n}\u00A0${COMPACT_HE_SUFFIX[unit]}`;
+    }
+    if (primary === 'en') {
+        return `${n}${COMPACT_EN_SUFFIX[unit]} ago`;
+    }
+    return formatRelativeTimeShort(when, nowMs, language);
+}

@@ -28,6 +28,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { AppIcon } from '../../components/AppIcon';
 import { colors } from '../../theme';
 import { getDisplayName } from '../../lib/userDisplay';
+import { formatAppDate } from '../../lib/formatAppDate';
 import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
 import { shareExpenseLink } from '../../services/invite.service';
 
@@ -43,10 +44,13 @@ const categoryEmoji: Record<string, string> = {
 };
 
 export function ExpenseDetailScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
-    const { expenseId, groupId } = route.params;
+    const params = (route.params ?? {}) as { expenseId?: string; groupId?: string };
+    const expenseId = params.expenseId ?? '';
+    const groupId = params.groupId ?? '';
+    const hasRouteParams = Boolean(params.expenseId && params.groupId);
     const { isLoading, startLoading, stopLoading } = useLoading();
 
     const [expense, setExpense] = useState<Expense | null>(null);
@@ -59,6 +63,10 @@ export function ExpenseDetailScreen() {
     const receiptDisplayUrl = useExpenseReceiptDisplayUrl(expense?.receiptUrl);
 
     useEffect(() => {
+        if (!hasRouteParams) {
+            stopLoading();
+            return;
+        }
         const loadData = async () => {
             startLoading();
             const expenseData = await getExpenseWithSplits(expenseId);
@@ -71,7 +79,7 @@ export function ExpenseDetailScreen() {
             stopLoading();
         };
         void loadData();
-    }, [expenseId, startLoading, stopLoading]);
+    }, [expenseId, hasRouteParams, startLoading, stopLoading]);
 
     const handleStopSeries = useCallback(async () => {
         setShowStopSeriesDialog(false);
@@ -103,6 +111,16 @@ export function ExpenseDetailScreen() {
         }
     }, [expenseId, navigation]);
 
+    if (!hasRouteParams) {
+        return (
+            <EmptyState
+                iconName="alert-circle-outline"
+                title={t('common.error')}
+                message={t('common.loadError')}
+            />
+        );
+    }
+
     if (isLoading) {
         return <LoadingIndicator />;
     }
@@ -117,7 +135,7 @@ export function ExpenseDetailScreen() {
         );
     }
 
-    const formattedDate = new Date(expense.expenseDate).toLocaleDateString();
+    const formattedDate = formatAppDate(expense.expenseDate, i18n.language);
     const emoji = categoryEmoji[expense.category || 'other'] || '📦';
 
     return (

@@ -5,9 +5,10 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { View, FlatList, RefreshControl } from 'react-native';
+import { View, RefreshControl } from 'react-native';
+import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Expense } from '@cost-share/shared';
 import { useGroupExpensesQuery } from '../../hooks/queries/useGroupExpensesQuery';
 import { queryClient } from '../../lib/queryClient';
@@ -17,13 +18,15 @@ import { EmptyState } from '../../components/EmptyState';
 import { ExpenseCard } from '../../components/ExpenseCard';
 import { useNetworkStatus } from '../../lib/networkStatus';
 import { colors } from '../../theme';
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 
 export function ExpenseListScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
-    const route = useRoute<any>();
-    const { groupId } = route.params;
-    const expensesQuery = useGroupExpensesQuery(groupId);
+    const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
+    const groupId = required?.groupId ?? '';
+    const expensesQuery = useGroupExpensesQuery(isValid ? groupId : '');
     const { online } = useNetworkStatus();
     const [refreshing, setRefreshing] = useState(false);
 
@@ -52,9 +55,16 @@ export function ExpenseListScreen() {
         [navigation, groupId],
     );
 
-    const renderExpense = ({ item }: { item: Expense }) => (
-        <ExpenseCard expense={item} onPress={handleExpensePress} />
+    const renderExpense = useCallback(
+        ({ item }: { item: Expense }) => (
+            <ExpenseCard expense={item} onPress={handleExpensePress} />
+        ),
+        [handleExpensePress],
     );
+
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
 
     if (expensesQuery.isLoading && expenses.length === 0) {
         return <LoadingIndicator />;
@@ -62,11 +72,13 @@ export function ExpenseListScreen() {
 
     return (
         <View className="flex-1 bg-slate-50">
-            <FlatList
+            <HotVirtualizedList
+                testID="expense-list-virtualized"
                 data={expenses}
                 keyExtractor={(item) => item.id}
                 renderItem={renderExpense}
-                contentContainerClassName="p-4"
+                style={{ flex: 1 }}
+                contentContainerStyle={{ padding: 16 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}

@@ -79,8 +79,8 @@ export function SummaryCover({
             style={{
                 position: 'absolute',
                 top: topInset + BUTTON_TOP_OFFSET,
-                left: 12,
-                right: 12,
+                start: 12,
+                end: 12,
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -92,7 +92,7 @@ export function SummaryCover({
                 <TouchableOpacity
                     onPress={onBack}
                     accessibilityRole="button"
-                    accessibilityLabel="Back"
+                    accessibilityLabel={t('common.back')}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     testID="appbar-back"
                     style={styles.circleButton}
@@ -238,8 +238,8 @@ const styles = StyleSheet.create({
     },
     titleRow: {
         position: 'absolute',
-        left: 14,
-        right: 14,
+        start: 14,
+        end: 14,
         bottom: 10,
         flexDirection: 'row',
         alignItems: 'flex-end',

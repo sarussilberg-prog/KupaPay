@@ -5,19 +5,17 @@
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { GroupInviteSharePanel } from '../../components/invite/GroupInviteSharePanel';
-
-type RouteParams = {
-    groupId: string;
-    groupName: string;
-};
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 
 export function GroupPostCreateInviteScreen() {
     const navigation = useNavigation<any>();
-    const route = useRoute<any>();
     const insets = useSafeAreaInsets();
-    const { groupId, groupName } = (route.params ?? {}) as RouteParams;
+    const { isValid, required } = useRequiredRouteParams(['groupId', 'groupName'] as const);
+    const groupId = required?.groupId ?? '';
+    const groupName = required?.groupName ?? '';
 
     const openGroup = useCallback(() => {
         navigation.replace('Main', {
@@ -25,6 +23,10 @@ export function GroupPostCreateInviteScreen() {
             params: { screen: 'GroupDetail', params: { groupId } },
         });
     }, [navigation, groupId]);
+
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
 
     return (
         <View

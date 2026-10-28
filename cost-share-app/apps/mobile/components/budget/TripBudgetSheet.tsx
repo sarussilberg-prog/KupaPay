@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import { Button } from '../Button';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetShell } from '../BottomSheetShell';
 import { Text } from '../AppText';
+import { Input } from '../Input';
 import { CurrencyPicker } from '../CurrencyPicker';
 import { setGroupTripBudget } from '../../services/tripBudget.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
-import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 
 interface TripBudgetSheetProps {
     visible: boolean;
@@ -29,10 +28,8 @@ export function TripBudgetSheet({
     onSaved,
 }: TripBudgetSheetProps) {
     const { t } = useTranslation();
-    const isRtl = useRtlLayout();
     const [amountText, setAmountText] = useState('');
     const [currency, setCurrency] = useState(defaultCurrency);
-    const [pickerOpen, setPickerOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -74,55 +71,40 @@ export function TripBudgetSheet({
     };
 
     return (
-        <>
-            <BottomSheetShell
-                visible={visible}
-                onClose={onClose}
-                label={t('pro.tripBudget.sheetTitle')}
-            >
-                <Text className="text-gray-600 text-sm mb-3">{t('pro.tripBudget.sheetBody')}</Text>
-                <TextInput
+        <BottomSheetShell
+            visible={visible}
+            onClose={onClose}
+            label={t('pro.tripBudget.sheetTitle')}
+            onSave={() => void handleSave()}
+            saveDisabled={loading}
+        >
+            <View className="px-4 pb-6 pt-2 gap-1">
+                <Text className="text-gray-600 text-sm mb-2">{t('pro.tripBudget.sheetBody')}</Text>
+                <Input
+                    label={t('expenses.amount')}
                     value={amountText}
                     onChangeText={setAmountText}
                     keyboardType="decimal-pad"
                     placeholder={t('pro.tripBudget.amountPlaceholder')}
-                    className={[
-                        'border border-gray-200 rounded-xl px-3 py-3 mb-3 text-gray-900',
-                        rtlTextClassName(isRtl),
-                    ]
-                        .filter(Boolean)
-                        .join(' ')}
+                    containerClassName="mb-3"
+                    testID="trip-budget-amount"
                 />
-                <Pressable
-                    onPress={() => setPickerOpen(true)}
-                    className="border border-gray-200 rounded-xl py-3 px-3 mb-4"
-                >
-                    <Text className="text-gray-700 text-center">{currency}</Text>
-                </Pressable>
-                <Button
-                    title={t('common.save')}
-                    onPress={() => void handleSave()}
-                    loading={loading}
-                    disabled={loading}
-                    variant="pro"
-                    className="mb-2"
-                    testID="trip-budget-save"
+                <CurrencyPicker
+                    value={currency}
+                    onChange={setCurrency}
+                    label={t('groups.currency')}
                 />
-                {initialAmount != null && (
-                    <Pressable onPress={() => void handleClear()} disabled={loading} className="py-3 items-center">
+                {initialAmount != null ? (
+                    <Pressable
+                        onPress={() => void handleClear()}
+                        disabled={loading}
+                        className="py-3 items-center mt-1"
+                        testID="trip-budget-clear"
+                    >
                         <Text className="text-red-600 font-medium">{t('pro.tripBudget.clear')}</Text>
                     </Pressable>
-                )}
-            </BottomSheetShell>
-            <CurrencyPicker
-                visible={pickerOpen}
-                value={currency}
-                onChange={c => {
-                    setCurrency(c);
-                    setPickerOpen(false);
-                }}
-                onClose={() => setPickerOpen(false)}
-            />
-        </>
+                ) : null}
+            </View>
+        </BottomSheetShell>
     );
 }

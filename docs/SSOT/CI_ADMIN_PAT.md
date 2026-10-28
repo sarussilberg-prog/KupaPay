@@ -1,11 +1,26 @@
-# CI tokens and branch protection (#146, #213)
+# CI tokens and branch protection (#146, #213, #602)
 
 ## Policy
 
-- **PR merge to `dev`:** `GITHUB_TOKEN` only (`gh pr merge --auto` after Sonar + CI).
-- **Dev prerelease bump:** direct push to `dev` with **`[skip ci]`** after auto-merge (no follow-up PR; Vercel ignores the commit).
-- **`ADMIN_PAT`:** remove from workflows; rotate/revoke any legacy token used for bypass.
+- **PR merge to `dev`:** `GITHUB_TOKEN` only (`gh pr merge --auto` after Sonar + CI gate). Branch protection **CI gate** applies to normal PRs; do not bypass.
+- **Dev prerelease bump:** after a squash-merge lands on `dev`, [`bump-dev-prerelease.yml`](../../.github/workflows/bump-dev-prerelease.yml) commits `version.json` + `CHANGELOG.md` with **`[skip ci]`** and pushes directly to `dev`. That push must bypass required checks (no full CI/Vercel for a metadata-only commit).
+- **`ADMIN_PAT`:** fine-grained or classic PAT owned by a **repo admin**. Stored as the **`ADMIN_PAT`** Actions secret. Used only for:
+  - Dev prerelease push (`bump-dev-prerelease.yml` checkout + push)
+  - Main semver bump (`bump-version-main.yml`)
+  - Branch protection admin workflow (`admin-branch-protection.yml`)
+  - Mobile CD baseline / repo variables where `GITHUB_TOKEN` is insufficient
 
-## If version-bump PR creation fails
+`admin-branch-protection.yml` sets **`enforce_admins: false`**, so the admin PAT can push `[skip ci]` bumps while non-admin pushes still require **CI gate**.
 
-Enable **Settings → Actions → Allow GitHub Actions to create and approve pull requests**, or bump `cost-share-app/packages/shared/version.json` manually on `dev`.
+## Secret setup
+
+1. Create a PAT for a dedicated admin bot or owner account with **Contents: read/write** on this repo.
+2. Add **`ADMIN_PAT`** under **Settings → Secrets and variables → Actions**.
+3. Rotate on schedule or if leaked; update the secret only (workflows reference the name).
+
+## If bump push still fails
+
+- Confirm **`ADMIN_PAT`** is set and the token owner is still a repo **admin**.
+- Confirm dev protection still has **`enforce_admins: false`** (re-run `admin-branch-protection` workflow if needed).
+- Reconcile backlog: **Actions → Bump dev prerelease → Run workflow** (`workflow_dispatch`) after merges that skipped the bump hook (e.g. before #605’s `pull_request` closed trigger).
+- As a one-off, bump `cost-share-app/packages/shared/version.json` on `dev` via PR (full CI) or manual admin push.

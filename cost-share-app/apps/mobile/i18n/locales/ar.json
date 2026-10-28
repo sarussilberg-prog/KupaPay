@@ -17,6 +17,9 @@
         "loadError": "تعذّر تحميل البيانات",
         "networkError": "خطأ في الشبكة. يُرجى التحقق من اتصالك بالإنترنت.",
         "offlineTitle": "أنت غير متصل بالإنترنت",
+        "offlineBannerMessage": "لا يوجد اتصال بالإنترنت. البيانات المحفوظة ما زالت متاحة؛ ستتم مزامنة التغييرات عند عودة الاتصال.",
+        "screenErrorTitle": "حدث خطأ ما",
+        "screenErrorMessage": "واجه هذا الشاشة خطأً غير متوقع. أعد المحاولة أو ارجع للخلف.",
         "retry": "إعادة المحاولة",
         "search": "بحث",
         "submit": "إرسال",
@@ -414,7 +417,9 @@
             "showLess": "عرض أقل"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} بعملات أخرى",
+            "otherCurrenciesHint": "({{count}} عملات)",
+            "otherCurrenciesHint_one": "({{count}} عملة)"
         },
         "hero": {
             "spentTogether": "المصروف معًا",
@@ -430,6 +435,8 @@
             "owedToYouCaption": "مستحق لك",
             "moreCurrencies": "{{count}} عملات",
             "moreCurrencies_one": "{{count}} عملة",
+            "moreCurrenciesNoun": "عملات",
+            "moreCurrenciesNoun_one": "عملة",
             "updatedAgo": "تم التحديث {{when}}",
             "balanceUnavailable": "الرصيد غير متاح دون اتصال"
         },
@@ -714,6 +721,10 @@
                 "stopConfirmTitle": "إيقاف المصروفات المتكررة؟",
                 "stopConfirmBody": "المصروفات السابقة تبقى. لن تُنشأ تكرارات جديدة.",
                 "stopped": "تم إيقاف السلسلة المتكررة",
+                "editScopeTitle": "تحديث المصروف المتكرر؟",
+                "editScopeBody": "تطبيق التغييرات على التكرارات المستقبلية أو على هذا المصروف فقط.",
+                "editScopeSeries": "التكرارات المستقبلية أيضًا",
+                "editScopeOccurrence": "هذا المصروف فقط",
                 "frequency": {
                     "weekly": "أسبوعي",
                     "monthly": "شهري",
@@ -852,7 +863,7 @@
             "statusActive": "نشط",
             "statusInactive": "غير نشط",
             "metaLine": "{{days}} يوم · {{uses}} / {{max}} استخدام",
-            "unlimited": "∞",
+            "unlimited": "بلا حد",
             "deactivateCta": "إلغاء التفعيل",
             "deactivateTitle": "إلغاء تفعيل {{code}}؟",
             "deactivateMessage": "لن يتمكن المستخدمون من استرداد هذا الرمز بعد الإلغاء.",
@@ -959,6 +970,26 @@
             "byPlatform": "حسب المنصة",
             "last7Days": "آخر 7 أيام",
             "noData": "لا توجد أحداث في هذه الفترة بعد"
+        },
+        "growth": {
+            "portalRow": "MAU والمؤشر الشمالي",
+            "screenTitle": "مقاييس النمو",
+            "asOf": "تم التحديث {{when}} (UTC)",
+            "northStarTitle": "المؤشر الشمالي",
+            "northStarDefinition": "مجموعات أضاف فيها عضوان على الأقل مصروفًا واحدًا في الشهر التقويمي الحالي.",
+            "northStarCurrent": "هذا الشهر ({{month}})",
+            "northStarPrevious": "الشهر السابق ({{month}})",
+            "activeAuthorsTitle": "منشئو المصروفات النشطون",
+            "activeAuthorsNote": "مستخدمون فريدون أنشأوا مصروفًا غير محذوف في النافذة الزمنية. استخدم PostHog لـ MAU/WAU/DAU من فتح التطبيق.",
+            "dau": "نشطون يوميًا",
+            "wau": "نشطون أسبوعيًا",
+            "mau": "نشطون شهريًا (تقريبي)",
+            "mauEpicProgress": "{{percent}}% نحو هدف {{target}} MAU",
+            "seriesTitle": "المؤشر الشمالي — آخر 12 شهرًا",
+            "openPostHogDashboard": "فتح لوحة MAU في PostHog",
+            "postHogDashboardHint": "عيّن EXPO_PUBLIC_POSTHOG_PROJECT_ID (ومعرّف لوحة MAU اختياريًا) للربط مع PostHog من هنا.",
+            "webOnlyNote": "التفصيل حسب المنصة واللغة في لوحة PostHog المرتبطة.",
+            "analyticsUnavailableBody": "دالة مقاييس النمو مفقودة أو غير ممنوحة في مشروع Supabase. طبّق أحدث migrations على dev ثم حدّث."
         },
         "supportMessages": {
             "title": "رسائل الدعم",
@@ -1525,6 +1556,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "قسّم بعدالة وسوِّ الحسابات أسرع مع Pro",
             "feature1": "بدون إعلانات",
             "feature2": "تحويل تلقائي للعملات في الرحلات",
             "feature3": "تقرير PDF منظم لكل مجموعة",
@@ -1555,7 +1587,9 @@
             "trialFreePeriodHeading": "تجربة مجانية {{trialDays}} أيام",
             "trialFreePeriodBody": "جرّب كل ميزات Pro مجاناً لمدة {{trialDays}} أيام. يمكنك الإلغاء من الإعدادات قبل انتهاء التجربة إذا لم ترغب في الاستمرار.",
             "trialRenewalDisclosure": "بعد {{trialDays}} أيام سيتم خصم {{price}}/{{period}} ما لم تُلغِ من الإعدادات.",
-            "havePromoCode": "لديك رمز؟"
+            "havePromoCode": "لديك رمز؟",
+            "alreadyProTitle": "أنت مشترك في Pro",
+            "alreadyProBody": "اشتراكك نشط. أدر الفوترة من App Store أو Google Play، واستمر في استخدام ميزات Pro في التطبيق."
         },
         "promoCode": {
             "sheetTitle": "استرداد الرمز",
@@ -1577,7 +1611,45 @@
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "إدارة الاشتراك",
-            "freeTrialUntil": "تجربة مجانية حتى {{date}}"
+            "freeTrialUntil": "تجربة مجانية حتى {{date}}",
+            "activeUntil": "Pro نشط حتى {{date}}",
+            "activeIndividualAndGroup": "اشتراك Pro نشط؛ هذه المجموعة لديها أيضًا Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "اشتراكي",
+            "openDetails": "تفاصيل الاشتراك",
+            "screenIntro": "تُدار الخطة وتاريخ التجديد والفوترة من App Store أو Google Play. يُعرض Trip Pass لكل مجموعة أدناه.",
+            "disabled": "الاشتراكات غير متاحة في هذا الإصدار.",
+            "empty": "لا يوجد اشتراك نشط على هذا الحساب.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "ترويجي",
+            "storeStripe": "فوترة ويب",
+            "storeUnknown": "متجر التطبيقات",
+            "renewsOn": "يتجدد في {{date}}",
+            "expiresOn": "الوصول حتى {{date}}",
+            "expiredOn": "انتهى في {{date}}",
+            "autoRenewOn": "التجديد التلقائي مفعّل",
+            "autoRenewOff": "التجديد التلقائي متوقف",
+            "trialActive": "تجربة مجانية جارية",
+            "purchasedVia": "تم الشراء عبر {{store}}",
+            "billingIssueBody": "حدثت مشكلة في الدفع. حدّث طريقة الدفع للاحتفاظ بـ Pro.",
+            "fixPayment": "إصلاح الدفع",
+            "tripPassSection": "مجموعات Trip Pass",
+            "tripPassUntil": "Pro للمجموعة حتى {{date}}",
+            "renewalDisclosureShort": "تتجدد الاشتراكات تلقائيًا حتى الإلغاء من حساب المتجر قبل 24 ساعة على الأقل من التجديد. راجع الشروط والخصوصية.",
+            "status": {
+                "active": "نشط",
+                "cancelled_until_expiry": "ملغى — نشط حتى الانتهاء",
+                "billing_issue": "مشكلة فوترة",
+                "expired": "منتهٍ",
+                "none": "لا اشتراك"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro لهذه المجموعة",
+            "activeUntil": "Pro لجميع أعضاء المجموعة حتى {{date}}."
         },
         "trialReminder": {
             "title": "تجربة KupaPay Pro تنتهي قريبًا",

@@ -17,6 +17,9 @@
         "loadError": "Failed to load data",
         "networkError": "Network error. Please check your connection.",
         "offlineTitle": "You're offline",
+        "offlineBannerMessage": "No internet connection. Saved data is still available; changes will sync when you're back online.",
+        "screenErrorTitle": "Something went wrong",
+        "screenErrorMessage": "This screen hit an unexpected error. Try again or go back.",
         "retry": "Retry",
         "search": "Search",
         "submit": "Submit",
@@ -402,7 +405,9 @@
             "showLess": "Show less"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}}"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}}",
+            "otherCurrenciesHint": "({{count}} currencies)",
+            "otherCurrenciesHint_one": "({{count}} currency)"
         },
         "hero": {
             "spentTogether": "Spent together",
@@ -418,6 +423,8 @@
             "owedToYouCaption": "Owed to you",
             "moreCurrencies": "{{count}} currencies",
             "moreCurrencies_one": "{{count}} currency",
+            "moreCurrenciesNoun": "currencies",
+            "moreCurrenciesNoun_one": "currency",
             "updatedAgo": "Updated {{when}}",
             "balanceUnavailable": "Balance unavailable offline"
         },
@@ -688,6 +695,10 @@
                 "stopConfirmTitle": "Stop recurring expenses?",
                 "stopConfirmBody": "Past expenses stay in the group. No new repeats will be created.",
                 "stopped": "Recurring series stopped",
+                "editScopeTitle": "Update recurring expense?",
+                "editScopeBody": "Apply changes to future repeats or only this expense.",
+                "editScopeSeries": "Future repeats too",
+                "editScopeOccurrence": "This expense only",
                 "frequency": {
                     "weekly": "Weekly",
                     "monthly": "Monthly",
@@ -820,7 +831,7 @@
             "statusActive": "Active",
             "statusInactive": "Inactive",
             "metaLine": "{{days}} days · {{uses}} / {{max}} uses",
-            "unlimited": "∞",
+            "unlimited": "Unlimited",
             "deactivateCta": "Deactivate",
             "deactivateTitle": "Deactivate {{code}}?",
             "deactivateMessage": "Users won't be able to redeem this code after deactivation.",
@@ -917,6 +928,26 @@
             "byPlatform": "By platform",
             "last7Days": "Last 7 days",
             "noData": "No events in this period yet"
+        },
+        "growth": {
+            "portalRow": "MAU & north star",
+            "screenTitle": "Growth metrics",
+            "asOf": "Updated {{when}} (UTC)",
+            "northStarTitle": "North star",
+            "northStarDefinition": "Groups where at least two members each added an expense this calendar month.",
+            "northStarCurrent": "This month ({{month}})",
+            "northStarPrevious": "Previous month ({{month}})",
+            "activeAuthorsTitle": "Active expense authors",
+            "activeAuthorsNote": "Distinct users who created a non-deleted expense in the window. Use PostHog for MAU/WAU/DAU from app opens.",
+            "dau": "DAU",
+            "wau": "WAU",
+            "mau": "MAU (proxy)",
+            "mauEpicProgress": "{{percent}}% toward {{target}} MAU epic",
+            "seriesTitle": "North star — last 12 months",
+            "openPostHogDashboard": "Open PostHog MAU dashboard",
+            "postHogDashboardHint": "Set EXPO_PUBLIC_POSTHOG_PROJECT_ID (and optional MAU dashboard id) to link PostHog from here.",
+            "webOnlyNote": "PostHog breakdowns by platform and locale live in the linked dashboard.",
+            "analyticsUnavailableBody": "The growth metrics function is missing or not granted on this Supabase project. Apply the latest migrations to dev, then refresh."
         },
         "supportMessages": {
             "title": "Support Messages",
@@ -1386,6 +1417,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Split fairly, settle faster with Pro",
             "feature1": "No ads",
             "feature2": "Auto currency conversion for trips",
             "feature3": "Clean PDF report for every group",
@@ -1416,7 +1448,9 @@
             "trialFreePeriodHeading": "{{trialDays}}-day free trial",
             "trialFreePeriodBody": "Try every Pro feature free for {{trialDays}} days. Cancel in Settings before the trial ends if you don't want to continue.",
             "trialRenewalDisclosure": "After {{trialDays}} days, you'll be charged {{price}}/{{period}} unless you cancel in Settings.",
-            "havePromoCode": "Have a code?"
+            "havePromoCode": "Have a code?",
+            "alreadyProTitle": "You're on Pro",
+            "alreadyProBody": "Your subscription is active. Manage billing in the App Store or Google Play, or keep enjoying Pro features in the app."
         },
         "promoCode": {
             "sheetTitle": "Redeem code",
@@ -1438,7 +1472,45 @@
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Manage subscription",
-            "freeTrialUntil": "Free trial until {{date}}"
+            "freeTrialUntil": "Free trial until {{date}}",
+            "activeUntil": "Pro active until {{date}}",
+            "activeIndividualAndGroup": "Pro subscription active; this group also has Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "My subscription",
+            "openDetails": "Subscription details",
+            "screenIntro": "Plan, renewal date, and billing are managed in the App Store or Google Play. Trip Pass access is shown per group below.",
+            "disabled": "Subscriptions are not available in this build.",
+            "empty": "No active subscription on this account.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Promotional",
+            "storeStripe": "Web billing",
+            "storeUnknown": "Your app store",
+            "renewsOn": "Renews on {{date}}",
+            "expiresOn": "Access until {{date}}",
+            "expiredOn": "Expired on {{date}}",
+            "autoRenewOn": "Auto-renew is on",
+            "autoRenewOff": "Auto-renew is off",
+            "trialActive": "Free trial in progress",
+            "purchasedVia": "Purchased via {{store}}",
+            "billingIssueBody": "There was a problem with your payment. Update your payment method to keep Pro.",
+            "fixPayment": "Fix payment",
+            "tripPassSection": "Trip Pass groups",
+            "tripPassUntil": "Pro for this group until {{date}}",
+            "renewalDisclosureShort": "Subscriptions renew automatically until you cancel in your app store account at least 24 hours before renewal. See Terms and Privacy.",
+            "status": {
+                "active": "Active",
+                "cancelled_until_expiry": "Canceled — active until expiry",
+                "billing_issue": "Billing issue",
+                "expired": "Expired",
+                "none": "No subscription"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro for this group",
+            "activeUntil": "Everyone in this group has Pro until {{date}}."
         },
         "trialReminder": {
             "title": "KupaPay Pro trial ending soon",

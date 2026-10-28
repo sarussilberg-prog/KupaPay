@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next';
+import bundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs/config';
+import { sentryReleaseMetadata } from '@cost-share/shared';
 import { CONTENT_SECURITY_POLICY } from '../../packages/shared/src/security/contentSecurityPolicy';
 import versionJson from '../../packages/shared/version.json';
 
@@ -45,6 +48,10 @@ const securityHeaders = [
   },
 ];
 
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig: NextConfig = {
   transpilePackages: ['@cost-share/shared'],
   // Marketing pages: allow CDN/browser caching between deploys (free-tier friendly).
@@ -90,4 +97,31 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN?.trim();
+const uploadSourceMaps = Boolean(sentryAuthToken);
+const { release, dist } = sentryReleaseMetadata({
+  slug: 'kupapay-web',
+  version: appVersion,
+  buildNumber: vercelSha || null,
+});
+
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
+  org: process.env.SENTRY_ORG?.trim() || 'kupay-hb',
+  project: process.env.SENTRY_PROJECT?.trim() || 'kupapay-web',
+  authToken: sentryAuthToken,
+  silent: !uploadSourceMaps,
+  sourcemaps: {
+    disable: !uploadSourceMaps,
+  },
+  release: uploadSourceMaps
+    ? {
+        name: release,
+        dist,
+        create: true,
+        finalize: true,
+      }
+    : {
+        create: false,
+        finalize: false,
+      },
+});

@@ -11,7 +11,8 @@ export function parsePendingInvitePayload(raw: string | null): PendingInvite | n
         if (
             (parsed.kind === 'friend' ||
                 parsed.kind === 'group' ||
-                parsed.kind === 'expenseShare') &&
+                parsed.kind === 'expenseShare' ||
+                parsed.kind === 'settleReminder') &&
             typeof parsed.token === 'string' &&
             isValidInviteToken(parsed.token)
         ) {

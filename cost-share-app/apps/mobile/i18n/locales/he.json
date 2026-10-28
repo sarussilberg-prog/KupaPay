@@ -17,6 +17,9 @@
         "loadError": "טעינת הנתונים נכשלה",
         "networkError": "שגיאת רשת. אנא בדקו את החיבור שלכם.",
         "offlineTitle": "אין חיבור לאינטרנט",
+        "offlineBannerMessage": "אין חיבור לאינטרנט. הנתונים השמורים עדיין זמינים; השינויים יסונכרנו כשהחיבור יחזור.",
+        "screenErrorTitle": "משהו השתבש",
+        "screenErrorMessage": "מסך זה נתקל בשגיאה בלתי צפויה. נסו שוב או חזרו אחורה.",
         "retry": "נסה שוב",
         "search": "חיפוש",
         "submit": "שלח",
@@ -402,7 +405,9 @@
             "showLess": "הצג פחות"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} במטבעות נוספים"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} במטבעות נוספים",
+            "otherCurrenciesHint": "({{count}} מטבעות)",
+            "otherCurrenciesHint_one": "({{count}} מטבע)"
         },
         "hero": {
             "spentTogether": "הוציאו ביחד",
@@ -418,6 +423,8 @@
             "owedToYouCaption": "מגיע לך",
             "moreCurrencies": "{{count}} מטבעות",
             "moreCurrencies_one": "{{count}} מטבע",
+            "moreCurrenciesNoun": "מטבעות",
+            "moreCurrenciesNoun_one": "מטבע",
             "updatedAgo": "עודכן {{when}}",
             "balanceUnavailable": "היתרה אינה זמינה במצב לא מקוון"
         },
@@ -690,6 +697,10 @@
                 "stopConfirmTitle": "להפסיק הוצאה קבועה?",
                 "stopConfirmBody": "הוצאות שכבר נוצרו נשארות. לא ייווצרו הוצאות חדשות.",
                 "stopped": "סדרת ההוצאות הקבועה הופסקה",
+                "editScopeTitle": "לעדכן הוצאה קבועה?",
+                "editScopeBody": "להחיל את השינויים גם על חזרות עתידיות או רק על ההוצאה הזו.",
+                "editScopeSeries": "גם חזרות עתידיות",
+                "editScopeOccurrence": "רק ההוצאה הזו",
                 "frequency": {
                     "weekly": "שבועי",
                     "monthly": "חודשי",
@@ -822,7 +833,7 @@
             "statusActive": "פעיל",
             "statusInactive": "לא פעיל",
             "metaLine": "{{days}} ימים · {{uses}} / {{max}} שימושים",
-            "unlimited": "∞",
+            "unlimited": "ללא הגבלה",
             "deactivateCta": "השבתה",
             "deactivateTitle": "להשבית את {{code}}?",
             "deactivateMessage": "לאחר ההשבתה לא ניתן יהיה לממש את הקוד.",
@@ -919,6 +930,26 @@
             "byPlatform": "לפי פלטפורמה",
             "last7Days": "7 ימים אחרונים",
             "noData": "אין אירועים בתקופה זו עדיין"
+        },
+        "growth": {
+            "portalRow": "MAU ומדד צפון",
+            "screenTitle": "מדדי צמיחה",
+            "asOf": "עודכן {{when}} (UTC)",
+            "northStarTitle": "מדד צפון",
+            "northStarDefinition": "קבוצות שבהן לפחות שני חברים הוסיפו הוצאה בחודש הקלנדרי הנוכחי.",
+            "northStarCurrent": "החודש הנוכחי ({{month}})",
+            "northStarPrevious": "החודש הקודם ({{month}})",
+            "activeAuthorsTitle": "יוצרי הוצאות פעילים",
+            "activeAuthorsNote": "משתמשים ייחודיים שיצרו הוצאה שלא נמחקה בחלון הזמן. ל-MAU/WAU/DAU מפתיחות אפליקציה השתמשו ב-PostHog.",
+            "dau": "פעילים יומיים",
+            "wau": "פעילים שבועיים",
+            "mau": "פעילים חודשיים (פרוקסי)",
+            "mauEpicProgress": "{{percent}}% ליעד {{target}} MAU",
+            "seriesTitle": "מדד צפון — 12 חודשים אחרונים",
+            "openPostHogDashboard": "פתח לוח MAU ב-PostHog",
+            "postHogDashboardHint": "הגדר EXPO_PUBLIC_POSTHOG_PROJECT_ID (ואופציונלית מזהה לוח MAU) לקישור ל-PostHog מכאן.",
+            "webOnlyNote": "פילוח לפי פלטפורמה ושפה נמצא בלוח PostHog המקושר.",
+            "analyticsUnavailableBody": "פונקציית מדדי הצמיחה חסרה או ללא הרשאה בפרויקט Supabase. יישמו את המיגרציות האחרונות ב-dev ורעננו."
         },
         "supportMessages": {
             "title": "הודעות תמיכה",
@@ -1388,6 +1419,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "הקופה, בלי הגבלות",
+            "titleValueFocus": "לחלק הוגן, לסגור חובות מהר יותר עם Pro",
             "feature1": "בלי פרסומות",
             "feature2": "המרת מטבע אוטומטית לטיול",
             "feature3": "דוח PDF מסודר לכל קבוצה",
@@ -1418,7 +1450,9 @@
             "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",
             "trialFreePeriodBody": "כל יכולות Pro בחינם ל-{{trialDays}} ימים. ניתן לבטל בהגדרות לפני סיום הניסיון אם לא רוצים להמשיך.",
             "trialRenewalDisclosure": "אחרי {{trialDays}} ימים יחויב {{price}} ל{{period}} אלא אם תבטלו בהגדרות.",
-            "havePromoCode": "יש לכם קוד?"
+            "havePromoCode": "יש לכם קוד?",
+            "alreadyProTitle": "אתם ב-Pro",
+            "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
         },
         "promoCode": {
             "sheetTitle": "מימוש קוד",
@@ -1440,7 +1474,45 @@
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "ניהול מנוי",
-            "freeTrialUntil": "ניסיון חינם עד {{date}}"
+            "freeTrialUntil": "ניסיון חינם עד {{date}}",
+            "activeUntil": "Pro פעיל עד {{date}}",
+            "activeIndividualAndGroup": "מנוי Pro פעיל; לקבוצה זו יש גם Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "המנוי שלי",
+            "openDetails": "פרטי מנוי",
+            "screenIntro": "תוכנית, תאריך חידוש וחיוב מנוהלים ב-App Store או Google Play. גישת Trip Pass מוצגת לפי קבוצה.",
+            "disabled": "מנויים אינם זמינים בגרסה זו.",
+            "empty": "אין מנוי פעיל בחשבון זה.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "קידום",
+            "storeStripe": "חיוב באינטרנט",
+            "storeUnknown": "חנות האפליקציות",
+            "renewsOn": "מתחדש ב-{{date}}",
+            "expiresOn": "גישה עד {{date}}",
+            "expiredOn": "פג תוקף ב-{{date}}",
+            "autoRenewOn": "חידוש אוטומטי פעיל",
+            "autoRenewOff": "חידוש אוטומטי כבוי",
+            "trialActive": "ניסיון חינם פעיל",
+            "purchasedVia": "נרכש דרך {{store}}",
+            "billingIssueBody": "יש בעיה בתשלום. עדכנו אמצעי תשלום כדי להמשיך ב-Pro.",
+            "fixPayment": "תיקון תשלום",
+            "tripPassSection": "קבוצות Trip Pass",
+            "tripPassUntil": "Pro לקבוצה עד {{date}}",
+            "renewalDisclosureShort": "מנויים מתחדשים אוטומטית עד לביטול בחשבון החנות לפחות 24 שעות לפני החידוש. ראו תנאים ופרטיות.",
+            "status": {
+                "active": "פעיל",
+                "cancelled_until_expiry": "בוטל — פעיל עד תום התקופה",
+                "billing_issue": "בעיית חיוב",
+                "expired": "פג תוקף",
+                "none": "אין מנוי"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro לקבוצה זו",
+            "activeUntil": "Pro לכל חברי הקבוצה עד {{date}}."
         },
         "trialReminder": {
             "title": "ניסיון KupaPay Pro מסתיים בקרוב",

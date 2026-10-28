@@ -3,6 +3,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MemberAvatar } from '../MemberAvatar';
+import { ProBadge } from '../pro/ProBadge';
 import { AppIcon } from '../AppIcon';
 import { colors, shadows } from '../../theme';
 import { useRtlLayout, rtlRowStyle } from '../../hooks/useRtlLayout';
@@ -12,9 +13,16 @@ interface Props {
     avatarUrl?: string;
     onSharePress: () => void;
     onEditPress: () => void;
+    showProBadge?: boolean;
 }
 
-export function ProfileHeaderRow({ name, avatarUrl, onSharePress, onEditPress }: Props) {
+export function ProfileHeaderRow({
+    name,
+    avatarUrl,
+    onSharePress,
+    onEditPress,
+    showProBadge = false,
+}: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
 
@@ -32,6 +40,11 @@ export function ProfileHeaderRow({ name, avatarUrl, onSharePress, onEditPress }:
                     >
                         {name}
                     </Text>
+                    {showProBadge ? (
+                        <View className="mt-1 self-start">
+                            <ProBadge compact testID="profile-pro-badge" />
+                        </View>
+                    ) : null}
                 </View>
                 <View style={rtlRowStyle(isRtl)} className="items-center gap-2">
                     <TouchableOpacity

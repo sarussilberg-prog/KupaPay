@@ -21,12 +21,43 @@ import {
     type Language,
     isLanguage,
 } from '@cost-share/shared';
-import { mobileI18nResources, type MobileI18nLocaleCode } from './localeConfig';
+import {
+    loadMobileLocaleTranslation,
+    mobileI18nResources,
+    type MobileI18nLocaleCode,
+} from './localeConfig';
 import { useAppStore } from '../store';
 
 type SupportedLanguage = Language;
 
 const resources = mobileI18nResources;
+
+const loadedLocaleBundles = new Set<SupportedLanguage>(['en']);
+
+async function ensureMobileLocaleBundle(language: SupportedLanguage): Promise<void> {
+    if (loadedLocaleBundles.has(language)) {
+        return;
+    }
+    const translation = await loadMobileLocaleTranslation(language);
+    if (i18n.isInitialized) {
+        i18n.addResourceBundle(language, 'translation', translation, true, true);
+    }
+    loadedLocaleBundles.add(language);
+}
+
+async function resourcesForStartupLanguage(
+    language: SupportedLanguage,
+): Promise<Record<string, { translation: object }>> {
+    if (language === DEFAULT_LANGUAGE) {
+        return { ...mobileI18nResources };
+    }
+    const translation = await loadMobileLocaleTranslation(language);
+    loadedLocaleBundles.add(language);
+    return {
+        ...mobileI18nResources,
+        [language]: { translation },
+    };
+}
 
 // Java's `Locale.getLanguage()` returns deprecated ISO 639-1 codes for backwards
 // compatibility — Hebrew is "iw" (not "he"), Indonesian is "in" (not "id"), Yiddish
@@ -86,15 +117,20 @@ let initPromise: Promise<void> | null = null;
 async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
     if (!i18n.isInitialized) {
         if (!initPromise) {
-            initPromise = i18n.use(initReactI18next).init({
-                ...i18nInitOptions,
-                lng: language,
-            }).then(() => undefined);
+            initPromise = (async () => {
+                const resources = await resourcesForStartupLanguage(language);
+                await i18n.use(initReactI18next).init({
+                    ...i18nInitOptions,
+                    resources,
+                    lng: language,
+                });
+            })();
         }
         await initPromise;
         return;
     }
 
+    await ensureMobileLocaleBundle(language);
     if (i18n.language !== language) {
         await i18n.changeLanguage(language);
     }
@@ -116,21 +152,17 @@ async function syncNativeRtl(language: SupportedLanguage): Promise<void> {
 
     const applied = await AsyncStorage.getItem(RTL_NATIVE_APPLIED_KEY);
     if (applied === language) {
-        // forceRTL + reload already ran for this language but native isRTL can stay
-        // wrong on Android dev builds — RtlLayoutProvider still mirrors from store.
-        if (__DEV__) {
-            console.warn(
-                '[i18n] Native I18nManager.isRTL still mismatched after reload; using logical RTL.',
-            );
-        }
-        return;
+        // Stale @rtl_native_applied: reload ran but native isRTL can stay wrong (Android dev).
+        // Clear the flag and retry forceRTL + reload so Settings toggle can recover without restart.
+        await AsyncStorage.removeItem(RTL_NATIVE_APPLIED_KEY);
     }
 
     I18nManager.forceRTL(desiredRTL);
     await AsyncStorage.setItem(RTL_NATIVE_APPLIED_KEY, language);
     if (__DEV__) {
         // Updates.reloadAsync() in a dev client can leave the splash stuck.
-        DevSettings.reload();
+        // DevSettings is undefined on web (Expo web dev) — logical RTL still applies via RtlLayoutProvider.
+        DevSettings?.reload?.();
     } else {
         await Updates.reloadAsync();
     }

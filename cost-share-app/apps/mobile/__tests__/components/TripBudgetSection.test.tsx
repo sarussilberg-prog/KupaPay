@@ -6,6 +6,10 @@ jest.mock('../../services/tripBudget.service', () => ({
     fetchGroupTripBudget: jest.fn().mockResolvedValue({ amount: 100, currency: 'USD' }),
 }));
 
+jest.mock('../../services/proTrialFeatureTouch.service', () => ({
+    touchProTrialFeature: jest.fn(),
+}));
+
 describe('TripBudgetSection', () => {
     it('shows locked upsell when Pro perk is locked', () => {
         const { getByText } = renderWithQuery(

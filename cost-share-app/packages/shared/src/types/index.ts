@@ -290,6 +290,7 @@ export type ActivityEventKind =
     | 'group_note_changed'
     | 'settle_up_reminder'
     | 'unsettled_balance_nudge'
+    | 'pro_trial_lifecycle_nudge'
     | 'trip_budget_alert';
 
 /**
@@ -826,4 +827,5 @@ export type Profile = User;
 export type PendingInvite =
     | { kind: 'friend'; token: string }
     | { kind: 'group'; token: string }
-    | { kind: 'expenseShare'; token: string };
+    | { kind: 'expenseShare'; token: string }
+    | { kind: 'settleReminder'; token: string };

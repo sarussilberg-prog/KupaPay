@@ -11,6 +11,7 @@ import { CombinedPayerSplitButton } from '../components/expenseV2/CombinedPayerS
 import { CurrencyPill } from '../components/expenseV2/CurrencyPill';
 import { CAPTURE_USER_ID, captureGroups, captureSimplifiedInputs } from './ascCaptureSeed';
 import type { AscCaptureScreen } from '../lib/ascCaptureParams';
+import { SettingsScreen } from '../screens/profile/SettingsScreen';
 
 export function AscCaptureGroupsScreen() {
     const simplified = useMemo(
@@ -176,6 +177,14 @@ export function AscCaptureProPaywallScreen() {
     );
 }
 
+export function AscCaptureSettingsProScreen() {
+    return (
+        <View style={styles.flex} testID="asc-demo-screen-settings-pro">
+            <SettingsScreen />
+        </View>
+    );
+}
+
 export function renderAscCaptureScreen(screen: AscCaptureScreen) {
     switch (screen) {
         case 'groups':
@@ -190,6 +199,8 @@ export function renderAscCaptureScreen(screen: AscCaptureScreen) {
             return <AscCaptureProCurrencyScreen />;
         case 'pro-paywall':
             return <AscCaptureProPaywallScreen />;
+        case 'settings-pro':
+            return <AscCaptureSettingsProScreen />;
         default:
             return <AscCaptureGroupsScreen />;
     }

@@ -9,6 +9,7 @@ describe('SENTRY_TAGS', () => {
             REALTIME_ECHO: 'realtime.echo',
             SWEEP_ZOMBIE: 'sweep.zombie',
             NETWORK_TRANSITION: 'network.transition',
+            SCREEN_ERROR: 'screen.error_boundary',
         });
     });
 });

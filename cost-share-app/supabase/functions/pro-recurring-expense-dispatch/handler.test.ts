@@ -18,3 +18,19 @@ Deno.test('dispatchRecurringExpenses reports lock skip', async () => {
     });
     assertEquals(result.skipped, true);
 });
+
+Deno.test('dispatchRecurringExpenses drains until batch under limit', async () => {
+    let calls = 0;
+    const result = await dispatchRecurringExpenses(
+        {
+            async generateDue() {
+                calls += 1;
+                return { created: calls < 3 ? 200 : 50 };
+            },
+        },
+        200,
+        5,
+    );
+    assertEquals(result, { ok: true, created: 450, skipped: false });
+    assertEquals(calls, 3);
+});

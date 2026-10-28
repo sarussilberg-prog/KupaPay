@@ -30,6 +30,10 @@ export async function waitForPurchasesReady(): Promise<boolean> {
     return false;
 }
 
+export async function fetchPurchasesCustomerInfo(): Promise<null> {
+    return null;
+}
+
 export async function logOutPurchases(): Promise<void> {}
 
 function capturePackages(): PaywallPackages {
@@ -75,9 +79,44 @@ export async function fetchProSubscriptionUiState(): Promise<{
     isInFreeTrial: boolean;
     trialEndsAt: string | null;
     manageSubscriptionsAvailable: boolean;
+    trialLifecycleSent?: number[];
+    trialFeatureUsage?: Record<string, boolean>;
 }> {
-    return { isInFreeTrial: false, trialEndsAt: null, manageSubscriptionsAvailable: false };
+    if (!KUPAPAY_PRO_ENABLED) {
+        return { isInFreeTrial: false, trialEndsAt: null, manageSubscriptionsAvailable: false };
+    }
+    const { supabase } = await import('../lib/supabase');
+    const { getCurrentUserId } = await import('../lib/auth');
+    const userId = await getCurrentUserId();
+    if (!userId) {
+        return { isInFreeTrial: false, trialEndsAt: null, manageSubscriptionsAvailable: false };
+    }
+    const { data: profileRow } = await supabase
+        .from('profiles')
+        .select('pro_trial_ends_at, pro_trial_lifecycle_sent, pro_trial_feature_usage')
+        .eq('id', userId)
+        .maybeSingle();
+    const trialEndsAt = profileRow?.pro_trial_ends_at ?? null;
+    const inTrial = trialEndsAt != null && Date.parse(trialEndsAt) > Date.now();
+    let trialLifecycleSent: number[] = [];
+    const sentRaw = profileRow?.pro_trial_lifecycle_sent;
+    if (Array.isArray(sentRaw)) {
+        trialLifecycleSent = sentRaw.map(v => Number(v)).filter(n => Number.isFinite(n));
+    }
+    let trialFeatureUsage: Record<string, boolean> = {};
+    if (profileRow?.pro_trial_feature_usage && typeof profileRow.pro_trial_feature_usage === 'object') {
+        trialFeatureUsage = profileRow.pro_trial_feature_usage as Record<string, boolean>;
+    }
+    return {
+        isInFreeTrial: inTrial,
+        trialEndsAt: inTrial ? trialEndsAt : null,
+        manageSubscriptionsAvailable: false,
+        trialLifecycleSent,
+        trialFeatureUsage,
+    };
 }
+
+export async function syncProTrialNudgeToRevenueCat(_touchDay: number, _event: 'shown' | 'dismissed'): Promise<void> {}
 
 export async function purchasePackage(
     _pkg: PurchasesPackageLike,

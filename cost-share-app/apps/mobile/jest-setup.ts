@@ -241,5 +241,16 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
     },
 }));
 
+jest.mock('./i18n/localeLoader', () => {
+    const actual = jest.requireActual<typeof import('./i18n/localeLoader')>('./i18n/localeLoader');
+    const { mobileI18nResourcesAllLocales } =
+        jest.requireActual<typeof import('./i18n/testLocaleResources')>('./i18n/testLocaleResources');
+    return {
+        ...actual,
+        loadMobileLocaleTranslation: async (language: keyof typeof mobileI18nResourcesAllLocales) =>
+            mobileI18nResourcesAllLocales[language].translation,
+    };
+});
+
 // Silence the React Native logging during tests.
 jest.spyOn(console, 'warn').mockImplementation(() => { });

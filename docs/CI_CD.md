@@ -42,7 +42,7 @@ PRs targeting **`main`** always run the **full** suite (no path skipping).
 
 Job **`CI gate`** is the single pass/fail summary for branch protection.
 
-Auto-merge to `dev` runs when **CI gate** and **Supabase migration guard** succeed and SonarCloud is green. If the PR is behind **`origin/dev`**, CI calls **`gh pr update-branch`** (merge commit) and re-runs checks instead of failing silently at merge time. The **Auto-merge** job enables **GitHub native squash auto-merge** (`gh pr merge --auto`); dev prerelease bumps run on **`push` to `dev`** via [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) with `[skip ci]`.
+Auto-merge to `dev` runs when **CI gate** and **Supabase migration guard** succeed and SonarCloud is green. If the PR is behind **`origin/dev`**, CI calls **`gh pr update-branch`** (merge commit) and re-runs checks instead of failing silently at merge time. If update-branch hits a transient GraphQL head-ref flake through all retries, auto-merge **defers** (CI stays green; the next run retries). The **Auto-merge** job enables **GitHub native squash auto-merge** (`gh pr merge --auto`). When GitHub completes that merge as **`github-actions[bot]`**, standalone `on: push` workflows on [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) do not run (that workflow is **`workflow_dispatch` only**). Instead, the **Auto-merge** job waits for the merge to finish, then runs **`bump-dev-prerelease.mjs`** in the same job (commits with **`[skip ci]`**, pushes with **`ADMIN_PAT`**). Standalone [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) is **`workflow_dispatch` only** (see [CI_ADMIN_PAT.md](SSOT/CI_ADMIN_PAT.md)).
 
 ### Branch protection proposal (GitHub UI — not applied by CI)
 
@@ -109,6 +109,18 @@ Path-filtered matrix ([#140](https://github.com/sarussilberg-prog/KupaPay/issues
 
 Flaky SQL tests: quarantine manifest ([#138](https://github.com/sarussilberg-prog/KupaPay/issues/138)) — each `*.test.sql` runs or is quarantined with a tracking issue.
 
+### Jest (mobile) + Playwright flaky handling ([#510](https://github.com/sarussilberg-prog/KupaPay/issues/510))
+
+**Mobile unit tests (blocking CI gate):** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) job **Mobile tests** runs [`ci-jest-run-tests.sh`](../cost-share-app/scripts/ci-jest-run-tests.sh):
+
+1. All Jest files **except** those in [`apps/mobile/__tests__/ci-quarantine.json`](../cost-share-app/apps/mobile/__tests__/ci-quarantine.json).
+2. On failure, **one** `--onlyFailures` retry; tests that pass only on retry are reported as **flaky** (`::warning` + job summary + `jest-flaky-report` artifact).
+3. Quarantined files run afterward **non-blocking** (failures are warnings; CI gate still passes).
+
+Add a quarantine entry with `issue` + `reason` (path relative to `apps/mobile/`, e.g. `__tests__/foo.test.ts`). Optional `@quarantine` in a test title is for humans only — CI reads the manifest. **Coverage ratchet** skips quarantined paths and caps manifest size via [`ci-coverage-baseline.json`](../cost-share-app/scripts/ci-coverage-baseline.json) (`mobile_jest_tests.max_quarantined`).
+
+**Playwright (on-demand / scheduled, not CI gate):** [`playwright.config.ts`](../cost-share-app/playwright.config.ts) sets `retries: 1` in CI and writes `playwright-report/results.json`. E2E workflows call [`ci-playwright-flaky-summary.sh`](../cost-share-app/scripts/ci-playwright-flaky-summary.sh) to list tests that passed on retry in the job summary.
+
 ### Performance / budgets
 
 [`.github/workflows/ci-performance.yml`](../.github/workflows/ci-performance.yml) — path-filtered when mobile/web change.
@@ -135,6 +147,8 @@ Squash merge via `gh pr merge --auto` after checks + SonarCloud, then dev prerel
 |-----------|----------|----------|
 | Supabase | [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | Migrations → development DB + smoke |
 | Web | Vercel | [`vercel-should-build.sh`](../cost-share-app/apps/web/scripts/vercel-should-build.sh) — path-based skip; dev vs prod by project ID |
+
+**Vercel dashboard + project roots:** See [SSOT/VERCEL.md](SSOT/VERCEL.md).
 
 **Vercel ignored build step (SSOT):** Do not maintain branch/path skip logic in the Vercel dashboard. Set **Ignored Build Step** to the same command as [`apps/web/vercel.json`](../cost-share-app/apps/web/vercel.json) `ignoreCommand` (project root = `cost-share-app/apps/web`):
 

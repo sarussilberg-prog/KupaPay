@@ -13,3 +13,30 @@ export function parseRpcResult(data: unknown): RpcResult | null {
     }
     return null;
 }
+
+/** Expense RPCs return `{ ok: true, expense: row }` or `{ ok: false, error_code }`. */
+export function unwrapExpenseRpcRow(data: unknown): Record<string, unknown> | null {
+    if (!data || typeof data !== 'object') return null;
+    const row = data as Record<string, unknown>;
+    if (row.ok === true && row.expense && typeof row.expense === 'object') {
+        return row.expense as Record<string, unknown>;
+    }
+    return null;
+}
+
+export class RpcStructuredError extends Error {
+    readonly errorCode: string;
+
+    constructor(errorCode: string) {
+        super(errorCode);
+        this.name = 'RpcStructuredError';
+        this.errorCode = errorCode;
+    }
+}
+
+export function assertRpcSuccess(data: unknown): void {
+    const parsed = parseRpcResult(data);
+    if (parsed && !parsed.ok) {
+        throw new RpcStructuredError(parsed.error_code);
+    }
+}

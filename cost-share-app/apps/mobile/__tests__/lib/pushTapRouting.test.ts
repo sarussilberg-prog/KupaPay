@@ -32,6 +32,8 @@ describe('notificationDataToPendingNavigation', () => {
             .toEqual({ target: 'settleUpList', groupId: 'g7' });
     });
     it('routes pro trial reminder to subscription management', () => {
+        expect(notificationDataToPendingNavigation({ kind: 'pro_trial_lifecycle_nudge' }))
+            .toEqual({ target: 'manageSubscription' });
         expect(notificationDataToPendingNavigation({ kind: 'pro_trial_reminder' }))
             .toEqual({ target: 'manageSubscription' });
     });

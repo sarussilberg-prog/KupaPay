@@ -23,7 +23,7 @@ import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 import { platformAlert } from '../../lib/platformAlert';
-import { ProUpgradeButton } from '../ProUpgradeButton';
+import { ProUpsellButton } from '../pro/ProUpsellButton';
 
 const APP_LOGO = require('../../assets/logo.png');
 
@@ -32,11 +32,12 @@ const COUNTDOWN_SECONDS = 5;
 type ProPromoInterstitialProps = Readonly<{
     visible: boolean;
     onDismiss: () => void;
+    groupId?: string;
     /** When set, CTA opens the Pro paywall instead of the legacy “coming soon” alert. */
     onUpgrade?: () => void;
 }>;
 
-export function ProPromoInterstitial({ visible, onDismiss, onUpgrade }: ProPromoInterstitialProps) {
+export function ProPromoInterstitial({ visible, onDismiss, onUpgrade, groupId }: ProPromoInterstitialProps) {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
@@ -157,7 +158,8 @@ export function ProPromoInterstitial({ visible, onDismiss, onUpgrade }: ProPromo
 
                     {/* CTA — only visible once user can dismiss anyway */}
                     {canDismiss && (
-                        <ProUpgradeButton
+                        <ProUpsellButton
+                            groupId={groupId}
                             title={t('monetization.proPromo.cta')}
                             onPress={() => {
                                 if (onUpgrade) {
@@ -254,7 +256,7 @@ const styles = StyleSheet.create({
     proBadge: {
         position: 'absolute',
         bottom: -8,
-        right: -10,
+        end: -10,
         backgroundColor: BRAND_BLUE,
         borderRadius: 6,
         paddingHorizontal: 8,

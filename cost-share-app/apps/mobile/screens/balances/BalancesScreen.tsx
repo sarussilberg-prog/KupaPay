@@ -16,7 +16,9 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 import {
     CurrencyAmount,
     DebtSummary,
@@ -82,9 +84,9 @@ function sumPaidByCurrency(
 
 export function BalancesScreen() {
     const { t } = useTranslation();
-    const route = useRoute<any>();
     const navigation = useNavigation<any>();
-    const { groupId } = route.params;
+    const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
+    const groupId = required?.groupId ?? '';
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
     const groupsQuery = useGroupsQuery();
     const group = groupsQuery.data?.find(g => g.id === groupId);
@@ -335,6 +337,10 @@ export function BalancesScreen() {
         return exists ? pairwiseDebts : [seed, ...pairwiseDebts];
     }, [pairwiseDebts, settleTarget]);
 
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
+
     if (
         (isLoadingContributions && !contributions) ||
         (isLoadingDebts && !simplifiedByCurrency)
@@ -364,6 +370,7 @@ export function BalancesScreen() {
 
                 {KUPAPAY_PRO_ENABLED || tripCurrencyUnlocked ? (
                     <GroupTripCurrencySection
+                        groupId={groupId}
                         defaultCurrency={defaultCurrency}
                         debts={pairwiseDebts}
                         memberNames={nameById}

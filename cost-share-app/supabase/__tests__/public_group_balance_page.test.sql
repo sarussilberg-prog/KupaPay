@@ -13,6 +13,7 @@ DECLARE
     v_payload JSON;
     v_text TEXT;
     v_exp UUID;
+    v_redeem JSON;
 BEGIN
     INSERT INTO auth.users (id) VALUES (v_alice), (v_bob);
     INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, invite_token)
@@ -84,14 +85,11 @@ BEGIN
     END IF;
 
     PERFORM set_config('request.jwt.claim.sub', v_bob::text, true);
-    BEGIN
-        PERFORM public.redeem_group_invite(v_balance);
-        RAISE EXCEPTION 'Case 7 failed: balance token must not join a group';
-    EXCEPTION WHEN OTHERS THEN
-        IF SQLERRM NOT LIKE '%invite_not_found%' THEN
-            RAISE;
-        END IF;
-    END;
+    v_redeem := public.redeem_group_invite(v_balance);
+    IF (v_redeem->>'ok')::boolean IS NOT FALSE
+        OR v_redeem->>'error_code' IS DISTINCT FROM 'invite_not_found' THEN
+        RAISE EXCEPTION 'Case 7 failed: balance token must not join a group, got %', v_redeem;
+    END IF;
 
     v_payload := public.get_public_group_balance_page('short');
     IF (v_payload->>'ok')::BOOLEAN IS DISTINCT FROM FALSE THEN

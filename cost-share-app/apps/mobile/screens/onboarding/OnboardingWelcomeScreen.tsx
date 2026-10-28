@@ -140,13 +140,13 @@ const styles = StyleSheet.create({
     heroWrap: {
         position: 'absolute',
         top: 0,
-        left: 0,
-        right: 0,
+        start: 0,
+        end: 0,
     },
     bottom: {
         position: 'absolute',
-        left: 0,
-        right: 0,
+        start: 0,
+        end: 0,
         bottom: 0,
         paddingHorizontal: 28,
         paddingTop: 28,

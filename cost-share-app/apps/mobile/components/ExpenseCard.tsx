@@ -9,6 +9,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Expense } from '@cost-share/shared';
+import { formatAppDate } from '../lib/formatAppDate';
 
 interface ExpenseCardProps {
     expense: Expense;
@@ -27,10 +28,10 @@ const categoryEmoji: Record<string, string> = {
     other: '📦',
 };
 
-export function ExpenseCard({ expense, payerName, onPress }: ExpenseCardProps) {
-    const { t } = useTranslation();
+function ExpenseCardBase({ expense, payerName, onPress }: ExpenseCardProps) {
+    const { t, i18n } = useTranslation();
 
-    const formattedDate = new Date(expense.expenseDate).toLocaleDateString();
+    const formattedDate = formatAppDate(expense.expenseDate, i18n.language);
     const emoji = categoryEmoji[expense.category || 'other'] || '📦';
 
     return (
@@ -66,3 +67,5 @@ export function ExpenseCard({ expense, payerName, onPress }: ExpenseCardProps) {
         </TouchableOpacity>
     );
 }
+
+export const ExpenseCard = React.memo(ExpenseCardBase);

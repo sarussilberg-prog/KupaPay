@@ -4,6 +4,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=scripts/ci-jest-quarantine-lib.sh
+source "$ROOT/scripts/ci-jest-quarantine-lib.sh"
 
 BASELINE="${CI_COVERAGE_BASELINE:-scripts/ci-coverage-baseline.json}"
 SUMMARY="${CI_COVERAGE_SUMMARY:-apps/mobile/coverage/coverage-summary.json}"
@@ -14,12 +16,28 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
+JEST_IGNORE=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && JEST_IGNORE+=("$line")
+done < <(ci_jest_quarantine_ignore_args)
+
+quarantined_jest="$(ci_jest_quarantine_count)"
+max_jq="$(jq -r '.metrics.mobile_jest_tests.max_quarantined // empty' "$BASELINE")"
+if [[ -n "$max_jq" && "$quarantined_jest" -gt "$max_jq" ]]; then
+  echo "::error::Jest quarantine: ${quarantined_jest} > max ${max_jq} (see apps/mobile/__tests__/ci-quarantine.json)" >&2
+  exit 1
+fi
+if [[ -n "$max_jq" ]]; then
+  echo "✅ jest quarantine: ${quarantined_jest} (max ${max_jq})"
+fi
+
 echo "▶ Jest (mobile workspace) with coverage"
 npm test --workspace=@cost-share/mobile -- \
   --coverage \
   --coverageReporters=json-summary \
   --passWithNoTests \
-  --ci
+  --ci \
+  "${JEST_IGNORE[@]}"
 
 if [[ ! -f "$SUMMARY" ]]; then
   echo "::error::Missing $SUMMARY after Jest run" >&2

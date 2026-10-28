@@ -17,7 +17,7 @@
 
 ## Dev branch automation
 
-Each squash-merge to `dev` (via `ci.yml` auto-merge) runs `cost-share-app/scripts/bump-dev-prerelease.mjs`:
+Each squash-merge to `dev` is followed by the **Auto-merge** job in [`ci.yml`](../../.github/workflows/ci.yml) (wait for merge, then `cost-share-app/scripts/bump-dev-prerelease.mjs`; [`bump-dev-prerelease.yml`](../../.github/workflows/bump-dev-prerelease.yml) is manual recovery only):
 
 1. Increments `-dev.N` in `version.json`.
 2. Appends the merged PR title to root `CHANGELOG.md`.

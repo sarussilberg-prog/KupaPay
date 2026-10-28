@@ -48,4 +48,16 @@ describe('redeemKupaPayPromoCode', () => {
         const result = await redeemKupaPayPromoCode('SUMMER');
         expect(result).toEqual({ ok: false, code: 'promo_already_redeemed' });
     });
+
+    it.each([
+        ['promo_inactive', 'promo_inactive'],
+        ['promo_expired', 'promo_expired'],
+        ['promo_max_uses', 'promo_max_uses'],
+        ['promo_rate_limit_exceeded', 'promo_rate_limit_exceeded'],
+        ['not_authenticated', 'not_authenticated'],
+    ] as const)('maps %s RPC errors to %s', async (message, code) => {
+        mockRpc.mockResolvedValue({ data: null, error: { message } });
+        const result = await redeemKupaPayPromoCode('SUMMER');
+        expect(result).toEqual({ ok: false, code });
+    });
 });

@@ -1,4 +1,4 @@
-import type { GroupBalance, GroupBalanceOther } from '../types';
+import type { GroupBalance, GroupBalanceOther, GroupRollup } from '../types';
 import { convertToBaseCurrency, type RatesFromBase } from './fxConversion';
 
 export type GroupBalanceDisplay = {
@@ -127,6 +127,88 @@ export function collectGroupFxCurrencies(
  * For the groups list: each group's `defaultCurrency` is the display base;
  * map base → balance currencies that need FX conversion into that base.
  */
+export type GroupRollupTotalDisplay = {
+    /** Signed net total in `currency` (positive = owed to user). */
+    net: number;
+    currency: string;
+    isConverted: boolean;
+    /** True when FX was required but at least one leg could not convert — shows primary-only fallback. */
+    conversionFailed?: boolean;
+};
+
+export function rollupCurrencyLegs(rollup: GroupRollup): { currency: string; net: number }[] {
+    const legs: { currency: string; net: number }[] = [];
+    if (Math.abs(rollup.primary.net) >= 0.01) {
+        legs.push({ currency: rollup.primary.currency, net: rollup.primary.net });
+    }
+    for (const o of rollup.others ?? []) {
+        if (Math.abs(o.net) < 0.01) continue;
+        if (o.currency === rollup.primary.currency) continue;
+        legs.push({ currency: o.currency, net: o.net });
+    }
+    return legs;
+}
+
+/**
+ * Sum every non-zero currency leg in a group rollup into one signed net in `displayCurrency`.
+ * If any required FX rate is missing, falls back to the primary leg only in its native currency.
+ */
+export function resolveGroupRollupTotalDisplay(
+    rollup: GroupRollup | undefined,
+    displayCurrency: string,
+    ratesFromBase?: RatesFromBase,
+): GroupRollupTotalDisplay | undefined {
+    if (!rollup) return undefined;
+
+    const legs = rollupCurrencyLegs(rollup);
+    if (legs.length === 0) {
+        return {
+            net: rollup.primary.net,
+            currency: rollup.primary.currency,
+            isConverted: false,
+        };
+    }
+
+    let total = 0;
+    let anyConverted = false;
+
+    for (const leg of legs) {
+        const resolved = resolveSingle(leg.net, leg.currency, displayCurrency, ratesFromBase);
+        if (resolved.conversionFailed) {
+            return {
+                net: rollup.primary.net,
+                currency: rollup.primary.currency,
+                isConverted: false,
+                conversionFailed: true,
+            };
+        }
+        total += resolved.net;
+        if (resolved.isConverted) anyConverted = true;
+    }
+
+    return {
+        net: roundMoney(total),
+        currency: displayCurrency,
+        isConverted: anyConverted,
+    };
+}
+
+/** Foreign currencies appearing in group rollups that need FX into `displayCurrency`. */
+export function collectGroupRollupFxCurrencies(
+    rollups: Map<string, GroupRollup> | undefined,
+    displayCurrency: string,
+): string[] {
+    const set = new Set<string>();
+    rollups?.forEach(rollup => {
+        for (const leg of rollupCurrencyLegs(rollup)) {
+            if (leg.currency !== displayCurrency && Math.abs(leg.net) >= 0.01) {
+                set.add(leg.currency);
+            }
+        }
+    });
+    return [...set].sort((a, b) => a.localeCompare(b));
+}
+
 export function collectGroupListFxBases(
     balances: GroupBalance[],
     defaultCurrencyByGroupId: Record<string, string | undefined>,

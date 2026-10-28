@@ -9,25 +9,66 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Install k6
-        run: |
-          sudo gpg -k
-          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC6D69
-          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-          sudo apt-get update
-          sudo apt-get install -y k6
-      - name: Run k6 against dev (optional secrets)
+
+      - name: Verify load-test secrets (LOAD_TEST_* or E2E_*)
         env:
-          SUPABASE_URL: ${{ secrets.LOAD_TEST_SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.LOAD_TEST_SUPABASE_ANON_KEY }}
-          K6_USER_JWT: ${{ secrets.LOAD_TEST_USER_JWT }}
+          LOAD_TEST_SUPABASE_URL: ${{ secrets.LOAD_TEST_SUPABASE_URL }}
+          LOAD_TEST_SUPABASE_ANON_KEY: ${{ secrets.LOAD_TEST_SUPABASE_ANON_KEY }}
+          LOAD_TEST_PASSWORD: ${{ secrets.LOAD_TEST_PASSWORD }}
+          LOAD_TEST_EMAIL: ${{ secrets.LOAD_TEST_EMAIL }}
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+        run: |
+          set -euo pipefail
+          missing=()
+          if [[ -z "${LOAD_TEST_SUPABASE_URL:-}" && -z "${E2E_SUPABASE_URL:-}" ]]; then
+            missing+=('LOAD_TEST_SUPABASE_URL or E2E_SUPABASE_URL')
+          fi
+          if [[ -z "${LOAD_TEST_SUPABASE_ANON_KEY:-}" && -z "${E2E_SUPABASE_ANON_KEY:-}" ]]; then
+            missing+=('LOAD_TEST_SUPABASE_ANON_KEY or E2E_SUPABASE_ANON_KEY')
+          fi
+          if [[ -z "${LOAD_TEST_PASSWORD:-}" && -z "${E2E_TEST_PASSWORD:-}" ]]; then
+            missing+=('LOAD_TEST_PASSWORD or E2E_TEST_PASSWORD')
+          fi
+          if ((${#missing[@]} > 0)); then
+            echo '::error::Load test cannot run: missing required repository secrets.'
+            printf '  - %s\n' "${missing[@]}"
+            echo 'Optional: LOAD_TEST_EMAIL or E2E_TEST_EMAIL (defaults to e2e-playwright@kupay-dev.test).'
+            echo 'See cost-share-app/scripts/load-test/README.md'
+            exit 1
+          fi
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
+
+      - name: Validate load-test manifest (CI)
+        run: npm run test:load-test --prefix cost-share-app
+
+      - name: Prepare k6 auth (LOAD_TEST_* or E2E_* secrets)
+        env:
+          LOAD_TEST_SUPABASE_URL: ${{ secrets.LOAD_TEST_SUPABASE_URL }}
+          LOAD_TEST_SUPABASE_ANON_KEY: ${{ secrets.LOAD_TEST_SUPABASE_ANON_KEY }}
+          LOAD_TEST_PASSWORD: ${{ secrets.LOAD_TEST_PASSWORD }}
+          LOAD_TEST_EMAIL: ${{ secrets.LOAD_TEST_EMAIL }}
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+        run: |
+          set -euo pipefail
+          export SUPABASE_URL="${LOAD_TEST_SUPABASE_URL:-$E2E_SUPABASE_URL}"
+          export SUPABASE_ANON_KEY="${LOAD_TEST_SUPABASE_ANON_KEY:-$E2E_SUPABASE_ANON_KEY}"
+          export LOAD_TEST_PASSWORD="${LOAD_TEST_PASSWORD:-$E2E_TEST_PASSWORD}"
+          export LOAD_TEST_EMAIL="${LOAD_TEST_EMAIL:-$E2E_TEST_EMAIL}"
+          node cost-share-app/scripts/load-test/prepare-k6-env.mjs >> "$GITHUB_ENV"
+
+      - name: Run k6 against dev
+        env:
           K6_VUS: '10'
           K6_DURATION: '45s'
         run: |
-          if [[ -z "${SUPABASE_URL:-}" || -z "${SUPABASE_ANON_KEY:-}" || -z "${K6_USER_JWT:-}" ]]; then
-            echo "Skipping k6: set LOAD_TEST_* repository secrets to run dev RPC load test."
-            echo "See cost-share-app/scripts/load-test/README.md"
-            exit 0
-          fi
           cd cost-share-app/scripts/load-test
-          k6 run k6-dev-rpcs.js | tee "$GITHUB_STEP_SUMMARY"
+          k6 run k6-dev-rpcs.js | tee k6-summary.txt
+          cat k6-summary.txt >> "$GITHUB_STEP_SUMMARY"

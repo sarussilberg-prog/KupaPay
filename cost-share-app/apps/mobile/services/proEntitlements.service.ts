@@ -1,4 +1,5 @@
 import { hasProFromTimestamps, type ProStatusTimestamps } from '@cost-share/shared';
+import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
 import { supabase } from '../lib/supabase';
 
 export type AdminProViewMode = 'real' | 'force_pro' | 'force_free';
@@ -10,6 +11,16 @@ export interface MyProStatus extends ProStatusTimestamps {
     adminProViewMode: AdminProViewMode;
     adminProViewExpiresAt: string | null;
 }
+
+const CAPTURE_PRO_STATUS: MyProStatus = {
+    hasPro: true,
+    individualProUntil: '2027-01-15T00:00:00.000Z',
+    groupPassUntil: null,
+    includedTripPassCredits: 0,
+    unassignedTripPassCount: 0,
+    adminProViewMode: 'real',
+    adminProViewExpiresAt: null,
+};
 
 /** @internal Exported for unit tests. */
 export function parseProStatusRpcRow(data: Record<string, unknown> | null): MyProStatus {
@@ -40,32 +51,28 @@ export function parseProStatusRpcRow(data: Record<string, unknown> | null): MyPr
 }
 
 export async function fetchMyProStatus(groupId?: string | null): Promise<MyProStatus> {
+    if (isAscScreenshotDemo()) {
+        if (groupId === 'g-barcelona') {
+            return {
+                ...CAPTURE_PRO_STATUS,
+                groupPassUntil: '2026-12-20T00:00:00.000Z',
+            };
+        }
+        return CAPTURE_PRO_STATUS;
+    }
     const { data, error } = await supabase.rpc('get_my_pro_status', {
         p_group_id: groupId ?? null,
     });
-    if (error || data == null) {
-        return {
-            hasPro: false,
-            individualProUntil: null,
-            groupPassUntil: null,
-            includedTripPassCredits: 0,
-            unassignedTripPassCount: 0,
-            adminProViewMode: 'real',
-            adminProViewExpiresAt: null,
-        };
+    if (error) {
+        throw error;
+    }
+    if (data == null) {
+        throw new Error('get_my_pro_status returned null');
     }
     if (typeof data === 'object') {
         return parseProStatusRpcRow(data as Record<string, unknown>);
     }
-    return {
-        hasPro: false,
-        individualProUntil: null,
-        groupPassUntil: null,
-        includedTripPassCredits: 0,
-        unassignedTripPassCount: 0,
-        adminProViewMode: 'real',
-        adminProViewExpiresAt: null,
-    };
+    throw new Error('get_my_pro_status returned unexpected payload');
 }
 
 export async function setMyAdminProViewMode(

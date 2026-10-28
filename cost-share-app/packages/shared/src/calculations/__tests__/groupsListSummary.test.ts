@@ -28,10 +28,10 @@ describe('deriveGroupsListSummaryParts', () => {
         );
         expect(parts?.primaryNet).toBe(30);
         expect(parts?.primaryCurrency).toBe('USD');
-        expect(parts?.foreignHint).toBeUndefined();
+        expect(parts?.foreignCurrencyCount).toBe(0);
     });
 
-    it('adds a foreign hint for non-default currencies', () => {
+    it('counts foreign currencies without exposing raw amounts', () => {
         const parts = deriveGroupsListSummaryParts(
             makeSummary({
                 defaultCurrency: 'USD',
@@ -40,13 +40,10 @@ describe('deriveGroupsListSummaryParts', () => {
                 byCurrency: [
                     { currency: 'USD', owed: 10, owedToUser: 10 },
                     { currency: 'AFN', owed: 0, owedToUser: 138.75 },
+                    { currency: 'ILS', owed: 5, owedToUser: 0 },
                 ],
             }),
         );
-        expect(parts?.foreignHint).toEqual({
-            count: 1,
-            net: 138.75,
-            currency: 'AFN',
-        });
+        expect(parts?.foreignCurrencyCount).toBe(2);
     });
 });

@@ -9,6 +9,7 @@ import { jsonResponse, preflight } from './cors.ts';
 export interface ProxyEnv {
     SUPABASE_URL: string;
     SUPABASE_ANON_KEY: string;
+    SUPABASE_SERVICE_ROLE_KEY: string;
     /** Regional Sentry API host, e.g. https://de.sentry.io for EU orgs. */
     SENTRY_API_BASE_URL: string;
     SENTRY_API_TOKEN: string;
@@ -16,6 +17,10 @@ export interface ProxyEnv {
     SENTRY_PROJECT_DEV: string;
     SENTRY_PROJECT_PROD: string;
 }
+
+export const DEFAULT_SENTRY_ORG = 'kupay-hb';
+export const DEFAULT_SENTRY_PROJECT_DEV = 'copay-mobile-dev';
+export const DEFAULT_SENTRY_PROJECT_PROD = 'copay-mobile-prod';
 
 /** EU org kupay-hb lives on de.sentry.io — sentry.io does not return EU project data. */
 export function normalizeSentryApiBase(raw: string | undefined): string {
@@ -98,9 +103,62 @@ async function verifyCallerAdmin(client: SupabaseClient): Promise<AdminVerdict> 
 
 function missingSentryCoreConfig(env: ProxyEnv): string[] {
     const missing: string[] = [];
-    if (!env.SENTRY_API_TOKEN.trim()) missing.push('SENTRY_API_TOKEN');
     if (!env.SENTRY_ORG.trim()) missing.push('SENTRY_ORG');
     return missing;
+}
+
+type TokenResolveResult =
+    | { ok: true; token: string }
+    | { ok: false; response: Response };
+
+function makeServiceClient(env: ProxyEnv): SupabaseClient {
+    return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+    });
+}
+
+/** Env var first; else Vault secret `sentry_api_token` via service_sentry_api_token RPC. */
+export async function resolveSentryApiToken(env: ProxyEnv): Promise<TokenResolveResult> {
+    const fromEnv = env.SENTRY_API_TOKEN.trim();
+    if (fromEnv) return { ok: true, token: fromEnv };
+
+    if (!env.SUPABASE_SERVICE_ROLE_KEY.trim()) {
+        return {
+            ok: false,
+            response: jsonResponse({
+                ok: false,
+                error: 'sentry_not_configured',
+                missing: ['SENTRY_API_TOKEN', 'SUPABASE_SERVICE_ROLE_KEY'],
+            }, 503),
+        };
+    }
+
+    const serviceClient = makeServiceClient(env);
+    const { data, error } = await serviceClient.rpc('service_sentry_api_token');
+    if (error) {
+        return {
+            ok: false,
+            response: jsonResponse({
+                ok: false,
+                error: 'sentry_token_lookup_failed',
+                detail: error.message,
+            }, 503),
+        };
+    }
+
+    const fromVault = typeof data === 'string' ? data.trim() : '';
+    if (!fromVault) {
+        return {
+            ok: false,
+            response: jsonResponse({
+                ok: false,
+                error: 'sentry_not_configured',
+                missing: ['SENTRY_API_TOKEN', 'vault:sentry_api_token'],
+            }, 503),
+        };
+    }
+
+    return { ok: true, token: fromVault };
 }
 
 function missingSentryConfig(env: ProxyEnv, environment: 'dev' | 'prod'): string[] {
@@ -125,14 +183,14 @@ type SentryCallResult =
 
 async function callSentry(
     url: string,
-    env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<SentryCallResult> {
     let upstream: Response;
     try {
         upstream = await fetchFn(url, {
             headers: {
-                Authorization: `Bearer ${env.SENTRY_API_TOKEN}`,
+                Authorization: `Bearer ${apiToken}`,
                 Accept: 'application/json',
             },
         });
@@ -218,14 +276,29 @@ export async function handleRequest(
 
     switch (body.action) {
         case 'list_issues':
-            return await proxyListIssues(body, env, fetchFn);
+            return await withSentryApiToken(env, (apiToken) =>
+                proxyListIssues(body, env, apiToken, fetchFn)
+            );
         case 'issue_events':
-            return await proxyIssueEvents(body, env, fetchFn);
+            return await withSentryApiToken(env, (apiToken) =>
+                proxyIssueEvents(body, env, apiToken, fetchFn)
+            );
         case 'issue_detail':
-            return await proxyIssueDetail(body, env, fetchFn);
+            return await withSentryApiToken(env, (apiToken) =>
+                proxyIssueDetail(body, env, apiToken, fetchFn)
+            );
         default:
             return jsonResponse({ ok: false, error: 'invalid_action' }, 400);
     }
+}
+
+async function withSentryApiToken(
+    env: ProxyEnv,
+    run: (apiToken: string) => Promise<Response>,
+): Promise<Response> {
+    const tokenResult = await resolveSentryApiToken(env);
+    if (!tokenResult.ok) return tokenResult.response;
+    return run(tokenResult.token);
 }
 
 // ---------- list_issues ----------
@@ -267,6 +340,7 @@ function trimIssue(raw: SentryListIssueRaw): IssueSummary {
 async function proxyListIssues(
     body: ActionListIssues,
     env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<Response> {
     if (body.environment !== 'dev' && body.environment !== 'prod') {
@@ -292,7 +366,7 @@ async function proxyListIssues(
     });
     const url = `${buildSentryApiUrl(env, `/projects/${env.SENTRY_ORG}/${project}/issues/`)}?${params.toString()}`;
 
-    const result = await callSentry(url, env, fetchFn);
+    const result = await callSentry(url, apiToken, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryListIssueRaw[];
     const issues = Array.isArray(data) ? data.map(trimIssue) : [];
@@ -379,6 +453,7 @@ function trimEvent(raw: SentryEventRaw): SlimEvent {
 async function proxyIssueEvents(
     body: ActionIssueEvents,
     env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<Response> {
     if (!body.issueId || typeof body.issueId !== 'string') {
@@ -392,7 +467,7 @@ async function proxyIssueEvents(
         );
     }
     const url = `${buildSentryApiUrl(env, `/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/events/`)}?limit=20`;
-    const result = await callSentry(url, env, fetchFn);
+    const result = await callSentry(url, apiToken, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryEventRaw[];
     const events = Array.isArray(data) ? data.map(trimEvent) : [];
@@ -440,6 +515,7 @@ function trimDetail(raw: SentryIssueDetailRaw): IssueDetail {
 async function proxyIssueDetail(
     body: ActionIssueDetail,
     env: ProxyEnv,
+    apiToken: string,
     fetchFn: FetchFn,
 ): Promise<Response> {
     if (!body.issueId || typeof body.issueId !== 'string') {
@@ -456,7 +532,7 @@ async function proxyIssueDetail(
         env,
         `/organizations/${env.SENTRY_ORG}/issues/${encodeURIComponent(body.issueId)}/`,
     );
-    const result = await callSentry(url, env, fetchFn);
+    const result = await callSentry(url, apiToken, fetchFn);
     if (!result.ok) return result.response;
     const data = result.data as SentryIssueDetailRaw;
     return jsonResponse({ ok: true, data: trimDetail(data) }, 200);

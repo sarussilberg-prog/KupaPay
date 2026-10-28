@@ -8,15 +8,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     View,
     Text,
-    FlatList,
     RefreshControl,
     TouchableOpacity,
-    ListRenderItem,
 } from 'react-native';
+import type { ListRenderItem } from '@shopify/flash-list';
+import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { deriveBalanceSummary, GroupWithMembers } from '@cost-share/shared';
+import {
+    collectGroupRollupFxCurrencies,
+    deriveBalanceSummary,
+    GroupWithMembers,
+} from '@cost-share/shared';
 import { useGroupsQuery } from '../../hooks/queries/useGroupsQuery';
 import { createDemoGroup } from '../../services/groups.service';
 import { queryClient } from '../../lib/queryClient';
@@ -190,10 +194,18 @@ export function GroupsListScreen() {
         [simplified, authUserId, baseCurrency],
     );
 
-    const fxSymbols = useMemo(
-        () => collectProfileFxCurrencies(rawBalanceSummary, [], baseCurrency),
-        [rawBalanceSummary, baseCurrency],
-    );
+    const fxSymbols = useMemo(() => {
+        const set = new Set(
+            collectProfileFxCurrencies(rawBalanceSummary, [], baseCurrency),
+        );
+        for (const c of collectGroupRollupFxCurrencies(
+            simplified?.groupRollups,
+            baseCurrency,
+        )) {
+            set.add(c);
+        }
+        return [...set].sort((a, b) => a.localeCompare(b));
+    }, [rawBalanceSummary, baseCurrency, simplified?.groupRollups]);
 
     const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
     const { summary: balanceSummary, conversion } = useProfileBalanceSummary(
@@ -256,6 +268,8 @@ export function GroupsListScreen() {
             <GroupCard
                 group={item.group}
                 rollup={simplified?.groupRollups.get(item.group.id)}
+                displayCurrency={baseCurrency}
+                ratesFromBase={ratesQuery.data?.rates}
                 groupHasOpenDebts={groupHasOpenDebts[item.group.id] === true}
                 balanceUnknown={balanceUnknown}
                 searchQuery={trimmedQuery || undefined}
@@ -266,7 +280,16 @@ export function GroupsListScreen() {
                 onPress={handleGroupPress}
             />
         ),
-        [simplified, balanceUnknown, groupHasOpenDebts, unreadByGroup, trimmedQuery, handleGroupPress],
+        [
+            simplified,
+            balanceUnknown,
+            baseCurrency,
+            ratesQuery.data?.rates,
+            groupHasOpenDebts,
+            unreadByGroup,
+            trimmedQuery,
+            handleGroupPress,
+        ],
     );
 
     const renderItem = useCallback<ListRenderItem<FilteredRow>>(
@@ -337,15 +360,12 @@ export function GroupsListScreen() {
             />
 
             <View className="flex-1">
-                <FlatList
+                <HotVirtualizedList
+                    testID="groups-list-virtualized"
                     data={activeRows}
                     keyExtractor={item => item.group.id}
                     renderItem={renderItem}
-                    initialNumToRender={12}
-                    maxToRenderPerBatch={8}
-                    windowSize={7}
-                    removeClippedSubviews
-                    className="flex-1"
+                    style={{ flex: 1 }}
                     contentContainerStyle={{
                         paddingHorizontal: 16,
                         paddingBottom: listBottomPadding,

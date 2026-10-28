@@ -24,3 +24,14 @@ jobs:
           FREE_TIER_POSTHOG_HOST: ${{ secrets.FREE_TIER_POSTHOG_HOST }}
         run: |
           node cost-share-app/scripts/check-free-tier-usage.mjs | tee "$GITHUB_STEP_SUMMARY"
+
+      - name: Growth metrics snapshot (#422)
+        env:
+          SUPABASE_URL: ${{ secrets.GROWTH_METRICS_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.GROWTH_METRICS_SUPABASE_ANON_KEY }}
+          GROWTH_METRICS_ADMIN_JWT: ${{ secrets.GROWTH_METRICS_ADMIN_JWT }}
+          GROWTH_METRICS_FORMAT: markdown
+          GROWTH_METRICS_OPTIONAL: '1'
+        run: |
+          echo "" | tee -a "$GITHUB_STEP_SUMMARY"
+          node cost-share-app/scripts/print-growth-metrics.mjs | tee -a "$GITHUB_STEP_SUMMARY"

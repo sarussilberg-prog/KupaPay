@@ -109,7 +109,7 @@ export async function exportGroupExcel(
     try {
         const input = buildExportInput(group, payload);
         const filename = xlsxFilename(group);
-        const base64 = buildGroupExportExcelBase64(input);
+        const base64 = await buildGroupExportExcelBase64(input);
 
         if (Platform.OS === 'web') {
             const binary = atob(base64);

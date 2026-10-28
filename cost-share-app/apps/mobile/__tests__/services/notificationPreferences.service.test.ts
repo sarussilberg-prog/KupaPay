@@ -21,18 +21,32 @@ describe('notificationPreferences.service', () => {
         (supabase.from as jest.Mock).mockReturnValue({
             select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({
                 data: { push_enabled: true, expenses_push: false, settlements_push: true,
-                    messages_push: false, friends_push: true, groups_push: true }, error: null }) }) }),
+                    messages_push: false, friends_push: true, groups_push: true,
+                    reminders_push: false, quiet_hours_enabled: true, quiet_hours_start: 23,
+                    quiet_hours_end: 7, timezone: 'Asia/Jerusalem', daily_push_cap: 5,
+                    unsettled_nudge_after_days: 14 }, error: null }) }) }),
         });
         const prefs = await fetchNotificationPreferences('u1');
         expect(prefs.expensesPush).toBe(false);
         expect(prefs.messagesPush).toBe(false);
+        expect(prefs.remindersPush).toBe(false);
+        expect(prefs.quietHoursStart).toBe(23);
+        expect(prefs.unsettledNudgeAfterDays).toBe(14);
     });
 
     it('sends camelCase prefs as snake_case JSON to the RPC', async () => {
         (supabase.rpc as jest.Mock).mockResolvedValue({ error: null });
-        await saveNotificationPreferences({ ...DEFAULT_NOTIFICATION_PREFERENCES, messagesPush: false });
+        await saveNotificationPreferences({
+            ...DEFAULT_NOTIFICATION_PREFERENCES,
+            messagesPush: false,
+            remindersPush: false,
+        });
         expect(supabase.rpc).toHaveBeenCalledWith('update_notification_preferences', {
-            p_prefs: expect.objectContaining({ messages_push: false, push_enabled: true }),
+            p_prefs: expect.objectContaining({
+                messages_push: false,
+                reminders_push: false,
+                push_enabled: true,
+            }),
         });
     });
 });

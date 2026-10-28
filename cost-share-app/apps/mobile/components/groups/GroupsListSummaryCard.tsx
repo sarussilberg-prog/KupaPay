@@ -9,7 +9,6 @@ import {
     classifyUserNetBalance,
     deriveGroupsListSummaryParts,
     formatGroupsListAmount,
-    wrapLtrForBidi,
     type BalanceSummary,
 } from '@cost-share/shared';
 import { Text } from '../AppText';
@@ -67,22 +66,17 @@ export function GroupsListSummaryCard({
                   language: i18n.language,
               });
 
-    const foreignLine =
-        parts.foreignHint && !isLoading
-            ? t('groups.listSummary.otherCurrenciesLine', {
-                  count: parts.foreignHint.count,
-                  countLabel: wrapLtrForBidi(
-                      t('groups.card.moreCurrencies', {
-                          count: parts.foreignHint.count,
-                      }),
-                  ),
-                  amount: formatGroupsListAmount(
-                      parts.foreignHint.net,
-                      parts.foreignHint.currency,
-                      { language: i18n.language },
-                  ),
-              })
-            : null;
+    const showFxFailureHint =
+        !isLoading &&
+        conversion?.failed === true &&
+        !conversion?.isConverted &&
+        parts.foreignCurrencyCount > 0;
+
+    const foreignHintLine = showFxFailureHint
+        ? t('groups.listSummary.otherCurrenciesHint', {
+              count: parts.foreignCurrencyCount,
+          })
+        : null;
 
     return (
         <View
@@ -102,18 +96,18 @@ export function GroupsListSummaryCard({
                 <Text
                     testID="groups-list-summary-amount"
                     className={toneAmountClass[tone] ?? toneAmountClass.unknown}
-                    style={{ writingDirection: 'ltr' }}
+                    style={{ textAlign: align, writingDirection: direction }}
                 >
                     {amountText}
                 </Text>
             )}
-            {foreignLine ? (
+            {foreignHintLine ? (
                 <Text
-                    testID="groups-list-summary-foreign"
-                    className="text-sm text-slate-500 dark:text-slate-400 mt-2"
+                    testID="groups-list-summary-foreign-hint"
+                    className="text-[11px] text-slate-400 dark:text-slate-500 mt-2"
                     style={{ textAlign: align, writingDirection: direction }}
                 >
-                    {foreignLine}
+                    {foreignHintLine}
                 </Text>
             ) : null}
         </View>

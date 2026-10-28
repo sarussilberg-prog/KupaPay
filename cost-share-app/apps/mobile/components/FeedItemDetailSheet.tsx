@@ -744,7 +744,7 @@ function ExpenseHero({
                     style={{
                         position: 'absolute',
                         top: 10,
-                        left: 10,
+                        start: 10,
                         backgroundColor: 'rgba(0,0,0,0.45)',
                         paddingHorizontal: 10,
                         paddingVertical: 4,
@@ -769,8 +769,8 @@ function ExpenseHero({
                 style={{
                     position: 'absolute',
                     top: 36,
-                    left: 14,
-                    right: 14,
+                    start: 14,
+                    end: 14,
                     fontSize: 17,
                     fontWeight: '700',
                     color: '#FFFFFF',
@@ -787,7 +787,7 @@ function ExpenseHero({
                 style={{
                     position: 'absolute',
                     top: 12,
-                    right: 14,
+                    end: 14,
                     fontSize: 11,
                     color: 'rgba(255,255,255,0.92)',
                     textShadowColor: 'rgba(0,0,0,0.4)',
@@ -966,7 +966,7 @@ function SettlementHero({
                     style={{
                         position: 'absolute',
                         top: 10,
-                        left: 10,
+                        start: 10,
                         backgroundColor: 'rgba(0,0,0,0.45)',
                         paddingHorizontal: 10,
                         paddingVertical: 4,
@@ -991,7 +991,7 @@ function SettlementHero({
                     style={{
                         position: 'absolute',
                         top: 12,
-                        right: 14,
+                        end: 14,
                         fontSize: 11,
                         color: 'rgba(255,255,255,0.92)',
                         textShadowColor: 'rgba(0,0,0,0.4)',
@@ -1344,7 +1344,7 @@ const batchStyles = StyleSheet.create({
         paddingVertical: 10,
     },
     debtRowBorder: { borderBottomWidth: 1, borderBottomColor: '#DBEAFE' },
-    debtLeft: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 12 },
+    debtLeft: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginEnd: 12 },
     arrow: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
     arrowGreen: { backgroundColor: '#DCFCE7' },
     arrowRed: { backgroundColor: '#FEE2E2' },

@@ -27,6 +27,7 @@ export const queryKeys = {
         ['legal-document', slug, locale] as const,
     adminPlatformMetrics: ['admin', 'platform-metrics'] as const,
     adminMonetizationMetrics: ['admin', 'monetization-metrics'] as const,
+    adminGrowthMetrics: ['admin', 'growth-metrics'] as const,
     adminSupportMessages: ['admin', 'support-messages'] as const,
     adminSentryIssues: (params: {
         environment: 'dev' | 'prod';
@@ -40,6 +41,7 @@ export const queryKeys = {
         ['adminSentryIssueEvents', issueId] as const,
     proStatus: (groupId?: string) =>
         groupId ? (['proStatus', groupId] as const) : (['proStatus'] as const),
+    mySubscription: () => ['mySubscription'] as const,
     exchangeRates: (base: string, symbolsKey: string) =>
         ['exchangeRates', base, symbolsKey] as const,
 };

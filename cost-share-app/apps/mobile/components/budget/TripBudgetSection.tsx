@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import { ProUpgradeButton } from '../ProUpgradeButton';
+import { ProUpsellButton } from '../pro/ProUpsellButton';
 import { useTranslation } from 'react-i18next';
 type BudgetExpenseRow = {
     amount: number;
@@ -11,6 +11,7 @@ import { Text } from '../AppText';
 import { fetchGroupTripBudget, type TripBudgetSettings } from '../../services/tripBudget.service';
 import { TripBudgetSheet } from './TripBudgetSheet';
 import { captureProductEvent } from '../../lib/productAnalytics';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 
 interface TripBudgetSectionProps {
     groupId: string;
@@ -65,6 +66,7 @@ export function TripBudgetSection({
             group_id: groupId,
             percent_used: pct,
         });
+        touchProTrialFeature({ tripBudget: true });
     }, [unlocked, budgetAmount, groupId, pct]);
 
     if (!unlocked) {
@@ -72,7 +74,8 @@ export function TripBudgetSection({
             <View className="mx-4 mb-3 p-4 rounded-2xl bg-amber-50 border border-amber-100">
                 <Text className="text-gray-800 font-semibold mb-1">{t('pro.tripBudget.title')}</Text>
                 <Text className="text-gray-600 text-sm mb-3">{t('pro.tripBudget.lockedBody')}</Text>
-                <ProUpgradeButton
+                <ProUpsellButton
+                    groupId={groupId}
                     title={t('pro.tripBudget.upgrade')}
                     onPress={onUpgrade}
                     testID="trip-budget-upgrade"

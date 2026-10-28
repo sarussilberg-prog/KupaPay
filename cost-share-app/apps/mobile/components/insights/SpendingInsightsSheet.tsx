@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
-import { ProUpgradeButton } from '../ProUpgradeButton';
+import { ProUpsellButton } from '../pro/ProUpsellButton';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetShell } from '../BottomSheetShell';
 import { Text } from '../AppText';
@@ -14,6 +14,7 @@ import {
     type WeekSpendRow,
 } from '../../services/spendingInsights.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 
 type Tab = 'category' | 'member' | 'week';
 
@@ -88,6 +89,7 @@ export function SpendingInsightsSheet({
                 currency,
                 category_rows: c.length,
             });
+            touchProTrialFeature({ spendingInsights: true });
         });
     }, [visible, unlocked, groupId, currency]);
 
@@ -105,7 +107,8 @@ export function SpendingInsightsSheet({
                 {!unlocked ? (
                     <>
                         <Text className="text-gray-600 text-sm mb-4">{t('pro.spendingInsights.lockedBody')}</Text>
-                        <ProUpgradeButton
+                        <ProUpsellButton
+                            groupId={groupId}
                             title={t('pro.spendingInsights.upgrade')}
                             onPress={onUpgrade}
                             testID="spending-insights-upgrade"

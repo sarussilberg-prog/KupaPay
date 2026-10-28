@@ -74,6 +74,7 @@ import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewSc
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
 import { SettingsRowLayoutPreviewScreen } from './screens/dev/SettingsRowLayoutPreviewScreen';
 import { readGroupsListPreviewParams } from './dev/groupsListPreviewParams';
+import { ScreenErrorBoundary } from './components/ScreenErrorBoundary';
 
 function isGroupCardPreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
@@ -444,7 +445,9 @@ function App() {
       <SafeAreaProvider>
         <RtlLayoutProvider>
           <WebFrame>
-            <UpdateRequiredScreen config={forcedUpdateConfig} />
+            <ScreenErrorBoundary screenName="UpdateRequired">
+              <UpdateRequiredScreen config={forcedUpdateConfig} />
+            </ScreenErrorBoundary>
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>
@@ -511,13 +514,19 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             {isPublicSupportPath ? (
-              <PublicSupportScreen />
+              <ScreenErrorBoundary screenName="PublicSupport">
+                <PublicSupportScreen />
+              </ScreenErrorBoundary>
             ) : preOnboardingDone === null ? (
               <AppGateSkeleton />
             ) : showPreOnboarding ? (
-              <OnboardingPreAuthFlow onFinished={() => setPreOnboardingDone(true)} />
+              <ScreenErrorBoundary screenName="OnboardingPreAuth">
+                <OnboardingPreAuthFlow onFinished={() => setPreOnboardingDone(true)} />
+              </ScreenErrorBoundary>
             ) : (
-              <LoginScreen />
+              <ScreenErrorBoundary screenName="Login">
+                <LoginScreen />
+              </ScreenErrorBoundary>
             )}
             <Toast config={toastConfig} topOffset={56} />
           </WebFrame>

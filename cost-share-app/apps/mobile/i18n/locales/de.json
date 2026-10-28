@@ -17,6 +17,9 @@
         "loadError": "Daten konnten nicht geladen werden",
         "networkError": "Netzwerkfehler. Bitte überprüfe deine Verbindung.",
         "offlineTitle": "Du bist offline",
+        "offlineBannerMessage": "Keine Internetverbindung. Gespeicherte Daten sind weiter verfügbar; Änderungen werden synchronisiert, sobald du wieder online bist.",
+        "screenErrorTitle": "Etwas ist schiefgelaufen",
+        "screenErrorMessage": "Auf diesem Bildschirm ist ein unerwarteter Fehler aufgetreten. Versuche es erneut oder gehe zurück.",
         "retry": "Erneut versuchen",
         "search": "Suchen",
         "submit": "Absenden",
@@ -402,7 +405,9 @@
             "showLess": "Weniger anzeigen"
         },
         "listSummary": {
-            "otherCurrenciesLine": "{{countLabel}} · {{amount}} in anderen Währungen"
+            "otherCurrenciesLine": "{{countLabel}} · {{amount}} in anderen Währungen",
+            "otherCurrenciesHint": "({{count}} Währungen)",
+            "otherCurrenciesHint_one": "({{count}} Währung)"
         },
         "hero": {
             "spentTogether": "Gemeinsam ausgegeben",
@@ -418,6 +423,8 @@
             "owedToYouCaption": "Dir zustehend",
             "moreCurrencies": "{{count}} Währungen",
             "moreCurrencies_one": "{{count}} Währung",
+            "moreCurrenciesNoun": "Währungen",
+            "moreCurrenciesNoun_one": "Währung",
             "updatedAgo": "Aktualisiert {{when}}",
             "balanceUnavailable": "Saldo offline nicht verfügbar"
         },
@@ -688,6 +695,10 @@
                 "stopConfirmTitle": "Wiederkehrende Ausgaben stoppen?",
                 "stopConfirmBody": "Bisherige Ausgaben bleiben. Es werden keine neuen Wiederholungen erstellt.",
                 "stopped": "Wiederkehrende Serie gestoppt",
+                "editScopeTitle": "Wiederkehrende Ausgabe aktualisieren?",
+                "editScopeBody": "Änderungen für künftige Wiederholungen übernehmen oder nur diese Ausgabe.",
+                "editScopeSeries": "Auch künftige Wiederholungen",
+                "editScopeOccurrence": "Nur diese Ausgabe",
                 "frequency": {
                     "weekly": "Wöchentlich",
                     "monthly": "Monatlich",
@@ -820,7 +831,7 @@
             "statusActive": "Aktiv",
             "statusInactive": "Inaktiv",
             "metaLine": "{{days}} Tage · {{uses}} / {{max}} Einlösungen",
-            "unlimited": "∞",
+            "unlimited": "Unbegrenzt",
             "deactivateCta": "Deaktivieren",
             "deactivateTitle": "{{code}} deaktivieren?",
             "deactivateMessage": "Nach der Deaktivierung kann der Code nicht mehr eingelöst werden.",
@@ -917,6 +928,26 @@
             "byPlatform": "Nach Plattform",
             "last7Days": "Letzte 7 Tage",
             "noData": "In diesem Zeitraum noch keine Ereignisse"
+        },
+        "growth": {
+            "portalRow": "MAU & North Star",
+            "screenTitle": "Wachstumsmetriken",
+            "asOf": "Aktualisiert {{when}} (UTC)",
+            "northStarTitle": "Leitmetrik",
+            "northStarDefinition": "Gruppen, in denen mindestens zwei Mitglieder im laufenden Kalendermonat jeweils eine Ausgabe erfasst haben.",
+            "northStarCurrent": "Dieser Monat ({{month}})",
+            "northStarPrevious": "Vormonat ({{month}})",
+            "activeAuthorsTitle": "Aktive Ausgaben-Erfasser",
+            "activeAuthorsNote": "Eindeutige Nutzer mit nicht gelöschter Ausgabe im Zeitraum. MAU/WAU/DAU aus App-Starts siehe PostHog.",
+            "dau": "Täglich aktive",
+            "wau": "Wöchentlich aktive",
+            "mau": "Monatlich aktive (Proxy)",
+            "mauEpicProgress": "{{percent}} % zum {{target}}-MAU-Ziel",
+            "seriesTitle": "North Star — letzte 12 Monate",
+            "openPostHogDashboard": "PostHog-MAU-Dashboard öffnen",
+            "postHogDashboardHint": "EXPO_PUBLIC_POSTHOG_PROJECT_ID (optional MAU-Dashboard-ID) setzen, um PostHog zu verlinken.",
+            "webOnlyNote": "Aufschlüsselung nach Plattform und Sprache im verlinkten PostHog-Dashboard.",
+            "analyticsUnavailableBody": "Die Wachstumsmetrik-Funktion fehlt oder ist auf diesem Supabase-Projekt nicht freigegeben. Neueste Migrationen auf dev anwenden und aktualisieren."
         },
         "supportMessages": {
             "title": "Support-Nachrichten",
@@ -1443,6 +1474,7 @@
         "badge": "Pro",
         "paywall": {
             "title": "KupaPay Pro",
+            "titleValueFocus": "Fair teilen, schneller ausgleichen mit Pro",
             "feature1": "Keine Werbung",
             "feature2": "Automatische Währungsumrechnung für Reisen",
             "feature3": "Sauberer PDF-Bericht für jede Gruppe",
@@ -1473,7 +1505,9 @@
             "trialFreePeriodHeading": "{{trialDays}} Tage kostenlos testen",
             "trialFreePeriodBody": "{{trialDays}} Tage alle Pro-Funktionen gratis. In den Einstellungen vor Ende der Testphase kündigen, wenn du nicht weitermachen möchtest.",
             "trialRenewalDisclosure": "Nach {{trialDays}} Tagen werden {{price}}/{{period}} berechnet, sofern du nicht in den Einstellungen kündigst.",
-            "havePromoCode": "Code vorhanden?"
+            "havePromoCode": "Code vorhanden?",
+            "alreadyProTitle": "Du hast Pro",
+            "alreadyProBody": "Dein Abo ist aktiv. Verwalte die Abrechnung im App Store oder bei Google Play und nutze weiter alle Pro-Funktionen."
         },
         "promoCode": {
             "sheetTitle": "Code einlösen",
@@ -1495,7 +1529,45 @@
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Abo verwalten",
-            "freeTrialUntil": "Kostenlose Testphase bis {{date}}"
+            "freeTrialUntil": "Kostenlose Testphase bis {{date}}",
+            "activeUntil": "Pro aktiv bis {{date}}",
+            "activeIndividualAndGroup": "Pro-Abo aktiv; diese Gruppe hat zusätzlich Trip Pass Pro."
+        },
+        "subscription": {
+            "sectionTitle": "Mein Abo",
+            "openDetails": "Abo-Details",
+            "screenIntro": "Plan, Verlängerung und Abrechnung verwaltest du im App Store oder Google Play. Trip Pass pro Gruppe siehst du unten.",
+            "disabled": "Abos sind in diesem Build nicht verfügbar.",
+            "empty": "Kein aktives Abo auf diesem Konto.",
+            "planUnknown": "KupaPay Pro",
+            "storeAppStore": "App Store",
+            "storePlayStore": "Google Play",
+            "storePromotional": "Werbeaktion",
+            "storeStripe": "Web-Abrechnung",
+            "storeUnknown": "App-Store",
+            "renewsOn": "Verlängert am {{date}}",
+            "expiresOn": "Zugang bis {{date}}",
+            "expiredOn": "Abgelaufen am {{date}}",
+            "autoRenewOn": "Automatische Verlängerung an",
+            "autoRenewOff": "Automatische Verlängerung aus",
+            "trialActive": "Kostenlose Testphase läuft",
+            "purchasedVia": "Gekauft über {{store}}",
+            "billingIssueBody": "Beim Zahlen ist ein Problem aufgetreten. Aktualisiere die Zahlungsmethode, um Pro zu behalten.",
+            "fixPayment": "Zahlung beheben",
+            "tripPassSection": "Trip-Pass-Gruppen",
+            "tripPassUntil": "Pro für diese Gruppe bis {{date}}",
+            "renewalDisclosureShort": "Abos verlängern sich automatisch, bis du im Store-Konto spätestens 24 Stunden vorher kündigst. Siehe AGB und Datenschutz.",
+            "status": {
+                "active": "Aktiv",
+                "cancelled_until_expiry": "Gekündigt — aktiv bis Ablauf",
+                "billing_issue": "Zahlungsproblem",
+                "expired": "Abgelaufen",
+                "none": "Kein Abo"
+            }
+        },
+        "groupPass": {
+            "activeTitle": "Trip Pass Pro für diese Gruppe",
+            "activeUntil": "Pro für alle Gruppenmitglieder bis {{date}}."
         },
         "trialReminder": {
             "title": "KupaPay-Pro-Testphase endet bald",

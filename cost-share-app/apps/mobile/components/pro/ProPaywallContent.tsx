@@ -14,7 +14,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
-import { APP_WEB_ORIGIN, buildLegalPageUrl } from '@cost-share/shared';
+import { APP_WEB_ORIGIN, buildLegalPageUrl, paywallTitleKeyForVariant } from '@cost-share/shared';
+import { useGrowthExperimentFlags } from '../../hooks/useGrowthExperiment';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { Button } from '../Button';
@@ -26,11 +27,11 @@ import {
     checkIntroductoryPriceEligibility,
     isPurchasesConfigured,
     loadOfferingPackages,
-    openSubscriptionManagement,
     purchasePackage,
     restorePurchases,
     type IntroEligibilityMap,
 } from '../../services/purchases.service';
+import { openSubscriptionManagementForUser } from '../../lib/openSubscriptionManagement';
 import { introFreeTrialDaysForPackage, planShowsFreeTrial } from '../../lib/proTrialPaywall';
 import {
     fetchPaywallOfferings,
@@ -41,11 +42,12 @@ import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
 import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
+import { useProStatus } from '../../hooks/useProStatus';
+import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { ProMemberPaywallPanel } from './ProMemberPaywallPanel';
 import { PromoCodeRedeemSheet } from './PromoCodeRedeemSheet';
 
 const WEB_ORIGIN = (process.env.EXPO_PUBLIC_WEB_APP_URL ?? APP_WEB_ORIGIN).replace(/\/$/, '');
-const APP_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
-const PLAY_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 type PlanKey = 'monthly' | 'yearly' | 'trip_pass';
 
@@ -79,8 +81,12 @@ export function ProPaywallContent({
     onPurchaseSuccess,
 }: Readonly<ProPaywallContentProps>) {
     const { t } = useTranslation();
+    const { paywallHeadlineVariant } = useGrowthExperimentFlags();
+    const paywallTitleKey = paywallTitleKeyForVariant(paywallHeadlineVariant);
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
+    const { hasPro } = useProStatus(groupId);
+    const showMemberPanel = KUPAPAY_PRO_ENABLED && hasPro;
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [selected, setSelected] = useState<PlanKey>('yearly');
@@ -193,10 +199,8 @@ export function ProPaywallContent({
     }, [busy, featureKey, groupId, onPurchaseSuccess]);
 
     const handleManage = useCallback(async () => {
-        await openSubscriptionManagement();
-        const url = Platform.OS === 'ios' ? APP_STORE_URL : PLAY_STORE_URL;
-        if (url) await Linking.openURL(url);
-    }, []);
+        await openSubscriptionManagementForUser(language);
+    }, [language]);
 
     const handleRedeemCode = useCallback(() => {
         setPromoSheetOpen(true);
@@ -334,6 +338,27 @@ export function ProPaywallContent({
         );
     }, [loadFailedReason, loading, packages, retryLoad, selected, showTripPass, storeConfigured, t, tripPassPrice]);
 
+    if (showMemberPanel) {
+        return (
+            <View
+                className="flex-1 bg-slate-50"
+                style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }}
+            >
+                {onClose ? (
+                    <Pressable
+                        onPress={onClose}
+                        className="self-end p-2 mr-4 mb-2"
+                        hitSlop={12}
+                        testID="paywall-close"
+                    >
+                        <AppIcon name="close" size={24} color={colors.gray500} />
+                    </Pressable>
+                ) : null}
+                <ProMemberPaywallPanel onClose={onClose} />
+            </View>
+        );
+    }
+
     return (
         <ScrollView
             className="flex-1 bg-slate-50"
@@ -355,7 +380,7 @@ export function ProPaywallContent({
             ) : null}
 
             <Text className="text-2xl font-bold text-gray-900 text-center mb-6">
-                {t('pro.paywall.title')}
+                {t(paywallTitleKey)}
             </Text>
 
             <View className="gap-2 mb-6">

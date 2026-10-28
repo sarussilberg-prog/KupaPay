@@ -94,6 +94,12 @@ import {
     getExpenseWithSplits,
     updateExpense,
 } from '../../services/expenses.service';
+import {
+    getRecurringSeriesForExpense,
+    updateRecurringExpenseSeries,
+    type RecurringSeriesMeta,
+} from '../../services/recurringExpenses.service';
+import { captureProductEvent } from '../../lib/productAnalytics';
 import { uploadExpenseReceipt } from '../../services/storage.service';
 import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
 import { handleError } from '../../lib/handleError';
@@ -108,6 +114,8 @@ import {
 } from '@cost-share/shared';
 import { ReceiptTextScanSheet } from '../../components/receipt/ReceiptTextScanSheet';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
+import { formatAppDateShort } from '../../lib/formatAppDate';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import {
     UnequalSplitMode,
@@ -120,6 +128,10 @@ import {
     uiToStoredSplitMode,
 } from '../../lib/expenseSplitForm';
 import { colors } from '../../theme';
+import {
+    isKnownGroupId,
+    resolveAddExpenseGroupId,
+} from '../../lib/favoriteGroup';
 
 function uiToUnequalMode(mode: UiSplitMode): UnequalSplitMode {
     return mode === 'percent' ? 'percent' : 'amount';
@@ -137,9 +149,6 @@ function isSameDay(a: Date, b: Date): boolean {
     );
 }
 
-function formatShortDate(date: Date): string {
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 /**
  * Stable string representation of the form's edit-relevant state, used to detect
@@ -154,6 +163,7 @@ function snapshotKey(s: {
     splitMode: UiSplitMode;
     selectedMemberIds: string[];
     unequalValues: Record<string, string>;
+    recurringFrequency?: RecurringFrequency;
 }): string {
     const ids = [...s.selectedMemberIds].sort();
     const uneq: Record<string, string> = {};
@@ -169,11 +179,12 @@ function snapshotKey(s: {
         m: s.splitMode,
         ids,
         u: uneq,
+        rf: s.recurringFrequency ?? '',
     });
 }
 
 export function AddExpenseScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const insets = useSafeAreaInsets();
@@ -185,7 +196,9 @@ export function AddExpenseScreen() {
     const groupId = resolvedGroupId ?? '';
     const { isLoading, startLoading, stopLoading } = useLoading();
     const currentUser = useAppStore(state => state.currentUser);
+    const favoriteGroupId = useAppStore(state => state.favoriteGroupId);
     const groupsQuery = useGroupsQuery();
+    const groups = groupsQuery.data ?? [];
     const storeGroup = groupId
         ? groupsQuery.data?.find(g => g.id === groupId)
         : undefined;
@@ -236,7 +249,9 @@ export function AddExpenseScreen() {
     const [recurringEnabled, setRecurringEnabled] = useState(false);
     const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('monthly');
     const [recurringSheetVisible, setRecurringSheetVisible] = useState(false);
+    const [editSeriesMeta, setEditSeriesMeta] = useState<RecurringSeriesMeta | null>(null);
     const [groupPickerVisible, setGroupPickerVisible] = useState(false);
+    const groupPickerAutoOpenedRef = useRef(false);
     const amountShake = useRef(new Animated.Value(0)).current;
     const descriptionShake = useRef(new Animated.Value(0)).current;
     const editSnapshotRef = useRef<string>('');
@@ -269,6 +284,30 @@ export function AddExpenseScreen() {
     useLayoutEffect(() => {
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
+
+    // When the route seed or persisted favorite is stale, re-resolve once groups
+    // are known. Do not override a valid in-screen pick (see handleSelectGroup).
+    useEffect(() => {
+        if (isEditMode || groups.length === 0) return;
+        if (isKnownGroupId(resolvedGroupId, groups)) return;
+        const next = resolveAddExpenseGroupId({
+            routeGroupId,
+            favoriteGroupId,
+            groups,
+        });
+        if (next && next !== resolvedGroupId) {
+            setResolvedGroupId(next);
+        }
+    }, [isEditMode, routeGroupId, favoriteGroupId, groups, resolvedGroupId]);
+
+    // Create mode with no valid group yet: require an explicit pick via the sheet.
+    useEffect(() => {
+        if (isEditMode || groupPickerAutoOpenedRef.current) return;
+        if (groupsQuery.isLoading || groups.length === 0) return;
+        if (isKnownGroupId(resolvedGroupId, groups)) return;
+        groupPickerAutoOpenedRef.current = true;
+        setGroupPickerVisible(true);
+    }, [isEditMode, groupsQuery.isLoading, groups, resolvedGroupId]);
 
     useEffect(() => {
         if (!isEditMode && storeGroup?.defaultCurrency) {
@@ -428,6 +467,17 @@ export function AddExpenseScreen() {
                     }
                 }
 
+                const seriesMeta = await getRecurringSeriesForExpense(expenseId);
+                let snapshotFrequency: RecurringFrequency | undefined;
+                if (seriesMeta && !seriesMeta.endedAt) {
+                    setEditSeriesMeta(seriesMeta);
+                    setRecurringFrequency(seriesMeta.frequency);
+                    setRecurringEnabled(true);
+                    snapshotFrequency = seriesMeta.frequency;
+                } else {
+                    setEditSeriesMeta(null);
+                }
+
                 editSnapshotRef.current = snapshotKey({
                     description: expense.description,
                     amount: String(expense.amount),
@@ -437,6 +487,7 @@ export function AddExpenseScreen() {
                     splitMode: initialSplitMode,
                     selectedMemberIds: initialMemberIds,
                     unequalValues: initialUnequalValues,
+                    recurringFrequency: snapshotFrequency,
                 });
             }
             setExpenseLoading(false);
@@ -469,11 +520,26 @@ export function AddExpenseScreen() {
     const hasDescription = description.trim().length > 0;
     const hasValidAmount =
         amount.length > 0 && Number.isFinite(parsedAmount) && parsedAmount > 0;
+    const hasValidGroup = isKnownGroupId(groupId, groups);
+
     const canSave = useMemo(() => {
         const hasMembers = selectedMemberIds.length > 0;
         const unequalReady = splitMode === 'equal' || unequalCheck.isValid;
-        return hasDescription && hasValidAmount && hasMembers && unequalReady;
-    }, [hasDescription, hasValidAmount, selectedMemberIds.length, splitMode, unequalCheck.isValid]);
+        return (
+            hasValidGroup &&
+            hasDescription &&
+            hasValidAmount &&
+            hasMembers &&
+            unequalReady
+        );
+    }, [
+        hasValidGroup,
+        hasDescription,
+        hasValidAmount,
+        selectedMemberIds.length,
+        splitMode,
+        unequalCheck.isValid,
+    ]);
 
     const editChanged = useMemo(() => {
         if (!isEditMode) return true;
@@ -487,6 +553,7 @@ export function AddExpenseScreen() {
             splitMode,
             selectedMemberIds,
             unequalValues,
+            ...(editSeriesMeta ? { recurringFrequency } : {}),
         });
         if (current !== editSnapshotRef.current) return true;
         if (localReceiptUri !== null) return true;
@@ -504,6 +571,8 @@ export function AddExpenseScreen() {
         unequalValues,
         localReceiptUri,
         receiptRemoved,
+        editSeriesMeta,
+        recurringFrequency,
     ]);
 
     const canSubmit = canSave && editChanged;
@@ -527,6 +596,7 @@ export function AddExpenseScreen() {
             const parsed = new Date(`${draft.expenseDate}T12:00:00`);
             if (!Number.isNaN(parsed.getTime())) setDate(parsed);
         }
+        touchProTrialFeature({ receiptScan: true });
     }, []);
 
     const handleReceiptPress = useCallback(() => {
@@ -588,7 +658,11 @@ export function AddExpenseScreen() {
     }, [t, localReceiptUri, receiptUrl, receiptRemoved, receiptOcrUnlocked, navigation, groupId]);
 
     const handleRecurringPress = useCallback(() => {
-        if (isEditMode) return;
+        if (isEditMode && !editSeriesMeta) return;
+        if (isEditMode && editSeriesMeta) {
+            setRecurringSheetVisible(true);
+            return;
+        }
         if (!recurringUnlocked && KUPAPAY_PRO_ENABLED) {
             navigation.navigate('Paywall', {
                 featureKey: 'recurring_expenses',
@@ -603,7 +677,7 @@ export function AddExpenseScreen() {
             return;
         }
         setRecurringSheetVisible(true);
-    }, [isEditMode, recurringUnlocked, navigation, groupId, recurringEnabled]);
+    }, [isEditMode, editSeriesMeta, recurringUnlocked, navigation, groupId, recurringEnabled]);
 
     const handleEditorDone = useCallback((draft: EditPayerSplitDraft) => {
         setPaidBy(draft.payerId);
@@ -711,23 +785,80 @@ export function AddExpenseScreen() {
             return;
         }
 
-        const result = expenseId
-            ? await updateExpense(expenseId, {
-                  description: description.trim(),
-                  amount: parsedAmount,
-                  currency,
-                  category,
-                  paidBy: payerId,
-                  expenseDate: date,
-                  splits,
-                  splitMode: storedSplitMode,
-                  ...receiptUpdate,
-              })
-            : null;
-        stopLoading();
-        if (result) {
-            navigation.goBack();
+        const updatePayload = {
+            description: description.trim(),
+            amount: parsedAmount,
+            currency,
+            category,
+            paidBy: payerId,
+            expenseDate: date,
+            splits,
+            splitMode: storedSplitMode,
+            ...receiptUpdate,
+        };
+
+        const commitEdit = async (applyToSeries: boolean) => {
+            if (!expenseId) return;
+            if (applyToSeries && editSeriesMeta?.seriesId) {
+                const seriesOk = await updateRecurringExpenseSeries(editSeriesMeta.seriesId, {
+                    description: updatePayload.description,
+                    amount: updatePayload.amount,
+                    currency: updatePayload.currency,
+                    category: updatePayload.category,
+                    paidBy: updatePayload.paidBy,
+                    splitMode: updatePayload.splitMode,
+                    splits: updatePayload.splits,
+                    frequency: recurringFrequency,
+                });
+                if (!seriesOk) {
+                    stopLoading();
+                    handleError(new Error('updateRecurringExpenseSeries failed'), {
+                        toast: { titleKey: 'common.error', messageKey: 'common.loadError' },
+                        tags: { service: 'recurringExpenses', op: 'updateRecurringExpenseSeries' },
+                        extra: { seriesId: editSeriesMeta.seriesId, groupId },
+                    });
+                    return;
+                }
+                void captureProductEvent('recurring_series_updated', {
+                    group_id: groupId,
+                    frequency: recurringFrequency,
+                });
+            }
+            const result = await updateExpense(expenseId, updatePayload);
+            stopLoading();
+            if (result) {
+                navigation.goBack();
+            }
+        };
+
+        if (editSeriesMeta && !editSeriesMeta.endedAt) {
+            stopLoading();
+            platformAlert(
+                t('expenses.v2.recurring.editScopeTitle'),
+                t('expenses.v2.recurring.editScopeBody'),
+                [
+                    {
+                        text: t('expenses.v2.recurring.editScopeSeries'),
+                        onPress: () => {
+                            startLoading();
+                            void commitEdit(true);
+                        },
+                    },
+                    {
+                        text: t('expenses.v2.recurring.editScopeOccurrence'),
+                        onPress: () => {
+                            startLoading();
+                            void commitEdit(false);
+                        },
+                    },
+                    { text: t('common.cancel'), style: 'cancel' },
+                ],
+                { cancelable: true },
+            );
+            return;
         }
+
+        await commitEdit(false);
     }, [
         canSave,
         currentUser,
@@ -753,6 +884,7 @@ export function AddExpenseScreen() {
         recurringEnabled,
         recurringUnlocked,
         recurringFrequency,
+        editSeriesMeta,
     ]);
 
     const runShake = useCallback((anim: Animated.Value) => {
@@ -822,7 +954,7 @@ export function AddExpenseScreen() {
         : t('expenses.v2.recurring.label');
     const dateLabel = isSameDay(date, new Date())
         ? t('expenses.v2.today')
-        : formatShortDate(date);
+        : formatAppDateShort(date, i18n.language);
     const headerTitle = isEditMode ? t('expenses.v2.headerEdit') : t('expenses.v2.headerNew');
 
     const editorInitial: EditPayerSplitDraft = {
@@ -871,12 +1003,15 @@ export function AddExpenseScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.heroTop}>
-                    {!isEditMode && storeGroup ? (
+                    {!isEditMode ? (
                         <>
                             <GroupSelectPill
-                                groupName={storeGroup.name}
-                                groupType={storeGroup.groupType}
-                                imageUrl={storeGroup.imageUrl}
+                                groupName={
+                                    storeGroup?.name ?? t('expenses.v2.selectGroup')
+                                }
+                                groupType={storeGroup?.groupType}
+                                imageUrl={storeGroup?.imageUrl}
+                                placeholder={!storeGroup}
                                 onPress={() => setGroupPickerVisible(true)}
                             />
                             <View style={{ height: 16 }} />
@@ -1128,11 +1263,14 @@ export function AddExpenseScreen() {
                         onPress={handleReceiptPress}
                         testID="meta-receipt"
                     />
-                    {!isEditMode ? (
+                    {!isEditMode || editSeriesMeta ? (
                         <QuietIconPill
                             icon="repeat-outline"
                             label={recurringLabel}
-                            active={recurringEnabled && recurringUnlocked}
+                            active={
+                                (recurringEnabled && recurringUnlocked) ||
+                                Boolean(editSeriesMeta)
+                            }
                             onPress={handleRecurringPress}
                             testID="meta-recurring"
                         />
@@ -1286,7 +1424,7 @@ const styles = StyleSheet.create({
     },
     currencyPillWeb: {
         position: 'absolute',
-        left: 4,
+        start: 4,
         top: 0,
         bottom: 0,
         justifyContent: 'center',
@@ -1412,8 +1550,8 @@ const styles = StyleSheet.create({
     },
     footer: {
         position: 'absolute',
-        left: 0,
-        right: 0,
+        start: 0,
+        end: 0,
         bottom: 0,
         paddingHorizontal: 16,
         paddingTop: 20,

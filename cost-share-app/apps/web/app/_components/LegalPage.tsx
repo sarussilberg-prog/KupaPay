@@ -12,6 +12,7 @@ import {
   type LegalSlug,
 } from '@cost-share/shared';
 import { loadStaticLegalDocument } from '@/lib/legalContent';
+import { resolveWebLegalDocumentSource } from '@/lib/webLegalDocumentSource';
 import { marketingLandingPath } from '@/lib/marketingSeo';
 
 // Legal pages are public — use a plain anon client with no session/cookie handling.
@@ -33,7 +34,8 @@ interface Props {
 export default async function LegalPage({ slug, langOverride }: Props) {
   const locale = await getLocale(langOverride);
   const t = getTranslations(locale);
-  const staticDoc = loadStaticLegalDocument(slug, locale);
+  const useStaticBundle = resolveWebLegalDocumentSource(slug, locale) === 'static_bundle';
+  const staticDoc = useStaticBundle ? loadStaticLegalDocument(slug, locale) : null;
 
   let data: { title: string; content_md: string; effective_date: string | null } | null =
     staticDoc

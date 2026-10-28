@@ -110,5 +110,349 @@
     "backHome": "Zur Startseite",
     "effectiveDate": "Gültig ab ",
     "appVersion": "App-Version "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Kostenlos Rechnungen teilen — wer schuldet wem | KupaPay",
+      "description": "Teile Rechnungen mit Freunden kostenlos. Personen und Ausgaben eingeben, minimale Überweisungen erhalten — ohne Anmeldung.",
+      "ogTitle": "Split-Rechner — minimale Überweisungen",
+      "ogDescription": "Berechne, wer wem nach Reise, Essen oder Miete zahlt. Ergebnis speichern oder teilen und in KupaPay verfolgen."
+    },
+    "title": "Ausgaben-Split-Rechner",
+    "subtitle": "Personen und Ausgaben hinzufügen — wir vereinfachen Schulden auf wenige Überweisungen.",
+    "defaults": {
+      "personA": "Anna",
+      "personB": "Lukas",
+      "newPerson": "Freund"
+    },
+    "participants": {
+      "title": "Personen",
+      "nameLabel": "Personenname",
+      "add": "Person hinzufügen",
+      "remove": "Entfernen"
+    },
+    "expenses": {
+      "title": "Ausgaben",
+      "currency": "Währung",
+      "currencyHint": "3-Buchstaben-Code, z. B. EUR",
+      "amount": "Betrag",
+      "paidBy": "Bezahlt von",
+      "splitAmong": "Gleich aufteilen unter",
+      "add": "Ausgabe hinzufügen",
+      "remove": "Ausgabe entfernen"
+    },
+    "results": {
+      "title": "Ausgleichen",
+      "transferLine": "{from} zahlt an {to} {amount}",
+      "allSettled": "Alle sind ausgeglichen — keine Überweisungen nötig.",
+      "algorithmNote": "Überweisungen minimiert ({mode}).",
+      "algorithmExact": "exakt",
+      "algorithmGreedy": "näherungsweise",
+      "errors": {
+        "no_participants": "Mindestens eine Person hinzufügen.",
+        "no_expenses": "Mindestens eine Ausgabe mit Betrag hinzufügen.",
+        "invalid_amount": "Beträge, Zahler und Beteiligte jeder Ausgabe prüfen.",
+        "unbalanced": "Summen stimmen nicht — Ausgaben anpassen und erneut versuchen."
+      }
+    },
+    "share": {
+      "copy": "Teilen-Link kopieren",
+      "copied": "Link kopiert",
+      "error": "Link konnte nicht kopiert werden"
+    },
+    "cta": {
+      "title": "Aufteilung als Gruppe speichern",
+      "body": "Lade KupaPay herunter, um Ausgaben zu tracken, Freunde einzuladen und mit Echtzeit-Salden auszugleichen."
+    }
+  },
+  "useCaseShared": {
+    "howItWorksTitle": "So funktioniert's",
+    "faqTitle": "FAQ",
+    "exploreTitle": "Mehr entdecken",
+    "splitCalculatorLink": "Kostenloser Split-Rechner",
+    "mainLandingLink": "KupaPay Startseite",
+    "otherUseCasesTitle": "Weitere Split-Szenarien"
+  },
+  "useCases": {
+    "trip": {
+      "navLabel": "Reisekosten",
+      "seo": {
+        "title": "Reisekosten mit Freunden teilen — kostenlos | KupaPay",
+        "description": "Flüge, Hotels, Benzin und Mahlzeiten auf Gruppenreisen erfassen. KupaPay vereinfacht Schulden auf die wenigsten Überweisungen — kostenlos auf iOS, Android und Web.",
+        "ogTitle": "Rechnungen auf Reisen teilen — ohne Tabellen",
+        "ogDescription": "Eine Gruppe für die Reise, alle Ausgaben synchron, automatische Schuldenvereinfachung beim Ausgleich."
+      },
+      "hero": {
+        "headline": "Reisekosten teilen — ohne Tabellenkalkulation",
+        "subheadline": "Flüge, Hotels, Benzin und Abendessen — eine Gruppe, klare Salden und weniger Überweisungen am Ende."
+      },
+      "benefits": {
+        "title": "Für Reisegruppen gemacht",
+        "items": [
+          {
+            "title": "Eine Gruppe für die ganze Reise",
+            "description": "Einmal Reisebegleiter einladen und Ausgaben unterwegs hinzufügen — alle sehen Salden in Echtzeit."
+          },
+          {
+            "title": "Weniger Zahlungen am Ende",
+            "description": "Schuldenvereinfachung bündelt viele kleine Schulden auf die minimale Zahl von Überweisungen zwischen Freunden."
+          },
+          {
+            "title": "Offline unterwegs",
+            "description": "Ausgaben ohne Netz erfassen; KupaPay synchronisiert, sobald Sie wieder online sind."
+          },
+          {
+            "title": "Ausgleichsdetails teilen",
+            "description": "Nutzen Sie Ausgleichs-Links, damit jeder genau weiß, wem wie viel zu zahlen ist."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Reisegruppe anlegen",
+            "description": "Benennen Sie die Reise und laden Sie Freunde per Link ein."
+          },
+          {
+            "title": "Gemeinsame Kosten hinzufügen",
+            "description": "Erfassen Sie, wer Transport, Unterkunft, Essen oder Aktivitäten bezahlt hat und wer jede Rechnung teilt."
+          },
+          {
+            "title": "Mit vereinfachten Summen ausgleichen",
+            "description": "KupaPay zeigt Nettosalden und die kleinste Menge an Überweisungen, um die Reise abzuschließen."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Können wir auf einer Reise verschiedene Währungen nutzen?",
+            "answer": "Ja. Erfassen Sie Ausgaben in der Zahlungswährung; Salden bleiben pro Ausgabe und Gruppeneinstellung klar."
+          },
+          {
+            "question": "Brauche ich ein Konto zum Start?",
+            "answer": "Melden Sie sich im Web an oder laden Sie die App herunter, um eine Gruppe zu erstellen und andere einzuladen."
+          },
+          {
+            "question": "Worin unterscheidet sich das vom manuellen Teilen?",
+            "answer": "KupaPay erfasst jede Ausgabe, berechnet Salden automatisch neu und reduziert nötige Banküberweisungen am Ende."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Reisegruppe starten",
+        "body": "Laden Sie KupaPay herunter oder melden Sie sich im Web an, um eine Reisegruppe anzulegen und die erste gemeinsame Ausgabe hinzuzufügen."
+      }
+    },
+    "roommates": {
+      "navLabel": "Mitbewohner-Rechnungen",
+      "seo": {
+        "title": "Miete und Rechnungen mit Mitbewohnern teilen — KupaPay",
+        "description": "Teilen Sie Miete, Nebenkosten, Einkäufe und Haushaltskosten mit Mitbewohnern. Automatische Schuldenvereinfachung und monatliche Übersicht — kostenlos.",
+        "ogTitle": "Mitbewohner-Rechnungen einfach teilen",
+        "ogDescription": "Haushaltsausgaben tracken, sehen wer wem schuldet, mit weniger Überweisungen ausgleichen."
+      },
+      "hero": {
+        "headline": "Mitbewohner-Rechnungen ohne peinliches Rechnen",
+        "subheadline": "Miete, Nebenkosten, Einkäufe und Gemeinschaftsbedarf — fair und transparent im Haushalt."
+      },
+      "benefits": {
+        "title": "Für Wohngemeinschaften",
+        "items": [
+          {
+            "title": "Wiederkehrende Haushaltskosten",
+            "description": "Miete, Nebenkosten, Internet und Einkäufe beim Bezahlen erfassen, damit am Monatsende nichts fehlt."
+          },
+          {
+            "title": "Klare Salden pro Person",
+            "description": "Jeder Mitbewohner sieht jederzeit seinen Anteil und Nettosaldo in der Gruppe."
+          },
+          {
+            "title": "Einfacherer Ausgleich",
+            "description": "Wenn zurückgezahlt wird, reduziert Schuldenvereinfachung überflüssige Überweisungen."
+          },
+          {
+            "title": "Einladung per Link",
+            "description": "Mitbewohner in Sekunden zur Haushaltsgruppe hinzufügen — ohne Ausgaben neu einzutippen."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Haushaltsgruppe erstellen",
+            "description": "Gruppe für Wohnung oder Haus einrichten und Mitbewohner einladen."
+          },
+          {
+            "title": "Rechnungen beim Bezahlen erfassen",
+            "description": "Eintragen, wer Miete, Nebenkosten oder Einkäufe bezahlt hat, gleichmäßig oder mit individuellen Anteilen teilen."
+          },
+          {
+            "title": "Monatlich ausgleichen",
+            "description": "Vereinfachte Summen nutzen, um zu sehen, wer wem überweisen soll."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Kann eine Person die Miete zahlen und aufteilen?",
+            "answer": "Ja. Gesamtzahlung erfassen und Betrag auf Mitbewohner verteilen — Salden aktualisieren sich für alle."
+          },
+          {
+            "question": "Ist KupaPay für Mitbewohner kostenlos?",
+            "answer": "Ja. Gruppenausgaben-Tracking und Schuldenvereinfachung im Kern sind kostenlos."
+          },
+          {
+            "question": "Kann ich zuerst schnell rechnen?",
+            "answer": "Nutzen Sie den kostenlosen Split-Rechner auf dieser Seite für eine Schätzung, speichern Sie die Gruppe dann in der App zum Weitertracken."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Haushaltsgruppe einrichten",
+        "body": "KupaPay auf dem Handy oder im Web nutzen, um Mitbewohner-Ausgaben gemeinsam zu tracken."
+      }
+    },
+    "event": {
+      "navLabel": "Event-Ausgaben",
+      "seo": {
+        "title": "Gruppenessen und Event-Rechnungen teilen — KupaPay",
+        "description": "Kosten für Abendessen, Partys, Tickets und Gruppenevents teilen. Gäste einladen, Ausgaben hinzufügen und mit automatischer Schuldenvereinfachung ausgleichen.",
+        "ogTitle": "Event-Kosten fair teilen",
+        "ogDescription": "Einmaliges Dinner, Feier oder Tickets — in einer Gruppe sehen, wer bezahlt hat und wer schuldet."
+      },
+      "hero": {
+        "headline": "Event-Kosten teilen, bevor alle gehen",
+        "subheadline": "Gruppenessen, Tickets, Deko oder Getränke — einmal erfassen und fair ausgleichen."
+      },
+      "benefits": {
+        "title": "Für Essen, Partys und Ausflüge",
+        "items": [
+          {
+            "title": "Schnelle Gruppenerstellung",
+            "description": "Event-Gruppe anlegen und Einladungslink teilen, solange alle noch zusammen sind."
+          },
+          {
+            "title": "Ungleiche Rechnungen teilen",
+            "description": "Wählen Sie pro Ausgabe, wer beteiligt ist, wenn nicht alle Gleiches bestellt haben."
+          },
+          {
+            "title": "Echtzeit-Summen",
+            "description": "Salden aktualisieren sich mit jeder Ausgabe — keine Überraschungen später."
+          },
+          {
+            "title": "Minimale Überweisungen",
+            "description": "Schuldenvereinfachung hilft, das Event mit weniger Zahlungen zwischen Gästen abzuschließen."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Gruppe für das Event öffnen",
+            "description": "Benennen Sie sie z. B. „Geburtstagsessen“ und laden Sie Teilnehmer ein."
+          },
+          {
+            "title": "Bezahltes erfassen",
+            "description": "Rechnung, Zahler und wer jeden Posten oder die Summe teilt hinzufügen."
+          },
+          {
+            "title": "Teilen, wer wem schuldet",
+            "description": "Ausgleichsdetails senden, damit Gäste der richtigen Person zahlen."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Funktioniert es für einmalige Events?",
+            "answer": "Ja. Gruppe für ein Dinner oder eine Party anlegen und danach archivieren oder löschen."
+          },
+          {
+            "question": "Kann ich die Web-App am Tisch nutzen?",
+            "answer": "Ja. Im Web anmelden oder die App nutzen, um Ausgaben vor Ort hinzuzufügen."
+          },
+          {
+            "question": "Was, wenn nicht alle gleich viel verbraucht haben?",
+            "answer": "Beim Hinzufügen einer Ausgabe wählen Sie beteiligte Mitglieder, damit Salden die reale Teilnahme widerspiegeln."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Event-Gruppe erstellen",
+        "body": "App herunterladen oder im Web anmelden, um die nächste Gruppenrechnung in Minuten zu teilen."
+      }
+    },
+    "couple": {
+      "navLabel": "Paar-Ausgaben",
+      "seo": {
+        "title": "Paar-Ausgaben und gemeinsame Kosten — KupaPay",
+        "description": "Gemeinsame Ausgaben als Paar tracken: Miete, Einkäufe, Dates und Rechnungen. Klare Salden und einfacher Ausgleich — kostenlos.",
+        "ogTitle": "Gemeinsame Ausgaben zu zweit",
+        "ogDescription": "Kleine Gruppe für zwei Personen, automatische Salden und Schuldenvereinfachung beim Ausgleich."
+      },
+      "hero": {
+        "headline": "Gemeinsame Ausgaben als Paar tracken",
+        "subheadline": "Miete, Einkäufe, Abos und Abende — fair für beide ohne ständiges Kopfrechnen."
+      },
+      "benefits": {
+        "title": "Einfaches Teilen zu zweit",
+        "items": [
+          {
+            "title": "Nur ihr zwei",
+            "description": "Eigene Gruppe für gemeinsame Kosten — ohne komplizierte Tabelle."
+          },
+          {
+            "title": "Beide können Ausgaben hinzufügen",
+            "description": "Ihr könnt beide erfassen, was bezahlt wurde und wie geteilt wird."
+          },
+          {
+            "title": "Saldo immer im Blick",
+            "description": "Auf einen Blick sehen, wer wem schuldet, statt Belege später abzugleichen."
+          },
+          {
+            "title": "Sauber ausgleichen",
+            "description": "Beim Kontoausgleich zeigt die Vereinfachung bei Bedarf eine klare Einzelüberweisung."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Paar-Gruppe erstellen",
+            "description": "Partner oder Partnerin mit einem Link einladen."
+          },
+          {
+            "title": "Gemeinsame Ausgaben hinzufügen",
+            "description": "Rechnungen erfassen, die einer von euch bezahlt, gleichmäßig oder nach Absprache teilen."
+          },
+          {
+            "title": "Ausgleichen, wann ihr wollt",
+            "description": "Salden und Ausgleichs-Links nutzen, wenn ihr ausgleichen möchtet."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Brauchen wir beide die App?",
+            "answer": "Einer kann Ausgaben hinzufügen, aber für beide ist es am klarsten mit App oder Web-Anmeldung."
+          },
+          {
+            "question": "Können wir standardmäßig 50/50 teilen?",
+            "answer": "Ja. Gleichteilung ist Standard; pro Ausgabe anpassbar."
+          },
+          {
+            "question": "Sind unsere Daten privat?",
+            "answer": "Gruppendaten sind nur für eingeladene Mitglieder sichtbar. Details in der Datenschutzerklärung."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Paar-Gruppe starten",
+        "body": "KupaPay kostenlos auf iPhone, Android oder Web holen, um gemeinsame Ausgaben zu tracken."
+      }
+    }
   }
 }

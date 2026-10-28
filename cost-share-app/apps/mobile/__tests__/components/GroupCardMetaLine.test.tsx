@@ -25,7 +25,7 @@ const baseGroup = (lastActivityAt: Date): GroupWithMembers => ({
 
 describe('GroupCardMetaLine', () => {
     it('shows only member count when activity is very recent', () => {
-        const { getByTestId, queryByText } = render(
+        const { getByTestId, queryByTestId } = render(
             <GroupCardMetaLine
                 group={baseGroup(new Date())}
                 memberCount={1}
@@ -33,14 +33,26 @@ describe('GroupCardMetaLine', () => {
             />,
         );
         expect(getByTestId('group-card-meta')).toBeTruthy();
-        expect(queryByText(/groups\.card\.updatedAgo/)).toBeNull();
+        expect(queryByTestId('group-card-meta-updated')).toBeNull();
     });
 
-    it('appends updated ago when activity is older than threshold', () => {
+    it('appends compact updated time when activity is older than threshold', () => {
         const old = new Date(Date.now() - GROUP_CARD_UPDATED_META_MIN_AGE_MS - 86_400_000);
-        const { getByText } = render(
+        const { getByTestId } = render(
             <GroupCardMetaLine group={baseGroup(old)} memberCount={2} language="en" />,
         );
-        expect(getByText(/groups\.card\.updatedAgo/)).toBeTruthy();
+        expect(getByTestId('group-card-meta-updated')).toBeTruthy();
     });
+
+    it('uses full Hebrew relative day labels on the meta line', () => {
+        const sixDaysAgo = new Date(Date.now() - GROUP_CARD_UPDATED_META_MIN_AGE_MS - 6 * 86_400_000);
+        const { getByTestId } = render(
+            <GroupCardMetaLine group={baseGroup(sixDaysAgo)} memberCount={2} language="he" />,
+        );
+        const updated = getByTestId('group-card-meta-updated');
+        expect(String(updated.props.children)).toContain('לפני');
+        expect(String(updated.props.children)).not.toMatch(/י׳/);
+        expect(String(updated.props.children)).toMatch(/6/);
+    });
+
 });

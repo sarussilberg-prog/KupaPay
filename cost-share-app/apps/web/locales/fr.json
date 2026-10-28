@@ -110,5 +110,349 @@
     "backHome": "Retour à l’accueil",
     "effectiveDate": "En vigueur depuis le ",
     "appVersion": "Version de l’app "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Calculateur de partage de dépenses gratuit — qui doit quoi | KupaPay",
+      "description": "Partagez les factures entre amis gratuitement. Saisissez les personnes et dépenses, obtenez le minimum de virements — sans inscription.",
+      "ogTitle": "Calculateur de partage — virements minimaux",
+      "ogDescription": "Calculez qui paie qui après un voyage, un dîner ou un loyer. Enregistrez ou partagez le résultat, puis suivez dans KupaPay."
+    },
+    "title": "Calculateur de partage de dépenses",
+    "subtitle": "Ajoutez des personnes et des dépenses — nous simplifions les dettes en un minimum de virements.",
+    "defaults": {
+      "personA": "Camille",
+      "personB": "Jules",
+      "newPerson": "Ami"
+    },
+    "participants": {
+      "title": "Personnes",
+      "nameLabel": "Nom",
+      "add": "Ajouter une personne",
+      "remove": "Retirer"
+    },
+    "expenses": {
+      "title": "Dépenses",
+      "currency": "Devise",
+      "currencyHint": "Code à 3 lettres, ex. EUR",
+      "amount": "Montant",
+      "paidBy": "Payé par",
+      "splitAmong": "Partager également entre",
+      "add": "Ajouter une dépense",
+      "remove": "Supprimer la dépense"
+    },
+    "results": {
+      "title": "Régler",
+      "transferLine": "{from} paie {to} {amount}",
+      "allSettled": "Tout le monde est à l’équilibre — aucun virement.",
+      "algorithmNote": "Virements minimisés ({mode}).",
+      "algorithmExact": "exacte",
+      "algorithmGreedy": "approximatif",
+      "errors": {
+        "no_participants": "Ajoutez au moins une personne.",
+        "no_expenses": "Ajoutez au moins une dépense avec un montant.",
+        "invalid_amount": "Vérifiez montants, payeur et participants de chaque dépense.",
+        "unbalanced": "Les totaux ne s’équilibrent pas — ajustez les dépenses et réessayez."
+      }
+    },
+    "share": {
+      "copy": "Copier le lien de partage",
+      "copied": "Lien copié",
+      "error": "Impossible de copier le lien"
+    },
+    "cta": {
+      "title": "Enregistrer ce partage comme groupe",
+      "body": "Téléchargez KupaPay pour suivre les dépenses, inviter des amis et régler avec des soldes en temps réel."
+    }
+  },
+  "useCaseShared": {
+    "howItWorksTitle": "Comment ça marche",
+    "faqTitle": "FAQ",
+    "exploreTitle": "En savoir plus",
+    "splitCalculatorLink": "Calculateur de partage gratuit",
+    "mainLandingLink": "Accueil KupaPay",
+    "otherUseCasesTitle": "Autres façons de partager"
+  },
+  "useCases": {
+    "trip": {
+      "navLabel": "Dépenses de voyage",
+      "seo": {
+        "title": "Partager les frais de voyage entre amis — gratuit | KupaPay",
+        "description": "Suivez vols, hôtels, essence et repas en voyage de groupe. KupaPay réduit qui doit à qui au minimum de virements — gratuit sur iOS, Android et le web.",
+        "ogTitle": "Partagez les factures de voyage sans tableur",
+        "ogDescription": "Un groupe pour le voyage, chaque dépense synchronisée, simplification automatique des dettes au règlement."
+      },
+      "hero": {
+        "headline": "Partagez les frais de voyage sans tableur",
+        "subheadline": "Vols, hôtels, essence et dîners — un groupe, des soldes clairs et moins de virements à la fin."
+      },
+      "benefits": {
+        "title": "Pensé pour les groupes de voyage",
+        "items": [
+          {
+            "title": "Un groupe pour tout le voyage",
+            "description": "Invitez vos compagnons une fois et ajoutez les dépenses au fil de l’eau — tout le monde voit les soldes se mettre à jour en temps réel."
+          },
+          {
+            "title": "Moins de paiements à la fin",
+            "description": "La simplification des dettes regroupe les petites dettes en un nombre minimal de virements entre amis."
+          },
+          {
+            "title": "Fonctionne hors ligne en route",
+            "description": "Enregistrez les dépenses sans réseau ; KupaPay synchronise dès que vous êtes de nouveau en ligne."
+          },
+          {
+            "title": "Partagez les détails de règlement",
+            "description": "Utilisez les liens de règlement pour que chacun sache exactement qui payer et combien."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Créez un groupe voyage",
+            "description": "Nommez votre voyage et invitez vos amis par lien."
+          },
+          {
+            "title": "Ajoutez les coûts partagés",
+            "description": "Indiquez qui a payé transport, logement, repas ou activités et qui partage chaque facture."
+          },
+          {
+            "title": "Réglez avec des totaux simplifiés",
+            "description": "KupaPay affiche les soldes nets et le plus petit ensemble de virements pour clôturer le voyage."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Peut-on utiliser plusieurs devises dans un même voyage ?",
+            "answer": "Oui. Ajoutez les dépenses dans la devise payée ; les soldes restent clairs par dépense et selon les paramètres du groupe."
+          },
+          {
+            "question": "Faut-il un compte pour commencer ?",
+            "answer": "Connectez-vous sur le web ou téléchargez l’app mobile pour créer un groupe et inviter les autres."
+          },
+          {
+            "question": "En quoi est-ce différent d’un partage manuel ?",
+            "answer": "KupaPay suit chaque dépense, recalcule les soldes automatiquement et réduit le nombre de virements bancaires à la fin."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Lancez votre groupe voyage",
+        "body": "Téléchargez KupaPay ou connectez-vous sur le web pour créer un groupe voyage et ajouter votre première dépense commune."
+      }
+    },
+    "roommates": {
+      "navLabel": "Factures colocataires",
+      "seo": {
+        "title": "Partager loyer et charges entre colocataires — KupaPay",
+        "description": "Partagez loyer, charges, courses et coûts du foyer entre colocataires. Simplification automatique des dettes et suivi mensuel — gratuit.",
+        "ogTitle": "Le partage des factures en colocation, simplifié",
+        "ogDescription": "Suivez les dépenses du logement, voyez qui doit quoi et réglez avec moins de virements."
+      },
+      "hero": {
+        "headline": "Partagez les factures de coloc sans calcul gênant",
+        "subheadline": "Loyer, charges, courses et fournitures communes — gardez le foyer équitable et transparent."
+      },
+      "benefits": {
+        "title": "Pour les logements partagés",
+        "items": [
+          {
+            "title": "Charges du foyer récurrentes",
+            "description": "Enregistrez loyer, charges, internet et courses au fur et à mesure pour ne rien oublier en fin de mois."
+          },
+          {
+            "title": "Soldes clairs par personne",
+            "description": "Chaque colocataire voit sa part et son solde net dans le groupe à tout moment."
+          },
+          {
+            "title": "Règlement plus simple",
+            "description": "Quand vient le moment de se rembourser, la simplification des dettes limite les virements inutiles."
+          },
+          {
+            "title": "Invitation par lien",
+            "description": "Ajoutez les colocataires au groupe logement en quelques secondes — sans ressaisir les dépenses."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Créez un groupe logement",
+            "description": "Configurez un groupe pour votre appartement ou maison et invitez les colocataires."
+          },
+          {
+            "title": "Ajoutez les factures au paiement",
+            "description": "Indiquez qui a payé le loyer, les charges ou les courses et partagez à parts égales ou personnalisées."
+          },
+          {
+            "title": "Réglez chaque mois",
+            "description": "Utilisez les totaux simplifiés pour voir qui doit virer à qui."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Une personne peut-elle payer le loyer et le partager ?",
+            "answer": "Oui. Enregistrez le paiement complet et répartissez le montant entre colocataires ; les soldes se mettent à jour pour tous."
+          },
+          {
+            "question": "KupaPay est-il gratuit pour les colocataires ?",
+            "answer": "Oui. Le suivi des dépenses de groupe et la simplification des dettes sont gratuits."
+          },
+          {
+            "question": "Puis-je faire un calcul rapide d’abord ?",
+            "answer": "Utilisez le calculateur gratuit sur ce site pour une estimation ponctuelle, puis enregistrez le groupe dans l’app pour continuer le suivi."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Configurez votre groupe logement",
+        "body": "Installez KupaPay sur votre téléphone ou utilisez le web pour suivre les dépenses de colocation ensemble."
+      }
+    },
+    "event": {
+      "navLabel": "Dépenses d’événement",
+      "seo": {
+        "title": "Partager facture de dîner et d’événement — KupaPay",
+        "description": "Partagez les coûts de dîners, fêtes, billets et événements de groupe. Invitez, ajoutez des dépenses et réglez avec simplification automatique des dettes.",
+        "ogTitle": "Partage équitable des coûts d’événement",
+        "ogDescription": "Dîner ponctuel, fête ou billets — suivez qui a payé et qui doit quoi dans un seul groupe."
+      },
+      "hero": {
+        "headline": "Partagez les coûts de l’événement avant que chacun parte",
+        "subheadline": "Dîners de groupe, billets, déco ou boissons — enregistrez une fois et réglez équitablement."
+      },
+      "benefits": {
+        "title": "Pour dîners, fêtes et sorties",
+        "items": [
+          {
+            "title": "Création de groupe rapide",
+            "description": "Créez un groupe événement et partagez un lien d’invitation tant que tout le monde est encore ensemble."
+          },
+          {
+            "title": "Factures inégales",
+            "description": "Choisissez qui partage chaque dépense quand tout le monde n’a pas pris la même chose."
+          },
+          {
+            "title": "Totaux en temps réel",
+            "description": "Les soldes se mettent à jour à chaque dépense — pas de mauvaise surprise plus tard."
+          },
+          {
+            "title": "Minimum de virements",
+            "description": "La simplification des dettes aide à clôturer l’événement avec moins de paiements entre invités."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Ouvrez un groupe pour l’événement",
+            "description": "Nommez-le par exemple « Dîner d’anniversaire » et invitez les participants."
+          },
+          {
+            "title": "Enregistrez ce qui a été payé",
+            "description": "Ajoutez la facture, qui a payé et qui partage chaque article ou le total."
+          },
+          {
+            "title": "Partagez qui doit quoi",
+            "description": "Envoyez les détails de règlement pour que les invités paient la bonne personne."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Est-ce adapté aux événements ponctuels ?",
+            "answer": "Oui. Créez un groupe pour un seul dîner ou une fête, puis archivez-le ou supprimez-le quand vous avez terminé."
+          },
+          {
+            "question": "Puis-je utiliser le web à table ?",
+            "answer": "Oui. Connectez-vous sur le web ou utilisez l’app mobile pour ajouter des dépenses sur place."
+          },
+          {
+            "question": "Et si tout le monde n’a pas consommé pareil ?",
+            "answer": "Lors de l’ajout d’une dépense, sélectionnez les membres concernés pour que les soldes reflètent qui a vraiment participé."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Créez un groupe événement",
+        "body": "Téléchargez l’app ou connectez-vous sur le web pour partager votre prochaine addition de groupe en quelques minutes."
+      }
+    },
+    "couple": {
+      "navLabel": "Dépenses de couple",
+      "seo": {
+        "title": "Dépenses de couple et coûts communs — KupaPay",
+        "description": "Suivez les dépenses communes à deux : loyer, courses, sorties et factures. Soldes clairs et règlement simple — gratuit.",
+        "ogTitle": "Dépenses communes à deux",
+        "ogDescription": "Un petit groupe pour deux personnes, soldes automatiques et simplification des dettes au règlement."
+      },
+      "hero": {
+        "headline": "Suivez vos dépenses communes en couple",
+        "subheadline": "Loyer, courses, abonnements et sorties — restez équitables sans calcul mental constant."
+      },
+      "benefits": {
+        "title": "Partage simple à deux",
+        "items": [
+          {
+            "title": "Juste vous deux",
+            "description": "Un groupe dédié aux coûts communs — pas besoin d’un tableur compliqué."
+          },
+          {
+            "title": "Chacun peut ajouter des dépenses",
+            "description": "Vous pouvez tous les deux enregistrer ce qui a été payé et comment le partager."
+          },
+          {
+            "title": "Le solde toujours visible",
+            "description": "Voyez d’un coup d’œil qui doit à qui au lieu de recoller les reçus plus tard."
+          },
+          {
+            "title": "Règlement net",
+            "description": "Quand vous équilibrez les comptes, la simplification affiche un virement clair unique si besoin."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Créez un groupe couple",
+            "description": "Invitez votre partenaire avec un seul lien."
+          },
+          {
+            "title": "Ajoutez les dépenses communes",
+            "description": "Enregistrez les factures payées par l’un ou l’autre et partagez à parts égales ou selon votre accord."
+          },
+          {
+            "title": "Réglez quand vous voulez",
+            "description": "Utilisez les soldes et les liens de règlement quand vous souhaitez vous équilibrer."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Avons-nous tous les deux besoin de l’app ?",
+            "answer": "L’un de vous peut ajouter les dépenses, mais l’expérience est plus claire pour les deux avec l’app ou la connexion web."
+          },
+          {
+            "question": "Peut-on partager 50/50 par défaut ?",
+            "answer": "Oui. Le partage égal est le défaut ; vous pouvez ajuster par dépense si besoin."
+          },
+          {
+            "question": "Nos données sont-elles privées ?",
+            "answer": "Les données du groupe ne sont visibles que par les membres invités. Consultez notre politique de confidentialité pour les détails."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Lancez un groupe couple",
+        "body": "Obtenez KupaPay gratuitement sur iPhone, Android ou le web pour suivre vos dépenses communes."
+      }
+    }
   }
 }

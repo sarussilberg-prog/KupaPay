@@ -34,8 +34,13 @@ New violations fail CI (per lint type) when that type is **`enforce: true`** in 
 |------|------------------------|
 | `get_user_simplified_inputs` | ≤ 800 ms |
 | `get_user_groups_archive_state` | ≤ 400 ms |
+| `get_activity_unread_count` | ≤ 200 ms |
 | Groups list join query | ≤ 400 ms |
 | Group expenses list query | ≤ 400 ms, no seq scan on `expenses` at scale |
+
+### MAU load test (#425)
+
+Dev REST load: [`cost-share-app/scripts/load-test/`](../../cost-share-app/scripts/load-test/) (k6 + manifest). Pass: **p95 < 300 ms**, errors **< 0.5%** on dev. Manual workflow: `load-test-dev-manual.yml`. Index review and free-tier headroom: `INDEX_REVIEW.md`, `HEADROOM.md`, `REPORT.md` in that folder.
 
 ### Mobile Supabase request budgets (mocked)
 
@@ -55,10 +60,17 @@ Configured in [`cost-share-app/.size-limit.json`](../../cost-share-app/.size-lim
 
 | Artifact | Limit |
 |----------|--------|
-| Expo web `index-*.js` | 2800 KB (measured ~1760 KB gzip, Oct 2026) |
-| Next.js `main-app-*.js` | 180 KB (measured ~0.4 KB gzip for app shell chunk; limit guards regressions) |
+| Expo web `index-*.js` | 2500 KB gzip (entry chunk; non-English locales and `xlsx` load on demand) |
+| Next.js `main-app-*.js` | 180 KB (measured ~1.5 KB gzip for app shell chunk; limit guards regressions) |
 
 Run locally: `cd cost-share-app && npm run size:ci`.
+
+**Bundle analysis (local, optional):**
+
+| Target | Command |
+|--------|---------|
+| Expo / Metro (web export) | `npm run analyze:mobile` then `npm run analyze:atlas -w @cost-share/mobile` |
+| Next.js marketing site | `npm run analyze:web` (opens webpack report when `ANALYZE=true`) |
 
 ### Lighthouse
 
@@ -87,7 +99,7 @@ Run locally: `cd cost-share-app && npm run size:ci`.
 | `development` / previews | **1.0** |
 
 - **Mobile:** `EXPO_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/mobile/lib/sentry.ts`](../../cost-share-app/apps/mobile/lib/sentry.ts)
-- **Next.js site:** `NEXT_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/web/instrumentation-client.ts`](../../cost-share-app/apps/web/instrumentation-client.ts)
+- **Next.js site:** `NEXT_PUBLIC_SENTRY_ENVIRONMENT` + [`apps/web/lib/sentryInit.ts`](../../cost-share-app/apps/web/lib/sentryInit.ts) (client + server). Source maps: Vercel env `SENTRY_AUTH_TOKEN` + `SENTRY_PROJECT=kupapay-web` during `next build` ([`next.config.ts`](../../cost-share-app/apps/web/next.config.ts)).
 
 Error `sampleRate` remains **1.0** (errors are not subsampled).
 

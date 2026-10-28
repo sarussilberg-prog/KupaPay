@@ -41,6 +41,10 @@ jest.mock('@react-navigation/native', () => ({
     useFocusEffect: jest.fn(),
 }));
 
+jest.mock('../../../components/pro/ProSettingsSection', () => ({
+    ProSettingsSection: () => null,
+}));
+
 import { SettingsScreen } from '../../../screens/profile/SettingsScreen';
 import { useAppStore } from '../../../store';
 import { updateUser } from '../../../services/users.service';

@@ -3,11 +3,12 @@
 // CI is currently Node-only and does NOT run these tests.
 
 import { assertEquals, assertStringIncludes } from '@std/assert';
-import { handleRequest, type ProxyEnv } from './handler.ts';
+import { handleRequest, resolveSentryApiToken, type ProxyEnv } from './handler.ts';
 
 const baseEnv: ProxyEnv = {
     SUPABASE_URL: 'https://example.supabase.co',
     SUPABASE_ANON_KEY: 'anon-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
     SENTRY_API_BASE_URL: '',
     SENTRY_API_TOKEN: 'sentry-token',
     SENTRY_ORG: 'kupay-hb',
@@ -175,9 +176,13 @@ Deno.test(
 );
 
 Deno.test(
-    'missing SENTRY_API_TOKEN returns sentry_not_configured',
+    'missing token and service role returns sentry_not_configured',
     withSupabaseAdmin(true, async () => {
-        const env: ProxyEnv = { ...baseEnv, SENTRY_API_TOKEN: '' };
+        const env: ProxyEnv = {
+            ...baseEnv,
+            SENTRY_API_TOKEN: '',
+            SUPABASE_SERVICE_ROLE_KEY: '',
+        };
         const req = new Request('https://x/admin-sentry-proxy', {
             method: 'POST',
             headers: { Authorization: 'Bearer jwt', 'Content-Type': 'application/json' },
@@ -188,6 +193,81 @@ Deno.test(
         const json = await res.json();
         assertEquals(json.error, 'sentry_not_configured');
         assertEquals(json.missing.includes('SENTRY_API_TOKEN'), true);
+        assertEquals(json.missing.includes('SUPABASE_SERVICE_ROLE_KEY'), true);
+    }),
+);
+
+Deno.test('resolveSentryApiToken reads Vault via service RPC when env empty', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = ((input: RequestInfo | URL): Promise<Response> => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes('/rest/v1/rpc/service_sentry_api_token')) {
+            return Promise.resolve(
+                new Response(JSON.stringify('vault-token-abc'), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                }),
+            );
+        }
+        return originalFetch(input as RequestInfo);
+    }) as typeof fetch;
+    try {
+        const env: ProxyEnv = { ...baseEnv, SENTRY_API_TOKEN: '' };
+        const result = await resolveSentryApiToken(env);
+        assertEquals(result.ok, true);
+        if (result.ok) assertEquals(result.token, 'vault-token-abc');
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});
+
+Deno.test(
+    'list_issues uses Vault token when SENTRY_API_TOKEN env is unset',
+    withSupabaseAdmin(true, async () => {
+        const calls: { url: string; auth: string | null }[] = [];
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+            const url = typeof input === 'string' ? input : input.toString();
+            if (url.includes('/rest/v1/rpc/is_app_admin')) {
+                return Promise.resolve(
+                    new Response(JSON.stringify(true), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' },
+                    }),
+                );
+            }
+            if (url.includes('/rest/v1/rpc/service_sentry_api_token')) {
+                return Promise.resolve(
+                    new Response(JSON.stringify('vault-sentry-token'), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' },
+                    }),
+                );
+            }
+            if (url.includes('de.sentry.io/api/0/')) {
+                const auth =
+                    (init?.headers as Record<string, string> | undefined)?.['Authorization'] ?? null;
+                calls.push({ url, auth });
+                return Promise.resolve(
+                    new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+                );
+            }
+            return originalFetch(input as RequestInfo, init);
+        }) as typeof fetch;
+        try {
+            const env: ProxyEnv = { ...baseEnv, SENTRY_API_TOKEN: '' };
+            const req = new Request('https://x/admin-sentry-proxy', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer jwt', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'list_issues', environment: 'dev' }),
+            });
+            const res = await handleRequest(req, env);
+            assertEquals(res.status, 200);
+            assertEquals(calls.length, 1);
+            assertEquals(calls[0].auth, 'Bearer vault-sentry-token');
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
     }),
 );
 

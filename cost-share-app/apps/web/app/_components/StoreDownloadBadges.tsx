@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Translations } from '@/lib/i18n';
 import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/marketingSeo';
 

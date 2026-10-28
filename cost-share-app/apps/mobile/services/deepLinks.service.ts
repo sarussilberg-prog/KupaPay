@@ -15,13 +15,15 @@ import { supabase } from '../lib/supabase';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { captureProductEvent, trackSecondGroupMemberJoined } from '../lib/productAnalytics';
+import { parseRpcResult } from '../lib/rpcResult';
 import { listClaimableGuestMembers } from './groups.service';
 import { INVITE_TOKEN_RE } from '../lib/inviteToken';
 
 export type InviteRedemptionResult =
     | { kind: 'friend' }
     | { kind: 'group'; groupId: string }
-    | { kind: 'settleReminder' };
+    | { kind: 'settleReminder' }
+    | { kind: 'expenseShare' };
 
 export type InviteLink =
     | { kind: 'friend'; token: string }
@@ -126,7 +128,7 @@ async function redeemInviteLink(
             return null;
         }
         showInfoToast('expenses.shareLinkOpenApp');
-        return null;
+        return { kind: 'expenseShare' as const };
     }
 
     if (link.kind === 'settleReminder') {
@@ -154,6 +156,11 @@ async function redeemInviteLink(
             handleRedemptionError(error, 'friend');
             return null;
         }
+        const failure = parseRpcResult(data);
+        if (failure && !failure.ok) {
+            handleRedemptionErrorCode(failure.error_code, 'friend');
+            return null;
+        }
         const payload = data as { friend_id: string; friend_name: string };
         showAppToast({
             type: 'success',
@@ -172,6 +179,11 @@ async function redeemInviteLink(
         handleRedemptionError(error, 'group');
         return null;
     }
+    const failure = parseRpcResult(data);
+    if (failure && !failure.ok) {
+        handleRedemptionErrorCode(failure.error_code, 'group');
+        return null;
+    }
     const payload = data as { group_id: string; group_name: string; already_member: boolean };
     showAppToast({
         type: 'success',
@@ -181,7 +193,7 @@ async function redeemInviteLink(
         titleParams: payload.already_member ? undefined : { groupName: payload.group_name },
     });
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
-    void queryClient.invalidateQueries({ queryKey: ['groups'] });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.groups });
     const claimable = !payload.already_member
         ? await listClaimableGuestMembers(payload.group_id)
         : [];
@@ -193,14 +205,31 @@ async function redeemInviteLink(
     return { kind: 'group', groupId: payload.group_id };
 }
 
-function handleRedemptionError(error: { message: string }, kind: 'friend' | 'group' | 'settleReminder'): void {
-    const message = error.message;
-    // cannot_self_invite is pure UX guidance, not a bug — info toast, no Sentry.
-    if (message.includes('cannot_self_invite')) {
+function handleRedemptionErrorCode(
+    errorCode: string,
+    kind: 'friend' | 'group' | 'settleReminder',
+): void {
+    if (errorCode === 'cannot_self_invite') {
         showInfoToast('invite.redemption.selfInvite');
         return;
     }
-    if (message.includes('invite_not_found')) {
+    if (errorCode === 'invite_not_found') {
+        handleError(new Error(errorCode), {
+            toast: { titleKey: 'invite.redemption.invalid' },
+            tags: { service: 'deepLinks', op: 'redeem', kind, reason: 'invite_not_found' },
+        });
+        return;
+    }
+    handleRedemptionError({ message: errorCode }, kind);
+}
+
+function handleRedemptionError(error: { message: string }, kind: 'friend' | 'group' | 'settleReminder'): void {
+    const message = error.message;
+    if (message === 'cannot_self_invite' || message.includes('cannot_self_invite')) {
+        showInfoToast('invite.redemption.selfInvite');
+        return;
+    }
+    if (message === 'invite_not_found' || message.includes('invite_not_found')) {
         handleError(error, {
             toast: { titleKey: 'invite.redemption.invalid' },
             tags: { service: 'deepLinks', op: 'redeem', kind, reason: 'invite_not_found' },

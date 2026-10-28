@@ -9,6 +9,8 @@ import {
     fetchAdminPlatformMetrics,
     fetchAdminMonetizationMetrics,
     AdminMonetizationMetricsError,
+    fetchAdminGrowthMetrics,
+    AdminGrowthMetricsError,
 } from '../../services/admin.service';
 
 beforeEach(() => {
@@ -128,5 +130,33 @@ describe('fetchAdminMonetizationMetrics', () => {
         mockRpc.mockResolvedValue({ data: null, error: { message: 'not_admin' } });
         await expect(fetchAdminMonetizationMetrics()).rejects.toBeInstanceOf(AdminMonetizationMetricsError);
         await expect(fetchAdminMonetizationMetrics()).rejects.toMatchObject({ code: 'not_admin' });
+    });
+});
+
+describe('fetchAdminGrowthMetrics', () => {
+    it('maps get_growth_metrics RPC to AdminGrowthMetrics', async () => {
+        mockRpc.mockResolvedValue({
+            data: {
+                as_of: '2026-10-27T08:00:00Z',
+                north_star: {
+                    current_month: '2026-10',
+                    current_month_count: 2,
+                    previous_month: '2026-09',
+                    previous_month_count: 1,
+                },
+                active_expense_authors: { dau: 1, wau: 5, mau: 20, note: 'x' },
+                north_star_monthly_series: [{ month: '2026-10', north_star_groups: 2 }],
+            },
+            error: null,
+        });
+        const m = await fetchAdminGrowthMetrics();
+        expect(mockRpc).toHaveBeenCalledWith('get_growth_metrics');
+        expect(m.northStar.currentMonthCount).toBe(2);
+        expect(m.activeExpenseAuthors.mau).toBe(20);
+    });
+
+    it('throws not_admin for non-admin callers', async () => {
+        mockRpc.mockResolvedValue({ data: null, error: { message: 'not_admin' } });
+        await expect(fetchAdminGrowthMetrics()).rejects.toBeInstanceOf(AdminGrowthMetricsError);
     });
 });

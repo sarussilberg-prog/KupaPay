@@ -1,5 +1,4 @@
 import React from 'react';
-import { Platform } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 
@@ -24,12 +23,30 @@ jest.mock('../../services/monetization.service', () => ({
 
 jest.mock('../../lib/productAnalytics', () => ({
     captureProductEvent: jest.fn(),
+    getProductAnalyticsClient: jest.fn(() => null),
 }));
 
 jest.mock('../../lib/paywallOfferingsLoad', () => ({
     ...jest.requireActual('../../lib/paywallOfferingsLoad'),
     fetchPaywallOfferings: jest.fn(),
     reportPaywallLoadFailed: jest.fn(),
+}));
+
+jest.mock('../../hooks/useProStatus', () => ({
+    useProStatus: jest.fn(() => ({
+        hasPro: false,
+        proPerkUnlocked: false,
+        isLoading: false,
+        isError: false,
+        data: undefined,
+        adminProViewMode: 'real' as const,
+        adminProViewOverrideActive: false,
+        adminProViewExpiresAt: null,
+    })),
+}));
+
+jest.mock('../../lib/featureFlags', () => ({
+    KUPAPAY_PRO_ENABLED: true,
 }));
 
 jest.mock('../../services/purchases.service', () => ({
@@ -173,10 +190,7 @@ describe('ProPaywallContent offerings load', () => {
         expect(await findByText('pro.paywall.tryFreeTrialCta:14')).toBeTruthy();
     });
 
-    it('never shows EU withdrawal acknowledgement', async () => {
-        const os = Platform.OS;
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'ios' });
-
+    it('does not show EU withdrawal acknowledgement on the paywall', async () => {
         fetchMock.mockResolvedValue({
             status: 'ready',
             packages: {
@@ -184,9 +198,7 @@ describe('ProPaywallContent offerings load', () => {
                 annual: mockPackage,
                 tripPass: null,
             },
-            introEligibility: {
-                kupapay_pro_yearly: { status: 2 },
-            },
+            introEligibility: {},
         });
         purchaseMock.mockResolvedValue({ ok: true });
 
@@ -196,7 +208,6 @@ describe('ProPaywallContent offerings load', () => {
 
         await waitFor(() => {
             expect(queryByTestId('paywall-loading')).toBeNull();
-            expect(getByTestId('paywall-purchase-btn')).toBeTruthy();
         });
         expect(queryByTestId('paywall-eu-withdrawal-ack')).toBeNull();
 
@@ -204,8 +215,6 @@ describe('ProPaywallContent offerings load', () => {
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
         });
-
-        Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
     });
 
     it('opens promo code sheet from Have a code link', async () => {

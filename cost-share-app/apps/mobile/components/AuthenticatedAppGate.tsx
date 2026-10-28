@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { onlineManager } from '@tanstack/react-query';
 import type { GroupWithMembers } from '@cost-share/shared';
@@ -12,15 +12,19 @@ import {
 } from '../lib/onboardingStorage';
 import { runAuthenticatedGate } from '../lib/authenticatedGateResolve';
 import { useAuthenticatedInviteRedemption } from '../hooks/useAuthenticatedInviteRedemption';
-import { fetchGroups } from '../services/groups.service';
+import { groupsQueryOptions } from '../hooks/queries/groupsQueryOptions';
 import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
+import { useSubscriptionRefreshOnForeground } from '../hooks/useSubscriptionRefreshOnForeground';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { AppGateSkeleton } from './skeletons/AppGateSkeleton';
+import { ScreenErrorBoundary } from './ScreenErrorBoundary';
 import { useAppStore } from '../store';
 import { AdminProViewBanner } from './admin/AdminProViewBanner';
 import { AppReviewPromptHost } from './appReview/AppReviewPromptHost';
+import { NetworkOfflineBanner } from './NetworkOfflineBanner';
 import { View } from 'react-native';
+import { retryConnectivitySync } from '../lib/reconnectSync';
 
 /**
  * Hard ceiling on how long resolveGate will wait for fetchGroups before
@@ -62,6 +66,7 @@ export function AuthenticatedAppGate() {
     // member/friend/group avatars render instantly and work offline. Single
     // mount, debounced, deduped — runs for the whole authenticated session.
     useAvatarPrefetcher();
+    useSubscriptionRefreshOnForeground();
 
     const resolveGate = useCallback(async () => {
         // Seeds the groups cache before mounting the navigator so GroupsListScreen
@@ -75,7 +80,11 @@ export function AuthenticatedAppGate() {
             getCachedGroupsCount: () =>
                 (queryClient.getQueryData<GroupWithMembers[]>(queryKeys.groups) ?? []).length,
             isOnline: () => onlineManager.isOnline(),
-            fetchGroups: () => withTimeout(fetchGroups(), GATE_FETCH_TIMEOUT_MS),
+            fetchGroups: () =>
+                withTimeout(
+                    queryClient.fetchQuery(groupsQueryOptions()),
+                    GATE_FETCH_TIMEOUT_MS,
+                ),
             seedGroups: (groups) => queryClient.setQueryData(queryKeys.groups, groups),
             hasPendingInvite: () => Boolean(useAppStore.getState().pendingInvite),
         });
@@ -86,12 +95,27 @@ export function AuthenticatedAppGate() {
         void resolveGate();
     }, [resolveGate]);
 
+    const wasOnlineRef = useRef(onlineManager.isOnline());
+    useEffect(() => {
+        return onlineManager.subscribe((nextOnline) => {
+            const wasOnline = wasOnlineRef.current;
+            wasOnlineRef.current = nextOnline;
+            if (nextOnline && !wasOnline) {
+                void retryConnectivitySync(queryClient);
+            }
+        });
+    }, []);
+
     if (gate === 'loading') {
         return <AppGateSkeleton />;
     }
 
     if (gate === 'create') {
-        return <ActivationOnboardingScreen onDone={() => setGate('main')} />;
+        return (
+            <ScreenErrorBoundary screenName="ActivationOnboarding">
+                <ActivationOnboardingScreen onDone={() => setGate('main')} />
+            </ScreenErrorBoundary>
+        );
     }
 
     return (
@@ -101,6 +125,7 @@ export function AuthenticatedAppGate() {
         >
             <View style={{ flex: 1 }}>
                 <AdminProViewBanner />
+                <NetworkOfflineBanner />
                 <View style={{ flex: 1 }}>
                     <AppNavigator />
                 </View>

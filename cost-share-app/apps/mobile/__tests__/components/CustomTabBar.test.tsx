@@ -1,10 +1,23 @@
 import React from 'react';
 import { Text } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { CustomTabBar } from '../../components/navigation/CustomTabBar';
 import { useAppStore } from '../../store';
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
+
+jest.mock('../../services/groups.service', () => ({
+    fetchGroups: jest.fn().mockResolvedValue([]),
+}));
+
+function renderTabBar(props: ReturnType<typeof makeProps>) {
+    return render(
+        <QueryClientProvider client={queryClient}>
+            <CustomTabBar {...props} />
+        </QueryClientProvider>,
+    );
+}
 
 // Silence the Activity unread-count query network dependency.
 jest.mock('../../hooks/queries/useActivityUnreadCount', () => ({
@@ -48,20 +61,26 @@ function makeProps(overrides?: {
     } as any;
 }
 
+const defaultGroupsSeed = [
+    { id: 'g-favorite', name: 'Favorite', updatedAt: new Date('2026-02-01') },
+    { id: 'g-viewing', name: 'Viewing', updatedAt: new Date('2026-01-15') },
+];
+
 beforeEach(() => {
     queryClient.clear();
     useAppStore.setState({ language: 'en', favoriteGroupId: 'g-favorite' } as any);
+    queryClient.setQueryData(queryKeys.groups, defaultGroupsSeed);
 });
 
 describe('CustomTabBar', () => {
     it('renders all four tab labels plus the center add button', () => {
-        const { getByText, getByTestId } = render(<CustomTabBar {...makeProps()} />);
+        const { getByText, getByTestId } = renderTabBar(makeProps());
         ROUTE_NAMES.forEach((name) => expect(getByText(name)).toBeTruthy());
         expect(getByTestId('center-add-button')).toBeTruthy();
     });
 
     it('places the center button in the middle (2 tabs each side)', () => {
-        const { getByTestId } = render(<CustomTabBar {...makeProps()} />);
+        const { getByTestId } = renderTabBar(makeProps());
         const left = getByTestId('tabbar-side-leading');
         const right = getByTestId('tabbar-side-trailing');
         // Each side wraps exactly two tab buttons. findAllByProps traverses the
@@ -82,9 +101,7 @@ describe('CustomTabBar', () => {
     it('pressing "+" navigates to AddExpense with the favorite group id', () => {
         const navigate = jest.fn();
         const getParent = jest.fn(() => ({ navigate }));
-        const { getByTestId } = render(
-            <CustomTabBar {...makeProps({ getParent })} />,
-        );
+        const { getByTestId } = renderTabBar(makeProps({ getParent }));
         fireEvent.press(getByTestId('center-add-button'));
         expect(navigate).toHaveBeenCalledWith('AddExpense', { groupId: 'g-favorite' });
     });
@@ -92,23 +109,21 @@ describe('CustomTabBar', () => {
     it('falls back to the first group when favoriteGroupId is empty', () => {
         useAppStore.setState({ favoriteGroupId: null } as any);
         queryClient.setQueryData(queryKeys.groups, [
-            { id: 'g-first', name: 'First' },
-            { id: 'g-second', name: 'Second' },
+            { id: 'g-first', name: 'First', updatedAt: new Date('2026-01-01') },
+            { id: 'g-second', name: 'Second', updatedAt: new Date('2026-03-01') },
         ]);
         const navigate = jest.fn();
         const getParent = jest.fn(() => ({ navigate }));
-        const { getByTestId } = render(
-            <CustomTabBar {...makeProps({ getParent })} />,
-        );
+        const { getByTestId } = renderTabBar(makeProps({ getParent }));
         fireEvent.press(getByTestId('center-add-button'));
-        expect(navigate).toHaveBeenCalledWith('AddExpense', { groupId: 'g-first' });
+        expect(navigate).toHaveBeenCalledWith('AddExpense', { groupId: 'g-second' });
     });
 
     it('emits tabPress when the focused tab is pressed again', () => {
         const emit = jest.fn(() => ({ defaultPrevented: false }));
         const props = makeProps({ index: 0 });
         props.navigation.emit = emit;
-        const { getByTestId } = render(<CustomTabBar {...props} />);
+        const { getByTestId } = renderTabBar(props);
         fireEvent.press(getByTestId('tab-Groups'));
         expect(emit).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -148,7 +163,7 @@ describe('CustomTabBar', () => {
                 { key: 'Profile-3', name: 'Profile' },
             ],
         };
-        const { getByTestId } = render(<CustomTabBar {...props} />);
+        const { getByTestId } = renderTabBar(props);
         fireEvent.press(getByTestId('center-add-button'));
         expect(navigate).toHaveBeenCalledWith('AddExpense', {
             groupId: 'g-viewing',
@@ -157,7 +172,7 @@ describe('CustomTabBar', () => {
 
     it('mirrors the row direction in RTL (Hebrew)', () => {
         useAppStore.setState({ language: 'he' } as any);
-        const { getByTestId } = render(<CustomTabBar {...makeProps()} />);
+        const { getByTestId } = renderTabBar(makeProps());
         const row = getByTestId('tabbar-row');
         expect(row.props.style).toEqual(
             expect.arrayContaining([

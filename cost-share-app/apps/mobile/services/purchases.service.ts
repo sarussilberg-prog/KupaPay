@@ -15,8 +15,7 @@ import { registerTripPassPurchaseIntent } from './proEntitlements.service';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 import { logMonetizationEvent } from './monetization.service';
 import { captureProductEvent } from '../lib/productAnalytics';
-import { queryClient } from '../lib/queryClient';
-import { queryKeys } from '../hooks/queries/keys';
+import { applyOptimisticProPurchaseCache, refreshProStatusQueries } from '../lib/proStatusCache';
 import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
 import {
     collectSubscriptionProductIds,
@@ -40,6 +39,7 @@ export interface ProSubscriptionUiState {
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesPackage = import('react-native-purchases').PurchasesPackage;
+type PurchasesCustomerInfo = import('react-native-purchases').CustomerInfo;
 
 let purchasesMod: PurchasesModule | null = null;
 let configured = false;
@@ -86,6 +86,13 @@ async function configurePurchasesForUserInner(userId: string): Promise<void> {
                 entitlementId: REVENUECAT_ENTITLEMENT_PRO,
                 customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
             });
+            const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
+            if (active) {
+                applyOptimisticProPurchaseCache({
+                    individualUntil: active.expirationDate ?? undefined,
+                });
+            }
+            void refreshProStatusQueries();
         });
         customerInfoListenerAttached = true;
     }
@@ -114,12 +121,31 @@ export async function configurePurchasesForUser(userId: string): Promise<void> {
 /** Await SDK configure+logIn before getOfferings/getCustomerInfo (avoids RC singleton crash). */
 export async function waitForPurchasesReady(): Promise<boolean> {
     if (!isPurchasesConfigured()) return false;
+    const userId = useAppStore.getState().currentUser?.id;
+    if (!configurePromise && userId) {
+        try {
+            await configurePurchasesForUser(userId);
+        } catch {
+            return false;
+        }
+    }
     if (!configurePromise) return configured;
     try {
         await configurePromise;
         return configured;
     } catch {
         return false;
+    }
+}
+
+/** Safe CustomerInfo read — never touches the RC singleton before configure+logIn. */
+export async function fetchPurchasesCustomerInfo(): Promise<PurchasesCustomerInfo | null> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return null;
+    try {
+        return await Purchases.default.getCustomerInfo();
+    } catch {
+        return null;
     }
 }
 
@@ -140,7 +166,7 @@ export async function checkIntroductoryPriceEligibility(
     packages: PaywallPackages | null,
 ): Promise<IntroEligibilityMap> {
     const Purchases = await getPurchases();
-    if (!Purchases || !packages) return {};
+    if (!Purchases || !packages || !(await waitForPurchasesReady())) return {};
     const productIds = collectSubscriptionProductIds(packages);
     try {
         return await Purchases.default.checkTrialOrIntroductoryPriceEligibility(productIds);
@@ -303,7 +329,12 @@ export async function purchasePackage(
                     >[0]['customerInfo'],
                 });
             }
-            await invalidateProQueries(opts.groupId);
+            applyOptimisticProPurchaseCache({
+                groupId: opts.groupId,
+                tripPassOnly: tripPassPurchased && !active,
+                individualUntil: active?.expirationDate ?? undefined,
+            });
+            await refreshProStatusQueries(opts.groupId);
             return { ok: true };
         }
         await trackPurchaseEvent('purchase_failed', opts.featureKey, {
@@ -339,7 +370,11 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
                 entitlementId: REVENUECAT_ENTITLEMENT_PRO,
                 customerInfo: info as Parameters<typeof syncProTrialReminder>[0]['customerInfo'],
             });
-            await invalidateProQueries(groupId);
+            applyOptimisticProPurchaseCache({
+                groupId,
+                individualUntil: active.expirationDate ?? undefined,
+            });
+            await refreshProStatusQueries(groupId);
             return true;
         }
         await trackPurchaseEvent('restore_failed', featureKey);
@@ -347,13 +382,6 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
     } catch {
         await trackPurchaseEvent('restore_failed', featureKey);
         return false;
-    }
-}
-
-async function invalidateProQueries(groupId?: string): Promise<void> {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
-    if (groupId) {
-        await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus(groupId) });
     }
 }
 
@@ -387,5 +415,24 @@ export async function presentOfferCodeRedemption(): Promise<void> {
 
     if (target === 'android_play_redeem') {
         await Linking.openURL(googlePlayOfferRedeemUrl());
+    }
+}
+
+/** RevenueCat subscriber attributes for trial lifecycle nudges (#406). */
+export async function syncProTrialNudgeToRevenueCat(
+    touchDay: number,
+    event: 'shown' | 'dismissed',
+): Promise<void> {
+    if (!KUPAPAY_PRO_ENABLED) return;
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return;
+    try {
+        await Purchases.default.setAttributes({
+            pro_trial_nudge_day: String(touchDay),
+            pro_trial_nudge_event: event,
+            pro_trial_nudge_at: new Date().toISOString(),
+        });
+    } catch {
+        // Analytics must not break flows
     }
 }
