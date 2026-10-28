@@ -14,7 +14,8 @@ const DB_OPS = Number(process.env.GROUP_LEDGER_SIM_DB_OPS ?? Math.min(120, CI_SI
 const SEED = Number(process.env.GROUP_LEDGER_SIM_SEED ?? DEFAULT_SIM_SEED);
 
 const GROUP_ID = '00000000-0000-0000-0000-000000006411';
-const CALLER_ID = '00000000-0000-0000-0000-000000006410';
+/** RPC caller — must exist in auth.users, profiles, and group_members (u_0). */
+const CALLER_ID = userUuid('u_0');
 
 function psql(sql: string): string {
     return execSync(
