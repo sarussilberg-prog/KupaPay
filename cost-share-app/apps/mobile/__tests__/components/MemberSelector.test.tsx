@@ -66,4 +66,18 @@ describe('MemberSelector', () => {
         // The "✓" indicator is rendered for selected items
         expect(getAllByText('✓').length).toBeGreaterThan(0);
     });
+
+    it('pills variant toggles members on press', () => {
+        const onToggle = jest.fn();
+        const { getByText } = render(
+            <MemberSelector
+                variant="pills"
+                members={users}
+                selectedIds={[]}
+                onToggle={onToggle}
+            />
+        );
+        fireEvent.press(getByText('Bob'));
+        expect(onToggle).toHaveBeenCalledWith('u2');
+    });
 });
