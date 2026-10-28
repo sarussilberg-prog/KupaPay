@@ -3,6 +3,10 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { GroupCard } from '../../components/GroupCard';
 import type { GroupWithMembers } from '@cost-share/shared';
 import { rollupOf } from '../../testUtils/groupRollup';
+import {
+    GROUP_CARD_CHIP_MAX_WIDTH,
+    groupCardBalanceColumnStyle,
+} from '../../components/groupCardLayout';
 
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
@@ -57,6 +61,15 @@ describe('GroupCard', () => {
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
         expect(getByText('groups.card.settled')).toBeTruthy();
+    });
+
+    it('uses a fixed-width centered balance column on wide layouts', () => {
+        const { getByTestId } = render(
+            <GroupCard group={baseGroup} onPress={() => {}} />,
+        );
+        const column = getByTestId('group-card-balance-column');
+        expect(column.props.style).toMatchObject(groupCardBalanceColumnStyle);
+        expect(column.props.style.width).toBe(GROUP_CARD_CHIP_MAX_WIDTH);
     });
 
     it('renders localized owed chip when primary.net > 0', () => {

@@ -107,10 +107,10 @@ export function BalanceChip({
         () => ({
             flexShrink: 0,
             flexGrow: 0,
+            width: '100%',
             maxWidth: GROUP_CARD_CHIP_MAX_WIDTH,
             alignItems: 'center',
             justifyContent: 'center',
-            alignSelf: 'center',
             gap: 2,
         }),
         [],
