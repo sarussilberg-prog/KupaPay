@@ -164,5 +164,295 @@
       "title": "Guardar esta división como grupo",
       "body": "Descarga KupaPay para registrar gastos, invitar amigos y liquidar con saldos en tiempo real."
     }
+  },
+  "useCaseShared": {
+    "howItWorksTitle": "Cómo funciona",
+    "faqTitle": "Preguntas frecuentes",
+    "exploreTitle": "Explorar más",
+    "splitCalculatorLink": "Calculadora de división gratuita",
+    "mainLandingLink": "Inicio de KupaPay",
+    "otherUseCasesTitle": "Otras formas de dividir"
+  },
+  "useCases": {
+    "trip": {
+      "navLabel": "Gastos de viaje",
+      "seo": {
+        "title": "Divide gastos de viaje con amigos — gratis | KupaPay",
+        "description": "Registra vuelos, hoteles, gasolina y comidas en un viaje en grupo. KupaPay simplifica quién debe a quién al mínimo de transferencias — gratis en iOS, Android y web.",
+        "ogTitle": "Divide facturas del viaje sin hojas de cálculo",
+        "ogDescription": "Un grupo para el viaje, cada gasto sincronizado y simplificación automática de deudas al saldar."
+      },
+      "hero": {
+        "headline": "Divide gastos de viaje sin hojas de cálculo",
+        "subheadline": "Vuelos, hoteles, gasolina y cenas — un grupo, saldos claros y menos transferencias al final."
+      },
+      "benefits": {
+        "title": "Hecho para grupos de viaje",
+        "items": [
+          {
+            "title": "Un grupo para todo el viaje",
+            "description": "Invita a tus compañeros una vez y añade gastos sobre la marcha — todos ven los saldos actualizarse en tiempo real."
+          },
+          {
+            "title": "Menos pagos al final",
+            "description": "La simplificación de deudas agrupa deudas pequeñas en el mínimo número de transferencias entre amigos."
+          },
+          {
+            "title": "Funciona sin conexión en ruta",
+            "description": "Registra gastos sin señal; KupaPay sincroniza cuando vuelves a estar en línea."
+          },
+          {
+            "title": "Comparte datos de liquidación",
+            "description": "Usa enlaces de liquidación para que todos sepan exactamente a quién pagar y cuánto."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Crea un grupo de viaje",
+            "description": "Ponle nombre al viaje e invita amigos con un enlace."
+          },
+          {
+            "title": "Añade costes compartidos",
+            "description": "Registra quién pagó transporte, alojamiento, comida o actividades y quién comparte cada factura."
+          },
+          {
+            "title": "Salda con totales simplificados",
+            "description": "KupaPay muestra saldos netos y el conjunto más pequeño de transferencias para cerrar el viaje."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "¿Podemos usar distintas monedas en un viaje?",
+            "answer": "Sí. Añade gastos en la moneda en que pagaste; los saldos siguen claros por gasto y ajustes del grupo."
+          },
+          {
+            "question": "¿Necesito cuenta para empezar?",
+            "answer": "Inicia sesión en la web o descarga la app móvil para crear un grupo e invitar a otros."
+          },
+          {
+            "question": "¿En qué se diferencia de dividir a mano?",
+            "answer": "KupaPay registra cada gasto, recalcula saldos automáticamente y reduce cuántas transferencias bancarias necesitas al final."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Empieza tu grupo de viaje",
+        "body": "Descarga KupaPay o inicia sesión en la web para crear un grupo de viaje y añadir tu primer gasto compartido."
+      }
+    },
+    "roommates": {
+      "navLabel": "Facturas entre compañeros",
+      "seo": {
+        "title": "Divide alquiler y facturas con compañeros de piso — KupaPay",
+        "description": "Divide alquiler, suministros, compra y costes del hogar con compañeros. Simplificación automática de deudas y seguimiento mensual — gratis.",
+        "ogTitle": "Dividir facturas en piso compartido, fácil",
+        "ogDescription": "Registra gastos del hogar, ve quién debe a quién y salda con menos transferencias."
+      },
+      "hero": {
+        "headline": "Divide facturas del piso sin cuentas incómodas",
+        "subheadline": "Alquiler, suministros, compra y material común — mantén el hogar justo y transparente."
+      },
+      "benefits": {
+        "title": "Para hogares compartidos",
+        "items": [
+          {
+            "title": "Costes del hogar recurrentes",
+            "description": "Registra alquiler, suministros, internet y compra cuando ocurren para no olvidar nada a fin de mes."
+          },
+          {
+            "title": "Saldos claros por persona",
+            "description": "Cada compañero ve su parte y saldo neto en el grupo en cualquier momento."
+          },
+          {
+            "title": "Liquidación más simple",
+            "description": "Cuando toca devolver dinero, la simplificación de deudas reduce transferencias extra."
+          },
+          {
+            "title": "Invita con enlace",
+            "description": "Añade compañeros al grupo del hogar en segundos — sin volver a escribir gastos."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Crea un grupo del hogar",
+            "description": "Configura un grupo para tu piso o casa e invita a tus compañeros."
+          },
+          {
+            "title": "Añade facturas al pagar",
+            "description": "Indica quién pagó alquiler, suministros o compra y divide a partes iguales o personalizadas."
+          },
+          {
+            "title": "Salda cada mes",
+            "description": "Usa totales simplificados para ver quién debe transferir a quién."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "¿Puede una persona pagar el alquiler y repartirlo?",
+            "answer": "Sí. Registra el pago completo y reparte el importe entre compañeros; los saldos se actualizan para todos."
+          },
+          {
+            "question": "¿KupaPay es gratis para compañeros de piso?",
+            "answer": "Sí. El seguimiento básico de gastos de grupo y la simplificación de deudas son gratis."
+          },
+          {
+            "question": "¿Puedo probar un cálculo rápido antes?",
+            "answer": "Usa la calculadora gratuita de este sitio para una estimación puntual y luego guarda el grupo en la app para seguir."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Configura tu grupo del hogar",
+        "body": "Instala KupaPay en el móvil o usa la web para registrar gastos del piso juntos."
+      }
+    },
+    "event": {
+      "navLabel": "Gastos de eventos",
+      "seo": {
+        "title": "Divide factura de cena y evento — KupaPay",
+        "description": "Divide costes de cenas, fiestas, entradas y eventos en grupo. Invita, añade gastos y salda con simplificación automática de deudas.",
+        "ogTitle": "Divide costes de eventos con equidad",
+        "ogDescription": "Cena puntual, celebración o entradas — registra quién pagó y quién debe en un solo grupo."
+      },
+      "hero": {
+        "headline": "Divide costes del evento antes de que se vayan",
+        "subheadline": "Cenas en grupo, entradas, decoración o bebidas — anótalos una vez y salda con equidad."
+      },
+      "benefits": {
+        "title": "Para cenas, fiestas y salidas",
+        "items": [
+          {
+            "title": "Grupo listo al momento",
+            "description": "Crea un grupo del evento y comparte un enlace de invitación mientras siguen juntos."
+          },
+          {
+            "title": "Facturas desiguales",
+            "description": "Elige quién comparte cada gasto cuando no todos pidieron lo mismo."
+          },
+          {
+            "title": "Totales en tiempo real",
+            "description": "Los saldos se actualizan con cada gasto — sin sorpresas después."
+          },
+          {
+            "title": "Mínimo de transferencias",
+            "description": "La simplificación de deudas ayuda a cerrar el evento con menos pagos entre invitados."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Abre un grupo para el evento",
+            "description": "Ponle un nombre como \"Cena de cumpleaños\" e invita participantes."
+          },
+          {
+            "title": "Registra lo pagado",
+            "description": "Añade la factura, quién pagó y quién debe repartir cada partida o el total."
+          },
+          {
+            "title": "Comparte quién debe a quién",
+            "description": "Envía datos de liquidación para que los invitados paguen a la persona correcta."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "¿Sirve para eventos puntuales?",
+            "answer": "Sí. Crea un grupo para una cena o fiesta y archívalo o bórralo cuando termines."
+          },
+          {
+            "question": "¿Puedo usar la web en la mesa?",
+            "answer": "Sí. Inicia sesión en la web o usa la app móvil para añadir gastos al momento."
+          },
+          {
+            "question": "¿Y si no consumieron igual?",
+            "answer": "Al añadir un gasto, elige qué miembros lo comparten para que los saldos reflejen quién participó."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Crea un grupo de evento",
+        "body": "Descarga la app o inicia sesión en la web para dividir tu próxima factura de grupo en minutos."
+      }
+    },
+    "couple": {
+      "navLabel": "Gastos de pareja",
+      "seo": {
+        "title": "Gastos de pareja y costes compartidos — KupaPay",
+        "description": "Registra gastos compartidos en pareja: alquiler, compra, salidas y facturas. Saldos claros y liquidación simple — gratis.",
+        "ogTitle": "Gastos compartidos para dos",
+        "ogDescription": "Un grupo pequeño para dos personas, saldos automáticos y simplificación de deudas al saldar."
+      },
+      "hero": {
+        "headline": "Registra gastos compartidos en pareja",
+        "subheadline": "Alquiler, compra, suscripciones y salidas — mantened la equidad sin cálculo mental constante."
+      },
+      "benefits": {
+        "title": "Compartir simple para dos",
+        "items": [
+          {
+            "title": "Solo vosotros dos",
+            "description": "Un grupo dedicado a costes comunes — sin hoja de cálculo complicada."
+          },
+          {
+            "title": "Cualquiera puede añadir gastos",
+            "description": "Ambos podéis registrar lo pagado y cómo repartirlo."
+          },
+          {
+            "title": "Saldo siempre visible",
+            "description": "Ved de un vistazo quién debe a quién en lugar de cuadrar tickets después."
+          },
+          {
+            "title": "Liquidación ordenada",
+            "description": "Al cuadrar cuentas, la simplificación muestra una transferencia clara si hace falta."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Crea un grupo de pareja",
+            "description": "Invita a tu pareja con un enlace."
+          },
+          {
+            "title": "Añade gastos compartidos",
+            "description": "Registra facturas que pague cualquiera y reparte a partes iguales o según acuerdo."
+          },
+          {
+            "title": "Salda cuando queráis",
+            "description": "Usa saldos y enlaces de liquidación cuando queráis equilibrar."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "¿Necesitamos la app los dos?",
+            "answer": "Uno puede añadir gastos, pero la experiencia es más clara para ambos con la app o acceso web."
+          },
+          {
+            "question": "¿Podemos dividir 50/50 por defecto?",
+            "answer": "Sí. La división igual es el valor predeterminado; puedes ajustar por gasto."
+          },
+          {
+            "question": "¿Nuestros datos son privados?",
+            "answer": "Los datos del grupo solo los ven miembros invitados. Consulta nuestra política de privacidad."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Empieza un grupo de pareja",
+        "body": "Obtén KupaPay gratis en iPhone, Android o web para registrar gastos compartidos juntos."
+      }
+    }
   }
 }
