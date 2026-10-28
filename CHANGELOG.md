@@ -5,3 +5,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 ## [2.2.0-dev.0] — baseline
 
 - Internal version tracking initialized (marketing version 2.2.0).
+## [2.2.0-dev.1] — 2026-10-28
+- feat(promo): KupaPay-owned promo codes (supersedes #491) (#623)
