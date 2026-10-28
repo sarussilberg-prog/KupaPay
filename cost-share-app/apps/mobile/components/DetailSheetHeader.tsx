@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     menuCard: {
         position: 'absolute',
         top: 42,
-        right: 4,
+        end: 4,
         minWidth: 160,
         padding: 4,
         backgroundColor: '#FFFFFF',
@@ -165,8 +165,8 @@ const styles = StyleSheet.create({
     menuBackdrop: {
         position: 'absolute',
         top: -1000,
-        left: -1000,
-        right: -1000,
+        start: -1000,
+        end: -1000,
         bottom: -1000,
         zIndex: 9,
     },

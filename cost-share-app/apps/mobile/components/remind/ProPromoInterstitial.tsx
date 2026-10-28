@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     proBadge: {
         position: 'absolute',
         bottom: -8,
-        right: -10,
+        end: -10,
         backgroundColor: BRAND_BLUE,
         borderRadius: 6,
         paddingHorizontal: 8,

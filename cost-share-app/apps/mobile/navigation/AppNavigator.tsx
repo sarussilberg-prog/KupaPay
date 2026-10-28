@@ -361,7 +361,7 @@ function MainTabs() {
                             />
                             <UnreadBadge
                                 count={unreadCount}
-                                style={{ position: 'absolute', top: -6, right: -10 }}
+                                style={{ position: 'absolute', top: -6, end: -10 }}
                             />
                         </View>
                     ),
