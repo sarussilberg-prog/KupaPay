@@ -23,6 +23,9 @@ interface BottomSheetShellProps {
     children: React.ReactNode;
 }
 
+/** Equal min-width on header slots keeps the title centered (incl. RTL). */
+const HEADER_SLOT_MIN_WIDTH = 64;
+
 export function BottomSheetShell({
     visible,
     label,
@@ -57,33 +60,47 @@ export function BottomSheetShell({
                     <View className="items-center pt-2">
                         <View className="w-10 h-1 rounded-full bg-gray-200" />
                     </View>
-                    <View className="flex-row items-center justify-between px-4 py-3">
-                        <Pressable onPress={onClose} hitSlop={8}>
-                            <Text className="text-[15px] font-medium text-gray-600">
-                                {t('common.cancel')}
-                            </Text>
-                        </Pressable>
+                    <View className="flex-row items-center px-4 py-3">
+                        <View
+                            style={{ minWidth: HEADER_SLOT_MIN_WIDTH }}
+                            className="items-start"
+                        >
+                            <Pressable onPress={onClose} hitSlop={8}>
+                                <Text className="text-[15px] font-medium text-gray-600">
+                                    {t('common.cancel')}
+                                </Text>
+                            </Pressable>
+                        </View>
                         <Text
-                            className="text-xs font-semibold text-gray-500 uppercase"
+                            className="flex-1 text-center text-xs font-semibold text-gray-500 uppercase"
                             style={{ letterSpacing: 0.06 * 12 }}
                         >
                             {label}
                         </Text>
-                        <Pressable
-                            onPress={() => { if (!saveDisabled && onSave) onSave(); }}
-                            hitSlop={8}
-                            disabled={saveDisabled}
+                        <View
+                            style={{ minWidth: HEADER_SLOT_MIN_WIDTH }}
+                            className="items-end"
                         >
-                            <Text
-                                className={
-                                    saveDisabled
-                                        ? 'text-[15px] font-bold text-gray-300'
-                                        : 'text-[15px] font-bold text-primary-dark'
-                                }
-                            >
-                                {t('common.save')}
-                            </Text>
-                        </Pressable>
+                            {onSave ? (
+                                <Pressable
+                                    onPress={() => {
+                                        if (!saveDisabled) onSave();
+                                    }}
+                                    hitSlop={8}
+                                    disabled={saveDisabled}
+                                >
+                                    <Text
+                                        className={
+                                            saveDisabled
+                                                ? 'text-[15px] font-bold text-gray-300'
+                                                : 'text-[15px] font-bold text-primary-dark'
+                                        }
+                                    >
+                                        {t('common.save')}
+                                    </Text>
+                                </Pressable>
+                            ) : null}
+                        </View>
                     </View>
                     <View className="h-px bg-border-soft" />
                     <View style={{ flexShrink: 1 }}>{children}</View>
