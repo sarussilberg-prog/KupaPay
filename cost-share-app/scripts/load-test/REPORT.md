@@ -2,18 +2,24 @@
 
 | Field | Value |
 |-------|--------|
-| Date (UTC) | 2026-10-27 |
+| Date (UTC) | 2026-10-28 |
 | Harness | k6 + `load-test-manifest.json` (groups-list RPC trio) |
 | Supabase project | `drxfbicunusmipdgbgdk` (dev only) |
 | CI SQL proxy | `rpc_explain_performance.test.sql` (Docker SQL integration) |
 
 ## k6 against dev (REST, includes network)
 
-| RPC | p95 (ms) | Error rate |
-|-----|----------|------------|
-| `get_user_simplified_inputs` | _Run workflow or local k6_* — see README_ | |
-| `get_user_groups_archive_state` | | |
-| `get_activity_unread_count` | | |
+GitHub Actions runner → dev, 10 VUs × 45 s, dedicated user `kupapay-loadtest-k6@kupay-dev.test` (5 groups, 100 expenses).
+
+| RPC | p95 run 1 (ms) | p95 run 2 (ms) | Error rate |
+|-----|----------------|----------------|------------|
+| `get_user_simplified_inputs` | 496 | 989 | 0.00% |
+| `get_user_groups_archive_state` | 250 | 704 | 0.00% |
+| `get_activity_unread_count` | 237 | 712 | 0.00% |
+
+Runs (2026-10-28 UTC): [run 1](https://github.com/sarussilberg-prog/KupaPay/actions/runs/40709023691) (1059 req, overall p95 292 ms), [run 2](https://github.com/sarussilberg-prog/KupaPay/actions/runs/40709264702) (741 req, medians ~250 ms).
+
+**Reading:** errors pass. p95 fails the 300 ms bar. Even the trivial `get_activity_unread_count` swings from 237 to 712 ms between runs, and medians sit at 185–260 ms. That points to network distance and free-tier variance between the runner and dev, more than to the queries themselves. `get_user_simplified_inputs` is the only RPC that is consistently slowest. Next step: compare with server-side timings (`EXPLAIN ANALYZE` / `pg_stat_statements`) before tuning, and decide whether 300 ms end-to-end from a US runner is the right bar.
 
 **How to produce numbers:** GitHub → Actions → **Load test (dev, manual)** with `LOAD_TEST_*` or `E2E_*` secrets, or locally:
 
@@ -44,8 +50,8 @@ Local DB budgets are **looser than 300 ms** to absorb Docker variance; dev REST 
 - [x] k6 script targets current hot RPCs on dev (not legacy dashboard)
 - [x] Index review documented ([INDEX_REVIEW.md](./INDEX_REVIEW.md))
 - [x] Free-tier headroom report ([HEADROOM.md](./HEADROOM.md))
-- [ ] p95 < 300 ms on dev REST — **pending authenticated k6 run** (secrets not available in agent VM)
-- [ ] errors < 0.5% — **pending authenticated k6 run**
+- [ ] p95 < 300 ms on dev REST: **not met** (237–989 ms across 2 runs; see above)
+- [x] errors < 0.5%: 0.00% across 1800 requests
 
 ## Headroom summary
 

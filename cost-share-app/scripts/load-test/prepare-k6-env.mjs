@@ -4,7 +4,6 @@
  * Requires: SUPABASE_URL, SUPABASE_ANON_KEY, LOAD_TEST_EMAIL, LOAD_TEST_PASSWORD
  * (falls back to E2E_TEST_* / EXPO_PUBLIC_*).
  */
-import { createClient } from '@supabase/supabase-js';
 
 function pickEnv(...keys) {
     for (const key of keys) {
@@ -33,19 +32,27 @@ if (!supabaseUrl || !anonKey || !password) {
     process.exit(1);
 }
 
-const client = createClient(supabaseUrl, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
+// Plain fetch to GoTrue so the script runs in CI without installing node_modules.
+const res = await fetch(`${supabaseUrl.replace(/\/$/, '')}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: { apikey: anonKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
 });
-const { data, error } = await client.auth.signInWithPassword({ email, password });
-if (error || !data.session?.access_token || !data.user?.id) {
-    console.error('signInWithPassword failed:', error?.message ?? 'no session');
+const data = await res.json().catch(() => ({}));
+if (!res.ok || !data.access_token || !data.user?.id) {
+    console.error('signInWithPassword failed:', data?.msg ?? data?.error_description ?? `HTTP ${res.status}`);
     process.exit(1);
 }
+if (process.env.GITHUB_ACTIONS === 'true') {
+    // Mask the short-lived JWT in workflow logs (stderr keeps it out of $GITHUB_ENV).
+    console.error(`::add-mask::${data.access_token}`);
+}
+const session = { access_token: data.access_token };
 
 const lines = [
     `SUPABASE_URL=${supabaseUrl}`,
     `SUPABASE_ANON_KEY=${anonKey}`,
-    `K6_USER_JWT=${data.session.access_token}`,
+    `K6_USER_JWT=${session.access_token}`,
     `K6_USER_ID=${data.user.id}`,
 ];
 console.log(lines.join('\n'));
