@@ -146,15 +146,18 @@ describe('App version — single source of truth', () => {
 
   it('the version-bump automation targets the shared version.json (dev on push, main manual workflow)', () => {
     const devBump = read(resolve(REPO_ROOT, '.github/workflows/bump-dev-prerelease.yml'));
+    const devOnMerge = read(resolve(REPO_ROOT, '.github/workflows/dev-prerelease-on-merge.yml'));
     const main = read(resolve(REPO_ROOT, '.github/workflows/bump-version-main.yml'));
-    for (const text of [devBump, main]) {
+    for (const text of [devBump, devOnMerge, main]) {
       expect(text).toContain('cost-share-app/packages/shared/version.json');
       expect(text).not.toContain('cost-share-app/apps/mobile/version.json');
     }
-    expect(devBump).toMatch(/^\s*pull_request:\s*$/m);
-    expect(devBump).toContain('types: [closed]');
-    expect(devBump).toContain('branches: [dev]');
+    expect(devBump).toContain('workflow_dispatch');
     expect(devBump).not.toMatch(/^\s*push:\s*$/m);
+    expect(devOnMerge).toMatch(/^\s*pull_request:\s*$/m);
+    expect(devOnMerge).toContain('types: [closed]');
+    expect(devOnMerge).toContain('branches: [dev]');
+    expect(devOnMerge).toContain('ADMIN_PAT');
     expect(main).toContain('workflow_dispatch');
     expect(main).not.toMatch(/^\s*push:\s*$/m);
   });
