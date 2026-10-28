@@ -1,7 +1,7 @@
 import type { SplitCalculatorExpense, SplitCalculatorParticipant } from './splitCalculatorLogic';
 
 export const SPLIT_CALCULATOR_IMPORT_DRAFT_KEY = 'kupapay.split_calculator.import_draft.v1';
-export const SPLIT_CALCULATOR_POST_LOGIN_RETURN_KEY =
+const SPLIT_CALCULATOR_POST_LOGIN_RETURN_KEY =
     'kupapay.split_calculator.post_login_return.v1';
 
 export const SPLIT_CALCULATOR_RESUME_IMPORT_QUERY = 'resumeSplitImport';
@@ -71,11 +71,4 @@ export function clearSplitCalculatorImportDraft(): void {
 export function persistSplitCalculatorPostLoginReturn(returnUrl: string): void {
     if (typeof sessionStorage === 'undefined') return;
     sessionStorage.setItem(SPLIT_CALCULATOR_POST_LOGIN_RETURN_KEY, returnUrl);
-}
-
-export function consumeSplitCalculatorPostLoginReturn(): string | null {
-    if (typeof sessionStorage === 'undefined') return null;
-    const value = sessionStorage.getItem(SPLIT_CALCULATOR_POST_LOGIN_RETURN_KEY);
-    sessionStorage.removeItem(SPLIT_CALCULATOR_POST_LOGIN_RETURN_KEY);
-    return value;
 }

@@ -12,7 +12,7 @@ import {
 } from './splitCalculatorImport';
 import type { SplitCalculatorImportDraft } from './splitCalculatorImportDraft';
 
-export type SplitCalculatorImportOutcome =
+type SplitCalculatorImportOutcome =
     | { ok: true; groupId: string }
     | { ok: false; error: SplitCalculatorImportValidationError | 'not_authenticated' | 'import_failed' };
 

@@ -19,9 +19,9 @@ export type SplitCalculatorImportValidationError =
     | 'empty_group_name'
     | 'self_not_in_participants';
 
-export type SplitCalculatorImportExpenseDraft = Omit<CreateExpenseDto, 'groupId'>;
+type SplitCalculatorImportExpenseDraft = Omit<CreateExpenseDto, 'groupId'>;
 
-export type SplitCalculatorImportPlan = {
+type SplitCalculatorImportPlan = {
     groupName: string;
     defaultCurrency: string;
     /** Calculator participant id → KupaPay profile id (guest or signed-in user). */
