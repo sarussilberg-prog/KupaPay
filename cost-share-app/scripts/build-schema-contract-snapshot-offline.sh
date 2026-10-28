@@ -55,11 +55,13 @@ scan_functions_json() {
 TMP="$(mktemp)"
 collect_sql > "$TMP"
 
+extract_table_like_names() {
+  grep -Eio 'create table (if not exists )?((public)\.)?[a-z][a-z0-9_]*' "$1" | grep -Eio '[a-z][a-z0-9_]*$'
+  grep -Eio 'create (or replace )?view (public\.)?[a-z][a-z0-9_]*' "$1" | grep -Eio '[a-z][a-z0-9_]*$'
+}
+
 TABLES_JSON="$(
-  {
-    rg -io 'create table (if not exists )?(public\.)?([a-z0-9_]+)' "$TMP" -r '$3'
-    rg -io 'create (or replace )?view (public\.)?([a-z0-9_]+)' "$TMP" -r '$3'
-  } | sort -u \
+  extract_table_like_names "$TMP" | sort -u \
     | jq -R . | jq -s 'map({name: ., columns: []})'
 )"
 
