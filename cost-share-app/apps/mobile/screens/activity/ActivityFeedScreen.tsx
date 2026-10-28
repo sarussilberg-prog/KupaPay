@@ -5,7 +5,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     View,
-    FlatList,
     RefreshControl,
     TouchableOpacity,
     ActivityIndicator,
@@ -48,6 +47,7 @@ import { queryKeys } from '../../hooks/queries/keys';
 import { toEpochMs } from '../../lib/dateUtils';
 import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 import { EmptyState } from '../../components/EmptyState';
+import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { ActivityItem } from '../../components/ActivityItem';
 import { ActivityItemSkeleton } from '../../components/ActivityItemSkeleton';
 import { AppIcon } from '../../components/AppIcon';
@@ -934,15 +934,13 @@ export function ActivityFeedScreen() {
                 />
             )}
 
-            <FlatList
+            <HotVirtualizedList
+                testID="activity-feed-virtualized"
+                style={{ flex: 1 }}
                 data={displayedItems}
                 keyExtractor={keyExtractor}
                 renderItem={renderActivity}
-                contentContainerClassName="px-3 pb-4"
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={5}
-                removeClippedSubviews
+                contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 16 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={userRefreshing}
