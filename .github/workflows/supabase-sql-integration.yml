@@ -28,6 +28,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+
+      - name: Install Node deps (group ledger DB simulation)
+        run: npm ci --ignore-scripts
+
       - name: Pin Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -109,6 +118,9 @@ jobs:
 
       - name: Run SQL regression tests
         run: bash scripts/ci-supabase-sql-run-tests.sh
+
+      - name: Group ledger simulation (DB integration #641)
+        run: bash scripts/ci-group-ledger-simulation-db.sh
 
       - name: RPC/table schema contract (generated types surface)
         run: bash scripts/ci-supabase-types-contract.sh
