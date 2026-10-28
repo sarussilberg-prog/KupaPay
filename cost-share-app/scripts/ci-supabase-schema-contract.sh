@@ -110,7 +110,7 @@ base_tables="$(echo "$BASE_NORM" | jq -c '.tables')"
 live_funcs="$(echo "$LIVE_NORM" | jq -c '.functions')"
 base_funcs="$(echo "$BASE_NORM" | jq -c '.functions')"
 
-echo "::error::Schema contract drift — update $SNAPSHOT (bash scripts/build-schema-contract-snapshot-offline.sh or GENERATE_SCHEMA_CONTRACT_SNAPSHOT=1)"
+echo "::error::Schema contract drift — after SQL CI bootstrap, run: GENERATE_SCHEMA_CONTRACT_SNAPSHOT=1 bash scripts/ci-supabase-schema-contract.sh (offline seed: bash scripts/build-schema-contract-snapshot-offline.sh; must match Postgres)"
 echo "  tables live=${#live_tables} base=${#base_tables} | functions live=$(echo "$LIVE_NORM" | jq '.functions|length') base=$(echo "$BASE_NORM" | jq '.functions|length')"
 diff -u <(echo "$BASE_NORM" | jq .) <(echo "$LIVE_NORM" | jq .) || true
 exit 1

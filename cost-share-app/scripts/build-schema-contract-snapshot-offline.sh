@@ -25,21 +25,47 @@ PATCH_FILES=(
 collect_sql() {
   head -n "$SCHEMA_CORE_LINES" supabase/schema.sql
   for p in "${PATCH_FILES[@]}"; do cat "$p"; done
-  cat supabase/migrations/*.sql
+  shopt -s nullglob
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && cat "$f"
+  done < <(printf '%s\n' supabase/migrations/*.sql | sort)
+}
+
+scan_functions_json() {
+  declare -A funcs=()
+  shopt -s nocasematch
+  while IFS= read -r line || [[ -n "${line:-}" ]]; do
+    if [[ "$line" == *"drop function"* ]]; then
+      if [[ "$line" =~ public\.([a-z0-9_]+) ]]; then
+        unset "funcs[${BASH_REMATCH[1]}]"
+      elif [[ "$line" =~ function[[:space:]]+([a-z0-9_]+) ]]; then
+        unset "funcs[${BASH_REMATCH[1]}]"
+      fi
+    elif [[ "$line" =~ (function|procedure)[[:space:]]+(public\.)?([a-z0-9_]+)[[:space:]]*\( ]]; then
+      funcs["${BASH_REMATCH[3]}"]=1
+    fi
+  done < <(collect_sql)
+  shopt -u nocasematch
+  local names=()
+  local k
+  for k in "${!funcs[@]}"; do names+=("$k"); done
+  printf '%s\n' "${names[@]}" | sort -u | jq -R . | jq -s 'map({name: ., args: ""})'
 }
 
 TMP="$(mktemp)"
 collect_sql > "$TMP"
 
 TABLES_JSON="$(
-  rg -io 'create table (if not exists )?(public\.)?([a-z0-9_]+)' "$TMP" -r '$3' | sort -u \
+  {
+    rg -io 'create table (if not exists )?(public\.)?([a-z0-9_]+)' "$TMP" -r '$3'
+    rg -io 'create (or replace )?view (public\.)?([a-z0-9_]+)' "$TMP" -r '$3'
+  } | sort -u \
     | jq -R . | jq -s 'map({name: ., columns: []})'
 )"
 
-FUNCS_JSON="$(
-  rg -io '(function|procedure) (public\.)?([a-z0-9_]+)\(' "$TMP" -r '$3' | sort -u \
-    | jq -R . | jq -s 'map({name: ., args: ""})'
-)"
+FUNCS_JSON="$(scan_functions_json)"
+
+OUT="${SCHEMA_CONTRACT_SNAPSHOT:-supabase/ci/schema-contract.snapshot.json}"
 
 jq -n \
   --arg desc "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres." \
@@ -47,7 +73,7 @@ jq -n \
   --argjson tables "$TABLES_JSON" \
   --argjson functions "$FUNCS_JSON" \
   '{description:$desc, generated_at:$generated, tables:$tables, functions:$functions}' \
-  > supabase/ci/schema-contract.snapshot.json
+  > "$OUT"
 
 rm -f "$TMP"
-echo "✅ Wrote supabase/ci/schema-contract.snapshot.json ($(jq '.tables|length' supabase/ci/schema-contract.snapshot.json) tables, $(jq '.functions|length' supabase/ci/schema-contract.snapshot.json) functions)"
+echo "✅ Wrote $OUT ($(jq '.tables|length' "$OUT") tables, $(jq '.functions|length' "$OUT") functions)"

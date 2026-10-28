@@ -122,6 +122,9 @@ jobs:
       - name: Group ledger simulation (DB integration #641)
         run: bash scripts/ci-group-ledger-simulation-db.sh
 
+      - name: Offline schema contract seed matches snapshot
+        run: bash scripts/ci-verify-schema-contract-offline.sh
+
       - name: RPC/table schema contract (generated types surface)
         run: bash scripts/ci-supabase-types-contract.sh
 
