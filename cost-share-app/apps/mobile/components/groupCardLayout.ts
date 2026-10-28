@@ -9,3 +9,11 @@ export const GROUP_CARD_MENU_ICON = 18;
 export const GROUP_CARD_STACK_CHIP_MAX_WIDTH = 390;
 /** Upper bound for chip width — content-sized below this. */
 export const GROUP_CARD_CHIP_MAX_WIDTH = 120;
+
+/** Trailing balance column on wide list rows — fixed width so settled/owe pills share one axis. */
+export const groupCardBalanceColumnStyle = {
+    flexShrink: 0 as const,
+    flexGrow: 0 as const,
+    width: GROUP_CARD_CHIP_MAX_WIDTH,
+    alignItems: 'center' as const,
+};
