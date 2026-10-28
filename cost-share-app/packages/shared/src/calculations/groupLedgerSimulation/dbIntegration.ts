@@ -151,10 +151,13 @@ VALUES (
 
 function fetchSimplifiedNets(): Map<string, number> {
     const raw = psql(
-        `SELECT public.test_set_authenticated('${CALLER_ID}');
-SELECT public.get_user_simplified_inputs('${CALLER_ID}')::text;`,
+        `BEGIN;
+SELECT public.test_set_authenticated('${CALLER_ID}');
+SELECT public.get_user_simplified_inputs('${CALLER_ID}')::text;
+COMMIT;`,
     );
-    const jsonLine = raw.split('\n').filter(Boolean).at(-1);
+    const lines = raw.split('\n').filter(Boolean);
+    const jsonLine = lines[lines.length - 1];
     if (!jsonLine) {
         throw new Error('get_user_simplified_inputs returned no payload');
     }
