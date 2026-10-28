@@ -13,9 +13,26 @@ Optional deep link env (Expo web / mobile):
 
 ## Dashboard: MAU / WAU / DAU + north star
 
-1. Run `node scripts/posthog-ensure-mau-dashboard.mjs` (with PostHog personal API key) **or** in PostHog → **Dashboards** → **New dashboard** → name it `KupaPay MAU (1000 epic)`.
-2. Add insights from `posthog-growth-queries.hogql` and the funnel steps in [docs/SSOT/POSTHOG_EVENT_TAXONOMY.md](../../docs/SSOT/POSTHOG_EVENT_TAXONOMY.md).
-3. Optional: import tile definitions from `posthog-dashboard-mau-tiles.json` (copy event/interval/breakdown into the UI — PostHog free tier has no bulk JSON import API).
+1. Run `node scripts/posthog-ensure-mau-dashboard.mjs` (creates the dashboard shell if missing).
+2. Run `node scripts/posthog-ensure-mau-dashboard-tiles.mjs` to idempotently create/update insights from `posthog-dashboard-mau-tiles.json` and pin them to the dashboard (DAU/WAU/MAU × platform/locale, north-star HogQL, funnels).
+3. Manual fallback: copy specs from `posthog-dashboard-mau-tiles.json` and HogQL from `posthog-growth-queries.hogql` in the PostHog UI.
+
+### Environment (never commit secrets)
+
+| Variable | Purpose |
+|----------|---------|
+| `POSTHOG_PERSONAL_API_KEY` or `FREE_TIER_POSTHOG_PERSONAL_API_KEY` | Personal API key with `insight:write` + `dashboard:write` |
+| `POSTHOG_PROJECT_ID` or `FREE_TIER_POSTHOG_PROJECT_ID` | Numeric project id |
+| `POSTHOG_HOST` or `FREE_TIER_POSTHOG_HOST` | API host (default `https://eu.i.posthog.com`) |
+
+```bash
+cd cost-share-app
+export POSTHOG_PERSONAL_API_KEY=…
+export POSTHOG_PROJECT_ID=…
+node scripts/posthog-ensure-mau-dashboard.mjs
+node scripts/posthog-ensure-mau-dashboard-tiles.mjs
+npm run test:posthog-mau
+```
 
 ### Required tiles
 
