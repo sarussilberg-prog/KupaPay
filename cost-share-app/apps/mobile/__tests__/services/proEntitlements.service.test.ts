@@ -1,4 +1,8 @@
-import { fetchMyProStatus, parseProStatusRpcRow } from '../../services/proEntitlements.service';
+import {
+    fetchMyProStatus,
+    fetchMyProStatusWithStoreSync,
+    parseProStatusRpcRow,
+} from '../../services/proEntitlements.service';
 
 jest.mock('../../lib/supabase', () => ({
     supabase: {
@@ -10,9 +14,55 @@ jest.mock('../../lib/ascScreenshotDemo', () => ({
     isAscScreenshotDemo: () => false,
 }));
 
+jest.mock('../../services/purchases.service', () => ({
+    isPurchasesConfigured: jest.fn(),
+    waitForPurchasesReady: jest.fn(),
+    fetchPurchasesCustomerInfo: jest.fn(),
+}));
+
 import { supabase } from '../../lib/supabase';
+import {
+    fetchPurchasesCustomerInfo,
+    isPurchasesConfigured,
+    waitForPurchasesReady,
+} from '../../services/purchases.service';
 
 const rpcMock = supabase.rpc as jest.Mock;
+const purchasesConfiguredMock = isPurchasesConfigured as jest.MockedFunction<
+    typeof isPurchasesConfigured
+>;
+const waitReadyMock = waitForPurchasesReady as jest.MockedFunction<typeof waitForPurchasesReady>;
+const customerInfoMock = fetchPurchasesCustomerInfo as jest.MockedFunction<
+    typeof fetchPurchasesCustomerInfo
+>;
+
+describe('fetchMyProStatusWithStoreSync', () => {
+    beforeEach(() => {
+        rpcMock.mockReset();
+        purchasesConfiguredMock.mockReturnValue(true);
+        waitReadyMock.mockResolvedValue(true);
+    });
+
+    it('merges RevenueCat pro entitlement when RPC still reports free', async () => {
+        rpcMock.mockResolvedValue({
+            data: {
+                hasPro: false,
+                individualProUntil: null,
+                groupPassUntil: null,
+                adminProViewMode: 'real',
+            },
+            error: null,
+        });
+        const until = new Date(Date.now() + 86400000).toISOString();
+        customerInfoMock.mockResolvedValue({
+            entitlements: { active: { pro: { expirationDate: until } } },
+        } as Awaited<ReturnType<typeof fetchPurchasesCustomerInfo>>);
+
+        const status = await fetchMyProStatusWithStoreSync();
+        expect(status.hasPro).toBe(true);
+        expect(status.individualProUntil).toBe(until);
+    });
+});
 
 describe('fetchMyProStatus', () => {
     beforeEach(() => {

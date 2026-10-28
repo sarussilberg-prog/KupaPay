@@ -1515,6 +1515,7 @@
             "sectionTitle": "Моя подписка",
             "openDetails": "Детали подписки",
             "screenIntro": "План, продление и оплата управляются в App Store или Google Play. Trip Pass показан по группам ниже.",
+            "purchaseSuccessHint": "Преимущества Pro активны. Управляйте продлением и оплатой ниже.",
             "disabled": "Подписки недоступны в этой сборке.",
             "empty": "На этом аккаунте нет активной подписки.",
             "planUnknown": "KupaPay Pro",

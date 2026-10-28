@@ -1499,6 +1499,7 @@
             "sectionTitle": "Mi suscripción",
             "openDetails": "Detalles de la suscripción",
             "screenIntro": "El plan, la renovación y la facturación se gestionan en App Store o Google Play. Trip Pass se muestra por grupo abajo.",
+            "purchaseSuccessHint": "Tus ventajas Pro están activas. Gestiona la renovación y la facturación abajo.",
             "disabled": "Las suscripciones no están disponibles en esta versión.",
             "empty": "No hay suscripción activa en esta cuenta.",
             "planUnknown": "KupaPay Pro",

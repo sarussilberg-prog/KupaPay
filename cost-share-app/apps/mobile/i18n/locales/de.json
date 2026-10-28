@@ -1497,6 +1497,7 @@
             "sectionTitle": "Mein Abo",
             "openDetails": "Abo-Details",
             "screenIntro": "Plan, Verlängerung und Abrechnung verwaltest du im App Store oder Google Play. Trip Pass pro Gruppe siehst du unten.",
+            "purchaseSuccessHint": "Deine Pro-Vorteile sind aktiv. Verlängerung und Abrechnung verwaltest du unten.",
             "disabled": "Abos sind in diesem Build nicht verfügbar.",
             "empty": "Kein aktives Abo auf diesem Konto.",
             "planUnknown": "KupaPay Pro",

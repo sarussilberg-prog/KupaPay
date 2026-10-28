@@ -1497,6 +1497,7 @@
             "sectionTitle": "Mon abonnement",
             "openDetails": "Détails de l'abonnement",
             "screenIntro": "Forfait, renouvellement et facturation se gèrent dans l'App Store ou Google Play. Trip Pass est indiqué par groupe ci-dessous.",
+            "purchaseSuccessHint": "Vos avantages Pro sont actifs. Gérez le renouvellement et la facturation ci-dessous.",
             "disabled": "Les abonnements ne sont pas disponibles dans cette version.",
             "empty": "Aucun abonnement actif sur ce compte.",
             "planUnknown": "KupaPay Pro",
