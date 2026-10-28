@@ -3,7 +3,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
+import { useLayoutWindowWidth } from '../../hooks/useLayoutWindowWidth';
 import { useTranslation } from 'react-i18next';
 import {
     classifyUserNetBalance,
@@ -38,7 +39,7 @@ export function GroupsListSummaryCard({
 }: GroupsListSummaryCardProps) {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
-    const { width: windowWidth } = useWindowDimensions();
+    const windowWidth = useLayoutWindowWidth();
     const align = rtlTextAlign(isRtl);
     const direction: 'rtl' | 'ltr' = isRtl ? 'rtl' : 'ltr';
     const summaryAmountFit = windowWidth < 400;
