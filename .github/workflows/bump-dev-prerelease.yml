@@ -1,9 +1,7 @@
-# After a PR lands on dev, bump packages/shared/version.json without re-running full CI/Vercel.
+# Manual recovery for dev prerelease bumps. Automatic bumps run on pull_request closed in ci.yml.
 name: Bump dev prerelease
 
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
     inputs:
       pr_title:
@@ -18,12 +16,6 @@ concurrency:
 jobs:
   bump:
     name: Dev prerelease + changelog
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (
-        !contains(github.event.head_commit.message, '[skip ci]') &&
-        !startsWith(github.event.head_commit.message, 'chore: bump dev prerelease')
-      )
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -50,7 +42,7 @@ jobs:
 
       - name: Bump dev prerelease + changelog
         env:
-          PR_TITLE: ${{ github.event.inputs.pr_title || github.event.head_commit.message }}
+          PR_TITLE: ${{ github.event.inputs.pr_title }}
           PR_NUMBER: ''
         run: |
           set -euo pipefail

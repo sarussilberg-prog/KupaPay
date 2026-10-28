@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches: [dev, main, 'cursor/**']
   merge_group:
     branches: [dev]
@@ -610,6 +611,7 @@ jobs:
       needs.ci-gate.result == 'success' &&
       needs.migration-versions.result == 'success' &&
       github.event_name == 'pull_request' &&
+      github.event.action != 'closed' &&
       github.event.pull_request.draft != true &&
       github.event.pull_request.base.ref == 'dev'
     runs-on: ubuntu-latest
@@ -668,27 +670,17 @@ jobs:
           bash cost-share-app/scripts/supabase-unique-migration-versions-at-merge.sh
           echo "defer=false" >> "$GITHUB_OUTPUT"
 
-      - name: Squash merge PR to dev (ADMIN_PAT)
+      - name: Enable GitHub native auto-merge (squash)
         if: steps.sync_dev.outputs.defer != 'true'
         env:
-          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
-          GH_TOKEN: ${{ secrets.ADMIN_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          if [[ -z "${ADMIN_PAT}" ]]; then
-            echo "::error::ADMIN_PAT secret is not configured — required to squash-merge dev without github-actions[bot] (push workflows would not run; see docs/SSOT/CI_ADMIN_PAT.md)"
-            exit 1
-          fi
-          state="$(gh pr view "$PR_NUMBER" --repo "$REPO" --json state --jq .state)"
-          if [[ "$state" == "MERGED" ]]; then
-            echo "PR already merged"
-            exit 0
-          fi
           for attempt in 1 2 3; do
-            if err="$(gh pr merge "$PR_NUMBER" --squash --repo "$REPO" 2>&1)"; then
-              echo "✅ Squash-merged to dev (ADMIN_PAT — dispatches push for dev prerelease bump)"
+            if err="$(gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO" 2>&1)"; then
+              echo "✅ Auto-merge enabled — GitHub merges when required checks pass on current head"
               exit 0
             fi
             if [[ "$err" == *"not mergeable"* ]] || [[ "$err" == *"Could not resolve head ref"* ]]; then
@@ -699,7 +691,7 @@ jobs:
             echo "$err" >&2
             exit 1
           done
-          echo "::error::gh pr merge --squash failed after retries"
+          echo "::error::gh pr merge --auto failed after retries"
           exit 1
 
       - name: Wait for deferred branch sync
@@ -710,4 +702,67 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO" || true
-          echo "Auto-merge armed; fresh CI run will squash-merge with ADMIN_PAT after update-branch settles."
+          echo "Auto-merge armed; fresh CI run will complete merge after update-branch settles."
+
+  dev-prerelease-bump:
+    name: Dev prerelease + changelog
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'dev'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: dev-merge-and-bump
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - name: Require ADMIN_PAT (bypass CI gate on dev for [skip ci] bump only)
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADMIN_PAT}" ]]; then
+            echo "::error::ADMIN_PAT secret is not configured — required to push chore bumps to protected dev (see docs/SSOT/CI_ADMIN_PAT.md)"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+          token: ${{ secrets.ADMIN_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Bump dev prerelease + changelog
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch origin dev
+            git reset --hard origin/dev
+
+            node cost-share-app/scripts/bump-dev-prerelease.mjs
+            git add cost-share-app/packages/shared/version.json CHANGELOG.md
+            if git diff --staged --quiet; then
+              echo "No version bump needed"
+              exit 0
+            fi
+            git commit -m "chore: bump dev prerelease [skip ci]"
+            if git push origin HEAD:dev; then
+              echo "✅ Dev prerelease bumped"
+              exit 0
+            fi
+            echo "dev moved during bump; retrying (${attempt}/3)"
+          done
+          echo "::error::failed to push dev prerelease bump after 3 attempts"
+          exit 1
