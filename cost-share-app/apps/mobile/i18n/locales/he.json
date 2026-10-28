@@ -249,6 +249,9 @@
     "groups": {
         "title": "קופות",
         "listTitle": "הקופות שלי",
+        "listSection": {
+            "activeCount": "הקופות שלך · {{count}}"
+        },
         "newGroupCta": "קופה חדשה",
         "createGroup": "יצירת קופה",
         "editGroup": "ערוך קופה",

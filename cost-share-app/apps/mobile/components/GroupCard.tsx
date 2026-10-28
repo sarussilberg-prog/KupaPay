@@ -60,6 +60,8 @@ interface GroupCardProps {
     displayCurrency?: string;
     ratesFromBase?: RatesFromBase;
     onPress: (groupId: string) => void;
+    showOverflowMenu?: boolean;
+    showTrailingChevron?: boolean;
 }
 
 function GroupCardBase({
@@ -73,6 +75,8 @@ function GroupCardBase({
     displayCurrency,
     ratesFromBase,
     onPress,
+    showOverflowMenu = true,
+    showTrailingChevron = false,
 }: GroupCardProps) {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
@@ -333,25 +337,37 @@ function GroupCardBase({
                     ) : null}
                 </ListRow>
 
-                <TouchableOpacity
-                    onPress={() => setMenuOpen(true)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('groups.menu.title')}
-                    testID={`group-card-menu-${group.id}`}
-                    style={{
-                        width: GROUP_CARD_MENU_HIT,
-                        height: GROUP_CARD_MENU_HIT,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                    }}
-                >
-                    <AppIcon
-                        name="ellipsis-vertical"
-                        size={GROUP_CARD_MENU_ICON}
-                        color={colors.gray400}
-                    />
-                </TouchableOpacity>
+                {showTrailingChevron ? (
+                    <View style={{ flexShrink: 0 }}>
+                        <AppIcon
+                            name={isRtl ? 'chevron-back' : 'chevron-forward'}
+                            size={20}
+                            color={colors.gray300}
+                        />
+                    </View>
+                ) : null}
+
+                {showOverflowMenu ? (
+                    <TouchableOpacity
+                        onPress={() => setMenuOpen(true)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('groups.menu.title')}
+                        testID={`group-card-menu-${group.id}`}
+                        style={{
+                            width: GROUP_CARD_MENU_HIT,
+                            height: GROUP_CARD_MENU_HIT,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <AppIcon
+                            name="ellipsis-vertical"
+                            size={GROUP_CARD_MENU_ICON}
+                            color={colors.gray400}
+                        />
+                    </TouchableOpacity>
+                ) : null}
             </View>
 
             <Modal

@@ -249,6 +249,9 @@
     "groups": {
         "title": "Группы",
         "listTitle": "Мои группы",
+        "listSection": {
+            "activeCount": "Ваши группы · {{count}}"
+        },
         "newGroupCta": "Новая группа",
         "createGroup": "Создать группу",
         "editGroup": "Редактировать группу",

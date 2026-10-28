@@ -249,6 +249,9 @@
     "groups": {
         "title": "Groups",
         "listTitle": "My groups",
+        "listSection": {
+            "activeCount": "Your groups · {{count}}"
+        },
         "newGroupCta": "New group",
         "createGroup": "Create group",
         "editGroup": "Edit Group",

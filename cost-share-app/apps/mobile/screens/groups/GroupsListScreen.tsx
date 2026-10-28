@@ -1,16 +1,18 @@
 /**
  * GroupsListScreen
- * Main groups list with expandable search, filter/sort sheet,
- * per-group balance chips, and a floating bottom create-group CTA.
+ * Main groups list — handoff layout: wordmark, persistent search, section
+ * labels, chevron rows, and a floating create-group pill.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     View,
     Text,
     RefreshControl,
     TouchableOpacity,
+    TextInput,
 } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import type { ListRenderItem } from '@shopify/flash-list';
 import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,10 +41,11 @@ import { useRtlLayout } from '../../hooks/useRtlLayout';
 import { useAppStore } from '../../store';
 import { useAuthUserId } from '../../hooks/useAuthUserId';
 import { useExchangeRatesQuery } from '../../hooks/queries/useExchangeRatesQuery';
-import { useProfileBalanceSummary } from '../../hooks/useProfileBalanceSummary';
 import { collectProfileFxCurrencies } from '../../lib/collectProfileFxCurrencies';
-import { GroupsListHeader } from '../../components/groups/GroupsListHeader';
-import { GroupsListSummaryCard } from '../../components/groups/GroupsListSummaryCard';
+import { GroupsListHandoffHeader } from '../../components/groups/GroupsListHandoffHeader';
+import { GroupsListPersistentSearchBar } from '../../components/groups/GroupsListPersistentSearchBar';
+import { GroupsListSectionEyebrow } from '../../components/groups/GroupsListSectionEyebrow';
+import { GroupsListCreateFab } from '../../components/groups/GroupsListCreateFab';
 import {
     BalanceState,
     DEFAULT_FILTERS,
@@ -75,7 +78,9 @@ export function GroupsListScreen() {
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
-    const listBottomPadding = 24;
+    const tabBarHeight = useBottomTabBarHeight();
+    const listBottomPadding = 110;
+    const searchInputRef = useRef<TextInput | null>(null);
     const groupsQuery = useGroupsQuery();
     const groups = groupsQuery.data ?? [];
     // "Initial loading" = we have NO cached data yet AND a fetch is actively in
@@ -127,7 +132,6 @@ export function GroupsListScreen() {
     // instead of a bare "failed to load".
     const emptyVariant = resolveEmptyStateVariant({ online, hasError: loadError });
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchExpanded, setSearchExpanded] = useState(false);
     const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [archivedExpanded, setArchivedExpanded] = useState(false);
@@ -208,10 +212,6 @@ export function GroupsListScreen() {
     }, [rawBalanceSummary, baseCurrency, simplified?.groupRollups]);
 
     const ratesQuery = useExchangeRatesQuery(baseCurrency, fxSymbols);
-    const { summary: balanceSummary, conversion } = useProfileBalanceSummary(
-        rawBalanceSummary,
-        ratesQuery,
-    );
 
     const availableCurrencies = useMemo(
         () => unique(groups.map(g => g.defaultCurrency)),
@@ -278,6 +278,8 @@ export function GroupsListScreen() {
                 }
                 unreadCount={unreadByGroup?.[item.group.id] ?? 0}
                 onPress={handleGroupPress}
+                showOverflowMenu={false}
+                showTrailingChevron
             />
         ),
         [
@@ -297,16 +299,15 @@ export function GroupsListScreen() {
         [renderGroupRow],
     );
 
-    const listSummaryHeader = useMemo(() => {
+    const listSectionHeader = useMemo(() => {
         if (groups.length === 0) return null;
         return (
-            <GroupsListSummaryCard
-                summary={balanceSummary}
-                conversion={conversion}
-                balanceUnknown={balanceUnknown}
+            <GroupsListSectionEyebrow
+                label={t('groups.listSection.activeCount', { count: activeRows.length })}
+                testID="groups-list-section-active"
             />
         );
-    }, [groups.length, balanceSummary, conversion, balanceUnknown]);
+    }, [groups.length, activeRows.length, t]);
 
     const archivedFooter = useMemo(() => {
         if (archivedRows.length === 0) return null;
@@ -349,14 +350,15 @@ export function GroupsListScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-50 dark:bg-gray-900" edges={['top']}>
             <ProTrialLifecycleBanner />
-            <GroupsListHeader
-                searchQuery={searchQuery}
-                onSearchQueryChange={setSearchQuery}
-                searchExpanded={searchExpanded}
-                onSearchExpandedChange={setSearchExpanded}
+            <GroupsListHandoffHeader
+                onFocusSearch={() => searchInputRef.current?.focus()}
+            />
+            <GroupsListPersistentSearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
                 filterActive={filterActive}
                 onOpenFilters={() => setFiltersOpen(true)}
-                onCreateGroup={handleCreateGroup}
+                inputRef={searchInputRef}
             />
 
             <View className="flex-1">
@@ -370,7 +372,7 @@ export function GroupsListScreen() {
                         paddingHorizontal: 16,
                         paddingBottom: listBottomPadding,
                     }}
-                    ListHeaderComponent={listSummaryHeader}
+                    ListHeaderComponent={listSectionHeader}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -412,6 +414,13 @@ export function GroupsListScreen() {
                 />
 
             </View>
+
+            {groups.length > 0 ? (
+                <GroupsListCreateFab
+                    onPress={handleCreateGroup}
+                    bottomInset={Math.max(tabBarHeight + 12, 76)}
+                />
+            ) : null}
 
             <FiltersSheet
                 visible={filtersOpen}

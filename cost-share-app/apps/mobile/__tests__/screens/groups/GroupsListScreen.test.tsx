@@ -133,16 +133,16 @@ describe('GroupsListScreen', () => {
         expect(mockNavigate).toHaveBeenCalledWith('GroupDetail', { groupId: 'g1' });
     });
 
-    it('renders the header create button', async () => {
+    it('renders the handoff wordmark header', async () => {
         queryClient.setQueryData(queryKeys.groups, [makeGroup({})]);
         const { findByTestId } = render(<GroupsListScreen />);
-        expect(await findByTestId('groups-create-btn')).toBeTruthy();
+        expect(await findByTestId('groups-handoff-wordmark')).toBeTruthy();
     });
 
-    it('renders the list title and summary card when groups exist', async () => {
+    it('renders the active groups section eyebrow when groups exist', async () => {
         queryClient.setQueryData(queryKeys.groups, [makeGroup({})]);
         const { findByTestId } = render(<GroupsListScreen />);
-        expect(await findByTestId('groups-list-title')).toBeTruthy();
+        expect(await findByTestId('groups-list-section-active')).toBeTruthy();
     });
 
     it('filters groups by member name', async () => {
@@ -159,7 +159,6 @@ describe('GroupsListScreen', () => {
             }),
         ]);
         const { findByTestId, queryByText, getByText } = render(<GroupsListScreen />);
-        fireEvent.press(await findByTestId('groups-search-btn'));
         const input = await findByTestId('groups-search-input');
         fireEvent.changeText(input, 'bob');
         await waitFor(() => {
@@ -168,10 +167,10 @@ describe('GroupsListScreen', () => {
         });
     });
 
-    it('navigates to CreateGroup from the top-right add button', async () => {
+    it('navigates to CreateGroup from the floating create FAB', async () => {
         queryClient.setQueryData(queryKeys.groups, [makeGroup({})]);
         const { findByTestId } = render(<GroupsListScreen />);
-        fireEvent.press(await findByTestId('groups-create-btn'));
+        fireEvent.press(await findByTestId('groups-create-fab'));
         expect(mockNavigate).toHaveBeenCalledWith('CreateGroup');
     });
 });
