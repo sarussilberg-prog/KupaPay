@@ -207,7 +207,7 @@ function PendingSyncBadge({
             style={{
                 position: 'absolute',
                 top: 8,
-                right: 8,
+                end: 8,
                 padding: 4,
                 borderRadius: 12,
                 backgroundColor: 'rgba(255,255,255,0.9)',
@@ -982,8 +982,8 @@ export function GroupDetailScreen({
                                 style={{
                                     position: 'absolute',
                                     top: 0,
-                                    left: 8,
-                                    right: 8,
+                                    start: 8,
+                                    end: 8,
                                     bottom: 8,
                                     borderRadius: 16,
                                     backgroundColor: colors.primary,

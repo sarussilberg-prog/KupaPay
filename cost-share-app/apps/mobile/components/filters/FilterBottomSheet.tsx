@@ -153,12 +153,12 @@ const styles = StyleSheet.create({
     },
     clearBtn: {
         position: 'absolute',
-        left: 0,
+        start: 0,
         top: 4,
     },
     closeBtn: {
         position: 'absolute',
-        right: 0,
+        end: 0,
         top: 0,
         width: 32,
         height: 32,
