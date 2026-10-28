@@ -27,7 +27,7 @@ export function RecurringFrequencySheet({
             onClose={onClose}
             label={t('expenses.v2.recurring.sheetTitle')}
         >
-            <View className="gap-2 px-4 pb-6">
+            <View className="px-4 pb-6 pt-2 gap-3">
                 {FREQUENCIES.map(freq => {
                     const selected = freq === value;
                     return (
@@ -37,7 +37,7 @@ export function RecurringFrequencySheet({
                                 onSelect(freq);
                                 onClose();
                             }}
-                            className={`rounded-xl py-4 px-4 border ${
+                            className={`rounded-xl border px-4 py-3 ${
                                 selected ? 'border-primary bg-primary-extra-light' : 'border-gray-200 bg-white'
                             }`}
                             testID={`recurring-frequency-${freq}`}
