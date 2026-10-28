@@ -72,7 +72,12 @@ gh_pr_update_branch_with_retry() {
     rm -f "$err_file"
     return 1
   done
-  printf '%s\n' "$(cat "$err_file")" >&2
+  local err
+  err="$(cat "$err_file")"
+  printf '%s\n' "$err" >&2
   rm -f "$err_file"
+  if is_transient_head_ref_error "$err"; then
+    return 2
+  fi
   return 1
 }
