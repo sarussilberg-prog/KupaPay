@@ -17,3 +17,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(web): split calculator Save as group import (#613) (#644)
 ## [2.2.0-dev.6] — 2026-10-28
 - fix(ci): offline schema contract seed honors DROP FUNCTION (#636) (#645)
+## [2.2.0-dev.7] — 2026-10-28
+- docs: canonical groups list UI spec (mockup B2) (#646)
