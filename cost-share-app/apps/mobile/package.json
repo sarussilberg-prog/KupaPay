@@ -100,7 +100,7 @@
     "react-native-web": "^0.21.0",
     "react-native-worklets": "^0.5.1",
     "superjson": "^2.2.6",
-    "xlsx": "^0.18.5",
+    "xlsx": "npm:@e965/xlsx@0.20.3",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
