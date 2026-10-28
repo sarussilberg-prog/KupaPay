@@ -17,7 +17,7 @@
 
 ## Dev branch automation
 
-Each squash-merge to `dev` triggers the **`dev-prerelease-bump`** job in [`ci.yml`](../../.github/workflows/ci.yml) on **`pull_request` closed (merged)** (standalone [`bump-dev-prerelease.yml`](../../.github/workflows/bump-dev-prerelease.yml) is manual recovery only). That job runs `cost-share-app/scripts/bump-dev-prerelease.mjs`:
+Each squash-merge to `dev` triggers [`dev-prerelease-on-merge.yml`](../../.github/workflows/dev-prerelease-on-merge.yml) on **`pull_request` closed (merged)** ([`bump-dev-prerelease.yml`](../../.github/workflows/bump-dev-prerelease.yml) is manual recovery only). That workflow runs `cost-share-app/scripts/bump-dev-prerelease.mjs`:
 
 1. Increments `-dev.N` in `version.json`.
 2. Appends the merged PR title to root `CHANGELOG.md`.
