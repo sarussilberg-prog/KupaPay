@@ -88,27 +88,27 @@ ON CONFLICT (id) DO NOTHING;
 }
 
 function syncStateToDb(state: SimulationState): void {
-    psql(`
-BEGIN;
-SET LOCAL session_replication_role = replica;
-DELETE FROM public.settlements WHERE group_id = '${GROUP_ID}';
-DELETE FROM public.expense_splits WHERE expense_id IN (SELECT id FROM public.expenses WHERE group_id = '${GROUP_ID}');
-DELETE FROM public.expenses WHERE group_id = '${GROUP_ID}';
-`);
-
     ensureMemberProfiles(state);
 
+    const sql: string[] = [
+        'BEGIN;',
+        'SET LOCAL session_replication_role = replica;',
+        `DELETE FROM public.settlements WHERE group_id = '${GROUP_ID}';`,
+        `DELETE FROM public.expense_splits WHERE expense_id IN (SELECT id FROM public.expenses WHERE group_id = '${GROUP_ID}');`,
+        `DELETE FROM public.expenses WHERE group_id = '${GROUP_ID}';`,
+    ];
+
     for (const m of state.members) {
-        psql(`
-INSERT INTO public.group_members (group_id, user_id, is_active)
+        sql.push(
+            `INSERT INTO public.group_members (group_id, user_id, is_active)
 VALUES ('${GROUP_ID}', '${userUuid(m.userId)}', ${m.isActive})
-ON CONFLICT (group_id, user_id) DO UPDATE SET is_active = EXCLUDED.is_active;
-`);
+ON CONFLICT (group_id, user_id) DO UPDATE SET is_active = EXCLUDED.is_active;`,
+        );
     }
 
     for (const e of state.expenses) {
-        psql(`
-INSERT INTO public.expenses (id, group_id, description, amount, currency, paid_by, created_by, split_mode, is_deleted, expense_date)
+        sql.push(
+            `INSERT INTO public.expenses (id, group_id, description, amount, currency, paid_by, created_by, split_mode, is_deleted, expense_date)
 VALUES (
   '${expenseUuid(e.id)}',
   '${GROUP_ID}',
@@ -120,21 +120,21 @@ VALUES (
   '${esc(e.splitMode)}',
   ${e.isDeleted},
   CURRENT_DATE
-);
-`);
+);`,
+        );
     }
 
     for (const s of state.splits) {
-        psql(`
-INSERT INTO public.expense_splits (expense_id, user_id, amount)
-VALUES ('${expenseUuid(s.expenseId)}', '${userUuid(s.userId)}', ${s.amount});
-`);
+        sql.push(
+            `INSERT INTO public.expense_splits (expense_id, user_id, amount)
+VALUES ('${expenseUuid(s.expenseId)}', '${userUuid(s.userId)}', ${s.amount});`,
+        );
     }
 
     for (const st of state.settlements) {
         if (st.deletedAt) continue;
-        psql(`
-INSERT INTO public.settlements (group_id, from_user_id, to_user_id, amount, currency, created_by, settlement_date)
+        sql.push(
+            `INSERT INTO public.settlements (group_id, from_user_id, to_user_id, amount, currency, created_by, settlement_date)
 VALUES (
   '${GROUP_ID}',
   '${userUuid(st.fromUserId)}',
@@ -143,10 +143,12 @@ VALUES (
   '${esc(st.currency)}',
   '${CALLER_ID}',
   CURRENT_DATE
-);
-`);
+);`,
+        );
     }
-    psql('COMMIT;');
+
+    sql.push('COMMIT;');
+    psql(sql.join('\n'));
 }
 
 function fetchSimplifiedNets(): Map<string, number> {
