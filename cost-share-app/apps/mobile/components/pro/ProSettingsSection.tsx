@@ -54,13 +54,15 @@ export function ProSettingsSection() {
                 onPress={() => navigation.navigate('MySubscription')}
                 testID="settings-my-subscription"
             />
-            <SettingsRow
-                iconName="settings-outline"
-                label={t('pro.settings.manageSubscription')}
-                variant="chevron"
-                onPress={() => navigation.navigate('MySubscription')}
-                testID="settings-manage-subscription"
-            />
+            {hasPro || subscription != null ? (
+                <SettingsRow
+                    iconName="settings-outline"
+                    label={t('pro.settings.manageSubscription')}
+                    variant="chevron"
+                    onPress={() => navigation.navigate('MySubscription')}
+                    testID="settings-manage-subscription"
+                />
+            ) : null}
             {showUpsell ? (
                 <SettingsRow
                     iconName="star-outline"

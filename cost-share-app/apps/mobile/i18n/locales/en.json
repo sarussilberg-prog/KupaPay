@@ -1480,6 +1480,7 @@
             "sectionTitle": "My subscription",
             "openDetails": "Subscription details",
             "screenIntro": "Plan, renewal date, and billing are managed in the App Store or Google Play. Trip Pass access is shown per group below.",
+            "purchaseSuccessHint": "Your Pro benefits are active. Manage renewal and billing below.",
             "disabled": "Subscriptions are not available in this build.",
             "empty": "No active subscription on this account.",
             "planUnknown": "KupaPay Pro",

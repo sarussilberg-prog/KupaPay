@@ -1,6 +1,6 @@
 import { queryClient } from '../../lib/queryClient';
 import { queryKeys } from '../../hooks/queries/keys';
-import { applyOptimisticProPurchaseCache } from '../../lib/proStatusCache';
+import { applyOptimisticProPurchaseCache, refreshProStatusQueries } from '../../lib/proStatusCache';
 
 describe('applyOptimisticProPurchaseCache', () => {
     beforeEach(() => {
@@ -32,5 +32,14 @@ describe('applyOptimisticProPurchaseCache', () => {
         );
         expect(group?.hasPro).toBe(true);
         expect(group?.groupPassUntil).toBe('2026-08-01T00:00:00.000Z');
+    });
+
+    it('invalidates pro status and subscription queries on refresh', async () => {
+        const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries').mockResolvedValue();
+        await refreshProStatusQueries('g-refresh');
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proStatus() });
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.mySubscription() });
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proStatus('g-refresh') });
+        invalidateSpy.mockRestore();
     });
 });

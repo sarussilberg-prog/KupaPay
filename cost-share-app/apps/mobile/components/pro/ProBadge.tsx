@@ -14,9 +14,9 @@ export function ProBadge({ testID = 'pro-badge', compact = false }: Props) {
     return (
         <View
             testID={testID}
-            className={`rounded-full bg-indigo-50 border border-indigo-100 ${compact ? 'px-2 py-0.5' : 'px-2.5 py-1'}`}
+            className={`rounded-full bg-amber-50 border border-amber-200/80 ${compact ? 'px-2 py-0.5' : 'px-2.5 py-1'}`}
         >
-            <Text className={`font-semibold text-indigo-700 ${compact ? 'text-[10px]' : 'text-xs'}`}>
+            <Text className={`font-semibold text-amber-900 ${compact ? 'text-[10px]' : 'text-xs'}`}>
                 {t('pro.badge')}
             </Text>
         </View>

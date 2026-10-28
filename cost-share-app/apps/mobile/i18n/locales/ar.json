@@ -1619,6 +1619,7 @@
             "sectionTitle": "اشتراكي",
             "openDetails": "تفاصيل الاشتراك",
             "screenIntro": "تُدار الخطة وتاريخ التجديد والفوترة من App Store أو Google Play. يُعرض Trip Pass لكل مجموعة أدناه.",
+            "purchaseSuccessHint": "مزايا Pro نشطة. يمكنك إدارة التجديد والفوترة أدناه.",
             "disabled": "الاشتراكات غير متاحة في هذا الإصدار.",
             "empty": "لا يوجد اشتراك نشط على هذا الحساب.",
             "planUnknown": "KupaPay Pro",
