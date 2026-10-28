@@ -485,7 +485,7 @@ jobs:
       - run: echo "Docs-only change — application CI jobs skipped by path filter."
 
   knip-report:
-    name: Knip (dead code report)
+    name: Knip (dead code ratchet)
     needs: [ci-paths, setup]
     if: >-
       always() && needs.setup.result == 'success' &&
@@ -493,7 +493,6 @@ jobs:
         needs.ci-paths.outputs.mobile == 'true' ||
         needs.ci-paths.outputs.web == 'true')
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: cost-share-app
@@ -508,7 +507,8 @@ jobs:
         with:
           name: npm-node-modules
           path: cost-share-app/node_modules
-      - name: Report unused exports, files, and dependencies
+      - run: test -x node_modules/.bin/knip || npm ci
+      - name: Enforce dead-code ratchet
         run: npm run knip:ci
 
   ci-gate:
@@ -535,6 +535,7 @@ jobs:
         deno-edge-bundle-check,
         deno-edge-bundle-skipped,
         docs-only-gate,
+        knip-report,
       ]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
@@ -574,6 +575,7 @@ jobs:
           if [[ "$FULL" == "true" || "$MOBILE" == "true" || "$WEB" == "true" ]]; then
             check lint "${{ needs.lint.result }}"
             check typecheck "${{ needs.typecheck.result }}"
+            check knip-report "${{ needs.knip-report.result }}"
           fi
           if [[ "$FULL" == "true" || "$MOBILE" == "true" ]]; then
             check test "${{ needs.test.result }}"
