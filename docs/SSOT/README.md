@@ -22,6 +22,7 @@
 | Database model (reference) | [DATABASE_ARCHITECTURE.md](../../DATABASE_ARCHITECTURE.md) | `supabase/schema.sql` |
 | Pre-merge checklist | `AI-CHECKLIST.md` | — |
 | PostHog funnels / MAU / north star | [POSTHOG_EVENT_TAXONOMY.md](./POSTHOG_EVENT_TAXONOMY.md) | `packages/shared/src/analytics/` |
+| Community / Reddit growth playbooks | [growth/README.md](../growth/README.md) | [MARKETING_ATTRIBUTION.md](./MARKETING_ATTRIBUTION.md) |
 | Performance CI, budgets, Sentry tracing | [PERFORMANCE.md](./PERFORMANCE.md) | — |
 | Rollback (Vercel, Supabase, mobile) | [ROLLBACK_RUNBOOK.md](./ROLLBACK_RUNBOOK.md) | [VERCEL.md](./VERCEL.md), [CI_CD.md](../CI_CD.md) |
 | Bugs, gaps, pre-launch blockers | [KNOWN_ISSUES.md](./KNOWN_ISSUES.md) | [TECHNICAL_DEBT.md](./TECHNICAL_DEBT.md) (deferrals only) |

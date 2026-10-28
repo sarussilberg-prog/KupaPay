@@ -23,3 +23,7 @@ Stored locally (`AsyncStorage`) and sent to PostHog as person properties (`acqui
 HogQL starter: `cost-share-app/analytics/posthog-retention-by-channel.hogql`
 
 In PostHog UI: **Retention** insight → cohort `signup` → returning `app_open` → breakdown `acquisition_channel`; compare day 1, 7, 30.
+
+## Community UTM campaigns
+
+Reddit / travel / roommate communities (#418): [`docs/growth/REDDIT_TRAVEL_COMMUNITIES_PLAYBOOK.md`](../growth/REDDIT_TRAVEL_COMMUNITIES_PLAYBOOK.md) and [`docs/growth/reddit-travel-utm-links.json`](../growth/reddit-travel-utm-links.json) (`utm_campaign=reddit_travel_418`).
