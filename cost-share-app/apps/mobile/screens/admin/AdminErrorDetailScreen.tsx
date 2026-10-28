@@ -9,15 +9,18 @@ import {
     useSentryIssueEventsQuery,
 } from '../../hooks/queries/useAdminSentryQueries';
 import type { SentryEventSummary } from '../../services/adminSentry.service';
+import { readRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 
 export function AdminErrorDetailScreen() {
     const { t, i18n } = useTranslation();
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
-    const issueId: string = route.params?.issueId ?? '';
+    const issueId = readRouteParams<{ issueId?: string }>(route).issueId ?? '';
+    const hasIssueId = issueId.length > 0;
 
-    const detail = useSentryIssueDetailQuery(issueId);
-    const events = useSentryIssueEventsQuery(issueId);
+    const detail = useSentryIssueDetailQuery(hasIssueId ? issueId : '');
+    const events = useSentryIssueEventsQuery(hasIssueId ? issueId : '');
 
     const onRefresh = useCallback(() => {
         void detail.refetch();
@@ -91,6 +94,10 @@ export function AdminErrorDetailScreen() {
             ) : null}
         </View>
     ) : null;
+
+    if (!hasIssueId) {
+        return <RouteParamsFallback />;
+    }
 
     if (detail.isLoading) {
         return (
