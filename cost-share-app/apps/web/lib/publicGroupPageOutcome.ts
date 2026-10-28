@@ -5,7 +5,7 @@ import {
 
 export type PublicGroupPageOutcome =
     | { kind: 'not_found' }
-    | { kind: 'ok'; wire: PublicGroupBalancePageWire & { ok: true } };
+    | { kind: 'ok'; wire: PublicGroupBalancePageWire };
 
 /** Maps Supabase RPC result to a render branch for `/b/<token>` (REQ-GROW-02). */
 export function resolvePublicGroupPageOutcome(

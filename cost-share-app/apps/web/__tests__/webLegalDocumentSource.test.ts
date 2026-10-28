@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
     bundledTermsIncludeEuWithdrawalAck,
     resolveWebLegalDocumentSource,
-} from '../lib/webLegalDocumentSource.ts';
+} from '../lib/webLegalDocumentSource';
 
 test('resolveWebLegalDocumentSource prefers bundled markdown for terms and privacy', () => {
     assert.equal(resolveWebLegalDocumentSource('terms', 'en'), 'static_bundle');

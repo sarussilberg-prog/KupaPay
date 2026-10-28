@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveAuthRouteGate } from '../lib/authRouteGate.ts';
+import { resolveAuthRouteGate } from '../lib/authRouteGate';
 
 test('resolveAuthRouteGate allows auth callback without a session', () => {
     assert.deepEqual(resolveAuthRouteGate('/auth/callback', false), { kind: 'allow' });

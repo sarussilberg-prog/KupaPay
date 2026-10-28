@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolvePublicGroupPageOutcome } from '../lib/publicGroupPageOutcome.ts';
+import { resolvePublicGroupPageOutcome } from '../lib/publicGroupPageOutcome';
 
 test('resolvePublicGroupPageOutcome treats RPC errors as not found', () => {
     assert.deepEqual(resolvePublicGroupPageOutcome(new Error('rate limit'), null), {
@@ -19,6 +19,6 @@ test('resolvePublicGroupPageOutcome accepts valid anon-safe wire payloads', () =
     const outcome = resolvePublicGroupPageOutcome(null, data);
     assert.equal(outcome.kind, 'ok');
     if (outcome.kind === 'ok') {
-        assert.equal(outcome.wire.group.name, 'Trip');
+        assert.equal(outcome.wire.group?.name, 'Trip');
     }
 });

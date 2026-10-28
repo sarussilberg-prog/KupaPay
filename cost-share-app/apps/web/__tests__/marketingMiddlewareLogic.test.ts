@@ -4,7 +4,7 @@ import {
     detectMarketingLocale,
     normalizeMarketingLang,
     resolveMarketingMiddleware,
-} from '../lib/marketingMiddlewareLogic.ts';
+} from '../lib/marketingMiddlewareLogic';
 
 test('normalizeMarketingLang accepts region subtags', () => {
     assert.equal(normalizeMarketingLang('he-IL'), 'he');
