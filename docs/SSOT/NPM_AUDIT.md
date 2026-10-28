@@ -19,3 +19,5 @@ Root `package.json` `overrides` pin patched `next`, `postcss`, `sharp`, `tar`, a
 ## Mobile / Expo
 
 Many remaining advisories are **dev/build-time** transitive deps (Metro, Jest, Expo tooling). Track via Expo SDK upgrades; do not block product PRs on those until upstream patches land.
+
+**Group Excel export (`xlsx`):** `@cost-share/mobile` pins SheetJS from `cdn.sheetjs.com` (not the stale npm `xlsx@0.18.x` registry package) so export stays on a maintained build without GHSA-4r6h-8v6p-xvw6 / GHSA-5pgg-2g8v-p4x9 findings.

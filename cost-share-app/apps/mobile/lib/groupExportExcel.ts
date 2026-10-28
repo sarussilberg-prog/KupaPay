@@ -1,6 +1,11 @@
 import { buildGroupExportCsv, type GroupExportInput } from './groupExportCsv';
 
-async function loadXlsx() {
+async function loadXlsx(): Promise<typeof import('xlsx')> {
+    if (typeof process !== 'undefined' && process.env.JEST_WORKER_ID !== undefined) {
+        // Jest (CJS): dynamic import('xlsx') needs VM modules; require keeps xlsx out of prod bundles.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        return require('xlsx');
+    }
     return import('xlsx');
 }
 
