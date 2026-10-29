@@ -27,3 +27,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(mobile): import Splitwise group CSV (#396) (#650)
 ## [2.2.0-dev.11] — 2026-10-29
 - feat(web): Splitwise alternative comparison pages (#415) (#651)
+## [2.2.0-dev.12] — 2026-10-29
+- [MAU] Localized store screenshots pipeline (iOS 6.7/6.5 + Play) — Refs #409 (#653)
