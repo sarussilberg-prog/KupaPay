@@ -88,11 +88,13 @@ jobs:
       - name: Require screenshot artifacts (no placeholders)
         if: inputs.skip_screenshots != true
         run: |
+          # Steps run in cost-share-app/apps/mobile; store/ lives at the repo root.
           missing=0
-          for f in \
-            store/screenshots/ios/en-US/6.9/groups.png \
-            store/asc/review-screenshots/paywall-en-US.png
-          do
+          files="../../../store/screenshots/ios/en-US/6.9/groups.png"
+          if [ "${{ inputs.skip_iap }}" != "true" ]; then
+            files="$files ../../../store/asc/review-screenshots/paywall-en-US.png"
+          fi
+          for f in $files; do
             if [ ! -f "$f" ]; then echo "::error::Missing $f"; missing=1; fi
           done
           exit "$missing"
