@@ -59,8 +59,8 @@ export default function SplitwiseComparisonLanding({ locale, t }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {page.table.rows.map((row, index) => (
-                                        <tr key={index} className="border-b border-gray-100">
+                                    {page.table.rows.map((row) => (
+                                        <tr key={row.feature} className="border-b border-gray-100">
                                             <th scope="row" className="py-4 pe-4 font-medium text-gray-900 align-top">
                                                 {row.feature}
                                             </th>
@@ -83,9 +83,9 @@ export default function SplitwiseComparisonLanding({ locale, t }: Props) {
                             {page.whenToUse.title}
                         </h2>
                         <ul className="space-y-4 text-start">
-                            {page.whenToUse.items.map((item, index) => (
+                            {page.whenToUse.items.map((item) => (
                                 <li
-                                    key={index}
+                                    key={item}
                                     className="rounded-xl border border-gray-100 bg-white p-5 text-gray-600 text-sm leading-relaxed"
                                 >
                                     {item}
@@ -101,8 +101,8 @@ export default function SplitwiseComparisonLanding({ locale, t }: Props) {
                             {page.faq.title}
                         </h2>
                         <dl className="divide-y divide-gray-100 border-t border-gray-100">
-                            {page.faq.items.map((item, index) => (
-                                <div key={index} className="py-5 text-start">
+                            {page.faq.items.map((item) => (
+                                <div key={item.question} className="py-5 text-start">
                                     <dt className="font-medium text-gray-900 text-base mb-2">{item.question}</dt>
                                     <dd className="text-gray-500 text-sm leading-relaxed">{item.answer}</dd>
                                 </div>
