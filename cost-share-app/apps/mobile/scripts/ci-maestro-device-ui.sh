@@ -41,11 +41,27 @@ export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 mkdir -p "$ARTIFACTS/screenshots"
 
 if [[ "$PLATFORM" == "ios" ]]; then
-  SIM="${IOS_SIMULATOR_DEVICE:-iPhone 16}"
-  xcrun simctl boot "$SIM" 2>/dev/null || true
+  read -r -a IOS_DEVICES <<< "${IOS_SIMULATOR_DEVICES:-iPhone SE (3rd generation) iPhone 16 iPhone 16 Pro Max}"
   npx expo prebuild --platform ios --no-install
   (cd ios && pod install)
-  npx expo run:ios --device "$SIM" --configuration Release
+  for SIM in "${IOS_DEVICES[@]}"; do
+    echo "=== iOS simulator: $SIM ==="
+    xcrun simctl boot "$SIM" 2>/dev/null || true
+    npx expo run:ios --device "$SIM" --configuration Release
+    export MAESTRO_PLATFORM="ios-${SIM// /-}"
+    maestro test \
+      -e APP_LANG=en \
+      -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
+      -e E2E_EMAIL="$E2E_EMAIL" \
+      -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
+      "$ROOT/.maestro/device-ui/sign-in.yaml"
+    maestro test \
+      -e APP_LANG=en \
+      -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
+      -e E2E_EMAIL="$E2E_EMAIL" \
+      -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
+      "$ROOT/.maestro/device-ui/assert-layout-probes.yaml"
+  done
 elif [[ "$PLATFORM" == "android" ]]; then
   npx expo prebuild --platform android --no-install
   npx expo run:android --variant release

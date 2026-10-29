@@ -1,0 +1,15 @@
+appId: com.kupapay.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: friend-balances-weighted-net
+    timeout: 30000
+- tapOn:
+    id: friend-settle-all
+- extendedWaitUntil:
+    visible:
+      id: friend-cross-settle-confirm
+    timeout: 30000
+- assertNotVisible:
+    id: friend-balances-weighted-net
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_friend_settle_flow_ok

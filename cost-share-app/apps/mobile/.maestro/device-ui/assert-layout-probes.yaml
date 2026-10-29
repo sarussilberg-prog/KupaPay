@@ -1,0 +1,18 @@
+appId: com.kupapay.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 60000
+- extendedWaitUntil:
+    visible:
+      id: group-card-full-width-ok
+    timeout: 30000
+- extendedWaitUntil:
+    visible:
+      id: groups-create-btn-layout-ok
+    timeout: 30000
+- assertVisible:
+    id: tabbar-row
+- assertVisible:
+    id: groups-list-virtualized

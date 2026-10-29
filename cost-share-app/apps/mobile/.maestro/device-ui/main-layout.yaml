@@ -9,4 +9,5 @@ env:
     file: set-app-language.yaml
     env:
       APP_LANG: ${APP_LANG}
+- runFlow: assert-layout-probes.yaml
 - runFlow: visit-main-screens.yaml

@@ -1,17 +1,10 @@
 appId: com.kupapay.mobile
+env:
+  APP_LANG: he
 ---
 - launchApp:
-    clearState: false
-- extendedWaitUntil:
-    visible:
-      id: groups-list-title
-    timeout: 120000
-    optional: true
-- runFlow:
-    file: sign-in.yaml
-    when:
-      notVisible:
-        id: groups-list-title
+    clearState: true
+- runFlow: sign-in.yaml
 - runFlow:
     file: set-app-language.yaml
     env:
@@ -37,14 +30,6 @@ appId: com.kupapay.mobile
 - assertNotVisible:
     id: friend-settle-one-currency
 - takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_05_friend_breakdown_single_ccy
-- tapOn:
-    id: friend-settle-all
-- extendedWaitUntil:
-    visible:
-      id: friend-cross-settle-confirm
-    timeout: 30000
-- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_06_friend_settle_confirm
+- runFlow: assert-friend-settle-flow.yaml
 - tapOn:
     id: center-dialog-scrim
-- tapOn:
-    id: friend-balances-close
