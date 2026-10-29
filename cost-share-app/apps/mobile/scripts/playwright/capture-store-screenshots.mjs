@@ -16,19 +16,33 @@ const { chromium } = require('@playwright/test');
 const sharp = require('sharp');
 
 const distDir = path.join(mobileDir, 'dist');
-const outRoot = path.join(repoRoot, 'store/screenshots/ios');
+const iosOutRoot = path.join(repoRoot, 'store/screenshots/ios');
+const androidOutRoot = path.join(repoRoot, 'store/screenshots/android');
 const reviewDir = path.join(repoRoot, 'store/asc/review-screenshots');
 const captions = JSON.parse(
   fs.readFileSync(path.join(repoRoot, 'store/asc/screenshot-captions.json'), 'utf8'),
 );
+const localeManifest = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, 'store/aso/locale-manifest.json'), 'utf8'),
+);
 
 const LISTING_SCREENS = captions.screens;
-const LOCALES = Object.keys(captions.captions);
-const SIZES = {
-  '6.9': { width: 1320, height: 2868 },
+const ASC_LOCALES = (process.env.CAPTURE_ASC_LOCALES?.split(',').map((s) => s.trim()).filter(Boolean) ??
+  Object.keys(captions.captions));
+const IOS_SIZES = {
+  '6.7': { width: 1290, height: 2796 },
   '6.5': { width: 1284, height: 2778 },
+  '6.9': { width: 1320, height: 2868 },
   ipad: { width: 2048, height: 2732 },
 };
+const PLAY_PHONE = { width: 1080, height: 1920 };
+
+function playLocaleForAsc(ascLocale) {
+  const entry = Object.entries(localeManifest.ascLocaleByAppLocale ?? {}).find(
+    ([, asc]) => asc === ascLocale,
+  );
+  return entry?.[0] ?? ascLocale.split('-')[0];
+}
 
 function assertDist() {
   if (!fs.existsSync(path.join(distDir, 'index.html'))) {
@@ -55,15 +69,19 @@ async function captureAll() {
   const written = [];
 
   try {
-    for (const locale of LOCALES) {
+    for (const ascLocale of ASC_LOCALES) {
+      const playLocale = playLocaleForAsc(ascLocale);
+
       for (const screen of LISTING_SCREENS) {
-        const headline = captions.captions[locale]?.[screen] ?? captions.captions['en-US'][screen];
-        for (const [sizeKey, dim] of Object.entries(SIZES)) {
-          const outDir = path.join(outRoot, locale, sizeKey);
+        const headline =
+          captions.captions[ascLocale]?.[screen] ?? captions.captions['en-US'][screen];
+
+        for (const [sizeKey, dim] of Object.entries(IOS_SIZES)) {
+          const outDir = path.join(iosOutRoot, ascLocale, sizeKey);
           fs.mkdirSync(outDir, { recursive: true });
           const outPath = path.join(outDir, `${screen}.png`);
           const page = await browser.newPage({ viewport: { width: dim.width, height: dim.height } });
-          const url = `http://127.0.0.1:${port}/?capture=1&screen=${encodeURIComponent(screen)}&locale=${encodeURIComponent(locale)}&headline=${encodeURIComponent(headline)}`;
+          const url = `http://127.0.0.1:${port}/?capture=1&screen=${encodeURIComponent(screen)}&locale=${encodeURIComponent(ascLocale)}&headline=${encodeURIComponent(headline)}`;
           await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
           await page.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
           await page.waitForTimeout(600);
@@ -72,16 +90,34 @@ async function captureAll() {
           await assertScreenshotValid(outPath);
           written.push(outPath);
         }
+
+        const androidDir = path.join(androidOutRoot, playLocale);
+        fs.mkdirSync(androidDir, { recursive: true });
+        const androidPath = path.join(androidDir, `${screen}.png`);
+        const androidPage = await browser.newPage({
+          viewport: { width: PLAY_PHONE.width, height: PLAY_PHONE.height },
+        });
+        const androidUrl = `http://127.0.0.1:${port}/?capture=1&screen=${encodeURIComponent(screen)}&locale=${encodeURIComponent(ascLocale)}&headline=${encodeURIComponent(headline)}`;
+        await androidPage.goto(androidUrl, { waitUntil: 'networkidle', timeout: 120_000 });
+        await androidPage.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
+        await androidPage.waitForTimeout(600);
+        await androidPage.screenshot({ path: androidPath, type: 'png' });
+        await androidPage.close();
+        await assertScreenshotValid(androidPath, 60_000);
+        written.push(androidPath);
       }
 
+      if (process.env.CAPTURE_SKIP_IAP_REVIEW === '1') {
+        continue;
+      }
       fs.mkdirSync(reviewDir, { recursive: true });
-      const reviewPath = path.join(reviewDir, `paywall-${locale}.png`);
-      const headline = captions.captions[locale]?.['pro-currency'] ?? 'KupaPay Pro';
+      const reviewPath = path.join(reviewDir, `paywall-${ascLocale}.png`);
+      const paywallHeadline = captions.captions[ascLocale]?.['pro-currency'] ?? 'KupaPay Pro';
       const page = await browser.newPage({ viewport: { width: 1320, height: 2868 } });
-      const url = `http://127.0.0.1:${port}/?capture=1&screen=pro-paywall&locale=${encodeURIComponent(locale)}&headline=${encodeURIComponent(headline)}`;
+      const url = `http://127.0.0.1:${port}/?capture=1&screen=pro-paywall&locale=${encodeURIComponent(ascLocale)}&headline=${encodeURIComponent(paywallHeadline)}`;
       await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
       await page.waitForSelector('[data-testid="asc-demo-screen-pro-paywall"]', { timeout: 120_000 });
-      await page.waitForTimeout(600);
+      await page.waitForTimeout(2000);
       const phone = page.locator('[data-testid="asc-capture-phone"]');
       await phone.screenshot({ path: reviewPath, type: 'png' });
       await page.close();

@@ -9,3 +9,7 @@ Marketing owns final screenshots (#62). For a **clean local/demo state**:
 This wipes and recreates sample users (John/Jane/Bob), three groups, expenses, and balances suitable for demo captures. Switch the mobile app to dev `.env`, sign in as `john@example.com` / your seed password, and capture Hebrew UI + Bit/PayBox settle-up flows.
 
 Do **not** run seed against production.
+
+## Automated listing frames (no seed required)
+
+For App Store / Play marketing PNGs with caption overlays, use the Playwright pipeline — see [store/screenshots/README.md](../store/screenshots/README.md).

@@ -19,6 +19,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
+    "capture:store-screenshots": "bash scripts/capture-store-screenshots.sh",
     "analyze:web": "EXPO_ATLAS=true expo export --platform web",
     "analyze:atlas": "expo-atlas .expo/atlas.jsonl",
     "dev": "expo start --dev-client",
