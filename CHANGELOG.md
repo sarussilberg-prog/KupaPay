@@ -21,3 +21,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - docs: canonical groups list UI spec (mockup B2) (#646)
 ## [2.2.0-dev.8] — 2026-10-28
 - feat(analytics): automate PostHog MAU dashboard insight tiles (#584) (#647)
+## [2.2.0-dev.9] — 2026-10-29
+- test(shared): core settlement and balance summary unit tests (#649)
