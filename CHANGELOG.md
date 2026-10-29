@@ -25,3 +25,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - test(shared): core settlement and balance summary unit tests (#649)
 ## [2.2.0-dev.10] — 2026-10-29
 - feat(mobile): import Splitwise group CSV (#396) (#650)
+## [2.2.0-dev.11] — 2026-10-29
+- feat(web): Splitwise alternative comparison pages (#415) (#651)
