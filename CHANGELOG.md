@@ -45,3 +45,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - chore(release): merge main into dev for 2.2.0 (#663)
 ## [2.2.0-dev.20] — 2026-10-29
 - fix(store): ASC screenshot upload fileSize/checksum + replace set (#667)
+## [2.2.0-dev.21] — 2026-10-29
+- fix(store): reuse editable ASC version for 2.2.0 (#671)
