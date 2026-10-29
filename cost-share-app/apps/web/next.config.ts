@@ -4,6 +4,7 @@ import { withSentryConfig } from '@sentry/nextjs/config';
 import { sentryReleaseMetadata } from '@cost-share/shared';
 import { CONTENT_SECURITY_POLICY } from '../../packages/shared/src/security/contentSecurityPolicy';
 import versionJson from '../../packages/shared/version.json';
+import { localePrefixedAppEntryRedirects } from './lib/marketingAppRoutes';
 
 const appVersion = (versionJson as { version: string }).version;
 const vercelSha = (process.env.VERCEL_GIT_COMMIT_SHA ?? '').trim();
@@ -68,6 +69,9 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
+  },
+  async redirects() {
+    return localePrefixedAppEntryRedirects();
   },
   async rewrites() {
     const landing = inviteLandingBase();
