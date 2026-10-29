@@ -25,6 +25,8 @@ const config: KnipConfig = {
   // Knip does not resolve .mjs cross-imports for this script library (#584).
   ignoreIssues: {
     'scripts/posthog-mau-tiles-lib.mjs': ['exports'],
+    // CLI invoked only by .github/workflows/app-store-production.yml.
+    'apps/mobile/scripts/asc-submit-app-for-review.mjs': ['files'],
   },
   workspaces: {
     '@cost-share/mobile': {
