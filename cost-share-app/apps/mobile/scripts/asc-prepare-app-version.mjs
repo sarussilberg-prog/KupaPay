@@ -100,7 +100,25 @@ async function main() {
   const versions = await listIosVersions();
   let version = versions.find((v) => v.attributes?.versionString === whatsNew.versionString);
   if (!version) {
-    version = await createVersion(whatsNew.versionString);
+    // ASC allows one editable version: reuse it (rename) instead of creating a second one.
+    const editable = versions.find((v) => v.attributes?.appStoreState === "PREPARE_FOR_SUBMISSION");
+    if (editable && !dryRun) {
+      console.log(`Renaming editable version ${editable.attributes?.versionString} → ${whatsNew.versionString}`);
+      const patched = await ascRequest(`/v1/appStoreVersions/${editable.id}`, {
+        method: "PATCH",
+        token,
+        body: {
+          data: {
+            type: "appStoreVersions",
+            id: editable.id,
+            attributes: { versionString: whatsNew.versionString },
+          },
+        },
+      });
+      version = patched.data;
+    } else {
+      version = await createVersion(whatsNew.versionString);
+    }
   }
 
   const versionId = version.id;
