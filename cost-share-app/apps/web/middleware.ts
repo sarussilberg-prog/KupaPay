@@ -10,6 +10,9 @@ import {
     ONE_YEAR_LOCALE_COOKIE_MAX_AGE,
     resolveMarketingMiddleware,
 } from '@/lib/marketingMiddlewareLogic';
+import { shouldProxyPathToExpoApp } from '@/lib/marketingAppProxy';
+
+const APP_PROXY_ORIGIN = (process.env.APP_PROXY_ORIGIN ?? '').replace(/\/+$/, '');
 
 function withLocaleCookie(response: NextResponse, locale: Language): NextResponse {
     response.cookies.set(LOCALE_COOKIE, locale, {
@@ -31,6 +34,12 @@ function withAmbassadorRefCookie(response: NextResponse, request: NextRequest): 
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+
+    if (APP_PROXY_ORIGIN && shouldProxyPathToExpoApp(pathname)) {
+        const target = new URL(`${pathname}${request.nextUrl.search}`, APP_PROXY_ORIGIN);
+        return NextResponse.rewrite(target);
+    }
+
     const action = resolveMarketingMiddleware(pathname, {
         cookieLocale: request.cookies.get(LOCALE_COOKIE)?.value,
         acceptLanguage: request.headers.get('accept-language'),
@@ -55,15 +64,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/',
-        '/i/:path*',
-        '/g/:path*',
-        '/:locale(en|he|ru|ar|fr|es|de)',
-        '/:locale(en|he|ru|ar|fr|es|de)/split-calculator',
-        '/:locale(en|he|ru|ar|fr|es|de)/splitwise-alternative',
-        '/:locale(en|he|ru|ar|fr|es|de)/ambassadors',
-        '/:locale(en|he|ru|ar|fr|es|de)/guides',
-        '/:locale(en|he|ru|ar|fr|es|de)/guides/:guideSlug',
-        '/:locale(en|he|ru|ar|fr|es|de)/:slug(trip-expenses|roommate-bills|event-expenses|couple-expenses)',
+        '/((?!_next/static|_next/image|favicon\\.png|icon\\.png|apple-touch-icon\\.png|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml).*)',
     ],
 };
