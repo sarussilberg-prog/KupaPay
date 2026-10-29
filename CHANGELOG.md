@@ -43,3 +43,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(growth): ambassador program application, Pro grant, referral codes (#420) (#661)
 ## [2.2.0-dev.19] — 2026-10-29
 - chore(release): merge main into dev for 2.2.0 (#663)
+## [2.2.0-dev.20] — 2026-10-29
+- fix(store): ASC screenshot upload fileSize/checksum + replace set (#667)
