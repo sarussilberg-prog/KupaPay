@@ -1411,6 +1411,55 @@
         },
         "adUnavailableContinue": "Реклама на этом устройстве недоступна. Можно продолжить без просмотра."
     },
+    "splitwiseImport": {
+        "title": "Импорт из Splitwise",
+        "settingsRow": "Импорт CSV из Splitwise",
+        "hint": "Экспортируйте группу из Splitwise (Настройки → Экспорт в таблицу) и загрузите CSV сюда.",
+        "pickPrompt": "Выберите экспорт группы Splitwise (.csv). Мы покажем предпросмотр перед созданием группы в KupaPay.",
+        "pickFile": "Выбрать CSV-файл",
+        "webNote": "В веб-версии браузер откроет выбор файла.",
+        "groupNameLabel": "Название группы",
+        "selfMemberLabel": "Какой столбец — это вы?",
+        "guestNamesLabel": "Имена гостей для остальных участников",
+        "importCta": "Создать группу и импортировать",
+        "changeFile": "Выбрать другой файл",
+        "success": "Импортировано расходов: {{count}}",
+        "preview": {
+            "summary": "{{expenseCount}} расходов · {{memberCount}} участников · {{skippedCount}} строк пропущено",
+            "more": "+ ещё {{count}} расходов"
+        },
+        "previewExpensesTitle": "Предпросмотр",
+        "skippedTitle": "{{count}} строк не импортировано",
+        "skipped": {
+            "line": "Строка {{line}}: {{reason}}",
+            "more": "+ ещё {{count}} пропущенных строк",
+            "total_balance_row": "Строка итогового баланса",
+            "payment_row": "Строка платежа / расчёта",
+            "zero_cost": "Нулевая сумма",
+            "invalid_cost": "Некорректная сумма",
+            "invalid_currency": "Некорректная валюта",
+            "no_participants": "Нет участников",
+            "missing_payer": "Не удалось определить плательщика",
+            "unbalanced_row": "Доли не сходятся",
+            "column_mismatch": "Неверное число столбцов",
+            "invalid_date": "Некорректная дата"
+        },
+        "errors": {
+            "empty_file": "Файл пуст.",
+            "missing_required_columns": "Похоже, это не экспорт Splitwise (нет Date, Description, Cost или Currency).",
+            "no_member_columns": "Нет столбцов участников — экспортируйте группу, а не пустой лист.",
+            "no_expenses": "Из файла не удалось импортировать расходы.",
+            "read_failed": "Не удалось прочитать файл.",
+            "unsupported": "Неподдерживаемый тип файла.",
+            "cancelled": "Отменено",
+            "not_authenticated": "Войдите, чтобы импортировать.",
+            "missing_self_mapping": "Выберите, какой участник — это вы.",
+            "missing_member_mapping": "Не хватает сопоставления участника.",
+            "invalid_splits": "Не удалось сопоставить некоторые доли.",
+            "empty_group_name": "Введите название группы.",
+            "import_failed": "Импорт не удался. Попробуйте снова или меньший экспорт."
+        }
+    },
     "remind": {
         "sendReminderButton": "Отправить напоминание",
         "sheetTitle": "Отправить напоминание",

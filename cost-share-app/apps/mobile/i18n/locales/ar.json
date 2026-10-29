@@ -1455,6 +1455,55 @@
         },
         "adUnavailableContinue": "الإعلانات غير متاحة على هذا الجهاز. يمكنك المتابعة دون مشاهدة."
     },
+    "splitwiseImport": {
+        "title": "استيراد من Splitwise",
+        "settingsRow": "استيراد CSV من Splitwise",
+        "hint": "صدّر مجموعة من Splitwise (الإعدادات → تصدير كجدول)، ثم ارفع ملف CSV هنا.",
+        "pickPrompt": "اختر تصدير مجموعة Splitwise (.csv). سنعرض معاينة قبل إنشاء مجموعتك في KupaPay.",
+        "pickFile": "اختيار ملف CSV",
+        "webNote": "على الويب، سيفتح المتصفح منتقي الملفات.",
+        "groupNameLabel": "اسم المجموعة",
+        "selfMemberLabel": "أي عمود أنت؟",
+        "guestNamesLabel": "أسماء الضيوف للأعضاء الآخرين",
+        "importCta": "إنشاء المجموعة والاستيراد",
+        "changeFile": "اختيار ملف آخر",
+        "success": "تم استيراد {{count}} مصروفات",
+        "preview": {
+            "summary": "{{expenseCount}} مصروفات · {{memberCount}} أعضاء · {{skippedCount}} صفوف تم تخطيها",
+            "more": "+ {{count}} مصروفات أخرى"
+        },
+        "previewExpensesTitle": "معاينة",
+        "skippedTitle": "{{count}} صفوف لم تُستورد",
+        "skipped": {
+            "line": "السطر {{line}}: {{reason}}",
+            "more": "+ {{count}} صفوف متخطاة أخرى",
+            "total_balance_row": "صف إجمالي الأرصدة",
+            "payment_row": "صف دفع / تسوية",
+            "zero_cost": "مبلغ صفر",
+            "invalid_cost": "مبلغ غير صالح",
+            "invalid_currency": "عملة غير صالحة",
+            "no_participants": "لا مشاركين",
+            "missing_payer": "تعذر تحديد من دفع",
+            "unbalanced_row": "الحصص لا تتطابق",
+            "column_mismatch": "عدد أعمدة خاطئ",
+            "invalid_date": "تاريخ غير صالح"
+        },
+        "errors": {
+            "empty_file": "الملف فارغ.",
+            "missing_required_columns": "لا يبدو تصدير Splitwise (أعمدة Date أو Description أو Cost أو Currency مفقودة).",
+            "no_member_columns": "لم تُعثر على أعمدة أعضاء — صدّر مجموعة وليس ورقة فارغة.",
+            "no_expenses": "لم يمكن استيراد مصروفات من هذا الملف.",
+            "read_failed": "تعذر قراءة الملف.",
+            "unsupported": "نوع ملف غير مدعوم.",
+            "cancelled": "أُلغي",
+            "not_authenticated": "سجّل الدخول للاستيراد.",
+            "missing_self_mapping": "اختر أي عضو أنت.",
+            "missing_member_mapping": "تعيين عضو مفقود.",
+            "invalid_splits": "تعذر تعيين بعض التقسيمات.",
+            "empty_group_name": "أدخل اسم المجموعة.",
+            "import_failed": "فشل الاستيراد. حاول مرة أخرى أو ملفاً أصغر."
+        }
+    },
     "remind": {
         "sendReminderButton": "إرسال تذكير",
         "sheetTitle": "إرسال تذكير",

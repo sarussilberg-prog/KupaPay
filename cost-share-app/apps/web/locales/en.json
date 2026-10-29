@@ -46,6 +46,11 @@
         "description": "Create groups for trips, rent, dinners — as many as you like"
       },
       {
+        "icon": "import",
+        "title": "Import from Splitwise",
+        "description": "Upload a Splitwise CSV export to recreate your group, members, and expenses in minutes"
+      },
+      {
         "icon": "offline",
         "title": "Works offline",
         "description": "Add and view expenses even without internet — everything syncs automatically when you reconnect"

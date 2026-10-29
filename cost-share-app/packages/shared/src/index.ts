@@ -51,6 +51,15 @@ export * from './analytics/growthMetrics';
 export * from './analytics/growthExperiments';
 export * from './analytics/marketingAttribution';
 export * from './activation';
+export { parseSplitwiseCsvExport } from './import/splitwiseCsvParse';
+export { buildSplitwiseImportPlan, defaultGuestDisplayNames } from './import/splitwiseImportPlan';
+export type {
+    SplitwiseParseResult,
+    SplitwiseParseSuccess,
+    SplitwiseSkipReason,
+    SplitwiseMemberMapping,
+    SplitwiseParsedExpense,
+} from './import/splitwiseCsvTypes';
 export * from './email/lifecycleTemplates';
 export * from './email/lifecycleEmailCopy';
 export * from './email/renderTransactionalEmail';

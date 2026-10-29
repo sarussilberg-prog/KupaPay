@@ -1594,6 +1594,55 @@
             "amountPlaceholder": "Budget amount"
         }
     },
+    "splitwiseImport": {
+        "title": "Import from Splitwise",
+        "settingsRow": "Import Splitwise CSV",
+        "hint": "Export a group from Splitwise (Settings → Export as spreadsheet), then upload the CSV here.",
+        "pickPrompt": "Choose your Splitwise group export (.csv). We'll preview expenses before creating your KupaPay group.",
+        "pickFile": "Choose CSV file",
+        "webNote": "On web, your browser will open a file picker.",
+        "groupNameLabel": "Group name",
+        "selfMemberLabel": "Which column is you?",
+        "guestNamesLabel": "Guest names for other members",
+        "importCta": "Create group & import",
+        "changeFile": "Choose a different file",
+        "success": "Imported {{count}} expenses",
+        "preview": {
+            "summary": "{{expenseCount}} expenses · {{memberCount}} members · {{skippedCount}} rows skipped",
+            "more": "+ {{count}} more expenses"
+        },
+        "previewExpensesTitle": "Preview",
+        "skippedTitle": "{{count}} rows not imported",
+        "skipped": {
+            "line": "Line {{line}}: {{reason}}",
+            "more": "+ {{count}} more skipped rows",
+            "total_balance_row": "Total balance summary row",
+            "payment_row": "Payment / settlement row",
+            "zero_cost": "Zero amount",
+            "invalid_cost": "Invalid amount",
+            "invalid_currency": "Invalid currency",
+            "no_participants": "No one participated",
+            "missing_payer": "Could not determine who paid",
+            "unbalanced_row": "Shares do not add up",
+            "column_mismatch": "Wrong number of columns",
+            "invalid_date": "Invalid date"
+        },
+        "errors": {
+            "empty_file": "The file is empty.",
+            "missing_required_columns": "This doesn't look like a Splitwise export (missing Date, Description, Cost, or Currency).",
+            "no_member_columns": "No member columns found — export a group, not an empty sheet.",
+            "no_expenses": "No expenses could be imported from this file.",
+            "read_failed": "Could not read the file.",
+            "unsupported": "Unsupported file type.",
+            "cancelled": "Cancelled",
+            "not_authenticated": "Sign in to import.",
+            "missing_self_mapping": "Choose which member is you.",
+            "missing_member_mapping": "Missing member mapping.",
+            "invalid_splits": "Some expense splits could not be mapped.",
+            "empty_group_name": "Enter a group name.",
+            "import_failed": "Import failed. Try again or pick a smaller export."
+        }
+    },
     "remind": {
         "sendReminderButton": "Send Reminder",
         "sheetTitle": "Send a Reminder",
