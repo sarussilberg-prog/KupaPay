@@ -17,9 +17,10 @@ const dryRun = process.argv.includes("--dry-run");
 
 /** Map folder suffix to ASC screenshot display type. */
 const DISPLAY_BY_FOLDER = {
-  "6.9": "APP_IPHONE_69",
+  // ASC has no APP_IPHONE_69; 6.9" (1320x2868) shots go in the APP_IPHONE_67 set. 6.7 folder is skipped (same set).
+  "6.9": "APP_IPHONE_67",
   "6.5": "APP_IPHONE_65",
-  ipad: "APP_IPAD_PRO_129",
+  ipad: "APP_IPAD_PRO_3GEN_129",
 };
 
 async function editableVersionId() {
