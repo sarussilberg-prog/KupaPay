@@ -12,6 +12,9 @@ export const KUPAPAY_PRO_ENABLED = process.env.EXPO_PUBLIC_KUPAPAY_PRO_ENABLED =
 /** Passwordless email OTP sign-in (Supabase `signInWithOtp` + 6-digit code). */
 export const EMAIL_AUTH_ENABLED = process.env.EXPO_PUBLIC_ENABLE_EMAIL_AUTH === 'true';
 
+/** Maestro device UI: show seeded email+password panel on the login screen (CI simulators only). */
+export const E2E_MAESTRO_AUTH_ENABLED = process.env.EXPO_PUBLIC_E2E_MAESTRO_AUTH === 'true';
+
 export function isProUpsellSurfaceEnabled(): boolean {
     return KUPAPAY_PRO_ENABLED || SHOW_KUPAPAY_PRO_UPSELL;
 }

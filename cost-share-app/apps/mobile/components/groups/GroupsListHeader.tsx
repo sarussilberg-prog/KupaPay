@@ -3,7 +3,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useLayoutWindowWidth } from '../../hooks/useLayoutWindowWidth';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
@@ -74,13 +74,15 @@ function HeaderActions({
                     accessibilityLabel={createLabel}
                     testID="groups-create-btn"
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    style={[rtlRowStyle(isRtl), { flexShrink: 0 }]}
-                    className="h-10 items-center justify-center gap-1 rounded-full bg-primary px-3"
+                    style={[styles.createPill, rtlRowStyle(isRtl)]}
                 >
                     <AppIcon name="add" size={18} color={colors.white} />
                     <Text
-                        className="text-xs font-semibold text-white"
                         testID="groups-create-btn-label"
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.75}
+                        style={styles.createPillLabel}
                     >
                         {createLabel}
                     </Text>
@@ -181,3 +183,26 @@ export function GroupsListHeader({
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    createPill: {
+        flexShrink: 0,
+        minHeight: 40,
+        maxWidth: '100%',
+        paddingHorizontal: 12,
+        paddingVertical: Platform.OS === 'android' ? 8 : 10,
+        borderRadius: 9999,
+        backgroundColor: colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+    },
+    createPillLabel: {
+        flexShrink: 1,
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.white,
+        lineHeight: 16,
+        ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+    },
+});

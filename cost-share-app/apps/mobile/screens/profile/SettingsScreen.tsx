@@ -148,6 +148,7 @@ export function SettingsScreen() {
                         variant="value"
                         valueText={language === 'he' ? t('profile.hebrew') : t('profile.english')}
                         onPress={() => setShowLanguage(true)}
+                        testID="settings-language-row"
                     />
                     <SettingsRow
                         iconName="cash-outline"

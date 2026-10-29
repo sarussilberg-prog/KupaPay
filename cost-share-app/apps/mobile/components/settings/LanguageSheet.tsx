@@ -40,6 +40,7 @@ export function LanguageSheet({ visible, current, onSelect, onClose, testID }: P
                     {OPTIONS.map(opt => (
                         <TouchableOpacity
                             key={opt.code}
+                            testID={`language-option-${opt.code}`}
                             onPress={() => onSelect(opt.code)}
                             className="flex-row items-center px-5 py-4 border-t border-gray-100"
                         >

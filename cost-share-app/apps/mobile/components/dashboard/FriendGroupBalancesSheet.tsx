@@ -145,8 +145,9 @@ export function FriendGroupBalancesSheet({
         );
     }, [simplified, friendId, currentUserId, defaultCurrency, ratesFromBase]);
 
-    const hasOpenBalance =
-        crossGroupNet != null && crossGroupNet.perCurrency.length > 0;
+    const openCurrencyLines = crossGroupNet?.perCurrency ?? [];
+    const hasOpenBalance = openCurrencyLines.length > 0;
+    const isMultiCurrencyOpen = openCurrencyLines.length > 1;
 
     const weightedDisplay = crossGroupNet?.weightedInDefault;
     const weightedPositive = (weightedDisplay?.netBalance ?? 0) > 0.01;
@@ -164,11 +165,21 @@ export function FriendGroupBalancesSheet({
         setCrossSettleOpen(true);
     };
 
+    const breakdownModalVisible = visible && !crossSettleOpen;
+
     return (
         <>
-            <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+            <Modal
+                visible={breakdownModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={onClose}
+            >
                 <Pressable onPress={onClose} className="flex-1 bg-black/40 justify-center px-4">
-                    <Pressable onPress={() => { }} className="bg-white rounded-2xl max-h-[70%]">
+                    <Pressable
+                        onPress={(e) => e.stopPropagation()}
+                        className="bg-white rounded-2xl max-h-[70%]"
+                    >
                         {/* Header */}
                         <View
                             style={rtlRowStyle(isRtl)}
@@ -220,9 +231,9 @@ export function FriendGroupBalancesSheet({
                                     <Text className="text-xs text-amber-700 mt-1">
                                         {t('dashboard.conversionFailed')}
                                     </Text>
-                                ) : (
-                                    <View className="mt-2 gap-0.5">
-                                        {crossGroupNet?.perCurrency.map(line => (
+                                ) : isMultiCurrencyOpen ? (
+                                    <View className="mt-2 gap-0.5" testID="friend-balances-per-currency">
+                                        {openCurrencyLines.map(line => (
                                             <View
                                                 key={line.currency}
                                                 style={rtlRowStyle(isRtl)}
@@ -241,8 +252,10 @@ export function FriendGroupBalancesSheet({
                                             </View>
                                         ))}
                                     </View>
-                                )}
-                                {hasOpenBalance && !weightedDisplay.conversionFailed ? (
+                                ) : null}
+                                {hasOpenBalance &&
+                                isMultiCurrencyOpen &&
+                                !weightedDisplay.conversionFailed ? (
                                     <TouchableOpacity
                                         onPress={() => openCrossSettle(false)}
                                         className="mt-3 py-2"

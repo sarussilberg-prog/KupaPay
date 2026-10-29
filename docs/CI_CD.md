@@ -71,7 +71,20 @@ PRs to **`main`** always run the **full** CI matrix (no path skipping). Optional
 | **PR hygiene (scope + title)** | [`pr-hygiene.yml`](../.github/workflows/pr-hygiene.yml) — `cursor/*` PRs only |
 | **SonarCloud Code Analysis** | Waited on in **Auto-merge to dev** |
 
-Individual job names (only if you prefer granular protection instead of **CI gate**): **CI path plan**, **Install dependencies**, **Lint**, **Typecheck**, **Mobile tests**, **Coverage ratchet**, **Legal locale parity**, **Deno edge gate**, **No merge conflict markers**, **Expo mobile config**, **CI performance**, **Supabase SQL integration**, **Deno edge bundle (all functions)**, **Branch up to date with dev**.
+Individual job names (only if you prefer granular protection instead of **CI gate**): **CI path plan**, **Install dependencies**, **Lint**, **Typecheck**, **Mobile tests**, **Coverage ratchet**, **Legal locale parity**, **Deno edge gate**, **No merge conflict markers**, **Expo mobile config**, **Mobile device UI (Maestro iOS)**, **Mobile device UI (Maestro Android)**, **CI performance**, **Supabase SQL integration**, **Deno edge bundle (all functions)**, **Branch up to date with dev**.
+
+### Mobile device UI (Maestro)
+
+When a PR touches `cost-share-app/apps/mobile/**` or shared package code, CI runs **Mobile device UI (Maestro iOS)** on `macos-14` (iPhone 16 simulator) and **Mobile device UI (Maestro Android)** on an API 34 emulator. Both jobs:
+
+- Seed the dev E2E user (`npm run seed:e2e`) when `SUPABASE_SERVICE_ROLE_KEY_DEV` / `E2E_TEST_PASSWORD` secrets are set
+- Build a release dev client with `EXPO_PUBLIC_E2E_MAESTRO_AUTH=true` (email/password panel on the login screen)
+- Run flows under [`cost-share-app/apps/mobile/.maestro/device-ui/`](../cost-share-app/apps/mobile/.maestro/device-ui/) — groups list layout (en + he), seven-locale login string screenshots, and Hebrew RTL profile friend breakdown + settle confirm
+- Upload PNG artifacts: **`maestro-device-ui-ios`** and **`maestro-device-ui-android`** (retention 14 days)
+
+These jobs roll up into **CI gate** for path-scoped PRs; PRs to **`main`** always run them. If neither mobile nor full suite applies, **Mobile device UI (skipped)** satisfies the gate.
+
+**Branch protection (admin):** add **Mobile device UI (Maestro iOS)** and **Mobile device UI (Maestro Android)** to required checks on `dev` and `main`, or rely on **CI gate** alone (recommended). Secrets required: `E2E_TEST_PASSWORD`, `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY_DEV` (optional `E2E_TEST_EMAIL`).
 
 #### Security & supply chain (both branches)
 

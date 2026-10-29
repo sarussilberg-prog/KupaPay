@@ -1,0 +1,50 @@
+appId: com.kupapay.mobile
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 120000
+    optional: true
+- runFlow:
+    file: sign-in.yaml
+    when:
+      notVisible:
+        id: groups-list-title
+- runFlow:
+    file: set-app-language.yaml
+    env:
+      APP_LANG: he
+- tapOn:
+    id: tab-Profile
+- extendedWaitUntil:
+    visible:
+      id: profile-settings-button
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      text: "Salome"
+    direction: DOWN
+    timeout: 90000
+- tapOn: "Salome Assaraf"
+- extendedWaitUntil:
+    visible:
+      id: friend-balances-weighted-net
+    timeout: 30000
+- assertNotVisible:
+    id: friend-balances-per-currency
+- assertNotVisible:
+    id: friend-settle-one-currency
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_05_friend_breakdown_single_ccy
+- tapOn:
+    id: friend-settle-all
+- extendedWaitUntil:
+    visible:
+      id: friend-cross-settle-confirm
+    timeout: 30000
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_06_friend_settle_confirm
+- tapOn:
+    id: center-dialog-scrim
+- tapOn:
+    id: friend-balances-close

@@ -244,6 +244,8 @@ function GroupCardBase({
                 style={[
                     rtlRowStyle(isRtl),
                     {
+                        width: '100%',
+                        alignSelf: 'stretch',
                         alignItems: 'center',
                         padding: GROUP_CARD_PAD,
                         gap: GROUP_CARD_STACK_GAP,
@@ -256,6 +258,9 @@ function GroupCardBase({
                     testID={`group-card-${group.id}`}
                     style={{
                         flex: 1,
+                        flexGrow: 1,
+                        flexShrink: 1,
+                        flexBasis: 0,
                         alignItems: 'center',
                         gap: GROUP_CARD_ROW_GAP,
                         minWidth: 0,

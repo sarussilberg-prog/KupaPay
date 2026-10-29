@@ -104,4 +104,57 @@ describe('FriendGroupBalancesSheet weighted net header', () => {
         );
         expect(getByTestId('friend-settle-all')).toBeTruthy();
     });
+
+    it('shows per-currency rows and settle-in-one-currency when multiple currencies are open', () => {
+        const { getByTestId } = render(
+            <FriendGroupBalancesSheet
+                visible
+                friend={friend}
+                currentUserId="u-me"
+                defaultCurrency="ILS"
+                onClose={() => {}}
+                onSelectGroup={() => {}}
+            />,
+        );
+        expect(getByTestId('friend-balances-per-currency')).toBeTruthy();
+        expect(getByTestId('friend-settle-one-currency')).toBeTruthy();
+    });
+});
+
+describe('FriendGroupBalancesSheet single open currency', () => {
+    beforeEach(() => {
+        mockUseSimplifiedDebts.mockReturnValue({
+            data: makeSimplified([
+                {
+                    groupId: 'g1',
+                    currency: 'ILS',
+                    fromUserId: 'u-friend',
+                    toUserId: 'u-me',
+                    amount: 42,
+                },
+            ]),
+            isLoading: false,
+        } as ReturnType<typeof useSimplifiedDebts>);
+    });
+
+    it('shows only the net total without per-currency breakdown or single-currency settle link', () => {
+        const singleCurrencyFriend: FriendBalanceSummary = {
+            ...friend,
+            byCurrency: [{ currency: 'ILS', net: 42 }],
+        };
+        const { getByTestId, queryByTestId } = render(
+            <FriendGroupBalancesSheet
+                visible
+                friend={singleCurrencyFriend}
+                currentUserId="u-me"
+                defaultCurrency="ILS"
+                onClose={() => {}}
+                onSelectGroup={() => {}}
+            />,
+        );
+        expect(getByTestId('friend-balances-weighted-net')).toBeTruthy();
+        expect(queryByTestId('friend-balances-per-currency')).toBeNull();
+        expect(queryByTestId('friend-settle-one-currency')).toBeNull();
+        expect(getByTestId('friend-settle-all')).toBeTruthy();
+    });
 });

@@ -5,11 +5,26 @@ import {
     resolveAutoTextInputStyle,
     resolveAutoTextStyle,
     resolveCompactTextInputStyle,
+    rtlRowStyle,
     rtlTextAlign,
     rtlTextClassName,
 } from '../../hooks/useRtlLayout';
 
 describe('useRtlLayout helpers', () => {
+    it('uses row-reverse + direction ltr on native for RTL rows (flex-safe)', () => {
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+        expect(rtlRowStyle(true)).toEqual({
+            flexDirection: 'row-reverse',
+            direction: 'ltr',
+        });
+        expect(rtlRowStyle(false)).toEqual({
+            flexDirection: 'row',
+            direction: 'ltr',
+        });
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
+    });
+
     it('returns right alignment for Hebrew', () => {
         expect(rtlTextAlign(true)).toBe('right');
         expect(rtlTextAlign(false)).toBe('left');
