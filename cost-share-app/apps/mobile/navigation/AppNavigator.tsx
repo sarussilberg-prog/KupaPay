@@ -63,6 +63,7 @@ import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
 import { FavoriteGroupScreen } from '../screens/favoriteGroup/FavoriteGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
+import { SplitwiseImportScreen } from '../screens/groups/SplitwiseImportScreen';
 import { GroupPostCreateInviteScreen } from '../screens/groups/GroupPostCreateInviteScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
@@ -128,6 +129,7 @@ const Screen = {
     AdminMonetization: boundScreen(AdminMonetizationScreen, 'AdminMonetization'),
     AdminGrowthMetrics: boundScreen(AdminGrowthMetricsScreen, 'AdminGrowthMetrics'),
     CreateGroup: boundScreen(CreateGroupScreen, 'CreateGroup'),
+    SplitwiseImport: boundScreen(SplitwiseImportScreen, 'SplitwiseImport'),
     GroupPostCreateInvite: boundScreen(GroupPostCreateInviteScreen, 'GroupPostCreateInvite'),
     EditGroup: boundScreen(CreateGroupScreen, 'EditGroup'),
     AddExpense: boundScreen(AddExpenseScreen, 'AddExpense'),
@@ -513,6 +515,11 @@ export function AppNavigator() {
             <RootStack.Screen
                 name="CreateGroup"
                 component={Screen.CreateGroup}
+                options={{ headerShown: false }}
+            />
+            <RootStack.Screen
+                name="SplitwiseImport"
+                component={Screen.SplitwiseImport}
                 options={{ headerShown: false }}
             />
             <RootStack.Screen

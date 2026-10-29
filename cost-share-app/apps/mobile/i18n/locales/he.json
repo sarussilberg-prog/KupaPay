@@ -1596,6 +1596,55 @@
             "amountPlaceholder": "סכום תקציב"
         }
     },
+    "splitwiseImport": {
+        "title": "ייבוא מ-Splitwise",
+        "settingsRow": "ייבוא CSV מ-Splitwise",
+        "hint": "ייצאו קבוצה מ-Splitwise (הגדרות → ייצוא כגיליון), והעלו כאן את קובץ ה-CSV.",
+        "pickPrompt": "בחרו את ייצוא הקבוצה מ-Splitwise (.csv). נציג תצוגה מקדימה לפני יצירת הקבוצה ב-KupaPay.",
+        "pickFile": "בחירת קובץ CSV",
+        "webNote": "באתר, הדפדפן יפתח בוחר קבצים.",
+        "groupNameLabel": "שם הקבוצה",
+        "selfMemberLabel": "איזו עמודה זה את/ה?",
+        "guestNamesLabel": "שמות אורחים לשאר החברים",
+        "importCta": "יצירת קבוצה וייבוא",
+        "changeFile": "בחירת קובץ אחר",
+        "success": "יובאו {{count}} הוצאות",
+        "preview": {
+            "summary": "{{expenseCount}} הוצאות · {{memberCount}} חברים · {{skippedCount}} שורות דולגו",
+            "more": "+ עוד {{count}} הוצאות"
+        },
+        "previewExpensesTitle": "תצוגה מקדימה",
+        "skippedTitle": "{{count}} שורות לא יובאו",
+        "skipped": {
+            "line": "שורה {{line}}: {{reason}}",
+            "more": "+ עוד {{count}} שורות שדולגו",
+            "total_balance_row": "שורת סיכום יתרות",
+            "payment_row": "שורת תשלום / סילוק",
+            "zero_cost": "סכום אפס",
+            "invalid_cost": "סכום לא תקין",
+            "invalid_currency": "מטבע לא תקין",
+            "no_participants": "אין משתתפים",
+            "missing_payer": "לא ניתן לזהות מי שילם",
+            "unbalanced_row": "החלוקה לא מסתכמת",
+            "column_mismatch": "מספר עמודות שגוי",
+            "invalid_date": "תאריך לא תקין"
+        },
+        "errors": {
+            "empty_file": "הקובץ ריק.",
+            "missing_required_columns": "זה לא נראה כמו ייצוא Splitwise (חסרות עמודות Date, Description, Cost או Currency).",
+            "no_member_columns": "לא נמצאו עמודות חברים — ייצאו קבוצה, לא גיליון ריק.",
+            "no_expenses": "לא ניתן לייבא הוצאות מהקובץ.",
+            "read_failed": "לא ניתן לקרוא את הקובץ.",
+            "unsupported": "סוג קובץ לא נתמך.",
+            "cancelled": "בוטל",
+            "not_authenticated": "התחברו כדי לייבא.",
+            "missing_self_mapping": "בחרו איזה חבר זה אתם.",
+            "missing_member_mapping": "חסר מיפוי חבר.",
+            "invalid_splits": "לא ניתן למפות חלק מהחלוקות.",
+            "empty_group_name": "הזינו שם קבוצה.",
+            "import_failed": "הייבוא נכשל. נסו שוב או קובץ קטן יותר."
+        }
+    },
     "remind": {
         "sendReminderButton": "שלח תזכורת",
         "sheetTitle": "שלח תזכורת",

@@ -46,6 +46,11 @@
         "description": "Erstellt Gruppen für Reisen, Miete, Essen — so viele ihr wollt"
       },
       {
+        "icon": "import",
+        "title": "Import aus Splitwise",
+        "description": "Splitwise-CSV hochladen und Gruppe, Mitglieder und Ausgaben in Minuten übernehmen"
+      },
+      {
         "icon": "offline",
         "title": "Funktioniert offline",
         "description": "Ausgaben hinzufügen und ansehen auch ohne Internet — alles synchronisiert sich automatisch wieder"

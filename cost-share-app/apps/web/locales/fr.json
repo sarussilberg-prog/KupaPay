@@ -46,6 +46,11 @@
         "description": "Créez des groupes pour voyages, loyer, repas — autant que vous voulez"
       },
       {
+        "icon": "import",
+        "title": "Importer depuis Splitwise",
+        "description": "Téléversez un CSV Splitwise pour recréer groupe, membres et dépenses en quelques minutes"
+      },
+      {
         "icon": "offline",
         "title": "Fonctionne hors ligne",
         "description": "Ajoutez et consultez les dépenses sans internet — tout se synchronise au retour du réseau"

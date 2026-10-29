@@ -173,6 +173,16 @@ export function SettingsScreen() {
                     />
                 </SettingsSection>
 
+                <SettingsSection title={t('groups.title')}>
+                    <SettingsRow
+                        iconName="cloud-upload-outline"
+                        label={t('splitwiseImport.settingsRow')}
+                        variant="chevron"
+                        onPress={() => navigation.navigate('SplitwiseImport')}
+                        testID="settings-splitwise-import-row"
+                    />
+                </SettingsSection>
+
                 {KUPAPAY_PRO_ENABLED ? (
                     <SettingsSection title={t('referral.title')}>
                         <SettingsRow

@@ -51,6 +51,7 @@ export * from './analytics/growthMetrics';
 export * from './analytics/growthExperiments';
 export * from './analytics/marketingAttribution';
 export * from './activation';
+export * from './import';
 export * from './email/lifecycleTemplates';
 export * from './email/lifecycleEmailCopy';
 export * from './email/renderTransactionalEmail';

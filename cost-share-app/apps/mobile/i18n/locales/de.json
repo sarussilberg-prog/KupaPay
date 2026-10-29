@@ -1395,6 +1395,55 @@
         },
         "adUnavailableContinue": "Werbung ist auf diesem Gerät nicht verfügbar. Du kannst ohne Ansehen fortfahren."
     },
+    "splitwiseImport": {
+        "title": "Import aus Splitwise",
+        "settingsRow": "Splitwise-CSV importieren",
+        "hint": "Exportiere eine Gruppe aus Splitwise (Einstellungen → Als Tabelle exportieren) und lade die CSV hier hoch.",
+        "pickPrompt": "Wähle den Splitwise-Gruppenexport (.csv). Wir zeigen eine Vorschau, bevor die KupaPay-Gruppe erstellt wird.",
+        "pickFile": "CSV-Datei wählen",
+        "webNote": "Im Web öffnet der Browser eine Dateiauswahl.",
+        "groupNameLabel": "Gruppenname",
+        "selfMemberLabel": "Welche Spalte bist du?",
+        "guestNamesLabel": "Gastnamen für andere Mitglieder",
+        "importCta": "Gruppe erstellen & importieren",
+        "changeFile": "Andere Datei wählen",
+        "success": "{{count}} Ausgaben importiert",
+        "preview": {
+            "summary": "{{expenseCount}} Ausgaben · {{memberCount}} Mitglieder · {{skippedCount}} Zeilen übersprungen",
+            "more": "+ {{count}} weitere Ausgaben"
+        },
+        "previewExpensesTitle": "Vorschau",
+        "skippedTitle": "{{count}} Zeilen nicht importiert",
+        "skipped": {
+            "line": "Zeile {{line}}: {{reason}}",
+            "more": "+ {{count}} weitere übersprungene Zeilen",
+            "total_balance_row": "Zeile Gesamtsaldo",
+            "payment_row": "Zahlungs-/Ausgleichszeile",
+            "zero_cost": "Betrag null",
+            "invalid_cost": "Ungültiger Betrag",
+            "invalid_currency": "Ungültige Währung",
+            "no_participants": "Keine Teilnehmer",
+            "missing_payer": "Zahler nicht ermittelbar",
+            "unbalanced_row": "Anteile stimmen nicht",
+            "column_mismatch": "Falsche Spaltenanzahl",
+            "invalid_date": "Ungültiges Datum"
+        },
+        "errors": {
+            "empty_file": "Die Datei ist leer.",
+            "missing_required_columns": "Das sieht nicht nach einem Splitwise-Export aus (Date, Description, Cost oder Currency fehlt).",
+            "no_member_columns": "Keine Mitgliederspalten — exportiere eine Gruppe, kein leeres Blatt.",
+            "no_expenses": "Aus dieser Datei konnten keine Ausgaben importiert werden.",
+            "read_failed": "Datei konnte nicht gelesen werden.",
+            "unsupported": "Nicht unterstützter Dateityp.",
+            "cancelled": "Abgebrochen",
+            "not_authenticated": "Zum Importieren anmelden.",
+            "missing_self_mapping": "Wähle, welches Mitglied du bist.",
+            "missing_member_mapping": "Mitgliedszuordnung fehlt.",
+            "invalid_splits": "Einige Aufteilungen konnten nicht zugeordnet werden.",
+            "empty_group_name": "Gruppenname eingeben.",
+            "import_failed": "Import fehlgeschlagen. Erneut versuchen oder kleineren Export wählen."
+        }
+    },
     "remind": {
         "sendReminderButton": "Erinnerung senden",
         "sheetTitle": "Erinnerung senden",

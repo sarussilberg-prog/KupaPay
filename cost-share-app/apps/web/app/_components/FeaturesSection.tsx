@@ -56,6 +56,13 @@ const icons: Record<string, ReactNode> = {
       <path d="m9 12 2 2 4-4" />
     </svg>
   ),
+  import: (
+    <svg {...iconProps} aria-hidden="true">
+      <path d="M12 3v12" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 21h14" />
+    </svg>
+  ),
 };
 
 export default function FeaturesSection({ t }: Props) {

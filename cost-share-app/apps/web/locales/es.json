@@ -46,6 +46,11 @@
         "description": "Crea grupos para viajes, alquiler, cenas — los que quieras"
       },
       {
+        "icon": "import",
+        "title": "Importar desde Splitwise",
+        "description": "Sube un CSV de Splitwise para recrear tu grupo, miembros y gastos en minutos"
+      },
+      {
         "icon": "offline",
         "title": "Funciona sin conexión",
         "description": "Añade y consulta gastos sin internet — todo se sincroniza al volver a la red"
