@@ -1,12 +1,12 @@
 {
   "versionString": "2.2.0",
   "locales": {
-    "en-US": "• KupaPay Pro — ad-free, trip currency conversion, PDF reports\n• 14-day free trial on monthly and yearly Pro\n• Trip Pass — Pro for your whole group for 30 days\n• Smarter balances and settle-up flows\n• Stability and Hebrew RTL improvements",
-    "he": "• KupaPay Pro — בלי פרסומות, המרת מטבע לטיול, דוחות PDF\n• 14 ימי ניסיון חינם ב-Pro חודשי ושנתי\n• Trip Pass — Pro לכל הקבוצה ל-30 יום\n• יתרות וסגירת חובות משופרות\n• יציבות ושיפורי RTL בעברית",
-    "ru": "• KupaPay Pro — без рекламы, валюта поездки, PDF\n• 14 дней бесплатного Pro (месяц/год)\n• Trip Pass — Pro для всей группы на 30 дней\n• Улучшенные балансы и расчёты\n• Стабильность и RTL",
-    "ar-SA": "• KupaPay Pro — بدون إعلانات، عملات الرحلة، تقارير PDF\n• 14 يومًا تجربة مجانية (شهري/سنوي)\n• Trip Pass — Pro للمجموعة 30 يومًا\n• أرصدة وتسوية محسّنة\n• استقرار وتحسينات RTL",
-    "fr-FR": "• KupaPay Pro — sans pub, devises voyage, PDF\n• 14 jours d'essai gratuit (mensuel/annuel)\n• Trip Pass — Pro pour tout le groupe 30 jours\n• Soldes et règlements améliorés\n• Stabilité et RTL",
-    "es-ES": "• KupaPay Pro — sin anuncios, divisas viaje, PDF\n• 14 días de prueba gratis (mensual/anual)\n• Trip Pass — Pro para todo el grupo 30 días\n• Saldos y liquidaciones mejorados\n• Estabilidad y RTL",
-    "de-DE": "• KupaPay Pro — ohne Werbung, Reise-FX, PDF\n• 14 Tage kostenlos testen (Monat/Jahr)\n• Trip Pass — Pro für die ganze Gruppe 30 Tage\n• Bessere Salden und Ausgleich\n• Stabilität und RTL"
+    "en-US": "• Import your groups from Splitwise (CSV)\n• Redesigned groups list that fits every screen\n• More native Android back button, keyboard and touch feedback\n• Bug fixes and stability improvements",
+    "he": "• ייבוא קבוצות מ-Splitwise (קובץ CSV)\n• מסך קבוצות חדש שמתאים לכל מסך\n• כפתור חזרה, מקלדת ומגע טבעיים יותר באנדרואיד\n• תיקוני באגים ושיפורי יציבות",
+    "ru": "• Импорт групп из Splitwise (CSV)\n• Обновлённый список групп для любого экрана\n• Более привычные кнопка «Назад», клавиатура и отклик на Android\n• Исправления ошибок и стабильность",
+    "ar-SA": "• استيراد المجموعات من Splitwise ‏(CSV)\n• قائمة مجموعات جديدة تناسب كل شاشة\n• زر رجوع ولوحة مفاتيح واستجابة لمس أكثر طبيعية على Android\n• إصلاح الأخطاء وتحسين الاستقرار",
+    "fr-FR": "• Importez vos groupes depuis Splitwise (CSV)\n• Liste des groupes repensée pour tous les écrans\n• Bouton retour, clavier et retour tactile plus natifs sur Android\n• Corrections de bugs et stabilité",
+    "es-ES": "• Importa tus grupos desde Splitwise (CSV)\n• Lista de grupos renovada para cualquier pantalla\n• Botón atrás, teclado y respuesta táctil más nativos en Android\n• Corrección de errores y estabilidad",
+    "de-DE": "• Gruppen aus Splitwise importieren (CSV)\n• Neu gestaltete Gruppenliste für jeden Bildschirm\n• Natürlichere Zurück-Taste, Tastatur und Touch-Feedback auf Android\n• Fehlerbehebungen und Stabilität"
   }
 }
