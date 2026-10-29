@@ -6,10 +6,15 @@
 import { SimplifiedInputsPayload } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
+import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { ascCaptureSimplifiedInputs } from '../screenshotDemo/ascCaptureFixtures';
 
 const EMPTY: SimplifiedInputsPayload = { groups: [] };
 
 export async function fetchSimplifiedInputs(): Promise<SimplifiedInputsPayload> {
+    if (isAscScreenshotDemo()) {
+        return ascCaptureSimplifiedInputs();
+    }
     const userId = await getCurrentUserId();
     if (!userId) {
         // Throw rather than return EMPTY for the same reason as the RPC-error

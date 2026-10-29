@@ -2,7 +2,7 @@
 
 Localized, benefit-led marketing frames for all **7 product locales** (`en`, `he`, `ru`, `ar`, `fr`, `es`, `de`). Captions live in [`store/asc/screenshot-captions.json`](../asc/screenshot-captions.json). **Hebrew and Arabic** use RTL layout in the capture UI (see `screenshotDemo/AscStoreListingFrame.tsx`).
 
-Demo data only — no production Supabase seed or real user accounts required for capture (in-memory seed in `screenshotDemo/ascCaptureSeed.ts`).
+Demo data only — no production Supabase. Capture mode stubs services and seeds React Query from `screenshotDemo/ascCaptureSeed.ts` / `ascCaptureFixtures.ts`, then drives the **real** `AppNavigator` (headers + tab bar) inside a 430×932 logical phone viewport (Android: 360×640).
 
 Related: App Store prep [#409](https://github.com/sarussilberg-prog/KupaPay/issues/409), listing drafts [#62](https://github.com/sarussilberg-prog/KupaPay/issues/62) / [#155](https://github.com/sarussilberg-prog/KupaPay/issues/155).
 
@@ -35,7 +35,7 @@ export EXPO_PUBLIC_SUPABASE_ANON_KEY="<your-dev-anon-key>"
 npm run capture:store-screenshots
 ```
 
-This runs `expo export --platform web` then Playwright capture (`scripts/playwright/capture-store-screenshots.mjs`).
+This runs `expo export --platform web` then Playwright capture (`scripts/playwright/capture-store-screenshots.mjs`). Each PNG is the marketing headline plus a device frame showing the live Expo web app (not partial mock screens).
 
 Optional env (faster local runs):
 

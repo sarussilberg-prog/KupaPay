@@ -28,6 +28,12 @@ import {
     simplifyDebts,
     UnbalancedLedgerError,
 } from '@cost-share/shared';
+import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import {
+    ascCaptureExpenses,
+    ascCaptureGroupMembers,
+    ascCaptureGroups,
+} from '../screenshotDemo/ascCaptureFixtures';
 import { captureError } from '../lib/captureError';
 import { handleError } from '../lib/handleError';
 import { supabase } from '../lib/supabase';
@@ -115,6 +121,28 @@ async function filterActiveMemberIds(memberIds: string[]): Promise<string[]> {
 }
 
 async function loadBalanceData(groupId: string, userId?: string) {
+    if (isAscScreenshotDemo()) {
+        const group = ascCaptureGroups().find(g => g.id === groupId);
+        const defaultCurrency = group?.defaultCurrency ?? DEFAULT_CURRENCY;
+        const captureExpenses = ascCaptureExpenses(groupId);
+        const expenses = captureExpenses.map(e => ({
+            id: e.id,
+            paidBy: e.paidBy,
+            amount: e.amount,
+            currency: e.currency,
+        }));
+        const splits = captureExpenses.flatMap(e =>
+            e.splits.map(s => ({
+                expenseId: e.id,
+                userId: s.userId,
+                amount: s.amount,
+            })),
+        );
+        const userIds = userId
+            ? [userId]
+            : ascCaptureGroupMembers(groupId).map(m => m.userId);
+        return { defaultCurrency, expenses, splits, settlements: [], userIds };
+    }
     const [groupRes, membersRes, expensesRes, settlementsRes] = await Promise.all([
         supabase.from('groups').select('default_currency').eq('id', groupId).maybeSingle(),
         supabase.from('group_members').select('user_id').eq('group_id', groupId).eq('is_active', true),
@@ -171,6 +199,9 @@ async function loadBalanceData(groupId: string, userId?: string) {
 let fetchGroupsInFlight: Promise<GroupWithMembers[]> | null = null;
 
 async function fetchGroupsInternal(): Promise<GroupWithMembers[]> {
+    if (isAscScreenshotDemo()) {
+        return ascCaptureGroups();
+    }
     const userId = await getCurrentUserId();
     if (!userId) {
         // Throw so React Query treats this as an error and does NOT cache an
@@ -450,6 +481,9 @@ export async function markGroupNoteSeen(groupId: string): Promise<void> {
 }
 
 export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
+    if (isAscScreenshotDemo()) {
+        return ascCaptureGroupMembers(groupId);
+    }
     const { data, error } = await supabase
         .from('group_members')
         .select('*')
@@ -466,6 +500,22 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
 export async function fetchProfilesByUserIds(
     userIds: string[],
 ): Promise<Record<string, GroupMemberLite>> {
+    if (isAscScreenshotDemo()) {
+        const map: Record<string, GroupMemberLite> = {};
+        for (const group of ascCaptureGroups()) {
+            for (const m of group.members) {
+                if (userIds.includes(m.userId)) {
+                    map[m.userId] = {
+                        userId: m.userId,
+                        displayName: m.displayName,
+                        avatarUrl: null,
+                        isActive: true,
+                    };
+                }
+            }
+        }
+        return map;
+    }
     const unique = [...new Set(userIds.filter(Boolean))];
     if (unique.length === 0) return {};
 
@@ -672,6 +722,14 @@ export async function removeGroupMember(groupId: string, userId: string): Promis
 export async function getGroupContributions(
     groupId: string,
 ): Promise<MemberContributionsResult> {
+    if (isAscScreenshotDemo()) {
+        try {
+            const { expenses, splits, userIds } = await loadBalanceData(groupId);
+            return calculateMemberContributions({ userIds, expenses, splits });
+        } catch {
+            return { totals: [], matrix: [], expenseCount: 0 };
+        }
+    }
     try {
         const { expenses, splits, userIds } = await loadBalanceData(groupId);
         return calculateMemberContributions({ userIds, expenses, splits });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from '../components/AppText';
 import { useRtlLayout } from '../hooks/useRtlLayout';
@@ -8,17 +8,30 @@ type Props = {
     headline: string;
     subline?: string;
     children: React.ReactNode;
-    width: number;
-    height: number;
+    phoneWidth: number;
+    phoneHeight: number;
 };
 
-export function AscStoreListingFrame({ headline, subline, children, width, height }: Props) {
+const BEZEL = 12;
+
+/** Marketing frame: localized headline + device mockup at real logical phone size. */
+export function AscStoreListingFrame({
+    headline,
+    subline,
+    children,
+    phoneWidth,
+    phoneHeight,
+}: Props) {
     const isRtl = useRtlLayout();
-    const phoneWidth = Math.round(width * 0.78);
-    const phoneHeight = Math.round(height * 0.62);
+    const { width: canvasWidth, height: canvasHeight } = useWindowDimensions();
+    const deviceWidth = phoneWidth + BEZEL * 2;
+    const deviceHeight = phoneHeight + BEZEL * 2;
 
     return (
-        <View style={[styles.root, { width, height }]} testID="asc-capture-frame">
+        <View
+            style={[styles.root, { width: canvasWidth, height: canvasHeight }]}
+            testID="asc-capture-frame"
+        >
             <LinearGradient
                 colors={['#1e3a8a', '#3b82f6', '#93c5fd']}
                 start={{ x: 0, y: 0 }}
@@ -50,11 +63,11 @@ export function AscStoreListingFrame({ headline, subline, children, width, heigh
                     style={[
                         styles.phone,
                         {
-                            width: phoneWidth,
-                            height: phoneHeight,
+                            width: deviceWidth,
+                            height: deviceHeight,
+                            marginTop: Math.max(24, canvasHeight * 0.04),
                         },
                     ]}
-                    testID="asc-capture-phone"
                 >
                     <View style={styles.phoneInner}>{children}</View>
                 </View>
@@ -70,8 +83,8 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingTop: Platform.OS === 'web' ? 72 : 48,
-        paddingHorizontal: 40,
+        paddingTop: Platform.OS === 'web' ? 56 : 40,
+        paddingHorizontal: 36,
         alignItems: 'flex-start',
     },
     contentRtl: {
@@ -79,16 +92,16 @@ const styles = StyleSheet.create({
     },
     headline: {
         color: '#ffffff',
-        fontSize: 52,
+        fontSize: 46,
         fontWeight: '800',
         maxWidth: '92%',
-        lineHeight: 58,
+        lineHeight: 52,
         letterSpacing: -0.5,
     },
     subline: {
-        marginTop: 12,
+        marginTop: 10,
         color: 'rgba(255,255,255,0.92)',
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: '500',
         maxWidth: '88%',
     },
@@ -100,11 +113,10 @@ const styles = StyleSheet.create({
         textAlign: 'left',
     },
     phone: {
-        marginTop: 36,
         alignSelf: 'center',
         borderRadius: 36,
         backgroundColor: '#0f172a',
-        padding: 10,
+        padding: BEZEL,
         shadowColor: '#000',
         shadowOpacity: 0.35,
         shadowRadius: 24,

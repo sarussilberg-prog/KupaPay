@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 import { clearStaleAuthSession } from './authSessionLifecycle';
 import { useAppStore } from '../store';
+import { isAscScreenshotDemo } from './ascScreenshotDemo';
+import { CAPTURE_USER_ID } from '../screenshotDemo/ascCaptureSeed';
 
 /**
  * Returns the signed-in Supabase user id, or null if not authenticated.
@@ -13,6 +15,9 @@ import { useAppStore } from '../store';
  * the server still enforces real authorization via RLS on each request.
  */
 export async function getCurrentUserId(): Promise<string | null> {
+    if (isAscScreenshotDemo()) {
+        return useAppStore.getState().currentUser?.id ?? CAPTURE_USER_ID;
+    }
     const { data: { session } } = await supabase.auth.getSession();
     return session?.user?.id ?? null;
 }

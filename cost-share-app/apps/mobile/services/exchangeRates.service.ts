@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { ascCaptureExchangeRates } from '../screenshotDemo/ascCaptureFixtures';
 
 const CACHE_PREFIX = 'fx_rates_v2';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -118,6 +120,10 @@ export async function fetchExchangeRates(
     const unique = [...new Set(symbols.filter((s) => s && s !== baseCurrency))];
     if (unique.length === 0) {
         return { date: new Date().toISOString().slice(0, 10), rates: {} };
+    }
+
+    if (isAscScreenshotDemo()) {
+        return ascCaptureExchangeRates(baseCurrency, unique);
     }
 
     const cached = await readCache(baseCurrency, unique);
