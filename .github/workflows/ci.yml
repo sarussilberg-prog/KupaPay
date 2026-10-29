@@ -7,7 +7,8 @@ on:
     branches: [dev]
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
+  # Bump suffix when a stuck run holds an old group (hung job + failed cancel).
+  group: ci-v2-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
   cancel-in-progress: true
 
 jobs:
