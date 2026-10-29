@@ -12,7 +12,7 @@ export function PaywallScreen() {
     const showTripPass = route.params?.showTripPass !== false;
 
     return (
-        <View className="flex-1">
+        <View className="flex-1" testID="asc-demo-screen-pro-paywall">
             <ProPaywallContent
                 featureKey={featureKey}
                 groupId={groupId}

@@ -1,64 +1,79 @@
-import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from '../components/AppText';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 
-type Props = {
+/** Upper cap so the app region keeps most of the canvas (smallest iPhone logical heights). */
+const CAPTION_BAND_MAX_RATIO = 0.22;
+
+const PADDING_TOP = 48;
+const PADDING_BOTTOM = 28;
+const HEADLINE_FONT = 32;
+const HEADLINE_LINE_HEIGHT = 38;
+const SUBLINE_FONT = 17;
+const SUBLINE_LINE_HEIGHT = 22;
+const SUBLINE_MARGIN_TOP = 8;
+
+type Props = Readonly<{
     headline: string;
     subline?: string;
     children: React.ReactNode;
-    width: number;
-    height: number;
-};
+}>;
 
-export function AscStoreListingFrame({ headline, subline, children, width, height }: Props) {
+function estimateHeadlineLines(headline: string, canvasWidth: number): number {
+    const charsPerLine = Math.max(12, Math.floor((canvasWidth - 56) / (HEADLINE_FONT * 0.52)));
+    const lines = Math.ceil(headline.length / charsPerLine);
+    return Math.min(3, Math.max(1, lines));
+}
+
+/** Full-bleed listing: caption band on top, edge-to-edge app UI below (no device bezel). */
+export function AscStoreListingFrame({ headline, subline, children }: Props) {
     const isRtl = useRtlLayout();
-    const phoneWidth = Math.round(width * 0.78);
-    const phoneHeight = Math.round(height * 0.62);
+    const { width: canvasWidth, height: canvasHeight } = useWindowDimensions();
+
+    const captionBandHeight = useMemo(() => {
+        const headlineLines = estimateHeadlineLines(headline, canvasWidth);
+        const headlineBlock = headlineLines * HEADLINE_LINE_HEIGHT;
+        const sublineBlock = subline ? SUBLINE_MARGIN_TOP + SUBLINE_LINE_HEIGHT : 0;
+        const contentHeight = PADDING_TOP + PADDING_BOTTOM + headlineBlock + sublineBlock;
+        const maxBand = Math.round(canvasHeight * CAPTION_BAND_MAX_RATIO);
+        return Math.min(maxBand, Math.max(contentHeight, Math.round(canvasHeight * 0.14)));
+    }, [canvasWidth, canvasHeight, headline, subline]);
 
     return (
-        <View style={[styles.root, { width, height }]} testID="asc-capture-frame">
+        <View
+            style={[styles.root, { width: canvasWidth, height: canvasHeight }]}
+            testID="asc-capture-frame"
+        >
             <LinearGradient
-                colors={['#1e3a8a', '#3b82f6', '#93c5fd']}
+                colors={['#1e3a8a', '#2563eb', '#60a5fa']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-            />
-            <View style={[styles.content, isRtl && styles.contentRtl]}>
-                <Text
-                    style={[
-                        styles.headline,
-                        isRtl ? styles.textRtl : styles.textLtr,
-                        { alignSelf: 'stretch' },
-                    ]}
-                >
-                    {headline}
-                </Text>
-                {subline ? (
+                style={[styles.captionBand, { height: captionBandHeight }]}
+            >
+                <View style={styles.captionInner}>
                     <Text
                         style={[
-                            styles.subline,
+                            styles.headline,
                             isRtl ? styles.textRtl : styles.textLtr,
-                            { alignSelf: 'stretch' },
                         ]}
                     >
-                        {subline}
+                        {headline}
                     </Text>
-                ) : null}
-                <View
-                    style={[
-                        styles.phone,
-                        {
-                            width: phoneWidth,
-                            height: phoneHeight,
-                        },
-                    ]}
-                    testID="asc-capture-phone"
-                >
-                    <View style={styles.phoneInner}>{children}</View>
+                    {subline ? (
+                        <Text
+                            style={[
+                                styles.subline,
+                                isRtl ? styles.textRtl : styles.textLtr,
+                            ]}
+                        >
+                            {subline}
+                        </Text>
+                    ) : null}
                 </View>
-            </View>
+            </LinearGradient>
+            <View style={styles.appRegion}>{children}</View>
         </View>
     );
 }
@@ -66,31 +81,33 @@ export function AscStoreListingFrame({ headline, subline, children, width, heigh
 const styles = StyleSheet.create({
     root: {
         overflow: 'hidden',
-        backgroundColor: '#1e3a8a',
+        backgroundColor: '#f1f5f9',
+        flexDirection: 'column',
     },
-    content: {
+    captionBand: {
+        width: '100%',
+        flexShrink: 0,
+    },
+    captionInner: {
         flex: 1,
-        paddingTop: Platform.OS === 'web' ? 72 : 48,
-        paddingHorizontal: 40,
-        alignItems: 'flex-start',
-    },
-    contentRtl: {
-        alignItems: 'flex-end',
+        paddingTop: PADDING_TOP,
+        paddingBottom: PADDING_BOTTOM,
+        paddingHorizontal: 28,
+        justifyContent: 'flex-end',
     },
     headline: {
         color: '#ffffff',
-        fontSize: 52,
+        fontSize: HEADLINE_FONT,
         fontWeight: '800',
-        maxWidth: '92%',
-        lineHeight: 58,
-        letterSpacing: -0.5,
+        lineHeight: HEADLINE_LINE_HEIGHT,
+        letterSpacing: -0.4,
     },
     subline: {
-        marginTop: 12,
+        marginTop: SUBLINE_MARGIN_TOP,
         color: 'rgba(255,255,255,0.92)',
-        fontSize: 28,
+        fontSize: SUBLINE_FONT,
         fontWeight: '500',
-        maxWidth: '88%',
+        lineHeight: SUBLINE_LINE_HEIGHT,
     },
     textRtl: {
         textAlign: 'right',
@@ -99,24 +116,10 @@ const styles = StyleSheet.create({
     textLtr: {
         textAlign: 'left',
     },
-    phone: {
-        marginTop: 36,
-        alignSelf: 'center',
-        borderRadius: 36,
-        backgroundColor: '#0f172a',
-        padding: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.35,
-        shadowRadius: 24,
-        shadowOffset: { width: 0, height: 12 },
-        ...(Platform.OS === 'web'
-            ? { boxShadow: '0 24px 48px rgba(15,23,42,0.45)' }
-            : {}),
-    },
-    phoneInner: {
+    appRegion: {
         flex: 1,
-        borderRadius: 28,
-        overflow: 'hidden',
-        backgroundColor: '#f8fafc',
+        width: '100%',
+        minHeight: 0,
+        backgroundColor: '#f1f5f9',
     },
 });

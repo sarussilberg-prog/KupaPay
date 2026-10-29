@@ -13,10 +13,10 @@
  * collapsed across currencies.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
 import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 import {
@@ -85,6 +85,8 @@ function sumPaidByCurrency(
 export function BalancesScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
+    const route = useRoute<any>();
+    const scrollRef = useRef<ScrollView>(null);
     const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
     const groupId = required?.groupId ?? '';
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
@@ -93,6 +95,14 @@ export function BalancesScreen() {
     const groupName = group?.name;
     const defaultCurrency = group?.defaultCurrency ?? 'USD';
     const { proPerkUnlocked: tripCurrencyUnlocked } = useProStatusQuery(groupId);
+
+    useEffect(() => {
+        if (route.params?.ascCaptureFocus !== 'trip-currency') return;
+        const tId = globalThis.setTimeout(() => {
+            scrollRef.current?.scrollTo({ y: 480, animated: false });
+        }, 400);
+        return () => globalThis.clearTimeout(tId);
+    }, [route.params?.ascCaptureFocus]);
 
     const openTripCurrencyPaywall = useCallback(() => {
         navigation.navigate('Paywall', { featureKey: 'trip_currency', groupId });
@@ -349,8 +359,9 @@ export function BalancesScreen() {
     }
 
     return (
-        <View className="flex-1 bg-slate-50">
+        <View className="flex-1 bg-slate-50" testID="balances-screen-root">
             <ScrollView
+                ref={scrollRef}
                 refreshControl={
                     <RefreshControl
                         refreshing={isFetchingContributions || isFetchingDebts}

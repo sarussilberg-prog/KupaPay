@@ -14,6 +14,7 @@ import { Text } from './AppText';
 import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { toDate } from '../lib/dateUtils';
+import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
 
 /** Skip "Updated now" noise on list rows (Splitwise-style). */
 export const GROUP_CARD_UPDATED_META_MIN_AGE_MS = 90_000;
@@ -56,6 +57,10 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
                 ? t('groups.memberCount', { count: memberCount })
                 : t(`groups.types.${group.groupType}`);
         const memberLabel = bindCountLabelNoBreak(memberRaw);
+
+        if (isAscScreenshotDemo()) {
+            return { memberLabel, updatedWhen: null as string | null };
+        }
 
         if (!Number.isFinite(ageMs) || ageMs < GROUP_CARD_UPDATED_META_MIN_AGE_MS) {
             return { memberLabel, updatedWhen: null as string | null };
