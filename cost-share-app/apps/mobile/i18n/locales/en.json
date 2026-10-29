@@ -1393,6 +1393,12 @@
             "qualified": "Qualified — reward pending",
             "rewarded": "Pro month granted",
             "rejected": "Could not grant reward"
+        },
+        "ambassador": {
+            "title": "Ambassador referral link",
+            "body": "Share this link so new members can be attributed to your ambassador account.",
+            "codeLabel": "Your code",
+            "referralCount": "{{count}} attributed sign-ups"
         }
     },
     "monetization": {

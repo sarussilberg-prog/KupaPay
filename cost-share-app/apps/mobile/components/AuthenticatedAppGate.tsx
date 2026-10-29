@@ -12,6 +12,7 @@ import {
 } from '../lib/onboardingStorage';
 import { runAuthenticatedGate } from '../lib/authenticatedGateResolve';
 import { useAuthenticatedInviteRedemption } from '../hooks/useAuthenticatedInviteRedemption';
+import { useAmbassadorReferralClaim } from '../hooks/useAmbassadorReferralClaim';
 import { groupsQueryOptions } from '../hooks/queries/groupsQueryOptions';
 import { useAvatarPrefetcher } from '../hooks/useAvatarPrefetcher';
 import { useSubscriptionRefreshOnForeground } from '../hooks/useSubscriptionRefreshOnForeground';
@@ -61,6 +62,7 @@ export function AuthenticatedAppGate() {
     }, []);
 
     useAuthenticatedInviteRedemption({ onGroupRedeemed: () => void enterMainAfterGroupInvite() });
+    useAmbassadorReferralClaim();
 
     // Cache every avatar URL the app knows about into the OS image cache so
     // member/friend/group avatars render instantly and work offline. Single

@@ -11,6 +11,7 @@ import {
     type TravelGuideId,
 } from '@/lib/travelGuidesPages';
 import { USE_CASE_SLUGS, type UseCaseId } from '@/lib/useCasePages';
+import { AMBASSADOR_PROGRAM_SLUG } from '@/lib/ambassadorProgramPages';
 
 export const MARKETING_LOCALE_HEADER = 'x-kupapay-locale';
 
@@ -21,6 +22,24 @@ export function marketingLandingUrl(locale: Language): string {
 
 export function marketingLandingPath(locale: Language): string {
     return `/${locale}`;
+}
+
+export function ambassadorProgramPath(locale: Language): string {
+    return `/${locale}/${AMBASSADOR_PROGRAM_SLUG}`;
+}
+
+export function ambassadorProgramUrl(locale: Language): string {
+    return `${APP_WEB_ORIGIN}${ambassadorProgramPath(locale)}`;
+}
+
+export function buildAmbassadorProgramAlternateLanguages(): Record<string, string> {
+    const languages: Record<string, string> = {
+        'x-default': ambassadorProgramUrl('en'),
+    };
+    for (const locale of SUPPORTED_LANGUAGES) {
+        languages[hreflangForLocale(locale)] = ambassadorProgramUrl(locale);
+    }
+    return languages;
 }
 
 export const SPLIT_CALCULATOR_SLUG = 'split-calculator';

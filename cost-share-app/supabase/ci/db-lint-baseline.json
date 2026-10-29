@@ -40,6 +40,7 @@
     "rls_col_index_public_group_messages_user_id",
     "rls_col_index_public_group_passes_user_id",
     "rls_col_index_public_group_smart_reminder_recipient_state_user_id",
+    "rls_col_index_public_ambassador_referrals_user_id",
     "rls_col_index_public_profiles_group_id",
     "rls_col_index_public_profiles_user_id",
     "rls_col_index_public_monetization_events_user_id",

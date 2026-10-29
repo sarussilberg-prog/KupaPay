@@ -961,5 +961,67 @@
         ]
       }
     }
+  },
+  "ambassadorProgram": {
+    "seo": {
+      "title": "Programa embajadores KupaPay — creadores de viajes y líderes estudiantiles",
+      "description": "Solicita el programa de embajadores KupaPay: Pro gratis para creadores y líderes de grupo aprobados.",
+      "ogTitle": "Programa embajadores KupaPay",
+      "ogDescription": "Sin comisiones en efectivo — Pro gratis y enlace de referido para tus grupos."
+    },
+    "hero": {
+      "headline": "Programa para creadores de viajes y líderes de grupos estudiantiles",
+      "subheadline": "Comparte KupaPay con tu comunidad. Los embajadores aprobados reciben Pro y un enlace de referido personal."
+    },
+    "benefits": {
+      "title": "Qué reciben los embajadores",
+      "items": [
+        {
+          "title": "Pro gratuito",
+          "body": "Acceso Pro por un periodo definido para funciones avanzadas al organizar gastos de grupo."
+        },
+        {
+          "title": "Tu enlace",
+          "body": "Tras la aprobación recibes un código único para atribuir nuevos registros."
+        },
+        {
+          "title": "Revisión manual",
+          "body": "Cada solicitud la revisa el equipo de KupaPay. Pro nunca se otorga automáticamente."
+        }
+      ]
+    },
+    "form": {
+      "title": "Solicitar",
+      "signInHint": "Inicia sesión en la cuenta KupaPay que usarás como embajador antes de enviar.",
+      "audienceLabel": "Solicito como",
+      "audienceTravelCreator": "Creador/a de viajes / canal",
+      "audienceStudentLeader": "Grupo estudiantil / organizador/a de viaje",
+      "linkLabel": "Enlace a tu canal o grupo",
+      "linkPlaceholder": "https://…",
+      "messageLabel": "¿Cómo presentarás KupaPay?",
+      "messagePlaceholder": "Describe tu audiencia y cómo compartirás KupaPay (viajes, clubs, residencias…).",
+      "consentLabel": "Acepto que KupaPay use esta información para revisar mi solicitud, según la Política de privacidad.",
+      "privacyLink": "Política de privacidad",
+      "submit": "Enviar solicitud",
+      "submitting": "Enviando…",
+      "signInCta": "Iniciar sesión para solicitar"
+    },
+    "status": {
+      "pendingTitle": "Solicitud recibida",
+      "pendingBody": "Gracias — tu solicitud está pendiente. Enviaremos un correo a la cuenta KupaPay cuando se procese.",
+      "approvedTitle": "Eres embajador/a",
+      "approvedBody": "Tu código de referido:",
+      "rejectedTitle": "Solicitud no aprobada",
+      "rejectedBody": "Esta solicitud no fue aprobada. Contacta soporte si tienes dudas.",
+      "alreadyAmbassador": "Tu cuenta ya es embajador aprobado."
+    },
+    "errors": {
+      "notAuthenticated": "Inicia sesión para solicitar.",
+      "consentRequired": "Confirma el aviso de privacidad.",
+      "applicationPending": "Ya tienes una solicitud pendiente.",
+      "alreadyAmbassador": "La cuenta ya es embajadora.",
+      "generic": "No se pudo enviar. Inténtalo de nuevo."
+    },
+    "disclaimer": "El programa no paga comisiones en efectivo. Pro y seguimiento solo tras aprobación manual."
   }
 }

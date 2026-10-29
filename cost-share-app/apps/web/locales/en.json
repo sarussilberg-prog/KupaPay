@@ -602,6 +602,68 @@
       "body": "Download the app or sign in on the web, create a group, and add your first expense in minutes."
     }
   },
+  "ambassadorProgram": {
+    "seo": {
+      "title": "KupaPay Ambassador Program — travel creators & student leaders",
+      "description": "Apply for the KupaPay ambassador program: free Pro for approved travel creators and student group leaders who share KupaPay with their communities.",
+      "ogTitle": "KupaPay Ambassador Program",
+      "ogDescription": "Zero-cost program for creators and student leaders — apply for free Pro and a tracked referral link for your groups."
+    },
+    "hero": {
+      "headline": "Ambassador program for travel creators & student leaders",
+      "subheadline": "Share KupaPay with your community. Approved ambassadors receive complimentary Pro and a personal referral link to track sign-ups from their audience."
+    },
+    "benefits": {
+      "title": "What ambassadors receive",
+      "items": [
+        {
+          "title": "Complimentary Pro",
+          "body": "Approved ambassadors get Pro access for a defined period so you can use advanced features while organizing group expenses."
+        },
+        {
+          "title": "Your referral link",
+          "body": "After approval you receive a unique code. Share your link so new members who join KupaPay can be attributed to you."
+        },
+        {
+          "title": "Manual review",
+          "body": "Every application is reviewed by the KupaPay team. Pro is never granted automatically."
+        }
+      ]
+    },
+    "form": {
+      "title": "Apply",
+      "signInHint": "Sign in with the KupaPay account you want to use as an ambassador before submitting.",
+      "audienceLabel": "I am applying as",
+      "audienceTravelCreator": "Travel creator / content channel",
+      "audienceStudentLeader": "Student group / trip organizer",
+      "linkLabel": "Link to your channel or group",
+      "linkPlaceholder": "https://…",
+      "messageLabel": "How will you introduce KupaPay?",
+      "messagePlaceholder": "Describe your audience and how you plan to share KupaPay (trips, clubs, dorms, etc.).",
+      "consentLabel": "I agree that KupaPay may use the information above to review my application, as described in the Privacy Policy.",
+      "privacyLink": "Privacy Policy",
+      "submit": "Submit application",
+      "submitting": "Submitting…",
+      "signInCta": "Sign in to apply"
+    },
+    "status": {
+      "pendingTitle": "Application received",
+      "pendingBody": "Thanks — your application is pending review. We will email you at the address on your KupaPay account when it is processed.",
+      "approvedTitle": "You are an ambassador",
+      "approvedBody": "Your referral code:",
+      "rejectedTitle": "Application not approved",
+      "rejectedBody": "This application was not approved. You may contact support if you have questions.",
+      "alreadyAmbassador": "You are already an approved ambassador."
+    },
+    "errors": {
+      "notAuthenticated": "Sign in to submit an application.",
+      "consentRequired": "Please confirm the privacy notice.",
+      "applicationPending": "You already have a pending application.",
+      "alreadyAmbassador": "Your account is already an ambassador.",
+      "generic": "Could not submit. Try again in a moment."
+    },
+    "disclaimer": "The ambassador program does not pay cash commissions. Pro access and referral tracking are provided as described after manual approval."
+  },
   "travelGuides": {
     "shared": {
       "backToIndex": "All travel money guides",

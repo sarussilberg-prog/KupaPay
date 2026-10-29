@@ -1625,9 +1625,15 @@
             "body": "Deine kostenlose KupaPay-Pro-Testphase endet in zwei Tagen. Du möchtest nicht weitermachen? Kündige in den Einstellungen."
         },
         "trialLifecycle": {
-            "day1": { "title": "Willkommen bei Pro" },
-            "day10": { "title": "Noch 4 Tage in deiner Testphase" },
-            "day13": { "title": "Pro verlängert sich morgen" },
+            "day1": {
+                "title": "Willkommen bei Pro"
+            },
+            "day10": {
+                "title": "Noch 4 Tage in deiner Testphase"
+            },
+            "day13": {
+                "title": "Pro verlängert sich morgen"
+            },
             "disclosure": "Die Zahlung beginnt nach der Testphase, sofern du nicht unter Einstellungen → Abo verwalten (App Store / Google Play) kündigst.",
             "manage": "Abo verwalten"
         },
@@ -1723,6 +1729,12 @@
             "qualified": "Qualifiziert — Prämie ausstehend",
             "rewarded": "Pro-Monat gewährt",
             "rejected": "Prämie fehlgeschlagen"
+        },
+        "ambassador": {
+            "title": "Botschafter-Link",
+            "body": "Teile diesen Link, damit neue Nutzer deinem Botschafter-Konto zugeordnet werden.",
+            "codeLabel": "Dein Code",
+            "referralCount": "{{count}} zugeordnete Anmeldungen"
         }
     }
 }

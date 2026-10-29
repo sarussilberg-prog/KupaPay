@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-28T14:25:00Z",
+  "generated_at": "2026-10-29T07:12:04Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -16,6 +16,18 @@
     },
     {
       "name": "admin_pro_view_overrides",
+      "columns": []
+    },
+    {
+      "name": "ambassador_applications",
+      "columns": []
+    },
+    {
+      "name": "ambassador_referrals",
+      "columns": []
+    },
+    {
+      "name": "ambassadors",
       "columns": []
     },
     {
@@ -193,11 +205,19 @@
       "args": ""
     },
     {
+      "name": "admin_approve_ambassador_application",
+      "args": ""
+    },
+    {
       "name": "admin_create_promo_code",
       "args": ""
     },
     {
       "name": "admin_get_platform_metrics",
+      "args": ""
+    },
+    {
+      "name": "admin_list_ambassador_applications",
       "args": ""
     },
     {
@@ -210,6 +230,10 @@
     },
     {
       "name": "admin_list_support_messages",
+      "args": ""
+    },
+    {
+      "name": "admin_reject_ambassador_application",
       "args": ""
     },
     {
@@ -234,6 +258,10 @@
     },
     {
       "name": "assign_purchased_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "attribute_ambassador_referral",
       "args": ""
     },
     {
@@ -385,6 +413,10 @@
       "args": ""
     },
     {
+      "name": "_generate_ambassador_referral_code",
+      "args": ""
+    },
+    {
       "name": "generate_due_recurring_expenses",
       "args": ""
     },
@@ -442,6 +474,14 @@
     },
     {
       "name": "get_my_account_deletion_state",
+      "args": ""
+    },
+    {
+      "name": "get_my_ambassador_application",
+      "args": ""
+    },
+    {
+      "name": "get_my_ambassador_referral_stats",
       "args": ""
     },
     {
@@ -766,6 +806,10 @@
     },
     {
       "name": "stop_recurring_expense_series",
+      "args": ""
+    },
+    {
+      "name": "submit_ambassador_application",
       "args": ""
     },
     {
