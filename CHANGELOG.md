@@ -29,3 +29,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(web): Splitwise alternative comparison pages (#415) (#651)
 ## [2.2.0-dev.12] — 2026-10-29
 - [MAU] Localized store screenshots pipeline (iOS 6.7/6.5 + Play) — Refs #409 (#653)
+## [2.2.0-dev.13] — 2026-10-29
+- fix(ci): treat merged PR as success in auto-merge sync (#602) (#654)
