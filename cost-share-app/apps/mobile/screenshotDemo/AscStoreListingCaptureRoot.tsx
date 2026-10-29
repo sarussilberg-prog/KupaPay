@@ -82,7 +82,7 @@ export function AscStoreListingCaptureRoot() {
                         flex: 1,
                         width: '100%',
                         height: '100%',
-                        backgroundColor: phoneOnly ? '#f1f5f9' : '#f1f5f9',
+                        backgroundColor: '#f1f5f9',
                     }}
                 >
                     {phoneOnly ? appChrome : (

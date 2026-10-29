@@ -6,11 +6,11 @@ import {
     IOS_CAPTURE_STATUS_BAR_HEIGHT,
 } from './IosCaptureStatusBar';
 
-type Props = {
+type Props = Readonly<{
     children: React.ReactNode;
     /** When true, fill the parent app region (full-bleed listing). */
     fullBleed?: boolean;
-};
+}>;
 
 /**
  * App viewport for store captures — iOS status chrome + navigator, edge-to-edge width.

@@ -3,7 +3,6 @@ import {
     buildCaptureGroupsForLanguage,
     buildCaptureSimplifiedInputsForLanguage,
     barcelonaGroupNameForLanguage,
-    captureDisplayNameForUser,
 } from './ascCaptureLocaleData';
 
 let activeLanguage = 'en';
@@ -26,8 +25,4 @@ export function activeCaptureSimplifiedInputs(): SimplifiedInputsPayload {
 
 export function activeBarcelonaGroupName(): string {
     return barcelonaGroupNameForLanguage(activeLanguage);
-}
-
-export function activeCaptureYouLabel(): string {
-    return captureDisplayNameForUser(activeLanguage, 'capture-user-u1');
 }

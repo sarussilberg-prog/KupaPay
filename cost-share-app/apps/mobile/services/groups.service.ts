@@ -508,7 +508,6 @@ export async function fetchProfilesByUserIds(
                     map[m.userId] = {
                         userId: m.userId,
                         displayName: m.displayName,
-                        avatarUrl: null,
                         isActive: true,
                     };
                 }

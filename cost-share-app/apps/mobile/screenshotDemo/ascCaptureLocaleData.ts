@@ -627,7 +627,7 @@ function buildGroupRow(
 
 export function buildCaptureGroupsForLanguage(lang: string): GroupWithMembers[] {
     const copy = COPY[normalizeLanguage(lang)];
-    return copy.groups.map(buildGroupRow);
+    return copy.groups.map((g, index) => buildGroupRow(g, index));
 }
 
 export function buildCaptureSimplifiedInputsForLanguage(lang: string): SimplifiedInputsPayload {

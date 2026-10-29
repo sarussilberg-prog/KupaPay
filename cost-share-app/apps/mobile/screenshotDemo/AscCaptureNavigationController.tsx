@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import type { AscCaptureScreen } from '../lib/ascCaptureParams';
 import { navigateAscCaptureScreen } from '../lib/ascCaptureNavigate';
 import { rootNavigationRef } from '../lib/rootNavigationRef';
@@ -10,8 +10,6 @@ type Props = {
 
 /** Waits for the root navigator, jumps to the listing screen, then signals ready. */
 export function AscCaptureNavigationController({ screen, onReady }: Props) {
-    const [navigated, setNavigated] = useState(false);
-
     useEffect(() => {
         let cancelled = false;
         let attempts = 0;
@@ -21,7 +19,6 @@ export function AscCaptureNavigationController({ screen, onReady }: Props) {
             attempts += 1;
             if (rootNavigationRef.isReady()) {
                 navigateAscCaptureScreen(screen);
-                setNavigated(true);
                 globalThis.setTimeout(() => {
                     if (!cancelled) onReady();
                 }, 900);
@@ -38,6 +35,5 @@ export function AscCaptureNavigationController({ screen, onReady }: Props) {
         };
     }, [screen, onReady]);
 
-    if (!navigated) return null;
     return null;
 }

@@ -10,10 +10,6 @@ import {
     getAscCaptureActiveLanguage,
 } from './ascCaptureActiveLocale';
 
-export function inAscCaptureMode(): boolean {
-    return isAscScreenshotDemo();
-}
-
 export function ascCaptureGroups() {
     return activeCaptureGroups();
 }
@@ -53,7 +49,7 @@ export function ascCaptureGroupMembers(groupId: string): GroupMember[] {
     }));
 }
 
-export const captureExpenses: ExpenseWithSplits[] = [
+const captureExpenses: ExpenseWithSplits[] = [
     {
         id: 'exp-dinner',
         groupId: CAPTURE_GROUP_BARCELONA,
@@ -81,7 +77,7 @@ export const captureExpenses: ExpenseWithSplits[] = [
         description: 'Museum tickets',
         amount: 86,
         currency: 'EUR',
-        category: 'activities',
+        category: 'entertainment',
         expenseDate: new Date('2026-10-11'),
         paidBy: 'u-dana',
         createdBy: CAPTURE_USER_ID,

@@ -5,7 +5,7 @@ import { Text } from '../components/AppText';
 import { useRtlLayout } from '../hooks/useRtlLayout';
 
 /** Upper cap so the app region keeps most of the canvas (smallest iPhone logical heights). */
-export const CAPTION_BAND_MAX_RATIO = 0.22;
+const CAPTION_BAND_MAX_RATIO = 0.22;
 
 const PADDING_TOP = 48;
 const PADDING_BOTTOM = 28;
@@ -15,11 +15,11 @@ const SUBLINE_FONT = 17;
 const SUBLINE_LINE_HEIGHT = 22;
 const SUBLINE_MARGIN_TOP = 8;
 
-type Props = {
+type Props = Readonly<{
     headline: string;
     subline?: string;
     children: React.ReactNode;
-};
+}>;
 
 function estimateHeadlineLines(headline: string, canvasWidth: number): number {
     const charsPerLine = Math.max(12, Math.floor((canvasWidth - 56) / (HEADLINE_FONT * 0.52)));
