@@ -9,9 +9,9 @@ import {
     View,
     TextInput,
     KeyboardAvoidingView,
-    Platform,
     ActivityIndicator,
 } from 'react-native';
+import { nativeKeyboardAvoidingBehavior } from '../../lib/platformKeyboard';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { Text } from '../../components/AppText';
@@ -189,7 +189,7 @@ export function GroupNoteScreen() {
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            behavior={nativeKeyboardAvoidingBehavior()}
         >
             <View className="flex-1 bg-slate-50">
                 <View className="flex-row items-center justify-end px-4 pt-2 pb-1">

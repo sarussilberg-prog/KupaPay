@@ -62,6 +62,7 @@ import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
 import { configureRewardedAdsSdk } from './lib/configureRewardedAdsSdk';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
+import { AndroidSystemChrome } from './components/AndroidSystemChrome';
 import { UpdateRequiredScreen } from './screens/UpdateRequiredScreen';
 import {
     evaluateMinimumAppVersion,
@@ -556,6 +557,7 @@ function App() {
 function Root() {
   return (
     <PostHogAnalyticsProvider>
+      <AndroidSystemChrome />
       <AppExitGuard />
       <App />
     </PostHogAnalyticsProvider>

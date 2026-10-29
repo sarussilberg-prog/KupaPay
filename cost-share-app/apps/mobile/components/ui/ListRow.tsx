@@ -1,7 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, View, type StyleProp, type ViewStyle } from 'react-native';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
 import { useRtlLayout } from '../../hooks/useRtlLayout';
 import { listRowContainerStyle, ICON_LABEL_GAP } from './iconLabelLayout';
+import { AppPressable } from '../AppPressable';
 
 type ListRowProps = {
     children: React.ReactNode;
@@ -36,9 +37,13 @@ export function ListRow({
 
     if (onPress) {
         return (
-            <TouchableOpacity onPress={onPress} disabled={disabled} testID={testID ? `${testID}-press` : undefined}>
+            <AppPressable
+                onPress={onPress}
+                disabled={disabled}
+                testID={testID ? `${testID}-press` : undefined}
+            >
                 {inner}
-            </TouchableOpacity>
+            </AppPressable>
         );
     }
 

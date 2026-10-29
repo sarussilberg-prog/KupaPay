@@ -7,17 +7,18 @@
  * flow. Wraps content in a KeyboardAvoidingView so a focused TextInput (compose
  * step) isn't hidden behind the keyboard.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Modal,
-    Pressable,
     View,
     KeyboardAvoidingView,
-    Platform,
     useWindowDimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from './AppText';
+import { AppPressable } from './AppPressable';
+import { useAndroidHardwareBackHandler } from '../hooks/useAndroidHardwareBackHandler';
+import { nativeKeyboardAvoidingBehavior } from '../lib/platformKeyboard';
 
 interface CenterDialogShellProps {
     visible: boolean;
@@ -51,21 +52,33 @@ export function CenterDialogShell({
     const { t } = useTranslation();
     const { height } = useWindowDimensions();
     const maxHeight = Math.round(height * 0.8);
+    const handleClose = useCallback(() => {
+        onClose();
+    }, [onClose]);
+    useAndroidHardwareBackHandler(visible, handleClose);
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="fade"
+            onRequestClose={handleClose}
+            statusBarTranslucent
+            navigationBarTranslucent
+        >
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior={nativeKeyboardAvoidingBehavior()}
                 className="flex-1"
             >
                 <View
                     className="flex-1 items-center justify-center px-6"
                     style={{ backgroundColor: 'rgba(15,23,42,0.55)' }}
                 >
-                    <Pressable
+                    <AppPressable
                         testID="center-dialog-scrim"
-                        onPress={onClose}
+                        onPress={handleClose}
                         className="absolute inset-0"
+                        androidRipple={null}
                     />
                     <View
                         style={{
@@ -84,11 +97,11 @@ export function CenterDialogShell({
                                 className="items-start"
                             >
                                 {onLeftPress ? (
-                                    <Pressable onPress={onLeftPress} hitSlop={8}>
+                                    <AppPressable onPress={onLeftPress} hitSlop={8}>
                                         <Text className="text-[15px] font-medium text-gray-600">
                                             {leftLabel ?? t('common.cancel')}
                                         </Text>
-                                    </Pressable>
+                                    </AppPressable>
                                 ) : null}
                             </View>
                             <Text
@@ -102,7 +115,7 @@ export function CenterDialogShell({
                                 className="items-end"
                             >
                                 {onSave ? (
-                                    <Pressable
+                                    <AppPressable
                                         onPress={() => { if (!saveDisabled) onSave(); }}
                                         hitSlop={8}
                                         disabled={saveDisabled}
@@ -116,7 +129,7 @@ export function CenterDialogShell({
                                         >
                                             {saveLabel ?? t('common.save')}
                                         </Text>
-                                    </Pressable>
+                                    </AppPressable>
                                 ) : null}
                             </View>
                         </View>

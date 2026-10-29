@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { AppIcon } from './AppIcon';
 import { resolveCompactTextInputStyle, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
+import { nativeKeyboardAvoidingBehavior } from '../lib/platformKeyboard';
 
 interface MessageComposerSheetProps {
     visible: boolean;
@@ -147,13 +148,9 @@ export function MessageComposerSheet({
             onRequestClose={onClose}
         >
             <Pressable onPress={onClose} className="flex-1 bg-black/40 justify-end">
-                {Platform.OS === 'ios' ? (
-                    <KeyboardAvoidingView behavior="padding">
-                        {sheet}
-                    </KeyboardAvoidingView>
-                ) : (
-                    sheet
-                )}
+                <KeyboardAvoidingView behavior={nativeKeyboardAvoidingBehavior()}>
+                    {sheet}
+                </KeyboardAvoidingView>
             </Pressable>
         </Modal>
     );

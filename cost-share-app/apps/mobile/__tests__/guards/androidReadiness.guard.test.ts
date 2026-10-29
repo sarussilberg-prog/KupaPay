@@ -14,6 +14,10 @@ describe('Android Play readiness (Expo config guard)', () => {
                 android: {
                     package: string;
                     supportsRtl?: boolean;
+                    softwareKeyboardLayoutMode?: string;
+                    predictiveBackGestureEnabled?: boolean;
+                    androidStatusBar?: { barStyle: string; backgroundColor: string };
+                    androidNavigationBar?: { barStyle: string; backgroundColor: string };
                     permissions: string[];
                     blockedPermissions?: string[];
                     adaptiveIcon: {
@@ -28,6 +32,10 @@ describe('Android Play readiness (Expo config guard)', () => {
 
         expect(app.expo.android.package).toBe('com.kupapay.mobile');
         expect(app.expo.android.supportsRtl).toBe(true);
+        expect(app.expo.android.softwareKeyboardLayoutMode).toBe('resize');
+        expect(app.expo.android.predictiveBackGestureEnabled).toBe(true);
+        expect(app.expo.android.androidStatusBar?.barStyle).toBe('dark-content');
+        expect(app.expo.android.androidNavigationBar?.backgroundColor).toBe('#ffffff');
         expect(app.expo.android.permissions).toContain('com.android.vending.BILLING');
         expect(app.expo.android.blockedPermissions).toEqual(
             expect.arrayContaining(['android.permission.RECORD_AUDIO', 'android.permission.READ_MEDIA_IMAGES']),
