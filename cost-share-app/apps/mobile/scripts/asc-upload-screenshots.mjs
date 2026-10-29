@@ -2,6 +2,7 @@
 /**
  * Upload store/screenshots/ios/<locale>/*.png to the editable App Store version.
  */
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -83,6 +84,15 @@ async function screenshotSetId(localizationId, displayType) {
   return hit?.id;
 }
 
+/** Replace, not append: remove existing screenshots in the set (ASC caps a set at 10). */
+async function clearScreenshotSet(setId) {
+  if (dryRun || !setId) return;
+  const existing = await ascGetAll(`/v1/appScreenshotSets/${setId}/appScreenshots?limit=50`, token);
+  for (const shot of existing) {
+    await ascRequest(`/v1/appScreenshots/${shot.id}`, { method: "DELETE", token });
+  }
+}
+
 async function uploadScreenshot(setId, filePath) {
   if (dryRun) {
     console.log(`[dry-run] upload ${filePath} → set ${setId}`);
@@ -94,7 +104,7 @@ async function uploadScreenshot(setId, filePath) {
     body: {
       data: {
         type: "appScreenshots",
-        attributes: { fileName: path.basename(filePath) },
+        attributes: { fileName: path.basename(filePath), fileSize: fs.statSync(filePath).size },
         relationships: {
           appScreenshotSet: { data: { type: "appScreenshotSets", id: setId } },
         },
@@ -107,7 +117,10 @@ async function uploadScreenshot(setId, filePath) {
     method: "PATCH",
     token,
     body: {
-      data: { type: "appScreenshots", id: shotId, attributes: { uploaded: true } },
+      data: { type: "appScreenshots", id: shotId, attributes: {
+        uploaded: true,
+        sourceFileChecksum: crypto.createHash("md5").update(fs.readFileSync(filePath)).digest("hex"),
+      } },
     },
   });
 }
@@ -128,6 +141,7 @@ async function main() {
       const dir = path.join(localeDir, sizeFolder);
       if (!fs.statSync(dir).isDirectory()) continue;
       const setId = await screenshotSetId(locId, displayType);
+      await clearScreenshotSet(setId);
       const files = fs
         .readdirSync(dir)
         .filter((f) => f.endsWith(".png"))
