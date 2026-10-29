@@ -2,7 +2,7 @@
 
 Localized, benefit-led marketing frames for all **7 product locales** (`en`, `he`, `ru`, `ar`, `fr`, `es`, `de`). Captions live in [`store/asc/screenshot-captions.json`](../asc/screenshot-captions.json). **Hebrew and Arabic** use RTL layout in the capture UI (see `screenshotDemo/AscStoreListingFrame.tsx`).
 
-Demo data only — no production Supabase. Capture mode stubs services and seeds React Query from `screenshotDemo/ascCaptureSeed.ts` / `ascCaptureFixtures.ts`, then drives the **real** `AppNavigator` (headers + tab bar) inside a 430×932 logical phone viewport (Android: 360×640).
+Demo data only — no production Supabase. Per-locale group names live in `screenshotDemo/ascCaptureLocaleData.ts`. Capture stubs services, seeds React Query, and drives the **real** `AppNavigator` full-bleed below a caption band (≤18% height). Playwright uses a **430×932 logical viewport @ deviceScaleFactor 3** → 1290×2796 PNGs (Android: 360×640 @3 → 1080×1920).
 
 Related: App Store prep [#409](https://github.com/sarussilberg-prog/KupaPay/issues/409), listing drafts [#62](https://github.com/sarussilberg-prog/KupaPay/issues/62) / [#155](https://github.com/sarussilberg-prog/KupaPay/issues/155).
 

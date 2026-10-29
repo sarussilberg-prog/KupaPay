@@ -11,10 +11,6 @@ import type { AscCaptureScreen } from '../lib/ascCaptureParams';
 import { RtlLayoutProvider } from '../hooks/useRtlLayout';
 import { AppNavigator } from '../navigation/AppNavigator';
 import { rootNavigationRef } from '../lib/rootNavigationRef';
-import {
-    ASC_CAPTURE_ANDROID_PHONE,
-    ASC_CAPTURE_PHONE,
-} from '../lib/ascCaptureNavigate';
 import { AscStoreListingFrame } from './AscStoreListingFrame';
 import { CapturePhoneShell } from '../components/capture/CapturePhoneShell';
 import { seedAscCaptureApp } from './seedAscCaptureApp';
@@ -30,12 +26,6 @@ export function AscStoreListingCaptureRoot() {
     const locale = params?.locale ?? 'en-US';
     const screen = (params?.screen ?? 'groups') as AscCaptureScreen;
     const phoneOnly = params?.phoneOnly ?? false;
-    const isAndroidCapture =
-        Platform.OS === 'web' &&
-        typeof globalThis.location !== 'undefined' &&
-        new URLSearchParams(globalThis.location.search).get('platform') === 'android';
-
-    const phoneSize = isAndroidCapture ? ASC_CAPTURE_ANDROID_PHONE : ASC_CAPTURE_PHONE;
 
     const headline = useMemo(() => {
         if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined') {
@@ -65,8 +55,6 @@ export function AscStoreListingCaptureRoot() {
         return <View testID="asc-demo-loading" style={{ flex: 1, backgroundColor: '#1e3a8a' }} />;
     }
 
-    const captureReady = phoneOnly ? navReady : navReady;
-
     const realApp = (
         <>
             <NavigationContainer ref={rootNavigationRef}>
@@ -81,33 +69,25 @@ export function AscStoreListingCaptureRoot() {
             <View style={{ flex: 1 }}>{renderAscCaptureScreen(screen)}</View>
         ) : null;
 
+    const appChrome = (
+        <CapturePhoneShell fullBleed>{legacyPaywallOnly ?? realApp}</CapturePhoneShell>
+    );
+
     return (
         <QueryClientProvider client={queryClient}>
             <RtlLayoutProvider>
                 <View
-                    testID={captureReady ? 'asc-capture-ready' : 'asc-demo-loading'}
+                    testID={navReady ? 'asc-capture-ready' : 'asc-demo-loading'}
                     style={{
                         flex: 1,
                         width: '100%',
                         height: '100%',
-                        alignSelf: 'center',
-                        backgroundColor: phoneOnly ? '#f1f5f9' : '#1e3a8a',
+                        backgroundColor: phoneOnly ? '#f1f5f9' : '#f1f5f9',
                     }}
                 >
-                    {phoneOnly ? (
-                        <CapturePhoneShell width={phoneSize.width} height={phoneSize.height}>
-                            {legacyPaywallOnly ?? realApp}
-                        </CapturePhoneShell>
-                    ) : (
-                        <AscStoreListingFrame
-                            headline={headline}
-                            subline={t('app.name', 'KupaPay')}
-                            phoneWidth={phoneSize.width}
-                            phoneHeight={phoneSize.height}
-                        >
-                            <CapturePhoneShell width={phoneSize.width} height={phoneSize.height}>
-                                {realApp}
-                            </CapturePhoneShell>
+                    {phoneOnly ? appChrome : (
+                        <AscStoreListingFrame headline={headline} subline={t('app.name', 'KupaPay')}>
+                            {appChrome}
                         </AscStoreListingFrame>
                     )}
                 </View>

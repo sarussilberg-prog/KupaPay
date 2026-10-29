@@ -7,27 +7,33 @@ import {
 } from './IosCaptureStatusBar';
 
 type Props = {
-    width: number;
-    height: number;
     children: React.ReactNode;
+    /** When true, fill the parent app region (full-bleed listing). */
+    fullBleed?: boolean;
 };
 
 /**
- * Fixed logical phone viewport for store captures — real app navigator inside,
- * with iOS-style status bar chrome above the app safe area.
+ * App viewport for store captures — iOS status chrome + navigator, edge-to-edge width.
  */
-export function CapturePhoneShell({ width, height, children }: Props) {
-    const appHeight = height - IOS_CAPTURE_STATUS_BAR_HEIGHT;
+export function CapturePhoneShell({ children, fullBleed = true }: Props) {
     return (
-        <View style={[styles.shell, { width, height }]} testID="asc-capture-phone">
+        <View
+            style={[styles.shell, fullBleed && styles.fullBleed]}
+            testID="asc-capture-phone"
+        >
             <IosCaptureStatusBar />
             <SafeAreaProvider
                 initialMetrics={{
-                    frame: { x: 0, y: IOS_CAPTURE_STATUS_BAR_HEIGHT, width, height: appHeight },
+                    frame: {
+                        x: 0,
+                        y: IOS_CAPTURE_STATUS_BAR_HEIGHT,
+                        width: 430,
+                        height: 800,
+                    },
                     insets: { top: 0, left: 0, right: 0, bottom: 34 },
                 }}
             >
-                <View style={[styles.app, { height: appHeight }]}>{children}</View>
+                <View style={styles.app}>{children}</View>
             </SafeAreaProvider>
         </View>
     );
@@ -35,9 +41,13 @@ export function CapturePhoneShell({ width, height, children }: Props) {
 
 const styles = StyleSheet.create({
     shell: {
+        flex: 1,
+        width: '100%',
         overflow: 'hidden',
         backgroundColor: '#f8fafc',
-        borderRadius: 28,
+    },
+    fullBleed: {
+        borderRadius: 0,
     },
     app: {
         flex: 1,

@@ -3,27 +3,27 @@
  */
 import type { ExpenseWithSplits, GroupMember, User } from '@cost-share/shared';
 import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { CAPTURE_GROUP_BARCELONA, CAPTURE_USER_ID } from './ascCaptureSeed';
 import {
-    CAPTURE_GROUP_BARCELONA,
-    CAPTURE_USER_ID,
-    captureGroups,
-    captureSimplifiedInputs,
-} from './ascCaptureSeed';
+    activeCaptureGroups,
+    activeCaptureSimplifiedInputs,
+    getAscCaptureActiveLanguage,
+} from './ascCaptureActiveLocale';
 
 export function inAscCaptureMode(): boolean {
     return isAscScreenshotDemo();
 }
 
 export function ascCaptureGroups() {
-    return captureGroups;
+    return activeCaptureGroups();
 }
 
 export function ascCaptureSimplifiedInputs() {
-    return captureSimplifiedInputs;
+    return activeCaptureSimplifiedInputs();
 }
 
 export function ascCaptureUsersForGroup(groupId: string): User[] {
-    const group = captureGroups.find(g => g.id === groupId);
+    const group = activeCaptureGroups().find(g => g.id === groupId);
     if (!group) return [];
     const now = new Date('2026-10-01');
     return group.members.map(m => ({
@@ -32,7 +32,7 @@ export function ascCaptureUsersForGroup(groupId: string): User[] {
         email: `${m.userId}@capture.kupapay.local`,
         inviteToken: `tok-${m.userId}`,
         defaultCurrency: group.defaultCurrency,
-        language: 'en',
+        language: getAscCaptureActiveLanguage() as User['language'],
         isActive: true,
         isAdmin: false,
         createdAt: now,
@@ -41,7 +41,7 @@ export function ascCaptureUsersForGroup(groupId: string): User[] {
 }
 
 export function ascCaptureGroupMembers(groupId: string): GroupMember[] {
-    const group = captureGroups.find(g => g.id === groupId);
+    const group = activeCaptureGroups().find(g => g.id === groupId);
     if (!group) return [];
     const now = new Date('2026-10-01');
     return group.members.map(m => ({

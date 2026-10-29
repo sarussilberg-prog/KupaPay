@@ -2,16 +2,23 @@ import type { MyProStatus } from '../services/proEntitlements.service';
 import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
-import {
-    CAPTURE_USER_ID,
-    captureGroups,
-    captureSimplifiedInputs,
-} from './ascCaptureSeed';
+import { CAPTURE_USER_ID } from './ascCaptureSeed';
 import { ascCaptureExpenses, ascCaptureExchangeRates } from './ascCaptureFixtures';
+import {
+    activeBarcelonaGroupName,
+    activeCaptureGroups,
+    activeCaptureSimplifiedInputs,
+    setAscCaptureActiveLanguage,
+} from './ascCaptureActiveLocale';
+import { captureDisplayNameForUser } from './ascCaptureLocaleData';
 
 export function seedAscCaptureApp(localeAppLanguage: string): void {
-    queryClient.setQueryData(queryKeys.groups, captureGroups);
-    queryClient.setQueryData(queryKeys.simplifiedDebts, captureSimplifiedInputs);
+    setAscCaptureActiveLanguage(localeAppLanguage);
+    const groups = activeCaptureGroups();
+    const simplified = activeCaptureSimplifiedInputs();
+
+    queryClient.setQueryData(queryKeys.groups, groups);
+    queryClient.setQueryData(queryKeys.simplifiedDebts, simplified);
     queryClient.setQueryData(queryKeys.groupUnreadCounts, {});
     queryClient.setQueryData(queryKeys.activityUnreadCount, 0);
     queryClient.setQueryData(queryKeys.activityFeed(), []);
@@ -19,7 +26,7 @@ export function seedAscCaptureApp(localeAppLanguage: string): void {
     queryClient.setQueryData(queryKeys.friendRequestsIncoming, []);
     queryClient.setQueryData(queryKeys.friendRequestsOutgoing, []);
 
-    for (const group of captureGroups) {
+    for (const group of groups) {
         queryClient.setQueryData(queryKeys.groupExpenses(group.id), ascCaptureExpenses(group.id));
     }
 
@@ -54,18 +61,19 @@ export function seedAscCaptureApp(localeAppLanguage: string): void {
         tripPasses: [
             {
                 groupId: 'g-barcelona',
-                groupName: 'Barcelona Trip',
+                groupName: activeBarcelonaGroupName(),
                 expiresAt: '2026-12-20T00:00:00.000Z',
             },
         ],
         serverIndividualUntil: '2027-01-15T00:00:00.000Z',
     });
 
+    const youLabel = captureDisplayNameForUser(localeAppLanguage, CAPTURE_USER_ID);
     useAppStore.setState({
         session: { user: { id: CAPTURE_USER_ID } } as never,
         currentUser: {
             id: CAPTURE_USER_ID,
-            displayName: 'You',
+            displayName: youLabel,
             email: 'capture@kupapay.local',
             inviteToken: 'capture123456',
             defaultCurrency: 'ILS',

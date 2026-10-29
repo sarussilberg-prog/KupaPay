@@ -1,31 +1,23 @@
 import React from 'react';
-import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from '../components/AppText';
 import { useRtlLayout } from '../hooks/useRtlLayout';
+
+/** Caption band may use at most this share of the listing canvas height. */
+export const CAPTION_BAND_MAX_RATIO = 0.18;
 
 type Props = {
     headline: string;
     subline?: string;
     children: React.ReactNode;
-    phoneWidth: number;
-    phoneHeight: number;
 };
 
-const BEZEL = 12;
-
-/** Marketing frame: localized headline + device mockup at real logical phone size. */
-export function AscStoreListingFrame({
-    headline,
-    subline,
-    children,
-    phoneWidth,
-    phoneHeight,
-}: Props) {
+/** Full-bleed listing: caption band on top, edge-to-edge app UI below (no device bezel). */
+export function AscStoreListingFrame({ headline, subline, children }: Props) {
     const isRtl = useRtlLayout();
     const { width: canvasWidth, height: canvasHeight } = useWindowDimensions();
-    const deviceWidth = phoneWidth + BEZEL * 2;
-    const deviceHeight = phoneHeight + BEZEL * 2;
+    const captionMaxHeight = Math.round(canvasHeight * CAPTION_BAND_MAX_RATIO);
 
     return (
         <View
@@ -33,18 +25,17 @@ export function AscStoreListingFrame({
             testID="asc-capture-frame"
         >
             <LinearGradient
-                colors={['#1e3a8a', '#3b82f6', '#93c5fd']}
+                colors={['#1e3a8a', '#2563eb', '#60a5fa']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-            />
-            <View style={[styles.content, isRtl && styles.contentRtl]}>
+                style={[styles.captionBand, { maxHeight: captionMaxHeight }]}
+            >
                 <Text
                     style={[
                         styles.headline,
                         isRtl ? styles.textRtl : styles.textLtr,
-                        { alignSelf: 'stretch' },
                     ]}
+                    numberOfLines={3}
                 >
                     {headline}
                 </Text>
@@ -53,25 +44,14 @@ export function AscStoreListingFrame({
                         style={[
                             styles.subline,
                             isRtl ? styles.textRtl : styles.textLtr,
-                            { alignSelf: 'stretch' },
                         ]}
+                        numberOfLines={1}
                     >
                         {subline}
                     </Text>
                 ) : null}
-                <View
-                    style={[
-                        styles.phone,
-                        {
-                            width: deviceWidth,
-                            height: deviceHeight,
-                            marginTop: Math.max(24, canvasHeight * 0.04),
-                        },
-                    ]}
-                >
-                    <View style={styles.phoneInner}>{children}</View>
-                </View>
-            </View>
+            </LinearGradient>
+            <View style={styles.appRegion}>{children}</View>
         </View>
     );
 }
@@ -79,31 +59,28 @@ export function AscStoreListingFrame({
 const styles = StyleSheet.create({
     root: {
         overflow: 'hidden',
-        backgroundColor: '#1e3a8a',
+        backgroundColor: '#f1f5f9',
+        flexDirection: 'column',
     },
-    content: {
-        flex: 1,
-        paddingTop: Platform.OS === 'web' ? 56 : 40,
-        paddingHorizontal: 36,
-        alignItems: 'flex-start',
-    },
-    contentRtl: {
-        alignItems: 'flex-end',
+    captionBand: {
+        width: '100%',
+        paddingTop: 52,
+        paddingBottom: 20,
+        paddingHorizontal: 28,
+        justifyContent: 'flex-end',
     },
     headline: {
         color: '#ffffff',
-        fontSize: 46,
+        fontSize: 34,
         fontWeight: '800',
-        maxWidth: '92%',
-        lineHeight: 52,
-        letterSpacing: -0.5,
+        lineHeight: 40,
+        letterSpacing: -0.4,
     },
     subline: {
-        marginTop: 10,
+        marginTop: 8,
         color: 'rgba(255,255,255,0.92)',
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: '500',
-        maxWidth: '88%',
     },
     textRtl: {
         textAlign: 'right',
@@ -112,23 +89,10 @@ const styles = StyleSheet.create({
     textLtr: {
         textAlign: 'left',
     },
-    phone: {
-        alignSelf: 'center',
-        borderRadius: 36,
-        backgroundColor: '#0f172a',
-        padding: BEZEL,
-        shadowColor: '#000',
-        shadowOpacity: 0.35,
-        shadowRadius: 24,
-        shadowOffset: { width: 0, height: 12 },
-        ...(Platform.OS === 'web'
-            ? { boxShadow: '0 24px 48px rgba(15,23,42,0.45)' }
-            : {}),
-    },
-    phoneInner: {
+    appRegion: {
         flex: 1,
-        borderRadius: 28,
-        overflow: 'hidden',
-        backgroundColor: '#f8fafc',
+        width: '100%',
+        minHeight: 0,
+        backgroundColor: '#f1f5f9',
     },
 });

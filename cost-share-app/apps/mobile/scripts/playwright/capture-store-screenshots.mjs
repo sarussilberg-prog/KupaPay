@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Capture App Store / Play listing PNGs from Expo web export (real navigator + listing frame).
+ * Capture App Store / Play listing PNGs — full-bleed app @ deviceScaleFactor 3.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,6 +29,8 @@ const LISTING_SCREENS = captions.screens;
 const ASC_LOCALES = (process.env.CAPTURE_ASC_LOCALES?.split(',').map((s) => s.trim()).filter(Boolean) ??
   Object.keys(captions.captions));
 
+const DEVICE_SCALE = 3;
+
 const IOS_SIZES = {
   '6.7': { width: 1290, height: 2796 },
   '6.5': { width: 1284, height: 2778 },
@@ -52,35 +54,66 @@ function playLocaleForAsc(ascLocale) {
   return entry?.[0] ?? ascLocale.split('-')[0];
 }
 
+function logicalViewport(pixelSize) {
+  return {
+    width: Math.round(pixelSize.width / DEVICE_SCALE),
+    height: Math.round(pixelSize.height / DEVICE_SCALE),
+  };
+}
+
 function assertDist() {
   if (!fs.existsSync(path.join(distDir, 'index.html'))) {
     throw new Error(`Missing web export at ${distDir} — run expo export --platform web first`);
   }
 }
 
-async function assertScreenshotValid(pngPath, minBytes = 80_000, minWidth = 1000) {
+async function assertScreenshotValid(pngPath, expectedPixels, minBytes = 80_000) {
   const stat = fs.statSync(pngPath);
   if (stat.size < minBytes) {
     throw new Error(`Screenshot too small (${stat.size} B): ${pngPath}`);
   }
   const meta = await sharp(pngPath).metadata();
-  if (!meta.width || !meta.height || meta.width < minWidth) {
-    throw new Error(`Unexpected screenshot dimensions: ${pngPath}`);
+  const dw = Math.abs((meta.width ?? 0) - expectedPixels.width);
+  const dh = Math.abs((meta.height ?? 0) - expectedPixels.height);
+  if (dw > 1 || dh > 1) {
+    throw new Error(
+      `Unexpected screenshot dimensions ${meta.width}x${meta.height}, expected ${expectedPixels.width}x${expectedPixels.height} (±1): ${pngPath}`,
+    );
   }
 }
 
-async function captureListingPage(browser, url, viewport, outPath, screen) {
-  const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
+async function captureListingPage(browser, url, pixelSize, outPath, screen) {
+  const viewport = logicalViewport(pixelSize);
+  const page = await browser.newPage({ viewport, deviceScaleFactor: DEVICE_SCALE });
   await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
   await page.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
   const readySel = SCREEN_READY[screen];
   if (readySel) {
     await page.waitForSelector(readySel, { timeout: 120_000 });
   }
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(600);
   await page.screenshot({ path: outPath, type: 'png' });
   await page.close();
-  await assertScreenshotValid(outPath, outPath.includes('/android/') ? 60_000 : 80_000);
+  await assertScreenshotValid(
+    outPath,
+    pixelSize,
+    outPath.includes('/android/') ? 120_000 : 150_000,
+  );
+}
+
+async function captureReviewPaywall(browser, port, ascLocale, reviewPath) {
+  const paywallHeadline = captions.captions[ascLocale]?.['pro-currency'] ?? 'KupaPay Pro';
+  const pixelSize = { width: 1290, height: 2796 };
+  const viewport = logicalViewport(pixelSize);
+  const page = await browser.newPage({ viewport, deviceScaleFactor: DEVICE_SCALE });
+  const url = `http://127.0.0.1:${port}/?capture=1&phone=1&screen=pro-paywall&locale=${encodeURIComponent(ascLocale)}&headline=${encodeURIComponent(paywallHeadline)}`;
+  await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
+  await page.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
+  await page.waitForSelector('[data-testid="asc-demo-screen-pro-paywall"]', { timeout: 120_000 });
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: reviewPath, type: 'png' });
+  await page.close();
+  await assertScreenshotValid(reviewPath, pixelSize, 55_000);
 }
 
 async function captureAll() {
@@ -100,17 +133,7 @@ async function captureAll() {
         if (process.env.CAPTURE_SKIP_IAP_REVIEW === '1') continue;
         fs.mkdirSync(reviewDir, { recursive: true });
         const reviewPath = path.join(reviewDir, `paywall-${ascLocale}.png`);
-        const paywallHeadline = captions.captions[ascLocale]?.['pro-currency'] ?? 'KupaPay Pro';
-        const phoneViewport = { width: 454, height: 980 };
-        const page = await browser.newPage({ viewport: phoneViewport, deviceScaleFactor: 1 });
-        const url = `http://127.0.0.1:${port}/?capture=1&phone=1&screen=pro-paywall&locale=${encodeURIComponent(ascLocale)}&headline=${encodeURIComponent(paywallHeadline)}`;
-        await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
-        await page.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
-        await page.waitForSelector('[data-testid="asc-demo-screen-pro-paywall"]', { timeout: 120_000 });
-        await page.waitForTimeout(1500);
-        await page.screenshot({ path: reviewPath, type: 'png', fullPage: true });
-        await page.close();
-        await assertScreenshotValid(reviewPath, 15_000, 400);
+        await captureReviewPaywall(browser, port, ascLocale, reviewPath);
         written.push(reviewPath);
         continue;
       }
@@ -141,17 +164,7 @@ async function captureAll() {
       }
       fs.mkdirSync(reviewDir, { recursive: true });
       const reviewPath = path.join(reviewDir, `paywall-${ascLocale}.png`);
-      const paywallHeadline = captions.captions[ascLocale]?.['pro-currency'] ?? 'KupaPay Pro';
-      const phoneViewport = { width: 454, height: 980 };
-      const page = await browser.newPage({ viewport: phoneViewport, deviceScaleFactor: 1 });
-      const url = `http://127.0.0.1:${port}/?capture=1&phone=1&screen=pro-paywall&locale=${encodeURIComponent(ascLocale)}&headline=${encodeURIComponent(paywallHeadline)}`;
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
-      await page.waitForSelector('[data-testid="asc-capture-ready"]', { timeout: 120_000 });
-      await page.waitForSelector('[data-testid="asc-demo-screen-pro-paywall"]', { timeout: 120_000 });
-      await page.waitForTimeout(1500);
-      await page.screenshot({ path: reviewPath, type: 'png', fullPage: true });
-      await page.close();
-      await assertScreenshotValid(reviewPath, 15_000, 400);
+      await captureReviewPaywall(browser, port, ascLocale, reviewPath);
       written.push(reviewPath);
     }
   } finally {
