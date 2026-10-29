@@ -4,10 +4,10 @@
 
 import {
     buildSplitwiseImportPlan,
+    type CreateExpenseDto,
     type SplitwiseMemberMapping,
     type SplitwiseParsedExpense,
 } from '@cost-share/shared';
-import type { CreateExpenseDto } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
 import { createExpense } from './expenses.service';
