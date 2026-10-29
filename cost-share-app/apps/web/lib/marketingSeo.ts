@@ -4,6 +4,7 @@ import {
     SUPPORTED_LANGUAGES,
     type Language,
 } from '@cost-share/shared';
+import { SPLITWISE_COMPARISON_SLUG } from '@/lib/splitwiseComparisonPages';
 import { USE_CASE_SLUGS, type UseCaseId } from '@/lib/useCasePages';
 
 export const MARKETING_LOCALE_HEADER = 'x-kupapay-locale';
@@ -72,6 +73,24 @@ export function replaceLocaleInMarketingPath(pathname: string, locale: Language)
 /** hreflang values (BCP 47) for alternates metadata. */
 export function hreflangForLocale(locale: Language): string {
     return languageToIntlLocale(locale).split('-')[0] ?? locale;
+}
+
+export function splitwiseComparisonPath(locale: Language): string {
+    return `/${locale}/${SPLITWISE_COMPARISON_SLUG}`;
+}
+
+export function splitwiseComparisonUrl(locale: Language): string {
+    return `${APP_WEB_ORIGIN}${splitwiseComparisonPath(locale)}`;
+}
+
+export function buildSplitwiseComparisonAlternateLanguages(): Record<string, string> {
+    const languages: Record<string, string> = {
+        'x-default': splitwiseComparisonUrl('en'),
+    };
+    for (const locale of SUPPORTED_LANGUAGES) {
+        languages[hreflangForLocale(locale)] = splitwiseComparisonUrl(locale);
+    }
+    return languages;
 }
 
 export function buildLandingAlternateLanguages(): Record<string, string> {

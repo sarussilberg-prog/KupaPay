@@ -38,6 +38,8 @@ export const LOCALE_VALUE_ALLOWLIST_EXACT = new Set([
     'PayBox',
     'Trip Pass',
     'CSV',
+    'Splitwise',
+    'Splitwise Pro',
 ]);
 
 /** If the entire string matches, allow (e.g. "KupaPay Pro"). */
