@@ -4,6 +4,7 @@ import { withSentryConfig } from '@sentry/nextjs/config';
 import { sentryReleaseMetadata } from '@cost-share/shared';
 import { CONTENT_SECURITY_POLICY } from '../../packages/shared/src/security/contentSecurityPolicy';
 import versionJson from '../../packages/shared/version.json';
+import { appProxyBeforeFileRewrites } from './lib/marketingAppProxy';
 import { localePrefixedAppEntryRedirects } from './lib/marketingAppRoutes';
 
 const appVersion = (versionJson as { version: string }).version;
@@ -95,7 +96,7 @@ const nextConfig: NextConfig = {
     }
 
     return {
-      beforeFiles,
+      beforeFiles: [...beforeFiles, ...appProxyBeforeFileRewrites(APP_PROXY_ORIGIN)],
       fallback: [{ source: '/:path*', destination: `${APP_PROXY_ORIGIN}/:path*` }],
     };
   },
