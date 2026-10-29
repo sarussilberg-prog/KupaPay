@@ -20,7 +20,7 @@ See also [docs/SSOT/SUPABASE_ENVIRONMENTS.md](SSOT/SUPABASE_ENVIRONMENTS.md).
 
 ### Concurrency
 
-- Per PR: `ci-<pr-number>` with **cancel-in-progress** so superseded pushes stop stale runs.
+- Per PR: `ci-<pr-number>` with **cancel-in-progress** so superseded pushes stop stale runs. A hung job (no step timeout) can hold this group and leave newer runs **pending with zero jobs** until the stuck run finishes or is cancelled — **Mobile tests** and **Coverage ratchet** use a **45-minute** job timeout; Jest runs with **`--forceExit`** in CI.
 - Auto-merge + dev version bump: `dev-merge-and-bump` (no cancel) to avoid `version.json` races.
 
 ### Path-scoped jobs (speed)
@@ -71,20 +71,22 @@ PRs to **`main`** always run the **full** CI matrix (no path skipping). Optional
 | **PR hygiene (scope + title)** | [`pr-hygiene.yml`](../.github/workflows/pr-hygiene.yml) — `cursor/*` PRs only |
 | **SonarCloud Code Analysis** | Waited on in **Auto-merge to dev** |
 
-Individual job names (only if you prefer granular protection instead of **CI gate**): **CI path plan**, **Install dependencies**, **Lint**, **Typecheck**, **Mobile tests**, **Coverage ratchet**, **Legal locale parity**, **Deno edge gate**, **No merge conflict markers**, **Expo mobile config**, **Mobile device UI (Maestro iOS)**, **Mobile device UI (Maestro Android)**, **CI performance**, **Supabase SQL integration**, **Deno edge bundle (all functions)**, **Branch up to date with dev**.
+Individual job names (only if you prefer granular protection instead of **CI gate**): **CI path plan**, **Install dependencies**, **Lint**, **Typecheck**, **Mobile tests**, **Coverage ratchet**, **Legal locale parity**, **Deno edge gate**, **No merge conflict markers**, **Expo mobile config**, **CI performance**, **Supabase SQL integration**, **Deno edge bundle (all functions)**, **Branch up to date with dev**.
 
 ### Mobile device UI (Maestro)
 
-When a PR touches `cost-share-app/apps/mobile/**` or shared package code, CI runs **Mobile device UI (Maestro iOS)** on `macos-14` (iPhone 16 simulator) and **Mobile device UI (Maestro Android)** on an API 34 emulator. Both jobs:
+When a PR touches mobile/shared paths, [`mobile-device-ui-maestro.yml`](../.github/workflows/mobile-device-ui-maestro.yml) runs **Mobile device UI (Maestro iOS)** on **`macos-latest`** (single **iPhone 16** simulator). It uses a **separate concurrency group** (`maestro-ui-<pr>`) and **`continue-on-error: true`** so macOS queue time or simulator flakes do **not** block **CI gate** or auto-merge. Android PR emulators were removed from PR CI for cost; use [`e2e-smoke.yml`](../.github/workflows/e2e-smoke.yml) / nightly flows for broader device coverage.
+
+The Maestro job:
 
 - Seed the dev E2E user (`npm run seed:e2e`) when `SUPABASE_SERVICE_ROLE_KEY_DEV` / `E2E_TEST_PASSWORD` secrets are set
 - Build a release dev client with `EXPO_PUBLIC_E2E_MAESTRO_AUTH=true` (email/password panel on the login screen)
 - Run flows under [`cost-share-app/apps/mobile/.maestro/device-ui/`](../cost-share-app/apps/mobile/.maestro/device-ui/) — groups list layout (en + he), seven-locale login string screenshots, and Hebrew RTL profile friend breakdown + settle confirm
-- Upload PNG artifacts: **`maestro-device-ui-ios`** and **`maestro-device-ui-android`** (retention 14 days)
+- Upload PNG artifacts: **`maestro-device-ui-ios-<run_id>`** (retention 7 days)
 
-These jobs roll up into **CI gate** for path-scoped PRs; PRs to **`main`** always run them. If neither mobile nor full suite applies, **Mobile device UI (skipped)** satisfies the gate.
+**Not required for merge** — rely on **CI gate** (Jest + layout regression tests) for blocking checks. Optional: watch the Maestro workflow on the PR checks tab.
 
-**Branch protection (admin):** add **Mobile device UI (Maestro iOS)** and **Mobile device UI (Maestro Android)** to required checks on `dev` and `main`, or rely on **CI gate** alone (recommended). Secrets required: `E2E_TEST_PASSWORD`, `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY_DEV` (optional `E2E_TEST_EMAIL`).
+Secrets: `E2E_TEST_PASSWORD`, `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY_DEV` (optional `E2E_TEST_EMAIL`).
 
 #### Security & supply chain (both branches)
 

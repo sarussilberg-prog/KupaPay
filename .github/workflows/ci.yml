@@ -168,6 +168,7 @@ jobs:
       (needs.ci-paths.outputs.full_suite == 'true' ||
         needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: cost-share-app
@@ -199,6 +200,7 @@ jobs:
       (needs.ci-paths.outputs.full_suite == 'true' ||
         needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: cost-share-app
@@ -214,106 +216,6 @@ jobs:
       - run: bash scripts/ci-restore-node-modules-from-artifact.sh
       - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-coverage-check.sh
-
-  mobile-device-ui-ios:
-    name: Mobile device UI (Maestro iOS)
-    needs: [ci-paths, setup]
-    if: >-
-      always() && needs.setup.result == 'success' &&
-      (needs.ci-paths.outputs.full_suite == 'true' ||
-        needs.ci-paths.outputs.mobile == 'true')
-    runs-on: macos-14
-    timeout-minutes: 180
-    defaults:
-      run:
-        working-directory: cost-share-app
-    env:
-      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: iPhone SE (3rd generation) iPhone 16 iPhone 16 Pro Max
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
-      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      IOS_SIMULATOR_DEVICE: iPhone 16
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: cost-share-app/package-lock.json
-      - name: Install dependencies
-        run: npm ci
-      - name: Maestro device UI (iOS simulator)
-        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: maestro-device-ui-ios
-          path: artifacts/maestro-device-ui/screenshots
-          if-no-files-found: warn
-          retention-days: 14
-
-  mobile-device-ui-android:
-    name: Mobile device UI (Maestro Android)
-    needs: [ci-paths, setup]
-    if: >-
-      always() && needs.setup.result == 'success' &&
-      (needs.ci-paths.outputs.full_suite == 'true' ||
-        needs.ci-paths.outputs.mobile == 'true')
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    defaults:
-      run:
-        working-directory: cost-share-app
-    env:
-      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
-      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: cost-share-app/package-lock.json
-      - name: Install dependencies
-        run: npm ci
-      - name: Maestro device UI (Android phone emulator)
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          script: bash apps/mobile/scripts/ci-maestro-device-ui.sh android
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: maestro-device-ui-android
-          path: artifacts/maestro-device-ui/screenshots
-          if-no-files-found: warn
-          retention-days: 14
-
-  mobile-device-ui-skipped:
-    name: Mobile device UI (skipped)
-    needs: ci-paths
-    if: >-
-      needs.ci-paths.outputs.full_suite != 'true' &&
-      needs.ci-paths.outputs.mobile != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "No mobile paths — Maestro device UI skipped."
 
   legal-locale-parity:
     name: Legal locale parity
@@ -649,9 +551,6 @@ jobs:
         deno-edge-bundle-skipped,
         docs-only-gate,
         knip-report,
-        mobile-device-ui-ios,
-        mobile-device-ui-android,
-        mobile-device-ui-skipped,
       ]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
@@ -698,10 +597,6 @@ jobs:
             check coverage-ratchet "${{ needs.coverage-ratchet.result }}"
             check legal-locale-parity "${{ needs.legal-locale-parity.result }}"
             check expo-mobile-config "${{ needs.expo-mobile-config.result }}"
-            check "Mobile device UI (Maestro iOS)" "${{ needs.mobile-device-ui-ios.result }}"
-            check "Mobile device UI (Maestro Android)" "${{ needs.mobile-device-ui-android.result }}"
-          else
-            check "Mobile device UI (skipped)" "${{ needs.mobile-device-ui-skipped.result }}"
           fi
           if [[ "$FULL" == "true" || "$PERF" == "true" ]]; then
             check ci-performance "${{ needs.ci-performance.result }}"

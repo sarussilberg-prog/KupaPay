@@ -30,13 +30,13 @@ jest_invocation() {
   local out_basename="$1"
   shift
   npm test --workspace=@cost-share/mobile -- \
-    --passWithNoTests --ci "${IGNORE_ARGS[@]}" "$@" \
+    --passWithNoTests --ci --forceExit "${IGNORE_ARGS[@]}" "$@" \
     --json --outputFile="${JEST_JSON_OUT}/${out_basename}"
 }
 
 echo "▶ Group ledger simulation (#641, blocking)"
 npm test --workspace=@cost-share/mobile -- \
-  --passWithNoTests --ci --testPathPattern=groupLedgerSimulation
+  --passWithNoTests --ci --forceExit --testPathPattern=groupLedgerSimulation
 
 echo "▶ Mobile Jest (blocking, ${#QUARANTINED[@]} quarantined)"
 set +e
