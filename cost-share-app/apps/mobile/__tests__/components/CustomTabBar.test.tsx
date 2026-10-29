@@ -170,13 +170,13 @@ describe('CustomTabBar', () => {
         });
     });
 
-    it('mirrors the row direction in RTL (Hebrew)', () => {
+    it('mirrors the row direction in RTL (Hebrew) without direction:rtl on native flex rows', () => {
         useAppStore.setState({ language: 'he' } as any);
         const { getByTestId } = renderTabBar(makeProps());
         const row = getByTestId('tabbar-row');
         expect(row.props.style).toEqual(
             expect.arrayContaining([
-                expect.objectContaining({ direction: 'rtl' }),
+                expect.objectContaining({ direction: 'ltr', flexDirection: 'row-reverse' }),
             ]),
         );
     });

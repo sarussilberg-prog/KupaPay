@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Platform, type StyleProp, type ViewStyle } from 'react-native';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
 import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { AppPressable } from '../AppPressable';
 
@@ -17,10 +17,11 @@ export function ListRow({ children, onPress, testID, style, className }: Props) 
         alignItems: 'center',
         minWidth: 0,
         flex: 1,
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: 0,
         alignSelf: 'stretch',
-        ...(Platform.OS !== 'web'
-            ? { flexDirection: isRtl ? 'row-reverse' : 'row' }
-            : rtlRowStyle(isRtl)),
+        ...rtlRowStyle(isRtl),
     };
 
     if (onPress) {

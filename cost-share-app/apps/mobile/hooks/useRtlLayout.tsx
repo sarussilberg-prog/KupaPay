@@ -29,10 +29,21 @@ export function useRtlLayout(): boolean {
     return isLanguage(code) ? isRtlLanguage(code) : false;
 }
 
+/**
+ * Horizontal flex row that mirrors for RTL without breaking flex growth on native.
+ * On the New Architecture, `direction: 'rtl'` on a row shrinks flex children to
+ * content width (web does not). Native uses physical row-reverse + direction ltr.
+ */
 export function rtlRowStyle(isRtl: boolean): ViewStyle {
+    if (Platform.OS === 'web') {
+        return {
+            flexDirection: 'row',
+            direction: isRtl ? 'rtl' : 'ltr',
+        };
+    }
     return {
-        flexDirection: 'row',
-        direction: isRtl ? 'rtl' : 'ltr',
+        flexDirection: isRtl ? 'row-reverse' : 'row',
+        direction: 'ltr',
     };
 }
 

@@ -48,6 +48,7 @@ import {
     GROUP_CARD_TEXT_GAP,
     resolveGroupCardUsesStackedBalance,
 } from './groupCardLayout';
+import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -83,6 +84,7 @@ function GroupCardBase({
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const windowWidth = useLayoutWindowWidth();
+    const [fullWidthProbeOk, setFullWidthProbeOk] = useState(false);
     const stackBalanceChip = resolveGroupCardUsesStackedBalance(windowWidth);
     const balanceColumnStyle = groupCardBalanceColumnStyle(windowWidth);
     const memberCount = group.members?.length ?? 0;
@@ -240,10 +242,22 @@ function GroupCardBase({
     return (
         <>
             <View
+                testID={`group-card-shell-${group.id}`}
                 className={cardClass}
+                onLayout={
+                    isE2eLayoutProbeEnabled()
+                        ? (e) => {
+                              setFullWidthProbeOk(
+                                  isWidthAtLeastFullBleed(e.nativeEvent.layout.width, windowWidth),
+                              );
+                          }
+                        : undefined
+                }
                 style={[
                     rtlRowStyle(isRtl),
                     {
+                        width: '100%',
+                        alignSelf: 'stretch',
                         alignItems: 'center',
                         padding: GROUP_CARD_PAD,
                         gap: GROUP_CARD_STACK_GAP,
@@ -251,11 +265,22 @@ function GroupCardBase({
                     cardShadow,
                 ]}
             >
+                {isE2eLayoutProbeEnabled() && fullWidthProbeOk ? (
+                    <View
+                        testID="group-card-full-width-ok"
+                        accessibilityElementsHidden
+                        importantForAccessibility="no-hide-descendants"
+                        style={{ width: 0, height: 0, opacity: 0 }}
+                    />
+                ) : null}
                 <ListRow
                     onPress={() => onPress(group.id)}
                     testID={`group-card-${group.id}`}
                     style={{
                         flex: 1,
+                        flexGrow: 1,
+                        flexShrink: 1,
+                        flexBasis: 0,
                         alignItems: 'center',
                         gap: GROUP_CARD_ROW_GAP,
                         minWidth: 0,

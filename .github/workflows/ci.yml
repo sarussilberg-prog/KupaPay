@@ -7,7 +7,8 @@ on:
     branches: [dev]
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
+  # Bump suffix when a stuck run holds an old group (hung job + failed cancel).
+  group: ci-v2-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -168,6 +169,7 @@ jobs:
       (needs.ci-paths.outputs.full_suite == 'true' ||
         needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: cost-share-app
@@ -199,6 +201,7 @@ jobs:
       (needs.ci-paths.outputs.full_suite == 'true' ||
         needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: cost-share-app

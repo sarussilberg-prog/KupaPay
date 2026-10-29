@@ -12,7 +12,7 @@ import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { colors } from '../../theme';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
 import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
 import { AppIcon } from '../AppIcon';
@@ -88,7 +88,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             testID="tabbar-row"
             style={[
                 styles.row,
-                { direction: isRtl ? 'rtl' : 'ltr', paddingBottom: insets.bottom },
+                rtlRowStyle(isRtl),
+                { paddingBottom: insets.bottom },
             ]}
         >
             <View testID="tabbar-side-leading" style={styles.side}>

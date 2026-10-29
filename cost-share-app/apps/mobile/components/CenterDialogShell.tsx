@@ -31,6 +31,7 @@ interface CenterDialogShellProps {
     saveLabel?: string;
     onSave?: () => void;
     saveDisabled?: boolean;
+    saveTestID?: string;
     children: React.ReactNode;
 }
 
@@ -47,6 +48,7 @@ export function CenterDialogShell({
     saveLabel,
     onSave,
     saveDisabled = false,
+    saveTestID = 'center-dialog-save',
     children,
 }: CenterDialogShellProps) {
     const { t } = useTranslation();
@@ -116,6 +118,7 @@ export function CenterDialogShell({
                             >
                                 {onSave ? (
                                     <AppPressable
+                                        testID={saveTestID}
                                         onPress={() => { if (!saveDisabled) onSave(); }}
                                         hitSlop={8}
                                         disabled={saveDisabled}

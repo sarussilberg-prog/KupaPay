@@ -1,0 +1,28 @@
+appId: com.kupapay.mobile
+---
+- tapOn:
+    id: tab-Profile
+- extendedWaitUntil:
+    visible:
+      id: profile-settings-button
+    timeout: 60000
+- tapOn:
+    id: profile-settings-button
+- extendedWaitUntil:
+    visible:
+      id: settings-language-row
+    timeout: 30000
+- tapOn:
+    id: settings-language-row
+- extendedWaitUntil:
+    visible:
+      id: language-option-${APP_LANG}
+    timeout: 15000
+- tapOn:
+    id: language-option-${APP_LANG}
+- tapOn:
+    id: tab-Groups
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 60000

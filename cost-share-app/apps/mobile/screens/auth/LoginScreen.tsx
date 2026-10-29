@@ -36,8 +36,9 @@ import {
 } from '../../lib/deactivationNoticeStorage';
 import { getSupportEmail, openSupportContact } from '../../lib/openMailto';
 import { APP_VERSION } from '@cost-share/shared';
-import { EMAIL_AUTH_ENABLED } from '../../lib/featureFlags';
+import { EMAIL_AUTH_ENABLED, E2E_MAESTRO_AUTH_ENABLED } from '../../lib/featureFlags';
 import { LoginEmailOtpAuth } from '../../components/auth/LoginEmailOtpAuth';
+import { LoginE2EPasswordAuth } from '../../components/auth/LoginE2EPasswordAuth';
 import type { AuthError } from '../../services/auth.service';
 
 export function LoginScreen() {
@@ -301,6 +302,7 @@ export function LoginScreen() {
                             onAuthResult={handleEmailAuthResult}
                         />
                     ) : null}
+                    {E2E_MAESTRO_AUTH_ENABLED ? <LoginE2EPasswordAuth /> : null}
                     <Text className="text-[11px] text-gray-300 text-center mt-4">
                         v{APP_VERSION}
                     </Text>

@@ -104,12 +104,18 @@ export function FriendCrossGroupSettleSheet({
     useEffect(() => {
         if (visible && !wasVisible.current) {
             setTargetCurrency(defaultCurrency);
-            setStep(quickSettle ? 'confirm' : 'pick-currency');
+            const singleCurrency = previewCurrencies.length === 1;
+            setStep(
+                quickSettle || singleCurrency ? 'confirm' : 'pick-currency',
+            );
+            if (singleCurrency && previewCurrencies[0]) {
+                setTargetCurrency(previewCurrencies[0]);
+            }
             setCurrencyPickerOpen(false);
             setSubmitting(false);
         }
         wasVisible.current = visible;
-    }, [visible, defaultCurrency, quickSettle]);
+    }, [visible, defaultCurrency, quickSettle, previewCurrencies]);
 
     const friendName = friend ? getDisplayNameForFriend(friend, t) : '';
 
@@ -179,6 +185,7 @@ export function FriendCrossGroupSettleSheet({
             onLeftPress={leftAction?.onPress}
             saveLabel={step === 'confirm' ? t('dashboard.friendCrossSettleConfirmButton') : undefined}
             onSave={step === 'confirm' ? handleConfirm : undefined}
+            saveTestID="friend-cross-settle-confirm"
             saveDisabled={
                 step === 'confirm'
                     ? submitting ||
