@@ -24,16 +24,26 @@ for id in "${KUPAPAY_DEV_VERCEL_PROJECT_IDS[@]}"; do
 done
 if [[ "$IS_DEV_VERCEL_PROJECT" == true ]]; then
   DEFAULTS_FILE="$WEB_DIR/supabase-public.development.defaults"
+  APP_PROXY_DEFAULTS_FILE="$WEB_DIR/app-proxy.development.defaults"
 elif [[ "${VERCEL_ENV:-}" == "production" ]]; then
   DEFAULTS_FILE="$WEB_DIR/supabase-public.production.defaults"
+  APP_PROXY_DEFAULTS_FILE="$WEB_DIR/app-proxy.production.defaults"
 else
   DEFAULTS_FILE="$WEB_DIR/supabase-public.development.defaults"
+  APP_PROXY_DEFAULTS_FILE="$WEB_DIR/app-proxy.development.defaults"
 fi
 
 if [[ -f "$DEFAULTS_FILE" ]]; then
   set -a
   # shellcheck disable=SC1090
   source "$DEFAULTS_FILE"
+  set +a
+fi
+
+if [[ -f "$APP_PROXY_DEFAULTS_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$APP_PROXY_DEFAULTS_FILE"
   set +a
 fi
 
@@ -47,6 +57,11 @@ fi
 
 if [[ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" || -z "${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}" ]]; then
   echo "Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY." >&2
+  exit 1
+fi
+
+if [[ -n "${VERCEL:-}" && -z "${APP_PROXY_ORIGIN:-}" ]]; then
+  echo "Missing APP_PROXY_ORIGIN. Set in Vercel or commit app-proxy.*.defaults." >&2
   exit 1
 fi
 

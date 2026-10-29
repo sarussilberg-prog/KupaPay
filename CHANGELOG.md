@@ -47,3 +47,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(store): ASC screenshot upload fileSize/checksum + replace set (#667)
 ## [2.2.0-dev.21] — 2026-10-29
 - fix(store): reuse editable ASC version for 2.2.0 (#671)
+## [2.2.0-dev.22] — 2026-10-29
+- chore: back-merge main hotfix — marketing login proxy (#675)
