@@ -14,8 +14,8 @@
   "dependencies": {
     "@cost-share/shared": "*",
     "@sentry/nextjs": "^10.76.2",
-    "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.80.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
     "next": "15.5.28",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
