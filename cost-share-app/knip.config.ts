@@ -12,6 +12,8 @@ const config: KnipConfig = {
     'scripts/posthog-mau-tiles-lib.mjs',
     'scripts/posthog-ensure-mau-dashboard-tiles.mjs',
     'scripts/__tests__/posthog-mau-tiles-lib.test.mjs',
+    // CLI used by .github/workflows/app-store-production.yml (merged from main).
+    'apps/mobile/scripts/asc-submit-app-for-review.mjs',
   ],
   project: ['scripts/**/*.ts'],
   ignoreFiles: [
