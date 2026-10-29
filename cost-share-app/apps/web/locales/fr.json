@@ -961,5 +961,67 @@
         ]
       }
     }
+  },
+  "ambassadorProgram": {
+    "seo": {
+      "title": "Programme ambassadeurs KupaPay — créateurs voyage & responsables étudiants",
+      "description": "Candidatez au programme ambassadeurs KupaPay : Pro offert pour les créateurs et responsables de groupes approuvés.",
+      "ogTitle": "Programme ambassadeurs KupaPay",
+      "ogDescription": "Sans commission cash — Pro offert et lien de parrainage pour vos groupes."
+    },
+    "hero": {
+      "headline": "Programme pour créateurs voyage et responsables de groupes étudiants",
+      "subheadline": "Partagez KupaPay avec votre communauté. Les ambassadeurs approuvés reçoivent Pro et un lien de parrainage personnel."
+    },
+    "benefits": {
+      "title": "Ce que reçoivent les ambassadeurs",
+      "items": [
+        {
+          "title": "Pro offert",
+          "body": "Accès Pro pour une durée définie afin d’utiliser les fonctions avancées pour les dépenses de groupe."
+        },
+        {
+          "title": "Votre lien",
+          "body": "Après validation, vous recevez un code unique pour attribuer les nouvelles inscriptions."
+        },
+        {
+          "title": "Examen manuel",
+          "body": "Chaque candidature est revue par l’équipe KupaPay. Pro n’est jamais accordé automatiquement."
+        }
+      ]
+    },
+    "form": {
+      "title": "Candidater",
+      "signInHint": "Connectez-vous au compte KupaPay que vous utiliserez comme ambassadeur avant d’envoyer.",
+      "audienceLabel": "Je candidate en tant que",
+      "audienceTravelCreator": "Créateur·rice voyage / chaîne",
+      "audienceStudentLeader": "Groupe étudiant / organisateur·rice de voyage",
+      "linkLabel": "Lien vers votre chaîne ou groupe",
+      "linkPlaceholder": "https://…",
+      "messageLabel": "Comment présenterez-vous KupaPay ?",
+      "messagePlaceholder": "Décrivez votre audience et comment vous partagerez KupaPay (voyages, assos, résidences…).",
+      "consentLabel": "J’accepte que KupaPay utilise ces informations pour examiner ma candidature, conformément à la Politique de confidentialité.",
+      "privacyLink": "Politique de confidentialité",
+      "submit": "Envoyer la candidature",
+      "submitting": "Envoi…",
+      "signInCta": "Se connecter pour candidater"
+    },
+    "status": {
+      "pendingTitle": "Candidature reçue",
+      "pendingBody": "Merci — votre dossier est en attente. Nous écrirons à l’e-mail du compte KupaPay une fois traité.",
+      "approvedTitle": "Vous êtes ambassadeur·rice",
+      "approvedBody": "Votre code de parrainage :",
+      "rejectedTitle": "Candidature non retenue",
+      "rejectedBody": "Cette candidature n’a pas été approuvée. Contactez le support si besoin.",
+      "alreadyAmbassador": "Votre compte est déjà ambassadeur approuvé."
+    },
+    "errors": {
+      "notAuthenticated": "Connectez-vous pour candidater.",
+      "consentRequired": "Confirmez l’avis de confidentialité.",
+      "applicationPending": "Vous avez déjà une candidature en attente.",
+      "alreadyAmbassador": "Compte déjà ambassadeur.",
+      "generic": "Envoi impossible. Réessayez."
+    },
+    "disclaimer": "Aucune commission en cash. Pro et suivi des parrainages après approbation manuelle uniquement."
   }
 }

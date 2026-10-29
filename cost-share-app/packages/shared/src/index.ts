@@ -20,6 +20,7 @@ export * from './deferredInvite';
 export * from './publicGroupWeb';
 export * from './publicExpenseShare';
 export * from './invites';
+export * from './ambassador/referral';
 export * from './types';
 export * from './schemas';
 export * from './utils';

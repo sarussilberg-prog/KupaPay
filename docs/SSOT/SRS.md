@@ -106,6 +106,7 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 | REQ-GROW-02 | ✅ | Public web group balance page | Opt-in `public_balance_sharing_enabled`; `/b/<public_balance_token>` shows privacy-scoped balances + recent expenses (separate from `/g/<invite_token>` join links); rate-limited `get_public_group_balance_page` RPC; noindex + OG; mobile toggle + rotate revoke (#398) |
 | REQ-GROW-03 | ✅ | Splitwise CSV import | Upload Splitwise group export; preview + map members; import expenses (amount splits, currencies, dates); skipped-row report; iOS/Android/Expo web + landing mention (#396) |
 | REQ-GROW-04 | ✅ | Splitwise alternative SEO pages | Per-locale `/splitwise-alternative` on marketing web: honest feature table (dated), SEO metadata + sitemap, footer link, 7 locales + RTL (#415) |
+| REQ-GROW-05 | ✅ | Ambassador program | Web `/ambassadors` application (7 locales + RTL); manual admin approve → `profiles.pro_until` + unique `AMB-*` code; `?ref=` attribution on web/mobile (#420) |
 | REQ-NFR-03 | ✅ | Consistent domain types | `@cost-share/shared` types and mappers |
 | REQ-NFR-04 | ✅ | Row Level Security (Supabase) | RLS enabled; mobile uses anon key + user JWT |
 | REQ-NFR-05 | ⬜ | Offline support | Local queue + sync without screen refactor |
@@ -160,6 +161,7 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 
 | Date | Change |
 |------|--------|
+| 2026-10-29 | REQ-GROW-05 — Ambassador program (#420): `/ambassadors`, admin approve RPCs, referral attribution |
 | 2026-10-29 | REQ-GROW-04 — Splitwise alternative comparison pages (#415): `/splitwise-alternative`, 7 locales, sitemap + footer |
 | 2026-10-29 | REQ-GROW-03 — Splitwise CSV import (#396): shared parser, mobile import flow, 7 locales + RTL, landing feature |
 | 2026-10-16 | REQ-GROW-02 — public web group balance page (#398): `/b/<public_balance_token>`, SECURITY DEFINER RPC, 7 locales + RTL |

@@ -9,3 +9,10 @@ paths = [
   '''cost-share-app/apps/web/supabase-public\.development\.defaults''',
   '''cost-share-app/apps/web/supabase-public\.production\.defaults''',
 ]
+
+[[allowlists]]
+description = "AsyncStorage local persistence keys (not secrets)"
+paths = [
+  '''cost-share-app/apps/mobile/lib/pendingInviteStorageCore\.ts''',
+  '''cost-share-app/apps/mobile/lib/pendingAmbassadorRefStorageCore\.ts''',
+]

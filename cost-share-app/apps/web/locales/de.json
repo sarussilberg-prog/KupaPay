@@ -961,5 +961,67 @@
         ]
       }
     }
+  },
+  "ambassadorProgram": {
+    "seo": {
+      "title": "KupaPay-Botschafterprogramm — Reise-Creator & Studiengruppen-Leiter",
+      "description": "Bewirb dich für das KupaPay-Botschafterprogramm: Gratis-Pro für genehmigte Creator und Gruppenleiter.",
+      "ogTitle": "KupaPay-Botschafterprogramm",
+      "ogDescription": "Ohne Bargeld-Provision — Gratis-Pro und Empfehlungslink für deine Gruppen."
+    },
+    "hero": {
+      "headline": "Programm für Reise-Creator und Studiengruppen-Leiter",
+      "subheadline": "Teile KupaPay mit deiner Community. Genehmigte Botschafter erhalten Pro und einen persönlichen Empfehlungslink."
+    },
+    "benefits": {
+      "title": "Was Botschafter erhalten",
+      "items": [
+        {
+          "title": "Gratis-Pro",
+          "body": "Pro für einen festgelegten Zeitraum — für erweiterte Funktionen bei Gruppenausgaben."
+        },
+        {
+          "title": "Dein Link",
+          "body": "Nach Freigabe erhältst du einen eindeutigen Code zur Zuordnung neuer Nutzer."
+        },
+        {
+          "title": "Manuelle Prüfung",
+          "body": "Jede Bewerbung prüft das KupaPay-Team. Pro wird nie automatisch vergeben."
+        }
+      ]
+    },
+    "form": {
+      "title": "Bewerben",
+      "signInHint": "Melde dich mit dem KupaPay-Konto an, das du als Botschafter nutzen willst.",
+      "audienceLabel": "Ich bewerbe mich als",
+      "audienceTravelCreator": "Reise-Creator / Kanal",
+      "audienceStudentLeader": "Studiengruppe / Reiseorganisator",
+      "linkLabel": "Link zu Kanal oder Gruppe",
+      "linkPlaceholder": "https://…",
+      "messageLabel": "Wie stellst du KupaPay vor?",
+      "messagePlaceholder": "Beschreibe deine Audience und wie du KupaPay teilst (Reisen, Vereine, Wohnheime…).",
+      "consentLabel": "Ich willige ein, dass KupaPay diese Angaben zur Prüfung gemäß Datenschutzerklärung nutzt.",
+      "privacyLink": "Datenschutzerklärung",
+      "submit": "Bewerbung senden",
+      "submitting": "Wird gesendet…",
+      "signInCta": "Anmelden zum Bewerben"
+    },
+    "status": {
+      "pendingTitle": "Bewerbung eingegangen",
+      "pendingBody": "Danke — deine Bewerbung wartet auf Prüfung. Wir mailen an die KupaPay-Konto-Adresse nach der Entscheidung.",
+      "approvedTitle": "Du bist Botschafter",
+      "approvedBody": "Dein Empfehlungscode:",
+      "rejectedTitle": "Bewerbung abgelehnt",
+      "rejectedBody": "Diese Bewerbung wurde nicht genehmigt. Bei Fragen: Support.",
+      "alreadyAmbassador": "Dein Konto ist bereits genehmigter Botschafter."
+    },
+    "errors": {
+      "notAuthenticated": "Zum Bewerben anmelden.",
+      "consentRequired": "Bitte Datenschutzhinweis bestätigen.",
+      "applicationPending": "Du hast bereits eine offene Bewerbung.",
+      "alreadyAmbassador": "Konto ist bereits Botschafter.",
+      "generic": "Senden fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "disclaimer": "Keine Bargeld-Provisionen. Pro und Tracking nur nach manueller Freigabe."
   }
 }

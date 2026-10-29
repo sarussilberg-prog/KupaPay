@@ -51,6 +51,10 @@ import {
 } from './lib/productAnalytics';
 import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
+import {
+    captureAmbassadorRefFromUrl,
+    claimPendingAmbassadorReferral,
+} from './services/ambassador.service';
 import { consumeSplitCalculatorPostLoginReturn } from './lib/splitCalculatorPostLoginReturn';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
 import { recoverDeferredInviteAttribution } from './lib/recoverDeferredInviteAttribution';
@@ -182,11 +186,19 @@ function App() {
   }, [incomingUrl, session, setPendingInvite]);
 
   useEffect(() => {
+    if (!incomingUrl) return;
+    void captureAmbassadorRefFromUrl(incomingUrl).then((captured) => {
+      if (captured && session) void claimPendingAmbassadorReferral();
+    });
+  }, [incomingUrl, session]);
+
+  useEffect(() => {
     if (session) return;
     let cancelled = false;
     void Linking.getInitialURL().then((url) => {
       if (cancelled || !url) return;
       void capturePreAuthInvite(url, setPendingInvite);
+      void captureAmbassadorRefFromUrl(url);
     });
     return () => {
       cancelled = true;

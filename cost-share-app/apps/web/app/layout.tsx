@@ -5,6 +5,7 @@ import { isRtlLanguage } from '@cost-share/shared';
 import { getLocale } from '@/lib/locale';
 import { MARKETING_LOCALE_HEADER } from '@/lib/marketingSeo';
 import './globals.css';
+import AmbassadorRefAttribution from './_components/AmbassadorRefAttribution';
 
 export const metadata: Metadata = {
   title: APP_BRAND_TITLE,
@@ -35,7 +36,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={dir}>
-      <body className="antialiased bg-white text-gray-900">{children}</body>
+      <body className="antialiased bg-white text-gray-900">
+        <AmbassadorRefAttribution />
+        {children}
+      </body>
     </html>
   );
 }

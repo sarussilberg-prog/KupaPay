@@ -1625,9 +1625,15 @@
             "body": "Votre essai gratuit KupaPay Pro se termine dans deux jours. Vous ne souhaitez pas continuer ? Annulez dans Réglages."
         },
         "trialLifecycle": {
-            "day1": { "title": "Bienvenue sur Pro" },
-            "day10": { "title": "Plus que 4 jours d’essai" },
-            "day13": { "title": "Pro se renouvelle demain" },
+            "day1": {
+                "title": "Bienvenue sur Pro"
+            },
+            "day10": {
+                "title": "Plus que 4 jours d’essai"
+            },
+            "day13": {
+                "title": "Pro se renouvelle demain"
+            },
             "disclosure": "Le paiement commence après l’essai sauf annulation dans Réglages → Gérer l’abonnement (App Store / Google Play).",
             "manage": "Gérer l’abonnement"
         },
@@ -1723,6 +1729,12 @@
             "qualified": "Éligible — récompense en cours",
             "rewarded": "Mois Pro accordé",
             "rejected": "Récompense impossible"
+        },
+        "ambassador": {
+            "title": "Lien ambassadeur",
+            "body": "Partagez ce lien pour attribuer les nouveaux membres à votre compte ambassadeur.",
+            "codeLabel": "Votre code",
+            "referralCount": "{{count}} inscriptions attribuées"
         }
     }
 }

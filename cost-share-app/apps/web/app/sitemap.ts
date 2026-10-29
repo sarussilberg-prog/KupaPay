@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { APP_WEB_ORIGIN, SUPPORTED_LANGUAGES } from '@cost-share/shared';
 import {
+    ambassadorProgramPath,
     marketingLandingPath,
     splitCalculatorPath,
     splitwiseComparisonPath,
@@ -36,6 +37,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
         })),
     );
 
+    const ambassadorPages = SUPPORTED_LANGUAGES.map((locale) => ({
+        url: `${APP_WEB_ORIGIN}${ambassadorProgramPath(locale)}`,
+        lastModified,
+        changeFrequency: 'monthly' as const,
+        priority: locale === 'en' ? 0.7 : 0.65,
+    }));
+
     const comparisonPages = SUPPORTED_LANGUAGES.map((locale) => ({
         url: `${APP_WEB_ORIGIN}${splitwiseComparisonPath(locale)}`,
         lastModified,
@@ -62,6 +70,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return [
         ...locales,
         ...calculators,
+        ...ambassadorPages,
         ...comparisonPages,
         ...travelGuidesIndexPages,
         ...travelGuideArticlePages,
