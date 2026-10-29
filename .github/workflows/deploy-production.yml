@@ -41,7 +41,7 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # need full history to diff against github.event.before
 
@@ -59,8 +59,8 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
       - name: Run Step 1 probes (docs/PROD_MIGRATION_REPAIR.md), read-only
@@ -97,9 +97,9 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 
