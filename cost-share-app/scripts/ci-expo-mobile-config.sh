@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT/apps/mobile"
 
-export EXPO_PUBLIC_KUPAPAY_PRO_ENABLED="${EXPO_PUBLIC_KUPAPAY_PRO_ENABLED:-true}"
+export EXPO_PUBLIC_KUPAPAY_PRO_ENABLED="${EXPO_PUBLIC_KUPAPAY_PRO_ENABLED:-false}"
 export CI=1
 
 EXPO_BIN="$ROOT/node_modules/.bin/expo"

@@ -20,6 +20,7 @@ export * from './deferredInvite';
 export * from './publicGroupWeb';
 export * from './publicExpenseShare';
 export * from './invites';
+export * from './ambassador/referral';
 export * from './types';
 export * from './schemas';
 export * from './utils';
@@ -35,6 +36,7 @@ export * from './pro/hasPro';
 export * from './pro/proMembership';
 export * from './pro/subscriptionSnapshot';
 export * from './pro/proTrialLifecycle';
+export * from './pro/proTrialLifecycleMessages';
 export * from './groups/monthlyBillsCycle';
 export * from './recurring/recurringDates';
 export * from './appReview';
@@ -46,9 +48,19 @@ export * from './legal/staticLegalDocument';
 export * from './legal/legalParity';
 export { LEGAL_ENGLISH_PREVAILS_NOTE } from './legal/legalEnglishPrevailsNote';
 export * from './analytics/productAnalyticsEvents';
+export * from './analytics/growthMetrics';
 export * from './analytics/growthExperiments';
 export * from './analytics/marketingAttribution';
 export * from './activation';
+export { parseSplitwiseCsvExport } from './import/splitwiseCsvParse';
+export { buildSplitwiseImportPlan, defaultGuestDisplayNames } from './import/splitwiseImportPlan';
+export type {
+    SplitwiseParseResult,
+    SplitwiseParseSuccess,
+    SplitwiseSkipReason,
+    SplitwiseMemberMapping,
+    SplitwiseParsedExpense,
+} from './import/splitwiseCsvTypes';
 export * from './email/lifecycleTemplates';
 export * from './email/lifecycleEmailCopy';
 export * from './email/renderTransactionalEmail';

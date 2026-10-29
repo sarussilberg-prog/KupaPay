@@ -34,7 +34,4 @@ export function shouldOfferAppReview(
     return false;
 }
 
-/** @deprecated Use {@link shouldOfferAppReview} — kept for mobile import stability. */
-export const shouldOfferStoreReview = shouldOfferAppReview;
-
 export { APP_REVIEW_THROTTLE_MS };

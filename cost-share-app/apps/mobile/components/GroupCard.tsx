@@ -11,8 +11,8 @@ import {
     Pressable,
     Platform,
     ScrollView,
-    useWindowDimensions,
 } from 'react-native';
+import { useLayoutWindowWidth } from '../hooks/useLayoutWindowWidth';
 import { useNavigation } from '@react-navigation/native';
 import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
@@ -39,14 +39,14 @@ import { confirmSetFavoriteGroup } from '../lib/favoriteGroupMenu';
 import { platformAlert } from '../lib/platformAlert';
 import { showInfoToast, showSuccessMessage } from '../lib/appToast';
 import {
-    GROUP_CARD_CHIP_MAX_WIDTH,
     GROUP_CARD_MENU_HIT,
+    groupCardBalanceColumnStyle,
     GROUP_CARD_MENU_ICON,
     GROUP_CARD_PAD,
     GROUP_CARD_ROW_GAP,
-    GROUP_CARD_STACK_CHIP_MAX_WIDTH,
     GROUP_CARD_STACK_GAP,
     GROUP_CARD_TEXT_GAP,
+    resolveGroupCardUsesStackedBalance,
 } from './groupCardLayout';
 
 interface GroupCardProps {
@@ -82,8 +82,9 @@ function GroupCardBase({
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
-    const { width: windowWidth } = useWindowDimensions();
-    const stackBalanceChip = windowWidth <= GROUP_CARD_STACK_CHIP_MAX_WIDTH;
+    const windowWidth = useLayoutWindowWidth();
+    const stackBalanceChip = resolveGroupCardUsesStackedBalance(windowWidth);
+    const balanceColumnStyle = groupCardBalanceColumnStyle(windowWidth);
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
     const isArchived = group.isArchivedByMe || group.isAutoArchived;
@@ -282,7 +283,8 @@ function GroupCardBase({
                                     className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
                                     query={searchQuery}
-                                    numberOfLines={1}
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
                                 />
                             </View>
                             {!isArchived && (unreadCount ?? 0) > 0 && (
@@ -316,7 +318,9 @@ function GroupCardBase({
                         )}
                         {stackBalanceChip ? (
                             <View
+                                testID="group-card-balance-column"
                                 style={{
+                                    ...balanceColumnStyle,
                                     alignSelf: isRtl ? 'flex-start' : 'flex-end',
                                     marginTop: 2,
                                 }}
@@ -327,7 +331,7 @@ function GroupCardBase({
                     </View>
 
                     {!stackBalanceChip ? (
-                        <View style={{ flexShrink: 0, flexGrow: 0, maxWidth: GROUP_CARD_CHIP_MAX_WIDTH }}>
+                        <View testID="group-card-balance-column" style={balanceColumnStyle}>
                             {balanceChipNode}
                         </View>
                     ) : null}

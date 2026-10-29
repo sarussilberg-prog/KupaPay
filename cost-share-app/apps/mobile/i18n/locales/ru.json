@@ -16,7 +16,11 @@
         "unknown": "Неизвестно",
         "loadError": "Не удалось загрузить данные",
         "networkError": "Ошибка сети. Проверьте подключение к интернету.",
+        "permissionError": "У вас нет прав на это действие. Обновите и попробуйте снова.",
         "offlineTitle": "Нет подключения к сети",
+        "offlineBannerMessage": "Нет подключения к интернету. Сохранённые данные доступны; изменения синхронизируются после восстановления связи.",
+        "screenErrorTitle": "Что-то пошло не так",
+        "screenErrorMessage": "На этом экране произошла непредвиденная ошибка. Повторите попытку или вернитесь назад.",
         "retry": "Повторить",
         "search": "Поиск",
         "submit": "Отправить",
@@ -699,6 +703,10 @@
                 "stopConfirmTitle": "Остановить повторяющиеся расходы?",
                 "stopConfirmBody": "Уже созданные расходы останутся. Новые повторы создаваться не будут.",
                 "stopped": "Серия повторов остановлена",
+                "editScopeTitle": "Обновить повторяющийся расход?",
+                "editScopeBody": "Применить изменения к будущим повторениям или только к этому расходу.",
+                "editScopeSeries": "И будущие повторения",
+                "editScopeOccurrence": "Только этот расход",
                 "frequency": {
                     "weekly": "Еженедельно",
                     "monthly": "Ежемесячно",
@@ -819,6 +827,29 @@
             "resetOnboardingRow": "Сбросить онбординг",
             "previewCreateGroupRow": "Предпросмотр экрана первой группы"
         },
+        "promoCodes": {
+            "title": "Промокоды",
+            "portalRow": "Промокоды",
+            "empty": "Промокодов пока нет.",
+            "createCta": "Создать код",
+            "createTitle": "Новый промокод",
+            "codePlaceholder": "Код (например SUMMER-2026)",
+            "durationPlaceholder": "Срок Pro (дней)",
+            "maxUsesPlaceholder": "Макс. использований (необяз.)",
+            "createConfirm": "Создать",
+            "createSuccess": "Промокод создан",
+            "createError": "Не удалось создать промокод",
+            "statusActive": "Активен",
+            "statusInactive": "Неактивен",
+            "metaLine": "{{days}} дн. · {{uses}} / {{max}} использ.",
+            "unlimited": "Без лимита",
+            "deactivateCta": "Деактивировать",
+            "deactivateTitle": "Деактивировать {{code}}?",
+            "deactivateMessage": "После деактивации код нельзя будет активировать.",
+            "deactivateConfirm": "Деактивировать",
+            "deactivateSuccess": "Код деактивирован",
+            "deactivateError": "Не удалось деактивировать код"
+        },
         "proView": {
             "sectionTitle": "Режим просмотра Pro",
             "description": "Предпросмотр Free или Pro только для вашего аккаунта (24 ч). Не меняет реальную подписку.",
@@ -914,6 +945,26 @@
             "byPlatform": "По платформе",
             "last7Days": "Последние 7 дней",
             "noData": "За этот период событий пока нет"
+        },
+        "growth": {
+            "portalRow": "MAU и north star",
+            "screenTitle": "Метрики роста",
+            "asOf": "Обновлено {{when}} (UTC)",
+            "northStarTitle": "Ключевая метрика",
+            "northStarDefinition": "Группы, где минимум два участника добавили расход в текущем календарном месяце.",
+            "northStarCurrent": "Текущий месяц ({{month}})",
+            "northStarPrevious": "Прошлый месяц ({{month}})",
+            "activeAuthorsTitle": "Активные авторы расходов",
+            "activeAuthorsNote": "Уникальные пользователи, создавшие неудалённый расход в окне. MAU/WAU/DAU по открытиям приложения — в PostHog.",
+            "dau": "Дневная активность",
+            "wau": "Недельная активность",
+            "mau": "Месячная активность (прокси)",
+            "mauEpicProgress": "{{percent}} % к цели {{target}} MAU",
+            "seriesTitle": "North star — последние 12 месяцев",
+            "openPostHogDashboard": "Открыть дашборд MAU в PostHog",
+            "postHogDashboardHint": "Задайте EXPO_PUBLIC_POSTHOG_PROJECT_ID (и опционально id дашборда MAU) для ссылки на PostHog.",
+            "webOnlyNote": "Разбивка по платформе и языку — в связанном дашборде PostHog.",
+            "analyticsUnavailableBody": "Функция метрик роста отсутствует или не выдана в этом проекте Supabase. Примените последние миграции на dev и обновите."
         },
         "supportMessages": {
             "title": "Обращения в поддержку",
@@ -1360,6 +1411,55 @@
         },
         "adUnavailableContinue": "Реклама на этом устройстве недоступна. Можно продолжить без просмотра."
     },
+    "splitwiseImport": {
+        "title": "Импорт из Splitwise",
+        "settingsRow": "Импорт CSV из Splitwise",
+        "hint": "Экспортируйте группу из Splitwise (Настройки → Экспорт в таблицу) и загрузите CSV сюда.",
+        "pickPrompt": "Выберите экспорт группы Splitwise (.csv). Мы покажем предпросмотр перед созданием группы в KupaPay.",
+        "pickFile": "Выбрать CSV-файл",
+        "webNote": "В веб-версии браузер откроет выбор файла.",
+        "groupNameLabel": "Название группы",
+        "selfMemberLabel": "Какой столбец — это вы?",
+        "guestNamesLabel": "Имена гостей для остальных участников",
+        "importCta": "Создать группу и импортировать",
+        "changeFile": "Выбрать другой файл",
+        "success": "Импортировано расходов: {{count}}",
+        "preview": {
+            "summary": "{{expenseCount}} расходов · {{memberCount}} участников · {{skippedCount}} строк пропущено",
+            "more": "+ ещё {{count}} расходов"
+        },
+        "previewExpensesTitle": "Предпросмотр",
+        "skippedTitle": "{{count}} строк не импортировано",
+        "skipped": {
+            "line": "Строка {{line}}: {{reason}}",
+            "more": "+ ещё {{count}} пропущенных строк",
+            "total_balance_row": "Строка итогового баланса",
+            "payment_row": "Строка платежа / расчёта",
+            "zero_cost": "Нулевая сумма",
+            "invalid_cost": "Некорректная сумма",
+            "invalid_currency": "Некорректная валюта",
+            "no_participants": "Нет участников",
+            "missing_payer": "Не удалось определить плательщика",
+            "unbalanced_row": "Доли не сходятся",
+            "column_mismatch": "Неверное число столбцов",
+            "invalid_date": "Некорректная дата"
+        },
+        "errors": {
+            "empty_file": "Файл пуст.",
+            "missing_required_columns": "Похоже, это не экспорт Splitwise (нет Date, Description, Cost или Currency).",
+            "no_member_columns": "Нет столбцов участников — экспортируйте группу, а не пустой лист.",
+            "no_expenses": "Из файла не удалось импортировать расходы.",
+            "read_failed": "Не удалось прочитать файл.",
+            "unsupported": "Неподдерживаемый тип файла.",
+            "cancelled": "Отменено",
+            "not_authenticated": "Войдите, чтобы импортировать.",
+            "missing_self_mapping": "Выберите, какой участник — это вы.",
+            "missing_member_mapping": "Не хватает сопоставления участника.",
+            "invalid_splits": "Не удалось сопоставить некоторые доли.",
+            "empty_group_name": "Введите название группы.",
+            "import_failed": "Импорт не удался. Попробуйте снова или меньший экспорт."
+        }
+    },
     "remind": {
         "sendReminderButton": "Отправить напоминание",
         "sheetTitle": "Отправить напоминание",
@@ -1477,6 +1577,23 @@
             "alreadyProTitle": "У вас Pro",
             "alreadyProBody": "Подписка активна. Управляйте оплатой в App Store или Google Play и пользуйтесь функциями Pro."
         },
+        "promoCode": {
+            "sheetTitle": "Активировать код",
+            "kupapayHint": "Введите промокод KupaPay, чтобы открыть Pro на аккаунте.",
+            "inputPlaceholder": "Код KupaPay",
+            "redeeming": "Активация…",
+            "storeSection": "App Store или Google Play",
+            "playRedeem": "Активировать в Google Play",
+            "success": "Pro активирован по промокоду.",
+            "errorInvalid": "Неверный код.",
+            "errorInactive": "Код неактивен.",
+            "errorExpired": "Срок действия кода истёк.",
+            "errorMaxUses": "Достигнут лимит активаций.",
+            "errorAlreadyRedeemed": "Вы уже использовали этот код.",
+            "errorRateLimit": "Слишком много попыток. Попробуйте позже.",
+            "errorAuth": "Войдите, чтобы активировать код.",
+            "errorGeneric": "Не удалось активировать код. Попробуйте снова."
+        },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Управление подпиской",
@@ -1488,6 +1605,7 @@
             "sectionTitle": "Моя подписка",
             "openDetails": "Детали подписки",
             "screenIntro": "План, продление и оплата управляются в App Store или Google Play. Trip Pass показан по группам ниже.",
+            "purchaseSuccessHint": "Преимущества Pro активны. Управляйте продлением и оплатой ниже.",
             "disabled": "Подписки недоступны в этой сборке.",
             "empty": "На этом аккаунте нет активной подписки.",
             "planUnknown": "KupaPay Pro",
@@ -1525,9 +1643,15 @@
             "body": "Бесплатный период KupaPay Pro заканчивается через два дня. Не хотите продолжать? Отмените в настройках."
         },
         "trialLifecycle": {
-            "day1": { "title": "Добро пожаловать в Pro" },
-            "day10": { "title": "Осталось 4 дня пробного периода" },
-            "day13": { "title": "Pro продлится завтра" },
+            "day1": {
+                "title": "Добро пожаловать в Pro"
+            },
+            "day10": {
+                "title": "Осталось 4 дня пробного периода"
+            },
+            "day13": {
+                "title": "Pro продлится завтра"
+            },
             "disclosure": "Оплата начнётся после пробного периода, если не отмените в Настройки → Управление подпиской (App Store / Google Play).",
             "manage": "Управление подпиской"
         },
@@ -1623,6 +1747,12 @@
             "qualified": "Подтверждено — награда в очереди",
             "rewarded": "Месяц Pro начислен",
             "rejected": "Не удалось начислить"
+        },
+        "ambassador": {
+            "title": "Ссылка амбассadorа",
+            "body": "Делитесь ссылкой, чтобы новые пользователи учитывались за вашим аккаунтом.",
+            "codeLabel": "Ваш код",
+            "referralCount": "{{count}} приписанных регистраций"
         }
     }
 }

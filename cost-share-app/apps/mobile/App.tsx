@@ -3,7 +3,7 @@ import { finishAppBootSpan } from './lib/appBootPerformance';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppState, type AppStateStatus, Appearance, LogBox, View, Platform } from 'react-native';
+import { AppState, type AppStateStatus, LogBox, View, Platform } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import * as SplashScreen from 'expo-splash-screen';
@@ -51,6 +51,11 @@ import {
 } from './lib/productAnalytics';
 import { PostHogAnalyticsProvider } from './components/PostHogAnalyticsProvider';
 import { capturePreAuthInvite } from './lib/capturePreAuthInvite';
+import {
+    captureAmbassadorRefFromUrl,
+    claimPendingAmbassadorReferral,
+} from './services/ambassador.service';
+import { consumeSplitCalculatorPostLoginReturn } from './lib/splitCalculatorPostLoginReturn';
 import { loadPersistedPendingInvite } from './lib/pendingInviteStorage';
 import { recoverDeferredInviteAttribution } from './lib/recoverDeferredInviteAttribution';
 import {
@@ -61,6 +66,7 @@ import { recordAppLaunchForStoreReview } from './lib/storeReviewPrompt';
 import { configureRewardedAdsSdk } from './lib/configureRewardedAdsSdk';
 import { WebAlertHost } from './components/WebAlertHost';
 import { AppExitGuard } from './components/AppExitGuard';
+import { AndroidSystemChrome } from './components/AndroidSystemChrome';
 import { UpdateRequiredScreen } from './screens/UpdateRequiredScreen';
 import {
     evaluateMinimumAppVersion,
@@ -74,6 +80,7 @@ import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewSc
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
 import { SettingsRowLayoutPreviewScreen } from './screens/dev/SettingsRowLayoutPreviewScreen';
 import { readGroupsListPreviewParams } from './dev/groupsListPreviewParams';
+import { ScreenErrorBoundary } from './components/ScreenErrorBoundary';
 
 function isGroupCardPreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
@@ -149,12 +156,8 @@ function App() {
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
     if (isGroupsListB2PreviewMode()) return;
-    const apply = (scheme: 'light' | 'dark' | null | undefined) => {
-      document.documentElement.classList.toggle('dark', scheme === 'dark');
-    };
-    apply(Appearance.getColorScheme());
-    const sub = Appearance.addChangeListener(({ colorScheme }) => apply(colorScheme));
-    return () => sub.remove();
+    // The app is light-only (app.json userInterfaceStyle: "light"); never follow the OS scheme on web.
+    document.documentElement.classList.remove('dark');
   }, []);
 
   useEffect(() => {
@@ -183,11 +186,19 @@ function App() {
   }, [incomingUrl, session, setPendingInvite]);
 
   useEffect(() => {
+    if (!incomingUrl) return;
+    void captureAmbassadorRefFromUrl(incomingUrl).then((captured) => {
+      if (captured && session) void claimPendingAmbassadorReferral();
+    });
+  }, [incomingUrl, session]);
+
+  useEffect(() => {
     if (session) return;
     let cancelled = false;
     void Linking.getInitialURL().then((url) => {
       if (cancelled || !url) return;
       void capturePreAuthInvite(url, setPendingInvite);
+      void captureAmbassadorRefFromUrl(url);
     });
     return () => {
       cancelled = true;
@@ -368,6 +379,13 @@ function App() {
               void captureProductEvent('signup', { provider });
               void trackSignupCompleted({ provider });
             }
+            if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined') {
+              const splitCalcReturn = consumeSplitCalculatorPostLoginReturn();
+              if (splitCalcReturn) {
+                globalThis.location.href = splitCalcReturn;
+                return;
+              }
+            }
             setTimeout(() => {
               void acceptSession(nextSession, 'fresh');
             }, 0);
@@ -444,7 +462,9 @@ function App() {
       <SafeAreaProvider>
         <RtlLayoutProvider>
           <WebFrame>
-            <UpdateRequiredScreen config={forcedUpdateConfig} />
+            <ScreenErrorBoundary screenName="UpdateRequired">
+              <UpdateRequiredScreen config={forcedUpdateConfig} />
+            </ScreenErrorBoundary>
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>
@@ -511,13 +531,19 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             {isPublicSupportPath ? (
-              <PublicSupportScreen />
+              <ScreenErrorBoundary screenName="PublicSupport">
+                <PublicSupportScreen />
+              </ScreenErrorBoundary>
             ) : preOnboardingDone === null ? (
               <AppGateSkeleton />
             ) : showPreOnboarding ? (
-              <OnboardingPreAuthFlow onFinished={() => setPreOnboardingDone(true)} />
+              <ScreenErrorBoundary screenName="OnboardingPreAuth">
+                <OnboardingPreAuthFlow onFinished={() => setPreOnboardingDone(true)} />
+              </ScreenErrorBoundary>
             ) : (
-              <LoginScreen />
+              <ScreenErrorBoundary screenName="Login">
+                <LoginScreen />
+              </ScreenErrorBoundary>
             )}
             <Toast config={toastConfig} topOffset={56} />
           </WebFrame>
@@ -543,6 +569,7 @@ function App() {
 function Root() {
   return (
     <PostHogAnalyticsProvider>
+      <AndroidSystemChrome />
       <AppExitGuard />
       <App />
     </PostHogAnalyticsProvider>

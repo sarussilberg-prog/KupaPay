@@ -16,7 +16,11 @@
         "unknown": "Desconocido",
         "loadError": "No se pudieron cargar los datos",
         "networkError": "Error de red. Comprueba tu conexión.",
+        "permissionError": "No tienes permiso para hacer esto. Actualiza e inténtalo de nuevo.",
         "offlineTitle": "Sin conexión",
+        "offlineBannerMessage": "Sin conexión a Internet. Los datos guardados siguen disponibles; los cambios se sincronizarán cuando vuelvas a estar en línea.",
+        "screenErrorTitle": "Algo salió mal",
+        "screenErrorMessage": "Esta pantalla encontró un error inesperado. Inténtalo de nuevo o vuelve atrás.",
         "retry": "Reintentar",
         "search": "Buscar",
         "submit": "Enviar",
@@ -692,6 +696,10 @@
                 "stopConfirmTitle": "¿Detener gastos recurrentes?",
                 "stopConfirmBody": "Los gastos pasados se mantienen. No se crearán nuevas repeticiones.",
                 "stopped": "Serie recurrente detenida",
+                "editScopeTitle": "¿Actualizar gasto recurrente?",
+                "editScopeBody": "Aplicar cambios a repeticiones futuras o solo a este gasto.",
+                "editScopeSeries": "También repeticiones futuras",
+                "editScopeOccurrence": "Solo este gasto",
                 "frequency": {
                     "weekly": "Semanal",
                     "monthly": "Mensual",
@@ -810,6 +818,29 @@
             "resetOnboardingRow": "Restablecer la introducción",
             "previewCreateGroupRow": "Vista previa de la pantalla del primer grupo"
         },
+        "promoCodes": {
+            "title": "Códigos promocionales",
+            "portalRow": "Códigos promocionales",
+            "empty": "Aún no hay códigos promocionales.",
+            "createCta": "Crear código",
+            "createTitle": "Nuevo código promocional",
+            "codePlaceholder": "Código (p. ej. SUMMER-2026)",
+            "durationPlaceholder": "Duración Pro (días)",
+            "maxUsesPlaceholder": "Usos máximos (opcional)",
+            "createConfirm": "Crear",
+            "createSuccess": "Código creado",
+            "createError": "No se pudo crear el código",
+            "statusActive": "Activo",
+            "statusInactive": "Inactivo",
+            "metaLine": "{{days}} días · {{uses}} / {{max}} usos",
+            "unlimited": "Ilimitado",
+            "deactivateCta": "Desactivar",
+            "deactivateTitle": "¿Desactivar {{code}}?",
+            "deactivateMessage": "Los usuarios no podrán canjear este código después.",
+            "deactivateConfirm": "Desactivar",
+            "deactivateSuccess": "Código desactivado",
+            "deactivateError": "No se pudo desactivar el código"
+        },
         "proView": {
             "sectionTitle": "Modo de vista Pro",
             "description": "Vista previa de Free o Pro solo para tu cuenta (24 h). No cambia la suscripción real.",
@@ -899,6 +930,26 @@
             "byPlatform": "Por plataforma",
             "last7Days": "Últimos 7 días",
             "noData": "Aún no hay eventos en este periodo"
+        },
+        "growth": {
+            "portalRow": "MAU y north star",
+            "screenTitle": "Métricas de crecimiento",
+            "asOf": "Actualizado {{when}} (UTC)",
+            "northStarTitle": "Métrica estrella",
+            "northStarDefinition": "Grupos en los que al menos dos miembros añadieron un gasto en el mes calendario actual.",
+            "northStarCurrent": "Este mes ({{month}})",
+            "northStarPrevious": "Mes anterior ({{month}})",
+            "activeAuthorsTitle": "Autores de gastos activos",
+            "activeAuthorsNote": "Usuarios distintos que crearon un gasto no eliminado en la ventana. Para MAU/WAU/DAU por aperturas de app, usa PostHog.",
+            "dau": "Activos diarios",
+            "wau": "Activos semanales",
+            "mau": "Activos mensuales (proxy)",
+            "mauEpicProgress": "{{percent}} % hacia el objetivo de {{target}} MAU",
+            "seriesTitle": "North star — últimos 12 meses",
+            "openPostHogDashboard": "Abrir panel MAU en PostHog",
+            "postHogDashboardHint": "Configura EXPO_PUBLIC_POSTHOG_PROJECT_ID (y opcionalmente el id del panel MAU) para enlazar PostHog desde aquí.",
+            "webOnlyNote": "Desglose por plataforma e idioma en el panel de PostHog enlazado.",
+            "analyticsUnavailableBody": "Falta la función de métricas de crecimiento o no está concedida en este proyecto Supabase. Aplica las últimas migraciones en dev y actualiza."
         },
         "supportMessages": {
             "title": "Mensajes de ayuda",
@@ -1345,6 +1396,55 @@
         },
         "adUnavailableContinue": "Los anuncios no están disponibles en este dispositivo. Puedes continuar sin verlos."
     },
+    "splitwiseImport": {
+        "title": "Importar desde Splitwise",
+        "settingsRow": "Importar CSV de Splitwise",
+        "hint": "Exporta un grupo de Splitwise (Ajustes → Exportar como hoja) y sube el CSV aquí.",
+        "pickPrompt": "Elige la exportación del grupo Splitwise (.csv). Verás una vista previa antes de crear tu grupo en KupaPay.",
+        "pickFile": "Elegir archivo CSV",
+        "webNote": "En la web, el navegador abrirá un selector de archivos.",
+        "groupNameLabel": "Nombre del grupo",
+        "selfMemberLabel": "¿Qué columna eres tú?",
+        "guestNamesLabel": "Nombres de invitados para otros miembros",
+        "importCta": "Crear grupo e importar",
+        "changeFile": "Elegir otro archivo",
+        "success": "{{count}} gastos importados",
+        "preview": {
+            "summary": "{{expenseCount}} gastos · {{memberCount}} miembros · {{skippedCount}} filas omitidas",
+            "more": "+ {{count}} gastos más"
+        },
+        "previewExpensesTitle": "Vista previa",
+        "skippedTitle": "{{count}} filas no importadas",
+        "skipped": {
+            "line": "Línea {{line}}: {{reason}}",
+            "more": "+ {{count}} filas omitidas más",
+            "total_balance_row": "Fila de saldo total",
+            "payment_row": "Fila de pago / liquidación",
+            "zero_cost": "Importe cero",
+            "invalid_cost": "Importe no válido",
+            "invalid_currency": "Moneda no válida",
+            "no_participants": "Sin participantes",
+            "missing_payer": "No se pudo determinar quién pagó",
+            "unbalanced_row": "Las partes no cuadran",
+            "column_mismatch": "Número incorrecto de columnas",
+            "invalid_date": "Fecha no válida"
+        },
+        "errors": {
+            "empty_file": "El archivo está vacío.",
+            "missing_required_columns": "No parece una exportación de Splitwise (faltan Date, Description, Cost o Currency).",
+            "no_member_columns": "No hay columnas de miembros — exporta un grupo, no una hoja vacía.",
+            "no_expenses": "No se pudieron importar gastos de este archivo.",
+            "read_failed": "No se pudo leer el archivo.",
+            "unsupported": "Tipo de archivo no compatible.",
+            "cancelled": "Cancelado",
+            "not_authenticated": "Inicia sesión para importar.",
+            "missing_self_mapping": "Elige qué miembro eres tú.",
+            "missing_member_mapping": "Falta la asignación de un miembro.",
+            "invalid_splits": "No se pudieron mapear algunas divisiones.",
+            "empty_group_name": "Introduce un nombre de grupo.",
+            "import_failed": "Error al importar. Inténtalo de nuevo o usa una exportación más pequeña."
+        }
+    },
     "remind": {
         "sendReminderButton": "Enviar recordatorio",
         "sheetTitle": "Enviar un recordatorio",
@@ -1461,6 +1561,23 @@
             "alreadyProTitle": "Ya tienes Pro",
             "alreadyProBody": "Tu suscripción está activa. Gestiona la facturación en App Store o Google Play y sigue usando las funciones Pro."
         },
+        "promoCode": {
+            "sheetTitle": "Canjear código",
+            "kupapayHint": "Introduce tu código promocional de KupaPay para desbloquear Pro.",
+            "inputPlaceholder": "Código KupaPay",
+            "redeeming": "Canjeando…",
+            "storeSection": "App Store o Google Play",
+            "playRedeem": "Canjear en Google Play",
+            "success": "Pro desbloqueado con tu código.",
+            "errorInvalid": "Ese código no es válido.",
+            "errorInactive": "Este código ya no está activo.",
+            "errorExpired": "Este código ha caducado.",
+            "errorMaxUses": "Este código alcanzó el límite de canjes.",
+            "errorAlreadyRedeemed": "Ya usaste este código.",
+            "errorRateLimit": "Demasiados intentos. Inténtalo más tarde.",
+            "errorAuth": "Inicia sesión para canjear un código.",
+            "errorGeneric": "No se pudo canjear el código. Inténtalo de nuevo."
+        },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Gestionar suscripción",
@@ -1472,6 +1589,7 @@
             "sectionTitle": "Mi suscripción",
             "openDetails": "Detalles de la suscripción",
             "screenIntro": "El plan, la renovación y la facturación se gestionan en App Store o Google Play. Trip Pass se muestra por grupo abajo.",
+            "purchaseSuccessHint": "Tus ventajas Pro están activas. Gestiona la renovación y la facturación abajo.",
             "disabled": "Las suscripciones no están disponibles en esta versión.",
             "empty": "No hay suscripción activa en esta cuenta.",
             "planUnknown": "KupaPay Pro",
@@ -1509,9 +1627,15 @@
             "body": "Tu prueba gratis de KupaPay Pro termina en dos días. ¿No quieres continuar? Cancela en Ajustes."
         },
         "trialLifecycle": {
-            "day1": { "title": "Bienvenido a Pro" },
-            "day10": { "title": "Quedan 4 días de prueba" },
-            "day13": { "title": "Pro se renueva mañana" },
+            "day1": {
+                "title": "Bienvenido a Pro"
+            },
+            "day10": {
+                "title": "Quedan 4 días de prueba"
+            },
+            "day13": {
+                "title": "Pro se renueva mañana"
+            },
             "disclosure": "El pago comienza después de la prueba salvo que canceles en Ajustes → Gestionar suscripción (App Store / Google Play).",
             "manage": "Gestionar suscripción"
         },
@@ -1607,6 +1731,12 @@
             "qualified": "Calificado — recompensa pendiente",
             "rewarded": "Mes Pro concedido",
             "rejected": "No se pudo conceder"
+        },
+        "ambassador": {
+            "title": "Enlace de embajador",
+            "body": "Comparte este enlace para atribuir nuevos miembros a tu cuenta de embajador.",
+            "codeLabel": "Tu código",
+            "referralCount": "{{count}} registros atribuidos"
         }
     }
 }

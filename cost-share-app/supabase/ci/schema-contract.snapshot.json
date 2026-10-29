@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-27T08:40:00Z",
+  "generated_at": "2026-10-29T07:12:04Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -16,6 +16,18 @@
     },
     {
       "name": "admin_pro_view_overrides",
+      "columns": []
+    },
+    {
+      "name": "ambassador_applications",
+      "columns": []
+    },
+    {
+      "name": "ambassador_referrals",
+      "columns": []
+    },
+    {
+      "name": "ambassadors",
       "columns": []
     },
     {
@@ -47,11 +59,11 @@
       "columns": []
     },
     {
-      "name": "expense_splits",
+      "name": "expenses",
       "columns": []
     },
     {
-      "name": "expenses",
+      "name": "expense_splits",
       "columns": []
     },
     {
@@ -79,15 +91,15 @@
       "columns": []
     },
     {
+      "name": "groups",
+      "columns": []
+    },
+    {
       "name": "group_smart_reminder_recipient_state",
       "columns": []
     },
     {
       "name": "group_user_archive",
-      "columns": []
-    },
-    {
-      "name": "groups",
       "columns": []
     },
     {
@@ -108,6 +120,18 @@
     },
     {
       "name": "profiles",
+      "columns": []
+    },
+    {
+      "name": "promo_codes",
+      "columns": []
+    },
+    {
+      "name": "promo_redeem_rate_limits",
+      "columns": []
+    },
+    {
+      "name": "promo_redemptions",
       "columns": []
     },
     {
@@ -165,42 +189,6 @@
   ],
   "functions": [
     {
-      "name": "_advance_recurring_next_date",
-      "args": ""
-    },
-    {
-      "name": "_attribute_referral",
-      "args": ""
-    },
-    {
-      "name": "_get_group_pairwise_debts_core",
-      "args": ""
-    },
-    {
-      "name": "_insert_expense_from_recurring_series",
-      "args": ""
-    },
-    {
-      "name": "_insert_trip_budget_alert_events",
-      "args": ""
-    },
-    {
-      "name": "_profile_last_active_at",
-      "args": ""
-    },
-    {
-      "name": "_recurring_local_today",
-      "args": ""
-    },
-    {
-      "name": "_recurring_series_has_invalid_members",
-      "args": ""
-    },
-    {
-      "name": "_weekly_digest_stats",
-      "args": ""
-    },
-    {
       "name": "accept_friend_request",
       "args": ""
     },
@@ -217,7 +205,19 @@
       "args": ""
     },
     {
+      "name": "admin_approve_ambassador_application",
+      "args": ""
+    },
+    {
+      "name": "admin_create_promo_code",
+      "args": ""
+    },
+    {
       "name": "admin_get_platform_metrics",
+      "args": ""
+    },
+    {
+      "name": "admin_list_ambassador_applications",
       "args": ""
     },
     {
@@ -225,7 +225,15 @@
       "args": ""
     },
     {
+      "name": "admin_list_promo_codes",
+      "args": ""
+    },
+    {
       "name": "admin_list_support_messages",
+      "args": ""
+    },
+    {
+      "name": "admin_reject_ambassador_application",
       "args": ""
     },
     {
@@ -233,7 +241,15 @@
       "args": ""
     },
     {
+      "name": "admin_set_promo_code_active",
+      "args": ""
+    },
+    {
       "name": "admin_update_support_message_status",
+      "args": ""
+    },
+    {
+      "name": "_advance_recurring_next_date",
       "args": ""
     },
     {
@@ -242,6 +258,14 @@
     },
     {
       "name": "assign_purchased_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "attribute_ambassador_referral",
+      "args": ""
+    },
+    {
+      "name": "_attribute_referral",
       "args": ""
     },
     {
@@ -373,6 +397,10 @@
       "args": ""
     },
     {
+      "name": "enforce_promo_redeem_rate_limit",
+      "args": ""
+    },
+    {
       "name": "enforce_support_message_rate_limit",
       "args": ""
     },
@@ -382,6 +410,10 @@
     },
     {
       "name": "expense_receipt_object_path_for_user",
+      "args": ""
+    },
+    {
+      "name": "_generate_ambassador_referral_code",
       "args": ""
     },
     {
@@ -406,6 +438,10 @@
     },
     {
       "name": "get_group_pairwise_debts",
+      "args": ""
+    },
+    {
+      "name": "_get_group_pairwise_debts_core",
       "args": ""
     },
     {
@@ -441,6 +477,14 @@
       "args": ""
     },
     {
+      "name": "get_my_ambassador_application",
+      "args": ""
+    },
+    {
+      "name": "get_my_ambassador_referral_stats",
+      "args": ""
+    },
+    {
       "name": "get_my_invite_token",
       "args": ""
     },
@@ -454,6 +498,10 @@
     },
     {
       "name": "get_my_referral_status",
+      "args": ""
+    },
+    {
+      "name": "get_promo_redemption_for_rc_sync",
       "args": ""
     },
     {
@@ -529,6 +577,14 @@
       "args": ""
     },
     {
+      "name": "_insert_expense_from_recurring_series",
+      "args": ""
+    },
+    {
+      "name": "_insert_trip_budget_alert_events",
+      "args": ""
+    },
+    {
       "name": "invite_preview_client_key",
       "args": ""
     },
@@ -577,6 +633,10 @@
       "args": ""
     },
     {
+      "name": "mark_promo_redemption_rc_synced",
+      "args": ""
+    },
+    {
       "name": "mark_pro_trial_lifecycle_sent",
       "args": ""
     },
@@ -601,7 +661,19 @@
       "args": ""
     },
     {
+      "name": "_profile_last_active_at",
+      "args": ""
+    },
+    {
       "name": "profile_visible_to_viewer",
+      "args": ""
+    },
+    {
+      "name": "_recurring_local_today",
+      "args": ""
+    },
+    {
+      "name": "_recurring_series_has_invalid_members",
       "args": ""
     },
     {
@@ -614,6 +686,10 @@
     },
     {
       "name": "redeem_included_trip_pass",
+      "args": ""
+    },
+    {
+      "name": "redeem_promo_code",
       "args": ""
     },
     {
@@ -733,11 +809,7 @@
       "args": ""
     },
     {
-      "name": "test_set_authenticated",
-      "args": ""
-    },
-    {
-      "name": "test_set_jwt_sub",
+      "name": "submit_ambassador_application",
       "args": ""
     },
     {
@@ -774,6 +846,10 @@
     },
     {
       "name": "update_updated_at_column",
+      "args": ""
+    },
+    {
+      "name": "_weekly_digest_stats",
       "args": ""
     }
   ]

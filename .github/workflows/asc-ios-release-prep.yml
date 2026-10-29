@@ -55,13 +55,16 @@ jobs:
         run: node scripts/playwright/capture-store-screenshots.mjs
       - name: Assert screenshot artifacts exist
         run: |
+          test -f ../../../store/screenshots/ios/en-US/6.7/groups.png
           test -f ../../../store/screenshots/ios/en-US/6.9/groups.png
+          test -f ../../../store/screenshots/android/en/groups.png
           test -f ../../../store/asc/review-screenshots/paywall-en-US.png
       - uses: actions/upload-artifact@v4
         with:
           name: store-screenshots
           path: |
             store/screenshots/ios/
+            store/screenshots/android/
             store/asc/review-screenshots/
 
   asc_apply:

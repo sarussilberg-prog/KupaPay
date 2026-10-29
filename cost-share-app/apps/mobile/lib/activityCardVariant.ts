@@ -195,6 +195,7 @@ export function getActivityCardVariant(
             return MESSAGE;
         case 'settle_up_reminder':
         case 'unsettled_balance_nudge':
+        case 'pro_trial_lifecycle_nudge':
             return SETTLE_REMINDER;
         case 'trip_budget_alert':
             return TRIP_BUDGET_ALERT;

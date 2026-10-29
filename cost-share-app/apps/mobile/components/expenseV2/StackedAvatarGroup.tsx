@@ -22,7 +22,7 @@ export function StackedAvatarGroup({ members, max = 4, testID = 'stacked-avatar-
                 <View
                     key={m.id}
                     style={{
-                        marginLeft: i === 0 ? -6 : -10,
+                        marginStart: i === 0 ? -6 : -10,
                         borderWidth: 2,
                         borderColor: '#FFFFFF',
                         borderRadius: 13,

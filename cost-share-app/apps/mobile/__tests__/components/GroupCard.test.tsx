@@ -3,6 +3,22 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { GroupCard } from '../../components/GroupCard';
 import type { GroupWithMembers } from '@cost-share/shared';
 import { rollupOf } from '../../testUtils/groupRollup';
+import {
+    GROUP_CARD_CHIP_MAX_WIDTH,
+    groupCardBalanceColumnStyle,
+    resolveGroupCardUsesStackedBalance,
+} from '../../components/groupCardLayout';
+
+const mockUseWindowDimensions = jest.fn(() => ({
+    width: 430,
+    height: 800,
+    scale: 2,
+    fontScale: 1,
+}));
+
+jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
+    default: () => mockUseWindowDimensions(),
+}));
 
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
@@ -57,6 +73,39 @@ describe('GroupCard', () => {
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
         expect(getByText('groups.card.settled')).toBeTruthy();
+    });
+
+    it('uses a width-scaled centered balance column on inline layouts', () => {
+        mockUseWindowDimensions.mockReturnValue({
+            width: 430,
+            height: 800,
+            scale: 2,
+            fontScale: 1,
+        });
+        const { getByTestId } = render(
+            <GroupCard group={baseGroup} onPress={() => {}} />,
+        );
+        expect(resolveGroupCardUsesStackedBalance(430)).toBe(false);
+        const column = getByTestId('group-card-balance-column');
+        const expected = groupCardBalanceColumnStyle(430);
+        expect(column.props.style.width).toBe(expected.width);
+        expect(column.props.style.alignItems).toBe('center');
+        expect(expected.width).toBe(GROUP_CARD_CHIP_MAX_WIDTH);
+    });
+
+    it('stacks the balance chip under the title on narrow widths', () => {
+        mockUseWindowDimensions.mockReturnValue({
+            width: 320,
+            height: 800,
+            scale: 2,
+            fontScale: 1,
+        });
+        const { getByTestId } = render(
+            <GroupCard group={baseGroup} onPress={() => {}} />,
+        );
+        expect(resolveGroupCardUsesStackedBalance(320)).toBe(true);
+        const column = getByTestId('group-card-balance-column');
+        expect(column.props.style.alignSelf).toBe('flex-end');
     });
 
     it('renders localized owed chip when primary.net > 0', () => {

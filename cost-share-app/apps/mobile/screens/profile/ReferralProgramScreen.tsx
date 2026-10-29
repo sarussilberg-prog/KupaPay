@@ -3,17 +3,27 @@ import { ScrollView, View, Text, Pressable, ActivityIndicator } from 'react-nati
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { buildAmbassadorReferralUrl } from '@cost-share/shared';
+import {
+    fetchMyAmbassadorReferralStats,
+} from '../../services/ambassador.service';
 import { fetchMyReferralStatus, referralInviteUrl, shareReferralInvite } from '../../services/referral.service';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import * as Clipboard from 'expo-clipboard';
 import { showSuccessMessage } from '../../lib/appToast';
 
 export function ReferralProgramScreen() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const insets = useSafeAreaInsets();
+    const language = (i18n.language?.split('-')[0] ?? 'en') as 'en' | 'he' | 'ru' | 'ar' | 'fr' | 'es' | 'de';
     const { data, isLoading, refetch } = useQuery({
         queryKey: ['referralStatus'],
         queryFn: fetchMyReferralStatus,
+        enabled: KUPAPAY_PRO_ENABLED,
+    });
+    const { data: ambassadorStats } = useQuery({
+        queryKey: ['ambassadorReferralStats'],
+        queryFn: fetchMyAmbassadorReferralStats,
         enabled: KUPAPAY_PRO_ENABLED,
     });
 
@@ -73,6 +83,23 @@ export function ReferralProgramScreen() {
                     <Text className="text-gray-800 font-semibold">{t('referral.copyLink')}</Text>
                 </Pressable>
             </View>
+
+            {ambassadorStats?.isAmbassador && ambassadorStats.referralCode ? (
+                <View className="px-4 mt-6 bg-white mx-4 rounded-xl border border-slate-200 p-4">
+                    <Text className="text-gray-900 font-semibold">{t('referral.ambassador.title')}</Text>
+                    <Text className="text-gray-600 text-sm mt-1">{t('referral.ambassador.body')}</Text>
+                    <Text className="text-gray-500 text-xs mt-2">{t('referral.ambassador.codeLabel')}</Text>
+                    <Text className="text-gray-900 font-mono mt-1">{ambassadorStats.referralCode}</Text>
+                    <Text className="text-gray-500 text-xs mt-3 break-all">
+                        {buildAmbassadorReferralUrl(ambassadorStats.referralCode, language)}
+                    </Text>
+                    {typeof ambassadorStats.referralCount === 'number' ? (
+                        <Text className="text-gray-600 text-sm mt-3">
+                            {t('referral.ambassador.referralCount', { count: ambassadorStats.referralCount })}
+                        </Text>
+                    ) : null}
+                </View>
+            ) : null}
 
             <View className="px-4 mt-6">
                 <Text className="text-gray-800 font-medium mb-2">{t('referral.statusTitle')}</Text>

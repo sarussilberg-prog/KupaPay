@@ -67,6 +67,10 @@ jobs:
           set -euo pipefail
           out="$(bash cost-share-app/scripts/gh-pr-sync-with-dev.sh "$PR_NUMBER" "$REPO" "$PR_HEAD_SHA")"
           echo "$out"
+          if grep -q '^already_merged=true$' <<<"$out"; then
+            echo "PR already merged — branch sync not needed for this run."
+            exit 0
+          fi
           if grep -q '^defer_merge=true$' <<<"$out"; then
             echo "::error::Branch sync queued — this run is stale; required checks will re-run on the updated merge commit."
             exit 1
@@ -97,10 +101,12 @@ jobs:
             turbo-${{ runner.os }}-
       - run: npm ci
       - run: npm run audit:ci
+      - name: Pack node_modules (preserve .bin symlinks for downstream jobs)
+        run: bash scripts/ci-pack-node-modules-artifact.sh
       - uses: actions/upload-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
+          path: cost-share-app/node_modules.tar.zst
           if-no-files-found: error
           retention-days: 1
 
@@ -124,8 +130,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/turbo || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh turbo
       - run: npm run lint
 
   typecheck:
@@ -148,8 +155,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/tsc || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh tsc
       - run: npm run typecheck
 
   test:
@@ -171,8 +179,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-jest-run-tests.sh
       - name: Upload Jest flake report
         if: always()
@@ -201,8 +210,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-coverage-check.sh
 
   legal-locale-parity:
@@ -224,8 +234,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/jest || npm ci --ignore-scripts
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-legal-locale-parity.sh
 
   deno-edge-plan:
@@ -378,8 +389,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - run: test -x node_modules/.bin/expo || npm ci --ignore-scripts
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh expo
       - run: bash scripts/ci-expo-mobile-config.sh
 
   migration-versions:
@@ -485,7 +497,7 @@ jobs:
       - run: echo "Docs-only change — application CI jobs skipped by path filter."
 
   knip-report:
-    name: Knip (dead code report)
+    name: Knip (dead code ratchet)
     needs: [ci-paths, setup]
     if: >-
       always() && needs.setup.result == 'success' &&
@@ -493,7 +505,6 @@ jobs:
         needs.ci-paths.outputs.mobile == 'true' ||
         needs.ci-paths.outputs.web == 'true')
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: cost-share-app
@@ -507,8 +518,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-node-modules
-          path: cost-share-app/node_modules
-      - name: Report unused exports, files, and dependencies
+          path: cost-share-app
+      - run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - run: bash scripts/ci-assert-install-artifact.sh knip
+      - name: Enforce dead-code ratchet
         run: npm run knip:ci
 
   ci-gate:
@@ -521,6 +534,7 @@ jobs:
         lint,
         typecheck,
         test,
+        coverage-ratchet,
         legal-locale-parity,
         deno-edge-gate,
         no-merge-conflicts,
@@ -534,6 +548,7 @@ jobs:
         deno-edge-bundle-check,
         deno-edge-bundle-skipped,
         docs-only-gate,
+        knip-report,
       ]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
@@ -573,9 +588,11 @@ jobs:
           if [[ "$FULL" == "true" || "$MOBILE" == "true" || "$WEB" == "true" ]]; then
             check lint "${{ needs.lint.result }}"
             check typecheck "${{ needs.typecheck.result }}"
+            check knip-report "${{ needs.knip-report.result }}"
           fi
           if [[ "$FULL" == "true" || "$MOBILE" == "true" ]]; then
             check test "${{ needs.test.result }}"
+            check coverage-ratchet "${{ needs.coverage-ratchet.result }}"
             check legal-locale-parity "${{ needs.legal-locale-parity.result }}"
             check expo-mobile-config "${{ needs.expo-mobile-config.result }}"
           fi
@@ -657,6 +674,12 @@ jobs:
           git fetch origin dev main --quiet
           sync_out="$(bash cost-share-app/scripts/gh-pr-sync-with-dev.sh "$PR_NUMBER" "$REPO" "$PR_HEAD_SHA")"
           echo "$sync_out"
+          if grep -q '^already_merged=true$' <<<"$sync_out"; then
+            echo "defer=false" >> "$GITHUB_OUTPUT"
+            echo "already_merged=true" >> "$GITHUB_OUTPUT"
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if grep -q '^defer_merge=true$' <<<"$sync_out"; then
             echo "defer=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -665,15 +688,101 @@ jobs:
           echo "defer=false" >> "$GITHUB_OUTPUT"
 
       - name: Enable GitHub native auto-merge (squash)
-        if: steps.sync_dev.outputs.defer != 'true'
+        if: steps.sync_dev.outputs.defer != 'true' && steps.sync_dev.outputs.already_merged != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO"
-          echo "✅ Auto-merge enabled — GitHub merges when required checks pass on current head"
+          for attempt in 1 2 3; do
+            if err="$(gh pr merge "$PR_NUMBER" --squash --auto --repo "$REPO" 2>&1)"; then
+              echo "✅ Auto-merge enabled — GitHub merges when required checks pass on current head"
+              exit 0
+            fi
+            if [[ "$err" == *"not mergeable"* ]] || [[ "$err" == *"Could not resolve head ref"* ]]; then
+              echo "::warning::Transient merge API flake (attempt ${attempt}/3): $err"
+              sleep $(( attempt * 10 ))
+              continue
+            fi
+            echo "$err" >&2
+            exit 1
+          done
+          echo "::error::gh pr merge --auto failed after retries"
+          exit 1
+
+      - name: Wait for squash merge to land on dev
+        id: wait_merge
+        if: steps.sync_dev.outputs.defer != 'true' && steps.sync_dev.outputs.already_merged != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 180); do
+            state="$(gh pr view "$PR_NUMBER" --repo "$REPO" --json state --jq .state)"
+            if [[ "$state" == "MERGED" ]]; then
+              echo "merged=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::warning::Timed out waiting for auto-merge; run Bump dev prerelease workflow_dispatch to reconcile version.json"
+          echo "merged=false" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
+        with:
+          ref: dev
+          fetch-depth: 0
+          token: ${{ secrets.ADMIN_PAT }}
+
+      - uses: actions/setup-node@v4
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
+        with:
+          node-version: '20'
+
+      - name: Apply dev prerelease bump
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADMIN_PAT}" ]]; then
+            echo "::error::ADMIN_PAT secret is not configured — required to push chore bumps to protected dev (see docs/SSOT/CI_ADMIN_PAT.md)"
+            exit 1
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch origin dev
+            git reset --hard origin/dev
+
+            node cost-share-app/scripts/bump-dev-prerelease.mjs
+            git add cost-share-app/packages/shared/version.json CHANGELOG.md
+            if git diff --staged --quiet; then
+              echo "No version bump needed"
+              exit 0
+            fi
+            git commit -m "chore: bump dev prerelease [skip ci]"
+            if git push origin HEAD:dev; then
+              echo "✅ Dev prerelease bumped"
+              exit 0
+            fi
+            echo "dev moved during bump; retrying (${attempt}/3)"
+          done
+          echo "::error::failed to push dev prerelease bump after 3 attempts"
+          exit 1
 
       - name: Wait for deferred branch sync
         if: steps.sync_dev.outputs.defer == 'true'

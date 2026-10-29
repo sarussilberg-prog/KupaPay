@@ -41,6 +41,7 @@ export const PRODUCT_ANALYTICS_EXTENDED_EVENTS = [
     'review_web_feedback_cta',
     'recurring_series_created',
     'recurring_series_stopped',
+    'recurring_series_updated',
     'trip_currency_viewed',
     'smart_reminder_configured',
     'spending_insights_viewed',

@@ -2,46 +2,50 @@
 
 Uses [k6](https://k6.io/) (open source, free). Targets **development** only (`drxfbicunusmipdgbgdk`).
 
+Hot path RPCs are defined in [`load-test-manifest.json`](./load-test-manifest.json) (groups list: simplified debts, archive state, activity unread). Legacy `get_user_dashboard` was removed in migration `20261016161100` — do not load-test it.
+
 ## Prerequisites
 
 ```bash
-# macOS / Linux
-brew install k6
+brew install k6   # macOS / Linux
 ```
 
-## Run
+## Run (password auth helper)
 
 ```bash
 cd cost-share-app/scripts/load-test
 export SUPABASE_URL="https://drxfbicunusmipdgbgdk.supabase.co"
 export SUPABASE_ANON_KEY="<dev anon key>"
-export K6_USER_JWT="<authenticated user JWT for a test account>"
-export K6_USER_ID="<same user's UUID>"
+export LOAD_TEST_PASSWORD="<dev test user password>"
+# optional: LOAD_TEST_EMAIL (default e2e-playwright@kupay-dev.test)
+eval "$(node prepare-k6-env.mjs)"
 k6 run k6-dev-rpcs.js
 ```
+
+Or export `K6_USER_JWT` / `K6_USER_ID` manually after sign-in.
 
 Optional tuning:
 
 | Env | Default | Purpose |
 |-----|---------|---------|
-| `K6_VUS` | `15` | Virtual users |
+| `K6_VUS` | `15` | Virtual users (~10× naive concurrent peak @ 1000 MAU) |
 | `K6_DURATION` | `1m` | Steady load duration |
 
 ## Pass criteria (issue #425)
 
-- p95 RPC latency **< 300 ms** on dev
+- p95 RPC latency **< 300 ms** on dev (k6 thresholds)
 - HTTP error rate **< 0.5%**
-- Document headroom vs [FREE_TIER_LIMITS.md](../../../docs/SSOT/FREE_TIER_LIMITS.md)
+- Index review: [INDEX_REVIEW.md](./INDEX_REVIEW.md)
+- Free-tier headroom: [HEADROOM.md](./HEADROOM.md) + [FREE_TIER_LIMITS.md](../../../docs/SSOT/FREE_TIER_LIMITS.md)
 
-Fill `REPORT.md` after each run (copy from `REPORT.template.md`).
+Update [REPORT.md](./REPORT.md) after each authenticated k6 run. CI validates the manifest via `npm run test:load-test`.
 
-## Index review
+## GitHub Actions
 
-Before blaming app code, confirm hot paths:
+Workflow [`.github/workflows/load-test-dev-manual.yml`](../../../.github/workflows/load-test-dev-manual.yml) accepts `LOAD_TEST_*` secrets or falls back to `E2E_*` credentials.
 
-```sql
--- expenses by group + created_at (dashboard / activity)
-SELECT indexname FROM pg_indexes WHERE tablename = 'expenses';
+## Local unit tests (no k6 / no network)
+
+```bash
+cd cost-share-app && npm run test:load-test
 ```
-
-Existing migration `202382` added performance indexes on dev; re-run `EXPLAIN (ANALYZE, BUFFERS)` in Supabase SQL editor if p95 fails.

@@ -14,6 +14,7 @@ import {
     type WeekSpendRow,
 } from '../../services/spendingInsights.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 
 type Tab = 'category' | 'member' | 'week';
 
@@ -88,6 +89,7 @@ export function SpendingInsightsSheet({
                 currency,
                 category_rows: c.length,
             });
+            touchProTrialFeature({ spendingInsights: true });
         });
     }, [visible, unlocked, groupId, currency]);
 
@@ -102,6 +104,7 @@ export function SpendingInsightsSheet({
                 onClose={onClose}
                 label={t('pro.spendingInsights.sheetTitle')}
             >
+                <View className="px-4 pb-6" testID="bottom-sheet-body">
                 {!unlocked ? (
                     <>
                         <Text className="text-gray-600 text-sm mb-4">{t('pro.spendingInsights.lockedBody')}</Text>
@@ -182,6 +185,7 @@ export function SpendingInsightsSheet({
                         )}
                     </>
                 )}
+                </View>
             </BottomSheetShell>
             <CurrencyPicker
                 visible={pickerOpen}

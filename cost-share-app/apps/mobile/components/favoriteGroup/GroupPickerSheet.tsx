@@ -7,6 +7,7 @@
 import React from 'react';
 import { Modal, Pressable, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import { GroupWithMembers } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { GroupAvatar } from '../GroupAvatar';
@@ -26,6 +27,8 @@ interface Props {
      * (e.g. the Add Expense group pill) can pass a context-appropriate title.
      */
     title?: string;
+    /** Override for the trailing "Create group" row. Defaults to closing and opening CreateGroup. */
+    onCreateGroup?: () => void;
 }
 
 export function GroupPickerSheet({
@@ -35,9 +38,19 @@ export function GroupPickerSheet({
     onSelectGroup,
     onClose,
     title,
+    onCreateGroup,
 }: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
+    const navigation = useNavigation<any>();
+    const handleCreateGroup = () => {
+        onClose();
+        if (onCreateGroup) {
+            onCreateGroup();
+            return;
+        }
+        navigation.navigate('Groups', { screen: 'CreateGroup' });
+    };
     const headerTitle = title ?? t('favoriteGroup.pickerTitle');
 
     return (
@@ -99,6 +112,19 @@ export function GroupPickerSheet({
                                 </TouchableOpacity>
                             );
                         })}
+                        <TouchableOpacity
+                            onPress={handleCreateGroup}
+                            style={[rtlRowStyle(isRtl), { alignSelf: 'center' }]}
+                            className="items-center gap-1 mt-1 mb-2 px-3 py-1.5 rounded-full bg-primary/10"
+                            accessibilityRole="button"
+                            accessibilityLabel={t('groups.createGroup')}
+                            testID="group-picker-create-group"
+                        >
+                            <AppIcon name="add" size={14} color={colors.primary} />
+                            <Text className="text-xs font-semibold text-primary" numberOfLines={1}>
+                                {t('groups.createGroup')}
+                            </Text>
+                        </TouchableOpacity>
                     </ScrollView>
                 </Pressable>
             </Pressable>

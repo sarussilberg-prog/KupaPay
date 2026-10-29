@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ScrollView, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { nativeKeyboardAvoidingBehavior } from '../../lib/platformKeyboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../AppText';
 import { colors } from '../../theme';
@@ -39,7 +40,7 @@ export function CreateGroupFormShell({
         <SafeAreaView edges={['top']} style={styles.root} testID={testID}>
             <KeyboardAvoidingView
                 style={styles.flex}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior={nativeKeyboardAvoidingBehavior()}
             >
                 <View style={styles.header}>
                     <View style={[styles.headerSide, styles.headerStart]}>

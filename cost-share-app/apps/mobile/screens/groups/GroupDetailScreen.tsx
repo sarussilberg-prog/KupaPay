@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
     View,
     Text,
-    FlatList,
     RefreshControl,
     TouchableOpacity,
     Modal,
@@ -91,6 +90,9 @@ import { GroupMembersSheet } from '../../components/groupDetail/GroupMembersShee
 import { ClaimGuestMembersSheet } from '../../components/guest/ClaimGuestMembersSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedItemRow } from '../../components/FeedItemRow';
+import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
+import { feedItemStableKey } from '../../lib/feedItemStableKey';
+import type { FlashListRef } from '@shopify/flash-list';
 import {
     FAB_BOTTOM_GAP,
     FAB_LIST_GAP,
@@ -144,6 +146,8 @@ export type GroupDetailScreenProps = {
     showBack?: boolean;
     /** When provided (Favorite tab), tapping star+swap in the cover calls this. */
     onSwitcherPress?: () => void;
+    /** Favorite tab passes id explicitly — route params can lag one frame. */
+    groupId?: string;
 };
 
 const CATEGORIES: ExpenseCategory[] = [
@@ -205,7 +209,7 @@ function PendingSyncBadge({
             style={{
                 position: 'absolute',
                 top: 8,
-                right: 8,
+                end: 8,
                 padding: 4,
                 borderRadius: 12,
                 backgroundColor: 'rgba(255,255,255,0.9)',
@@ -220,27 +224,32 @@ function PendingSyncBadge({
     );
 }
 
-export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDetailScreenProps = {}) {
+export function GroupDetailScreen({
+    showBack = true,
+    onSwitcherPress,
+    groupId: groupIdProp,
+}: GroupDetailScreenProps = {}) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const {
-        groupId,
+        groupId: groupIdFromRoute,
         focusFeedItem: focusFeedItemParam,
         editSettlementId: editSettlementIdParam,
         openNote: openNoteParam,
         openSettleUp: openSettleUpParam,
         openGuestClaim: openGuestClaimParam,
-    } = route.params as {
-        groupId: string;
+    } = (route.params ?? {}) as {
+        groupId?: string;
         focusFeedItem?: GroupDetailFocusFeedItem;
         editSettlementId?: string;
         openNote?: boolean;
         openSettleUp?: boolean;
         openGuestClaim?: boolean;
     };
-    const listRef = useRef<FlatList<FeedItem>>(null);
+    const groupId = groupIdProp ?? groupIdFromRoute ?? '';
+    const listRef = useRef<FlashListRef<FeedItem>>(null);
     const focusSessionRef = useRef<FocusSessionState>(IDLE_FOCUS_SESSION);
     const focusScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const focusClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -541,10 +550,16 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         navigation.setParams({ groupId, focusFeedItem: undefined });
 
         focusScrollTimerRef.current = setTimeout(() => {
-            listRef.current?.scrollToIndex({
-                index,
-                animated: true,
-                viewPosition: 0.35,
+            const scrollToFocused = () =>
+                listRef.current?.scrollToIndex({
+                    index,
+                    animated: true,
+                    viewPosition: 0.35,
+                });
+            void scrollToFocused()?.catch(() => {
+                setTimeout(() => {
+                    void scrollToFocused();
+                }, 80);
             });
             setFocusedRowKey(rowKey);
         }, 120);
@@ -887,6 +902,85 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
         [composer, groupId],
     );
 
+    const extractFeedItemKey = useCallback(
+        (item: FeedItem) => feedItemStableKey(item),
+        [],
+    );
+
+    const renderFeedItem = useCallback(
+        ({ item }: { item: FeedItem }) => {
+            const itemKey = feedItemStableKey(item);
+            const isFocused = focusedRowKey === itemKey;
+            return (
+                <View className="px-2" style={{ position: 'relative' }}>
+                    <FeedItemRow
+                        item={item}
+                        currentUserId={currentUserId}
+                        memberMap={memberMap}
+                        onExpensePress={handleExpensePress}
+                        onMessageEdit={handleMessageEdit}
+                        onMessageDelete={handleMessageDelete}
+                        onSettlementPress={handleSettlementPress}
+                        onBatchPress={
+                            item.kind === 'consolidation_batch'
+                                ? () =>
+                                      setBatchDetail({
+                                          batch: item.batch,
+                                          settlements: item.settlements,
+                                      })
+                                : undefined
+                        }
+                        searchQuery={trimmedQuery || undefined}
+                    />
+                    {item.kind === 'expense' && isPendingExpenseId(item.expense.id) && (
+                        <PendingSyncBadge
+                            expenseId={item.expense.id}
+                            pendingFailed={
+                                (item.expense as { pendingFailed?: boolean }).pendingFailed ===
+                                true
+                            }
+                        />
+                    )}
+                    {isFocused && (
+                        <View
+                            pointerEvents="none"
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                start: 8,
+                                end: 8,
+                                bottom: 8,
+                                borderRadius: 16,
+                                backgroundColor: colors.primary,
+                                opacity: 0.18,
+                            }}
+                        />
+                    )}
+                </View>
+            );
+        },
+        [
+            focusedRowKey,
+            currentUserId,
+            memberMap,
+            handleExpensePress,
+            handleMessageEdit,
+            handleMessageDelete,
+            handleSettlementPress,
+            trimmedQuery,
+        ],
+    );
+
+    if (!groupId) {
+        return (
+            <EmptyState
+                iconName="alert-circle-outline"
+                title={t('common.error')}
+                message={t('common.loadError')}
+            />
+        );
+    }
+
     if (isLoading && groupExpenses.length === 0 && !displayGroup) {
         return <GroupDetailSkeleton />;
     }
@@ -903,80 +997,12 @@ export function GroupDetailScreen({ showBack = true, onSwitcherPress }: GroupDet
 
     return (
         <View className="flex-1 bg-slate-50">
-            <FlatList
+            <HotVirtualizedList
+                testID="group-detail-feed-virtualized"
                 ref={listRef}
                 data={filteredFeed}
-                onScrollToIndexFailed={(info) => {
-                    setTimeout(() => {
-                        listRef.current?.scrollToIndex({
-                            index: info.index,
-                            animated: true,
-                            viewPosition: 0.35,
-                        });
-                    }, 80);
-                }}
-                keyExtractor={item =>
-                    item.kind === 'expense'
-                        ? `e:${item.expense.id}`
-                        : item.kind === 'settlement'
-                            ? `s:${item.settlement.id}`
-                            : item.kind === 'consolidation_batch'
-                                ? `b:${item.batch.id}`
-                                : `m:${item.message.id}`
-                }
-                renderItem={({ item }) => {
-                    const itemKey =
-                        item.kind === 'expense'
-                            ? `e:${item.expense.id}`
-                            : item.kind === 'settlement'
-                                ? `s:${item.settlement.id}`
-                                : item.kind === 'consolidation_batch'
-                                    ? `b:${item.batch.id}`
-                                    : `m:${item.message.id}`;
-                    const isFocused = focusedRowKey === itemKey;
-                    return (
-                    <View className="px-2" style={{ position: 'relative' }}>
-                        <FeedItemRow
-                            item={item}
-                            currentUserId={currentUserId}
-                            memberMap={memberMap}
-                            onExpensePress={handleExpensePress}
-                            onMessageEdit={handleMessageEdit}
-                            onMessageDelete={handleMessageDelete}
-                            onSettlementPress={handleSettlementPress}
-                            onBatchPress={item.kind === 'consolidation_batch'
-                                ? () => setBatchDetail({ batch: item.batch, settlements: item.settlements })
-                                : undefined}
-                            searchQuery={trimmedQuery || undefined}
-                        />
-                        {item.kind === 'expense' &&
-                            isPendingExpenseId(item.expense.id) && (
-                                <PendingSyncBadge
-                                    expenseId={item.expense.id}
-                                    pendingFailed={
-                                        (item.expense as { pendingFailed?: boolean })
-                                            .pendingFailed === true
-                                    }
-                                />
-                            )}
-                        {isFocused && (
-                            <View
-                                pointerEvents="none"
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 8,
-                                    right: 8,
-                                    bottom: 8,
-                                    borderRadius: 16,
-                                    backgroundColor: colors.primary,
-                                    opacity: 0.18,
-                                }}
-                            />
-                        )}
-                    </View>
-                    );
-                }}
+                keyExtractor={extractFeedItemKey}
+                renderItem={renderFeedItem}
                 ListHeaderComponent={
                     <>
                         <GroupSummaryCard

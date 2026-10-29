@@ -1,0 +1,40 @@
+{
+  "issue": 425,
+  "supabaseProjectRef": "drxfbicunusmipdgbgdk",
+  "passCriteria": {
+    "p95RpcMs": 300,
+    "maxErrorRate": 0.005
+  },
+  "mauModel": {
+    "targetMau": 1000,
+    "sessionsPerUserPerMonth": 20,
+    "rpcsPerGroupsListOpen": 3
+  },
+  "rpcs": [
+    {
+      "name": "get_user_simplified_inputs",
+      "method": "POST",
+      "body": { "p_user_id": "{{userId}}" },
+      "tags": ["groups-list", "profile"]
+    },
+    {
+      "name": "get_user_groups_archive_state",
+      "method": "POST",
+      "body": {},
+      "tags": ["groups-list"]
+    },
+    {
+      "name": "get_activity_unread_count",
+      "method": "POST",
+      "body": {},
+      "tags": ["groups-list", "activity"]
+    }
+  ],
+  "retiredRpcs": [
+    {
+      "name": "get_user_dashboard",
+      "removedInMigration": "20261016161100_revoke_legacy_balance_rpcs.sql",
+      "replacement": "get_user_simplified_inputs"
+    }
+  ]
+}

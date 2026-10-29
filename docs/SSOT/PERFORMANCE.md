@@ -34,8 +34,13 @@ New violations fail CI (per lint type) when that type is **`enforce: true`** in 
 |------|------------------------|
 | `get_user_simplified_inputs` | ≤ 800 ms |
 | `get_user_groups_archive_state` | ≤ 400 ms |
+| `get_activity_unread_count` | ≤ 200 ms |
 | Groups list join query | ≤ 400 ms |
 | Group expenses list query | ≤ 400 ms, no seq scan on `expenses` at scale |
+
+### MAU load test (#425)
+
+Dev REST load: [`cost-share-app/scripts/load-test/`](../../cost-share-app/scripts/load-test/) (k6 + manifest). Pass: **p95 < 300 ms**, errors **< 0.5%** on dev. Manual workflow: `load-test-dev-manual.yml`. Index review and free-tier headroom: `INDEX_REVIEW.md`, `HEADROOM.md`, `REPORT.md` in that folder.
 
 ### Mobile Supabase request budgets (mocked)
 

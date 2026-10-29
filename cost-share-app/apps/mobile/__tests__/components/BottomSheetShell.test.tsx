@@ -67,4 +67,14 @@ describe('BottomSheetShell', () => {
         fireEvent.press(getByTestId('bottom-sheet-scrim'));
         expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    it('hides Save when onSave is omitted', () => {
+        const { queryByText, getByText } = render(
+            <BottomSheetShell visible label="REPEAT" onClose={jest.fn()}>
+                <Text>body</Text>
+            </BottomSheetShell>
+        );
+        expect(getByText('REPEAT')).toBeTruthy();
+        expect(queryByText('common.save')).toBeNull();
+    });
 });

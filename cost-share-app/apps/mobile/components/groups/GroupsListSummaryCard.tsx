@@ -4,6 +4,7 @@
 
 import React, { useMemo } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import { useLayoutWindowWidth } from '../../hooks/useLayoutWindowWidth';
 import { useTranslation } from 'react-i18next';
 import {
     classifyUserNetBalance,
@@ -15,6 +16,7 @@ import { Text } from '../AppText';
 import { useRtlLayout, rtlTextAlign } from '../../hooks/useRtlLayout';
 import { colors, shadows } from '../../theme';
 import type { ProfileBalanceConversion } from '../../hooks/useProfileBalanceSummary';
+import { GROUPS_LIST_SUMMARY_AMOUNT_MIN_FONT_SCALE } from '../groupsListLayout';
 
 interface GroupsListSummaryCardProps {
     summary: BalanceSummary | undefined;
@@ -37,8 +39,10 @@ export function GroupsListSummaryCard({
 }: GroupsListSummaryCardProps) {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
+    const windowWidth = useLayoutWindowWidth();
     const align = rtlTextAlign(isRtl);
     const direction: 'rtl' | 'ltr' = isRtl ? 'rtl' : 'ltr';
+    const summaryAmountFit = windowWidth < 400;
 
     const parts = useMemo(
         () => deriveGroupsListSummaryParts(summary),
@@ -96,7 +100,12 @@ export function GroupsListSummaryCard({
                 <Text
                     testID="groups-list-summary-amount"
                     className={toneAmountClass[tone] ?? toneAmountClass.unknown}
-                    style={{ textAlign: align, writingDirection: direction }}
+                    style={{ textAlign: align, writingDirection: direction, minWidth: 0 }}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit={summaryAmountFit}
+                    minimumFontScale={
+                        summaryAmountFit ? GROUPS_LIST_SUMMARY_AMOUNT_MIN_FONT_SCALE : undefined
+                    }
                 >
                     {amountText}
                 </Text>
@@ -105,7 +114,8 @@ export function GroupsListSummaryCard({
                 <Text
                     testID="groups-list-summary-foreign-hint"
                     className="text-[11px] text-slate-400 dark:text-slate-500 mt-2"
-                    style={{ textAlign: align, writingDirection: direction }}
+                    style={{ textAlign: align, writingDirection: direction, minWidth: 0 }}
+                    numberOfLines={2}
                 >
                     {foreignHintLine}
                 </Text>

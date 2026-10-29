@@ -417,3 +417,22 @@ export async function presentOfferCodeRedemption(): Promise<void> {
         await Linking.openURL(googlePlayOfferRedeemUrl());
     }
 }
+
+/** RevenueCat subscriber attributes for trial lifecycle nudges (#406). */
+export async function syncProTrialNudgeToRevenueCat(
+    touchDay: number,
+    event: 'shown' | 'dismissed',
+): Promise<void> {
+    if (!KUPAPAY_PRO_ENABLED) return;
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return;
+    try {
+        await Purchases.default.setAttributes({
+            pro_trial_nudge_day: String(touchDay),
+            pro_trial_nudge_event: event,
+            pro_trial_nudge_at: new Date().toISOString(),
+        });
+    } catch {
+        // Analytics must not break flows
+    }
+}

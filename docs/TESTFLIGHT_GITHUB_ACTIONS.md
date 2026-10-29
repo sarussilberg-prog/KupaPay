@@ -30,7 +30,7 @@ Configure under **GitHub → Settings → Secrets and variables → Actions → 
 
 | Input | Default | Effect |
 |-------|---------|--------|
-| `pro_enabled` | `true` | Sets `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED` to `true` or `false` for **this build only** (does not change EAS project env). |
+| `pro_enabled` | `false` | Sets `EXPO_PUBLIC_KUPAPAY_PRO_ENABLED` to `true` or `false` for **this build only** (does not change EAS project env). Opt in explicitly for Pro sandbox builds. |
 
 ## Version / build number
 

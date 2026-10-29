@@ -8,14 +8,24 @@ ASO research, iOS keyword drafts, and rank tracking: [`../aso/README.md`](../aso
 | `<locale>/short_description.txt` | Short description (≤80 chars) |
 | `<locale>/full_description.txt` | Full description |
 | `graphics/feature-graphic-1024x500.png` | Feature graphic |
-| `graphics/phone/*.png` | Phone screenshots (1080×1920); replace with real captures |
+| `../screenshots/android/<locale>/` | Phone screenshots (1080×1920, caption overlays) — see [store/screenshots/README.md](../screenshots/README.md) |
+| `graphics/phone/*.png` | Legacy English placeholders; prefer `../screenshots/android/` |
 | `DATA_SAFETY_ANSWERS.md` | Data safety form draft |
 | `CONTENT_RATING_ANSWERS.md` | IARC questionnaire draft |
 | `SUBSCRIPTION_OFFERS.md` | Play base-plan **14-day** free trial; no Android EU waiver |
 
 Locales: `en`, `he`, `ru`, `ar`, `fr`, `es`, `de`.
 
-## Regenerate marketing frames
+## Regenerate localized phone screenshots (recommended)
+
+```bash
+cd cost-share-app/apps/mobile
+npm run capture:store-screenshots
+```
+
+Outputs: `store/screenshots/android/{en,he,ru,ar,fr,es,de}/*.png`. Full steps: [store/screenshots/README.md](../screenshots/README.md).
+
+## Legacy placeholder frames (English only)
 
 ```bash
 python3 store/play/scripts/generate-play-graphics.py

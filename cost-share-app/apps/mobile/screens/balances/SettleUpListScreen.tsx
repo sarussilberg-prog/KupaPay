@@ -10,7 +10,9 @@ import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { View, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { useRequiredRouteParams } from '../../hooks/useRequiredRouteParams';
+import { RouteParamsFallback } from '../../components/RouteParamsFallback';
 import {
     ConsolidationBatch,
     DisplaySettlement,
@@ -85,9 +87,9 @@ function sortDebts(debts: PairwiseDebt[], currentUserId: string): SortedDebts {
 
 export function SettleUpListScreen() {
     const { t } = useTranslation();
-    const route = useRoute<any>();
     const navigation = useNavigation<any>();
-    const { groupId } = route.params;
+    const { isValid, required } = useRequiredRouteParams(['groupId'] as const);
+    const groupId = required?.groupId ?? '';
     const currentUserId = useAppStore(s => s.currentUser?.id ?? '');
     const groupsQuery = useGroupsQuery();
     const group = groupsQuery.data?.find(g => g.id === groupId);
@@ -532,6 +534,10 @@ export function SettleUpListScreen() {
         },
         [editingSettlement, updateSettlementMutation],
     );
+
+    if (!isValid) {
+        return <RouteParamsFallback />;
+    }
 
     if ((isLoading || isFetching) && debts.length === 0) {
         return <LoadingIndicator />;

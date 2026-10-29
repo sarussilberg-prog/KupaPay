@@ -53,8 +53,8 @@ export function GroupDetailFloatingActions({
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        left: 16,
-        right: 16,
+        start: 16,
+        end: 16,
         flexDirection: 'row',
         // Physical left in both HE and EN (message used to sit opposite the
         // expense FAB on the right).

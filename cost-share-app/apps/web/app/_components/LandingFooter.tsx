@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { APP_VERSION } from '@cost-share/shared';
 import type { Translations, Language } from '@/lib/i18n';
+import { splitwiseComparisonPath, travelGuidesIndexPath } from '@/lib/marketingSeo';
 import LanguagePicker from './LanguagePicker';
 
 interface Props {
@@ -21,6 +22,12 @@ export default function LandingFooter({ t, locale }: Props) {
           </Link>
           <Link href="/support" className="hover:text-gray-800 transition-colors">
             {t.footer.contact}
+          </Link>
+          <Link href={travelGuidesIndexPath(locale)} className="hover:text-gray-800 transition-colors">
+            {t.footer.travelGuides}
+          </Link>
+          <Link href={splitwiseComparisonPath(locale)} className="hover:text-gray-800 transition-colors">
+            {t.footer.splitwiseAlternative}
           </Link>
         </nav>
         <div className="flex items-center gap-5">

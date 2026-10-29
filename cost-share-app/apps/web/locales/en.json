@@ -46,6 +46,11 @@
         "description": "Create groups for trips, rent, dinners — as many as you like"
       },
       {
+        "icon": "import",
+        "title": "Import from Splitwise",
+        "description": "Upload a Splitwise CSV export to recreate your group, members, and expenses in minutes"
+      },
+      {
         "icon": "offline",
         "title": "Works offline",
         "description": "Add and view expenses even without internet — everything syncs automatically when you reconnect"
@@ -103,12 +108,920 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "contact": "Contact",
-    "copyright": "© 2026 KupaPay"
+    "splitwiseAlternative": "Splitwise alternative",
+    "copyright": "© 2026 KupaPay",
+    "travelGuides": "Travel money guides"
   },
   "legal": {
     "notFound": "Document not found.",
     "backHome": "Back to home",
     "effectiveDate": "Effective from ",
     "appVersion": "App version "
+  },
+  "useCaseShared": {
+    "howItWorksTitle": "How it works",
+    "faqTitle": "FAQ",
+    "exploreTitle": "Explore more",
+    "splitCalculatorLink": "Free split calculator",
+    "mainLandingLink": "KupaPay home",
+    "otherUseCasesTitle": "Other ways to split"
+  },
+  "useCases": {
+    "trip": {
+      "navLabel": "Trip expenses",
+      "seo": {
+        "title": "Split trip expenses with friends — free bill splitter | KupaPay",
+        "description": "Track flights, hotels, gas, and meals on a group trip. KupaPay simplifies who owes whom into the fewest transfers — free on iOS, Android, and web.",
+        "ogTitle": "Split trip bills without the spreadsheet",
+        "ogDescription": "One group for your trip, every expense in sync, automatic debt simplification when you settle up."
+      },
+      "hero": {
+        "headline": "Split trip expenses without the spreadsheet",
+        "subheadline": "Flights, hotels, gas, and dinners — one group, clear balances, fewer transfers when you settle up."
+      },
+      "benefits": {
+        "title": "Built for travel groups",
+        "items": [
+          {
+            "title": "One group for the whole trip",
+            "description": "Invite travel mates once and add expenses as you go — everyone sees balances update in real time."
+          },
+          {
+            "title": "Fewer payments at the end",
+            "description": "Debt simplification rolls many small debts into the minimum number of transfers between friends."
+          },
+          {
+            "title": "Works offline on the road",
+            "description": "Log expenses without signal; KupaPay syncs when you are back online."
+          },
+          {
+            "title": "Share settle-up details",
+            "description": "Use settle-up links so everyone knows exactly who to pay and how much."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Create a trip group",
+            "description": "Name your trip and invite friends with a link."
+          },
+          {
+            "title": "Add shared costs",
+            "description": "Record who paid for transport, lodging, food, or activities and who should share each bill."
+          },
+          {
+            "title": "Settle with simplified totals",
+            "description": "KupaPay shows net balances and the smallest set of transfers to close the trip."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Can we use different currencies on one trip?",
+            "answer": "Yes. Add expenses in the currency you paid in; balances stay clear per expense and group settings."
+          },
+          {
+            "question": "Do I need an account to start?",
+            "answer": "Sign in on the web app or download the mobile app to create a group and invite others."
+          },
+          {
+            "question": "How is this different from splitting manually?",
+            "answer": "KupaPay tracks every expense, recalculates balances automatically, and reduces how many bank transfers you need at the end."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Start your trip group",
+        "body": "Download KupaPay or sign in on the web to create a trip group and add your first shared expense."
+      }
+    },
+    "roommates": {
+      "navLabel": "Roommate bills",
+      "seo": {
+        "title": "Split roommate bills & rent — shared expenses app | KupaPay",
+        "description": "Split rent, utilities, groceries, and household costs with roommates. Automatic debt simplification and monthly-friendly tracking — free.",
+        "ogTitle": "Roommate bill splitting made simple",
+        "ogDescription": "Track shared home expenses, see who owes what, and settle up with fewer transfers."
+      },
+      "hero": {
+        "headline": "Split roommate bills without awkward math",
+        "subheadline": "Rent, utilities, groceries, and shared supplies — keep household costs fair and transparent."
+      },
+      "benefits": {
+        "title": "Made for shared homes",
+        "items": [
+          {
+            "title": "Recurring household costs",
+            "description": "Log rent, utilities, internet, and groceries as they happen so nothing is forgotten at month end."
+          },
+          {
+            "title": "Clear balances per person",
+            "description": "Each roommate sees their share and net balance in the group at any time."
+          },
+          {
+            "title": "Simpler settle-up",
+            "description": "When it is time to pay each other back, debt simplification cuts down extra transfers."
+          },
+          {
+            "title": "Invite via link",
+            "description": "Add roommates to the home group in seconds — no need to re-enter expenses manually."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Create a home group",
+            "description": "Set up a group for your apartment or house and invite roommates."
+          },
+          {
+            "title": "Add bills as you pay them",
+            "description": "Enter who paid rent, utilities, or groceries and split equally or by custom shares."
+          },
+          {
+            "title": "Settle monthly",
+            "description": "Use simplified totals to see who should transfer to whom."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Can one person pay rent and split it?",
+            "answer": "Yes. Record the full payment and split the amount among roommates; balances update for everyone."
+          },
+          {
+            "question": "Is KupaPay free for roommates?",
+            "answer": "Yes. Core group expense tracking and debt simplification are free."
+          },
+          {
+            "question": "Can I try a quick calculation first?",
+            "answer": "Use the free split calculator on this site for a one-off estimate, then save the group in the app to keep tracking."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Set up your home group",
+        "body": "Get KupaPay on your phone or use the web app to track roommate expenses together."
+      }
+    },
+    "event": {
+      "navLabel": "Event expenses",
+      "seo": {
+        "title": "Split event & group dinner bills — expense splitter | KupaPay",
+        "description": "Split costs for dinners, parties, tickets, and group events. Invite guests, add expenses, and settle up with automatic debt simplification.",
+        "ogTitle": "Split event costs fairly",
+        "ogDescription": "One-off dinners, celebrations, or tickets — track who paid and who owes in a single group."
+      },
+      "hero": {
+        "headline": "Split event costs before everyone leaves",
+        "subheadline": "Group dinners, tickets, decorations, or drinks — capture costs once and settle fairly."
+      },
+      "benefits": {
+        "title": "For dinners, parties, and outings",
+        "items": [
+          {
+            "title": "Fast group setup",
+            "description": "Create an event group and share an invite link while people are still together."
+          },
+          {
+            "title": "Split uneven bills",
+            "description": "Choose who shares each expense when not everyone ordered the same thing."
+          },
+          {
+            "title": "Real-time totals",
+            "description": "Balances update as expenses are added so there are no surprises later."
+          },
+          {
+            "title": "Minimum transfers",
+            "description": "Debt simplification helps you close the event with fewer payments between guests."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Open a group for the event",
+            "description": "Give it a name like “Birthday dinner” and invite participants."
+          },
+          {
+            "title": "Log what was paid",
+            "description": "Add the bill, who paid, and who should split each item or the total."
+          },
+          {
+            "title": "Share who owes what",
+            "description": "Send settle-up details so guests can pay the right person."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Does it work for one-time events?",
+            "answer": "Yes. Create a group for a single dinner or party and archive or delete it when you are done."
+          },
+          {
+            "question": "Can I use the web app at the table?",
+            "answer": "Yes. Sign in on the web or use the mobile app to add expenses on the spot."
+          },
+          {
+            "question": "What if someone did not consume equally?",
+            "answer": "When adding an expense, select which members share it so balances reflect who actually participated."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Create an event group",
+        "body": "Download the app or sign in on the web to split your next group bill in minutes."
+      }
+    },
+    "couple": {
+      "navLabel": "Couple expenses",
+      "seo": {
+        "title": "Split couple expenses & shared costs — KupaPay",
+        "description": "Track shared spending as a couple: rent, groceries, dates, and bills. See balances clearly and settle up simply — free.",
+        "ogTitle": "Shared expenses for two",
+        "ogDescription": "One small group for two people, automatic balances, and debt simplification when you settle."
+      },
+      "hero": {
+        "headline": "Track shared expenses as a couple",
+        "subheadline": "Rent, groceries, subscriptions, and nights out — keep both sides fair without constant mental math."
+      },
+      "benefits": {
+        "title": "Simple sharing for two",
+        "items": [
+          {
+            "title": "Just the two of you",
+            "description": "A dedicated group for shared costs — no need for a complicated spreadsheet."
+          },
+          {
+            "title": "Either partner can add expenses",
+            "description": "Both of you can log what was paid and how it should be split."
+          },
+          {
+            "title": "Always know the balance",
+            "description": "See net who owes whom at a glance instead of reconciling receipts later."
+          },
+          {
+            "title": "Settle up cleanly",
+            "description": "When you balance accounts, simplification shows a single clear transfer if needed."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Create a couple group",
+            "description": "Invite your partner with one link."
+          },
+          {
+            "title": "Add shared spending",
+            "description": "Record bills either of you pays and split evenly or by agreement."
+          },
+          {
+            "title": "Settle when you choose",
+            "description": "Use balances and settle-up links when you want to even out."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Do we both need the app?",
+            "answer": "One of you can add expenses, but both partners get the clearest experience with the app or web sign-in."
+          },
+          {
+            "question": "Can we split 50/50 by default?",
+            "answer": "Yes. Equal splits are the default; you can adjust per expense when needed."
+          },
+          {
+            "question": "Is our data private?",
+            "answer": "Group data is visible only to members you invite. See our Privacy Policy for details."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Start a couple group",
+        "body": "Get KupaPay free on iPhone, Android, or the web to track shared expenses together."
+      }
+    }
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Free expense split calculator — who owes whom | KupaPay",
+      "description": "Split bills with friends for free. Enter people and expenses, get the minimum transfers to settle up — no signup required.",
+      "ogTitle": "Free split calculator — minimum transfers",
+      "ogDescription": "Calculate who pays whom after a trip, dinner, or rent split. Save or share the result, then track it in KupaPay."
+    },
+    "title": "Expense split calculator",
+    "subtitle": "Add people and expenses — we simplify debts into the fewest transfers.",
+    "defaults": {
+      "personA": "Alex",
+      "personB": "Sam",
+      "newPerson": "Friend"
+    },
+    "participants": {
+      "title": "People",
+      "nameLabel": "Name",
+      "add": "Add person",
+      "remove": "Remove"
+    },
+    "expenses": {
+      "title": "Expenses",
+      "currency": "Currency",
+      "currencyHint": "3-letter code, e.g. USD",
+      "amount": "Amount",
+      "paidBy": "Paid by",
+      "splitAmong": "Split equally among",
+      "add": "Add expense",
+      "remove": "Remove expense"
+    },
+    "results": {
+      "title": "Settle up",
+      "transferLine": "{from} pays {to} {amount}",
+      "allSettled": "Everyone is even — no transfers needed.",
+      "algorithmNote": "Transfers minimized ({mode}).",
+      "algorithmExact": "exact",
+      "algorithmGreedy": "approximate",
+      "errors": {
+        "no_participants": "Add at least one person.",
+        "no_expenses": "Add at least one expense with an amount.",
+        "invalid_amount": "Check amounts, payer, and who shares each expense.",
+        "unbalanced": "Totals do not balance — adjust expenses and try again."
+      }
+    },
+    "share": {
+      "copy": "Copy share link",
+      "copied": "Link copied",
+      "error": "Could not copy link"
+    },
+    "cta": {
+      "title": "Save this split as a group",
+      "body": "Create a KupaPay group with these people and expenses — track balances and settle up in the app.",
+      "downloadHint": "Prefer the mobile app? Download KupaPay for iPhone or Android."
+    },
+    "import": {
+      "defaultGroupName": "Split from calculator",
+      "groupNameLabel": "Group name",
+      "selfLabel": "You are",
+      "saveButton": "Save as group",
+      "signInButton": "Sign in to save",
+      "checkingSession": "Checking sign-in…",
+      "working": "Creating group…",
+      "success": "Group created. Open KupaPay to view balances and invite friends.",
+      "openApp": "Open KupaPay",
+      "expenseDescription": "Expense {n}",
+      "errors": {
+        "no_participants": "Add at least one person before saving.",
+        "no_expenses": "Add at least one expense with an amount before saving.",
+        "invalid_amount": "Check amounts, payer, and who shares each expense.",
+        "unbalanced": "Totals do not balance — adjust expenses and try again.",
+        "empty_group_name": "Enter a group name.",
+        "self_not_in_participants": "Choose which person you are in the group.",
+        "not_authenticated": "Sign in to save this split as a group.",
+        "import_failed": "Could not create the group. Try again in a moment."
+      }
+    }
+  },
+  "splitwiseComparison": {
+    "seo": {
+      "title": "KupaPay vs Splitwise — free Splitwise alternative | KupaPay",
+      "description": "Compare KupaPay and Splitwise for splitting group bills: debt simplification, offline mode, Splitwise CSV import, and free core tracking on iOS, Android, and web.",
+      "ogTitle": "Splitwise alternative — honest feature comparison",
+      "ogDescription": "See how KupaPay compares to Splitwise for trips, roommates, and shared expenses. Updated feature table with sources from Splitwise’s public docs."
+    },
+    "hero": {
+      "headline": "A free Splitwise alternative for shared expenses",
+      "subheadline": "KupaPay tracks group bills, simplifies debts, and lets you import a Splitwise CSV export into a new group — on iPhone, Android, and the web."
+    },
+    "disclaimer": "Splitwise is a trademark of its respective owner. KupaPay is not affiliated with Splitwise. This page reflects publicly documented features only.",
+    "table": {
+      "title": "KupaPay vs Splitwise",
+      "asOfLabel": "As of {date} (from each product’s public documentation and this site’s feature set)",
+      "featureColumn": "Feature",
+      "kupapayColumn": "KupaPay",
+      "splitwiseColumn": "Splitwise",
+      "caption": "Side-by-side feature comparison",
+      "rows": [
+        {
+          "feature": "Debt simplification (fewer settle-up payments)",
+          "kupapay": "Yes — built into every group",
+          "splitwise": "Yes — “Simplify debts” (core feature)"
+        },
+        {
+          "feature": "Track group expenses and balances",
+          "kupapay": "Yes",
+          "splitwise": "Yes"
+        },
+        {
+          "feature": "Equal, percentage, or share splits",
+          "kupapay": "Yes — per expense in the app",
+          "splitwise": "Yes — equal, unequal, %, or shares (core)"
+        },
+        {
+          "feature": "Offline mode",
+          "kupapay": "Yes — add and view expenses offline; syncs when online",
+          "splitwise": "Yes (listed as a core feature)"
+        },
+        {
+          "feature": "Cloud sync across devices",
+          "kupapay": "Yes",
+          "splitwise": "Yes (core feature)"
+        },
+        {
+          "feature": "Move data from Splitwise",
+          "kupapay": "Import a Splitwise group CSV in the mobile app",
+          "splitwise": "Export a group as spreadsheet/CSV from group settings"
+        },
+        {
+          "feature": "Multi-currency expenses",
+          "kupapay": "Yes — record expenses in the currency paid",
+          "splitwise": "Yes — 100+ currencies (core feature)"
+        },
+        {
+          "feature": "Automatic currency conversion to your default currency",
+          "kupapay": "Not built in — balances stay per expense currency",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "Receipt scanning & itemization",
+          "kupapay": "Not part of the free core app described here",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "Import card/bank transactions",
+          "kupapay": "No",
+          "splitwise": "Splitwise Pro (US only, per Splitwise Pro page)"
+        },
+        {
+          "feature": "Daily expense limit on the free plan",
+          "kupapay": "No daily cap described for core tracking",
+          "splitwise": "Free accounts: up to 4 expenses per day (Splitwise Pro help)"
+        },
+        {
+          "feature": "Core app pricing (this comparison)",
+          "kupapay": "Free — core groups, splits, and debt simplification",
+          "splitwise": "Free core app with optional Splitwise Pro subscription"
+        }
+      ]
+    },
+    "whenToUse": {
+      "title": "When KupaPay is a good Splitwise alternative",
+      "items": [
+        "You want free group expense tracking with automatic debt simplification on phone and web.",
+        "You are switching from Splitwise and have a group CSV export to import into KupaPay.",
+        "Your group needs Hebrew or Arabic RTL, or you prefer KupaPay’s 7-language marketing site and app locales.",
+        "You like settle-up links and optional public balance pages for sharing totals without spreadsheets."
+      ]
+    },
+    "faq": {
+      "title": "FAQ",
+      "items": [
+        {
+          "question": "Is KupaPay affiliated with Splitwise?",
+          "answer": "No. KupaPay is an independent app. Splitwise CSV import helps you migrate your own export; it does not connect to Splitwise accounts."
+        },
+        {
+          "question": "Can I import my Splitwise group?",
+          "answer": "Yes. Export the group from Splitwise, then use Import from Splitwise in the KupaPay mobile app to preview members and expenses before creating the group."
+        },
+        {
+          "question": "Does KupaPay replace every Splitwise Pro feature?",
+          "answer": "No. Features such as receipt scanning, live currency conversion, and US card import are Splitwise Pro capabilities. KupaPay focuses on clear balances, debt simplification, and free core tracking."
+        },
+        {
+          "question": "Where is this comparison information from?",
+          "answer": "KupaPay rows match features documented on this site and in the app. Splitwise rows are based on Splitwise’s public homepage, Pro page, and help articles — not on undisclosed pricing or usage statistics."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Try KupaPay on your next group trip or bill split",
+      "body": "Download the app or sign in on the web, create a group, and add your first expense in minutes."
+    }
+  },
+  "ambassadorProgram": {
+    "seo": {
+      "title": "KupaPay Ambassador Program — travel creators & student leaders",
+      "description": "Apply for the KupaPay ambassador program: free Pro for approved travel creators and student group leaders who share KupaPay with their communities.",
+      "ogTitle": "KupaPay Ambassador Program",
+      "ogDescription": "Zero-cost program for creators and student leaders — apply for free Pro and a tracked referral link for your groups."
+    },
+    "hero": {
+      "headline": "Ambassador program for travel creators & student leaders",
+      "subheadline": "Share KupaPay with your community. Approved ambassadors receive complimentary Pro and a personal referral link to track sign-ups from their audience."
+    },
+    "benefits": {
+      "title": "What ambassadors receive",
+      "items": [
+        {
+          "title": "Complimentary Pro",
+          "body": "Approved ambassadors get Pro access for a defined period so you can use advanced features while organizing group expenses."
+        },
+        {
+          "title": "Your referral link",
+          "body": "After approval you receive a unique code. Share your link so new members who join KupaPay can be attributed to you."
+        },
+        {
+          "title": "Manual review",
+          "body": "Every application is reviewed by the KupaPay team. Pro is never granted automatically."
+        }
+      ]
+    },
+    "form": {
+      "title": "Apply",
+      "signInHint": "Sign in with the KupaPay account you want to use as an ambassador before submitting.",
+      "audienceLabel": "I am applying as",
+      "audienceTravelCreator": "Travel creator / content channel",
+      "audienceStudentLeader": "Student group / trip organizer",
+      "linkLabel": "Link to your channel or group",
+      "linkPlaceholder": "https://…",
+      "messageLabel": "How will you introduce KupaPay?",
+      "messagePlaceholder": "Describe your audience and how you plan to share KupaPay (trips, clubs, dorms, etc.).",
+      "consentLabel": "I agree that KupaPay may use the information above to review my application, as described in the Privacy Policy.",
+      "privacyLink": "Privacy Policy",
+      "submit": "Submit application",
+      "submitting": "Submitting…",
+      "signInCta": "Sign in to apply"
+    },
+    "status": {
+      "pendingTitle": "Application received",
+      "pendingBody": "Thanks — your application is pending review. We will email you at the address on your KupaPay account when it is processed.",
+      "approvedTitle": "You are an ambassador",
+      "approvedBody": "Your referral code:",
+      "rejectedTitle": "Application not approved",
+      "rejectedBody": "This application was not approved. You may contact support if you have questions.",
+      "alreadyAmbassador": "You are already an approved ambassador."
+    },
+    "errors": {
+      "notAuthenticated": "Sign in to submit an application.",
+      "consentRequired": "Please confirm the privacy notice.",
+      "applicationPending": "You already have a pending application.",
+      "alreadyAmbassador": "Your account is already an ambassador.",
+      "generic": "Could not submit. Try again in a moment."
+    },
+    "disclaimer": "The ambassador program does not pay cash commissions. Pro access and referral tracking are provided as described after manual approval."
+  },
+  "travelGuides": {
+    "shared": {
+      "backToIndex": "All travel money guides",
+      "relatedGuidesTitle": "More guides",
+      "toolsTitle": "Free tools for your trip",
+      "splitCalculatorLink": "Bill split calculator",
+      "splitwiseAlternativeLink": "Splitwise alternative",
+      "tripExpensesLink": "Trip expense splitting",
+      "homeLink": "KupaPay home",
+      "tipsHeading": "Practical tips",
+      "ctaTitle": "Track shared trip costs in KupaPay",
+      "ctaBody": "Create a group, log who paid what, and let KupaPay simplify settle-up — on iPhone, Android, and the web."
+    },
+    "index": {
+      "seo": {
+        "title": "Travel money & group trip guides | KupaPay",
+        "description": "Short evergreen guides on splitting trip costs, cash vs cards abroad, and destination money basics — with links to KupaPay’s free calculator and app.",
+        "ogTitle": "Travel money guides for group trips",
+        "ogDescription": "Practical tips for shared travel expenses, plus free tools to split bills with friends."
+      },
+      "hero": {
+        "headline": "Travel money guides for group trips",
+        "subheadline": "General, practical tips for paying together abroad — and free tools to split costs when you get home."
+      },
+      "intro": "These guides stay high-level on purpose: no exchange-rate guesses or price quotes. Use them alongside KupaPay’s bill split calculator and trip expense features when you track shared costs.",
+      "listHeading": "Guides"
+    },
+    "guides": {
+      "groupTripSplit": {
+        "cardTitle": "Splitting costs on a group trip",
+        "cardTeaser": "Set expectations early and log shared spending as you go.",
+        "seo": {
+          "title": "How to split costs on a group trip | KupaPay",
+          "description": "Practical tips for dividing shared travel expenses fairly — meals, lodging, transport — without awkward math at the end.",
+          "ogTitle": "Splitting costs on a group trip",
+          "ogDescription": "Simple habits for tracking who paid what on shared travel."
+        },
+        "hero": {
+          "headline": "Splitting costs on a group trip",
+          "subheadline": "A few shared habits make settle-up easier when the trip ends."
+        },
+        "intro": "Group travel works best when everyone agrees how costs are shared before money changes hands. KupaPay helps you record expenses and simplify debts; these tips focus on the travel workflow.",
+        "tips": [
+          {
+            "title": "Create a shared plan before you leave",
+            "body": "Agree on what is split equally (groceries, Airbnb) versus paid individually (flights, souvenirs). Write it in the group chat so expectations stay clear."
+          },
+          {
+            "title": "Log expenses while they are fresh",
+            "body": "Add each shared bill soon after it happens — payer, amount, and who participated. Waiting until the last night makes details easy to forget."
+          },
+          {
+            "title": "Use one group for the whole trip",
+            "body": "One KupaPay group per trip keeps balances in one place. For side outings, either split cash on the spot or add a separate expense with only the people who joined."
+          },
+          {
+            "title": "Try the web calculator for quick splits",
+            "body": "For a single dinner or taxi, use the free split calculator on this site, then save the split as a group in the app if you want ongoing balances."
+          }
+        ]
+      },
+      "cashVsCardAbroad": {
+        "cardTitle": "Cash vs card when traveling",
+        "cardTeaser": "Carry a mix, know your card’s travel settings, and keep receipts for shared bills.",
+        "seo": {
+          "title": "Cash vs card when traveling abroad | KupaPay",
+          "description": "General guidance on using cash and payment cards overseas — without specific fees or rate claims.",
+          "ogTitle": "Cash vs card when traveling",
+          "ogDescription": "Practical payment habits for trips with friends."
+        },
+        "hero": {
+          "headline": "Cash vs card when traveling",
+          "subheadline": "Most trips run smoother with both payment options available."
+        },
+        "intro": "Card acceptance and ATM availability vary by place and merchant. These tips avoid quoting fees or rates that change — check your bank’s current travel disclosures before you go.",
+        "tips": [
+          {
+            "title": "Keep some local cash for small purchases",
+            "body": "Markets, tips, and small vendors may prefer cash even where cards are common. Splitting a cash bill is easier when someone notes the total right away in your expense app."
+          },
+          {
+            "title": "Tell your bank you are traveling",
+            "body": "Many issuers let you set a travel notice in their app or website. That reduces the chance of a card decline in the middle of a group meal."
+          },
+          {
+            "title": "Use cards for larger, traceable expenses",
+            "body": "Hotels, car rentals, and many restaurants accept cards. Recording the cardholder as payer in KupaPay keeps the group balance accurate."
+          },
+          {
+            "title": "Save receipts for shared expenses",
+            "body": "A photo or note helps resolve questions later about tax, service charges, or who ordered what — especially for multi-currency trips."
+          }
+        ]
+      },
+      "multiCurrencyGroups": {
+        "cardTitle": "Multi-currency group expenses",
+        "cardTeaser": "Record each expense in the currency it was paid, then settle in whatever you agree.",
+        "seo": {
+          "title": "Multi-currency group expenses | KupaPay",
+          "description": "How to track shared trip costs when friends pay in different currencies — general workflow tips for KupaPay groups.",
+          "ogTitle": "Multi-currency group expenses",
+          "ogDescription": "Track travel costs in the currency paid, then simplify settle-up."
+        },
+        "hero": {
+          "headline": "Multi-currency group expenses",
+          "subheadline": "Trips often mix currencies; clarity matters more than mental math."
+        },
+        "intro": "KupaPay records expenses in the currency paid. Automatic conversion to a home currency is not the focus — agree how you will settle balances instead.",
+        "tips": [
+          {
+            "title": "Enter the currency shown on the receipt",
+            "body": "Use the amount and currency on the bill or card statement. That keeps each line item honest for everyone reviewing the group later."
+          },
+          {
+            "title": "Agree on a settle-up currency",
+            "body": "Pick one currency for final transfers if the group mixes cash and cards abroad. You can settle outside the app using your bank or payment app of choice."
+          },
+          {
+            "title": "Split by participation, not by exchange guesses",
+            "body": "Divide shared costs by who joined the activity. Avoid informal conversion shortcuts that someone might dispute after the trip."
+          },
+          {
+            "title": "Use debt simplification after the trip",
+            "body": "KupaPay’s simplification reduces how many payments are needed between friends once all expenses are logged."
+          }
+        ]
+      },
+      "settleUpAfterTravel": {
+        "cardTitle": "Settle up after a trip",
+        "cardTeaser": "Close the loop with simplified debts and clear confirmations.",
+        "seo": {
+          "title": "Settle up after a group trip | KupaPay",
+          "description": "Steps to finish group trip expenses: review balances, simplify debts, and confirm payments — without awkward spreadsheets.",
+          "ogTitle": "Settle up after a trip",
+          "ogDescription": "Finish shared travel expenses with fewer transfers between friends."
+        },
+        "hero": {
+          "headline": "Settle up after a trip",
+          "subheadline": "A short review beats leaving balances open for months."
+        },
+        "intro": "When travel ends, most groups want a clear “who pays whom” list. KupaPay is built for that moment — these habits keep it stress-free.",
+        "tips": [
+          {
+            "title": "Review the group ledger together",
+            "body": "Skim recent expenses in the app or on the web. Fix missing items or wrong splits before anyone sends money."
+          },
+          {
+            "title": "Rely on simplified debts",
+            "body": "Let the app compute net balances and fewer settle-up transfers instead of repaying every individual expense."
+          },
+          {
+            "title": "Mark payments when they happen",
+            "body": "Recording a settle-up payment in the group keeps history accurate for everyone, especially if you travel together again."
+          },
+          {
+            "title": "Archive or keep the group for next time",
+            "body": "Leave the trip group as a reference, or start a fresh group for your next adventure — either way, export habits beat forgotten IOUs."
+          }
+        ]
+      },
+      "japanTravelMoney": {
+        "cardTitle": "Japan travel money tips",
+        "cardTeaser": "Japanese yen, cash-friendly shops, and transit cards — plus tracking shared costs.",
+        "seo": {
+          "title": "Japan travel money tips for groups | KupaPay",
+          "description": "General money tips for Japan trips: yen cash, cards, and IC transit cards — without price or rate claims.",
+          "ogTitle": "Japan travel money tips",
+          "ogDescription": "Practical payment habits for group travel in Japan."
+        },
+        "hero": {
+          "headline": "Japan travel money tips",
+          "subheadline": "Japan uses the Japanese yen (JPY). Many travelers carry both cash and cards."
+        },
+        "intro": "Payment norms can differ by shop and city. These tips stick to widely known basics; check current guidance from official tourism sources before you travel.",
+        "tips": [
+          {
+            "title": "Carry yen for everyday spending",
+            "body": "Cash remains common at many restaurants, shrines, and smaller shops. When one person pays cash for the group, log the expense immediately so others can reimburse fairly."
+          },
+          {
+            "title": "IC transit cards help on trains and buses",
+            "body": "Reloadable IC cards (such as Suica and Pasmo) are widely used on public transport. Decide whether transit is a shared cost or individual before tapping through gates all week."
+          },
+          {
+            "title": "Cards work at many larger businesses",
+            "body": "Hotels, chains, and many urban restaurants accept cards. Still keep backup cash in case a smaller venue is cash-only."
+          },
+          {
+            "title": "Track shared meals and day trips",
+            "body": "Use a KupaPay trip group for ryokan stays, grocery runs, and group tickets so balances stay clear across long days of sightseeing."
+          }
+        ]
+      },
+      "thailandTravelMoney": {
+        "cardTitle": "Thailand travel money tips",
+        "cardTeaser": "Thai baht, ATMs, and splitting beach-trip costs with friends.",
+        "seo": {
+          "title": "Thailand travel money tips for groups | KupaPay",
+          "description": "General Thailand travel payment tips: Thai baht, cash, and cards — for groups splitting trip expenses.",
+          "ogTitle": "Thailand travel money tips",
+          "ogDescription": "Payment basics for shared travel in Thailand."
+        },
+        "hero": {
+          "headline": "Thailand travel money tips",
+          "subheadline": "Thailand’s currency is the Thai baht (THB)."
+        },
+        "intro": "Tourist areas often accept cards while markets and transport may prefer cash. Verify ATM and card policies with your bank before you leave home.",
+        "tips": [
+          {
+            "title": "Withdraw baht from reputable ATMs",
+            "body": "Use bank-affiliated ATMs when possible and shield your PIN. If one friend withdraws cash for the group, treat it as a shared expense only when everyone agreed to pool money."
+          },
+          {
+            "title": "Keep smaller notes for markets and transport",
+            "body": "Vendors may not break large bills. Splitting street-food runs is easier when someone logs the total paid in your expense group."
+          },
+          {
+            "title": "Cards at hotels and tours",
+            "body": "Lodging and many tour operators accept cards. Record the payer in KupaPay so room blocks, boat trips, and group activities stay fair."
+          },
+          {
+            "title": "Agree on tipping politely",
+            "body": "Tipping customs differ from many Western countries. When a service charge is included on a group bill, split that receipt like any other shared meal."
+          }
+        ]
+      },
+      "europeTravelMoney": {
+        "cardTitle": "Europe travel money tips",
+        "cardTeaser": "Euro in many countries, local currencies elsewhere — plan before a multi-country trip.",
+        "seo": {
+          "title": "Europe travel money tips for groups | KupaPay",
+          "description": "General Europe trip payment tips: euro, other local currencies, and cards — for friends splitting travel costs.",
+          "ogTitle": "Europe travel money tips",
+          "ogDescription": "Payment basics for multi-country European trips."
+        },
+        "hero": {
+          "headline": "Europe travel money tips",
+          "subheadline": "Many European countries use the euro (EUR); others use their own currencies."
+        },
+        "intro": "A single itinerary can cross several payment systems. These tips stay general — confirm which currency a destination uses before you budget with friends.",
+        "tips": [
+          {
+            "title": "Know which currency each stop uses",
+            "body": "Eurozone countries share EUR; places such as the United Kingdom, Switzerland, and much of Eastern Europe use other currencies. Label expenses in the currency paid inside KupaPay."
+          },
+          {
+            "title": "Contactless cards are common",
+            "body": "Many merchants accept tap-to-pay. For shared tabs, note who paid on their card so reimbursements stay accurate."
+          },
+          {
+            "title": "Cash for small towns and markets",
+            "body": "Rural markets and some cafés may prefer cash. Pooling grocery money works when one person buys and logs the receipt for the group."
+          },
+          {
+            "title": "Rail passes and group tickets",
+            "body": "Train reservations and museum blocks are easy to forget — add them as expenses when booked so the whole group sees the cost upfront."
+          }
+        ]
+      },
+      "ukTravelMoney": {
+        "cardTitle": "UK travel money tips",
+        "cardTeaser": "Pound sterling, contactless payments, and splitting city breaks.",
+        "seo": {
+          "title": "UK travel money tips for groups | KupaPay",
+          "description": "General UK trip payment tips: pound sterling (GBP), cards, and cash for group expense tracking.",
+          "ogTitle": "UK travel money tips",
+          "ogDescription": "Payment basics for group travel in the United Kingdom."
+        },
+        "hero": {
+          "headline": "UK travel money tips",
+          "subheadline": "The United Kingdom uses pound sterling (GBP)."
+        },
+        "intro": "London and other cities are largely card-friendly, but carrying some cash still helps for small purchases and repaying friends quickly.",
+        "tips": [
+          {
+            "title": "Contactless is widely available",
+            "body": "Many UK merchants accept contactless cards and mobile wallets. For group dinners, designate who pays and log the bill before everyone scatters."
+          },
+          {
+            "title": "Keep cash for occasional cash-only spots",
+            "body": "Some smaller venues may prefer cash or have minimums for cards. Shared taxi fares are easier to split when the payer logs the meter total right away."
+          },
+          {
+            "title": "Watch for service charges on bills",
+            "body": "Restaurants may add a service charge line. Include the full receipt total when splitting so nobody underpays the shared tip or fee."
+          },
+          {
+            "title": "Use a trip group for city breaks",
+            "body": "Weekend trips with shared Airbnb and pub tabs fit well in a KupaPay group — especially when friends join from different cities."
+          }
+        ]
+      },
+      "usaTravelMoney": {
+        "cardTitle": "USA travel money tips",
+        "cardTeaser": "US dollars, tipping at restaurants, and road-trip shared costs.",
+        "seo": {
+          "title": "USA travel money tips for groups | KupaPay",
+          "description": "General US trip payment tips: US dollar (USD), cards, and tipping norms — for groups tracking shared costs.",
+          "ogTitle": "USA travel money tips",
+          "ogDescription": "Payment basics for group travel in the United States."
+        },
+        "hero": {
+          "headline": "USA travel money tips",
+          "subheadline": "The United States uses the US dollar (USD)."
+        },
+        "intro": "Cards are accepted in most urban and suburban businesses; tipping is customary in many hospitality settings. Amounts vary — follow the venue’s prompts and local norms rather than fixed rules here.",
+        "tips": [
+          {
+            "title": "Cards cover most group meals",
+            "body": "Restaurants usually split checks on request, but one card plus KupaPay is often faster for large groups. Log tax and tip in the shared expense."
+          },
+          {
+            "title": "Tipping is expected in many sit-down restaurants",
+            "body": "Review the bill for suggested gratuity lines. When tipping is not included, the group can agree on a shared percentage before anyone pays."
+          },
+          {
+            "title": "Cash helps for parking, tips, and small vendors",
+            "body": "Farmer’s markets, valets, and some tolls may need cash. Note cash payouts in your trip group the same day."
+          },
+          {
+            "title": "Road trips: fuel and groceries",
+            "body": "Rotate who pays at the pump or warehouse store, or use one pool fund with clear logging — KupaPay keeps rotating payers fair over long drives."
+          }
+        ]
+      },
+      "tippingWhileTraveling": {
+        "cardTitle": "Tipping when traveling abroad",
+        "cardTeaser": "Norms differ by country — observe, ask, and split shared bills fairly.",
+        "seo": {
+          "title": "Tipping when traveling abroad | KupaPay",
+          "description": "General guidance on tipping customs while traveling — without quoting fixed amounts or rates.",
+          "ogTitle": "Tipping when traveling abroad",
+          "ogDescription": "How to handle gratuity on group trips without awkward settle-up."
+        },
+        "hero": {
+          "headline": "Tipping when traveling abroad",
+          "subheadline": "There is no single global tipping rule — customs vary by country and service type."
+        },
+        "intro": "These tips avoid listing amounts that change. When in doubt, ask your host, tour guide, or check official tourism guidance for your destination.",
+        "tips": [
+          {
+            "title": "Look at the bill first",
+            "body": "Some countries include service in the total; others leave gratuity to the customer. Split the final receipt amount in KupaPay so tips are shared the way the group agreed."
+          },
+          {
+            "title": "Agree as a group before you dine",
+            "body": "Decide whether everyone splits tip equally or only those who ordered alcohol, for example. A quick chat prevents debates later."
+          },
+          {
+            "title": "Cash tips vs card tips",
+            "body": "Some venues only accept cash gratuities directly to staff. If one person covers cash tips for the table, log it as a shared expense if that was the plan."
+          },
+          {
+            "title": "Tour guides and drivers",
+            "body": "Guided day trips often involve separate tipping expectations. Clarify with the operator what is customary rather than assuming home-country habits."
+          }
+        ]
+      }
+    }
   }
 }

@@ -4,15 +4,18 @@
  * drag handle, header row (Cancel · uppercase label · Save), hairline divider.
  * Children render in a scrollable body below the header.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
+    KeyboardAvoidingView,
     Modal,
-    Pressable,
     View,
     useWindowDimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from './AppText';
+import { AppPressable } from './AppPressable';
+import { useAndroidHardwareBackHandler } from '../hooks/useAndroidHardwareBackHandler';
+import { nativeKeyboardAvoidingBehavior } from '../lib/platformKeyboard';
 
 interface BottomSheetShellProps {
     visible: boolean;
@@ -22,6 +25,9 @@ interface BottomSheetShellProps {
     saveDisabled?: boolean;
     children: React.ReactNode;
 }
+
+/** Equal min-width on header slots keeps the title centered (incl. RTL). */
+const HEADER_SLOT_MIN_WIDTH = 64;
 
 export function BottomSheetShell({
     visible,
@@ -34,14 +40,30 @@ export function BottomSheetShell({
     const { t } = useTranslation();
     const { height } = useWindowDimensions();
     const sheetHeight = Math.round(height * 0.75);
+    const handleClose = useCallback(() => {
+        onClose();
+    }, [onClose]);
+    useAndroidHardwareBackHandler(visible, handleClose);
 
     return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="slide"
+            onRequestClose={handleClose}
+            statusBarTranslucent
+            navigationBarTranslucent
+        >
+            <KeyboardAvoidingView
+                behavior={nativeKeyboardAvoidingBehavior()}
+                className="flex-1 justify-end"
+            >
             <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(15,23,42,0.55)' }}>
-                <Pressable
+                <AppPressable
                     testID="bottom-sheet-scrim"
-                    onPress={onClose}
+                    onPress={handleClose}
                     className="absolute inset-0"
+                    androidRipple={null}
                 />
                 <View
                     style={{
@@ -57,38 +79,53 @@ export function BottomSheetShell({
                     <View className="items-center pt-2">
                         <View className="w-10 h-1 rounded-full bg-gray-200" />
                     </View>
-                    <View className="flex-row items-center justify-between px-4 py-3">
-                        <Pressable onPress={onClose} hitSlop={8}>
-                            <Text className="text-[15px] font-medium text-gray-600">
-                                {t('common.cancel')}
-                            </Text>
-                        </Pressable>
+                    <View className="flex-row items-center px-4 py-3">
+                        <View
+                            style={{ minWidth: HEADER_SLOT_MIN_WIDTH }}
+                            className="items-start"
+                        >
+                            <AppPressable onPress={handleClose} hitSlop={8}>
+                                <Text className="text-[15px] font-medium text-gray-600">
+                                    {t('common.cancel')}
+                                </Text>
+                            </AppPressable>
+                        </View>
                         <Text
-                            className="text-xs font-semibold text-gray-500 uppercase"
+                            className="flex-1 text-center text-xs font-semibold text-gray-500 uppercase"
                             style={{ letterSpacing: 0.06 * 12 }}
                         >
                             {label}
                         </Text>
-                        <Pressable
-                            onPress={() => { if (!saveDisabled && onSave) onSave(); }}
-                            hitSlop={8}
-                            disabled={saveDisabled}
+                        <View
+                            style={{ minWidth: HEADER_SLOT_MIN_WIDTH }}
+                            className="items-end"
                         >
-                            <Text
-                                className={
-                                    saveDisabled
-                                        ? 'text-[15px] font-bold text-gray-300'
-                                        : 'text-[15px] font-bold text-primary-dark'
-                                }
-                            >
-                                {t('common.save')}
-                            </Text>
-                        </Pressable>
+                            {onSave ? (
+                                <AppPressable
+                                    onPress={() => {
+                                        if (!saveDisabled) onSave();
+                                    }}
+                                    hitSlop={8}
+                                    disabled={saveDisabled}
+                                >
+                                    <Text
+                                        className={
+                                            saveDisabled
+                                                ? 'text-[15px] font-bold text-gray-300'
+                                                : 'text-[15px] font-bold text-primary-dark'
+                                        }
+                                    >
+                                        {t('common.save')}
+                                    </Text>
+                                </AppPressable>
+                            ) : null}
+                        </View>
                     </View>
                     <View className="h-px bg-border-soft" />
                     <View style={{ flexShrink: 1 }}>{children}</View>
                 </View>
             </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 }

@@ -28,7 +28,7 @@ const categoryEmoji: Record<string, string> = {
     other: '📦',
 };
 
-export function ExpenseCard({ expense, payerName, onPress }: ExpenseCardProps) {
+function ExpenseCardBase({ expense, payerName, onPress }: ExpenseCardProps) {
     const { t, i18n } = useTranslation();
 
     const formattedDate = formatAppDate(expense.expenseDate, i18n.language);
@@ -67,3 +67,5 @@ export function ExpenseCard({ expense, payerName, onPress }: ExpenseCardProps) {
         </TouchableOpacity>
     );
 }
+
+export const ExpenseCard = React.memo(ExpenseCardBase);

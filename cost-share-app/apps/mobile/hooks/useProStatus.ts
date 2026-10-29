@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchMyProStatus, type AdminProViewMode, type MyProStatus } from '../services/proEntitlements.service';
+import {
+    fetchMyProStatusWithStoreSync,
+    type AdminProViewMode,
+    type MyProStatus,
+} from '../services/proEntitlements.service';
 import { queryKeys } from './queries/keys';
 import { isProPerkUnlocked, resolveEffectiveHasPro } from '@cost-share/shared';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
@@ -18,7 +22,7 @@ export function useProStatus(groupId?: string | null) {
     const isAdmin = useAppStore((s) => s.currentUser?.isAdmin === true);
     const query = useQuery({
         queryKey: queryKeys.proStatus(groupId ?? undefined),
-        queryFn: () => fetchMyProStatus(groupId),
+        queryFn: () => fetchMyProStatusWithStoreSync(groupId),
         enabled: KUPAPAY_PRO_ENABLED || isAdmin,
         staleTime: 60_000,
     });

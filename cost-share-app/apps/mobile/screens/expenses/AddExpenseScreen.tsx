@@ -94,6 +94,12 @@ import {
     getExpenseWithSplits,
     updateExpense,
 } from '../../services/expenses.service';
+import {
+    getRecurringSeriesForExpense,
+    updateRecurringExpenseSeries,
+    type RecurringSeriesMeta,
+} from '../../services/recurringExpenses.service';
+import { captureProductEvent } from '../../lib/productAnalytics';
 import { uploadExpenseReceipt } from '../../services/storage.service';
 import { useExpenseReceiptDisplayUrl } from '../../hooks/useExpenseReceiptDisplayUrl';
 import { handleError } from '../../lib/handleError';
@@ -108,6 +114,7 @@ import {
 } from '@cost-share/shared';
 import { ReceiptTextScanSheet } from '../../components/receipt/ReceiptTextScanSheet';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { touchProTrialFeature } from '../../services/proTrialFeatureTouch.service';
 import { formatAppDateShort } from '../../lib/formatAppDate';
 import { useProStatusQuery } from '../../hooks/queries/useProStatusQuery';
 import {
@@ -156,6 +163,7 @@ function snapshotKey(s: {
     splitMode: UiSplitMode;
     selectedMemberIds: string[];
     unequalValues: Record<string, string>;
+    recurringFrequency?: RecurringFrequency;
 }): string {
     const ids = [...s.selectedMemberIds].sort();
     const uneq: Record<string, string> = {};
@@ -171,6 +179,7 @@ function snapshotKey(s: {
         m: s.splitMode,
         ids,
         u: uneq,
+        rf: s.recurringFrequency ?? '',
     });
 }
 
@@ -240,6 +249,7 @@ export function AddExpenseScreen() {
     const [recurringEnabled, setRecurringEnabled] = useState(false);
     const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('monthly');
     const [recurringSheetVisible, setRecurringSheetVisible] = useState(false);
+    const [editSeriesMeta, setEditSeriesMeta] = useState<RecurringSeriesMeta | null>(null);
     const [groupPickerVisible, setGroupPickerVisible] = useState(false);
     const groupPickerAutoOpenedRef = useRef(false);
     const amountShake = useRef(new Animated.Value(0)).current;
@@ -457,6 +467,17 @@ export function AddExpenseScreen() {
                     }
                 }
 
+                const seriesMeta = await getRecurringSeriesForExpense(expenseId);
+                let snapshotFrequency: RecurringFrequency | undefined;
+                if (seriesMeta && !seriesMeta.endedAt) {
+                    setEditSeriesMeta(seriesMeta);
+                    setRecurringFrequency(seriesMeta.frequency);
+                    setRecurringEnabled(true);
+                    snapshotFrequency = seriesMeta.frequency;
+                } else {
+                    setEditSeriesMeta(null);
+                }
+
                 editSnapshotRef.current = snapshotKey({
                     description: expense.description,
                     amount: String(expense.amount),
@@ -466,6 +487,7 @@ export function AddExpenseScreen() {
                     splitMode: initialSplitMode,
                     selectedMemberIds: initialMemberIds,
                     unequalValues: initialUnequalValues,
+                    recurringFrequency: snapshotFrequency,
                 });
             }
             setExpenseLoading(false);
@@ -531,6 +553,7 @@ export function AddExpenseScreen() {
             splitMode,
             selectedMemberIds,
             unequalValues,
+            ...(editSeriesMeta ? { recurringFrequency } : {}),
         });
         if (current !== editSnapshotRef.current) return true;
         if (localReceiptUri !== null) return true;
@@ -548,6 +571,8 @@ export function AddExpenseScreen() {
         unequalValues,
         localReceiptUri,
         receiptRemoved,
+        editSeriesMeta,
+        recurringFrequency,
     ]);
 
     const canSubmit = canSave && editChanged;
@@ -571,6 +596,7 @@ export function AddExpenseScreen() {
             const parsed = new Date(`${draft.expenseDate}T12:00:00`);
             if (!Number.isNaN(parsed.getTime())) setDate(parsed);
         }
+        touchProTrialFeature({ receiptScan: true });
     }, []);
 
     const handleReceiptPress = useCallback(() => {
@@ -632,7 +658,11 @@ export function AddExpenseScreen() {
     }, [t, localReceiptUri, receiptUrl, receiptRemoved, receiptOcrUnlocked, navigation, groupId]);
 
     const handleRecurringPress = useCallback(() => {
-        if (isEditMode) return;
+        if (isEditMode && !editSeriesMeta) return;
+        if (isEditMode && editSeriesMeta) {
+            setRecurringSheetVisible(true);
+            return;
+        }
         if (!recurringUnlocked && KUPAPAY_PRO_ENABLED) {
             navigation.navigate('Paywall', {
                 featureKey: 'recurring_expenses',
@@ -647,7 +677,7 @@ export function AddExpenseScreen() {
             return;
         }
         setRecurringSheetVisible(true);
-    }, [isEditMode, recurringUnlocked, navigation, groupId, recurringEnabled]);
+    }, [isEditMode, editSeriesMeta, recurringUnlocked, navigation, groupId, recurringEnabled]);
 
     const handleEditorDone = useCallback((draft: EditPayerSplitDraft) => {
         setPaidBy(draft.payerId);
@@ -755,23 +785,80 @@ export function AddExpenseScreen() {
             return;
         }
 
-        const result = expenseId
-            ? await updateExpense(expenseId, {
-                  description: description.trim(),
-                  amount: parsedAmount,
-                  currency,
-                  category,
-                  paidBy: payerId,
-                  expenseDate: date,
-                  splits,
-                  splitMode: storedSplitMode,
-                  ...receiptUpdate,
-              })
-            : null;
-        stopLoading();
-        if (result) {
-            navigation.goBack();
+        const updatePayload = {
+            description: description.trim(),
+            amount: parsedAmount,
+            currency,
+            category,
+            paidBy: payerId,
+            expenseDate: date,
+            splits,
+            splitMode: storedSplitMode,
+            ...receiptUpdate,
+        };
+
+        const commitEdit = async (applyToSeries: boolean) => {
+            if (!expenseId) return;
+            if (applyToSeries && editSeriesMeta?.seriesId) {
+                const seriesOk = await updateRecurringExpenseSeries(editSeriesMeta.seriesId, {
+                    description: updatePayload.description,
+                    amount: updatePayload.amount,
+                    currency: updatePayload.currency,
+                    category: updatePayload.category,
+                    paidBy: updatePayload.paidBy,
+                    splitMode: updatePayload.splitMode,
+                    splits: updatePayload.splits,
+                    frequency: recurringFrequency,
+                });
+                if (!seriesOk) {
+                    stopLoading();
+                    handleError(new Error('updateRecurringExpenseSeries failed'), {
+                        toast: { titleKey: 'common.error', messageKey: 'common.loadError' },
+                        tags: { service: 'recurringExpenses', op: 'updateRecurringExpenseSeries' },
+                        extra: { seriesId: editSeriesMeta.seriesId, groupId },
+                    });
+                    return;
+                }
+                void captureProductEvent('recurring_series_updated', {
+                    group_id: groupId,
+                    frequency: recurringFrequency,
+                });
+            }
+            const result = await updateExpense(expenseId, updatePayload);
+            stopLoading();
+            if (result) {
+                navigation.goBack();
+            }
+        };
+
+        if (editSeriesMeta && !editSeriesMeta.endedAt) {
+            stopLoading();
+            platformAlert(
+                t('expenses.v2.recurring.editScopeTitle'),
+                t('expenses.v2.recurring.editScopeBody'),
+                [
+                    {
+                        text: t('expenses.v2.recurring.editScopeSeries'),
+                        onPress: () => {
+                            startLoading();
+                            void commitEdit(true);
+                        },
+                    },
+                    {
+                        text: t('expenses.v2.recurring.editScopeOccurrence'),
+                        onPress: () => {
+                            startLoading();
+                            void commitEdit(false);
+                        },
+                    },
+                    { text: t('common.cancel'), style: 'cancel' },
+                ],
+                { cancelable: true },
+            );
+            return;
         }
+
+        await commitEdit(false);
     }, [
         canSave,
         currentUser,
@@ -797,6 +884,7 @@ export function AddExpenseScreen() {
         recurringEnabled,
         recurringUnlocked,
         recurringFrequency,
+        editSeriesMeta,
     ]);
 
     const runShake = useCallback((anim: Animated.Value) => {
@@ -1175,11 +1263,14 @@ export function AddExpenseScreen() {
                         onPress={handleReceiptPress}
                         testID="meta-receipt"
                     />
-                    {!isEditMode ? (
+                    {!isEditMode || editSeriesMeta ? (
                         <QuietIconPill
                             icon="repeat-outline"
                             label={recurringLabel}
-                            active={recurringEnabled && recurringUnlocked}
+                            active={
+                                (recurringEnabled && recurringUnlocked) ||
+                                Boolean(editSeriesMeta)
+                            }
                             onPress={handleRecurringPress}
                             testID="meta-recurring"
                         />
@@ -1333,7 +1424,7 @@ const styles = StyleSheet.create({
     },
     currencyPillWeb: {
         position: 'absolute',
-        left: 4,
+        start: 4,
         top: 0,
         bottom: 0,
         justifyContent: 'center',
@@ -1459,8 +1550,8 @@ const styles = StyleSheet.create({
     },
     footer: {
         position: 'absolute',
-        left: 0,
-        right: 0,
+        start: 0,
+        end: 0,
         bottom: 0,
         paddingHorizontal: 16,
         paddingTop: 20,

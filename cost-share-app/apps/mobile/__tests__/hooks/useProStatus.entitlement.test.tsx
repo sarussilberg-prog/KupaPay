@@ -3,7 +3,7 @@ import { Text } from 'react-native';
 import { render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useProStatus } from '../../hooks/useProStatus';
-import { fetchMyProStatus } from '../../services/proEntitlements.service';
+import { fetchMyProStatusWithStoreSync } from '../../services/proEntitlements.service';
 import { queryKeys } from '../../hooks/queries/keys';
 
 jest.mock('../../lib/featureFlags', () => ({
@@ -11,7 +11,7 @@ jest.mock('../../lib/featureFlags', () => ({
 }));
 
 jest.mock('../../services/proEntitlements.service', () => ({
-    fetchMyProStatus: jest.fn(),
+    fetchMyProStatusWithStoreSync: jest.fn(),
 }));
 
 jest.mock('../../store', () => ({
@@ -19,7 +19,9 @@ jest.mock('../../store', () => ({
         selector({ currentUser: { isAdmin: true } }),
 }));
 
-const fetchMock = fetchMyProStatus as jest.MockedFunction<typeof fetchMyProStatus>;
+const fetchMock = fetchMyProStatusWithStoreSync as jest.MockedFunction<
+    typeof fetchMyProStatusWithStoreSync
+>;
 
 function Probe() {
     const { hasPro, proPerkUnlocked } = useProStatus();
@@ -56,6 +58,30 @@ describe('useProStatus entitlement', () => {
         await waitFor(() => {
             expect(getByTestId('probe')).toHaveTextContent('pro-unlocked');
         });
+    });
+
+    it('shows Pro when store-synced fetch returns hasPro true after purchase', async () => {
+        fetchMock.mockResolvedValue({
+            hasPro: true,
+            adminProViewMode: 'real',
+            adminProViewExpiresAt: null,
+            individualProUntil: '2030-06-01T00:00:00.000Z',
+            groupPassUntil: null,
+            includedTripPassCredits: 0,
+            unassignedTripPassCount: 0,
+        });
+
+        const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+        const { getByTestId } = render(
+            <QueryClientProvider client={client}>
+                <Probe />
+            </QueryClientProvider>,
+        );
+
+        await waitFor(() => {
+            expect(getByTestId('probe')).toHaveTextContent('pro-unlocked');
+        });
+        expect(fetchMock).toHaveBeenCalled();
     });
 
     it('retains prior Pro cache when refetch throws', async () => {

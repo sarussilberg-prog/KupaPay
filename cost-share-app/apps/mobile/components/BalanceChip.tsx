@@ -61,19 +61,25 @@ function ChipText({
     numberOfLines = 1,
     testID,
     writingDirection,
+    adjustsFontSizeToFit,
+    minimumFontScale,
 }: {
     className: string;
     children: React.ReactNode;
     numberOfLines?: number;
     testID?: string;
     writingDirection?: 'ltr' | 'rtl';
+    adjustsFontSizeToFit?: boolean;
+    minimumFontScale?: number;
 }) {
     return (
         <Text
             className={className}
             numberOfLines={numberOfLines}
             testID={testID}
-            style={{ textAlign: 'center', width: '100%', writingDirection }}
+            adjustsFontSizeToFit={adjustsFontSizeToFit}
+            minimumFontScale={minimumFontScale}
+            style={{ textAlign: 'center', width: '100%', minWidth: 0, writingDirection }}
         >
             {children}
         </Text>
@@ -107,10 +113,10 @@ export function BalanceChip({
         () => ({
             flexShrink: 0,
             flexGrow: 0,
+            width: '100%',
             maxWidth: GROUP_CARD_CHIP_MAX_WIDTH,
             alignItems: 'center',
             justifyContent: 'center',
-            alignSelf: 'center',
             gap: 2,
         }),
         [],
@@ -161,7 +167,12 @@ export function BalanceChip({
             <ChipText className={styles.label} numberOfLines={2}>
                 {t(captionKey)}
             </ChipText>
-            <ChipText className={styles.amount} testID="balance-chip-amount">
+            <ChipText
+                className={styles.amount}
+                testID="balance-chip-amount"
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+            >
                 {amountText}
             </ChipText>
             {extraLabel ? (

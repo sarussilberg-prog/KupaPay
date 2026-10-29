@@ -5,6 +5,29 @@ import type { KnipConfig } from 'knip';
  * Conservative ignores: Expo config plugins, EAS/ASC scripts, i18n JSON, platform suffixes.
  */
 const config: KnipConfig = {
+  // Intentional root deps: hoist patched markdown-it/linkify-it for react-native-markdown-display (#590).
+  ignoreDependencies: ['markdown-it', 'linkify-it'],
+  entry: [
+    'scripts/group-ledger-simulation-db.integration.ts',
+    'scripts/posthog-mau-tiles-lib.mjs',
+    'scripts/posthog-ensure-mau-dashboard-tiles.mjs',
+    'scripts/__tests__/posthog-mau-tiles-lib.test.mjs',
+  ],
+  project: ['scripts/**/*.ts'],
+  ignoreFiles: [
+    'scripts/**',
+    'lighthouserc.cjs',
+    'supabase/functions/**/index.ts',
+    'supabase/functions/**/cors.ts',
+    'supabase/functions/invite-landing/**',
+  ],
+  ignoreBinaries: ['python3', 'eas'],
+  // Knip does not resolve .mjs cross-imports for this script library (#584).
+  ignoreIssues: {
+    'scripts/posthog-mau-tiles-lib.mjs': ['exports'],
+    // CLI invoked only by .github/workflows/app-store-production.yml.
+    'apps/mobile/scripts/asc-submit-app-for-review.mjs': ['files'],
+  },
   workspaces: {
     '@cost-share/mobile': {
       entry: [
@@ -17,7 +40,10 @@ const config: KnipConfig = {
       ],
       project: ['**/*.{ts,tsx}'],
       ignoreFiles: [
-        '{scripts,plugins,dev,screenshotDemo}/**',
+        'scripts/**',
+        'plugins/**',
+        'dev/**',
+        'screenshotDemo/**',
         'babel.config.js',
         'metro.config.js',
         'global.css',
@@ -35,14 +61,24 @@ const config: KnipConfig = {
       ],
     },
     '@cost-share/web': {
-      entry: ['middleware.ts', 'next.config.ts', '**/*.{test,spec}.{ts,tsx,mjs}'],
+      entry: [
+        'middleware.ts',
+        'next.config.ts',
+        'scripts/merge-travel-guides-fragments.mjs',
+        '**/*.{test,spec}.{ts,tsx,mjs}',
+      ],
       project: ['**/*.{ts,tsx,mjs}'],
       ignoreFiles: ['locales/**'],
       ignoreDependencies: ['sharp'],
     },
     '@cost-share/shared': {
-      entry: ['src/index.ts', '**/*.{test,spec}.{ts,tsx}'],
+      entry: [
+        'src/index.ts',
+        'src/calculations/groupLedgerSimulation/dbIntegration.ts',
+        '**/*.{test,spec}.{ts,tsx}',
+      ],
       project: ['src/**/*.{ts,tsx}'],
+      ignoreDependencies: ['fast-check'],
     },
   },
   ignoreWorkspaces: ['apps/mobile/modules/**'],

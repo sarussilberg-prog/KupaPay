@@ -23,7 +23,7 @@ interface FeedItemRowProps {
     searchQuery?: string;
 }
 
-export function FeedItemRow({
+function FeedItemRowBase({
     item,
     currentUserId,
     memberMap,
@@ -103,3 +103,5 @@ export function FeedItemRow({
         />
     );
 }
+
+export const FeedItemRow = React.memo(FeedItemRowBase);

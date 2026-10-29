@@ -46,6 +46,11 @@
         "description": "Erstellt Gruppen für Reisen, Miete, Essen — so viele ihr wollt"
       },
       {
+        "icon": "import",
+        "title": "Import aus Splitwise",
+        "description": "Splitwise-CSV hochladen und Gruppe, Mitglieder und Ausgaben in Minuten übernehmen"
+      },
+      {
         "icon": "offline",
         "title": "Funktioniert offline",
         "description": "Ausgaben hinzufügen und ansehen auch ohne Internet — alles synchronisiert sich automatisch wieder"
@@ -103,12 +108,920 @@
     "privacy": "Datenschutz",
     "terms": "Nutzungsbedingungen",
     "contact": "Kontakt",
-    "copyright": "© 2026 KupaPay"
+    "copyright": "© 2026 KupaPay",
+    "splitwiseAlternative": "Splitwise-Alternative",
+    "travelGuides": "Reise-Geld-Ratgeber"
   },
   "legal": {
     "notFound": "Dokument nicht gefunden.",
     "backHome": "Zur Startseite",
     "effectiveDate": "Gültig ab ",
     "appVersion": "App-Version "
+  },
+  "splitCalculator": {
+    "seo": {
+      "title": "Kostenlos Rechnungen teilen — wer schuldet wem | KupaPay",
+      "description": "Teile Rechnungen mit Freunden kostenlos. Personen und Ausgaben eingeben, minimale Überweisungen erhalten — ohne Anmeldung.",
+      "ogTitle": "Split-Rechner — minimale Überweisungen",
+      "ogDescription": "Berechne, wer wem nach Reise, Essen oder Miete zahlt. Ergebnis speichern oder teilen und in KupaPay verfolgen."
+    },
+    "title": "Ausgaben-Split-Rechner",
+    "subtitle": "Personen und Ausgaben hinzufügen — wir vereinfachen Schulden auf wenige Überweisungen.",
+    "defaults": {
+      "personA": "Anna",
+      "personB": "Lukas",
+      "newPerson": "Freund"
+    },
+    "participants": {
+      "title": "Personen",
+      "nameLabel": "Personenname",
+      "add": "Person hinzufügen",
+      "remove": "Entfernen"
+    },
+    "expenses": {
+      "title": "Ausgaben",
+      "currency": "Währung",
+      "currencyHint": "3-Buchstaben-Code, z. B. EUR",
+      "amount": "Betrag",
+      "paidBy": "Bezahlt von",
+      "splitAmong": "Gleich aufteilen unter",
+      "add": "Ausgabe hinzufügen",
+      "remove": "Ausgabe entfernen"
+    },
+    "results": {
+      "title": "Ausgleichen",
+      "transferLine": "{from} zahlt an {to} {amount}",
+      "allSettled": "Alle sind ausgeglichen — keine Überweisungen nötig.",
+      "algorithmNote": "Überweisungen minimiert ({mode}).",
+      "algorithmExact": "exakt",
+      "algorithmGreedy": "näherungsweise",
+      "errors": {
+        "no_participants": "Mindestens eine Person hinzufügen.",
+        "no_expenses": "Mindestens eine Ausgabe mit Betrag hinzufügen.",
+        "invalid_amount": "Beträge, Zahler und Beteiligte jeder Ausgabe prüfen.",
+        "unbalanced": "Summen stimmen nicht — Ausgaben anpassen und erneut versuchen."
+      }
+    },
+    "share": {
+      "copy": "Teilen-Link kopieren",
+      "copied": "Link kopiert",
+      "error": "Link konnte nicht kopiert werden"
+    },
+    "cta": {
+      "title": "Aufteilung als Gruppe speichern",
+      "body": "Erstelle eine KupaPay-Gruppe mit diesen Personen und Ausgaben — verfolge Salden und rechne in der App ab.",
+      "downloadHint": "Lieber die Mobile-App? Lade KupaPay für iPhone oder Android herunter."
+    },
+    "import": {
+      "defaultGroupName": "Aufteilung aus dem Rechner",
+      "groupNameLabel": "Gruppenname",
+      "selfLabel": "Du bist",
+      "saveButton": "Als Gruppe speichern",
+      "signInButton": "Anmelden zum Speichern",
+      "checkingSession": "Anmeldung wird geprüft…",
+      "working": "Gruppe wird erstellt…",
+      "success": "Gruppe erstellt. Öffne KupaPay, um Salden zu sehen und Freunde einzuladen.",
+      "openApp": "KupaPay öffnen",
+      "expenseDescription": "Ausgabe {n}",
+      "errors": {
+        "no_participants": "Füge mindestens eine Person hinzu, bevor du speicherst.",
+        "no_expenses": "Füge mindestens eine Ausgabe mit Betrag hinzu, bevor du speicherst.",
+        "invalid_amount": "Prüfe Beträge, Zahler und wer jede Ausgabe teilt.",
+        "unbalanced": "Die Summen stimmen nicht — passe Ausgaben an und versuche es erneut.",
+        "empty_group_name": "Gib einen Gruppennamen ein.",
+        "self_not_in_participants": "Wähle, welche Person du in der Gruppe bist.",
+        "not_authenticated": "Melde dich an, um diese Aufteilung als Gruppe zu speichern.",
+        "import_failed": "Gruppe konnte nicht erstellt werden. Versuche es gleich erneut."
+      }
+    }
+  },
+  "useCaseShared": {
+    "howItWorksTitle": "So funktioniert's",
+    "faqTitle": "FAQ",
+    "exploreTitle": "Mehr entdecken",
+    "splitCalculatorLink": "Kostenloser Split-Rechner",
+    "mainLandingLink": "KupaPay Startseite",
+    "otherUseCasesTitle": "Weitere Split-Szenarien"
+  },
+  "useCases": {
+    "trip": {
+      "navLabel": "Reisekosten",
+      "seo": {
+        "title": "Reisekosten mit Freunden teilen — kostenlos | KupaPay",
+        "description": "Flüge, Hotels, Benzin und Mahlzeiten auf Gruppenreisen erfassen. KupaPay vereinfacht Schulden auf die wenigsten Überweisungen — kostenlos auf iOS, Android und Web.",
+        "ogTitle": "Rechnungen auf Reisen teilen — ohne Tabellen",
+        "ogDescription": "Eine Gruppe für die Reise, alle Ausgaben synchron, automatische Schuldenvereinfachung beim Ausgleich."
+      },
+      "hero": {
+        "headline": "Reisekosten teilen — ohne Tabellenkalkulation",
+        "subheadline": "Flüge, Hotels, Benzin und Abendessen — eine Gruppe, klare Salden und weniger Überweisungen am Ende."
+      },
+      "benefits": {
+        "title": "Für Reisegruppen gemacht",
+        "items": [
+          {
+            "title": "Eine Gruppe für die ganze Reise",
+            "description": "Einmal Reisebegleiter einladen und Ausgaben unterwegs hinzufügen — alle sehen Salden in Echtzeit."
+          },
+          {
+            "title": "Weniger Zahlungen am Ende",
+            "description": "Schuldenvereinfachung bündelt viele kleine Schulden auf die minimale Zahl von Überweisungen zwischen Freunden."
+          },
+          {
+            "title": "Offline unterwegs",
+            "description": "Ausgaben ohne Netz erfassen; KupaPay synchronisiert, sobald Sie wieder online sind."
+          },
+          {
+            "title": "Ausgleichsdetails teilen",
+            "description": "Nutzen Sie Ausgleichs-Links, damit jeder genau weiß, wem wie viel zu zahlen ist."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Reisegruppe anlegen",
+            "description": "Benennen Sie die Reise und laden Sie Freunde per Link ein."
+          },
+          {
+            "title": "Gemeinsame Kosten hinzufügen",
+            "description": "Erfassen Sie, wer Transport, Unterkunft, Essen oder Aktivitäten bezahlt hat und wer jede Rechnung teilt."
+          },
+          {
+            "title": "Mit vereinfachten Summen ausgleichen",
+            "description": "KupaPay zeigt Nettosalden und die kleinste Menge an Überweisungen, um die Reise abzuschließen."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Können wir auf einer Reise verschiedene Währungen nutzen?",
+            "answer": "Ja. Erfassen Sie Ausgaben in der Zahlungswährung; Salden bleiben pro Ausgabe und Gruppeneinstellung klar."
+          },
+          {
+            "question": "Brauche ich ein Konto zum Start?",
+            "answer": "Melden Sie sich im Web an oder laden Sie die App herunter, um eine Gruppe zu erstellen und andere einzuladen."
+          },
+          {
+            "question": "Worin unterscheidet sich das vom manuellen Teilen?",
+            "answer": "KupaPay erfasst jede Ausgabe, berechnet Salden automatisch neu und reduziert nötige Banküberweisungen am Ende."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Reisegruppe starten",
+        "body": "Laden Sie KupaPay herunter oder melden Sie sich im Web an, um eine Reisegruppe anzulegen und die erste gemeinsame Ausgabe hinzuzufügen."
+      }
+    },
+    "roommates": {
+      "navLabel": "Mitbewohner-Rechnungen",
+      "seo": {
+        "title": "Miete und Rechnungen mit Mitbewohnern teilen — KupaPay",
+        "description": "Teilen Sie Miete, Nebenkosten, Einkäufe und Haushaltskosten mit Mitbewohnern. Automatische Schuldenvereinfachung und monatliche Übersicht — kostenlos.",
+        "ogTitle": "Mitbewohner-Rechnungen einfach teilen",
+        "ogDescription": "Haushaltsausgaben tracken, sehen wer wem schuldet, mit weniger Überweisungen ausgleichen."
+      },
+      "hero": {
+        "headline": "Mitbewohner-Rechnungen ohne peinliches Rechnen",
+        "subheadline": "Miete, Nebenkosten, Einkäufe und Gemeinschaftsbedarf — fair und transparent im Haushalt."
+      },
+      "benefits": {
+        "title": "Für Wohngemeinschaften",
+        "items": [
+          {
+            "title": "Wiederkehrende Haushaltskosten",
+            "description": "Miete, Nebenkosten, Internet und Einkäufe beim Bezahlen erfassen, damit am Monatsende nichts fehlt."
+          },
+          {
+            "title": "Klare Salden pro Person",
+            "description": "Jeder Mitbewohner sieht jederzeit seinen Anteil und Nettosaldo in der Gruppe."
+          },
+          {
+            "title": "Einfacherer Ausgleich",
+            "description": "Wenn zurückgezahlt wird, reduziert Schuldenvereinfachung überflüssige Überweisungen."
+          },
+          {
+            "title": "Einladung per Link",
+            "description": "Mitbewohner in Sekunden zur Haushaltsgruppe hinzufügen — ohne Ausgaben neu einzutippen."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Haushaltsgruppe erstellen",
+            "description": "Gruppe für Wohnung oder Haus einrichten und Mitbewohner einladen."
+          },
+          {
+            "title": "Rechnungen beim Bezahlen erfassen",
+            "description": "Eintragen, wer Miete, Nebenkosten oder Einkäufe bezahlt hat, gleichmäßig oder mit individuellen Anteilen teilen."
+          },
+          {
+            "title": "Monatlich ausgleichen",
+            "description": "Vereinfachte Summen nutzen, um zu sehen, wer wem überweisen soll."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Kann eine Person die Miete zahlen und aufteilen?",
+            "answer": "Ja. Gesamtzahlung erfassen und Betrag auf Mitbewohner verteilen — Salden aktualisieren sich für alle."
+          },
+          {
+            "question": "Ist KupaPay für Mitbewohner kostenlos?",
+            "answer": "Ja. Gruppenausgaben-Tracking und Schuldenvereinfachung im Kern sind kostenlos."
+          },
+          {
+            "question": "Kann ich zuerst schnell rechnen?",
+            "answer": "Nutzen Sie den kostenlosen Split-Rechner auf dieser Seite für eine Schätzung, speichern Sie die Gruppe dann in der App zum Weitertracken."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Haushaltsgruppe einrichten",
+        "body": "KupaPay auf dem Handy oder im Web nutzen, um Mitbewohner-Ausgaben gemeinsam zu tracken."
+      }
+    },
+    "event": {
+      "navLabel": "Event-Ausgaben",
+      "seo": {
+        "title": "Gruppenessen und Event-Rechnungen teilen — KupaPay",
+        "description": "Kosten für Abendessen, Partys, Tickets und Gruppenevents teilen. Gäste einladen, Ausgaben hinzufügen und mit automatischer Schuldenvereinfachung ausgleichen.",
+        "ogTitle": "Event-Kosten fair teilen",
+        "ogDescription": "Einmaliges Dinner, Feier oder Tickets — in einer Gruppe sehen, wer bezahlt hat und wer schuldet."
+      },
+      "hero": {
+        "headline": "Event-Kosten teilen, bevor alle gehen",
+        "subheadline": "Gruppenessen, Tickets, Deko oder Getränke — einmal erfassen und fair ausgleichen."
+      },
+      "benefits": {
+        "title": "Für Essen, Partys und Ausflüge",
+        "items": [
+          {
+            "title": "Schnelle Gruppenerstellung",
+            "description": "Event-Gruppe anlegen und Einladungslink teilen, solange alle noch zusammen sind."
+          },
+          {
+            "title": "Ungleiche Rechnungen teilen",
+            "description": "Wählen Sie pro Ausgabe, wer beteiligt ist, wenn nicht alle Gleiches bestellt haben."
+          },
+          {
+            "title": "Echtzeit-Summen",
+            "description": "Salden aktualisieren sich mit jeder Ausgabe — keine Überraschungen später."
+          },
+          {
+            "title": "Minimale Überweisungen",
+            "description": "Schuldenvereinfachung hilft, das Event mit weniger Zahlungen zwischen Gästen abzuschließen."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Gruppe für das Event öffnen",
+            "description": "Benennen Sie sie z. B. „Geburtstagsessen“ und laden Sie Teilnehmer ein."
+          },
+          {
+            "title": "Bezahltes erfassen",
+            "description": "Rechnung, Zahler und wer jeden Posten oder die Summe teilt hinzufügen."
+          },
+          {
+            "title": "Teilen, wer wem schuldet",
+            "description": "Ausgleichsdetails senden, damit Gäste der richtigen Person zahlen."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Funktioniert es für einmalige Events?",
+            "answer": "Ja. Gruppe für ein Dinner oder eine Party anlegen und danach archivieren oder löschen."
+          },
+          {
+            "question": "Kann ich die Web-App am Tisch nutzen?",
+            "answer": "Ja. Im Web anmelden oder die App nutzen, um Ausgaben vor Ort hinzuzufügen."
+          },
+          {
+            "question": "Was, wenn nicht alle gleich viel verbraucht haben?",
+            "answer": "Beim Hinzufügen einer Ausgabe wählen Sie beteiligte Mitglieder, damit Salden die reale Teilnahme widerspiegeln."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Event-Gruppe erstellen",
+        "body": "App herunterladen oder im Web anmelden, um die nächste Gruppenrechnung in Minuten zu teilen."
+      }
+    },
+    "couple": {
+      "navLabel": "Paar-Ausgaben",
+      "seo": {
+        "title": "Paar-Ausgaben und gemeinsame Kosten — KupaPay",
+        "description": "Gemeinsame Ausgaben als Paar tracken: Miete, Einkäufe, Dates und Rechnungen. Klare Salden und einfacher Ausgleich — kostenlos.",
+        "ogTitle": "Gemeinsame Ausgaben zu zweit",
+        "ogDescription": "Kleine Gruppe für zwei Personen, automatische Salden und Schuldenvereinfachung beim Ausgleich."
+      },
+      "hero": {
+        "headline": "Gemeinsame Ausgaben als Paar tracken",
+        "subheadline": "Miete, Einkäufe, Abos und Abende — fair für beide ohne ständiges Kopfrechnen."
+      },
+      "benefits": {
+        "title": "Einfaches Teilen zu zweit",
+        "items": [
+          {
+            "title": "Nur ihr zwei",
+            "description": "Eigene Gruppe für gemeinsame Kosten — ohne komplizierte Tabelle."
+          },
+          {
+            "title": "Beide können Ausgaben hinzufügen",
+            "description": "Ihr könnt beide erfassen, was bezahlt wurde und wie geteilt wird."
+          },
+          {
+            "title": "Saldo immer im Blick",
+            "description": "Auf einen Blick sehen, wer wem schuldet, statt Belege später abzugleichen."
+          },
+          {
+            "title": "Sauber ausgleichen",
+            "description": "Beim Kontoausgleich zeigt die Vereinfachung bei Bedarf eine klare Einzelüberweisung."
+          }
+        ]
+      },
+      "howItWorks": {
+        "steps": [
+          {
+            "title": "Paar-Gruppe erstellen",
+            "description": "Partner oder Partnerin mit einem Link einladen."
+          },
+          {
+            "title": "Gemeinsame Ausgaben hinzufügen",
+            "description": "Rechnungen erfassen, die einer von euch bezahlt, gleichmäßig oder nach Absprache teilen."
+          },
+          {
+            "title": "Ausgleichen, wann ihr wollt",
+            "description": "Salden und Ausgleichs-Links nutzen, wenn ihr ausgleichen möchtet."
+          }
+        ]
+      },
+      "faq": {
+        "items": [
+          {
+            "question": "Brauchen wir beide die App?",
+            "answer": "Einer kann Ausgaben hinzufügen, aber für beide ist es am klarsten mit App oder Web-Anmeldung."
+          },
+          {
+            "question": "Können wir standardmäßig 50/50 teilen?",
+            "answer": "Ja. Gleichteilung ist Standard; pro Ausgabe anpassbar."
+          },
+          {
+            "question": "Sind unsere Daten privat?",
+            "answer": "Gruppendaten sind nur für eingeladene Mitglieder sichtbar. Details in der Datenschutzerklärung."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Paar-Gruppe starten",
+        "body": "KupaPay kostenlos auf iPhone, Android oder Web holen, um gemeinsame Ausgaben zu tracken."
+      }
+    }
+  },
+  "splitwiseComparison": {
+    "seo": {
+      "title": "KupaPay vs Splitwise — kostenlose Alternative | KupaPay",
+      "description": "Vergleichen Sie KupaPay und Splitwise für Gruppenkosten: Schuldenvereinfachung, Offline-Modus, Splitwise-CSV-Import und kostenloses Tracking auf iOS, Android und Web.",
+      "ogTitle": "Splitwise-Alternative — ehrlicher Vergleich",
+      "ogDescription": "Wie KupaPay zu Splitwise passt für Reisen, WG und Events. Tabelle aus öffentlicher Dokumentation."
+    },
+    "hero": {
+      "headline": "Kostenlose Splitwise-Alternative für gemeinsame Ausgaben",
+      "subheadline": "KupaPay trackt Gruppenrechnungen, vereinfacht Schulden und importiert einen Splitwise-CSV-Export in eine neue Gruppe — auf iPhone, Android und Web."
+    },
+    "disclaimer": "Splitwise ist eine Marke des Rechteinhabers. KupaPay ist nicht mit Splitwise verbunden. Diese Seite basiert nur auf öffentlich dokumentierten Funktionen.",
+    "table": {
+      "title": "KupaPay vs Splitwise",
+      "asOfLabel": "Stand {date} (öffentliche Dokumentation beider Produkte und Funktionen dieser Website)",
+      "featureColumn": "Funktion",
+      "kupapayColumn": "KupaPay",
+      "splitwiseColumn": "Splitwise",
+      "caption": "Funktionsvergleich",
+      "rows": [
+        {
+          "feature": "Schuldenvereinfachung (weniger Ausgleichszahlungen)",
+          "kupapay": "Ja — in jeder Gruppe",
+          "splitwise": "Ja — „Simplify debts“ (Kern)"
+        },
+        {
+          "feature": "Gruppenausgaben und Salden",
+          "kupapay": "Ja",
+          "splitwise": "Ja"
+        },
+        {
+          "feature": "Gleich, Prozent oder Anteile",
+          "kupapay": "Ja — pro Ausgabe in der App",
+          "splitwise": "Ja — gleich, ungleich, % oder shares (Kern)"
+        },
+        {
+          "feature": "Offline-Modus",
+          "kupapay": "Ja — offline erfassen/ansehen; Sync online",
+          "splitwise": "Ja (Kernfunktion)"
+        },
+        {
+          "feature": "Cloud-Sync",
+          "kupapay": "Ja",
+          "splitwise": "Ja (Kern)"
+        },
+        {
+          "feature": "Wechsel von Splitwise",
+          "kupapay": "Gruppen-CSV in der Mobile-App importieren",
+          "splitwise": "Gruppe als Tabelle/CSV aus Gruppeneinstellungen exportieren"
+        },
+        {
+          "feature": "Mehrwährungs-Ausgaben",
+          "kupapay": "Ja — in gezahlter Währung",
+          "splitwise": "Ja — 100+ Währungen (Kern)"
+        },
+        {
+          "feature": "Automatische Währungsumrechnung",
+          "kupapay": "Nicht eingebaut — Salden pro Ausgabewährung",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "Belegscan & Itemisierung",
+          "kupapay": "Nicht Teil des hier beschriebenen kostenlosen Kerns",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "Karten-/Bankimport",
+          "kupapay": "Nein",
+          "splitwise": "Splitwise Pro (nur USA, laut Pro-Seite)"
+        },
+        {
+          "feature": "Tageslimit im Gratisplan",
+          "kupapay": "Kein Tageslimit für den Kern beschrieben",
+          "splitwise": "Gratis: bis 4 Ausgaben/Tag (Splitwise-Pro-Hilfe)"
+        },
+        {
+          "feature": "Preis des Kerns (dieser Vergleich)",
+          "kupapay": "Gratis — Gruppen, Splits, Vereinfachung",
+          "splitwise": "Gratis-Kernapp + optionales Splitwise Pro"
+        }
+      ]
+    },
+    "whenToUse": {
+      "title": "Wann KupaPay gut passt",
+      "items": [
+        "Sie wollen kostenloses Gruppentracking mit automatischer Vereinfachung auf Handy und Web.",
+        "Sie wechseln von Splitwise und haben einen Gruppen-CSV-Export.",
+        "Sie brauchen Hebräisch/Arabisch RTL oder 7 Sprachen auf Site und App.",
+        "Sie möchten Ausgleichslinks und optional eine öffentliche Saldo-Seite."
+      ]
+    },
+    "faq": {
+      "title": "FAQ",
+      "items": [
+        {
+          "question": "Ist KupaPay mit Splitwise verbunden?",
+          "answer": "Nein. KupaPay ist unabhängig. CSV-Import übernimmt Ihren Export; kein Splitwise-Konto-Zugang."
+        },
+        {
+          "question": "Kann ich eine Splitwise-Gruppe importieren?",
+          "answer": "Ja. Aus Splitwise exportieren, dann „Import aus Splitwise“ in der App mit Vorschau."
+        },
+        {
+          "question": "Ersetzt KupaPay alle Splitwise-Pro-Features?",
+          "answer": "Nein. Scan, Live-Umrechnung und US-Kartenimport sind Splitwise Pro. KupaPay fokussiert klare Salden, Vereinfachung und gratis Kern."
+        },
+        {
+          "question": "Woher stammen die Angaben?",
+          "answer": "KupaPay: Website und App. Splitwise: Startseite, Pro und Hilfe — ohne unveröffentlichte Preise oder Statistiken."
+        }
+      ]
+    },
+    "cta": {
+      "title": "KupaPay beim nächsten Split testen",
+      "body": "App laden oder im Web anmelden, Gruppe anlegen und erste Ausgabe hinzufügen."
+    }
+  },
+  "travelGuides": {
+    "shared": {
+      "backToIndex": "Alle Reise-Geld-Ratgeber",
+      "relatedGuidesTitle": "Weitere Ratgeber",
+      "toolsTitle": "Kostenlose Tools für deine Reise",
+      "splitCalculatorLink": "Rechnung-teilen-Rechner",
+      "splitwiseAlternativeLink": "Splitwise-Alternative",
+      "tripExpensesLink": "Reisekosten aufteilen",
+      "homeLink": "KupaPay Startseite",
+      "tipsHeading": "Praktische Tipps",
+      "ctaTitle": "Gemeinsame Reisekosten in KupaPay tracken",
+      "ctaBody": "Erstelle eine Gruppe, erfasse wer was bezahlt hat, und lass KupaPay die Abrechnung vereinfachen — auf iPhone, Android und im Web."
+    },
+    "index": {
+      "seo": {
+        "title": "Reise-Geld- & Gruppenreise-Ratgeber | KupaPay",
+        "description": "Kurze, dauerhafte Ratgeber zum Teilen von Reisekosten, Bargeld vs. Karte im Ausland und Geld-Basics nach Reiseziel — mit Links zu KupaPays kostenlosem Rechner und App.",
+        "ogTitle": "Reise-Geld-Ratgeber für Gruppenreisen",
+        "ogDescription": "Praktische Tipps für gemeinsame Reiseausgaben plus kostenlose Tools zum Teilen von Rechnungen mit Freunden."
+      },
+      "hero": {
+        "headline": "Reise-Geld-Ratgeber für Gruppenreisen",
+        "subheadline": "Allgemeine, praktische Tipps fürs gemeinsame Bezahlen im Ausland — und kostenlose Tools zum Aufteilen der Kosten nach der Heimkehr."
+      },
+      "intro": "Diese Ratgeber bleiben bewusst allgemein: keine Wechselkurs-Schätzungen oder Preisangaben. Nutze sie zusammen mit KupaPays Rechnung-teilen-Rechner und Reisekosten-Funktionen, wenn du gemeinsame Kosten trackst.",
+      "listHeading": "Ratgeber"
+    },
+    "guides": {
+      "groupTripSplit": {
+        "cardTitle": "Kosten auf Gruppenreise teilen",
+        "cardTeaser": "Früh Erwartungen klären und gemeinsame Ausgaben laufend erfassen.",
+        "seo": {
+          "title": "Kosten auf Gruppenreise teilen | KupaPay",
+          "description": "Praktische Tipps, gemeinsame Reisekosten fair zu teilen — Essen, Unterkunft, Transport — ohne peinliche Rechenerei am Ende.",
+          "ogTitle": "Kosten auf Gruppenreise teilen",
+          "ogDescription": "Einfache Gewohnheiten, um zu tracken, wer bei gemeinsamen Reisen was bezahlt hat."
+        },
+        "hero": {
+          "headline": "Kosten auf Gruppenreise teilen",
+          "subheadline": "Ein paar gemeinsame Regeln machen die Abrechnung am Reiseende leichter."
+        },
+        "intro": "Gruppenreisen laufen am besten, wenn alle vor dem Geldfluss einig sind, wie Kosten geteilt werden. KupaPay hilft beim Erfassen und Vereinfachen von Schulden; diese Tipps fokussieren den Reise-Workflow.",
+        "tips": [
+          {
+            "title": "Vor der Abreise einen gemeinsamen Plan erstellen",
+            "body": "Vereinbart, was gleich geteilt wird (Lebensmittel, Airbnb) und was jeder selbst zahlt (Flüge, Souvenirs). Schreibt es in den Gruppenchat, damit Erwartungen klar bleiben."
+          },
+          {
+            "title": "Ausgaben erfassen, solange sie frisch sind",
+            "body": "Fügt jede gemeinsame Rechnung kurz danach hinzu — Zahler, Betrag und wer dabei war. Bis zur letzten Nacht warten macht Details leicht vergesslich."
+          },
+          {
+            "title": "Eine Gruppe für die ganze Reise",
+            "body": "Eine KupaPay-Gruppe pro Reise hält Salden an einem Ort. Bei Nebenaktivitäten entweder bar vor Ort teilen oder eine separate Ausgabe nur mit Beteiligten anlegen."
+          },
+          {
+            "title": "Web-Rechner für schnelle Aufteilung",
+            "body": "Für ein Abendessen oder Taxi den kostenlosen Rechner auf der Seite nutzen und die Aufteilung bei Bedarf als Gruppe in der App speichern."
+          }
+        ]
+      },
+      "cashVsCardAbroad": {
+        "cardTitle": "Bargeld oder Karte auf Reisen",
+        "cardTeaser": "Beides dabeihaben, Karten-Reiseeinstellungen kennen und Belege für gemeinsame Rechnungen aufbewahren.",
+        "seo": {
+          "title": "Bargeld oder Karte im Ausland | KupaPay",
+          "description": "Allgemeine Hinweise zu Bargeld und Zahlungskarten im Ausland — ohne konkrete Gebühren- oder Kursangaben.",
+          "ogTitle": "Bargeld oder Karte auf Reisen",
+          "ogDescription": "Praktische Zahlungsgewohnheiten für Reisen mit Freunden."
+        },
+        "hero": {
+          "headline": "Bargeld oder Karte auf Reisen",
+          "subheadline": "Die meisten Reisen laufen smoother, wenn beide Zahlungsoptionen verfügbar sind."
+        },
+        "intro": "Kartenakzeptanz und Geldautomat-Verfügbarkeit variieren je nach Ort und Händler. Diese Tipps nennen keine wechselnden Gebühren oder Kurse — prüfe vor der Abreise die aktuellen Reisehinweise deiner Bank.",
+        "tips": [
+          {
+            "title": "Etwas lokales Bargeld für kleine Einkäufe",
+            "body": "Märkte, Trinkgeld und kleine Händler bevorzugen oft Bargeld, auch wo Karten üblich sind. Eine Barrechnung teilen ist leichter, wenn jemand den Betrag sofort in der Ausgaben-App notiert."
+          },
+          {
+            "title": "Der Bank mitteilen, dass du reist",
+            "body": "Viele Banken erlauben eine Reisemeldung in App oder Online-Banking. Das reduziert das Risiko einer Karten-Ablehnung mitten beim Gruppenessen."
+          },
+          {
+            "title": "Karten für größere, nachvollziehbare Ausgaben",
+            "body": "Hotels, Mietwagen und viele Restaurants nehmen Karten. Den Karteninhaber als Zahler in KupaPay zu erfassen, hält den Gruppensaldo korrekt."
+          },
+          {
+            "title": "Belege für gemeinsame Ausgaben aufbewahren",
+            "body": "Ein Foto oder Notiz hilft später bei Fragen zu Steuer, Servicegebühr oder wer was bestellt hat — besonders bei Multi-Währungs-Reisen."
+          }
+        ]
+      },
+      "multiCurrencyGroups": {
+        "cardTitle": "Gruppenausgaben in mehreren Währungen",
+        "cardTeaser": "Jede Ausgabe in der bezahlten Währung erfassen und in vereinbarter Währung ausgleichen.",
+        "seo": {
+          "title": "Gruppenausgaben in mehreren Währungen | KupaPay",
+          "description": "Gemeinsame Reisekosten tracken, wenn Freunde in verschiedenen Währungen zahlen — allgemeine Workflow-Tipps für KupaPay-Gruppen.",
+          "ogTitle": "Gruppenausgaben in mehreren Währungen",
+          "ogDescription": "Reisekosten in bezahlter Währung erfassen, dann Abrechnung vereinfachen."
+        },
+        "hero": {
+          "headline": "Gruppenausgaben in mehreren Währungen",
+          "subheadline": "Reisen mischen oft Währungen; Klarheit schlägt Kopfrechnen."
+        },
+        "intro": "KupaPay erfasst Ausgaben in der bezahlten Währung. Automatische Umrechnung in Heimatwährung steht nicht im Fokus — vereinbart stattdessen, wie ihr Salden ausgleicht.",
+        "tips": [
+          {
+            "title": "Währung vom Beleg eingeben",
+            "body": "Betrag und Währung von Rechnung oder Kartenabrechnung verwenden. So bleibt jede Zeile ehrlich für alle, die die Gruppe später prüfen."
+          },
+          {
+            "title": "Abrechnungswährung vereinbaren",
+            "body": "Eine Währung für finale Überweisungen wählen, wenn die Gruppe im Ausland Bargeld und Karten mischt. Ausgleich kann außerhalb der App über Bank oder Payment-App laufen."
+          },
+          {
+            "title": "Nach Beteiligung teilen, nicht nach Kurs-Schätzungen",
+            "body": "Gemeinsame Kosten nach Teilnahme aufteilen. Informelle Umrechnungs-Shortcuts vermeiden, die jemand nach der Reise anfechten könnte."
+          },
+          {
+            "title": "Nach der Reise Schulden vereinfachen",
+            "body": "KupaPays Vereinfachung reduziert die nötigen Zahlungen zwischen Freunden, sobald alle Ausgaben erfasst sind."
+          }
+        ]
+      },
+      "settleUpAfterTravel": {
+        "cardTitle": "Nach der Reise abrechnen",
+        "cardTeaser": "Mit vereinfachten Schulden und klaren Bestätigungen abschließen.",
+        "seo": {
+          "title": "Abrechnung nach Gruppenreise | KupaPay",
+          "description": "Schritte zum Abschluss: Salden prüfen, Schulden vereinfachen, Zahlungen bestätigen — ohne peinliche Tabellen.",
+          "ogTitle": "Nach der Reise abrechnen",
+          "ogDescription": "Gemeinsame Reiseausgaben mit weniger Überweisungen zwischen Freunden abschließen."
+        },
+        "hero": {
+          "headline": "Nach der Reise abrechnen",
+          "subheadline": "Eine kurze Durchsicht schlägt offene Salden über Monate."
+        },
+        "intro": "Am Reiseende wollen die meisten Gruppen eine klare Liste „wer zahlt wem“. KupaPay ist für genau diesen Moment gebaut — diese Gewohnheiten halten es stressfrei.",
+        "tips": [
+          {
+            "title": "Gemeinsam das Gruppenjournal prüfen",
+            "body": "Kürzliche Ausgaben in App oder Web überfliegen. Fehlende Posten oder falsche Aufteilungen korrigieren, bevor jemand Geld sendet."
+          },
+          {
+            "title": "Auf vereinfachte Schulden setzen",
+            "body": "Die App Nettosalden und weniger Ausgleichs-Überweisungen rechnen lassen statt jede Einzelausgabe zurückzuzahlen."
+          },
+          {
+            "title": "Zahlungen markieren, wenn sie passieren",
+            "body": "Eine Ausgleichszahlung in der Gruppe zu erfassen, hält die Historie für alle korrekt — besonders wenn ihr wieder zusammen reist."
+          },
+          {
+            "title": "Gruppe als Referenz behalten oder neu starten",
+            "body": "Reisegruppe als Nachschlag behalten oder frische Gruppe fürs nächste Abenteuer — in jedem Fall schlägt dokumentieren vergessene IOUs."
+          }
+        ]
+      },
+      "japanTravelMoney": {
+        "cardTitle": "Geld-Tipps für Japan",
+        "cardTeaser": "Japanischer Yen, bargeldfreundliche Läden, IC-Verkehrskarten — plus gemeinsame Kosten tracken.",
+        "seo": {
+          "title": "Geld-Tipps Japan für Gruppen | KupaPay",
+          "description": "Allgemeine Geld-Tipps für Japan: Yen, Karten und IC-Karten — ohne Preis- oder Kursbehauptungen.",
+          "ogTitle": "Geld-Tipps Reise Japan",
+          "ogDescription": "Praktische Zahlungsgewohnheiten für Gruppenreisen in Japan."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Japan",
+          "subheadline": "Japan nutzt den japanischen Yen (JPY). Viele Reisende haben Bargeld und Karten dabei."
+        },
+        "intro": "Zahlungsnormen unterscheiden sich je nach Laden und Stadt. Diese Tipps bleiben bei bekannten Basics; vor der Reise aktuelle Hinweise offizieller Tourismusquellen prüfen.",
+        "tips": [
+          {
+            "title": "Yen für Alltagsausgaben mitnehmen",
+            "body": "Bargeld ist in vielen Restaurants, Schreinen und kleinen Läden noch üblich. Wenn eine Person bar für die Gruppe zahlt, die Ausgabe sofort erfassen, damit andere fair erstatten können."
+          },
+          {
+            "title": "IC-Verkehrskarten helfen bei Zug und Bus",
+            "body": "Aufladbare IC-Karten (z. B. Suica und Pasmo) sind im ÖPNV weit verbreitet. Vorher klären, ob Transport gemeinsame oder individuelle Kosten sind, bevor ihr eine Woche durch Drehkreuze geht."
+          },
+          {
+            "title": "Karten funktionieren in vielen größeren Betrieben",
+            "body": "Hotels, Ketten und viele städtische Restaurants nehmen Karten. Trotzdem Reserve-Bargeld für rein barzahlende kleine Lokale mitnehmen."
+          },
+          {
+            "title": "Gemeinsame Mahlzeiten und Tagesausflüge tracken",
+            "body": "Eine KupaPay-Reisegruppe für Ryokan, Einkäufe und Gruppentickets nutzen, damit Salden an langen Sightseeing-Tagen klar bleiben."
+          }
+        ]
+      },
+      "thailandTravelMoney": {
+        "cardTitle": "Geld-Tipps für Thailand",
+        "cardTeaser": "Thailändischer Baht, Geldautomaten und Strandreise-Kosten mit Freunden teilen.",
+        "seo": {
+          "title": "Geld-Tipps Thailand für Gruppen | KupaPay",
+          "description": "Allgemeine Zahlungstipps Thailand: Baht, Bargeld und Karten — für Gruppen, die Reisekosten teilen.",
+          "ogTitle": "Geld-Tipps Reise Thailand",
+          "ogDescription": "Zahlungs-Basics für gemeinsame Reisen in Thailand."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Thailand",
+          "subheadline": "Thailands Währung ist der thailändische Baht (THB)."
+        },
+        "intro": "Touristengebiete nehmen oft Karten, Märkte und Transport bevorzugen eher Bargeld. Geldautomat- und Kartenregeln vor Abreise mit der Bank klären.",
+        "tips": [
+          {
+            "title": "Baht an seriösen Geldautomaten abheben",
+            "body": "Wenn möglich Bankautomaten nutzen und PIN schützen. Wenn ein Freund für die Gruppe abhebt, nur als gemeinsame Ausgabe zählen, wenn alle dem gemeinsamen Topf zugestimmt haben."
+          },
+          {
+            "title": "Kleinere Scheine für Märkte und Transport",
+            "body": "Händler wechseln große Scheine nicht immer. Street-Food teilen ist leichter, wenn jemand den gezahlten Gesamtbetrag in der Ausgabengruppe notiert."
+          },
+          {
+            "title": "Karten in Hotels und bei Touren",
+            "body": "Unterkünfte und viele Touranbieter nehmen Karten. Zahler in KupaPay erfassen, damit Zimmer, Boote und Gruppenaktivitäten fair bleiben."
+          },
+          {
+            "title": "Höflich über Trinkgeld einigen",
+            "body": "Trinkgeldgewohnheiten unterscheiden sich von vielen westlichen Ländern. Ist Service auf einer Gruppenrechnung enthalten, den Beleg wie jede andere gemeinsame Mahlzeit teilen."
+          }
+        ]
+      },
+      "europeTravelMoney": {
+        "cardTitle": "Geld-Tipps für Europa",
+        "cardTeaser": "Euro in vielen Ländern, lokale Währungen woanders — vor Multi-Länder-Trip planen.",
+        "seo": {
+          "title": "Geld-Tipps Europa für Gruppen | KupaPay",
+          "description": "Allgemeine Europa-Zahlungstipps: Euro, andere lokale Währungen und Karten — für Freunde, die Reisekosten teilen.",
+          "ogTitle": "Geld-Tipps Reise Europa",
+          "ogDescription": "Zahlungs-Basics für mehrländerige Europareisen."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Europa",
+          "subheadline": "Viele europäische Länder nutzen den Euro (EUR); andere haben eigene Währungen."
+        },
+        "intro": "Eine Route kann mehrere Zahlungssysteme durchqueren. Tipps bleiben allgemein — vor dem Budget mit Freunden klären, welche Währung jedes Ziel nutzt.",
+        "tips": [
+          {
+            "title": "Währung pro Stopp kennen",
+            "body": "Eurozone teilt EUR; Orte wie Vereinigtes Königreich, Schweiz und große Teile Osteuropas nutzen andere Währungen. Ausgaben in bezahlter Währung in KupaPay labeln."
+          },
+          {
+            "title": "Kontaktlose Karten sind verbreitet",
+            "body": "Viele Händler akzeptieren Tap-to-pay. Bei gemeinsamen Tabs notieren, wer mit seiner Karte gezahlt hat, damit Erstattungen stimmen."
+          },
+          {
+            "title": "Bargeld für Kleinstädte und Märkte",
+            "body": "Ländliche Märkte und manche Cafés bevorzugen Bargeld. Gemeinsamer Lebensmittel-Topf funktioniert, wenn eine Person einkauft und den Beleg für die Gruppe erfasst."
+          },
+          {
+            "title": "Bahnpässe und Gruppentickets",
+            "body": "Zugreservierungen und Museumsblöcke vergisst man leicht — bei Buchung als Ausgabe hinzufügen, damit die Gruppe Kosten vorab sieht."
+          }
+        ]
+      },
+      "ukTravelMoney": {
+        "cardTitle": "Geld-Tipps für Großbritannien",
+        "cardTeaser": "Pfund Sterling, kontaktlos zahlen und Städtetrips aufteilen.",
+        "seo": {
+          "title": "Geld-Tipps UK für Gruppen | KupaPay",
+          "description": "Allgemeine UK-Tipps: Pfund Sterling (GBP), Karten und Bargeld für Gruppenausgaben-Tracking.",
+          "ogTitle": "Geld-Tipps Reise UK",
+          "ogDescription": "Zahlungs-Basics für Gruppenreisen im Vereinigten Königreich."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Großbritannien",
+          "subheadline": "Das Vereinigte Königreich nutzt das Pfund Sterling (GBP)."
+        },
+        "intro": "London und andere Städte sind weitgehend kartenfreundlich, etwas Bargeld hilft trotzdem bei Kleinkäufen und schnellem Zurückzahlen an Freunde.",
+        "tips": [
+          {
+            "title": "Kontaktlos ist weit verbreitet",
+            "body": "Viele britische Händler nehmen kontaktlose Karten und Mobile Wallets. Beim Gruppenessen festlegen, wer zahlt, und die Rechnung erfassen, bevor sich alle verabschieden."
+          },
+          {
+            "title": "Bargeld für gelegentliche Cash-only-Spots",
+            "body": "Manche kleinere Lokale bevorzugen Bargeld oder haben Kartenmindestbeträge. Geteilte Taxis teilen sich leichter, wenn der Zahler den Taxameter-Betrag sofort notiert."
+          },
+          {
+            "title": "Servicegebühr auf Rechnungen beachten",
+            "body": "Restaurants können eine Service-Charge-Zeile hinzufügen. Den vollen Belegbetrag beim Teilen einbeziehen, damit niemand gemeinsames Trinkgeld oder Gebühr unterzahlt."
+          },
+          {
+            "title": "Reisegruppe für Städtetrips",
+            "body": "Wochenenden mit gemeinsamem Airbnb und Pub-Tabs passen gut in eine KupaPay-Gruppe — besonders wenn Freunde aus verschiedenen Städten kommen."
+          }
+        ]
+      },
+      "usaTravelMoney": {
+        "cardTitle": "Geld-Tipps für die USA",
+        "cardTeaser": "US-Dollar, Trinkgeld im Restaurant und gemeinsame Roadtrip-Kosten.",
+        "seo": {
+          "title": "Geld-Tipps USA für Gruppen | KupaPay",
+          "description": "Allgemeine USA-Tipps: US-Dollar (USD), Karten und Trinkgeld-Normen — für Gruppen mit gemeinsamen Kosten.",
+          "ogTitle": "Geld-Tipps Reise USA",
+          "ogDescription": "Zahlungs-Basics für Gruppenreisen in den Vereinigten Staaten."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für die USA",
+          "subheadline": "Die Vereinigten Staaten nutzen den US-Dollar (USD)."
+        },
+        "intro": "Karten werden in den meisten städtischen und suburbanen Geschäften akzeptiert; Trinkgeld ist in vielen Gastgewerbe-Bereichen üblich. Beträge variieren — den Hinweisen vor Ort und lokalen Normen folgen, nicht festen Regeln hier.",
+        "tips": [
+          {
+            "title": "Karten decken die meisten Gruppenmahlzeiten",
+            "body": "Restaurants teilen Rechnungen oft auf Wunsch, aber eine Karte plus KupaPay ist für große Gruppen oft schneller. Steuer und Trinkgeld in der gemeinsamen Ausgabe erfassen."
+          },
+          {
+            "title": "Trinkgeld wird in vielen Restaurants mit Bedienung erwartet",
+            "body": "Rechnung auf vorgeschlagene Gratuity-Zeilen prüfen. Ist keins enthalten, kann die Gruppe vor dem Zahlen einen gemeinsamen Prozentsatz vereinbaren."
+          },
+          {
+            "title": "Bargeld für Parken, Trinkgeld und kleine Händler",
+            "body": "Farmers Markets, Valet und manche Mautstellen brauchen Bargeld. Barzahlungen am selben Tag in der Reisegruppe notieren."
+          },
+          {
+            "title": "Roadtrip: Kraftstoff und Lebensmittel",
+            "body": "Abwechselnd an der Zapfsäule oder im Großmarkt zahlen oder einen gemeinsamen Topf mit klarer Dokumentation — KupaPay hält wechselnde Zahler auf langen Fahrten fair."
+          }
+        ]
+      },
+      "tippingWhileTraveling": {
+        "cardTitle": "Trinkgeld auf Reisen im Ausland",
+        "cardTeaser": "Normen unterscheiden sich nach Land — beobachten, fragen und gemeinsame Rechnungen fair teilen.",
+        "seo": {
+          "title": "Trinkgeld auf Reisen im Ausland | KupaPay",
+          "description": "Allgemeine Hinweise zu Trinkgeld auf Reisen — ohne feste Beträge oder Prozentsätze.",
+          "ogTitle": "Trinkgeld auf Reisen im Ausland",
+          "ogDescription": "Gratuity auf Gruppenreisen ohne peinliche Abrechnung handhaben."
+        },
+        "hero": {
+          "headline": "Trinkgeld auf Reisen im Ausland",
+          "subheadline": "Es gibt keine globale Trinkgeld-Regel — Bräuche variieren nach Land und Serviceart."
+        },
+        "intro": "Diese Tipps listen keine wechselnden Beträge. Im Zweifel Gastgeber, Reiseleiter fragen oder offizielle Tourismus-Hinweise zum Ziel prüfen.",
+        "tips": [
+          {
+            "title": "Zuerst auf die Rechnung schauen",
+            "body": "In manchen Ländern ist Service im Total enthalten; woanders liegt Gratuity beim Gast. Den finalen Belegbetrag in KupaPay teilen, wie die Gruppe Trinkgeld vereinbart hat."
+          },
+          {
+            "title": "Vor dem Essen in der Gruppe klären",
+            "body": "Entscheiden, ob alle Trinkgeld gleich teilen oder nur Alkohol-Besteller, zum Beispiel. Ein kurzes Gespräch verhindert Debatten später."
+          },
+          {
+            "title": "Bar-Trinkgeld vs. Karten-Trinkgeld",
+            "body": "Manche Lokale nehmen Gratuity nur bar direkt ans Personal. Deckt eine Person Bar-Trinkgeld für den Tisch, als gemeinsame Ausgabe erfassen, wenn das der Plan war."
+          },
+          {
+            "title": "Reiseleiter und Fahrer",
+            "body": "Geführte Tagesausflüge haben oft eigene Trinkgeld-Erwartungen. Beim Anbieter klären, was üblich ist, statt Heimatgewohnheiten zu unterstellen."
+          }
+        ]
+      }
+    }
+  },
+  "ambassadorProgram": {
+    "seo": {
+      "title": "KupaPay-Botschafterprogramm — Reise-Creator & Studiengruppen-Leiter",
+      "description": "Bewirb dich für das KupaPay-Botschafterprogramm: Gratis-Pro für genehmigte Creator und Gruppenleiter.",
+      "ogTitle": "KupaPay-Botschafterprogramm",
+      "ogDescription": "Ohne Bargeld-Provision — Gratis-Pro und Empfehlungslink für deine Gruppen."
+    },
+    "hero": {
+      "headline": "Programm für Reise-Creator und Studiengruppen-Leiter",
+      "subheadline": "Teile KupaPay mit deiner Community. Genehmigte Botschafter erhalten Pro und einen persönlichen Empfehlungslink."
+    },
+    "benefits": {
+      "title": "Was Botschafter erhalten",
+      "items": [
+        {
+          "title": "Gratis-Pro",
+          "body": "Pro für einen festgelegten Zeitraum — für erweiterte Funktionen bei Gruppenausgaben."
+        },
+        {
+          "title": "Dein Link",
+          "body": "Nach Freigabe erhältst du einen eindeutigen Code zur Zuordnung neuer Nutzer."
+        },
+        {
+          "title": "Manuelle Prüfung",
+          "body": "Jede Bewerbung prüft das KupaPay-Team. Pro wird nie automatisch vergeben."
+        }
+      ]
+    },
+    "form": {
+      "title": "Bewerben",
+      "signInHint": "Melde dich mit dem KupaPay-Konto an, das du als Botschafter nutzen willst.",
+      "audienceLabel": "Ich bewerbe mich als",
+      "audienceTravelCreator": "Reise-Creator / Kanal",
+      "audienceStudentLeader": "Studiengruppe / Reiseorganisator",
+      "linkLabel": "Link zu Kanal oder Gruppe",
+      "linkPlaceholder": "https://…",
+      "messageLabel": "Wie stellst du KupaPay vor?",
+      "messagePlaceholder": "Beschreibe deine Audience und wie du KupaPay teilst (Reisen, Vereine, Wohnheime…).",
+      "consentLabel": "Ich willige ein, dass KupaPay diese Angaben zur Prüfung gemäß Datenschutzerklärung nutzt.",
+      "privacyLink": "Datenschutzerklärung",
+      "submit": "Bewerbung senden",
+      "submitting": "Wird gesendet…",
+      "signInCta": "Anmelden zum Bewerben"
+    },
+    "status": {
+      "pendingTitle": "Bewerbung eingegangen",
+      "pendingBody": "Danke — deine Bewerbung wartet auf Prüfung. Wir mailen an die KupaPay-Konto-Adresse nach der Entscheidung.",
+      "approvedTitle": "Du bist Botschafter",
+      "approvedBody": "Dein Empfehlungscode:",
+      "rejectedTitle": "Bewerbung abgelehnt",
+      "rejectedBody": "Diese Bewerbung wurde nicht genehmigt. Bei Fragen: Support.",
+      "alreadyAmbassador": "Dein Konto ist bereits genehmigter Botschafter."
+    },
+    "errors": {
+      "notAuthenticated": "Zum Bewerben anmelden.",
+      "consentRequired": "Bitte Datenschutzhinweis bestätigen.",
+      "applicationPending": "Du hast bereits eine offene Bewerbung.",
+      "alreadyAmbassador": "Konto ist bereits Botschafter.",
+      "generic": "Senden fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "disclaimer": "Keine Bargeld-Provisionen. Pro und Tracking nur nach manueller Freigabe."
   }
 }

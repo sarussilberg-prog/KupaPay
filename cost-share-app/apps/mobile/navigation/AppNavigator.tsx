@@ -32,12 +32,13 @@ import { prefetchAddExpensePrerequisitesForAllGroups } from '../hooks/queries/pr
 import { useActivityUnreadCount } from '../hooks/queries/useActivityUnreadCount';
 
 function HeaderBackButton({ onPress }: { onPress: () => void }) {
+    const { t } = useTranslation();
     const isRtl = useRtlLayout();
     return (
         <TouchableOpacity
             onPress={onPress}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('common.back')}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             style={{ paddingHorizontal: 4, paddingVertical: 4 }}
         >
@@ -62,6 +63,7 @@ import { GroupsListScreen } from '../screens/groups/GroupsListScreen';
 import { GroupDetailScreen } from '../screens/groups/GroupDetailScreen';
 import { FavoriteGroupScreen } from '../screens/favoriteGroup/FavoriteGroupScreen';
 import { CreateGroupScreen } from '../screens/groups/CreateGroupScreen';
+import { SplitwiseImportScreen } from '../screens/groups/SplitwiseImportScreen';
 import { GroupPostCreateInviteScreen } from '../screens/groups/GroupPostCreateInviteScreen';
 import { GroupMembersScreen } from '../screens/groups/GroupMembersScreen';
 import { GroupNoteScreen } from '../screens/groups/GroupNoteScreen';
@@ -89,7 +91,50 @@ import { AdminErrorDetailScreen } from '../screens/admin/AdminErrorDetailScreen'
 import { AdminErrorEventScreen } from '../screens/admin/AdminErrorEventScreen';
 import { AdminSupportMessagesScreen } from '../screens/admin/AdminSupportMessagesScreen';
 import { AdminMonetizationScreen } from '../screens/admin/AdminMonetizationScreen';
+import { AdminPromoCodesScreen } from '../screens/admin/AdminPromoCodesScreen';
+import { AdminGrowthMetricsScreen } from '../screens/admin/AdminGrowthMetricsScreen';
 import { PaywallScreen } from '../screens/pro/PaywallScreen';
+import { boundScreen } from './boundScreen';
+
+/** One error boundary per route (#427). Reuse the same bound component across stacks. */
+const Screen = {
+    GroupsList: boundScreen(GroupsListScreen, 'GroupsList'),
+    GroupDetail: boundScreen(GroupDetailScreen, 'GroupDetail'),
+    FavoriteGroupHome: boundScreen(FavoriteGroupScreen, 'FavoriteGroupHome'),
+    GroupMembers: boundScreen(GroupMembersScreen, 'GroupMembers'),
+    GroupNote: boundScreen(GroupNoteScreen, 'GroupNote'),
+    ExpenseList: boundScreen(ExpenseListScreen, 'ExpenseList'),
+    ExpenseDetail: boundScreen(ExpenseDetailScreen, 'ExpenseDetail'),
+    Balances: boundScreen(BalancesScreen, 'Balances'),
+    SettleUpList: boundScreen(SettleUpListScreen, 'SettleUpList'),
+    SettlementHistory: boundScreen(SettlementHistoryScreen, 'SettlementHistory'),
+    ActivityFeed: boundScreen(ActivityFeedScreen, 'ActivityFeed'),
+    ProfileMain: boundScreen(ProfileScreen, 'ProfileMain'),
+    EditProfile: boundScreen(EditProfileScreen, 'EditProfile'),
+    Friends: boundScreen(FriendsScreen, 'Friends'),
+    FindFriends: boundScreen(FindFriendsScreen, 'FindFriends'),
+    Settings: boundScreen(SettingsScreen, 'Settings'),
+    Paywall: boundScreen(PaywallScreen, 'Paywall'),
+    NotificationSettings: boundScreen(NotificationSettingsScreen, 'NotificationSettings'),
+    ReferralProgram: boundScreen(ReferralProgramScreen, 'ReferralProgram'),
+    MySubscription: boundScreen(MySubscriptionScreen, 'MySubscription'),
+    ContactUs: boundScreen(ContactUsScreen, 'ContactUs'),
+    AdminPortal: boundScreen(AdminPortalScreen, 'AdminPortal'),
+    AdminDeletedUsers: boundScreen(AdminDeletedUsersScreen, 'AdminDeletedUsers'),
+    AdminOnboardingPreview: boundScreen(AdminOnboardingPreviewScreen, 'AdminOnboardingPreview'),
+    AdminErrors: boundScreen(AdminErrorsScreen, 'AdminErrors'),
+    AdminErrorDetail: boundScreen(AdminErrorDetailScreen, 'AdminErrorDetail'),
+    AdminErrorEvent: boundScreen(AdminErrorEventScreen, 'AdminErrorEvent'),
+    AdminSupportMessages: boundScreen(AdminSupportMessagesScreen, 'AdminSupportMessages'),
+    AdminMonetization: boundScreen(AdminMonetizationScreen, 'AdminMonetization'),
+    AdminGrowthMetrics: boundScreen(AdminGrowthMetricsScreen, 'AdminGrowthMetrics'),
+    CreateGroup: boundScreen(CreateGroupScreen, 'CreateGroup'),
+    SplitwiseImport: boundScreen(SplitwiseImportScreen, 'SplitwiseImport'),
+    GroupPostCreateInvite: boundScreen(GroupPostCreateInviteScreen, 'GroupPostCreateInvite'),
+    EditGroup: boundScreen(CreateGroupScreen, 'EditGroup'),
+    AddExpense: boundScreen(AddExpenseScreen, 'AddExpense'),
+    EditExpense: boundScreen(AddExpenseScreen, 'EditExpense'),
+};
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -129,47 +174,47 @@ function GroupsStack() {
         <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
             <Stack.Screen
                 name="GroupsList"
-                component={GroupsListScreen}
+                component={Screen.GroupsList}
                 options={{ title: t('tabs.groups'), headerShown: false }}
             />
             <Stack.Screen
                 name="GroupDetail"
-                component={GroupDetailScreen}
+                component={Screen.GroupDetail}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="GroupMembers"
-                component={GroupMembersScreen}
+                component={Screen.GroupMembers}
                 options={{ title: t('groups.members.title') }}
             />
             <Stack.Screen
                 name="GroupNote"
-                component={GroupNoteScreen}
+                component={Screen.GroupNote}
                 options={{ title: t('groups.note.title') }}
             />
             <Stack.Screen
                 name="ExpenseList"
-                component={ExpenseListScreen}
+                component={Screen.ExpenseList}
                 options={{ title: t('expenses.title') }}
             />
             <Stack.Screen
                 name="ExpenseDetail"
-                component={ExpenseDetailScreen}
+                component={Screen.ExpenseDetail}
                 options={{ title: t('expenses.expenseDetail') }}
             />
             <Stack.Screen
                 name="Balances"
-                component={BalancesScreen}
+                component={Screen.Balances}
                 options={{ title: t('balances.title') }}
             />
             <Stack.Screen
                 name="SettleUpList"
-                component={SettleUpListScreen}
+                component={Screen.SettleUpList}
                 options={{ title: t('settleUp.title') }}
             />
             <Stack.Screen
                 name="SettlementHistory"
-                component={SettlementHistoryScreen}
+                component={Screen.SettlementHistory}
                 options={{ title: t('balances.settlementHistory') }}
             />
         </Stack.Navigator>
@@ -184,7 +229,7 @@ function FavoriteGroupStack() {
         <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
             <Stack.Screen
                 name="FavoriteGroupHome"
-                component={FavoriteGroupScreen}
+                component={Screen.FavoriteGroupHome}
                 // Seed params so GroupDetailScreen's `route.params.groupId`
                 // destructure (which reads `route.params` directly) can't hit
                 // `undefined` on the first frame before FavoriteGroupScreen's
@@ -194,37 +239,37 @@ function FavoriteGroupStack() {
             />
             <Stack.Screen
                 name="GroupMembers"
-                component={GroupMembersScreen}
+                component={Screen.GroupMembers}
                 options={{ title: t('groups.members.title') }}
             />
             <Stack.Screen
                 name="GroupNote"
-                component={GroupNoteScreen}
+                component={Screen.GroupNote}
                 options={{ title: t('groups.note.title') }}
             />
             <Stack.Screen
                 name="ExpenseList"
-                component={ExpenseListScreen}
+                component={Screen.ExpenseList}
                 options={{ title: t('expenses.title') }}
             />
             <Stack.Screen
                 name="ExpenseDetail"
-                component={ExpenseDetailScreen}
+                component={Screen.ExpenseDetail}
                 options={{ title: t('expenses.expenseDetail') }}
             />
             <Stack.Screen
                 name="Balances"
-                component={BalancesScreen}
+                component={Screen.Balances}
                 options={{ title: t('balances.title') }}
             />
             <Stack.Screen
                 name="SettleUpList"
-                component={SettleUpListScreen}
+                component={Screen.SettleUpList}
                 options={{ title: t('settleUp.title') }}
             />
             <Stack.Screen
                 name="SettlementHistory"
-                component={SettlementHistoryScreen}
+                component={Screen.SettlementHistory}
                 options={{ title: t('balances.settlementHistory') }}
             />
         </Stack.Navigator>
@@ -239,12 +284,12 @@ function ActivityStack() {
         <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
             <Stack.Screen
                 name="ActivityFeed"
-                component={ActivityFeedScreen}
+                component={Screen.ActivityFeed}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="ExpenseDetail"
-                component={ExpenseDetailScreen}
+                component={Screen.ExpenseDetail}
                 options={{ title: t('expenses.expenseDetail') }}
             />
         </Stack.Navigator>
@@ -259,22 +304,22 @@ function ProfileStack() {
         <Stack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
             <Stack.Screen
                 name="ProfileMain"
-                component={ProfileScreen}
+                component={Screen.ProfileMain}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="EditProfile"
-                component={EditProfileScreen}
+                component={Screen.EditProfile}
                 options={{ title: t('profile.editProfile') }}
             />
             <Stack.Screen
                 name="Friends"
-                component={FriendsScreen}
+                component={Screen.Friends}
                 options={{ title: t('friends.title') }}
             />
             <Stack.Screen
                 name="FindFriends"
-                component={FindFriendsScreen}
+                component={Screen.FindFriends}
                 options={{ title: t('friends.find.title') }}
             />
         </Stack.Navigator>
@@ -319,7 +364,7 @@ function MainTabs() {
                             />
                             <UnreadBadge
                                 count={unreadCount}
-                                style={{ position: 'absolute', top: -6, right: -10 }}
+                                style={{ position: 'absolute', top: -6, end: -10 }}
                             />
                         </View>
                     ),
@@ -346,6 +391,8 @@ function MainTabs() {
         </Tab.Navigator>
     );
 }
+
+const BoundMainTabs = boundScreen(MainTabs, 'MainTabs');
 
 export function AppNavigator() {
     const { t } = useTranslation();
@@ -376,68 +423,68 @@ export function AppNavigator() {
         <RootStack.Navigator screenOptions={buildStackScreenOptions(isRtl)}>
             <RootStack.Screen
                 name="Main"
-                component={MainTabs}
+                component={BoundMainTabs}
                 options={{ headerShown: false }}
             />
 
             <RootStack.Screen
                 name="Settings"
-                component={SettingsScreen}
+                component={Screen.Settings}
                 options={{ title: t('settings.title') }}
             />
             <RootStack.Screen
                 name="Paywall"
-                component={PaywallScreen}
+                component={Screen.Paywall}
                 options={{ title: t('pro.paywall.title'), presentation: 'modal' }}
             />
             <RootStack.Screen
                 name="NotificationSettings"
-                component={NotificationSettingsScreen}
+                component={Screen.NotificationSettings}
                 options={{ title: t('notifications.title') }}
             />
             <RootStack.Screen
                 name="ReferralProgram"
-                component={ReferralProgramScreen}
+                component={Screen.ReferralProgram}
                 options={{ title: t('referral.title') }}
             />
             <RootStack.Screen
                 name="MySubscription"
-                component={MySubscriptionScreen}
+                component={Screen.MySubscription}
                 options={{ title: t('pro.subscription.sectionTitle') }}
             />
             <RootStack.Screen
                 name="ContactUs"
-                component={ContactUsScreen}
+                component={Screen.ContactUs}
                 options={{ title: t('settings.contactUs') }}
             />
             <RootStack.Screen
                 name="AdminPortal"
-                component={AdminPortalScreen}
+                component={Screen.AdminPortal}
                 options={{ title: t('admin.portal.title') }}
             />
             <RootStack.Screen
                 name="AdminDeletedUsers"
-                component={AdminDeletedUsersScreen}
+                component={Screen.AdminDeletedUsers}
                 options={{ title: t('admin.deletedUsers.title') }}
             />
             <RootStack.Screen
                 name="AdminOnboardingPreview"
-                component={AdminOnboardingPreviewScreen}
+                component={Screen.AdminOnboardingPreview}
                 options={{ headerShown: false }}
             />
             <RootStack.Screen
                 name="AdminErrors"
-                component={AdminErrorsScreen}
+                component={Screen.AdminErrors}
                 options={{ title: t('admin.errors.screenTitle') }}
             />
             <RootStack.Screen
                 name="AdminSupportMessages"
-                component={AdminSupportMessagesScreen}
+                component={Screen.AdminSupportMessages}
                 options={{ title: t('admin.supportMessages.title') }}
             />
             <RootStack.Screen
                 name="AdminErrorDetail"
-                component={AdminErrorDetailScreen}
+                component={Screen.AdminErrorDetail}
                 options={({ route }) => ({
                     title:
                         (route.params as { title?: string } | undefined)?.title ??
@@ -446,39 +493,54 @@ export function AppNavigator() {
             />
             <RootStack.Screen
                 name="AdminErrorEvent"
-                component={AdminErrorEventScreen}
+                component={Screen.AdminErrorEvent}
                 options={{ title: t('admin.errors.eventTitle') }}
             />
             <RootStack.Screen
                 name="AdminMonetization"
-                component={AdminMonetizationScreen}
-                options={{ title: 'Monetization' }}
+                component={Screen.AdminMonetization}
+                options={{ title: t('admin.monetization.portalRow') }}
+            />
+            <RootStack.Screen
+                name="AdminGrowthMetrics"
+                component={Screen.AdminGrowthMetrics}
+                options={{ title: t('admin.growth.screenTitle') }}
+            />
+            <RootStack.Screen
+                name="AdminPromoCodes"
+                component={AdminPromoCodesScreen}
+                options={{ title: t('admin.promoCodes.title') }}
             />
 
             <RootStack.Screen
                 name="CreateGroup"
-                component={CreateGroupScreen}
+                component={Screen.CreateGroup}
+                options={{ headerShown: false }}
+            />
+            <RootStack.Screen
+                name="SplitwiseImport"
+                component={Screen.SplitwiseImport}
                 options={{ headerShown: false }}
             />
             <RootStack.Screen
                 name="GroupPostCreateInvite"
-                component={GroupPostCreateInviteScreen}
+                component={Screen.GroupPostCreateInvite}
                 options={{ headerShown: false, presentation: 'modal' }}
             />
             <RootStack.Screen
                 name="EditGroup"
-                component={CreateGroupScreen}
+                component={Screen.EditGroup}
                 options={{ headerShown: false }}
             />
 
             <RootStack.Screen
                 name="AddExpense"
-                component={AddExpenseScreen}
+                component={Screen.AddExpense}
                 options={{ headerShown: false }}
             />
             <RootStack.Screen
                 name="EditExpense"
-                component={AddExpenseScreen}
+                component={Screen.EditExpense}
                 options={{ headerShown: false }}
             />
         </RootStack.Navigator>

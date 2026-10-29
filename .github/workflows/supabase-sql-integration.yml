@@ -28,6 +28,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+
+      - name: Install Node deps (group ledger DB simulation)
+        run: npm ci --ignore-scripts
+
       - name: Pin Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -50,14 +59,31 @@ jobs:
 
       - name: Load cached Postgres image
         if: steps.pg-image-cache.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/supabase-postgres-image.tar
-
-      - name: Pull Postgres image
-        if: steps.pg-image-cache.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
-          docker pull "${{ env.SUPABASE_POSTGRES_IMAGE }}"
-          docker save "${{ env.SUPABASE_POSTGRES_IMAGE }}" -o /tmp/supabase-postgres-image.tar
+          if ! docker load -i /tmp/supabase-postgres-image.tar; then
+            echo "::warning::Cached Postgres image tar corrupt — will pull fresh"
+            rm -f /tmp/supabase-postgres-image.tar
+            exit 1
+          fi
+        continue-on-error: true
+        id: pg_cache_load
+
+      - name: Pull Postgres image
+        if: steps.pg-image-cache.outputs.cache-hit != 'true' || steps.pg_cache_load.outcome == 'failure'
+        run: |
+          set -euo pipefail
+          image="${{ env.SUPABASE_POSTGRES_IMAGE }}"
+          for attempt in 1 2 3 4 5; do
+            if docker pull "$image"; then
+              docker save "$image" -o /tmp/supabase-postgres-image.tar
+              exit 0
+            fi
+            echo "::warning::docker pull attempt ${attempt}/5 failed (GHCR rate limit or network)"
+            sleep $((attempt * 15))
+          done
+          echo "::error::Could not pull Postgres image after 5 attempts"
+          exit 1
 
       - name: Lint migration filenames
         run: bash scripts/supabase-lint-migration-filenames.sh
@@ -92,6 +118,12 @@ jobs:
 
       - name: Run SQL regression tests
         run: bash scripts/ci-supabase-sql-run-tests.sh
+
+      - name: Group ledger simulation (DB integration #641)
+        run: bash scripts/ci-group-ledger-simulation-db.sh
+
+      - name: Offline schema contract seed matches snapshot
+        run: bash scripts/ci-verify-schema-contract-offline.sh
 
       - name: RPC/table schema contract (generated types surface)
         run: bash scripts/ci-supabase-types-contract.sh

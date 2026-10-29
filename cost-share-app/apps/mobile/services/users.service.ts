@@ -10,6 +10,8 @@ import { queryClient } from '../lib/queryClient';
 import { queryKeys } from '../hooks/queries/keys';
 import { useAppStore } from '../store';
 import { HEBREW_APP_DEFAULT_CURRENCY } from '../lib/appDefaultCurrency';
+import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { ascCaptureUsersForGroup } from '../screenshotDemo/ascCaptureFixtures';
 export type ProfileHydrationResult = 'active' | 'deactivated' | 'unknown';
 
 /** Client read path for app_admins — profiles table does not expose admin flag. */
@@ -79,6 +81,9 @@ export async function fetchUsers(): Promise<User[]> {
 
 /** Fetch profiles for active members of a specific group only. */
 export async function fetchGroupUsers(groupId: string): Promise<User[]> {
+    if (isAscScreenshotDemo()) {
+        return ascCaptureUsersForGroup(groupId);
+    }
     const { data: members, error: membersError } = await supabase
         .from('group_members')
         .select('user_id')

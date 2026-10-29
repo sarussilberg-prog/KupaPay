@@ -96,8 +96,6 @@ describe('SummaryFooter', () => {
       />,
     );
     const dot = getByTestId('summary-note-unread-dot');
-    expect(dot.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ left: -2 })]),
-    );
+    expect(dot.props.style).toEqual(expect.objectContaining({ end: -2 }));
   });
 });

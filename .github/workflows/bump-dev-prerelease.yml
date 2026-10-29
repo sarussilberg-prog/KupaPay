@@ -1,9 +1,13 @@
-# After a PR lands on dev, bump packages/shared/version.json without re-running full CI/Vercel.
+# Manual recovery for dev prerelease bumps. Automatic bumps run on pull_request closed in ci.yml.
 name: Bump dev prerelease
 
 on:
-  push:
-    branches: [dev]
+  workflow_dispatch:
+    inputs:
+      pr_title:
+        description: 'Changelog line (optional; defaults to latest dev commit subject)'
+        required: false
+        type: string
 
 concurrency:
   group: dev-merge-and-bump
@@ -12,17 +16,25 @@ concurrency:
 jobs:
   bump:
     name: Dev prerelease + changelog
-    if: >-
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !startsWith(github.event.head_commit.message, 'chore: bump dev prerelease')
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Require ADMIN_PAT (bypass CI gate on dev for [skip ci] bump only)
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADMIN_PAT}" ]]; then
+            echo "::error::ADMIN_PAT secret is not configured — required to push chore bumps to protected dev (see docs/SSOT/CI_ADMIN_PAT.md)"
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
         with:
           ref: dev
           fetch-depth: 0
+          token: ${{ secrets.ADMIN_PAT }}
 
       - uses: actions/setup-node@v4
         with:
@@ -30,19 +42,33 @@ jobs:
 
       - name: Bump dev prerelease + changelog
         env:
-          PR_TITLE: ${{ github.event.head_commit.message }}
+          PR_TITLE: ${{ github.event.inputs.pr_title }}
+          PR_NUMBER: ''
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull origin dev
 
-          node cost-share-app/scripts/bump-dev-prerelease.mjs
-          git add cost-share-app/packages/shared/version.json CHANGELOG.md
-          if git diff --staged --quiet; then
-            echo "No version bump needed"
-            exit 0
-          fi
-          git commit -m "chore: bump dev prerelease [skip ci]"
-          git push origin dev
-          echo "✅ Dev prerelease bumped"
+          for attempt in 1 2 3; do
+            git fetch origin dev
+            git reset --hard origin/dev
+            if [[ -z "${PR_TITLE}" ]]; then
+              PR_TITLE="$(git log -1 --pretty=%s)"
+              export PR_TITLE
+            fi
+
+            node cost-share-app/scripts/bump-dev-prerelease.mjs
+            git add cost-share-app/packages/shared/version.json CHANGELOG.md
+            if git diff --staged --quiet; then
+              echo "No version bump needed"
+              exit 0
+            fi
+            git commit -m "chore: bump dev prerelease [skip ci]"
+            if git push origin HEAD:dev; then
+              echo "✅ Dev prerelease bumped"
+              exit 0
+            fi
+            echo "dev moved during bump; retrying (${attempt}/3)"
+          done
+          echo "::error::failed to push dev prerelease bump after 3 attempts"
+          exit 1

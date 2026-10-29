@@ -73,6 +73,18 @@ BEGIN
 END;
 $$;
 
+-- CI-only: seed promo rate-limit rows (table has deny-all RLS for clients).
+CREATE OR REPLACE FUNCTION public.test_seed_promo_redeem_rate_limit(p_user_id UUID, p_attempt_count INT)
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  INSERT INTO public.promo_redeem_rate_limits (user_id, window_start, attempt_count)
+  VALUES (p_user_id, date_trunc('hour', NOW()), p_attempt_count)
+  ON CONFLICT (user_id, window_start) DO UPDATE SET attempt_count = EXCLUDED.attempt_count;
+$$;
+
 CREATE OR REPLACE FUNCTION extensions.digest(data TEXT, type TEXT)
 RETURNS bytea
 LANGUAGE sql

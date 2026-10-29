@@ -320,10 +320,10 @@ design_handoff_group_detail/
     └── screens/
         ├── GroupDetailScreen.jsx     ← THE SCREEN (main reference)
         ├── LoginScreen.jsx
-        ├── GroupsListScreen.jsx
+        ├── GroupsListScreen.jsx   ← superseded; see docs/superpowers/plans/groups-screeen.md
         ├── ProfileScreen.jsx
         ├── ActivityScreen.jsx
         └── AddExpenseScreen.jsx
 ```
 
-Open `prototype/index.html` in a browser to interact with the prototype. The `GroupDetailScreen` is the canonical reference — every other file is supporting context.
+Open `prototype/index.html` in a browser to interact with the prototype. The `GroupDetailScreen` is the canonical reference for **group detail**. For the **groups list**, use production `cost-share-app/apps/mobile/screens/groups/GroupsListScreen.tsx` and [docs/superpowers/plans/groups-screeen.md](../superpowers/plans/groups-screeen.md) (mockup B2). `prototype/screens/GroupsListScreen.jsx` is a historical sketch only.

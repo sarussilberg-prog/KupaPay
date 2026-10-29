@@ -2,6 +2,10 @@ import { act, renderHook } from '@testing-library/react-native';
 import { BackHandler, Platform } from 'react-native';
 import { useAppExitGuard } from '../../hooks/useAppExitGuard';
 import { rootNavigationRef } from '../../lib/rootNavigationRef';
+import {
+    pushAndroidHardwareBackHandler,
+    resetAndroidHardwareBackRegistryForTests,
+} from '../../lib/androidHardwareBackRegistry';
 
 const originalPlatform = Platform.OS;
 
@@ -36,6 +40,7 @@ function installWindowEventStubs(listeners: ListenerMap) {
 describe('useAppExitGuard', () => {
     afterEach(() => {
         setPlatform(originalPlatform);
+        resetAndroidHardwareBackRegistryForTests();
         jest.restoreAllMocks();
     });
 
@@ -51,6 +56,21 @@ describe('useAppExitGuard', () => {
             });
             jest.spyOn(BackHandler, 'exitApp').mockImplementation(() => undefined);
             jest.spyOn(rootNavigationRef, 'isReady').mockReturnValue(true);
+        });
+
+        it('delegates to overlay handlers before navigation pop', () => {
+            const overlay = jest.fn(() => true);
+            pushAndroidHardwareBackHandler(overlay);
+            jest.spyOn(rootNavigationRef, 'canGoBack').mockReturnValue(true);
+            const goBack = jest.spyOn(rootNavigationRef, 'goBack').mockImplementation(() => undefined);
+
+            renderHook(() => useAppExitGuard());
+            act(() => {
+                backHandler!();
+            });
+
+            expect(overlay).toHaveBeenCalledTimes(1);
+            expect(goBack).not.toHaveBeenCalled();
         });
 
         it('calls goBack when the navigation stack can pop', () => {

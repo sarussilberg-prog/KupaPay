@@ -77,7 +77,10 @@ export function GroupTripCurrencySection({
     if (currencies.length <= 1) return null;
 
     return (
-        <View className="mx-4 mb-4 p-4 rounded-2xl bg-white border border-gray-100">
+        <View
+            className="mx-4 mb-4 p-4 rounded-2xl bg-white border border-gray-100"
+            testID="group-trip-currency-section"
+        >
             <Text className="text-gray-900 font-semibold mb-2">{t('pro.tripCurrency.title')}</Text>
             <TouchableOpacity
                 onPress={() => setPickerOpen(true)}

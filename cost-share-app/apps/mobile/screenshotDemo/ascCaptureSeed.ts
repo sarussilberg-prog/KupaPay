@@ -1,6 +1,7 @@
 import type { GroupWithMembers, SimplifiedInputsPayload } from '@cost-share/shared';
 
 export const CAPTURE_USER_ID = 'capture-user-u1';
+export const CAPTURE_GROUP_BARCELONA = 'g-barcelona';
 
 export const captureGroups: GroupWithMembers[] = [
     {

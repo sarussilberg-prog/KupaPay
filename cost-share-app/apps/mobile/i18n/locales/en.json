@@ -16,7 +16,11 @@
         "unknown": "Unknown",
         "loadError": "Failed to load data",
         "networkError": "Network error. Please check your connection.",
+        "permissionError": "You don't have permission to do this. Refresh and try again.",
         "offlineTitle": "You're offline",
+        "offlineBannerMessage": "No internet connection. Saved data is still available; changes will sync when you're back online.",
+        "screenErrorTitle": "Something went wrong",
+        "screenErrorMessage": "This screen hit an unexpected error. Try again or go back.",
         "retry": "Retry",
         "search": "Search",
         "submit": "Submit",
@@ -692,6 +696,10 @@
                 "stopConfirmTitle": "Stop recurring expenses?",
                 "stopConfirmBody": "Past expenses stay in the group. No new repeats will be created.",
                 "stopped": "Recurring series stopped",
+                "editScopeTitle": "Update recurring expense?",
+                "editScopeBody": "Apply changes to future repeats or only this expense.",
+                "editScopeSeries": "Future repeats too",
+                "editScopeOccurrence": "This expense only",
                 "frequency": {
                     "weekly": "Weekly",
                     "monthly": "Monthly",
@@ -809,6 +817,29 @@
             "resetOnboardingRow": "Reset onboarding",
             "previewCreateGroupRow": "Preview first-group screen"
         },
+        "promoCodes": {
+            "title": "Promo codes",
+            "portalRow": "Promo codes",
+            "empty": "No promo codes yet.",
+            "createCta": "Create code",
+            "createTitle": "New promo code",
+            "codePlaceholder": "Code (e.g. SUMMER-2026)",
+            "durationPlaceholder": "Pro duration (days)",
+            "maxUsesPlaceholder": "Max uses (optional)",
+            "createConfirm": "Create",
+            "createSuccess": "Promo code created",
+            "createError": "Could not create promo code",
+            "statusActive": "Active",
+            "statusInactive": "Inactive",
+            "metaLine": "{{days}} days · {{uses}} / {{max}} uses",
+            "unlimited": "Unlimited",
+            "deactivateCta": "Deactivate",
+            "deactivateTitle": "Deactivate {{code}}?",
+            "deactivateMessage": "Users won't be able to redeem this code after deactivation.",
+            "deactivateConfirm": "Deactivate",
+            "deactivateSuccess": "Code deactivated",
+            "deactivateError": "Could not deactivate code"
+        },
         "proView": {
             "sectionTitle": "Pro view mode",
             "description": "Preview Free or Pro UX for your account only (24h). Does not change real subscriptions.",
@@ -898,6 +929,26 @@
             "byPlatform": "By platform",
             "last7Days": "Last 7 days",
             "noData": "No events in this period yet"
+        },
+        "growth": {
+            "portalRow": "MAU & north star",
+            "screenTitle": "Growth metrics",
+            "asOf": "Updated {{when}} (UTC)",
+            "northStarTitle": "North star",
+            "northStarDefinition": "Groups where at least two members each added an expense this calendar month.",
+            "northStarCurrent": "This month ({{month}})",
+            "northStarPrevious": "Previous month ({{month}})",
+            "activeAuthorsTitle": "Active expense authors",
+            "activeAuthorsNote": "Distinct users who created a non-deleted expense in the window. Use PostHog for MAU/WAU/DAU from app opens.",
+            "dau": "DAU",
+            "wau": "WAU",
+            "mau": "MAU (proxy)",
+            "mauEpicProgress": "{{percent}}% toward {{target}} MAU epic",
+            "seriesTitle": "North star — last 12 months",
+            "openPostHogDashboard": "Open PostHog MAU dashboard",
+            "postHogDashboardHint": "Set EXPO_PUBLIC_POSTHOG_PROJECT_ID (and optional MAU dashboard id) to link PostHog from here.",
+            "webOnlyNote": "PostHog breakdowns by platform and locale live in the linked dashboard.",
+            "analyticsUnavailableBody": "The growth metrics function is missing or not granted on this Supabase project. Apply the latest migrations to dev, then refresh."
         },
         "supportMessages": {
             "title": "Support Messages",
@@ -1342,6 +1393,12 @@
             "qualified": "Qualified — reward pending",
             "rewarded": "Pro month granted",
             "rejected": "Could not grant reward"
+        },
+        "ambassador": {
+            "title": "Ambassador referral link",
+            "body": "Share this link so new members can be attributed to your ambassador account.",
+            "codeLabel": "Your code",
+            "referralCount": "{{count}} attributed sign-ups"
         }
     },
     "monetization": {
@@ -1402,6 +1459,23 @@
             "alreadyProTitle": "You're on Pro",
             "alreadyProBody": "Your subscription is active. Manage billing in the App Store or Google Play, or keep enjoying Pro features in the app."
         },
+        "promoCode": {
+            "sheetTitle": "Redeem code",
+            "kupapayHint": "Enter your KupaPay promo code to unlock Pro on your account.",
+            "inputPlaceholder": "KupaPay code",
+            "redeeming": "Redeeming…",
+            "storeSection": "App Store or Google Play",
+            "playRedeem": "Redeem on Google Play",
+            "success": "Pro unlocked with your promo code.",
+            "errorInvalid": "That code isn't valid.",
+            "errorInactive": "This code is no longer active.",
+            "errorExpired": "This code has expired.",
+            "errorMaxUses": "This code has reached its redemption limit.",
+            "errorAlreadyRedeemed": "You've already used this code.",
+            "errorRateLimit": "Too many attempts. Try again later.",
+            "errorAuth": "Sign in to redeem a code.",
+            "errorGeneric": "Could not redeem this code. Try again."
+        },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "Manage subscription",
@@ -1413,6 +1487,7 @@
             "sectionTitle": "My subscription",
             "openDetails": "Subscription details",
             "screenIntro": "Plan, renewal date, and billing are managed in the App Store or Google Play. Trip Pass access is shown per group below.",
+            "purchaseSuccessHint": "Your Pro benefits are active. Manage renewal and billing below.",
             "disabled": "Subscriptions are not available in this build.",
             "empty": "No active subscription on this account.",
             "planUnknown": "KupaPay Pro",
@@ -1523,6 +1598,55 @@
             "sheetTitle": "Trip budget",
             "sheetBody": "Totals include expenses in the budget currency only.",
             "amountPlaceholder": "Budget amount"
+        }
+    },
+    "splitwiseImport": {
+        "title": "Import from Splitwise",
+        "settingsRow": "Import Splitwise CSV",
+        "hint": "Export a group from Splitwise (Settings → Export as spreadsheet), then upload the CSV here.",
+        "pickPrompt": "Choose your Splitwise group export (.csv). We'll preview expenses before creating your KupaPay group.",
+        "pickFile": "Choose CSV file",
+        "webNote": "On web, your browser will open a file picker.",
+        "groupNameLabel": "Group name",
+        "selfMemberLabel": "Which column is you?",
+        "guestNamesLabel": "Guest names for other members",
+        "importCta": "Create group & import",
+        "changeFile": "Choose a different file",
+        "success": "Imported {{count}} expenses",
+        "preview": {
+            "summary": "{{expenseCount}} expenses · {{memberCount}} members · {{skippedCount}} rows skipped",
+            "more": "+ {{count}} more expenses"
+        },
+        "previewExpensesTitle": "Preview",
+        "skippedTitle": "{{count}} rows not imported",
+        "skipped": {
+            "line": "Line {{line}}: {{reason}}",
+            "more": "+ {{count}} more skipped rows",
+            "total_balance_row": "Total balance summary row",
+            "payment_row": "Payment / settlement row",
+            "zero_cost": "Zero amount",
+            "invalid_cost": "Invalid amount",
+            "invalid_currency": "Invalid currency",
+            "no_participants": "No one participated",
+            "missing_payer": "Could not determine who paid",
+            "unbalanced_row": "Shares do not add up",
+            "column_mismatch": "Wrong number of columns",
+            "invalid_date": "Invalid date"
+        },
+        "errors": {
+            "empty_file": "The file is empty.",
+            "missing_required_columns": "This doesn't look like a Splitwise export (missing Date, Description, Cost, or Currency).",
+            "no_member_columns": "No member columns found — export a group, not an empty sheet.",
+            "no_expenses": "No expenses could be imported from this file.",
+            "read_failed": "Could not read the file.",
+            "unsupported": "Unsupported file type.",
+            "cancelled": "Cancelled",
+            "not_authenticated": "Sign in to import.",
+            "missing_self_mapping": "Choose which member is you.",
+            "missing_member_mapping": "Missing member mapping.",
+            "invalid_splits": "Some expense splits could not be mapped.",
+            "empty_group_name": "Enter a group name.",
+            "import_failed": "Import failed. Try again or pick a smaller export."
         }
     },
     "remind": {

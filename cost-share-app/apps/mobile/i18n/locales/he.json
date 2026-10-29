@@ -16,7 +16,11 @@
         "unknown": "לא ידוע",
         "loadError": "טעינת הנתונים נכשלה",
         "networkError": "שגיאת רשת. אנא בדקו את החיבור שלכם.",
+        "permissionError": "אין לכם הרשאה לבצע את הפעולה הזו. רעננו ונסו שוב.",
         "offlineTitle": "אין חיבור לאינטרנט",
+        "offlineBannerMessage": "אין חיבור לאינטרנט. הנתונים השמורים עדיין זמינים; השינויים יסונכרנו כשהחיבור יחזור.",
+        "screenErrorTitle": "משהו השתבש",
+        "screenErrorMessage": "מסך זה נתקל בשגיאה בלתי צפויה. נסו שוב או חזרו אחורה.",
         "retry": "נסה שוב",
         "search": "חיפוש",
         "submit": "שלח",
@@ -694,6 +698,10 @@
                 "stopConfirmTitle": "להפסיק הוצאה קבועה?",
                 "stopConfirmBody": "הוצאות שכבר נוצרו נשארות. לא ייווצרו הוצאות חדשות.",
                 "stopped": "סדרת ההוצאות הקבועה הופסקה",
+                "editScopeTitle": "לעדכן הוצאה קבועה?",
+                "editScopeBody": "להחיל את השינויים גם על חזרות עתידיות או רק על ההוצאה הזו.",
+                "editScopeSeries": "גם חזרות עתידיות",
+                "editScopeOccurrence": "רק ההוצאה הזו",
                 "frequency": {
                     "weekly": "שבועי",
                     "monthly": "חודשי",
@@ -811,6 +819,29 @@
             "resetOnboardingRow": "איפוס אונבורדינג",
             "previewCreateGroupRow": "תצוגה מקדימה — יצירת קופה ראשונה"
         },
+        "promoCodes": {
+            "title": "קודי קופון",
+            "portalRow": "קודי קופון",
+            "empty": "אין קודי קופון עדיין.",
+            "createCta": "יצירת קוד",
+            "createTitle": "קוד קופון חדש",
+            "codePlaceholder": "קוד (למשל SUMMER-2026)",
+            "durationPlaceholder": "משך Pro (ימים)",
+            "maxUsesPlaceholder": "מקסימום שימושים (אופציונלי)",
+            "createConfirm": "יצירה",
+            "createSuccess": "קוד הקופון נוצר",
+            "createError": "לא ניתן ליצור קוד קופון",
+            "statusActive": "פעיל",
+            "statusInactive": "לא פעיל",
+            "metaLine": "{{days}} ימים · {{uses}} / {{max}} שימושים",
+            "unlimited": "ללא הגבלה",
+            "deactivateCta": "השבתה",
+            "deactivateTitle": "להשבית את {{code}}?",
+            "deactivateMessage": "לאחר ההשבתה לא ניתן יהיה לממש את הקוד.",
+            "deactivateConfirm": "השבתה",
+            "deactivateSuccess": "הקוד הושבת",
+            "deactivateError": "לא ניתן להשבית את הקוד"
+        },
         "proView": {
             "sectionTitle": "מצב תצוגת Pro",
             "description": "תצוגה מקדימה של חוויית Free או Pro לחשבון שלך בלבד (24 שעות). לא משנה מנוי אמיתי.",
@@ -900,6 +931,26 @@
             "byPlatform": "לפי פלטפורמה",
             "last7Days": "7 ימים אחרונים",
             "noData": "אין אירועים בתקופה זו עדיין"
+        },
+        "growth": {
+            "portalRow": "MAU ומדד צפון",
+            "screenTitle": "מדדי צמיחה",
+            "asOf": "עודכן {{when}} (UTC)",
+            "northStarTitle": "מדד צפון",
+            "northStarDefinition": "קבוצות שבהן לפחות שני חברים הוסיפו הוצאה בחודש הקלנדרי הנוכחי.",
+            "northStarCurrent": "החודש הנוכחי ({{month}})",
+            "northStarPrevious": "החודש הקודם ({{month}})",
+            "activeAuthorsTitle": "יוצרי הוצאות פעילים",
+            "activeAuthorsNote": "משתמשים ייחודיים שיצרו הוצאה שלא נמחקה בחלון הזמן. ל-MAU/WAU/DAU מפתיחות אפליקציה השתמשו ב-PostHog.",
+            "dau": "פעילים יומיים",
+            "wau": "פעילים שבועיים",
+            "mau": "פעילים חודשיים (פרוקסי)",
+            "mauEpicProgress": "{{percent}}% ליעד {{target}} MAU",
+            "seriesTitle": "מדד צפון — 12 חודשים אחרונים",
+            "openPostHogDashboard": "פתח לוח MAU ב-PostHog",
+            "postHogDashboardHint": "הגדר EXPO_PUBLIC_POSTHOG_PROJECT_ID (ואופציונלית מזהה לוח MAU) לקישור ל-PostHog מכאן.",
+            "webOnlyNote": "פילוח לפי פלטפורמה ושפה נמצא בלוח PostHog המקושר.",
+            "analyticsUnavailableBody": "פונקציית מדדי הצמיחה חסרה או ללא הרשאה בפרויקט Supabase. יישמו את המיגרציות האחרונות ב-dev ורעננו."
         },
         "supportMessages": {
             "title": "הודעות תמיכה",
@@ -1344,6 +1395,12 @@
             "qualified": "זכאי — תגמול בדרך",
             "rewarded": "חודש Pro ניתן",
             "rejected": "לא ניתן לתגמל"
+        },
+        "ambassador": {
+            "title": "קישור שגריר",
+            "body": "שתפו קישור זה כדי לייחס משתמשים חדשים לחשבון השגריר שלכם.",
+            "codeLabel": "הקוד שלכם",
+            "referralCount": "{{count}} הרשמות מיוחסות"
         }
     },
     "monetization": {
@@ -1404,6 +1461,23 @@
             "alreadyProTitle": "אתם ב-Pro",
             "alreadyProBody": "המנוי שלכם פעיל. ניהול החיוב ב-App Store או Google Play — ובינתיים כל יכולות Pro זמינות באפליקציה."
         },
+        "promoCode": {
+            "sheetTitle": "מימוש קוד",
+            "kupapayHint": "הזינו קוד קופון של KupaPay כדי לפתוח Pro בחשבון שלכם.",
+            "inputPlaceholder": "קוד KupaPay",
+            "redeeming": "מממשים…",
+            "storeSection": "App Store או Google Play",
+            "playRedeem": "מימוש ב-Google Play",
+            "success": "Pro נפתח עם קוד הקופון.",
+            "errorInvalid": "הקוד אינו תקין.",
+            "errorInactive": "הקוד אינו פעיל.",
+            "errorExpired": "תוקף הקוד פג.",
+            "errorMaxUses": "הקוד הגיע למכסת המימושים.",
+            "errorAlreadyRedeemed": "כבר מימשתם קוד זה.",
+            "errorRateLimit": "יותר מדי ניסיונות. נסו שוב מאוחר יותר.",
+            "errorAuth": "התחברו כדי לממש קוד.",
+            "errorGeneric": "לא ניתן לממש את הקוד. נסו שוב."
+        },
         "settings": {
             "sectionTitle": "KupaPay Pro",
             "manageSubscription": "ניהול מנוי",
@@ -1415,6 +1489,7 @@
             "sectionTitle": "המנוי שלי",
             "openDetails": "פרטי מנוי",
             "screenIntro": "תוכנית, תאריך חידוש וחיוב מנוהלים ב-App Store או Google Play. גישת Trip Pass מוצגת לפי קבוצה.",
+            "purchaseSuccessHint": "היתרונות של Pro פעילים. ניהול חידוש וחיוב למטה.",
             "disabled": "מנויים אינם זמינים בגרסה זו.",
             "empty": "אין מנוי פעיל בחשבון זה.",
             "planUnknown": "KupaPay Pro",
@@ -1452,9 +1527,15 @@
             "body": "הניסיון החינמי שלך ב-KupaPay Pro מסתיים בעוד יומיים. לא רוצה להמשיך? אפשר לבטל בהגדרות."
         },
         "trialLifecycle": {
-            "day1": { "title": "ברוכים הבאים ל-Pro" },
-            "day10": { "title": "נותרו 4 ימים בניסיון" },
-            "day13": { "title": "Pro מתחדש מחר" },
+            "day1": {
+                "title": "ברוכים הבאים ל-Pro"
+            },
+            "day10": {
+                "title": "נותרו 4 ימים בניסיון"
+            },
+            "day13": {
+                "title": "Pro מתחדש מחר"
+            },
             "disclosure": "החיוב מתחיל אחרי הניסיון אלא אם תבטל/י בהגדרות → ניהול מנוי (App Store / Google Play).",
             "manage": "ניהול מנוי"
         },
@@ -1525,6 +1606,55 @@
             "sheetTitle": "תקציב טיול",
             "sheetBody": "הסכום כולל רק הוצאות במטבע התקציב.",
             "amountPlaceholder": "סכום תקציב"
+        }
+    },
+    "splitwiseImport": {
+        "title": "ייבוא מ-Splitwise",
+        "settingsRow": "ייבוא CSV מ-Splitwise",
+        "hint": "ייצאו קבוצה מ-Splitwise (הגדרות → ייצוא כגיליון), והעלו כאן את קובץ ה-CSV.",
+        "pickPrompt": "בחרו את ייצוא הקבוצה מ-Splitwise (.csv). נציג תצוגה מקדימה לפני יצירת הקבוצה ב-KupaPay.",
+        "pickFile": "בחירת קובץ CSV",
+        "webNote": "באתר, הדפדפן יפתח בוחר קבצים.",
+        "groupNameLabel": "שם הקבוצה",
+        "selfMemberLabel": "איזו עמודה זה את/ה?",
+        "guestNamesLabel": "שמות אורחים לשאר החברים",
+        "importCta": "יצירת קבוצה וייבוא",
+        "changeFile": "בחירת קובץ אחר",
+        "success": "יובאו {{count}} הוצאות",
+        "preview": {
+            "summary": "{{expenseCount}} הוצאות · {{memberCount}} חברים · {{skippedCount}} שורות דולגו",
+            "more": "+ עוד {{count}} הוצאות"
+        },
+        "previewExpensesTitle": "תצוגה מקדימה",
+        "skippedTitle": "{{count}} שורות לא יובאו",
+        "skipped": {
+            "line": "שורה {{line}}: {{reason}}",
+            "more": "+ עוד {{count}} שורות שדולגו",
+            "total_balance_row": "שורת סיכום יתרות",
+            "payment_row": "שורת תשלום / סילוק",
+            "zero_cost": "סכום אפס",
+            "invalid_cost": "סכום לא תקין",
+            "invalid_currency": "מטבע לא תקין",
+            "no_participants": "אין משתתפים",
+            "missing_payer": "לא ניתן לזהות מי שילם",
+            "unbalanced_row": "החלוקה לא מסתכמת",
+            "column_mismatch": "מספר עמודות שגוי",
+            "invalid_date": "תאריך לא תקין"
+        },
+        "errors": {
+            "empty_file": "הקובץ ריק.",
+            "missing_required_columns": "זה לא נראה כמו ייצוא Splitwise (חסרות עמודות Date, Description, Cost או Currency).",
+            "no_member_columns": "לא נמצאו עמודות חברים — ייצאו קבוצה, לא גיליון ריק.",
+            "no_expenses": "לא ניתן לייבא הוצאות מהקובץ.",
+            "read_failed": "לא ניתן לקרוא את הקובץ.",
+            "unsupported": "סוג קובץ לא נתמך.",
+            "cancelled": "בוטל",
+            "not_authenticated": "התחברו כדי לייבא.",
+            "missing_self_mapping": "בחרו איזה חבר זה אתם.",
+            "missing_member_mapping": "חסר מיפוי חבר.",
+            "invalid_splits": "לא ניתן למפות חלק מהחלוקות.",
+            "empty_group_name": "הזינו שם קבוצה.",
+            "import_failed": "הייבוא נכשל. נסו שוב או קובץ קטן יותר."
         }
     },
     "remind": {

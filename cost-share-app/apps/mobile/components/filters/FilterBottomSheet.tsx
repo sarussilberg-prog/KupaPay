@@ -3,7 +3,7 @@
  * Changes apply immediately; no Apply button.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useCallback } from 'react';
 import {
     View,
     Modal,
@@ -18,6 +18,7 @@ import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import { useAndroidHardwareBackHandler } from '../../hooks/useAndroidHardwareBackHandler';
 
 export interface FilterBottomSheetProps<T> {
     visible: boolean;
@@ -59,12 +60,19 @@ export function FilterBottomSheet<T>({
         onChange(onClear());
     };
 
+    const handleClose = useCallback(() => {
+        onClose();
+    }, [onClose]);
+    useAndroidHardwareBackHandler(visible, handleClose);
+
     return (
         <Modal
             visible={visible}
             transparent
             animationType="slide"
-            onRequestClose={onClose}
+            onRequestClose={handleClose}
+            statusBarTranslucent
+            navigationBarTranslucent
         >
             <View style={styles.backdrop}>
                 <Pressable
@@ -153,12 +161,12 @@ const styles = StyleSheet.create({
     },
     clearBtn: {
         position: 'absolute',
-        left: 0,
+        start: 0,
         top: 4,
     },
     closeBtn: {
         position: 'absolute',
-        right: 0,
+        end: 0,
         top: 0,
         width: 32,
         height: 32,
