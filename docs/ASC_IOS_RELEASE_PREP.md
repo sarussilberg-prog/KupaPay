@@ -9,7 +9,7 @@ Uses the same secrets as [TestFlight iOS](TESTFLIGHT_GITHUB_ACTIONS.md): `ASC_AP
 1. **Intro offers** — `scripts/asc-set-subscription-intro-offers.mjs` sets **TWO_WEEKS** `FREE_TRIAL` on monthly/yearly for all subscription territories.
 2. **IAP metadata** — `store/asc/iap-metadata.json` → `scripts/asc-update-iap-metadata.mjs` (localizations, review notes, paywall review screenshot).
 3. **Prices** — `scripts/asc-verify-iap-prices.mjs` checks ILS amounts against `expectedPriceILS`.
-4. **Screenshots** — Maestro + simulator when possible; repo assets under `store/screenshots/ios/<locale>/{6.9,6.5,ipad}/`. Source captions: `store/asc/screenshot-captions.json`.
+4. **Screenshots** — Playwright + Expo web (primary); Maestro optional on device. Repo assets under `store/screenshots/ios/<locale>/{6.7,6.5,6.9,ipad}/` and Play under `store/screenshots/android/<locale>/`. Source captions: `store/asc/screenshot-captions.json`. Regeneration: [store/screenshots/README.md](../store/screenshots/README.md).
 5. **Version** — `store/asc/whats-new.json` (SSOT `packages/shared/version.json`) → create/prepare version, attach latest **VALID** build, fill What's New.
 
 ## Local commands
