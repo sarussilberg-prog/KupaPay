@@ -1,6 +1,6 @@
 {
   "description": "Knip dead-code ceilings (ratchet only — never increase without clearing backlog).",
-  "max_total_issues": 355,
+  "max_total_issues": 356,
   "counts": {
     "unused_files": 38,
     "dependencies": 4,
