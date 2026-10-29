@@ -14,6 +14,15 @@ gh_pr_head_sha() {
   gh pr view "$pr_number" --repo "$repo" --json headRefOid --jq '.headRefOid'
 }
 
+gh_pr_state() {
+  local pr_number="$1" repo="$2"
+  gh pr view "$pr_number" --repo "$repo" --json state --jq '.state'
+}
+
+is_pr_merged_state() {
+  [[ "$(gh_pr_state "$1" "$2")" == "MERGED" ]]
+}
+
 # Retry gh pr view / headRefOid when GraphQL head ref is briefly unavailable.
 resolve_pr_head_sha_with_retry() {
   local pr_number="$1" repo="$2"

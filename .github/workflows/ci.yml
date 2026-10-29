@@ -67,6 +67,10 @@ jobs:
           set -euo pipefail
           out="$(bash cost-share-app/scripts/gh-pr-sync-with-dev.sh "$PR_NUMBER" "$REPO" "$PR_HEAD_SHA")"
           echo "$out"
+          if grep -q '^already_merged=true$' <<<"$out"; then
+            echo "PR already merged — branch sync not needed for this run."
+            exit 0
+          fi
           if grep -q '^defer_merge=true$' <<<"$out"; then
             echo "::error::Branch sync queued — this run is stale; required checks will re-run on the updated merge commit."
             exit 1
@@ -670,6 +674,12 @@ jobs:
           git fetch origin dev main --quiet
           sync_out="$(bash cost-share-app/scripts/gh-pr-sync-with-dev.sh "$PR_NUMBER" "$REPO" "$PR_HEAD_SHA")"
           echo "$sync_out"
+          if grep -q '^already_merged=true$' <<<"$sync_out"; then
+            echo "defer=false" >> "$GITHUB_OUTPUT"
+            echo "already_merged=true" >> "$GITHUB_OUTPUT"
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if grep -q '^defer_merge=true$' <<<"$sync_out"; then
             echo "defer=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -678,7 +688,7 @@ jobs:
           echo "defer=false" >> "$GITHUB_OUTPUT"
 
       - name: Enable GitHub native auto-merge (squash)
-        if: steps.sync_dev.outputs.defer != 'true'
+        if: steps.sync_dev.outputs.defer != 'true' && steps.sync_dev.outputs.already_merged != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -703,7 +713,7 @@ jobs:
 
       - name: Wait for squash merge to land on dev
         id: wait_merge
-        if: steps.sync_dev.outputs.defer != 'true'
+        if: steps.sync_dev.outputs.defer != 'true' && steps.sync_dev.outputs.already_merged != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -722,19 +732,25 @@ jobs:
           echo "merged=false" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
-        if: steps.sync_dev.outputs.defer != 'true' && steps.wait_merge.outputs.merged == 'true'
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
         with:
           ref: dev
           fetch-depth: 0
           token: ${{ secrets.ADMIN_PAT }}
 
       - uses: actions/setup-node@v4
-        if: steps.sync_dev.outputs.defer != 'true' && steps.wait_merge.outputs.merged == 'true'
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
         with:
           node-version: '20'
 
       - name: Apply dev prerelease bump
-        if: steps.sync_dev.outputs.defer != 'true' && steps.wait_merge.outputs.merged == 'true'
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
         env:
           ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
           PR_TITLE: ${{ github.event.pull_request.title }}

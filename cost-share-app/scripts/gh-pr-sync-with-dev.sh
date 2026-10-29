@@ -13,6 +13,13 @@ source "${SCRIPT_DIR}/lib/gh-pr-sync-helpers.sh"
 
 git fetch origin dev --quiet
 
+if is_pr_merged_state "$PR_NUMBER" "$REPO"; then
+  echo "✅ PR already merged — skip branch update"
+  echo "already_merged=true"
+  echo "defer_merge=false"
+  exit 0
+fi
+
 head_sha="$(resolve_pr_head_sha_with_retry "$PR_NUMBER" "$REPO")"
 if [[ -z "$head_sha" ]]; then
   echo "::error::Could not resolve PR head SHA after retries (event head: ${PR_HEAD_SHA})"
@@ -39,6 +46,12 @@ case "$update_rc" in
     exit 0
     ;;
   *)
+    if is_pr_merged_state "$PR_NUMBER" "$REPO"; then
+      echo "✅ PR merged during sync — skip branch update"
+      echo "already_merged=true"
+      echo "defer_merge=false"
+      exit 0
+    fi
     echo "::error::update-branch failed (merge conflicts?). Resolve on the PR branch and re-run CI."
     exit 1
     ;;
