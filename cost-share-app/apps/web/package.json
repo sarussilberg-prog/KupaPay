@@ -8,7 +8,8 @@
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "tsx --import ./__tests__/setup-react-jsx.mjs --test __tests__/*.test.mjs __tests__/*.test.ts __tests__/*.test.tsx",
-    "clean": "rm -rf .next node_modules"
+    "clean": "rm -rf .next node_modules",
+    "merge-travel-guides": "node scripts/merge-travel-guides-fragments.mjs"
   },
   "dependencies": {
     "@cost-share/shared": "*",
