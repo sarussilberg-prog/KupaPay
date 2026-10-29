@@ -35,3 +35,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): Android-native behavior polish (#429) (#657)
 ## [2.2.0-dev.15] — 2026-10-29
 - feat(web): travel money guides for all locales (#416) (#658)
+## [2.2.0-dev.16] — 2026-10-29
+- docs(marketing): 30-day TikTok/Shorts/Reels content plan (#419) (#659)
