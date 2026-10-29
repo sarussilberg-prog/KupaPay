@@ -33,3 +33,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(ci): treat merged PR as success in auto-merge sync (#602) (#654)
 ## [2.2.0-dev.14] — 2026-10-29
 - fix(mobile): Android-native behavior polish (#429) (#657)
+## [2.2.0-dev.15] — 2026-10-29
+- feat(web): travel money guides for all locales (#416) (#658)
