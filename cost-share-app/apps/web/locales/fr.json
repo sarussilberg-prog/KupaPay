@@ -109,7 +109,8 @@
     "terms": "Conditions d’utilisation",
     "contact": "Nous contacter",
     "copyright": "© 2026 KupaPay",
-    "splitwiseAlternative": "Alternative à Splitwise"
+    "splitwiseAlternative": "Alternative à Splitwise",
+    "travelGuides": "Guides argent & voyage"
   },
   "legal": {
     "notFound": "Document introuvable.",
@@ -599,6 +600,366 @@
     "cta": {
       "title": "Essayez KupaPay pour votre prochaine note",
       "body": "Téléchargez l’app ou connectez-vous sur le web, créez un groupe et ajoutez une première dépense."
+    }
+  },
+  "travelGuides": {
+    "shared": {
+      "backToIndex": "Tous les guides argent & voyage",
+      "relatedGuidesTitle": "Autres guides",
+      "toolsTitle": "Outils gratuits pour votre voyage",
+      "splitCalculatorLink": "Calculateur de partage de note",
+      "splitwiseAlternativeLink": "Alternative à Splitwise",
+      "tripExpensesLink": "Répartition des dépenses de voyage",
+      "homeLink": "Accueil KupaPay",
+      "tipsHeading": "Conseils pratiques",
+      "ctaTitle": "Suivez les dépenses partagées du voyage dans KupaPay",
+      "ctaBody": "Créez un groupe, notez qui a payé quoi, et laissez KupaPay simplifier les règlements — sur iPhone, Android et le web."
+    },
+    "index": {
+      "seo": {
+        "title": "Guides argent & voyages en groupe | KupaPay",
+        "description": "Guides courts et durables sur le partage des coûts, espèces vs cartes à l’étranger et bases monétaires par destination — avec liens vers le calculateur gratuit et l’app KupaPay.",
+        "ogTitle": "Guides argent pour voyages en groupe",
+        "ogDescription": "Conseils pratiques pour les dépenses partagées, plus des outils gratuits pour partager les notes entre amis."
+      },
+      "hero": {
+        "headline": "Guides argent pour voyages en groupe",
+        "subheadline": "Conseils généraux et pratiques pour payer ensemble à l’étranger — et outils gratuits pour répartir les coûts au retour."
+      },
+      "intro": "Ces guides restent volontairement généraux : pas de taux de change ni de prix inventés. Utilisez-les avec le calculateur de partage KupaPay et les fonctionnalités dépenses de voyage pour suivre les coûts communs.",
+      "listHeading": "Guides pratiques"
+    },
+    "guides": {
+      "groupTripSplit": {
+        "cardTitle": "Partager les coûts d’un voyage en groupe",
+        "cardTeaser": "Fixez les attentes tôt et enregistrez les dépenses communes au fil de l’eau.",
+        "seo": {
+          "title": "Comment partager les coûts d’un voyage en groupe | KupaPay",
+          "description": "Conseils pratiques pour répartir équitablement repas, hébergement, transport — sans calculs gênants à la fin.",
+          "ogTitle": "Partager les coûts d’un voyage en groupe",
+          "ogDescription": "Habitudes simples pour suivre qui a payé quoi en voyage partagé."
+        },
+        "hero": {
+          "headline": "Partager les coûts d’un voyage en groupe",
+          "subheadline": "Quelques habitudes communes facilitent le règlement à la fin du voyage."
+        },
+        "intro": "Le voyage en groupe fonctionne mieux quand tout le monde s’accorde sur le partage des coûts avant que l’argent ne circule. KupaPay aide à enregistrer les dépenses et simplifier les dettes ; ces conseils portent sur l’organisation du voyage.",
+        "tips": [
+          {
+            "title": "Établissez un plan commun avant le départ",
+            "body": "Décidez ce qui est partagé à parts égales (courses, Airbnb) et ce qui reste individuel (vols, souvenirs). Notez-le dans le chat de groupe pour garder des attentes claires."
+          },
+          {
+            "title": "Enregistrez les dépenses tant qu’elles sont fraîches",
+            "body": "Ajoutez chaque note commune peu après — payeur, montant et participants. Attendre la dernière soirée rend les détails faciles à oublier."
+          },
+          {
+            "title": "Un seul groupe pour tout le voyage",
+            "body": "Un groupe KupaPay par voyage centralise les soldes. Pour une sortie à part, partagez le cash sur place ou ajoutez une dépense séparée avec les personnes concernées."
+          },
+          {
+            "title": "Essayez le calculateur web pour un partage rapide",
+            "body": "Pour un dîner ou un taxi, utilisez le calculateur gratuit du site, puis enregistrez le partage comme groupe dans l’app si vous voulez un suivi continu."
+          }
+        ]
+      },
+      "cashVsCardAbroad": {
+        "cardTitle": "Espèces ou carte en voyage",
+        "cardTeaser": "Ayez les deux, connaissez les réglages voyage de votre carte et gardez les reçus des notes communes.",
+        "seo": {
+          "title": "Espèces ou carte à l’étranger | KupaPay",
+          "description": "Conseils généraux sur espèces et cartes à l’étranger — sans chiffres précis sur frais ou taux.",
+          "ogTitle": "Espèces ou carte en voyage",
+          "ogDescription": "Habitudes de paiement pratiques pour voyager entre amis."
+        },
+        "hero": {
+          "headline": "Espèces ou carte en voyage",
+          "subheadline": "La plupart des voyages se passent mieux avec les deux moyens de paiement."
+        },
+        "intro": "L’acceptation des cartes et la disponibilité des DAB varient selon les lieux. Ces conseils n’indiquent pas de frais ou taux changeants — vérifiez les infos voyage actuelles de votre banque avant de partir.",
+        "tips": [
+          {
+            "title": "Gardez un peu de monnaie locale pour les petits achats",
+            "body": "Marchés, pourboires et petits commerces peuvent préférer le cash même où les cartes sont courantes. Partager une note en espèces est plus simple si quelqu’un note le total tout de suite dans l’app."
+          },
+          {
+            "title": "Prévenez votre banque que vous voyagez",
+            "body": "Beaucoup d’émetteurs permettent une notification voyage dans leur app ou site. Cela réduit le risque de refus au milieu d’un repas de groupe."
+          },
+          {
+            "title": "Utilisez la carte pour les grosses dépenses traçables",
+            "body": "Hôtels, locations de voiture et beaucoup de restaurants acceptent la carte. Indiquer le titulaire comme payeur dans KupaPay garde le solde du groupe exact."
+          },
+          {
+            "title": "Conservez les reçus des dépenses communes",
+            "body": "Une photo ou une note aide plus tard pour taxes, frais de service ou qui a commandé quoi — surtout en multi-devises."
+          }
+        ]
+      },
+      "multiCurrencyGroups": {
+        "cardTitle": "Dépenses de groupe en plusieurs devises",
+        "cardTeaser": "Enregistrez chaque dépense dans la devise payée, puis réglez comme vous l’entendez.",
+        "seo": {
+          "title": "Dépenses de groupe multi-devises | KupaPay",
+          "description": "Comment suivre les coûts de voyage partagés quand les amis paient en devises différentes — conseils généraux pour les groupes KupaPay.",
+          "ogTitle": "Dépenses de groupe multi-devises",
+          "ogDescription": "Suivez les coûts dans la devise payée, puis simplifiez le règlement."
+        },
+        "hero": {
+          "headline": "Dépenses de groupe en plusieurs devises",
+          "subheadline": "Les voyages mélangent souvent les devises ; la clarté compte plus que le calcul mental."
+        },
+        "intro": "KupaPay enregistre les dépenses dans la devise payée. La conversion automatique en devise locale n’est pas l’objectif — convenez plutôt de comment vous solderez les comptes.",
+        "tips": [
+          {
+            "title": "Saisissez la devise indiquée sur le reçu",
+            "body": "Utilisez le montant et la devise de la note ou du relevé carte. Chaque ligne reste fidèle pour tous ceux qui relisent le groupe."
+          },
+          {
+            "title": "Choisissez une devise de règlement final",
+            "body": "Fixez une devise pour les virements finaux si le groupe mélange cash et cartes à l’étranger. Vous pouvez régler hors app via votre banque ou app de paiement."
+          },
+          {
+            "title": "Partagez selon la participation, pas des taux au pif",
+            "body": "Répartissez les coûts communs selon qui a participé. Évitez les conversions « de tête » qu’on pourrait contester après le voyage."
+          },
+          {
+            "title": "Utilisez la simplification des dettes après le voyage",
+            "body": "La simplification KupaPay réduit le nombre de paiements entre amis une fois toutes les dépenses saisies."
+          }
+        ]
+      },
+      "settleUpAfterTravel": {
+        "cardTitle": "Régler les comptes après le voyage",
+        "cardTeaser": "Bouclez la boucle avec des dettes simplifiées et des confirmations claires.",
+        "seo": {
+          "title": "Régler après un voyage en groupe | KupaPay",
+          "description": "Étapes pour clôturer les dépenses : revoir les soldes, simplifier les dettes, confirmer les paiements — sans tableurs gênants.",
+          "ogTitle": "Régler les comptes après le voyage",
+          "ogDescription": "Terminez les dépenses partagées avec moins de virements entre amis."
+        },
+        "hero": {
+          "headline": "Régler les comptes après le voyage",
+          "subheadline": "Une courte revue vaut mieux que des soldes ouverts pendant des mois."
+        },
+        "intro": "À la fin du voyage, la plupart des groupes veulent une liste claire « qui doit combien à qui ». KupaPay est fait pour ce moment — ces habitudes le rendent sans stress.",
+        "tips": [
+          {
+            "title": "Passez en revue le journal du groupe ensemble",
+            "body": "Parcourez les dépenses récentes dans l’app ou sur le web. Corrigez oublis ou mauvais partages avant qu’on envoie de l’argent."
+          },
+          {
+            "title": "Appuyez-vous sur les dettes simplifiées",
+            "body": "Laissez l’app calculer les soldes nets et moins de virements de règlement au lieu de rembourser chaque dépense une par une."
+          },
+          {
+            "title": "Marquez les paiements quand ils ont lieu",
+            "body": "Enregistrer un règlement dans le groupe garde un historique exact pour tous, surtout si vous voyagez à nouveau ensemble."
+          },
+          {
+            "title": "Gardez le groupe pour référence ou la prochaine fois",
+            "body": "Conservez le groupe voyage comme archive, ou créez-en un nouveau pour la prochaine aventure — dans tous les cas, noter vaut mieux qu’un « tu me dois » oublié."
+          }
+        ]
+      },
+      "japanTravelMoney": {
+        "cardTitle": "Argent au Japon : conseils",
+        "cardTeaser": "Yen, commerces favorisant le cash, cartes IC — et suivi des coûts partagés.",
+        "seo": {
+          "title": "Argent au Japon pour groupes | KupaPay",
+          "description": "Conseils généraux pour le Japon : yen, cartes et cartes IC — sans prix ni taux inventés.",
+          "ogTitle": "Conseils argent voyage Japon",
+          "ogDescription": "Habitudes de paiement pour voyager en groupe au Japon."
+        },
+        "hero": {
+          "headline": "Argent au Japon : conseils",
+          "subheadline": "Le Japon utilise le yen (JPY). Beaucoup de voyageurs ont cash et cartes."
+        },
+        "intro": "Les usages de paiement varient selon commerces et villes. Ces conseils restent sur des bases connues ; vérifiez les infos officielles tourisme avant de partir.",
+        "tips": [
+          {
+            "title": "Ayez des yens pour le quotidien",
+            "body": "Le cash reste courant dans beaucoup de restaurants, sanctuaires et petites boutiques. Si une personne paie le groupe en espèces, enregistrez tout de suite pour un remboursement équitable."
+          },
+          {
+            "title": "Les cartes IC facilitent trains et bus",
+            "body": "Les cartes IC rechargeables (Suica, Pasmo) sont très utilisées dans les transports. Décidez si le transport est un coût commun ou individuel avant une semaine de passages aux portiques."
+          },
+          {
+            "title": "Les cartes passent dans beaucoup de grandes enseignes",
+            "body": "Hôtels, chaînes et nombreux restaurants urbains acceptent la carte. Gardez quand même du cash au cas où un petit lieu serait cash only."
+          },
+          {
+            "title": "Suivez repas communs et excursions",
+            "body": "Utilisez un groupe voyage KupaPay pour ryokan, courses et billets groupés afin que les soldes restent clairs lors de longues journées."
+          }
+        ]
+      },
+      "thailandTravelMoney": {
+        "cardTitle": "Argent en Thaïlande : conseils",
+        "cardTeaser": "Baht, DAB et partage des coûts d’un voyage plage entre amis.",
+        "seo": {
+          "title": "Argent en Thaïlande pour groupes | KupaPay",
+          "description": "Conseils généraux Thaïlande : baht, espèces et cartes — pour groupes qui partagent les dépenses.",
+          "ogTitle": "Conseils argent voyage Thaïlande",
+          "ogDescription": "Bases de paiement pour voyager ensemble en Thaïlande."
+        },
+        "hero": {
+          "headline": "Argent en Thaïlande : conseils",
+          "subheadline": "La monnaie de la Thaïlande est le baht (THB)."
+        },
+        "intro": "Les zones touristiques acceptent souvent la carte ; marchés et transports peuvent préférer le cash. Vérifiez les règles DAB/carte de votre banque avant le départ.",
+        "tips": [
+          {
+            "title": "Retirez des bahts dans des DAB fiables",
+            "body": "Privilégiez les DAB bancaires et protégez votre code. Si un ami retire pour le groupe, comptez-le en dépense commune seulement si tout le monde a accepté une cagnotte."
+          },
+          {
+            "title": "Petites coupures pour marchés et transport",
+            "body": "Les vendeurs n’ont pas toujours la monnaie sur gros billets. Partager la street food est plus simple si quelqu’un note le total payé dans le groupe dépenses."
+          },
+          {
+            "title": "Cartes à l’hôtel et pour les tours",
+            "body": "Hébergement et beaucoup d’organisateurs acceptent la carte. Indiquez le payeur dans KupaPay pour chambres, bateaux et activités groupées."
+          },
+          {
+            "title": "Accordez-vous poliment sur le pourboire",
+            "body": "Les usages diffèrent de nombreux pays occidentaux. Si un service est inclus sur une note de groupe, partagez le reçu comme tout autre repas commun."
+          }
+        ]
+      },
+      "europeTravelMoney": {
+        "cardTitle": "Argent en Europe : conseils",
+        "cardTeaser": "Euro dans beaucoup de pays, monnaies locales ailleurs — planifiez un voyage multi-pays.",
+        "seo": {
+          "title": "Argent en Europe pour groupes | KupaPay",
+          "description": "Conseils généraux Europe : euro, autres monnaies et cartes — pour amis qui partagent les coûts.",
+          "ogTitle": "Conseils argent voyage Europe",
+          "ogDescription": "Bases de paiement pour un itinéraire européen multi-pays."
+        },
+        "hero": {
+          "headline": "Argent en Europe : conseils",
+          "subheadline": "De nombreux pays européens utilisent l’euro (EUR) ; d’autres ont leur propre monnaie."
+        },
+        "intro": "Un même itinéraire peut croiser plusieurs systèmes de paiement. Conseils généraux — confirmez la monnaie de chaque étape avant de budgétiser entre amis.",
+        "tips": [
+          {
+            "title": "Sachez quelle monnaie à chaque étape",
+            "body": "La zone euro partage l’EUR ; le Royaume-Uni, la Suisse et une grande partie de l’Est européen utilisent d’autres monnaies. Indiquez les dépenses dans la devise payée dans KupaPay."
+          },
+          {
+            "title": "Le sans contact est répandu",
+            "body": "Beaucoup de commerces acceptent le paiement tap-to-pay. Pour les additions communes, notez qui a payé avec sa carte pour des remboursements exacts."
+          },
+          {
+            "title": "Cash pour petites villes et marchés",
+            "body": "Marchés ruraux et certains cafés peuvent préférer le cash. Une cagnotte courses fonctionne quand une personne achète et enregistre le reçu pour le groupe."
+          },
+          {
+            "title": "Passes rail et billets groupés",
+            "body": "Réservations train et blocs musées s’oublient facilement — ajoutez-les comme dépenses à la réservation pour que le groupe voie le coût d’avance."
+          }
+        ]
+      },
+      "ukTravelMoney": {
+        "cardTitle": "Argent au Royaume-Uni : conseils",
+        "cardTeaser": "Livre sterling, paiement sans contact et partage d’un city break.",
+        "seo": {
+          "title": "Argent au Royaume-Uni pour groupes | KupaPay",
+          "description": "Conseils généraux UK : livre sterling (GBP), cartes et cash pour suivre les dépenses de groupe.",
+          "ogTitle": "Conseils argent voyage Royaume-Uni",
+          "ogDescription": "Bases de paiement pour voyager en groupe au Royaume-Uni."
+        },
+        "hero": {
+          "headline": "Argent au Royaume-Uni : conseils",
+          "subheadline": "Le Royaume-Uni utilise la livre sterling (GBP)."
+        },
+        "intro": "Londres et d’autres villes sont surtout carte-friendly, mais un peu de cash aide encore pour les petits achats et rembourser vite les amis.",
+        "tips": [
+          {
+            "title": "Le sans contact est très répandu",
+            "body": "Beaucoup de commerces britanniques acceptent cartes sans contact et wallets mobiles. Pour un dîner de groupe, désignez qui paie et enregistrez la note avant que chacun parte."
+          },
+          {
+            "title": "Gardez du cash pour les rares cash-only",
+            "body": "Certains petits lieux préfèrent le cash ou imposent un minimum carte. Un taxi partagé se partage mieux si le payeur note le total du compteur tout de suite."
+          },
+          {
+            "title": "Attention aux frais de service sur l’addition",
+            "body": "Les restaurants peuvent ajouter un service charge. Incluez le total du reçu au partage pour que personne ne sous-paye le pourboire ou frais communs."
+          },
+          {
+            "title": "Un groupe voyage pour un city break",
+            "body": "Week-ends avec Airbnb commun et additions au pub conviennent bien à un groupe KupaPay — surtout quand les amis viennent de villes différentes."
+          }
+        ]
+      },
+      "usaTravelMoney": {
+        "cardTitle": "Argent aux États-Unis : conseils",
+        "cardTeaser": "Dollar US, pourboires au restaurant et coûts partagés en road trip.",
+        "seo": {
+          "title": "Argent aux États-Unis pour groupes | KupaPay",
+          "description": "Conseils généraux USA : dollar (USD), cartes et usages du pourboire — pour groupes qui suivent les dépenses communes.",
+          "ogTitle": "Conseils argent voyage États-Unis",
+          "ogDescription": "Bases de paiement pour voyager en groupe aux États-Unis."
+        },
+        "hero": {
+          "headline": "Argent aux États-Unis : conseils",
+          "subheadline": "Les États-Unis utilisent le dollar US (USD)."
+        },
+        "intro": "Les cartes sont acceptées dans la plupart des commerces urbains et suburbains ; le pourboire est courant dans l’hôtellerie-restauration. Les montants varient — suivez les indications du lieu et les usages locaux plutôt que des règles fixes ici.",
+        "tips": [
+          {
+            "title": "Les cartes couvrent la plupart des repas de groupe",
+            "body": "Les restaurants divisent souvent l’addition sur demande, mais une carte plus KupaPay est souvent plus rapide pour un grand groupe. Notez taxe et pourboire dans la dépense commune."
+          },
+          {
+            "title": "Le pourboire est attendu dans beaucoup de restaurants avec service",
+            "body": "Vérifiez les lignes de gratuity suggérées. S’il n’est pas inclus, le groupe peut convenir d’un pourcentage commun avant de payer."
+          },
+          {
+            "title": "Le cash aide pour parking, pourboires et petits vendeurs",
+            "body": "Marchés fermiers, voituriers et certains péages peuvent exiger du cash. Notez les paiements cash dans le groupe voyage le jour même."
+          },
+          {
+            "title": "Road trip : carburant et courses",
+            "body": "Alternez qui paie à la pompe ou au supermarché, ou utilisez une cagnotte avec suivi clair — KupaPay garde l’équité quand les payeurs tournent sur de longs trajets."
+          }
+        ]
+      },
+      "tippingWhileTraveling": {
+        "cardTitle": "Pourboire en voyage à l’étranger",
+        "cardTeaser": "Les usages varient selon le pays — observez, demandez et partagez les notes équitablement.",
+        "seo": {
+          "title": "Pourboire en voyage à l’étranger | KupaPay",
+          "description": "Conseils généraux sur les usages du pourboire en voyage — sans montants ou pourcentages fixes.",
+          "ogTitle": "Pourboire en voyage à l’étranger",
+          "ogDescription": "Gérer le pourboire en voyage de groupe sans règlement gênant."
+        },
+        "hero": {
+          "headline": "Pourboire en voyage à l’étranger",
+          "subheadline": "Il n’existe pas de règle universelle — les usages varient selon le pays et le type de service."
+        },
+        "intro": "Ces conseils évitent de lister des montants changeants. En cas de doute, demandez à votre hôte, guide ou consultez les infos tourisme officielles.",
+        "tips": [
+          {
+            "title": "Regardez d’abord l’addition",
+            "body": "Dans certains pays le service est inclus ; ailleurs le pourboire relève du client. Partagez le montant final du reçu dans KupaPay comme le groupe l’a convenu pour le pourboire."
+          },
+          {
+            "title": "Accordez-vous en groupe avant le repas",
+            "body": "Décidez si tout le monde partage le pourboire à parts égales ou seulement ceux qui ont pris de l’alcool, par exemple. Une courte discussion évite les débats après."
+          },
+          {
+            "title": "Pourboire cash vs carte",
+            "body": "Certains établissements n’acceptent le pourboire qu’en cash pour le personnel. Si une personne couvre les pourboires cash de la table, enregistrez en dépense commune si c’était prévu."
+          },
+          {
+            "title": "Guides et chauffeurs",
+            "body": "Les excursions d’une journée ont souvent des attentes de pourboire distinctes. Clarifiez avec l’organisateur ce qui est d’usage plutôt que d’importer vos habitudes du pays d’origine."
+          }
+        ]
+      }
     }
   }
 }

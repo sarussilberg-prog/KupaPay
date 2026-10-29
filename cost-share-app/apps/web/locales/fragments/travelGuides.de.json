@@ -1,0 +1,363 @@
+{
+  "footerTravelGuides": "Reise-Geld-Ratgeber",
+  "travelGuides": {
+    "shared": {
+      "backToIndex": "Alle Reise-Geld-Ratgeber",
+      "relatedGuidesTitle": "Weitere Ratgeber",
+      "toolsTitle": "Kostenlose Tools für deine Reise",
+      "splitCalculatorLink": "Rechnung-teilen-Rechner",
+      "splitwiseAlternativeLink": "Splitwise-Alternative",
+      "tripExpensesLink": "Reisekosten aufteilen",
+      "homeLink": "KupaPay Startseite",
+      "tipsHeading": "Praktische Tipps",
+      "ctaTitle": "Gemeinsame Reisekosten in KupaPay tracken",
+      "ctaBody": "Erstelle eine Gruppe, erfasse wer was bezahlt hat, und lass KupaPay die Abrechnung vereinfachen — auf iPhone, Android und im Web."
+    },
+    "index": {
+      "seo": {
+        "title": "Reise-Geld- & Gruppenreise-Ratgeber | KupaPay",
+        "description": "Kurze, dauerhafte Ratgeber zum Teilen von Reisekosten, Bargeld vs. Karte im Ausland und Geld-Basics nach Reiseziel — mit Links zu KupaPays kostenlosem Rechner und App.",
+        "ogTitle": "Reise-Geld-Ratgeber für Gruppenreisen",
+        "ogDescription": "Praktische Tipps für gemeinsame Reiseausgaben plus kostenlose Tools zum Teilen von Rechnungen mit Freunden."
+      },
+      "hero": {
+        "headline": "Reise-Geld-Ratgeber für Gruppenreisen",
+        "subheadline": "Allgemeine, praktische Tipps fürs gemeinsame Bezahlen im Ausland — und kostenlose Tools zum Aufteilen der Kosten nach der Heimkehr."
+      },
+      "intro": "Diese Ratgeber bleiben bewusst allgemein: keine Wechselkurs-Schätzungen oder Preisangaben. Nutze sie zusammen mit KupaPays Rechnung-teilen-Rechner und Reisekosten-Funktionen, wenn du gemeinsame Kosten trackst.",
+      "listHeading": "Ratgeber"
+    },
+    "guides": {
+      "groupTripSplit": {
+        "cardTitle": "Kosten auf Gruppenreise teilen",
+        "cardTeaser": "Früh Erwartungen klären und gemeinsame Ausgaben laufend erfassen.",
+        "seo": {
+          "title": "Kosten auf Gruppenreise teilen | KupaPay",
+          "description": "Praktische Tipps, gemeinsame Reisekosten fair zu teilen — Essen, Unterkunft, Transport — ohne peinliche Rechenerei am Ende.",
+          "ogTitle": "Kosten auf Gruppenreise teilen",
+          "ogDescription": "Einfache Gewohnheiten, um zu tracken, wer bei gemeinsamen Reisen was bezahlt hat."
+        },
+        "hero": {
+          "headline": "Kosten auf Gruppenreise teilen",
+          "subheadline": "Ein paar gemeinsame Regeln machen die Abrechnung am Reiseende leichter."
+        },
+        "intro": "Gruppenreisen laufen am besten, wenn alle vor dem Geldfluss einig sind, wie Kosten geteilt werden. KupaPay hilft beim Erfassen und Vereinfachen von Schulden; diese Tipps fokussieren den Reise-Workflow.",
+        "tips": [
+          {
+            "title": "Vor der Abreise einen gemeinsamen Plan erstellen",
+            "body": "Vereinbart, was gleich geteilt wird (Lebensmittel, Airbnb) und was jeder selbst zahlt (Flüge, Souvenirs). Schreibt es in den Gruppenchat, damit Erwartungen klar bleiben."
+          },
+          {
+            "title": "Ausgaben erfassen, solange sie frisch sind",
+            "body": "Fügt jede gemeinsame Rechnung kurz danach hinzu — Zahler, Betrag und wer dabei war. Bis zur letzten Nacht warten macht Details leicht vergesslich."
+          },
+          {
+            "title": "Eine Gruppe für die ganze Reise",
+            "body": "Eine KupaPay-Gruppe pro Reise hält Salden an einem Ort. Bei Nebenaktivitäten entweder bar vor Ort teilen oder eine separate Ausgabe nur mit Beteiligten anlegen."
+          },
+          {
+            "title": "Web-Rechner für schnelle Aufteilung",
+            "body": "Für ein Abendessen oder Taxi den kostenlosen Rechner auf der Seite nutzen und die Aufteilung bei Bedarf als Gruppe in der App speichern."
+          }
+        ]
+      },
+      "cashVsCardAbroad": {
+        "cardTitle": "Bargeld oder Karte auf Reisen",
+        "cardTeaser": "Beides dabeihaben, Karten-Reiseeinstellungen kennen und Belege für gemeinsame Rechnungen aufbewahren.",
+        "seo": {
+          "title": "Bargeld oder Karte im Ausland | KupaPay",
+          "description": "Allgemeine Hinweise zu Bargeld und Zahlungskarten im Ausland — ohne konkrete Gebühren- oder Kursangaben.",
+          "ogTitle": "Bargeld oder Karte auf Reisen",
+          "ogDescription": "Praktische Zahlungsgewohnheiten für Reisen mit Freunden."
+        },
+        "hero": {
+          "headline": "Bargeld oder Karte auf Reisen",
+          "subheadline": "Die meisten Reisen laufen smoother, wenn beide Zahlungsoptionen verfügbar sind."
+        },
+        "intro": "Kartenakzeptanz und Geldautomat-Verfügbarkeit variieren je nach Ort und Händler. Diese Tipps nennen keine wechselnden Gebühren oder Kurse — prüfe vor der Abreise die aktuellen Reisehinweise deiner Bank.",
+        "tips": [
+          {
+            "title": "Etwas lokales Bargeld für kleine Einkäufe",
+            "body": "Märkte, Trinkgeld und kleine Händler bevorzugen oft Bargeld, auch wo Karten üblich sind. Eine Barrechnung teilen ist leichter, wenn jemand den Betrag sofort in der Ausgaben-App notiert."
+          },
+          {
+            "title": "Der Bank mitteilen, dass du reist",
+            "body": "Viele Banken erlauben eine Reisemeldung in App oder Online-Banking. Das reduziert das Risiko einer Karten-Ablehnung mitten beim Gruppenessen."
+          },
+          {
+            "title": "Karten für größere, nachvollziehbare Ausgaben",
+            "body": "Hotels, Mietwagen und viele Restaurants nehmen Karten. Den Karteninhaber als Zahler in KupaPay zu erfassen, hält den Gruppensaldo korrekt."
+          },
+          {
+            "title": "Belege für gemeinsame Ausgaben aufbewahren",
+            "body": "Ein Foto oder Notiz hilft später bei Fragen zu Steuer, Servicegebühr oder wer was bestellt hat — besonders bei Multi-Währungs-Reisen."
+          }
+        ]
+      },
+      "multiCurrencyGroups": {
+        "cardTitle": "Gruppenausgaben in mehreren Währungen",
+        "cardTeaser": "Jede Ausgabe in der bezahlten Währung erfassen und in vereinbarter Währung ausgleichen.",
+        "seo": {
+          "title": "Gruppenausgaben in mehreren Währungen | KupaPay",
+          "description": "Gemeinsame Reisekosten tracken, wenn Freunde in verschiedenen Währungen zahlen — allgemeine Workflow-Tipps für KupaPay-Gruppen.",
+          "ogTitle": "Gruppenausgaben in mehreren Währungen",
+          "ogDescription": "Reisekosten in bezahlter Währung erfassen, dann Abrechnung vereinfachen."
+        },
+        "hero": {
+          "headline": "Gruppenausgaben in mehreren Währungen",
+          "subheadline": "Reisen mischen oft Währungen; Klarheit schlägt Kopfrechnen."
+        },
+        "intro": "KupaPay erfasst Ausgaben in der bezahlten Währung. Automatische Umrechnung in Heimatwährung steht nicht im Fokus — vereinbart stattdessen, wie ihr Salden ausgleicht.",
+        "tips": [
+          {
+            "title": "Währung vom Beleg eingeben",
+            "body": "Betrag und Währung von Rechnung oder Kartenabrechnung verwenden. So bleibt jede Zeile ehrlich für alle, die die Gruppe später prüfen."
+          },
+          {
+            "title": "Abrechnungswährung vereinbaren",
+            "body": "Eine Währung für finale Überweisungen wählen, wenn die Gruppe im Ausland Bargeld und Karten mischt. Ausgleich kann außerhalb der App über Bank oder Payment-App laufen."
+          },
+          {
+            "title": "Nach Beteiligung teilen, nicht nach Kurs-Schätzungen",
+            "body": "Gemeinsame Kosten nach Teilnahme aufteilen. Informelle Umrechnungs-Shortcuts vermeiden, die jemand nach der Reise anfechten könnte."
+          },
+          {
+            "title": "Nach der Reise Schulden vereinfachen",
+            "body": "KupaPays Vereinfachung reduziert die nötigen Zahlungen zwischen Freunden, sobald alle Ausgaben erfasst sind."
+          }
+        ]
+      },
+      "settleUpAfterTravel": {
+        "cardTitle": "Nach der Reise abrechnen",
+        "cardTeaser": "Mit vereinfachten Schulden und klaren Bestätigungen abschließen.",
+        "seo": {
+          "title": "Abrechnung nach Gruppenreise | KupaPay",
+          "description": "Schritte zum Abschluss: Salden prüfen, Schulden vereinfachen, Zahlungen bestätigen — ohne peinliche Tabellen.",
+          "ogTitle": "Nach der Reise abrechnen",
+          "ogDescription": "Gemeinsame Reiseausgaben mit weniger Überweisungen zwischen Freunden abschließen."
+        },
+        "hero": {
+          "headline": "Nach der Reise abrechnen",
+          "subheadline": "Eine kurze Durchsicht schlägt offene Salden über Monate."
+        },
+        "intro": "Am Reiseende wollen die meisten Gruppen eine klare Liste „wer zahlt wem“. KupaPay ist für genau diesen Moment gebaut — diese Gewohnheiten halten es stressfrei.",
+        "tips": [
+          {
+            "title": "Gemeinsam das Gruppenjournal prüfen",
+            "body": "Kürzliche Ausgaben in App oder Web überfliegen. Fehlende Posten oder falsche Aufteilungen korrigieren, bevor jemand Geld sendet."
+          },
+          {
+            "title": "Auf vereinfachte Schulden setzen",
+            "body": "Die App Nettosalden und weniger Ausgleichs-Überweisungen rechnen lassen statt jede Einzelausgabe zurückzuzahlen."
+          },
+          {
+            "title": "Zahlungen markieren, wenn sie passieren",
+            "body": "Eine Ausgleichszahlung in der Gruppe zu erfassen, hält die Historie für alle korrekt — besonders wenn ihr wieder zusammen reist."
+          },
+          {
+            "title": "Gruppe als Referenz behalten oder neu starten",
+            "body": "Reisegruppe als Nachschlag behalten oder frische Gruppe fürs nächste Abenteuer — in jedem Fall schlägt dokumentieren vergessene IOUs."
+          }
+        ]
+      },
+      "japanTravelMoney": {
+        "cardTitle": "Geld-Tipps für Japan",
+        "cardTeaser": "Japanischer Yen, bargeldfreundliche Läden, IC-Verkehrskarten — plus gemeinsame Kosten tracken.",
+        "seo": {
+          "title": "Geld-Tipps Japan für Gruppen | KupaPay",
+          "description": "Allgemeine Geld-Tipps für Japan: Yen, Karten und IC-Karten — ohne Preis- oder Kursbehauptungen.",
+          "ogTitle": "Geld-Tipps Reise Japan",
+          "ogDescription": "Praktische Zahlungsgewohnheiten für Gruppenreisen in Japan."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Japan",
+          "subheadline": "Japan nutzt den japanischen Yen (JPY). Viele Reisende haben Bargeld und Karten dabei."
+        },
+        "intro": "Zahlungsnormen unterscheiden sich je nach Laden und Stadt. Diese Tipps bleiben bei bekannten Basics; vor der Reise aktuelle Hinweise offizieller Tourismusquellen prüfen.",
+        "tips": [
+          {
+            "title": "Yen für Alltagsausgaben mitnehmen",
+            "body": "Bargeld ist in vielen Restaurants, Schreinen und kleinen Läden noch üblich. Wenn eine Person bar für die Gruppe zahlt, die Ausgabe sofort erfassen, damit andere fair erstatten können."
+          },
+          {
+            "title": "IC-Verkehrskarten helfen bei Zug und Bus",
+            "body": "Aufladbare IC-Karten (z. B. Suica und Pasmo) sind im ÖPNV weit verbreitet. Vorher klären, ob Transport gemeinsame oder individuelle Kosten sind, bevor ihr eine Woche durch Drehkreuze geht."
+          },
+          {
+            "title": "Karten funktionieren in vielen größeren Betrieben",
+            "body": "Hotels, Ketten und viele städtische Restaurants nehmen Karten. Trotzdem Reserve-Bargeld für rein barzahlende kleine Lokale mitnehmen."
+          },
+          {
+            "title": "Gemeinsame Mahlzeiten und Tagesausflüge tracken",
+            "body": "Eine KupaPay-Reisegruppe für Ryokan, Einkäufe und Gruppentickets nutzen, damit Salden an langen Sightseeing-Tagen klar bleiben."
+          }
+        ]
+      },
+      "thailandTravelMoney": {
+        "cardTitle": "Geld-Tipps für Thailand",
+        "cardTeaser": "Thailändischer Baht, Geldautomaten und Strandreise-Kosten mit Freunden teilen.",
+        "seo": {
+          "title": "Geld-Tipps Thailand für Gruppen | KupaPay",
+          "description": "Allgemeine Zahlungstipps Thailand: Baht, Bargeld und Karten — für Gruppen, die Reisekosten teilen.",
+          "ogTitle": "Geld-Tipps Reise Thailand",
+          "ogDescription": "Zahlungs-Basics für gemeinsame Reisen in Thailand."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Thailand",
+          "subheadline": "Thailands Währung ist der thailändische Baht (THB)."
+        },
+        "intro": "Touristengebiete nehmen oft Karten, Märkte und Transport bevorzugen eher Bargeld. Geldautomat- und Kartenregeln vor Abreise mit der Bank klären.",
+        "tips": [
+          {
+            "title": "Baht an seriösen Geldautomaten abheben",
+            "body": "Wenn möglich Bankautomaten nutzen und PIN schützen. Wenn ein Freund für die Gruppe abhebt, nur als gemeinsame Ausgabe zählen, wenn alle dem gemeinsamen Topf zugestimmt haben."
+          },
+          {
+            "title": "Kleinere Scheine für Märkte und Transport",
+            "body": "Händler wechseln große Scheine nicht immer. Street-Food teilen ist leichter, wenn jemand den gezahlten Gesamtbetrag in der Ausgabengruppe notiert."
+          },
+          {
+            "title": "Karten in Hotels und bei Touren",
+            "body": "Unterkünfte und viele Touranbieter nehmen Karten. Zahler in KupaPay erfassen, damit Zimmer, Boote und Gruppenaktivitäten fair bleiben."
+          },
+          {
+            "title": "Höflich über Trinkgeld einigen",
+            "body": "Trinkgeldgewohnheiten unterscheiden sich von vielen westlichen Ländern. Ist Service auf einer Gruppenrechnung enthalten, den Beleg wie jede andere gemeinsame Mahlzeit teilen."
+          }
+        ]
+      },
+      "europeTravelMoney": {
+        "cardTitle": "Geld-Tipps für Europa",
+        "cardTeaser": "Euro in vielen Ländern, lokale Währungen woanders — vor Multi-Länder-Trip planen.",
+        "seo": {
+          "title": "Geld-Tipps Europa für Gruppen | KupaPay",
+          "description": "Allgemeine Europa-Zahlungstipps: Euro, andere lokale Währungen und Karten — für Freunde, die Reisekosten teilen.",
+          "ogTitle": "Geld-Tipps Reise Europa",
+          "ogDescription": "Zahlungs-Basics für mehrländerige Europareisen."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Europa",
+          "subheadline": "Viele europäische Länder nutzen den Euro (EUR); andere haben eigene Währungen."
+        },
+        "intro": "Eine Route kann mehrere Zahlungssysteme durchqueren. Tipps bleiben allgemein — vor dem Budget mit Freunden klären, welche Währung jedes Ziel nutzt.",
+        "tips": [
+          {
+            "title": "Währung pro Stopp kennen",
+            "body": "Eurozone teilt EUR; Orte wie Vereinigtes Königreich, Schweiz und große Teile Osteuropas nutzen andere Währungen. Ausgaben in bezahlter Währung in KupaPay labeln."
+          },
+          {
+            "title": "Kontaktlose Karten sind verbreitet",
+            "body": "Viele Händler akzeptieren Tap-to-pay. Bei gemeinsamen Tabs notieren, wer mit seiner Karte gezahlt hat, damit Erstattungen stimmen."
+          },
+          {
+            "title": "Bargeld für Kleinstädte und Märkte",
+            "body": "Ländliche Märkte und manche Cafés bevorzugen Bargeld. Gemeinsamer Lebensmittel-Topf funktioniert, wenn eine Person einkauft und den Beleg für die Gruppe erfasst."
+          },
+          {
+            "title": "Bahnpässe und Gruppentickets",
+            "body": "Zugreservierungen und Museumsblöcke vergisst man leicht — bei Buchung als Ausgabe hinzufügen, damit die Gruppe Kosten vorab sieht."
+          }
+        ]
+      },
+      "ukTravelMoney": {
+        "cardTitle": "Geld-Tipps für Großbritannien",
+        "cardTeaser": "Pfund Sterling, kontaktlos zahlen und Städtetrips aufteilen.",
+        "seo": {
+          "title": "Geld-Tipps UK für Gruppen | KupaPay",
+          "description": "Allgemeine UK-Tipps: Pfund Sterling (GBP), Karten und Bargeld für Gruppenausgaben-Tracking.",
+          "ogTitle": "Geld-Tipps Reise UK",
+          "ogDescription": "Zahlungs-Basics für Gruppenreisen im Vereinigten Königreich."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für Großbritannien",
+          "subheadline": "Das Vereinigte Königreich nutzt das Pfund Sterling (GBP)."
+        },
+        "intro": "London und andere Städte sind weitgehend kartenfreundlich, etwas Bargeld hilft trotzdem bei Kleinkäufen und schnellem Zurückzahlen an Freunde.",
+        "tips": [
+          {
+            "title": "Kontaktlos ist weit verbreitet",
+            "body": "Viele britische Händler nehmen kontaktlose Karten und Mobile Wallets. Beim Gruppenessen festlegen, wer zahlt, und die Rechnung erfassen, bevor sich alle verabschieden."
+          },
+          {
+            "title": "Bargeld für gelegentliche Cash-only-Spots",
+            "body": "Manche kleinere Lokale bevorzugen Bargeld oder haben Kartenmindestbeträge. Geteilte Taxis teilen sich leichter, wenn der Zahler den Taxameter-Betrag sofort notiert."
+          },
+          {
+            "title": "Servicegebühr auf Rechnungen beachten",
+            "body": "Restaurants können eine Service-Charge-Zeile hinzufügen. Den vollen Belegbetrag beim Teilen einbeziehen, damit niemand gemeinsames Trinkgeld oder Gebühr unterzahlt."
+          },
+          {
+            "title": "Reisegruppe für Städtetrips",
+            "body": "Wochenenden mit gemeinsamem Airbnb und Pub-Tabs passen gut in eine KupaPay-Gruppe — besonders wenn Freunde aus verschiedenen Städten kommen."
+          }
+        ]
+      },
+      "usaTravelMoney": {
+        "cardTitle": "Geld-Tipps für die USA",
+        "cardTeaser": "US-Dollar, Trinkgeld im Restaurant und gemeinsame Roadtrip-Kosten.",
+        "seo": {
+          "title": "Geld-Tipps USA für Gruppen | KupaPay",
+          "description": "Allgemeine USA-Tipps: US-Dollar (USD), Karten und Trinkgeld-Normen — für Gruppen mit gemeinsamen Kosten.",
+          "ogTitle": "Geld-Tipps Reise USA",
+          "ogDescription": "Zahlungs-Basics für Gruppenreisen in den Vereinigten Staaten."
+        },
+        "hero": {
+          "headline": "Geld-Tipps für die USA",
+          "subheadline": "Die Vereinigten Staaten nutzen den US-Dollar (USD)."
+        },
+        "intro": "Karten werden in den meisten städtischen und suburbanen Geschäften akzeptiert; Trinkgeld ist in vielen Gastgewerbe-Bereichen üblich. Beträge variieren — den Hinweisen vor Ort und lokalen Normen folgen, nicht festen Regeln hier.",
+        "tips": [
+          {
+            "title": "Karten decken die meisten Gruppenmahlzeiten",
+            "body": "Restaurants teilen Rechnungen oft auf Wunsch, aber eine Karte plus KupaPay ist für große Gruppen oft schneller. Steuer und Trinkgeld in der gemeinsamen Ausgabe erfassen."
+          },
+          {
+            "title": "Trinkgeld wird in vielen Restaurants mit Bedienung erwartet",
+            "body": "Rechnung auf vorgeschlagene Gratuity-Zeilen prüfen. Ist keins enthalten, kann die Gruppe vor dem Zahlen einen gemeinsamen Prozentsatz vereinbaren."
+          },
+          {
+            "title": "Bargeld für Parken, Trinkgeld und kleine Händler",
+            "body": "Farmers Markets, Valet und manche Mautstellen brauchen Bargeld. Barzahlungen am selben Tag in der Reisegruppe notieren."
+          },
+          {
+            "title": "Roadtrip: Kraftstoff und Lebensmittel",
+            "body": "Abwechselnd an der Zapfsäule oder im Großmarkt zahlen oder einen gemeinsamen Topf mit klarer Dokumentation — KupaPay hält wechselnde Zahler auf langen Fahrten fair."
+          }
+        ]
+      },
+      "tippingWhileTraveling": {
+        "cardTitle": "Trinkgeld auf Reisen im Ausland",
+        "cardTeaser": "Normen unterscheiden sich nach Land — beobachten, fragen und gemeinsame Rechnungen fair teilen.",
+        "seo": {
+          "title": "Trinkgeld auf Reisen im Ausland | KupaPay",
+          "description": "Allgemeine Hinweise zu Trinkgeld auf Reisen — ohne feste Beträge oder Prozentsätze.",
+          "ogTitle": "Trinkgeld auf Reisen im Ausland",
+          "ogDescription": "Gratuity auf Gruppenreisen ohne peinliche Abrechnung handhaben."
+        },
+        "hero": {
+          "headline": "Trinkgeld auf Reisen im Ausland",
+          "subheadline": "Es gibt keine globale Trinkgeld-Regel — Bräuche variieren nach Land und Serviceart."
+        },
+        "intro": "Diese Tipps listen keine wechselnden Beträge. Im Zweifel Gastgeber, Reiseleiter fragen oder offizielle Tourismus-Hinweise zum Ziel prüfen.",
+        "tips": [
+          {
+            "title": "Zuerst auf die Rechnung schauen",
+            "body": "In manchen Ländern ist Service im Total enthalten; woanders liegt Gratuity beim Gast. Den finalen Belegbetrag in KupaPay teilen, wie die Gruppe Trinkgeld vereinbart hat."
+          },
+          {
+            "title": "Vor dem Essen in der Gruppe klären",
+            "body": "Entscheiden, ob alle Trinkgeld gleich teilen oder nur Alkohol-Besteller, zum Beispiel. Ein kurzes Gespräch verhindert Debatten später."
+          },
+          {
+            "title": "Bar-Trinkgeld vs. Karten-Trinkgeld",
+            "body": "Manche Lokale nehmen Gratuity nur bar direkt ans Personal. Deckt eine Person Bar-Trinkgeld für den Tisch, als gemeinsame Ausgabe erfassen, wenn das der Plan war."
+          },
+          {
+            "title": "Reiseleiter und Fahrer",
+            "body": "Geführte Tagesausflüge haben oft eigene Trinkgeld-Erwartungen. Beim Anbieter klären, was üblich ist, statt Heimatgewohnheiten zu unterstellen."
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,363 @@
+{
+  "footerTravelGuides": "Guías de dinero en viajes",
+  "travelGuides": {
+    "shared": {
+      "backToIndex": "Todas las guías de dinero en viajes",
+      "relatedGuidesTitle": "Más guías",
+      "toolsTitle": "Herramientas gratis para tu viaje",
+      "splitCalculatorLink": "Calculadora para dividir la cuenta",
+      "splitwiseAlternativeLink": "Alternativa a Splitwise",
+      "tripExpensesLink": "Reparto de gastos del viaje",
+      "homeLink": "Inicio de KupaPay",
+      "tipsHeading": "Consejos prácticos",
+      "ctaTitle": "Controla los gastos compartidos del viaje en KupaPay",
+      "ctaBody": "Crea un grupo, anota quién pagó qué y deja que KupaPay simplifique los pagos — en iPhone, Android y la web."
+    },
+    "index": {
+      "seo": {
+        "title": "Guías de dinero y viajes en grupo | KupaPay",
+        "description": "Guías breves y permanentes sobre repartir costes, efectivo vs tarjetas en el extranjero y lo básico del dinero por destino — con enlaces a la calculadora gratis y la app de KupaPay.",
+        "ogTitle": "Guías de dinero para viajes en grupo",
+        "ogDescription": "Consejos prácticos para gastos compartidos en viajes y herramientas gratis para dividir cuentas con amigos."
+      },
+      "hero": {
+        "headline": "Guías de dinero para viajes en grupo",
+        "subheadline": "Consejos generales y prácticos para pagar juntos en el extranjero — y herramientas gratis para repartir costes al volver."
+      },
+      "intro": "Estas guías son generales a propósito: sin adivinar tipos de cambio ni precios. Úsalas junto con la calculadora de KupaPay y las funciones de gastos del viaje cuando lleves el control de costes compartidos.",
+      "listHeading": "Guías"
+    },
+    "guides": {
+      "groupTripSplit": {
+        "cardTitle": "Repartir costes en un viaje en grupo",
+        "cardTeaser": "Acordad expectativas pronto y registrad el gasto compartido sobre la marcha.",
+        "seo": {
+          "title": "Cómo repartir costes en un viaje en grupo | KupaPay",
+          "description": "Consejos prácticos para dividir de forma justa gastos compartidos — comidas, alojamiento, transporte — sin cuentas incómodas al final.",
+          "ogTitle": "Repartir costes en un viaje en grupo",
+          "ogDescription": "Hábitos sencillos para saber quién pagó qué en un viaje compartido."
+        },
+        "hero": {
+          "headline": "Repartir costes en un viaje en grupo",
+          "subheadline": "Unos hábitos comunes facilitan cerrar cuentas cuando termina el viaje."
+        },
+        "intro": "Los viajes en grupo funcionan mejor cuando todos acuerdan cómo se reparten los costes antes de mover dinero. KupaPay ayuda a registrar gastos y simplificar deudas; estos consejos se centran en el flujo del viaje.",
+        "tips": [
+          {
+            "title": "Crea un plan compartido antes de salir",
+            "body": "Acordad qué se reparte a partes iguales (supermercado, Airbnb) y qué paga cada uno (vuelos, recuerdos). Escríbelo en el chat del grupo para que las expectativas queden claras."
+          },
+          {
+            "title": "Registra gastos mientras están frescos",
+            "body": "Añade cada cuenta compartida poco después — quién pagó, importe y quién participó. Esperar a la última noche hace fácil olvidar detalles."
+          },
+          {
+            "title": "Un solo grupo para todo el viaje",
+            "body": "Un grupo de KupaPay por viaje concentra los saldos. En salidas aparte, repartid efectivo allí o añade un gasto aparte solo con quienes fueron."
+          },
+          {
+            "title": "Prueba la calculadora web para repartos rápidos",
+            "body": "Para una cena o un taxi, usa la calculadora gratis del sitio y guarda el reparto como grupo en la app si quieres saldos continuos."
+          }
+        ]
+      },
+      "cashVsCardAbroad": {
+        "cardTitle": "Efectivo o tarjeta al viajar",
+        "cardTeaser": "Llevad ambos, conoced la configuración de viaje de la tarjeta y guardad tickets de cuentas compartidas.",
+        "seo": {
+          "title": "Efectivo o tarjeta viajando al extranjero | KupaPay",
+          "description": "Orientación general sobre efectivo y tarjetas en el extranjero — sin cifras concretas de comisiones o tipos.",
+          "ogTitle": "Efectivo o tarjeta al viajar",
+          "ogDescription": "Hábitos de pago prácticos para viajes con amigos."
+        },
+        "hero": {
+          "headline": "Efectivo o tarjeta al viajar",
+          "subheadline": "La mayoría de viajes van mejor con las dos formas de pago disponibles."
+        },
+        "intro": "La aceptación de tarjetas y la disponibilidad de cajeros varían según lugar y comercio. Estos consejos no citan comisiones o tipos que cambian — revisa la información de viaje actual de tu banco antes de irte.",
+        "tips": [
+          {
+            "title": "Ten algo de efectivo local para compras pequeñas",
+            "body": "Mercados, propinas y vendedores pequeños pueden preferir efectivo aunque las tarjetas sean comunes. Dividir una cuenta en efectivo es más fácil si alguien anota el total enseguida en la app de gastos."
+          },
+          {
+            "title": "Avisa a tu banco de que viajas",
+            "body": "Muchos emisores permiten aviso de viaje en su app o web. Eso reduce el riesgo de que rechacen la tarjeta en medio de una comida de grupo."
+          },
+          {
+            "title": "Usa tarjetas para gastos grandes y rastreables",
+            "body": "Hoteles, alquiler de coches y muchos restaurantes aceptan tarjeta. Registrar al titular como pagador en KupaPay mantiene el saldo del grupo correcto."
+          },
+          {
+            "title": "Guarda tickets de gastos compartidos",
+            "body": "Una foto o nota ayuda después con impuestos, cargos de servicio o quién pidió qué — sobre todo en viajes con varias monedas."
+          }
+        ]
+      },
+      "multiCurrencyGroups": {
+        "cardTitle": "Gastos de grupo en varias monedas",
+        "cardTeaser": "Registra cada gasto en la moneda pagada y luego saldad como acordéis.",
+        "seo": {
+          "title": "Gastos de grupo en varias monedas | KupaPay",
+          "description": "Cómo seguir costes compartidos cuando los amigos pagan en distintas monedas — consejos generales para grupos de KupaPay.",
+          "ogTitle": "Gastos de grupo en varias monedas",
+          "ogDescription": "Registra costes en la moneda pagada y simplifica el cierre de cuentas."
+        },
+        "hero": {
+          "headline": "Gastos de grupo en varias monedas",
+          "subheadline": "Los viajes suelen mezclar monedas; la claridad importa más que calcular de memoria."
+        },
+        "intro": "KupaPay registra gastos en la moneda pagada. La conversión automática a moneda local no es el foco — acordad cómo saldaréis los saldos.",
+        "tips": [
+          {
+            "title": "Introduce la moneda del ticket",
+            "body": "Usa importe y moneda de la factura o extracto de tarjeta. Así cada línea es fiel para quien revise el grupo después."
+          },
+          {
+            "title": "Acordad una moneda para el cierre final",
+            "body": "Elegid una moneda para transferencias finales si mezcláis efectivo y tarjetas en el extranjero. Podéis saldar fuera de la app con vuestro banco o app de pago."
+          },
+          {
+            "title": "Repartid por participación, no por tipos inventados",
+            "body": "Dividid costes compartidos según quién se unió a la actividad. Evitad conversiones informales que alguien pueda discutir tras el viaje."
+          },
+          {
+            "title": "Usa la simplificación de deudas después del viaje",
+            "body": "La simplificación de KupaPay reduce cuántos pagos hacen falta entre amigos cuando todos los gastos están registrados."
+          }
+        ]
+      },
+      "settleUpAfterTravel": {
+        "cardTitle": "Cerrar cuentas después del viaje",
+        "cardTeaser": "Cierra el ciclo con deudas simplificadas y confirmaciones claras.",
+        "seo": {
+          "title": "Cerrar cuentas tras un viaje en grupo | KupaPay",
+          "description": "Pasos para terminar gastos del grupo: revisar saldos, simplificar deudas y confirmar pagos — sin hojas de cálculo incómodas.",
+          "ogTitle": "Cerrar cuentas después del viaje",
+          "ogDescription": "Termina gastos compartidos con menos transferencias entre amigos."
+        },
+        "hero": {
+          "headline": "Cerrar cuentas después del viaje",
+          "subheadline": "Una revisión breve es mejor que dejar saldos abiertos meses."
+        },
+        "intro": "Al acabar el viaje, la mayoría quiere una lista clara de «quién paga a quién». KupaPay está hecho para ese momento — estos hábitos lo mantienen sin estrés.",
+        "tips": [
+          {
+            "title": "Revisad el libro del grupo juntos",
+            "body": "Repasad gastos recientes en la app o la web. Corregid omisiones o repartos erróneos antes de que alguien envíe dinero."
+          },
+          {
+            "title": "Confiad en las deudas simplificadas",
+            "body": "Dejad que la app calcule saldos netos y menos transferencias de cierre en lugar de devolver cada gasto por separado."
+          },
+          {
+            "title": "Marcad pagos cuando ocurran",
+            "body": "Registrar un pago de cierre en el grupo mantiene el historial exacto para todos, sobre todo si volvéis a viajar juntos."
+          },
+          {
+            "title": "Conservad el grupo de referencia o para la próxima vez",
+            "body": "Dejad el grupo del viaje como archivo o crea uno nuevo para la próxima aventura — en cualquier caso, anotar gana a un «me debes» olvidado."
+          }
+        ]
+      },
+      "japanTravelMoney": {
+        "cardTitle": "Consejos de dinero para Japón",
+        "cardTeaser": "Yen japonés, comercios que prefieren efectivo y tarjetas IC — más control de costes compartidos.",
+        "seo": {
+          "title": "Dinero en Japón para grupos | KupaPay",
+          "description": "Consejos generales para Japón: yen, tarjetas y tarjetas IC — sin precios ni tipos inventados.",
+          "ogTitle": "Consejos de dinero para Japón",
+          "ogDescription": "Hábitos de pago para viajar en grupo por Japón."
+        },
+        "hero": {
+          "headline": "Consejos de dinero para Japón",
+          "subheadline": "Japón usa el yen japonés (JPY). Muchos viajeros llevan efectivo y tarjetas."
+        },
+        "intro": "Las normas de pago varían según tienda y ciudad. Estos consejos se quedan en lo básico conocido; consulta orientación actual de fuentes oficiales de turismo antes de viajar.",
+        "tips": [
+          {
+            "title": "Llevad yen para el día a día",
+            "body": "El efectivo sigue siendo habitual en muchos restaurantes, santuarios y tiendas pequeñas. Si alguien paga en efectivo por el grupo, registra el gasto al instante para que otros puedan reembolsar con justicia."
+          },
+          {
+            "title": "Las tarjetas IC ayudan en trenes y autobuses",
+            "body": "Tarjetas IC recargables (como Suica y Pasmo) se usan mucho en transporte público. Decidid si el transporte es coste compartido o individual antes de una semana pasando tornos."
+          },
+          {
+            "title": "Las tarjetas funcionan en muchos negocios grandes",
+            "body": "Hoteles, cadenas y muchos restaurantes urbanos aceptan tarjeta. Guardad efectivo de reserva por si un local pequeño es solo efectivo."
+          },
+          {
+            "title": "Controlad comidas compartidas y excursiones de un día",
+            "body": "Usa un grupo de viaje KupaPay para ryokan, compras y entradas de grupo para que los saldos sigan claros en días largos de turismo."
+          }
+        ]
+      },
+      "thailandTravelMoney": {
+        "cardTitle": "Consejos de dinero para Tailandia",
+        "cardTeaser": "Baht tailandés, cajeros y repartir costes de viaje a la playa con amigos.",
+        "seo": {
+          "title": "Dinero en Tailandia para grupos | KupaPay",
+          "description": "Consejos generales de pago en Tailandia: baht, efectivo y tarjetas — para grupos que reparten gastos.",
+          "ogTitle": "Consejos de dinero para Tailandia",
+          "ogDescription": "Lo básico del pago para viajar juntos por Tailandia."
+        },
+        "hero": {
+          "headline": "Consejos de dinero para Tailandia",
+          "subheadline": "La moneda de Tailandia es el baht tailandés (THB)."
+        },
+        "intro": "Las zonas turísticas suelen aceptar tarjetas; mercados y transporte pueden preferir efectivo. Verifica políticas de cajero y tarjeta con tu banco antes de salir de casa.",
+        "tips": [
+          {
+            "title": "Sacad baht en cajeros fiables",
+            "body": "Usad cajeros de bancos cuando podáis y proteged el PIN. Si un amigo saca efectivo para el grupo, tratadlo como gasto compartido solo si todos acordaron un fondo común."
+          },
+          {
+            "title": "Billetes pequeños para mercados y transporte",
+            "body": "Los vendedores pueden no cambiar billetes grandes. Repartir comida callejera es más fácil si alguien anota el total pagado en el grupo de gastos."
+          },
+          {
+            "title": "Tarjetas en hoteles y tours",
+            "body": "Alojamiento y muchos operadores aceptan tarjeta. Registra al pagador en KupaPay para habitaciones, barcos y actividades en grupo."
+          },
+          {
+            "title": "Acordad propinas con cortesía",
+            "body": "Las costumbres de propina difieren de muchos países occidentales. Si un cargo de servicio va en una cuenta de grupo, repartid ese ticket como cualquier otra comida compartida."
+          }
+        ]
+      },
+      "europeTravelMoney": {
+        "cardTitle": "Consejos de dinero para Europa",
+        "cardTeaser": "Euro en muchos países, monedas locales en otros — planificad antes de un viaje multi-país.",
+        "seo": {
+          "title": "Dinero en Europa para grupos | KupaPay",
+          "description": "Consejos generales de pago en Europa: euro, otras monedas y tarjetas — para amigos que reparten costes.",
+          "ogTitle": "Consejos de dinero para Europa",
+          "ogDescription": "Lo básico del pago en un viaje europeo por varios países."
+        },
+        "hero": {
+          "headline": "Consejos de dinero para Europa",
+          "subheadline": "Muchos países europeos usan el euro (EUR); otros tienen moneda propia."
+        },
+        "intro": "Un mismo itinerario puede cruzar varios sistemas de pago. Consejos generales — confirmad qué moneda usa cada destino antes de presupuestar con amigos.",
+        "tips": [
+          {
+            "title": "Sabed qué moneda en cada parada",
+            "body": "Los países del euro comparten EUR; sitios como Reino Unido, Suiza y gran parte del este europeo usan otras monedas. Etiquetad gastos en la moneda pagada dentro de KupaPay."
+          },
+          {
+            "title": "Las tarjetas contactless son habituales",
+            "body": "Muchos comercios aceptan pago sin contacto. En cuentas compartidas, anotad quién pagó con su tarjeta para reembolsos exactos."
+          },
+          {
+            "title": "Efectivo para pueblos pequeños y mercados",
+            "body": "Mercados rurales y algunos cafés pueden preferir efectivo. Un fondo común de supermercado funciona cuando uno compra y registra el ticket para el grupo."
+          },
+          {
+            "title": "Pases de tren y entradas de grupo",
+            "body": "Reservas de tren y bloques de museos se olvidan fácil — añadidlos como gastos al reservar para que el grupo vea el coste de antemano."
+          }
+        ]
+      },
+      "ukTravelMoney": {
+        "cardTitle": "Consejos de dinero para Reino Unido",
+        "cardTeaser": "Libra esterlina, pagos contactless y repartir escapadas urbanas.",
+        "seo": {
+          "title": "Dinero en Reino Unido para grupos | KupaPay",
+          "description": "Consejos generales UK: libra esterlina (GBP), tarjetas y efectivo para gastos de grupo.",
+          "ogTitle": "Consejos de dinero para Reino Unido",
+          "ogDescription": "Lo básico del pago para viajar en grupo por Reino Unido."
+        },
+        "hero": {
+          "headline": "Consejos de dinero para Reino Unido",
+          "subheadline": "Reino Unido usa la libra esterlina (GBP)."
+        },
+        "intro": "Londres y otras ciudades aceptan tarjetas en general, pero algo de efectivo ayuda en compras pequeñas y devolver dinero a amigos rápido.",
+        "tips": [
+          {
+            "title": "El contactless está muy extendido",
+            "body": "Muchos comercios británicos aceptan tarjetas contactless y monederos móviles. En cenas de grupo, decidid quién paga y registrad la cuenta antes de que se vayan."
+          },
+          {
+            "title": "Efectivo para locales ocasionales solo efectivo",
+            "body": "Algunos locales pequeños prefieren efectivo o tienen mínimo con tarjeta. Un taxi compartido se reparte mejor si quien paga anota el total del taxímetro al momento."
+          },
+          {
+            "title": "Ojo a cargos de servicio en la cuenta",
+            "body": "Los restaurantes pueden añadir service charge. Incluid el total del ticket al repartir para que nadie pague de menos la propina o cargo común."
+          },
+          {
+            "title": "Grupo de viaje para escapadas urbanas",
+            "body": "Fines de semana con Airbnb compartido y cuentas de pub encajan bien en un grupo KupaPay — sobre todo cuando amigos vienen de ciudades distintas."
+          }
+        ]
+      },
+      "usaTravelMoney": {
+        "cardTitle": "Consejos de dinero para EE. UU.",
+        "cardTeaser": "Dólar estadounidense, propinas en restaurantes y costes compartidos en road trip.",
+        "seo": {
+          "title": "Dinero en EE. UU. para grupos | KupaPay",
+          "description": "Consejos generales USA: dólar (USD), tarjetas y normas de propina — para grupos que siguen gastos compartidos.",
+          "ogTitle": "Consejos de dinero para EE. UU.",
+          "ogDescription": "Lo básico del pago para viajar en grupo por Estados Unidos."
+        },
+        "hero": {
+          "headline": "Consejos de dinero para EE. UU.",
+          "subheadline": "Estados Unidos usa el dólar estadounidense (USD)."
+        },
+        "intro": "Las tarjetas se aceptan en la mayoría de comercios urbanos y suburbanos; la propina es habitual en muchos servicios de hostelería. Los importes varían — seguid las indicaciones del local y costumbres locales, no reglas fijas aquí.",
+        "tips": [
+          {
+            "title": "Las tarjetas cubren la mayoría de comidas de grupo",
+            "body": "Los restaurantes suelen dividir cuentas a petición, pero una tarjeta más KupaPay suele ser más rápido en grupos grandes. Anota impuestos y propina en el gasto compartido."
+          },
+          {
+            "title": "Se espera propina en muchos restaurantes con servicio de mesa",
+            "body": "Revisa líneas de gratuity sugeridas. Si no está incluida, el grupo puede acordar un porcentaje común antes de pagar."
+          },
+          {
+            "title": "El efectivo ayuda en aparcamiento, propinas y vendedores pequeños",
+            "body": "Mercados de agricultores, aparcacoches y algunos peajes pueden necesitar efectivo. Anota pagos en efectivo en el grupo del viaje el mismo día."
+          },
+          {
+            "title": "Road trip: combustible y supermercado",
+            "body": "Turnad quién paga en la gasolinera o el almacén, o usad un fondo común con registro claro — KupaPay mantiene la equidad cuando rotáis pagadores en viajes largos."
+          }
+        ]
+      },
+      "tippingWhileTraveling": {
+        "cardTitle": "Propinas viajando al extranjero",
+        "cardTeaser": "Las costumbres cambian por país — observad, preguntad y repartid cuentas compartidas con justicia.",
+        "seo": {
+          "title": "Propinas viajando al extranjero | KupaPay",
+          "description": "Orientación general sobre propinas en viajes — sin importes o porcentajes fijos.",
+          "ogTitle": "Propinas viajando al extranjero",
+          "ogDescription": "Cómo manejar gratuity en viajes de grupo sin cierres incómodos."
+        },
+        "hero": {
+          "headline": "Propinas viajando al extranjero",
+          "subheadline": "No hay una regla global de propinas — las costumbres varían por país y tipo de servicio."
+        },
+        "intro": "Estos consejos evitan listar importes que cambian. En duda, pregunta al anfitrión, guía o consulta orientación oficial de turismo de tu destino.",
+        "tips": [
+          {
+            "title": "Mirad la cuenta primero",
+            "body": "En algunos países el servicio va incluido; en otros la propina depende del cliente. Repartid el importe final del ticket en KupaPay como acordó el grupo para la propina."
+          },
+          {
+            "title": "Acordad en grupo antes de comer",
+            "body": "Decidid si todos reparten propina igual o solo quien pidió alcohol, por ejemplo. Una charla breve evita debates después."
+          },
+          {
+            "title": "Propina en efectivo vs tarjeta",
+            "body": "Algunos locales solo aceptan gratuity en efectivo para el personal. Si alguien cubre propinas en efectivo de la mesa, regístralo como gasto compartido si era el plan."
+          },
+          {
+            "title": "Guías y conductores",
+            "body": "Las excursiones de un día suelen tener expectativas de propina aparte. Aclarad con el operador qué es habitual en lugar de asumir costumbres de vuestro país."
+          }
+        ]
+      }
+    }
+  }
+}

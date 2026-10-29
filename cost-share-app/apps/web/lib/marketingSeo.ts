@@ -5,6 +5,11 @@ import {
     type Language,
 } from '@cost-share/shared';
 import { SPLITWISE_COMPARISON_SLUG } from '@/lib/splitwiseComparisonPages';
+import {
+    TRAVEL_GUIDES_INDEX_SLUG,
+    TRAVEL_GUIDE_SLUGS,
+    type TravelGuideId,
+} from '@/lib/travelGuidesPages';
 import { USE_CASE_SLUGS, type UseCaseId } from '@/lib/useCasePages';
 
 export const MARKETING_LOCALE_HEADER = 'x-kupapay-locale';
@@ -89,6 +94,42 @@ export function buildSplitwiseComparisonAlternateLanguages(): Record<string, str
     };
     for (const locale of SUPPORTED_LANGUAGES) {
         languages[hreflangForLocale(locale)] = splitwiseComparisonUrl(locale);
+    }
+    return languages;
+}
+
+export function travelGuidesIndexPath(locale: Language): string {
+    return `/${locale}/${TRAVEL_GUIDES_INDEX_SLUG}`;
+}
+
+export function travelGuidesIndexUrl(locale: Language): string {
+    return `${APP_WEB_ORIGIN}${travelGuidesIndexPath(locale)}`;
+}
+
+export function buildTravelGuidesIndexAlternateLanguages(): Record<string, string> {
+    const languages: Record<string, string> = {
+        'x-default': travelGuidesIndexUrl('en'),
+    };
+    for (const locale of SUPPORTED_LANGUAGES) {
+        languages[hreflangForLocale(locale)] = travelGuidesIndexUrl(locale);
+    }
+    return languages;
+}
+
+export function travelGuidePath(locale: Language, guideId: TravelGuideId): string {
+    return `/${locale}/${TRAVEL_GUIDES_INDEX_SLUG}/${TRAVEL_GUIDE_SLUGS[guideId]}`;
+}
+
+export function travelGuideUrl(locale: Language, guideId: TravelGuideId): string {
+    return `${APP_WEB_ORIGIN}${travelGuidePath(locale, guideId)}`;
+}
+
+export function buildTravelGuideAlternateLanguages(guideId: TravelGuideId): Record<string, string> {
+    const languages: Record<string, string> = {
+        'x-default': travelGuideUrl('en', guideId),
+    };
+    for (const locale of SUPPORTED_LANGUAGES) {
+        languages[hreflangForLocale(locale)] = travelGuideUrl(locale, guideId);
     }
     return languages;
 }

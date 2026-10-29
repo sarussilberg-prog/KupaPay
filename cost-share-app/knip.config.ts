@@ -59,7 +59,12 @@ const config: KnipConfig = {
       ],
     },
     '@cost-share/web': {
-      entry: ['middleware.ts', 'next.config.ts', '**/*.{test,spec}.{ts,tsx,mjs}'],
+      entry: [
+        'middleware.ts',
+        'next.config.ts',
+        'scripts/merge-travel-guides-fragments.mjs',
+        '**/*.{test,spec}.{ts,tsx,mjs}',
+      ],
       project: ['**/*.{ts,tsx,mjs}'],
       ignoreFiles: ['locales/**'],
       ignoreDependencies: ['sharp'],
