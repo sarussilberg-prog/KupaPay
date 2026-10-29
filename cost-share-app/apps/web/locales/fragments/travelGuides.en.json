@@ -1,0 +1,363 @@
+{
+  "footerTravelGuides": "Travel money guides",
+  "travelGuides": {
+    "shared": {
+      "backToIndex": "All travel money guides",
+      "relatedGuidesTitle": "More guides",
+      "toolsTitle": "Free tools for your trip",
+      "splitCalculatorLink": "Bill split calculator",
+      "splitwiseAlternativeLink": "Splitwise alternative",
+      "tripExpensesLink": "Trip expense splitting",
+      "homeLink": "KupaPay home",
+      "tipsHeading": "Practical tips",
+      "ctaTitle": "Track shared trip costs in KupaPay",
+      "ctaBody": "Create a group, log who paid what, and let KupaPay simplify settle-up — on iPhone, Android, and the web."
+    },
+    "index": {
+      "seo": {
+        "title": "Travel money & group trip guides | KupaPay",
+        "description": "Short evergreen guides on splitting trip costs, cash vs cards abroad, and destination money basics — with links to KupaPay’s free calculator and app.",
+        "ogTitle": "Travel money guides for group trips",
+        "ogDescription": "Practical tips for shared travel expenses, plus free tools to split bills with friends."
+      },
+      "hero": {
+        "headline": "Travel money guides for group trips",
+        "subheadline": "General, practical tips for paying together abroad — and free tools to split costs when you get home."
+      },
+      "intro": "These guides stay high-level on purpose: no exchange-rate guesses or price quotes. Use them alongside KupaPay’s bill split calculator and trip expense features when you track shared costs.",
+      "listHeading": "Guides"
+    },
+    "guides": {
+      "groupTripSplit": {
+        "cardTitle": "Splitting costs on a group trip",
+        "cardTeaser": "Set expectations early and log shared spending as you go.",
+        "seo": {
+          "title": "How to split costs on a group trip | KupaPay",
+          "description": "Practical tips for dividing shared travel expenses fairly — meals, lodging, transport — without awkward math at the end.",
+          "ogTitle": "Splitting costs on a group trip",
+          "ogDescription": "Simple habits for tracking who paid what on shared travel."
+        },
+        "hero": {
+          "headline": "Splitting costs on a group trip",
+          "subheadline": "A few shared habits make settle-up easier when the trip ends."
+        },
+        "intro": "Group travel works best when everyone agrees how costs are shared before money changes hands. KupaPay helps you record expenses and simplify debts; these tips focus on the travel workflow.",
+        "tips": [
+          {
+            "title": "Create a shared plan before you leave",
+            "body": "Agree on what is split equally (groceries, Airbnb) versus paid individually (flights, souvenirs). Write it in the group chat so expectations stay clear."
+          },
+          {
+            "title": "Log expenses while they are fresh",
+            "body": "Add each shared bill soon after it happens — payer, amount, and who participated. Waiting until the last night makes details easy to forget."
+          },
+          {
+            "title": "Use one group for the whole trip",
+            "body": "One KupaPay group per trip keeps balances in one place. For side outings, either split cash on the spot or add a separate expense with only the people who joined."
+          },
+          {
+            "title": "Try the web calculator for quick splits",
+            "body": "For a single dinner or taxi, use the free split calculator on this site, then save the split as a group in the app if you want ongoing balances."
+          }
+        ]
+      },
+      "cashVsCardAbroad": {
+        "cardTitle": "Cash vs card when traveling",
+        "cardTeaser": "Carry a mix, know your card’s travel settings, and keep receipts for shared bills.",
+        "seo": {
+          "title": "Cash vs card when traveling abroad | KupaPay",
+          "description": "General guidance on using cash and payment cards overseas — without specific fees or rate claims.",
+          "ogTitle": "Cash vs card when traveling",
+          "ogDescription": "Practical payment habits for trips with friends."
+        },
+        "hero": {
+          "headline": "Cash vs card when traveling",
+          "subheadline": "Most trips run smoother with both payment options available."
+        },
+        "intro": "Card acceptance and ATM availability vary by place and merchant. These tips avoid quoting fees or rates that change — check your bank’s current travel disclosures before you go.",
+        "tips": [
+          {
+            "title": "Keep some local cash for small purchases",
+            "body": "Markets, tips, and small vendors may prefer cash even where cards are common. Splitting a cash bill is easier when someone notes the total right away in your expense app."
+          },
+          {
+            "title": "Tell your bank you are traveling",
+            "body": "Many issuers let you set a travel notice in their app or website. That reduces the chance of a card decline in the middle of a group meal."
+          },
+          {
+            "title": "Use cards for larger, traceable expenses",
+            "body": "Hotels, car rentals, and many restaurants accept cards. Recording the cardholder as payer in KupaPay keeps the group balance accurate."
+          },
+          {
+            "title": "Save receipts for shared expenses",
+            "body": "A photo or note helps resolve questions later about tax, service charges, or who ordered what — especially for multi-currency trips."
+          }
+        ]
+      },
+      "multiCurrencyGroups": {
+        "cardTitle": "Multi-currency group expenses",
+        "cardTeaser": "Record each expense in the currency it was paid, then settle in whatever you agree.",
+        "seo": {
+          "title": "Multi-currency group expenses | KupaPay",
+          "description": "How to track shared trip costs when friends pay in different currencies — general workflow tips for KupaPay groups.",
+          "ogTitle": "Multi-currency group expenses",
+          "ogDescription": "Track travel costs in the currency paid, then simplify settle-up."
+        },
+        "hero": {
+          "headline": "Multi-currency group expenses",
+          "subheadline": "Trips often mix currencies; clarity matters more than mental math."
+        },
+        "intro": "KupaPay records expenses in the currency paid. Automatic conversion to a home currency is not the focus — agree how you will settle balances instead.",
+        "tips": [
+          {
+            "title": "Enter the currency shown on the receipt",
+            "body": "Use the amount and currency on the bill or card statement. That keeps each line item honest for everyone reviewing the group later."
+          },
+          {
+            "title": "Agree on a settle-up currency",
+            "body": "Pick one currency for final transfers if the group mixes cash and cards abroad. You can settle outside the app using your bank or payment app of choice."
+          },
+          {
+            "title": "Split by participation, not by exchange guesses",
+            "body": "Divide shared costs by who joined the activity. Avoid informal conversion shortcuts that someone might dispute after the trip."
+          },
+          {
+            "title": "Use debt simplification after the trip",
+            "body": "KupaPay’s simplification reduces how many payments are needed between friends once all expenses are logged."
+          }
+        ]
+      },
+      "settleUpAfterTravel": {
+        "cardTitle": "Settle up after a trip",
+        "cardTeaser": "Close the loop with simplified debts and clear confirmations.",
+        "seo": {
+          "title": "Settle up after a group trip | KupaPay",
+          "description": "Steps to finish group trip expenses: review balances, simplify debts, and confirm payments — without awkward spreadsheets.",
+          "ogTitle": "Settle up after a trip",
+          "ogDescription": "Finish shared travel expenses with fewer transfers between friends."
+        },
+        "hero": {
+          "headline": "Settle up after a trip",
+          "subheadline": "A short review beats leaving balances open for months."
+        },
+        "intro": "When travel ends, most groups want a clear “who pays whom” list. KupaPay is built for that moment — these habits keep it stress-free.",
+        "tips": [
+          {
+            "title": "Review the group ledger together",
+            "body": "Skim recent expenses in the app or on the web. Fix missing items or wrong splits before anyone sends money."
+          },
+          {
+            "title": "Rely on simplified debts",
+            "body": "Let the app compute net balances and fewer settle-up transfers instead of repaying every individual expense."
+          },
+          {
+            "title": "Mark payments when they happen",
+            "body": "Recording a settle-up payment in the group keeps history accurate for everyone, especially if you travel together again."
+          },
+          {
+            "title": "Archive or keep the group for next time",
+            "body": "Leave the trip group as a reference, or start a fresh group for your next adventure — either way, export habits beat forgotten IOUs."
+          }
+        ]
+      },
+      "japanTravelMoney": {
+        "cardTitle": "Japan travel money tips",
+        "cardTeaser": "Japanese yen, cash-friendly shops, and transit cards — plus tracking shared costs.",
+        "seo": {
+          "title": "Japan travel money tips for groups | KupaPay",
+          "description": "General money tips for Japan trips: yen cash, cards, and IC transit cards — without price or rate claims.",
+          "ogTitle": "Japan travel money tips",
+          "ogDescription": "Practical payment habits for group travel in Japan."
+        },
+        "hero": {
+          "headline": "Japan travel money tips",
+          "subheadline": "Japan uses the Japanese yen (JPY). Many travelers carry both cash and cards."
+        },
+        "intro": "Payment norms can differ by shop and city. These tips stick to widely known basics; check current guidance from official tourism sources before you travel.",
+        "tips": [
+          {
+            "title": "Carry yen for everyday spending",
+            "body": "Cash remains common at many restaurants, shrines, and smaller shops. When one person pays cash for the group, log the expense immediately so others can reimburse fairly."
+          },
+          {
+            "title": "IC transit cards help on trains and buses",
+            "body": "Reloadable IC cards (such as Suica and Pasmo) are widely used on public transport. Decide whether transit is a shared cost or individual before tapping through gates all week."
+          },
+          {
+            "title": "Cards work at many larger businesses",
+            "body": "Hotels, chains, and many urban restaurants accept cards. Still keep backup cash in case a smaller venue is cash-only."
+          },
+          {
+            "title": "Track shared meals and day trips",
+            "body": "Use a KupaPay trip group for ryokan stays, grocery runs, and group tickets so balances stay clear across long days of sightseeing."
+          }
+        ]
+      },
+      "thailandTravelMoney": {
+        "cardTitle": "Thailand travel money tips",
+        "cardTeaser": "Thai baht, ATMs, and splitting beach-trip costs with friends.",
+        "seo": {
+          "title": "Thailand travel money tips for groups | KupaPay",
+          "description": "General Thailand travel payment tips: Thai baht, cash, and cards — for groups splitting trip expenses.",
+          "ogTitle": "Thailand travel money tips",
+          "ogDescription": "Payment basics for shared travel in Thailand."
+        },
+        "hero": {
+          "headline": "Thailand travel money tips",
+          "subheadline": "Thailand’s currency is the Thai baht (THB)."
+        },
+        "intro": "Tourist areas often accept cards while markets and transport may prefer cash. Verify ATM and card policies with your bank before you leave home.",
+        "tips": [
+          {
+            "title": "Withdraw baht from reputable ATMs",
+            "body": "Use bank-affiliated ATMs when possible and shield your PIN. If one friend withdraws cash for the group, treat it as a shared expense only when everyone agreed to pool money."
+          },
+          {
+            "title": "Keep smaller notes for markets and transport",
+            "body": "Vendors may not break large bills. Splitting street-food runs is easier when someone logs the total paid in your expense group."
+          },
+          {
+            "title": "Cards at hotels and tours",
+            "body": "Lodging and many tour operators accept cards. Record the payer in KupaPay so room blocks, boat trips, and group activities stay fair."
+          },
+          {
+            "title": "Agree on tipping politely",
+            "body": "Tipping customs differ from many Western countries. When a service charge is included on a group bill, split that receipt like any other shared meal."
+          }
+        ]
+      },
+      "europeTravelMoney": {
+        "cardTitle": "Europe travel money tips",
+        "cardTeaser": "Euro in many countries, local currencies elsewhere — plan before a multi-country trip.",
+        "seo": {
+          "title": "Europe travel money tips for groups | KupaPay",
+          "description": "General Europe trip payment tips: euro, other local currencies, and cards — for friends splitting travel costs.",
+          "ogTitle": "Europe travel money tips",
+          "ogDescription": "Payment basics for multi-country European trips."
+        },
+        "hero": {
+          "headline": "Europe travel money tips",
+          "subheadline": "Many European countries use the euro (EUR); others use their own currencies."
+        },
+        "intro": "A single itinerary can cross several payment systems. These tips stay general — confirm which currency a destination uses before you budget with friends.",
+        "tips": [
+          {
+            "title": "Know which currency each stop uses",
+            "body": "Eurozone countries share EUR; places such as the United Kingdom, Switzerland, and much of Eastern Europe use other currencies. Label expenses in the currency paid inside KupaPay."
+          },
+          {
+            "title": "Contactless cards are common",
+            "body": "Many merchants accept tap-to-pay. For shared tabs, note who paid on their card so reimbursements stay accurate."
+          },
+          {
+            "title": "Cash for small towns and markets",
+            "body": "Rural markets and some cafés may prefer cash. Pooling grocery money works when one person buys and logs the receipt for the group."
+          },
+          {
+            "title": "Rail passes and group tickets",
+            "body": "Train reservations and museum blocks are easy to forget — add them as expenses when booked so the whole group sees the cost upfront."
+          }
+        ]
+      },
+      "ukTravelMoney": {
+        "cardTitle": "UK travel money tips",
+        "cardTeaser": "Pound sterling, contactless payments, and splitting city breaks.",
+        "seo": {
+          "title": "UK travel money tips for groups | KupaPay",
+          "description": "General UK trip payment tips: pound sterling (GBP), cards, and cash for group expense tracking.",
+          "ogTitle": "UK travel money tips",
+          "ogDescription": "Payment basics for group travel in the United Kingdom."
+        },
+        "hero": {
+          "headline": "UK travel money tips",
+          "subheadline": "The United Kingdom uses pound sterling (GBP)."
+        },
+        "intro": "London and other cities are largely card-friendly, but carrying some cash still helps for small purchases and repaying friends quickly.",
+        "tips": [
+          {
+            "title": "Contactless is widely available",
+            "body": "Many UK merchants accept contactless cards and mobile wallets. For group dinners, designate who pays and log the bill before everyone scatters."
+          },
+          {
+            "title": "Keep cash for occasional cash-only spots",
+            "body": "Some smaller venues may prefer cash or have minimums for cards. Shared taxi fares are easier to split when the payer logs the meter total right away."
+          },
+          {
+            "title": "Watch for service charges on bills",
+            "body": "Restaurants may add a service charge line. Include the full receipt total when splitting so nobody underpays the shared tip or fee."
+          },
+          {
+            "title": "Use a trip group for city breaks",
+            "body": "Weekend trips with shared Airbnb and pub tabs fit well in a KupaPay group — especially when friends join from different cities."
+          }
+        ]
+      },
+      "usaTravelMoney": {
+        "cardTitle": "USA travel money tips",
+        "cardTeaser": "US dollars, tipping at restaurants, and road-trip shared costs.",
+        "seo": {
+          "title": "USA travel money tips for groups | KupaPay",
+          "description": "General US trip payment tips: US dollar (USD), cards, and tipping norms — for groups tracking shared costs.",
+          "ogTitle": "USA travel money tips",
+          "ogDescription": "Payment basics for group travel in the United States."
+        },
+        "hero": {
+          "headline": "USA travel money tips",
+          "subheadline": "The United States uses the US dollar (USD)."
+        },
+        "intro": "Cards are accepted in most urban and suburban businesses; tipping is customary in many hospitality settings. Amounts vary — follow the venue’s prompts and local norms rather than fixed rules here.",
+        "tips": [
+          {
+            "title": "Cards cover most group meals",
+            "body": "Restaurants usually split checks on request, but one card plus KupaPay is often faster for large groups. Log tax and tip in the shared expense."
+          },
+          {
+            "title": "Tipping is expected in many sit-down restaurants",
+            "body": "Review the bill for suggested gratuity lines. When tipping is not included, the group can agree on a shared percentage before anyone pays."
+          },
+          {
+            "title": "Cash helps for parking, tips, and small vendors",
+            "body": "Farmer’s markets, valets, and some tolls may need cash. Note cash payouts in your trip group the same day."
+          },
+          {
+            "title": "Road trips: fuel and groceries",
+            "body": "Rotate who pays at the pump or warehouse store, or use one pool fund with clear logging — KupaPay keeps rotating payers fair over long drives."
+          }
+        ]
+      },
+      "tippingWhileTraveling": {
+        "cardTitle": "Tipping when traveling abroad",
+        "cardTeaser": "Norms differ by country — observe, ask, and split shared bills fairly.",
+        "seo": {
+          "title": "Tipping when traveling abroad | KupaPay",
+          "description": "General guidance on tipping customs while traveling — without quoting fixed amounts or rates.",
+          "ogTitle": "Tipping when traveling abroad",
+          "ogDescription": "How to handle gratuity on group trips without awkward settle-up."
+        },
+        "hero": {
+          "headline": "Tipping when traveling abroad",
+          "subheadline": "There is no single global tipping rule — customs vary by country and service type."
+        },
+        "intro": "These tips avoid listing amounts that change. When in doubt, ask your host, tour guide, or check official tourism guidance for your destination.",
+        "tips": [
+          {
+            "title": "Look at the bill first",
+            "body": "Some countries include service in the total; others leave gratuity to the customer. Split the final receipt amount in KupaPay so tips are shared the way the group agreed."
+          },
+          {
+            "title": "Agree as a group before you dine",
+            "body": "Decide whether everyone splits tip equally or only those who ordered alcohol, for example. A quick chat prevents debates later."
+          },
+          {
+            "title": "Cash tips vs card tips",
+            "body": "Some venues only accept cash gratuities directly to staff. If one person covers cash tips for the table, log it as a shared expense if that was the plan."
+          },
+          {
+            "title": "Tour guides and drivers",
+            "body": "Guided day trips often involve separate tipping expectations. Clarify with the operator what is customary rather than assuming home-country habits."
+          }
+        ]
+      }
+    }
+  }
+}

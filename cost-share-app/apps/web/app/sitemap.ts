@@ -4,8 +4,11 @@ import {
     marketingLandingPath,
     splitCalculatorPath,
     splitwiseComparisonPath,
+    travelGuidePath,
+    travelGuidesIndexPath,
     useCasePath,
 } from '@/lib/marketingSeo';
+import { TRAVEL_GUIDE_IDS } from '@/lib/travelGuidesPages';
 import { USE_CASE_IDS } from '@/lib/useCasePages';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -40,10 +43,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: locale === 'en' ? 0.92 : 0.82,
     }));
 
+    const travelGuidesIndexPages = SUPPORTED_LANGUAGES.map((locale) => ({
+        url: `${APP_WEB_ORIGIN}${travelGuidesIndexPath(locale)}`,
+        lastModified,
+        changeFrequency: 'weekly' as const,
+        priority: locale === 'en' ? 0.88 : 0.78,
+    }));
+
+    const travelGuideArticlePages = SUPPORTED_LANGUAGES.flatMap((locale) =>
+        TRAVEL_GUIDE_IDS.map((guideId) => ({
+            url: `${APP_WEB_ORIGIN}${travelGuidePath(locale, guideId)}`,
+            lastModified,
+            changeFrequency: 'monthly' as const,
+            priority: locale === 'en' ? 0.85 : 0.75,
+        })),
+    );
+
     return [
         ...locales,
         ...calculators,
         ...comparisonPages,
+        ...travelGuidesIndexPages,
+        ...travelGuideArticlePages,
         ...useCasePages,
         {
             url: `${APP_WEB_ORIGIN}/privacy`,

@@ -7,7 +7,7 @@
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
-    "test": "tsx --test __tests__/*.test.mjs __tests__/*.test.ts __tests__/*.test.tsx",
+    "test": "tsx --import ./__tests__/setup-react-jsx.mjs --test __tests__/*.test.mjs __tests__/*.test.ts __tests__/*.test.tsx",
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
