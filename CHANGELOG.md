@@ -39,3 +39,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - docs(marketing): 30-day TikTok/Shorts/Reels content plan (#419) (#659)
 ## [2.2.0-dev.17] — 2026-10-29
 - fix(store): real AppNavigator store screenshots (#409 follow-up) (#660)
+## [2.2.0-dev.18] — 2026-10-29
+- feat(growth): ambassador program application, Pro grant, referral codes (#420) (#661)
