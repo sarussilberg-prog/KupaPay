@@ -1,0 +1,3 @@
+# Expo web app origin for Next.js fallback rewrites (kupa-pay.com → app UI).
+# Project: production Expo web deploy (kupa.pro). See docs/SSOT/VERCEL.md.
+APP_PROXY_ORIGIN=https://kupa.pro

@@ -31,7 +31,7 @@ For **each** connected project:
      ```
 3. **Install Command** — leave empty to use `vercel.json` `installCommand` (`cd ../.. && npm install --include=optional`).
 4. **Node.js version** — 20.x (matches GitHub Actions).
-5. **Environment variables** — Supabase publishable URL/key per [SUPABASE_ENVIRONMENTS.md](./SUPABASE_ENVIRONMENTS.md); Sentry see [PERFORMANCE.md](./PERFORMANCE.md) (`NEXT_PUBLIC_SENTRY_*`, optional `SENTRY_AUTH_TOKEN` for source maps on marketing builds).
+5. **Environment variables** — Supabase publishable URL/key per [SUPABASE_ENVIRONMENTS.md](./SUPABASE_ENVIRONMENTS.md); Sentry see [PERFORMANCE.md](./PERFORMANCE.md) (`NEXT_PUBLIC_SENTRY_*`, optional `SENTRY_AUTH_TOKEN` for source maps on marketing builds). Marketing builds also need **`APP_PROXY_ORIGIN`** (Expo web deploy origin for `/login`, `/home`, … fallback rewrites). Committed SSOT: [`app-proxy.production.defaults`](../../cost-share-app/apps/web/app-proxy.production.defaults) / [`app-proxy.development.defaults`](../../cost-share-app/apps/web/app-proxy.development.defaults), loaded by [`build-web-next.sh`](../../cost-share-app/apps/web/scripts/build-web-next.sh).
 
 ## Free-tier frugality
 

@@ -1,0 +1,3 @@
+# Expo web app origin for Next.js fallback rewrites (dev marketing previews).
+# Project: kupapay-dev Expo web preview. See docs/SSOT/SUPABASE_ENVIRONMENTS.md.
+APP_PROXY_ORIGIN=https://kupa-dev.vercel.app
