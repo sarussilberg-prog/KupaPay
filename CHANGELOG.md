@@ -23,3 +23,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(analytics): automate PostHog MAU dashboard insight tiles (#584) (#647)
 ## [2.2.0-dev.9] — 2026-10-29
 - test(shared): core settlement and balance summary unit tests (#649)
+## [2.2.0-dev.10] — 2026-10-29
+- feat(mobile): import Splitwise group CSV (#396) (#650)
