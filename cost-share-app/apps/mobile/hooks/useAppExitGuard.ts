@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BackHandler, Platform } from 'react-native';
+import { dispatchAndroidHardwareBack } from '../lib/androidHardwareBackRegistry';
 import { rootNavigationRef } from '../lib/rootNavigationRef';
 
 const HISTORY_MARKER = { __kupapayExitGuard: true } as const;
@@ -39,6 +40,7 @@ export function useAppExitGuard() {
     useEffect(() => {
         if (Platform.OS === 'android') {
             const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+                if (dispatchAndroidHardwareBack()) return true;
                 if (tryGoBackInApp()) return true;
                 setExitConfirmVisible(true);
                 return true;

@@ -4,15 +4,18 @@
  * drag handle, header row (Cancel · uppercase label · Save), hairline divider.
  * Children render in a scrollable body below the header.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
+    KeyboardAvoidingView,
     Modal,
-    Pressable,
     View,
     useWindowDimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from './AppText';
+import { AppPressable } from './AppPressable';
+import { useAndroidHardwareBackHandler } from '../hooks/useAndroidHardwareBackHandler';
+import { nativeKeyboardAvoidingBehavior } from '../lib/platformKeyboard';
 
 interface BottomSheetShellProps {
     visible: boolean;
@@ -37,14 +40,30 @@ export function BottomSheetShell({
     const { t } = useTranslation();
     const { height } = useWindowDimensions();
     const sheetHeight = Math.round(height * 0.75);
+    const handleClose = useCallback(() => {
+        onClose();
+    }, [onClose]);
+    useAndroidHardwareBackHandler(visible, handleClose);
 
     return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="slide"
+            onRequestClose={handleClose}
+            statusBarTranslucent
+            navigationBarTranslucent
+        >
+            <KeyboardAvoidingView
+                behavior={nativeKeyboardAvoidingBehavior()}
+                className="flex-1 justify-end"
+            >
             <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(15,23,42,0.55)' }}>
-                <Pressable
+                <AppPressable
                     testID="bottom-sheet-scrim"
-                    onPress={onClose}
+                    onPress={handleClose}
                     className="absolute inset-0"
+                    androidRipple={null}
                 />
                 <View
                     style={{
@@ -65,11 +84,11 @@ export function BottomSheetShell({
                             style={{ minWidth: HEADER_SLOT_MIN_WIDTH }}
                             className="items-start"
                         >
-                            <Pressable onPress={onClose} hitSlop={8}>
+                            <AppPressable onPress={handleClose} hitSlop={8}>
                                 <Text className="text-[15px] font-medium text-gray-600">
                                     {t('common.cancel')}
                                 </Text>
-                            </Pressable>
+                            </AppPressable>
                         </View>
                         <Text
                             className="flex-1 text-center text-xs font-semibold text-gray-500 uppercase"
@@ -82,7 +101,7 @@ export function BottomSheetShell({
                             className="items-end"
                         >
                             {onSave ? (
-                                <Pressable
+                                <AppPressable
                                     onPress={() => {
                                         if (!saveDisabled) onSave();
                                     }}
@@ -98,7 +117,7 @@ export function BottomSheetShell({
                                     >
                                         {t('common.save')}
                                     </Text>
-                                </Pressable>
+                                </AppPressable>
                             ) : null}
                         </View>
                     </View>
@@ -106,6 +125,7 @@ export function BottomSheetShell({
                     <View style={{ flexShrink: 1 }}>{children}</View>
                 </View>
             </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 }

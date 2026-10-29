@@ -7,9 +7,11 @@
 import { Text } from './AppText';
 import { AppIcon, type AppIconName } from './AppIcon';
 import React from 'react';
-import { TouchableOpacity, ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { colors } from '../theme';
 import { centeredTextStyle } from '../hooks/useRtlLayout';
+import { AppPressable } from './AppPressable';
+import { androidRippleDanger, androidRippleOnPrimary } from '../lib/androidRipple';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'pro';
 
@@ -63,13 +65,19 @@ export function Button({
 }: ButtonProps) {
     const styles = variantClasses[variant];
     const isDisabled = disabled || loading;
+    const ripple =
+        variant === 'danger'
+            ? androidRippleDanger
+            : variant === 'outline' || variant === 'secondary'
+              ? undefined
+              : androidRippleOnPrimary;
 
     return (
-        <TouchableOpacity
+        <AppPressable
             onPress={onPress}
-            activeOpacity={0.7}
             disabled={isDisabled}
             testID={testID}
+            androidRipple={Platform.OS === 'android' ? ripple : null}
             style={isDisabled ? { opacity: 0.5 } : undefined}
             className={`${styles.container} ${fullWidth ? 'w-full' : ''} ${className}`}
         >
@@ -97,6 +105,6 @@ export function Button({
                     </Text>
                 </View>
             )}
-        </TouchableOpacity>
+        </AppPressable>
     );
 }

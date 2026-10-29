@@ -32,14 +32,13 @@ describe('Button', () => {
         expect(onPress).not.toHaveBeenCalled();
     });
 
-    it('marks the touchable as disabled when loading', () => {
+    it('does not call onPress when loading', () => {
         const onPress = jest.fn();
-        const { UNSAFE_getByType } = render(
-            <Button title="Save" onPress={onPress} loading />
+        const { getByTestId } = render(
+            <Button title="Save" onPress={onPress} loading testID="save-btn" />
         );
-        const TouchableOpacity = require('react-native').TouchableOpacity;
-        const touchable = UNSAFE_getByType(TouchableOpacity);
-        expect(touchable.props.disabled).toBe(true);
+        fireEvent.press(getByTestId('save-btn'));
+        expect(onPress).not.toHaveBeenCalled();
     });
 
     it.each(['primary', 'secondary', 'outline', 'danger', 'pro'] as const)(

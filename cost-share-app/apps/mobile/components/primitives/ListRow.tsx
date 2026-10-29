@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-    View,
-    TouchableOpacity,
-    Platform,
-    type StyleProp,
-    type ViewStyle,
-} from 'react-native';
+import { View, Platform, type StyleProp, type ViewStyle } from 'react-native';
 import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
+import { AppPressable } from '../AppPressable';
 
 type Props = {
     children: React.ReactNode;
@@ -30,15 +25,14 @@ export function ListRow({ children, onPress, testID, style, className }: Props) 
 
     if (onPress) {
         return (
-            <TouchableOpacity
+            <AppPressable
                 onPress={onPress}
-                activeOpacity={0.7}
                 testID={testID}
                 className={className}
                 style={[rowStyle, style]}
             >
                 {children}
-            </TouchableOpacity>
+            </AppPressable>
         );
     }
 
