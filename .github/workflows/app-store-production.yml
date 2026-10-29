@@ -1,0 +1,132 @@
+# macOS local iOS production build, TestFlight upload, ASC prepare + submit for App Store review.
+name: App Store Production iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: Git ref to build (use main after release merge)
+        type: string
+        default: main
+      pro_enabled:
+        description: Enable KupaPay Pro (RevenueCat) — keep false until Paid Apps agreement
+        type: boolean
+        default: false
+
+concurrency:
+  group: app-store-production-ios
+  cancel-in-progress: true
+
+jobs:
+  app-store-production:
+    name: Build, upload, submit for review
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: cost-share-app/apps/mobile
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+          fetch-depth: 0
+
+      - name: Preflight secrets
+        id: preflight
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXPO_TOKEN:-}" ] || [ -z "${ASC_API_KEY_ID:-}" ] || [ -z "${ASC_API_KEY_ISSUER_ID:-}" ] || [ -z "${ASC_API_KEY_P8:-}" ]; then
+            echo "::error::Missing EXPO_TOKEN or ASC API key secrets"
+            exit 1
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        if: steps.preflight.outputs.ready == 'true'
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.ready == 'true'
+        working-directory: cost-share-app
+        run: npm ci --ignore-scripts
+
+      - name: Install EAS CLI
+        if: steps.preflight.outputs.ready == 'true'
+        run: npm install -g eas-cli@24.12.1 --ignore-scripts
+
+      - name: Write ASC API key
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: bash scripts/ci-write-asc-key.sh
+
+      - name: Sync EAS iOS buildNumber with App Store Connect
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: node scripts/sync-eas-ios-build-number.mjs
+
+      - name: Require RevenueCat iOS key when Pro enabled
+        if: steps.preflight.outputs.ready == 'true' && inputs.pro_enabled == true
+        env:
+          EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXPO_PUBLIC_REVENUECAT_IOS_KEY:-}" ]; then
+            echo "::error::EXPO_PUBLIC_REVENUECAT_IOS_KEY is required when pro_enabled=true"
+            exit 1
+          fi
+
+      - name: Build iOS locally & upload to TestFlight
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+          EXPO_PUBLIC_KUPAPAY_PRO_ENABLED: ${{ inputs.pro_enabled == true && 'true' || 'false' }}
+          EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+        run: |
+          set -euo pipefail
+          source scripts/ci-export-asc-env.sh
+          eas build \
+            --platform ios \
+            --profile production \
+            --local \
+            --non-interactive \
+            --output ./build-kupapay.ipa
+          bash scripts/eas-submit-testflight.sh ./build-kupapay.ipa
+          EXPECTED="$(eas build:version:get -p ios 2>/dev/null | grep -oE '[0-9]+$' || jq -r '.expo.ios.buildNumber' app.json)"
+          node scripts/asc-poll-build.mjs "$EXPECTED"
+
+      - name: Prepare App Store version & submit for review
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_PATH: ${{ github.workspace }}/cost-share-app/apps/mobile/asc-api-key.p8
+          ASC_APP_ID: "6780216665"
+        run: |
+          set -euo pipefail
+          source scripts/ci-export-asc-env.sh
+          MARKETING="$(jq -r .marketingVersion ../../packages/shared/version.json)"
+          node scripts/asc-prepare-app-version.mjs
+          node scripts/asc-submit-app-for-review.mjs "$MARKETING"

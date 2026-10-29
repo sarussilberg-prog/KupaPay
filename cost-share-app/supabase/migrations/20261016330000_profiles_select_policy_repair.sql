@@ -47,7 +47,7 @@ GRANT EXECUTE ON FUNCTION app_private.profile_peer_visible_for_rls(UUID) TO auth
 
 ALTER FUNCTION public.is_caller_active() SET row_security = off;
 
-DROP POLICY IF EXISTS profiles_select_scoped ON public.profiles;
+DROP POLICY IF EXISTS profiles_select_scoped ON public.profiles; -- destructive-ok: replace broken dev policy; recreated below in same migration
 
 CREATE POLICY profiles_select_scoped ON public.profiles
     FOR SELECT
