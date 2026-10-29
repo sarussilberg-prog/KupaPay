@@ -57,6 +57,8 @@ export type {
     SplitwiseParseResult,
     SplitwiseParseSuccess,
     SplitwiseSkipReason,
+    SplitwiseMemberMapping,
+    SplitwiseParsedExpense,
 } from './import/splitwiseCsvTypes';
 export * from './email/lifecycleTemplates';
 export * from './email/lifecycleEmailCopy';
