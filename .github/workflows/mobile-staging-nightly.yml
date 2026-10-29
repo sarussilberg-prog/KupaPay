@@ -33,7 +33,7 @@ jobs:
       android: ${{ steps.plan.outputs.android }}
       head_sha: ${{ steps.plan.outputs.head_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: dev
           fetch-depth: 0

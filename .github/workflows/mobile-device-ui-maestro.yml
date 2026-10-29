@@ -36,8 +36,8 @@ jobs:
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
@@ -46,7 +46,7 @@ jobs:
         run: npm ci
       - name: Maestro device UI (iOS simulator)
         run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: maestro-device-ui-ios-${{ github.run_id }}

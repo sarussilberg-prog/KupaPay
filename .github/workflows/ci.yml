@@ -24,7 +24,7 @@ jobs:
       performance: ${{ steps.parse.outputs.performance }}
       docs_only: ${{ steps.parse.outputs.docs_only }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: parse
@@ -55,7 +55,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Sync with origin/dev when behind (update-branch)
@@ -86,14 +86,14 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - name: Restore Turbo cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: cost-share-app/.turbo
           key: turbo-${{ runner.os }}-${{ hashFiles('cost-share-app/package-lock.json') }}-${{ github.sha }}
@@ -104,7 +104,7 @@ jobs:
       - run: npm run audit:ci
       - name: Pack node_modules (preserve .bin symlinks for downstream jobs)
         run: bash scripts/ci-pack-node-modules-artifact.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: npm-node-modules
           path: cost-share-app/node_modules.tar.zst
@@ -124,11 +124,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -149,11 +149,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -174,11 +174,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -187,7 +187,7 @@ jobs:
       - run: bash scripts/ci-jest-run-tests.sh
       - name: Upload Jest flake report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jest-flaky-report-${{ github.run_id }}
           path: cost-share-app/apps/mobile/.ci-artifacts/jest/
@@ -206,11 +206,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -230,11 +230,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -252,7 +252,7 @@ jobs:
     outputs:
       functions: ${{ steps.plan.outputs.functions }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: plan
@@ -292,7 +292,7 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
@@ -350,17 +350,17 @@ jobs:
     name: No merge conflict markers
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash scripts/ci-no-merge-conflicts.sh
 
   secret-scan:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -376,12 +376,12 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
       - name: Restore Expo cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             cost-share-app/apps/mobile/.expo
@@ -389,7 +389,7 @@ jobs:
           key: expo-${{ runner.os }}-${{ hashFiles('cost-share-app/apps/mobile/package.json', 'cost-share-app/package-lock.json') }}
           restore-keys: |
             expo-${{ runner.os }}-
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -401,7 +401,7 @@ jobs:
     name: Supabase migration guard
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Lint migration filenames
@@ -475,7 +475,7 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
@@ -512,13 +512,13 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -556,7 +556,7 @@ jobs:
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Aggregate required checks
         env:
           DOCS_ONLY: ${{ needs.ci-paths.outputs.docs_only }}
@@ -660,7 +660,7 @@ jobs:
           echo "::error::Timed out waiting for SonarCloud"
           exit 1
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -734,7 +734,7 @@ jobs:
           echo "::warning::Timed out waiting for auto-merge; run Bump dev prerelease workflow_dispatch to reconcile version.json"
           echo "merged=false" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: >-
           steps.sync_dev.outputs.defer != 'true' &&
           (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
@@ -743,7 +743,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.ADMIN_PAT }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: >-
           steps.sync_dev.outputs.defer != 'true' &&
           (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
