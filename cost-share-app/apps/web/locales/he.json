@@ -108,7 +108,8 @@
     "privacy": "מדיניות פרטיות",
     "terms": "תנאי שירות",
     "contact": "יצירת קשר",
-    "copyright": "© 2026 KupaPay"
+    "copyright": "© 2026 KupaPay",
+    "splitwiseAlternative": "חלופה ל-Splitwise"
   },
   "legal": {
     "notFound": "המסמך לא נמצא.",
@@ -481,6 +482,123 @@
         "title": "התחילו קבוצת זוג",
         "body": "קבלו את KupaPay בחינם ב-iPhone, Android או באינטרנט כדי לעקוב אחר הוצאות משותפות."
       }
+    }
+  },
+  "splitwiseComparison": {
+    "seo": {
+      "title": "KupaPay מול Splitwise — חלופה חינמית ל-Splitwise | KupaPay",
+      "description": "השוו בין KupaPay ל-Splitwise לחלוקת הוצאות קבוצתיות: פישוט חובות, מצב לא מקוון, ייבוא CSV מ-Splitwise ומעקב חינמי ב-iOS, Android והאינטרנט.",
+      "ogTitle": "חלופה ל-Splitwise — השוואת תכונות",
+      "ogDescription": "ראו איך KupaPay מתאימה ל-Splitwise לטיולים, שותפים לדירה והוצאות משותפות. טבלה מעודכנת לפי תיעוד ציבורי."
+    },
+    "hero": {
+      "headline": "חלופה חינמית ל-Splitwise להוצאות משותפות",
+      "subheadline": "KupaPay עוקבת אחר חשבונות קבוצתיים, מפשטת חובות ומאפשרת לייבא ייצוא CSV מ-Splitwise לקבוצה חדשה — ב-iPhone, Android והאינטרנט."
+    },
+    "disclaimer": "Splitwise הוא סימן מסחרי של בעליו. KupaPay אינה קשורה ל-Splitwise. העמוד מבוסס על תכונות שפורסמו בלבד.",
+    "table": {
+      "title": "KupaPay מול Splitwise",
+      "asOfLabel": "נכון ל-{date} (לפי תיעוד ציבורי של כל מוצר ותכונות אתר זה)",
+      "featureColumn": "תכונה",
+      "kupapayColumn": "KupaPay",
+      "splitwiseColumn": "Splitwise",
+      "caption": "השוואת תכונות",
+      "rows": [
+        {
+          "feature": "פישוט חובות (פחות תשלומי סגירה)",
+          "kupapay": "כן — בכל קבוצה",
+          "splitwise": "כן — „Simplify debts“ (ליבה)"
+        },
+        {
+          "feature": "מעקב הוצאות ויתרות קבוצתיות",
+          "kupapay": "כן",
+          "splitwise": "כן"
+        },
+        {
+          "feature": "חלוקה שווה, באחוזים או ביחידות",
+          "kupapay": "כן — לפי הוצאה באפליקציה",
+          "splitwise": "כן — שווה, לא שווה, % או shares (ליבה)"
+        },
+        {
+          "feature": "מצב לא מקוון",
+          "kupapay": "כן — הוספה וצפייה offline; סנכרון כשחוזרים online",
+          "splitwise": "כן (תכונת ליבה)"
+        },
+        {
+          "feature": "סנכרון בענן בין מכשירים",
+          "kupapay": "כן",
+          "splitwise": "כן (ליבה)"
+        },
+        {
+          "feature": "מעבר מ-Splitwise",
+          "kupapay": "ייבוא CSV של קבוצה באפליקציה",
+          "splitwise": "ייצוא קבוצה כגיליון/CSV מהגדרות הקבוצה"
+        },
+        {
+          "feature": "הוצאות במטבעות שונים",
+          "kupapay": "כן — רישום במטבע ששולם",
+          "splitwise": "כן — 100+ מטבעות (ליבה)"
+        },
+        {
+          "feature": "המרת מטבע אוטומטית למטבע ברירת מחדל",
+          "kupapay": "לא מובנה — יתרות לפי מטבע ההוצאה",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "סריקת קבלה ופירוט פריטים",
+          "kupapay": "לא חלק מהליבה החינמית המתוארת כאן",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "ייבוא עסקאות כרטיס/בנק",
+          "kupapay": "לא",
+          "splitwise": "Splitwise Pro (ארה״ב בלבד, לפי דף Pro)"
+        },
+        {
+          "feature": "מגבלה יומית בתוכנית החינמית",
+          "kupapay": "לא תואר מגבלה יומית למעקב הליבה",
+          "splitwise": "חינם: עד 4 הוצאות ביום (עזרת Splitwise Pro)"
+        },
+        {
+          "feature": "תמחור ליבה (השוואה זו)",
+          "kupapay": "חינם — קבוצות, חלוקות ופישוט חובות",
+          "splitwise": "אפליקציית ליבה חינמית + מנוי Pro אופציונלי"
+        }
+      ]
+    },
+    "whenToUse": {
+      "title": "מתי KupaPay מתאימה כחלופה ל-Splitwise",
+      "items": [
+        "רוצים מעקב קבוצתי חינמי עם פישוט חובות אוטומטי בטלפון ובאינטרנט.",
+        "עוברים מ-Splitwise ויש ייצוא CSV של קבוצה לייבוא ל-KupaPay.",
+        "צריך עברית/ערבית RTL או 7 שפות באתר ובאפליקציה.",
+        "אוהבים קישורי סגירה ודף יתרות ציבורי אופציונלי בלי גיליונות."
+      ]
+    },
+    "faq": {
+      "title": "שאלות נפוצות",
+      "items": [
+        {
+          "question": "האם KupaPay קשורה ל-Splitwise?",
+          "answer": "לא. KupaPay עצמאית. ייבוא CSV עוזר להעביר את הייצוא שלכם; אין חיבור לחשבון Splitwise."
+        },
+        {
+          "question": "אפשר לייבא קבוצה מ-Splitwise?",
+          "answer": "כן. ייצאו מ-Splitwise, ואז „ייבוא מ-Splitwise“ באפליקציה — תצוגה מקדימה לפני יצירת הקבוצה."
+        },
+        {
+          "question": "האם KupaPay מחליפה את כל תכונות Splitwise Pro?",
+          "answer": "לא. סריקת קבלות, המרת מטבע חיה וייבוא כרטיס בארה״ב הם יכולות Pro של Splitwise. KupaPay מתמקדת ביתרות ברורות, פישוט חובות ומעקב ליבה חינמי."
+        },
+        {
+          "question": "מאיפה המידע בהשוואה?",
+          "answer": "שורות KupaPay לפי האתר והאפליקציה. שורות Splitwise לפי דף הבית, Pro ומאמרי עזרה ציבוריים — בלי מחירים או סטטיסטיקות שלא פורסמו."
+        }
+      ]
+    },
+    "cta": {
+      "title": "נסו KupaPay בחלוקה הבאה",
+      "body": "הורידו את האפליקציה או התחברו באינטרנט, צרו קבוצה והוסיפו הוצאה ראשונה."
     }
   }
 }

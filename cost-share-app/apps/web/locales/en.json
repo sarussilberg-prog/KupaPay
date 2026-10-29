@@ -108,6 +108,7 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "contact": "Contact",
+    "splitwiseAlternative": "Splitwise alternative",
     "copyright": "© 2026 KupaPay"
   },
   "legal": {
@@ -481,6 +482,123 @@
         "not_authenticated": "Sign in to save this split as a group.",
         "import_failed": "Could not create the group. Try again in a moment."
       }
+    }
+  },
+  "splitwiseComparison": {
+    "seo": {
+      "title": "KupaPay vs Splitwise — free Splitwise alternative | KupaPay",
+      "description": "Compare KupaPay and Splitwise for splitting group bills: debt simplification, offline mode, Splitwise CSV import, and free core tracking on iOS, Android, and web.",
+      "ogTitle": "Splitwise alternative — honest feature comparison",
+      "ogDescription": "See how KupaPay compares to Splitwise for trips, roommates, and shared expenses. Updated feature table with sources from Splitwise’s public docs."
+    },
+    "hero": {
+      "headline": "A free Splitwise alternative for shared expenses",
+      "subheadline": "KupaPay tracks group bills, simplifies debts, and lets you import a Splitwise CSV export into a new group — on iPhone, Android, and the web."
+    },
+    "disclaimer": "Splitwise is a trademark of its respective owner. KupaPay is not affiliated with Splitwise. This page reflects publicly documented features only.",
+    "table": {
+      "title": "KupaPay vs Splitwise",
+      "asOfLabel": "As of {date} (from each product’s public documentation and this site’s feature set)",
+      "featureColumn": "Feature",
+      "kupapayColumn": "KupaPay",
+      "splitwiseColumn": "Splitwise",
+      "caption": "Side-by-side feature comparison",
+      "rows": [
+        {
+          "feature": "Debt simplification (fewer settle-up payments)",
+          "kupapay": "Yes — built into every group",
+          "splitwise": "Yes — “Simplify debts” (core feature)"
+        },
+        {
+          "feature": "Track group expenses and balances",
+          "kupapay": "Yes",
+          "splitwise": "Yes"
+        },
+        {
+          "feature": "Equal, percentage, or share splits",
+          "kupapay": "Yes — per expense in the app",
+          "splitwise": "Yes — equal, unequal, %, or shares (core)"
+        },
+        {
+          "feature": "Offline mode",
+          "kupapay": "Yes — add and view expenses offline; syncs when online",
+          "splitwise": "Yes (listed as a core feature)"
+        },
+        {
+          "feature": "Cloud sync across devices",
+          "kupapay": "Yes",
+          "splitwise": "Yes (core feature)"
+        },
+        {
+          "feature": "Move data from Splitwise",
+          "kupapay": "Import a Splitwise group CSV in the mobile app",
+          "splitwise": "Export a group as spreadsheet/CSV from group settings"
+        },
+        {
+          "feature": "Multi-currency expenses",
+          "kupapay": "Yes — record expenses in the currency paid",
+          "splitwise": "Yes — 100+ currencies (core feature)"
+        },
+        {
+          "feature": "Automatic currency conversion to your default currency",
+          "kupapay": "Not built in — balances stay per expense currency",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "Receipt scanning & itemization",
+          "kupapay": "Not part of the free core app described here",
+          "splitwise": "Splitwise Pro"
+        },
+        {
+          "feature": "Import card/bank transactions",
+          "kupapay": "No",
+          "splitwise": "Splitwise Pro (US only, per Splitwise Pro page)"
+        },
+        {
+          "feature": "Daily expense limit on the free plan",
+          "kupapay": "No daily cap described for core tracking",
+          "splitwise": "Free accounts: up to 4 expenses per day (Splitwise Pro help)"
+        },
+        {
+          "feature": "Core app pricing (this comparison)",
+          "kupapay": "Free — core groups, splits, and debt simplification",
+          "splitwise": "Free core app with optional Splitwise Pro subscription"
+        }
+      ]
+    },
+    "whenToUse": {
+      "title": "When KupaPay is a good Splitwise alternative",
+      "items": [
+        "You want free group expense tracking with automatic debt simplification on phone and web.",
+        "You are switching from Splitwise and have a group CSV export to import into KupaPay.",
+        "Your group needs Hebrew or Arabic RTL, or you prefer KupaPay’s 7-language marketing site and app locales.",
+        "You like settle-up links and optional public balance pages for sharing totals without spreadsheets."
+      ]
+    },
+    "faq": {
+      "title": "FAQ",
+      "items": [
+        {
+          "question": "Is KupaPay affiliated with Splitwise?",
+          "answer": "No. KupaPay is an independent app. Splitwise CSV import helps you migrate your own export; it does not connect to Splitwise accounts."
+        },
+        {
+          "question": "Can I import my Splitwise group?",
+          "answer": "Yes. Export the group from Splitwise, then use Import from Splitwise in the KupaPay mobile app to preview members and expenses before creating the group."
+        },
+        {
+          "question": "Does KupaPay replace every Splitwise Pro feature?",
+          "answer": "No. Features such as receipt scanning, live currency conversion, and US card import are Splitwise Pro capabilities. KupaPay focuses on clear balances, debt simplification, and free core tracking."
+        },
+        {
+          "question": "Where is this comparison information from?",
+          "answer": "KupaPay rows match features documented on this site and in the app. Splitwise rows are based on Splitwise’s public homepage, Pro page, and help articles — not on undisclosed pricing or usage statistics."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Try KupaPay on your next group trip or bill split",
+      "body": "Download the app or sign in on the web, create a group, and add your first expense in minutes."
     }
   }
 }

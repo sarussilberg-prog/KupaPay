@@ -1,6 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { APP_WEB_ORIGIN, SUPPORTED_LANGUAGES } from '@cost-share/shared';
-import { marketingLandingPath, splitCalculatorPath, useCasePath } from '@/lib/marketingSeo';
+import {
+    marketingLandingPath,
+    splitCalculatorPath,
+    splitwiseComparisonPath,
+    useCasePath,
+} from '@/lib/marketingSeo';
 import { USE_CASE_IDS } from '@/lib/useCasePages';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -28,9 +33,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         })),
     );
 
+    const comparisonPages = SUPPORTED_LANGUAGES.map((locale) => ({
+        url: `${APP_WEB_ORIGIN}${splitwiseComparisonPath(locale)}`,
+        lastModified,
+        changeFrequency: 'weekly' as const,
+        priority: locale === 'en' ? 0.92 : 0.82,
+    }));
+
     return [
         ...locales,
         ...calculators,
+        ...comparisonPages,
         ...useCasePages,
         {
             url: `${APP_WEB_ORIGIN}/privacy`,
