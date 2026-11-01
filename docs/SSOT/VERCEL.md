@@ -33,6 +33,10 @@ For **each** connected project:
 4. **Node.js version** — 20.x (matches GitHub Actions).
 5. **Environment variables** — Supabase publishable URL/key per [SUPABASE_ENVIRONMENTS.md](./SUPABASE_ENVIRONMENTS.md); Sentry see [PERFORMANCE.md](./PERFORMANCE.md) (`NEXT_PUBLIC_SENTRY_*`, optional `SENTRY_AUTH_TOKEN` for source maps on marketing builds). Marketing builds also need **`APP_PROXY_ORIGIN`** (Expo web deploy origin for `/login`, `/home`, … fallback rewrites). Committed SSOT: [`app-proxy.production.defaults`](../../cost-share-app/apps/web/app-proxy.production.defaults) / [`app-proxy.development.defaults`](../../cost-share-app/apps/web/app-proxy.development.defaults), loaded by [`build-web-next.sh`](../../cost-share-app/apps/web/scripts/build-web-next.sh).
 
+## Marketing → Expo proxy routing
+
+Middleware rewrites any **non-marketing** path to `APP_PROXY_ORIGIN` (`lib/marketingAppProxy.ts`). Paths under **`/_expo/`**, **`/assets/`**, app entry routes (`/login`, `/auth/*`, …), and root **`/manifest.json`** / **`/favicon.ico`** (Expo web; marketing uses `manifest.webmanifest` and `favicon.png`) must **not** be classified as marketing-owned static files — otherwise `.js`/`.css` bundles 404 on the marketing domain and the login shell stays white. Regression: `apps/web/__tests__/marketingAppProxy.test.ts` and Playwright `e2e/next-marketing-login-proxy.spec.ts` (requires `E2E_BASE_URL`, run via `e2e-smoke.yml`).
+
 ## Free-tier frugality
 
 - **Ignored build step** skips deploys when `apps/web` or `apps/mobile` + `packages/shared` are unchanged between commits.
