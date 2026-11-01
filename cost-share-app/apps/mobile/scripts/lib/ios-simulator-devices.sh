@@ -25,8 +25,27 @@ parse_ios_simulator_devices() {
 # Map a human name (e.g. "iPhone 16") to an installed simulator name + UDID on this Mac.
 resolve_ios_simulator() {
   local want="$1"
-  local line udid name
-  line="$(xcrun simctl list devices available 2>/dev/null | grep -F "${want} (" | head -1 || true)"
+  local line udid name candidate
+  local -a candidates=("$want")
+  case "$want" in
+    "iPhone SE (3rd generation)"|*SE*)
+      candidates+=("iPhone 16e" "iPhone 17e" "iPhone SE (3rd generation)")
+      ;;
+    "iPhone 16")
+      candidates+=("iPhone 17" "iPhone 16" "iPhone 16e")
+      ;;
+    "iPhone 16 Pro Max")
+      candidates+=("iPhone 17 Pro Max" "iPhone 16 Pro Max")
+      ;;
+  esac
+  line=""
+  for candidate in "${candidates[@]}"; do
+    line="$(xcrun simctl list devices available 2>/dev/null | grep -F "${candidate} (" | head -1 || true)"
+    if [[ -n "$line" ]]; then
+      want="$candidate"
+      break
+    fi
+  done
   if [[ -z "$line" ]]; then
     line="$(xcrun simctl list devices available 2>/dev/null | grep -Fi "${want}" | grep -E '\([0-9A-Fa-f-]{36}\)' | head -1 || true)"
   fi
