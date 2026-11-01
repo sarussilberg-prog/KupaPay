@@ -77,11 +77,12 @@ find_ios_sim_app_bundle() {
 IOS_APP_BINARY=""
 
 run_ios_on_simulator() {
+  # Release on CI: do not start Metro or open exp+ dev-client deep links (Maestro launchApp owns startup).
   if [[ -n "$IOS_APP_BINARY" && -d "$IOS_APP_BINARY" ]]; then
     echo "Reusing built app: $IOS_APP_BINARY"
     npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release --binary "$IOS_APP_BINARY" --no-bundler
   else
-    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release
+    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release --no-bundler
     IOS_APP_BINARY="$(find_ios_sim_app_bundle)"
     echo "Built app bundle: ${IOS_APP_BINARY:-<not found>}"
   fi
