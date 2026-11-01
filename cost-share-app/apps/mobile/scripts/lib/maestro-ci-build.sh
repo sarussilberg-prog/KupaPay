@@ -44,6 +44,9 @@ maestro_android_prebuild() {
 
 maestro_android_assemble_release() {
   local mobile_root="$1"
+  if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
+    export SENTRY_DISABLE_AUTO_UPLOAD="${SENTRY_DISABLE_AUTO_UPLOAD:-true}"
+  fi
   cd "$mobile_root/android"
   ./gradlew assembleRelease -x lint -x test
 }

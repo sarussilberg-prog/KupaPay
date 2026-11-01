@@ -151,6 +151,7 @@ jobs:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      SENTRY_DISABLE_AUTO_UPLOAD: 'true'
       MAESTRO_ANDROID_APK_STAGING_DIR: /tmp/maestro-android-apk
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
