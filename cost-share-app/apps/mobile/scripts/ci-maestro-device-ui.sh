@@ -50,7 +50,7 @@ if [[ "$PLATFORM" == "ios" ]]; then
   for SIM in "${IOS_DEVICES[@]}"; do
     echo "=== iOS simulator: $SIM ==="
     prepare_ios_simulator "$SIM"
-    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release
+    run_ios_on_simulator
     export MAESTRO_PLATFORM="ios-${SIM// /-}"
     maestro test \
       -e APP_LANG=en \

@@ -18,7 +18,7 @@ jobs:
     name: Groups layout probes (iOS)
     continue-on-error: true
     runs-on: macos-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     defaults:
       run:
         working-directory: cost-share-app
@@ -59,7 +59,7 @@ jobs:
     name: Groups layout probes (Android)
     continue-on-error: true
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     defaults:
       run:
         working-directory: cost-share-app

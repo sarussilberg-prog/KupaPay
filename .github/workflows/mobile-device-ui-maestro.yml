@@ -20,7 +20,7 @@ jobs:
     # Informational only — failures do not block CI gate / auto-merge.
     continue-on-error: true
     runs-on: macos-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     defaults:
       run:
         working-directory: cost-share-app

@@ -68,3 +68,21 @@ prepare_ios_simulator() {
   xcrun simctl bootstatus "$IOS_SIM_UDID" -b 2>/dev/null || true
   open -a Simulator >/dev/null 2>&1 || true
 }
+
+find_ios_sim_app_bundle() {
+  find "$HOME/Library/Developer/Xcode/DerivedData" -name 'KupaPay.app' -path '*Release-iphonesimulator*' 2>/dev/null | head -1
+}
+
+# First simulator: full Release build. Later simulators: reinstall existing .app via --binary.
+IOS_APP_BINARY=""
+
+run_ios_on_simulator() {
+  if [[ -n "$IOS_APP_BINARY" && -d "$IOS_APP_BINARY" ]]; then
+    echo "Reusing built app: $IOS_APP_BINARY"
+    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release --binary "$IOS_APP_BINARY" --no-bundler
+  else
+    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release
+    IOS_APP_BINARY="$(find_ios_sim_app_bundle)"
+    echo "Built app bundle: ${IOS_APP_BINARY:-<not found>}"
+  fi
+}

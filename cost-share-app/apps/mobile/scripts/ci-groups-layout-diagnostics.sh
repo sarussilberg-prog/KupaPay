@@ -44,7 +44,7 @@ run_ios() {
   for SIM in "${IOS_DEVICES[@]}"; do
     echo "=== Layout diagnostics iOS: $SIM ==="
     prepare_ios_simulator "$SIM"
-    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release
+    run_ios_on_simulator
     export MAESTRO_PLATFORM="ios-${IOS_SIM_NAME// /-}"
     for loc in "${LOCALES[@]}"; do
       set +e
