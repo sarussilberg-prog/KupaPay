@@ -117,7 +117,7 @@ jobs:
       IOS_SIMULATOR_DEVICES: 'iPhone 16'
       MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
       MAESTRO_NATIVE_FINGERPRINT: ${{ needs.plan.outputs.native_fingerprint }}
-      MAESTRO_IOS_APP_STAGING_DIR: ${{ runner.temp }}/maestro-ios-app
+      MAESTRO_IOS_APP_STAGING_DIR: /tmp/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -164,7 +164,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: ios_app_cache
         with:
-          path: ${{ runner.temp }}/maestro-ios-app
+          path: /tmp/maestro-ios-app
           key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
           restore-keys: maestro-ios-app-
       - name: Install dependencies
@@ -176,12 +176,12 @@ jobs:
         uses: actions/cache/save@v4
         if: always() && steps.ios_app_cache.outputs.cache-hit != 'true'
         with:
-          path: ${{ runner.temp }}/maestro-ios-app
+          path: /tmp/maestro-ios-app
           key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
       - uses: actions/upload-artifact@v7
         with:
           name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
-          path: ${{ runner.temp }}/maestro-ios-app
+          path: /tmp/maestro-ios-app
           if-no-files-found: error
           retention-days: 5
 
@@ -198,7 +198,7 @@ jobs:
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
       IOS_SIMULATOR_DEVICES: 'iPhone 16'
-      MAESTRO_IOS_APP_CACHE_DIR: ${{ runner.temp }}/maestro-ios-app
+      MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -217,7 +217,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
-          path: ${{ runner.temp }}/maestro-ios-app
+          path: /tmp/maestro-ios-app
       - uses: actions/download-artifact@v8
         with:
           name: maestro-flow-plan
@@ -247,7 +247,7 @@ jobs:
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
       MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
-      MAESTRO_ANDROID_APK_STAGING_DIR: ${{ runner.temp }}/maestro-android-apk
+      MAESTRO_ANDROID_APK_STAGING_DIR: /tmp/maestro-android-apk
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -280,7 +280,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: android_apk_cache
         with:
-          path: ${{ runner.temp }}/maestro-android-apk
+          path: /tmp/maestro-android-apk
           key: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
           restore-keys: maestro-android-apk-
       - name: Install dependencies
@@ -292,12 +292,12 @@ jobs:
         uses: actions/cache/save@v4
         if: always() && steps.android_apk_cache.outputs.cache-hit != 'true'
         with:
-          path: ${{ runner.temp }}/maestro-android-apk
+          path: /tmp/maestro-android-apk
           key: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
       - uses: actions/upload-artifact@v7
         with:
           name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
-          path: ${{ runner.temp }}/maestro-android-apk
+          path: /tmp/maestro-android-apk
           if-no-files-found: error
           retention-days: 5
 
@@ -310,7 +310,7 @@ jobs:
     timeout-minutes: 35
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      MAESTRO_ANDROID_APK_CACHE_DIR: ${{ runner.temp }}/maestro-android-apk
+      MAESTRO_ANDROID_APK_CACHE_DIR: /tmp/maestro-android-apk
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -329,7 +329,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
-          path: ${{ runner.temp }}/maestro-android-apk
+          path: /tmp/maestro-android-apk
       - uses: actions/download-artifact@v8
         with:
           name: maestro-flow-plan
@@ -348,6 +348,6 @@ jobs:
           profile: pixel_6
           script: |
             export MAESTRO_FLOW_PLAN_JSON="$(cat "$GITHUB_WORKSPACE/maestro-flow-plan.json")"
-            export MAESTRO_ANDROID_APK_CACHE_DIR="${{ runner.temp }}/maestro-android-apk"
+            export MAESTRO_ANDROID_APK_CACHE_DIR="/tmp/maestro-android-apk"
             cd cost-share-app
             bash apps/mobile/scripts/ci-maestro-device-ui.sh android test
