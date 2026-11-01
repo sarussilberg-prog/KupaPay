@@ -24,6 +24,16 @@ test('shouldProxyPathToExpoApp includes login and other app entry paths', () => 
     assert.equal(shouldProxyPathToExpoApp('/he'), false);
 });
 
+test('shouldProxyPathToExpoApp proxies Expo static bundles before PUBLIC_FILE extension match', () => {
+    assert.equal(shouldProxyPathToExpoApp('/_expo/static/js/web/index-abc.js'), true);
+    assert.equal(shouldProxyPathToExpoApp('/_expo/static/css/web-abc.css'), true);
+    assert.equal(shouldProxyPathToExpoApp('/assets/x.png'), true);
+    assert.equal(shouldProxyPathToExpoApp('/manifest.json'), true);
+    assert.equal(shouldProxyPathToExpoApp('/favicon.ico'), true);
+    assert.equal(shouldProxyPathToExpoApp('/favicon.png'), false);
+    assert.equal(shouldProxyPathToExpoApp('/_next/static/x.js'), false);
+});
+
 test('appProxyBeforeFileRewrites lists /login before filesystem locale matching', () => {
     const rules = appProxyBeforeFileRewrites('https://app-proxy.example.test');
     assert.ok(rules.some((rule) => rule.source === '/login' && rule.destination.endsWith('/login')));
