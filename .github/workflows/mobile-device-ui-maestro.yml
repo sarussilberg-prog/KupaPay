@@ -79,8 +79,8 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_REF: ${{ github.ref }}
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-          MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && inputs.tier || '' }}
-          MAESTRO_WORKFLOW_DISPATCH_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.tier == 'full' && 'true' || 'false' }}
+          MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier || '' }}
+          MAESTRO_WORKFLOW_DISPATCH_FULL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier == 'full' && 'true' || 'false' }}
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
         run: |
           node scripts/lib/maestro-ci-plan.mjs | tee /tmp/maestro-plan.json
@@ -95,7 +95,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "blocking=true" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.tier }}" == "full" ]]; then
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.tier }}" == "full" ]]; then
             echo "blocking=true" >> "$GITHUB_OUTPUT"
           elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "main" ]]; then
             echo "blocking=true" >> "$GITHUB_OUTPUT"
