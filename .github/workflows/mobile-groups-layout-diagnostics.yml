@@ -234,13 +234,3 @@ jobs:
           script: |
             cd cost-share-app
             bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh android test
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: groups-layout-diagnostics-android-${{ github.run_id }}
-          path: |
-            artifacts/groups-layout-diagnostics/logs
-            artifacts/groups-layout-diagnostics/json
-            artifacts/groups-layout-diagnostics/screenshots
-          if-no-files-found: warn
-          retention-days: 14
