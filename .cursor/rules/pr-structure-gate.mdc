@@ -1,0 +1,17 @@
+---
+description: Required PR template sections enforced by CI (PR structure gate).
+alwaysApply: true
+---
+
+# PR structure gate
+
+All pull requests must follow [`.github/pull_request_template.md`](../../.github/pull_request_template.md). See [docs/TESTING.md](../../docs/TESTING.md) for Spec doc paths and red/green rules.
+
+Before opening or updating a PR:
+
+- Fill **Implementation**, **Tests**, **Proof**, and **Spec** with real content (not TBD/placeholders).
+- List every changed test file under **Tests** (backtick paths).
+- Touch `docs/SSOT/**`, `docs/TESTING.md`, `docs/CI_CD.md`, or `docs/superpowers/specs/**`, or add `Spec: no change needed - <reason>`.
+- Bug fixes: add regression tests and use `fix:` title or `bug` label so CI runs red/green proof.
+
+Cloud agents: your PR will not auto-merge unless **CI gate** passes, including **PR structure gate**.

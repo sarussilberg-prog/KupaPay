@@ -47,6 +47,47 @@ jobs:
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
           fi
 
+  pr-structure-gate:
+    name: PR structure gate
+    if: github.event_name == 'pull_request'
+    needs: [ci-paths, setup]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v7
+        if: needs.setup.result == 'success'
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v8
+        if: needs.setup.result == 'success'
+        with:
+          name: npm-node-modules
+          path: cost-share-app
+      - name: Restore node_modules for red/green proof
+        if: needs.setup.result == 'success'
+        working-directory: cost-share-app
+        run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - name: Validate PR structure (+ red/green when setup ran)
+        working-directory: cost-share-app
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          RUN_RED_GREEN: ${{ needs.setup.result == 'success' && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          PR_LABELS="$(jq -r '[.pull_request.labels[].name] | join(",")' "$GITHUB_EVENT_PATH")"
+          export PR_LABELS
+          bash scripts/ci-pr-structure-gate.sh
+
   branch-up-to-date:
     name: Branch up to date with dev
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
@@ -532,6 +573,7 @@ jobs:
     needs:
       [
         ci-paths,
+        pr-structure-gate,
         branch-up-to-date,
         setup,
         lint,
@@ -576,6 +618,10 @@ jobs:
           check no-merge-conflicts "${{ needs.no-merge-conflicts.result }}"
           check secret-scan "${{ needs.secret-scan.result }}"
           check deno-edge-gate "${{ needs.deno-edge-gate.result }}"
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            check pr-structure-gate "${{ needs.pr-structure-gate.result }}"
+          fi
 
           if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "dev" ]]; then
             check branch-up-to-date "${{ needs.branch-up-to-date.result }}"

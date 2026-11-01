@@ -22,3 +22,14 @@ Default MCP (`.mcp.json`) is **development only**. Do not run seed, destructive 
 ## Mobile
 
 - [cost-share-app/apps/mobile/AGENTS.md](cost-share-app/apps/mobile/AGENTS.md)
+
+## Pull requests (required — CI blocks merge)
+
+Use [`.github/pull_request_template.md`](.github/pull_request_template.md) on **every** PR (including cloud agents). **PR structure gate** is part of **CI gate**.
+
+1. **Implementation** — full description of what changed and why.
+2. **Tests** — list each test file path you changed (must match the diff). App code under `cost-share-app/` needs test changes unless you add label `no-tests-needed` and `No tests needed: <reason>`.
+3. **Proof** — explain what the tests assert. Bug fixes (`fix:` title or `bug` label) must include regression tests that **fail on base** and **pass on head** (CI verifies).
+4. **Spec** — update a central spec doc ([docs/TESTING.md](docs/TESTING.md) lists paths) or add `Spec: no change needed - <reason>`.
+
+Do not merge with a failing **CI gate** or bypass the structure check.

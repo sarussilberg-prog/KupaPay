@@ -1,5 +1,27 @@
 # Testing policy (KupaPay)
 
+## PR structure gate (required CI)
+
+Every PR to `dev` / `main` must use [`.github/pull_request_template.md`](../.github/pull_request_template.md). Job **PR structure gate** (rolled into **CI gate**) enforces:
+
+| Section | Requirement |
+|---------|-------------|
+| **Implementation** | What changed and why (substantive text, not placeholders). |
+| **Tests** | Lists every **automated test file** changed in the diff (paths in backticks). App changes under `cost-share-app/apps/` or `cost-share-app/packages/` require test file changes unless the PR has label `no-tests-needed` **and** a body line `No tests needed: <reason>`. Docs-only PRs (`docs/**`, root `*.md`) are exempt. |
+| **Proof** | How tests catch the regression. For **bug-fix** PRs (`bug` label or `fix:` / `fix(scope):` title), CI runs **red/green**: checkout merge-base, overlay only the new/changed test files, expect **FAIL**; then run on PR head and expect **PASS**. Summarized in the job summary. |
+| **Spec** | Touch a **central spec doc** (below) **or** include `Spec: no change needed - <reason>` in the PR body. |
+
+**Central spec docs** (any change satisfies Spec):
+
+- `docs/SSOT/**` — SRS, CODE QUALITY, KNOWN_ISSUES, etc.
+- `docs/TESTING.md` (this file)
+- `docs/CI_CD.md`
+- `docs/superpowers/specs/**`
+
+Validator implementation: [`cost-share-app/scripts/lib/pr-structure-gate.mjs`](../cost-share-app/scripts/lib/pr-structure-gate.mjs) (unit tests in [`cost-share-app/scripts/__tests__/pr-structure-gate.test.mjs`](../cost-share-app/scripts/__tests__/pr-structure-gate.test.mjs)).
+
+**Dependabot** PRs authored by `dependabot[bot]` that only change lockfiles or `.github/workflows/` / `dependabot.yml` are exempt.
+
 ## Regression rule (mandatory)
 
 **Every bug fix must ship with at least one automated regression test that would have failed before the fix.**
