@@ -1,30 +1,60 @@
-# Phase-1 layout diagnostics for Groups RTL (#680–#682). Informational; uploads probe logs and JSON frames.
+# Phase-1 Groups layout diagnostics (#680–#682). Informational; shares Maestro build caches.
 name: Mobile Groups layout diagnostics
 
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     branches: [dev, main, 'cursor/**']
     paths:
       - 'cost-share-app/apps/mobile/**'
       - '.github/workflows/mobile-groups-layout-diagnostics.yml'
 
 concurrency:
-  group: groups-layout-diag-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
+  group: groups-layout-diag-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  layout-diagnostics-ios:
-    name: Groups layout probes (iOS)
-    continue-on-error: true
+  plan:
+    name: Layout diagnostics plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      native_fingerprint: ${{ steps.plan.outputs.native_fingerprint }}
+      skip_native_rebuild: ${{ steps.plan.outputs.skip_native_rebuild }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci
+      - name: Native fingerprint
+        id: plan
+        working-directory: cost-share-app
+        env:
+          CHANGED_FILES: ''
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+        run: node scripts/lib/maestro-ci-plan.mjs | tee /tmp/plan.json
+
+  build-ios:
+    name: Diagnostics build (iOS)
+    needs: plan
     runs-on: macos-latest
-    timeout-minutes: 180
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
       IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
+      MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
+      MAESTRO_IOS_APP_STAGING_DIR: ${{ runner.temp }}/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -38,12 +68,68 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: cost-share-app/package-lock.json
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/mobile/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: maestro-pods-${{ runner.os }}-${{ hashFiles('cost-share-app/apps/mobile/ios/Podfile.lock', 'cost-share-app/apps/mobile/Podfile') }}
+          restore-keys: maestro-pods-${{ runner.os }}-
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: maestro-derived-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-derived-
+      - name: Install dependencies
+        run: npm ci
+      - name: Build iOS app (once)
+        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: layout-diag-ios-app-${{ github.run_id }}
+          path: ${{ runner.temp }}/maestro-ios-app
+          if-no-files-found: warn
+
+  layout-diagnostics-ios:
+    name: Groups layout probes (iOS)
+    needs: [plan, build-ios]
+    continue-on-error: true
+    runs-on: macos-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
+      MAESTRO_IOS_APP_CACHE_DIR: ${{ runner.temp }}/maestro-ios-app
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: layout-diag-ios-app-${{ github.run_id }}
+          path: ${{ runner.temp }}/maestro-ios-app
       - name: Install dependencies
         run: npm ci
       - name: Run layout diagnostics (iOS)
-        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios
+        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios test
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -55,16 +141,17 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  layout-diagnostics-android:
-    name: Groups layout probes (Android)
-    continue-on-error: true
+  build-android:
+    name: Diagnostics build (Android)
+    needs: plan
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      MAESTRO_ANDROID_APK_STAGING_DIR: ${{ runner.temp }}/maestro-android-apk
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -78,9 +165,61 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            apps/mobile/android/.gradle
+          key: maestro-gradle-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-gradle-
       - name: Install dependencies
+        run: npm ci
+      - name: Build Android APK (once)
+        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh android build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: layout-diag-android-apk-${{ github.run_id }}
+          path: ${{ runner.temp }}/maestro-android-apk
+          if-no-files-found: warn
+
+  layout-diagnostics-android:
+    name: Groups layout probes (Android)
+    needs: [plan, build-android]
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      MAESTRO_ANDROID_APK_CACHE_DIR: ${{ runner.temp }}/maestro-android-apk
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: layout-diag-android-apk-${{ github.run_id }}
+          path: ${{ runner.temp }}/maestro-android-apk
+      - name: Install dependencies
+        working-directory: cost-share-app
         run: npm ci
       - uses: actions/setup-java@v4
         with:
@@ -93,9 +232,8 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
-            echo "JAVA_HOME=${JAVA_HOME:-unset}"
-            java -version || true
-            bash cost-share-app/apps/mobile/scripts/ci-groups-layout-diagnostics.sh android
+            cd cost-share-app
+            bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh android test
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -75,16 +75,28 @@ Individual job names (only if you prefer granular protection instead of **CI gat
 
 ### Mobile device UI (Maestro)
 
-When a PR touches mobile/shared paths, [`mobile-device-ui-maestro.yml`](../.github/workflows/mobile-device-ui-maestro.yml) runs **Mobile device UI (Maestro iOS)** on **`macos-latest`** (single **iPhone 16** simulator). It uses a **separate concurrency group** (`maestro-ui-<pr>`) and **`continue-on-error: true`** so macOS queue time or simulator flakes do **not** block **CI gate** or auto-merge. Android PR emulators were removed from PR CI for cost; use [`e2e-smoke.yml`](../.github/workflows/e2e-smoke.yml) / nightly flows for broader device coverage.
+When a PR touches mobile/shared paths, [`mobile-device-ui-maestro.yml`](../.github/workflows/mobile-device-ui-maestro.yml) runs Maestro on simulators/emulators. It uses concurrency group **`maestro-ui-<pr>`** with **`cancel-in-progress: false`** so rapid pushes do not throw away long macOS runs.
 
-The Maestro job:
+**Build once + cache:** A **build** job produces the iOS `.app` / Android release APK once per commit (or restores from cache keyed by **`@expo/fingerprint`** native hash). A **test** job reuses that binary for all flows. Caches: CocoaPods, Gradle, Xcode DerivedData, optional ccache, plus GitHub Actions cache for the staged app/APK when the native fingerprint is unchanged. JS-only diffs set **`skip_native_rebuild`** (reuse native tree + cached binary when the fingerprint matches).
 
-- Seed the dev E2E user (`npm run seed:e2e`) when `SUPABASE_SERVICE_ROLE_KEY_DEV` / `E2E_TEST_PASSWORD` secrets are set
-- Build a release dev client with `EXPO_PUBLIC_E2E_MAESTRO_AUTH=true` (email/password panel on the login screen)
-- Run flows under [`cost-share-app/apps/mobile/.maestro/device-ui/`](../cost-share-app/apps/mobile/.maestro/device-ui/) — groups list layout (en + he), seven-locale login string screenshots, and Hebrew RTL profile friend breakdown + settle confirm
-- Upload PNG artifacts: **`maestro-device-ui-ios-<run_id>`** (retention 7 days)
+**Timeouts:** build jobs **40 min**, test jobs **35 min** (hard cap; prior single-job runs used 90–180 min).
 
-**Not required for merge** — rely on **CI gate** (Jest + layout regression tests) for blocking checks. Optional: watch the Maestro workflow on the PR checks tab.
+**Tiers** (planner: [`maestro-ci-plan.mjs`](../cost-share-app/scripts/lib/maestro-ci-plan.mjs)):
+
+| Trigger | Tier | Platforms |
+|---------|------|-----------|
+| PR → **`dev`** | **Smoke** + path-mapped flows for touched screens | iOS only |
+| PR → **`main`**, push **`main`**, label **`maestro-full`**, or **`workflow_dispatch` → full** | **Full** suite | iOS + Android |
+| PR → **`dev`** with label **`maestro-full`** | **Full** | iOS + Android |
+
+- **Smoke:** `sign-in.yaml`, `assert-layout-probes.yaml`, `visit-main-screens.yaml` (en), plus extra flows mapped from changed screen files (see [TESTING.md](./TESTING.md)).
+- **Full:** all locale login strings, en/he layout tours, Hebrew profile friend breakdown — same coverage as the legacy single-job workflow.
+
+**Blocking:** Failures are **non-blocking** on **`dev`** PRs (`continue-on-error`). **`main`** / manual **full** runs are **blocking** (store-release gate — run **`workflow_dispatch` → full** before App Store / Play production submit).
+
+**Groups layout diagnostics:** [`mobile-groups-layout-diagnostics.yml`](../.github/workflows/mobile-groups-layout-diagnostics.yml) uses the same build/test split and semicolon-separated **`IOS_SIMULATOR_DEVICES`** (fixes `"iPhone 16"` space-splitting). Skips cleanly until `groups-layout-diagnostics-tour.yaml` lands.
+
+Artifacts: **`maestro-device-ui-ios-<run_id>`** screenshots (7 days); iOS/Android app artifacts keyed by native fingerprint (5 days).
 
 Secrets: `E2E_TEST_PASSWORD`, `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY_DEV` (optional `E2E_TEST_EMAIL`).
 

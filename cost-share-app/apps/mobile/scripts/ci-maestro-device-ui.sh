@@ -2,16 +2,20 @@
 # Build (or reuse) a dev client and run Maestro device UI flows on iOS simulator or Android emulator.
 set -euo pipefail
 
-PLATFORM="${1:?Usage: ci-maestro-device-ui.sh ios|android}"
+PLATFORM="${1:?Usage: ci-maestro-device-ui.sh ios|android [build|test|all]}"
+PHASE="${2:-${MAESTRO_PHASE:-all}}"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/ios-simulator-devices.sh
 source "$SCRIPT_DIR/lib/ios-simulator-devices.sh"
+# shellcheck source=lib/maestro-ci-build.sh
+source "$SCRIPT_DIR/lib/maestro-ci-build.sh"
+
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 COST_SHARE="$REPO_ROOT/cost-share-app"
 ARTIFACTS="${MAESTRO_ARTIFACTS_DIR:-$REPO_ROOT/artifacts/maestro-device-ui}"
-LOCALES_LAYOUT=(en he)
-LOCALES_ALL=(en he ar ru de es fr)
+FLOW_PLAN_JSON="${MAESTRO_FLOW_PLAN_JSON:-}"
 
 export EXPO_PUBLIC_E2E_MAESTRO_AUTH=true
 export EXPO_PUBLIC_SUPABASE_URL="${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}"
@@ -24,96 +28,107 @@ if [[ -z "${E2E_TEST_PASSWORD:-}" ]]; then
 fi
 
 export E2E_EMAIL="${E2E_TEST_EMAIL:-e2e-playwright@kupay-dev.test}"
-
-if ! command -v maestro >/dev/null 2>&1; then
-  echo "Installing Maestro CLI…"
-  curl -Ls "https://get.maestro.mobile.dev" | bash
-  export PATH="$PATH:$HOME/.maestro/bin"
-fi
-
-cd "$COST_SHARE"
-if [[ -n "${SUPABASE_URL:-}" && -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then
-  npm run seed:e2e
-else
-  echo "::notice::Skipping seed:e2e — Supabase service-role secrets not set"
-fi
-
-cd "$ROOT"
 export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
-mkdir -p "$ARTIFACTS/screenshots" "$ARTIFACTS/logs"
+maestro_ensure_cli
+maestro_seed_e2e_if_configured "$COST_SHARE"
+
+mkdir -p "$ARTIFACTS/screenshots"
 
 if [[ "$PLATFORM" == "ios" ]]; then
-  parse_ios_simulator_devices
-  npx expo prebuild --platform ios --no-install
-  (cd ios && pod install)
-  for SIM in "${IOS_DEVICES[@]}"; do
-    echo "=== iOS simulator: $SIM ==="
-    prepare_ios_simulator "$SIM"
-    run_ios_on_simulator
-    export MAESTRO_PLATFORM="ios-${SIM// /-}"
-    maestro test \
-      -e APP_LANG=en \
-      -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
-      -e E2E_EMAIL="$E2E_EMAIL" \
-      -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
-      "$ROOT/.maestro/device-ui/sign-in.yaml"
-    maestro test \
-      -e APP_LANG=en \
-      -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
-      -e E2E_EMAIL="$E2E_EMAIL" \
-      -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
-      "$ROOT/.maestro/device-ui/assert-layout-probes.yaml"
-  done
+  if [[ "$PHASE" == "build" || "$PHASE" == "all" ]]; then
+    maestro_ios_prebuild_and_pods "$ROOT"
+    parse_ios_simulator_devices
+    local_first="${IOS_DEVICES[0]}"
+    echo "=== iOS build simulator: $local_first ==="
+    prepare_ios_simulator "$local_first"
+    if [[ -n "${MAESTRO_IOS_APP_CACHE_DIR:-}" ]] && maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR"; then
+      run_ios_on_simulator
+    else
+      run_ios_on_simulator
+    fi
+    if [[ -n "${MAESTRO_IOS_APP_STAGING_DIR:-}" ]]; then
+      maestro_stage_ios_app_artifact "$MAESTRO_IOS_APP_STAGING_DIR"
+    fi
+  fi
+
+  if [[ "$PHASE" == "test" || "$PHASE" == "all" ]]; then
+    if [[ "$PHASE" == "test" ]]; then
+      maestro_ios_prebuild_and_pods "$ROOT"
+    fi
+    if [[ -z "$FLOW_PLAN_JSON" && "$PHASE" == "test" ]]; then
+      echo "::error::MAESTRO_FLOW_PLAN_JSON required for test phase"
+      exit 1
+    fi
+    if [[ "$PHASE" == "all" && -z "$FLOW_PLAN_JSON" ]]; then
+      FLOW_PLAN_JSON='[{"file":"sign-in.yaml","locales":null},{"file":"assert-layout-probes.yaml","locales":null},{"file":"locale-strings-login.yaml","locales":["en","he","ar","ru","de","es","fr"]},{"file":"main-layout.yaml","locales":["en","he"]},{"file":"profile-friend-breakdown.yaml","locales":["he"]}]'
+    fi
+    parse_ios_simulator_devices
+    sim_for_test="${IOS_DEVICES[0]}"
+    prepare_ios_simulator "$sim_for_test"
+    if [[ -n "${MAESTRO_IOS_APP_CACHE_DIR:-}" ]]; then
+      maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR" || true
+    fi
+    if [[ -z "${IOS_APP_BINARY:-}" ]]; then
+      run_ios_on_simulator
+    else
+      npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release --binary "$IOS_APP_BINARY" --no-bundler
+    fi
+    export MAESTRO_PLATFORM="ios-${IOS_SIM_NAME// /-}"
+    if [[ "$PHASE" == "all" ]]; then
+      for SIM in "${IOS_DEVICES[@]}"; do
+        [[ "$SIM" == "$sim_for_test" ]] && continue
+        echo "=== iOS extra simulator probes: $SIM ==="
+        prepare_ios_simulator "$SIM"
+        run_ios_on_simulator
+        export MAESTRO_PLATFORM="ios-${SIM// /-}"
+        maestro test \
+          -e APP_LANG=en \
+          -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
+          -e E2E_EMAIL="$E2E_EMAIL" \
+          -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
+          "$ROOT/.maestro/device-ui/sign-in.yaml"
+        maestro test \
+          -e APP_LANG=en \
+          -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
+          -e E2E_EMAIL="$E2E_EMAIL" \
+          -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
+          "$ROOT/.maestro/device-ui/assert-layout-probes.yaml"
+      done
+      export MAESTRO_PLATFORM="ios-${IOS_SIM_NAME// /-}"
+    fi
+    maestro_run_flow_plan "$ROOT" "$FLOW_PLAN_JSON"
+  fi
 elif [[ "$PLATFORM" == "android" ]]; then
-  npx expo prebuild --platform android --no-install
-  npx expo run:android --variant release
+  cd "$ROOT"
+  if [[ "$PHASE" == "build" || "$PHASE" == "all" ]]; then
+    maestro_android_prebuild "$ROOT"
+    npx expo run:android --variant release
+    if [[ -n "${MAESTRO_ANDROID_APK_STAGING_DIR:-}" ]]; then
+      maestro_stage_android_apk "$ROOT" "$MAESTRO_ANDROID_APK_STAGING_DIR"
+    fi
+  fi
+  if [[ "$PHASE" == "test" || "$PHASE" == "all" ]]; then
+    if [[ "$PHASE" == "test" ]]; then
+      maestro_android_prebuild "$ROOT"
+    fi
+    if [[ -z "$FLOW_PLAN_JSON" && "$PHASE" == "test" ]]; then
+      echo "::error::MAESTRO_FLOW_PLAN_JSON required for test phase"
+      exit 1
+    fi
+    if [[ "$PHASE" == "all" && -z "$FLOW_PLAN_JSON" ]]; then
+      FLOW_PLAN_JSON='[{"file":"sign-in.yaml","locales":null},{"file":"assert-layout-probes.yaml","locales":null},{"file":"locale-strings-login.yaml","locales":["en","he","ar","ru","de","es","fr"]},{"file":"main-layout.yaml","locales":["en","he"]},{"file":"profile-friend-breakdown.yaml","locales":["he"]}]'
+    fi
+    if [[ "$PHASE" == "test" && -n "${MAESTRO_ANDROID_APK_CACHE_DIR:-}" && -f "$MAESTRO_ANDROID_APK_CACHE_DIR/app-release.apk" ]]; then
+      adb install -r "$MAESTRO_ANDROID_APK_CACHE_DIR/app-release.apk" || true
+    fi
+    export MAESTRO_PLATFORM="android"
+    maestro_run_flow_plan "$ROOT" "$FLOW_PLAN_JSON"
+  fi
 else
   echo "Unknown platform: $PLATFORM"
   exit 1
 fi
 
-export MAESTRO_PLATFORM="$PLATFORM"
-
-for loc in "${LOCALES_ALL[@]}"; do
-  echo "Maestro locale strings (login): $loc"
-  maestro test \
-    -e APP_LANG="$loc" \
-    -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
-    "$ROOT/.maestro/device-ui/locale-strings-login.yaml"
-done
-
-for loc in "${LOCALES_LAYOUT[@]}"; do
-  echo "Maestro layout tour: $loc"
-  maestro test \
-    -e APP_LANG="$loc" \
-    -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
-    -e E2E_EMAIL="$E2E_EMAIL" \
-    -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
-    "$ROOT/.maestro/device-ui/main-layout.yaml"
-  echo "Maestro groups layout diagnostics assert: $loc"
-  set +e
-  maestro test \
-    -e APP_LANG="$loc" \
-    -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
-    -e E2E_EMAIL="$E2E_EMAIL" \
-    -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
-    "$ROOT/.maestro/device-ui/groups-layout-diagnostics-tour.yaml"
-  diag_exit=$?
-  set -e
-  echo "$diag_exit" > "${ARTIFACTS}/diagnostics-${loc}.exit" 2>/dev/null || true
-  if [[ "$loc" == "he" ]]; then
-    echo "Maestro profile friend breakdown (RTL): $loc"
-    maestro test \
-      -e APP_LANG="$loc" \
-      -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
-      "$ROOT/.maestro/device-ui/profile-friend-breakdown.yaml"
-  fi
-done
-
-LATEST="$(ls -td "$HOME/.maestro/tests"/* 2>/dev/null | head -1 || true)"
-if [[ -n "${LATEST:-}" ]]; then
-  find "$LATEST" -name '*.png' -exec cp {} "$ARTIFACTS/screenshots/" \;
-fi
-
+maestro_collect_screenshots "$ARTIFACTS"
 echo "Screenshots collected under $ARTIFACTS/screenshots"
