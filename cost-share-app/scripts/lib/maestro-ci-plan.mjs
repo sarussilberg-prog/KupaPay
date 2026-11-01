@@ -8,7 +8,7 @@ import {
 } from './maestro-screen-flow-map.mjs';
 
 /** Paths that force a native rebuild (not JS-only). */
-export const NATIVE_TOUCH_PATTERNS = [
+const NATIVE_TOUCH_PATTERNS = [
   /^cost-share-app\/apps\/mobile\/ios\//,
   /^cost-share-app\/apps\/mobile\/android\//,
   /^cost-share-app\/apps\/mobile\/app\.json$/,
@@ -47,7 +47,7 @@ export function isJsOnlyMobileChange(changedFiles) {
  * @param {string} mobileAppDir absolute path to apps/mobile
  * @returns {string}
  */
-export function computeNativeFingerprint(mobileAppDir) {
+function computeNativeFingerprint(mobileAppDir) {
   const result = spawnSync(
     'npx',
     ['--yes', '@expo/fingerprint', 'fingerprint:generate'],
@@ -117,7 +117,7 @@ export function planMaestroCi(input) {
 /**
  * CLI: write GitHub Actions outputs and summary JSON to stdout.
  */
-export function runMaestroCiPlanCli() {
+function runMaestroCiPlanCli() {
   const repoRoot = process.env.GITHUB_WORKSPACE || path.resolve(import.meta.dirname, '../../..');
   const mobileDir = path.join(repoRoot, 'cost-share-app/apps/mobile');
 

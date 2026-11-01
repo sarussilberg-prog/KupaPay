@@ -5,8 +5,6 @@
 
 /** @typedef {{ file: string, locales: string[] | null, note?: string }} FlowRun */
 
-const DEVICE_UI = '.maestro/device-ui';
-
 const MOBILE_PREFIX = 'cost-share-app/apps/mobile/';
 
 /** @param {string} p */
@@ -22,7 +20,7 @@ function normalizeMobilePath(p) {
 }
 
 /** Screen or feature roots → flow basenames (under device-ui). Keys are under apps/mobile/. */
-export const SCREEN_TO_FLOWS = Object.freeze({
+const SCREEN_TO_FLOWS = Object.freeze({
   'screens/auth/LoginScreen.tsx': [
     'sign-in.yaml',
     'locale-strings-login.yaml',
@@ -136,7 +134,7 @@ export function flowRunsForChangedFiles(changedFiles) {
  * @param {string[]} flowNames basenames only
  * @returns {FlowRun[]}
  */
-export function expandFlowNamesToRuns(flowNames) {
+function expandFlowNamesToRuns(flowNames) {
   /** @type {FlowRun[]} */
   const runs = [];
   for (const file of flowNames) {
@@ -178,6 +176,3 @@ export function mergeSmokeAndAffected(affected) {
   return dedupeRuns([...smokeFlowRuns(), ...affected]);
 }
 
-export function flowPath(basename) {
-  return `${DEVICE_UI}/${basename}`;
-}
