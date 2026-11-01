@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, type StyleProp, type ViewStyle } from 'react-native';
+import { View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { AppPressable } from '../AppPressable';
 
@@ -7,11 +7,12 @@ type Props = {
     children: React.ReactNode;
     onPress?: () => void;
     testID?: string;
+    onLayout?: (event: LayoutChangeEvent) => void;
     style?: StyleProp<ViewStyle>;
     className?: string;
 };
 
-export function ListRow({ children, onPress, testID, style, className }: Props) {
+export function ListRow({ children, onPress, testID, onLayout, style, className }: Props) {
     const isRtl = useRtlLayout();
     const rowStyle: ViewStyle = {
         alignItems: 'center',
@@ -29,6 +30,7 @@ export function ListRow({ children, onPress, testID, style, className }: Props) 
             <AppPressable
                 onPress={onPress}
                 testID={testID}
+                onLayout={onLayout}
                 className={className}
                 style={[rowStyle, style]}
             >
@@ -38,7 +40,7 @@ export function ListRow({ children, onPress, testID, style, className }: Props) 
     }
 
     return (
-        <View testID={testID} className={className} style={[rowStyle, style]}>
+        <View testID={testID} onLayout={onLayout} className={className} style={[rowStyle, style]}>
             {children}
         </View>
     );

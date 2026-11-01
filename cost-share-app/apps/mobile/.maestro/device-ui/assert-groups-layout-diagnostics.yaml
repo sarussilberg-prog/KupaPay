@@ -1,0 +1,13 @@
+appId: com.kupapay.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 60000
+- extendedWaitUntil:
+    visible:
+      id: groups-layout-diagnostics-json
+    timeout: 45000
+- assertVisible:
+    id: groups-layout-diagnostics-ok
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_groups_layout_diagnostics_ok

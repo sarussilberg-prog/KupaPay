@@ -3,7 +3,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Platform, View, type TextStyle } from 'react-native';
+import { Platform, View, type LayoutChangeEvent, type TextStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
     bindCountLabelNoBreak,
@@ -40,9 +40,16 @@ type Props = {
     memberCount: number;
     language: string;
     testID?: string;
+    onLayout?: (event: LayoutChangeEvent) => void;
 };
 
-export function GroupCardMetaLine({ group, memberCount, language, testID = 'group-card-meta' }: Props) {
+export function GroupCardMetaLine({
+    group,
+    memberCount,
+    language,
+    testID = 'group-card-meta',
+    onLayout,
+}: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const textAlign = rtlTextAlign(isRtl);
@@ -82,6 +89,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
     return (
         <View
             testID={testID}
+            onLayout={onLayout}
             style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
         >
             <Text

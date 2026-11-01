@@ -1,0 +1,90 @@
+# Phase-1 layout diagnostics for Groups RTL (#680–#682). Informational; uploads probe logs.
+name: Mobile Groups layout diagnostics
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [dev, main, 'cursor/**']
+    paths:
+      - 'cost-share-app/apps/mobile/**'
+      - '.github/workflows/mobile-groups-layout-diagnostics.yml'
+
+concurrency:
+  group: groups-layout-diag-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  layout-diagnostics-ios:
+    name: Groups layout probes (iOS)
+    continue-on-error: true
+    runs-on: macos-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation) iPhone 16 iPhone 16 Pro Max'
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run layout diagnostics (iOS)
+        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: groups-layout-diagnostics-ios-${{ github.run_id }}
+          path: |
+            artifacts/groups-layout-diagnostics/logs
+            artifacts/groups-layout-diagnostics/screenshots
+          if-no-files-found: warn
+          retention-days: 14
+
+  layout-diagnostics-android:
+    name: Groups layout probes (Android)
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Layout diagnostics (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          script: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh android

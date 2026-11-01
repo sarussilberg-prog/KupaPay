@@ -49,6 +49,7 @@ import {
     resolveGroupCardUsesStackedBalance,
 } from './groupCardLayout';
 import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
+import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -61,6 +62,8 @@ interface GroupCardProps {
     displayCurrency?: string;
     ratesFromBase?: RatesFromBase;
     onPress: (groupId: string) => void;
+    /** First list card only — publishes layout frames for Maestro diagnostics. */
+    layoutProbePrimary?: boolean;
 }
 
 function GroupCardBase({
@@ -74,6 +77,7 @@ function GroupCardBase({
     displayCurrency,
     ratesFromBase,
     onPress,
+    layoutProbePrimary = false,
 }: GroupCardProps) {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
@@ -242,16 +246,23 @@ function GroupCardBase({
     return (
         <>
             <View
-                testID={`group-card-shell-${group.id}`}
+                testID={
+                    layoutProbePrimary ? 'group-card-probe-shell' : `group-card-shell-${group.id}`
+                }
                 className={cardClass}
                 onLayout={
                     isE2eLayoutProbeEnabled()
                         ? (e) => {
+                              if (layoutProbePrimary) {
+                                  layoutProbeOnLayout('group-card-shell')?.(e);
+                              }
                               setFullWidthProbeOk(
                                   isWidthAtLeastFullBleed(e.nativeEvent.layout.width, windowWidth),
                               );
                           }
-                        : undefined
+                        : layoutProbePrimary
+                          ? layoutProbeOnLayout('group-card-shell')
+                          : undefined
                 }
                 style={[
                     rtlRowStyle(isRtl),
@@ -275,7 +286,8 @@ function GroupCardBase({
                 ) : null}
                 <ListRow
                     onPress={() => onPress(group.id)}
-                    testID={`group-card-${group.id}`}
+                    testID={layoutProbePrimary ? 'group-card-probe-row' : `group-card-${group.id}`}
+                    onLayout={layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined}
                     style={{
                         flex: 1,
                         flexGrow: 1,
@@ -286,15 +298,26 @@ function GroupCardBase({
                         minWidth: 0,
                     }}
                 >
-                    <GroupAvatar
-                        imageUrl={group.imageUrl}
-                        groupType={group.groupType}
-                        name={group.name}
-                        size="sm"
+                    <View
+                        testID={layoutProbePrimary ? 'group-card-probe-avatar' : undefined}
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-avatar') : undefined
+                        }
                         style={{ flexShrink: 0 }}
-                    />
+                    >
+                        <GroupAvatar
+                            imageUrl={group.imageUrl}
+                            groupType={group.groupType}
+                            name={group.name}
+                            size="sm"
+                        />
+                    </View>
 
                     <View
+                        testID={layoutProbePrimary ? 'group-card-probe-name' : undefined}
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-name') : undefined
+                        }
                         style={{
                             flex: 1,
                             minWidth: 0,
@@ -332,6 +355,16 @@ function GroupCardBase({
                             group={group}
                             memberCount={memberCount}
                             language={i18n.language}
+                            testID={
+                                layoutProbePrimary
+                                    ? 'group-card-probe-member-count'
+                                    : 'group-card-meta'
+                            }
+                            onLayout={
+                                layoutProbePrimary
+                                    ? layoutProbeOnLayout('group-card-member-count')
+                                    : undefined
+                            }
                         />
                         {hasMatches && (
                             <IconLabel
@@ -343,7 +376,16 @@ function GroupCardBase({
                         )}
                         {stackBalanceChip ? (
                             <View
-                                testID="group-card-balance-column"
+                                testID={
+                                    layoutProbePrimary
+                                        ? 'group-card-probe-balance'
+                                        : 'group-card-balance-column'
+                                }
+                                onLayout={
+                                    layoutProbePrimary
+                                        ? layoutProbeOnLayout('group-card-balance')
+                                        : undefined
+                                }
                                 style={{
                                     ...balanceColumnStyle,
                                     alignSelf: isRtl ? 'flex-start' : 'flex-end',
@@ -356,7 +398,19 @@ function GroupCardBase({
                     </View>
 
                     {!stackBalanceChip ? (
-                        <View testID="group-card-balance-column" style={balanceColumnStyle}>
+                        <View
+                            testID={
+                                layoutProbePrimary
+                                    ? 'group-card-probe-balance'
+                                    : 'group-card-balance-column'
+                            }
+                            onLayout={
+                                layoutProbePrimary
+                                    ? layoutProbeOnLayout('group-card-balance')
+                                    : undefined
+                            }
+                            style={balanceColumnStyle}
+                        >
                             {balanceChipNode}
                         </View>
                     ) : null}
@@ -366,7 +420,12 @@ function GroupCardBase({
                     onPress={() => setMenuOpen(true)}
                     accessibilityRole="button"
                     accessibilityLabel={t('groups.menu.title')}
-                    testID={`group-card-menu-${group.id}`}
+                    testID={
+                        layoutProbePrimary ? 'group-card-probe-menu' : `group-card-menu-${group.id}`
+                    }
+                    onLayout={
+                        layoutProbePrimary ? layoutProbeOnLayout('group-card-menu') : undefined
+                    }
                     style={{
                         width: GROUP_CARD_MENU_HIT,
                         height: GROUP_CARD_MENU_HIT,

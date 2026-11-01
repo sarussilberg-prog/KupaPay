@@ -17,6 +17,16 @@ import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
 import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
 import { AppIcon } from '../AppIcon';
 import { useActivityUnreadCount } from '../../hooks/queries/useActivityUnreadCount';
+import { layoutProbeOnLayout } from '../diagnostics/layoutProbeHandlers';
+import type { LayoutProbeId } from '../../lib/groupsLayoutDiagnostics';
+import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
+
+const TAB_PROBE_ID: Record<string, LayoutProbeId> = {
+    Profile: 'tab-profile',
+    Activity: 'tab-activity',
+    FavoriteGroup: 'tab-favorite',
+    Groups: 'tab-groups',
+};
 
 const ICON_SIZE = 24;
 
@@ -57,6 +67,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             }
         };
 
+        const probeId = TAB_PROBE_ID[route.name];
+
         return (
             <TouchableOpacity
                 key={route.key}
@@ -64,6 +76,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                 accessibilityState={focused ? { selected: true } : {}}
                 accessibilityLabel={label}
                 testID={`tab-${route.name}`}
+                onLayout={probeId ? layoutProbeOnLayout(probeId) : undefined}
                 onPress={onPress}
                 activeOpacity={0.7}
                 style={styles.tab}
@@ -86,6 +99,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     return (
         <View
             testID="tabbar-row"
+            onLayout={isE2eLayoutProbeEnabled() ? layoutProbeOnLayout('tabbar-row') : undefined}
             style={[
                 styles.row,
                 rtlRowStyle(isRtl),
