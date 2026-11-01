@@ -231,10 +231,7 @@ jobs:
         if: always()
         with:
           name: maestro-device-ui-ios-${{ github.run_id }}
-          path: |
-            artifacts/maestro-device-ui/screenshots
-            artifacts/maestro-device-ui/logs
-            artifacts/maestro-device-ui/diagnostics-*.exit
+          path: artifacts/maestro-device-ui/screenshots
           if-no-files-found: warn
           retention-days: 7
 
