@@ -42,6 +42,12 @@ maestro_android_prebuild() {
   npx expo prebuild --platform android --no-install
 }
 
+maestro_android_assemble_release() {
+  local mobile_root="$1"
+  cd "$mobile_root/android"
+  ./gradlew assembleRelease -x lint -x test
+}
+
 maestro_stage_ios_app_artifact() {
   local dest="$1"
   local app="${IOS_APP_BINARY:-}"

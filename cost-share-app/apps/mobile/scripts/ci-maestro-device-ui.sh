@@ -103,7 +103,7 @@ elif [[ "$PLATFORM" == "android" ]]; then
   cd "$ROOT"
   if [[ "$PHASE" == "build" || "$PHASE" == "all" ]]; then
     maestro_android_prebuild "$ROOT"
-    npx expo run:android --variant release
+    maestro_android_assemble_release "$ROOT"
     if [[ -n "${MAESTRO_ANDROID_APK_STAGING_DIR:-}" ]]; then
       maestro_stage_android_apk "$ROOT" "$MAESTRO_ANDROID_APK_STAGING_DIR"
     fi
