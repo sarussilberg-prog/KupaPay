@@ -53,3 +53,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - chore: back-merge main — login proxy hotfix (#673, #677) (#678)
 ## [2.2.0-dev.24] — 2026-10-29
 - fix(mobile): native groups layout, profile friend settle sheet, Maestro device UI (#676)
+## [2.2.0-dev.25] — 2026-11-01
+- feat(ci): required PR structure gate with red/green proof (#679) (#694)
