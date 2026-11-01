@@ -193,5 +193,5 @@ export function buildDiagnosticPayload(
 }
 
 export function diagnosticJson(payload: GroupsLayoutDiagnosticPayload): string {
-    return JSON.stringify(payload);
+    return JSON.stringify(payload, null, 0);
 }
