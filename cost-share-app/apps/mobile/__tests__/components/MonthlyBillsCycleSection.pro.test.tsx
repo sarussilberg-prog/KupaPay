@@ -22,8 +22,14 @@ jest.mock('../../hooks/queries/useProStatusQuery', () => ({
 
 describe('MonthlyBillsCycleSection Pro gate', () => {
     beforeEach(() => {
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2026-10-15T12:00:00Z'));
         mockNavigate.mockClear();
         proStatusMock.proPerkUnlocked = false;
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
     });
 
     const baseProps = {
