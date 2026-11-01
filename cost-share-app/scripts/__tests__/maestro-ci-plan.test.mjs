@@ -1,4 +1,3 @@
-/** Maestro CI planner unit tests (tier + JS-only native skip). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { planMaestroCi, isJsOnlyMobileChange } from '../lib/maestro-ci-plan.mjs';
