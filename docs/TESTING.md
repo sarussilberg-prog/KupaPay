@@ -41,6 +41,8 @@ Document new tests in the PR body: *what each test asserts* and *which bug it wo
 | Unit / component | `apps/mobile/__tests__/` | RNTL, style resolver, i18n keys |
 | Architecture | `apps/mobile/__tests__/architecture/` | Forbidden native RTL + flex patterns |
 | Device UI | `apps/mobile/.maestro/device-ui/` | Login, layout probes, settle flows (CI) |
+| Maestro CI planner | `cost-share-app/scripts/lib/maestro-ci-plan.mjs` | Tier + flow list for device UI workflows |
+| Screen → flow map | `cost-share-app/scripts/lib/maestro-screen-flow-map.mjs` | Path-based extra flows on dev PRs |
 
 ### Layout probes (Maestro)
 
@@ -58,6 +60,27 @@ Use `expectAtMostOneVisibleModal` from `__tests__/helpers/modalTestUtils.tsx` fo
 ## CI
 
 See [CI_CD.md](./CI_CD.md) — **Mobile device UI (Maestro iOS/Android)** on path-scoped PRs.
+
+### Maestro CI tiers (screen → flow mapping)
+
+Dev PRs run **smoke** flows plus **affected** flows derived from changed files under `cost-share-app/apps/mobile/`. Mapping is defined in [`maestro-screen-flow-map.mjs`](../cost-share-app/scripts/lib/maestro-screen-flow-map.mjs) (unit tests: [`maestro-screen-flow-map.test.mjs`](../cost-share-app/scripts/__tests__/maestro-screen-flow-map.test.mjs)).
+
+| Screen / area (source path) | Extra Maestro flows |
+|-----------------------------|---------------------|
+| `screens/auth/LoginScreen.tsx`, `components/auth/LoginE2EPasswordAuth.tsx` | `sign-in.yaml`, `locale-strings-login.yaml`, `assert-layout-probes.yaml` |
+| `screens/groups/GroupsListScreen.tsx`, `components/GroupCard.tsx`, `components/groups/*` | `assert-groups-layout.yaml`, `main-layout.yaml`, layout probes |
+| `screens/activity/ActivityFeedScreen.tsx` | `visit-main-screens.yaml`, `main-layout.yaml` |
+| `screens/favoriteGroup/FavoriteGroupScreen.tsx` | `visit-main-screens.yaml`, `main-layout.yaml` |
+| `screens/expenses/AddExpenseScreen.tsx` (prefix `screens/expenses/`) | `visit-main-screens.yaml`, `main-layout.yaml` |
+| `screens/profile/ProfileScreen.tsx`, `components/dashboard/Friend*Sheet.tsx` | `profile-friend-breakdown.yaml`, `main-layout.yaml` |
+| `components/navigation/CustomTabBar.tsx` | `visit-main-screens.yaml`, `main-layout.yaml` |
+| `hooks/useRtlLayout.tsx` | `main-layout.yaml`, `profile-friend-breakdown.yaml` |
+
+**Smoke baseline (always on dev):** `sign-in.yaml`, `assert-layout-probes.yaml`, `visit-main-screens.yaml` (English).
+
+**Full tier (`main`, label `maestro-full`, or manual dispatch):** all flows in [`fullFlowRuns()`](../cost-share-app/scripts/lib/maestro-screen-flow-map.mjs) on **iOS and Android**.
+
+Planner tests: [`maestro-ci-plan.test.mjs`](../cost-share-app/scripts/__tests__/maestro-ci-plan.test.mjs).
 
 ## Adding a test for your fix
 

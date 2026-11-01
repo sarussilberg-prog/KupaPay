@@ -1,32 +1,117 @@
-# Non-blocking Maestro device UI on PRs (iOS). Does not hold the main CI concurrency group.
+# Maestro device UI — build once, tiered flows (smoke on dev PRs, full on main / manual).
 name: Mobile device UI (Maestro)
 
 on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'smoke (dev default) or full (store release gate)'
+        type: choice
+        options: [smoke, full]
+        default: full
+  push:
+    branches: [main]
+    paths:
+      - 'cost-share-app/apps/mobile/**'
+      - 'cost-share-app/packages/shared/**'
+      - 'cost-share-app/scripts/seed-e2e-dev-user.ts'
+      - 'cost-share-app/scripts/lib/maestro-*.mjs'
+      - '.github/workflows/mobile-device-ui-maestro.yml'
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     branches: [dev, main, 'cursor/**']
     paths:
       - 'cost-share-app/apps/mobile/**'
       - 'cost-share-app/packages/shared/**'
       - 'cost-share-app/scripts/seed-e2e-dev-user.ts'
+      - 'cost-share-app/scripts/lib/maestro-*.mjs'
       - '.github/workflows/mobile-device-ui-maestro.yml'
 
 concurrency:
-  group: maestro-ui-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
+  # Do not cancel in-progress simulator runs on every push (macOS queue is expensive).
+  group: maestro-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  maestro-ios:
-    name: Mobile device UI (Maestro iOS)
-    # Informational only — failures do not block CI gate / auto-merge.
-    continue-on-error: true
+  plan:
+    name: Maestro CI plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      tier: ${{ steps.plan.outputs.tier }}
+      run_ios: ${{ steps.plan.outputs.run_ios }}
+      run_android: ${{ steps.plan.outputs.run_android }}
+      js_only: ${{ steps.plan.outputs.js_only }}
+      skip_native_rebuild: ${{ steps.plan.outputs.skip_native_rebuild }}
+      native_fingerprint: ${{ steps.plan.outputs.native_fingerprint }}
+      flow_plan_json: ${{ steps.plan.outputs.flow_plan_json }}
+      blocking: ${{ steps.blocking.outputs.blocking }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies (plan)
+        working-directory: cost-share-app
+        run: npm ci
+      - name: Changed files
+        id: changed
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.base_ref }}"
+            git fetch origin "$base" --depth=1
+            git diff --name-only "origin/${base}...HEAD" > /tmp/changed.txt
+          else
+            git show --name-only --pretty=format: HEAD > /tmp/changed.txt || true
+          fi
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          cat /tmp/changed.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+      - name: Compute plan
+        id: plan
+        working-directory: cost-share-app
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && inputs.tier || '' }}
+          MAESTRO_WORKFLOW_DISPATCH_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.tier == 'full' && 'true' || 'false' }}
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+        run: node scripts/lib/maestro-ci-plan.mjs | tee /tmp/maestro-plan.json
+      - name: Blocking gate flag
+        id: blocking
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "blocking=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.tier }}" == "full" ]]; then
+            echo "blocking=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "main" ]]; then
+            echo "blocking=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "blocking=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-ios:
+    name: Maestro build (iOS)
+    needs: plan
+    if: needs.plan.outputs.run_ios == 'true'
     runs-on: macos-latest
-    timeout-minutes: 90
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: iPhone 16
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
+      MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
+      MAESTRO_NATIVE_FINGERPRINT: ${{ needs.plan.outputs.native_fingerprint }}
+      MAESTRO_IOS_APP_STAGING_DIR: ${{ runner.temp }}/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -40,12 +125,98 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: cost-share-app/package-lock.json
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/mobile/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: maestro-pods-${{ runner.os }}-${{ hashFiles('cost-share-app/apps/mobile/ios/Podfile.lock', 'cost-share-app/apps/mobile/Podfile') }}
+          restore-keys: |
+            maestro-pods-${{ runner.os }}-
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: maestro-derived-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-derived-
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: maestro-ccache-ios-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-ccache-ios-
+      - name: Setup ccache
+        run: |
+          brew install ccache || true
+          echo "CCACHE_DIR=${{ runner.temp }}/ccache" >> "$GITHUB_ENV"
+          echo "CC=\"ccache clang\"" >> "$GITHUB_ENV"
+          echo "CXX=\"ccache clang++\"" >> "$GITHUB_ENV"
+      - name: Restore cached iOS app bundle
+        uses: actions/cache/restore@v4
+        id: ios_app_cache
+        with:
+          path: ${{ runner.temp }}/maestro-ios-app
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-ios-app-
       - name: Install dependencies
         run: npm ci
-      - name: Maestro device UI (iOS simulator)
-        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios
+      - name: Build iOS simulator app
+        if: steps.ios_app_cache.outputs.cache-hit != 'true'
+        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios build
+      - name: Save iOS app bundle cache
+        uses: actions/cache/save@v4
+        if: always() && steps.ios_app_cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/maestro-ios-app
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          path: ${{ runner.temp }}/maestro-ios-app
+          if-no-files-found: error
+          retention-days: 5
+
+  test-ios:
+    name: Mobile device UI (Maestro iOS)
+    needs: [plan, build-ios]
+    if: needs.plan.outputs.run_ios == 'true'
+    continue-on-error: ${{ needs.plan.outputs.blocking != 'true' }}
+    runs-on: macos-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
+      MAESTRO_FLOW_PLAN_JSON: ${{ needs.plan.outputs.flow_plan_json }}
+      MAESTRO_IOS_APP_CACHE_DIR: ${{ runner.temp }}/maestro-ios-app
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          path: ${{ runner.temp }}/maestro-ios-app
+      - name: Install dependencies
+        run: npm ci
+      - name: Maestro flows (iOS)
+        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios test
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -53,3 +224,116 @@ jobs:
           path: artifacts/maestro-device-ui/screenshots
           if-no-files-found: warn
           retention-days: 7
+
+  build-android:
+    name: Maestro build (Android)
+    needs: plan
+    if: needs.plan.outputs.run_android == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
+      MAESTRO_ANDROID_APK_STAGING_DIR: ${{ runner.temp }}/maestro-android-apk
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            apps/mobile/android/.gradle
+          key: maestro-gradle-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-gradle-
+      - name: Restore cached APK
+        uses: actions/cache/restore@v4
+        id: android_apk_cache
+        with:
+          path: ${{ runner.temp }}/maestro-android-apk
+          key: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-android-apk-
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Android release APK
+        if: steps.android_apk_cache.outputs.cache-hit != 'true'
+        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh android build
+      - name: Save Android APK cache
+        uses: actions/cache/save@v4
+        if: always() && steps.android_apk_cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/maestro-android-apk
+          key: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          path: ${{ runner.temp }}/maestro-android-apk
+          if-no-files-found: error
+          retention-days: 5
+
+  test-android:
+    name: Mobile device UI (Maestro Android)
+    needs: [plan, build-android]
+    if: needs.plan.outputs.run_android == 'true'
+    continue-on-error: ${{ needs.plan.outputs.blocking != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      MAESTRO_FLOW_PLAN_JSON: ${{ needs.plan.outputs.flow_plan_json }}
+      MAESTRO_ANDROID_APK_CACHE_DIR: ${{ runner.temp }}/maestro-android-apk
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          path: ${{ runner.temp }}/maestro-android-apk
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Maestro flows (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            cd cost-share-app
+            bash apps/mobile/scripts/ci-maestro-device-ui.sh android test
