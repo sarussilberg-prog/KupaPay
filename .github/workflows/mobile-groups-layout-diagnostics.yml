@@ -24,7 +24,7 @@ jobs:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation) iPhone 16 iPhone 16 Pro Max'
+      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -50,6 +50,7 @@ jobs:
           name: groups-layout-diagnostics-ios-${{ github.run_id }}
           path: |
             artifacts/groups-layout-diagnostics/logs
+            artifacts/groups-layout-diagnostics/json
             artifacts/groups-layout-diagnostics/screenshots
           if-no-files-found: warn
           retention-days: 14
@@ -87,4 +88,14 @@ jobs:
           api-level: 34
           arch: x86_64
           profile: pixel_6
-          script: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh android
+          script: bash cost-share-app/apps/mobile/scripts/ci-groups-layout-diagnostics.sh android
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: groups-layout-diagnostics-android-${{ github.run_id }}
+          path: |
+            artifacts/groups-layout-diagnostics/logs
+            artifacts/groups-layout-diagnostics/json
+            artifacts/groups-layout-diagnostics/screenshots
+          if-no-files-found: warn
+          retention-days: 14

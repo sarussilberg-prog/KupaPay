@@ -3,7 +3,10 @@
 set -euo pipefail
 
 PLATFORM="${1:?Usage: ci-maestro-device-ui.sh ios|android}"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/ios-simulator-devices.sh
+source "$SCRIPT_DIR/lib/ios-simulator-devices.sh"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 COST_SHARE="$REPO_ROOT/cost-share-app"
 ARTIFACTS="${MAESTRO_ARTIFACTS_DIR:-$REPO_ROOT/artifacts/maestro-device-ui}"
@@ -41,7 +44,7 @@ export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 mkdir -p "$ARTIFACTS/screenshots"
 
 if [[ "$PLATFORM" == "ios" ]]; then
-  read -r -a IOS_DEVICES <<< "${IOS_SIMULATOR_DEVICES:-iPhone SE (3rd generation) iPhone 16 iPhone 16 Pro Max}"
+  parse_ios_simulator_devices
   npx expo prebuild --platform ios --no-install
   (cd ios && pod install)
   for SIM in "${IOS_DEVICES[@]}"; do

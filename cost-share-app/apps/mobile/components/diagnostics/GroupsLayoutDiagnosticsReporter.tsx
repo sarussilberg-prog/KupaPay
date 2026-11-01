@@ -27,7 +27,10 @@ export function GroupsLayoutDiagnosticsReporter() {
     useEffect(() => {
         if (!isE2eLayoutProbeEnabled()) return undefined;
         return subscribeLayoutDiagnostics(() => {
-            setPayload(buildDiagnosticPayload(i18n.language, isRtl, windowWidth));
+            const next = buildDiagnosticPayload(i18n.language, isRtl, windowWidth);
+            setPayload(next);
+            // Metro / Maestro log capture for CI artifact extraction
+            console.log('[LAYOUT_DIAG_JSON]', diagnosticJson(next));
         });
     }, [i18n.language, isRtl, windowWidth]);
 

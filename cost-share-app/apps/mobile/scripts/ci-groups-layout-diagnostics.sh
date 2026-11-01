@@ -3,7 +3,10 @@
 set -euo pipefail
 
 PLATFORM="${1:?Usage: ci-groups-layout-diagnostics.sh ios|android|both}"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/ios-simulator-devices.sh
+source "$SCRIPT_DIR/lib/ios-simulator-devices.sh"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 COST_SHARE="$REPO_ROOT/cost-share-app"
 ARTIFACTS="${LAYOUT_DIAG_ARTIFACTS_DIR:-$REPO_ROOT/artifacts/groups-layout-diagnostics}"
@@ -35,7 +38,7 @@ cd "$ROOT"
 mkdir -p "$ARTIFACTS/json" "$ARTIFACTS/screenshots" "$ARTIFACTS/logs"
 
 run_ios() {
-  read -r -a IOS_DEVICES <<< "${IOS_SIMULATOR_DEVICES:-iPhone SE (3rd generation) iPhone 16 iPhone 16 Pro Max}"
+  parse_ios_simulator_devices
   npx expo prebuild --platform ios --no-install
   (cd ios && pod install)
   for SIM in "${IOS_DEVICES[@]}"; do
@@ -55,6 +58,9 @@ run_ios() {
       exit_code=$?
       set -e
       echo "$exit_code" > "$ARTIFACTS/logs/${MAESTRO_PLATFORM}_${loc}.exit"
+      grep -o '\[LAYOUT_DIAG_JSON\].*' "$ARTIFACTS/logs/${MAESTRO_PLATFORM}_${loc}.log" \
+        | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
+        > "$ARTIFACTS/json/${MAESTRO_PLATFORM}_${loc}.json" 2>/dev/null || true
     done
   done
 }
@@ -75,6 +81,9 @@ run_android() {
     exit_code=$?
     set -e
     echo "$exit_code" > "$ARTIFACTS/logs/${MAESTRO_PLATFORM}_${loc}.exit"
+    grep -o '\[LAYOUT_DIAG_JSON\].*' "$ARTIFACTS/logs/${MAESTRO_PLATFORM}_${loc}.log" \
+      | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
+      > "$ARTIFACTS/json/${MAESTRO_PLATFORM}_${loc}.json" 2>/dev/null || true
   done
 }
 
