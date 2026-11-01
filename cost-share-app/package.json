@@ -48,7 +48,7 @@
     "test:load-test": "node --test scripts/load-test/__tests__/*.test.mjs",
     "test:posthog-mau": "node --test scripts/__tests__/posthog-mau-tiles-lib.test.mjs",
     "test:pr-structure-gate": "node --test scripts/__tests__/pr-structure-gate.test.mjs",
-    "test:maestro-ci": "node --test scripts/__tests__/maestro-screen-flow-map.test.mjs scripts/__tests__/maestro-ci-plan.test.mjs",
+    "test:maestro-ci": "node --test scripts/__tests__/maestro-screen-flow-map.test.mjs scripts/__tests__/maestro-ci-plan.test.mjs scripts/__tests__/github-maestro-workflows.test.mjs",
     "size": "size-limit",
     "size:ci": "bash scripts/ci-bundle-size.sh",
     "analyze:mobile": "npm run analyze:web -w @cost-share/mobile",

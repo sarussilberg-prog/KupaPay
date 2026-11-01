@@ -77,7 +77,9 @@ Individual job names (only if you prefer granular protection instead of **CI gat
 
 When a PR touches mobile/shared paths, [`mobile-device-ui-maestro.yml`](../.github/workflows/mobile-device-ui-maestro.yml) runs Maestro on simulators/emulators. It uses concurrency group **`maestro-ui-<pr>`** with **`cancel-in-progress: false`** so rapid pushes do not throw away long macOS runs.
 
-**Build once + cache:** A **build** job produces the iOS `.app` / Android release APK once per commit (or restores from cache keyed by **`@expo/fingerprint`** native hash). A **test** job reuses that binary for all flows. Caches: CocoaPods, Gradle, Xcode DerivedData, optional ccache, plus GitHub Actions cache for the staged app/APK when the native fingerprint is unchanged. JS-only diffs set **`skip_native_rebuild`** (reuse native tree + cached binary when the fingerprint matches).
+**Build once + cache:** A **build** job produces the iOS `.app` / Android release APK once per commit (or restores from cache keyed by **`@expo/fingerprint`** native hash). A **test** job reuses that binary for all flows. Staged binaries use fixed paths under **`/tmp/maestro-ios-app`** and **`/tmp/maestro-android-apk`** (job-level `env` must not use `${{ runner.temp }}` — GitHub rejects that expression and the workflow never schedules). Caches: CocoaPods, Gradle, Xcode DerivedData, plus GitHub Actions cache for the staged app/APK when the native fingerprint is unchanged. Android **build** jobs set **`SENTRY_DISABLE_AUTO_UPLOAD=true`** when no `SENTRY_AUTH_TOKEN` is available so release assemble does not fail on Sentry upload. JS-only diffs set **`skip_native_rebuild`** (reuse native tree + cached binary when the fingerprint matches).
+
+Workflow invariants are regression-tested in [`github-maestro-workflows.test.mjs`](../cost-share-app/scripts/__tests__/github-maestro-workflows.test.mjs) (included in `npm run test:maestro-ci`).
 
 **Timeouts:** build jobs **40 min**, test jobs **35 min** (hard cap; prior single-job runs used 90–180 min).
 
