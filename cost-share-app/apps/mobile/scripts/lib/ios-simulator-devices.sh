@@ -21,3 +21,31 @@ parse_ios_simulator_devices() {
     return 1
   fi
 }
+
+# Map a human name (e.g. "iPhone 16") to an installed simulator name + UDID on this Mac.
+resolve_ios_simulator() {
+  local want="$1"
+  local line udid name
+  line="$(xcrun simctl list devices available 2>/dev/null | grep -F "${want} (" | head -1 || true)"
+  if [[ -z "$line" ]]; then
+    line="$(xcrun simctl list devices available 2>/dev/null | grep -Fi "${want}" | grep -E '\([0-9A-Fa-f-]{36}\)' | head -1 || true)"
+  fi
+  if [[ -z "$line" ]]; then
+    echo "::error::No available iOS Simulator matching \"${want}\". Available iPhones:" >&2
+    xcrun simctl list devices available 2>/dev/null | grep -i iphone | head -20 >&2 || true
+    return 1
+  fi
+  udid="$(grep -oE '[0-9A-Fa-f-]{36}' <<< "$line" | head -1)"
+  name="$(sed -E 's/^[[:space:]]+//; s/ \([0-9A-Fa-f-]{36}\).*//' <<< "$line")"
+  IOS_SIM_NAME="$name"
+  IOS_SIM_UDID="$udid"
+}
+
+prepare_ios_simulator() {
+  local want="$1"
+  resolve_ios_simulator "$want" || return 1
+  echo "Using simulator: ${IOS_SIM_NAME} (${IOS_SIM_UDID})"
+  xcrun simctl boot "$IOS_SIM_UDID" 2>/dev/null || true
+  xcrun simctl bootstatus "$IOS_SIM_UDID" -b 2>/dev/null || true
+  open -a Simulator >/dev/null 2>&1 || true
+}

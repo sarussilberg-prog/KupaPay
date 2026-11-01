@@ -43,9 +43,9 @@ run_ios() {
   (cd ios && pod install)
   for SIM in "${IOS_DEVICES[@]}"; do
     echo "=== Layout diagnostics iOS: $SIM ==="
-    xcrun simctl boot "$SIM" 2>/dev/null || true
-    npx expo run:ios --device "$SIM" --configuration Release
-    export MAESTRO_PLATFORM="ios-${SIM// /-}"
+    prepare_ios_simulator "$SIM"
+    npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release
+    export MAESTRO_PLATFORM="ios-${IOS_SIM_NAME// /-}"
     for loc in "${LOCALES[@]}"; do
       set +e
       maestro test \
