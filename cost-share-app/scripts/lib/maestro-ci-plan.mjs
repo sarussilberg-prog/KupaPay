@@ -155,7 +155,6 @@ function runMaestroCiPlanCli() {
     appendFileSync(out, `js_only=${plan.jsOnly}\n`, 'utf8');
     appendFileSync(out, `skip_native_rebuild=${plan.jsOnly}\n`, 'utf8');
     appendFileSync(out, `native_fingerprint=${nativeFingerprint}\n`, 'utf8');
-    appendFileSync(out, `flow_plan_json=${JSON.stringify(plan.flowRuns)}\n`, 'utf8');
   }
 }
 
