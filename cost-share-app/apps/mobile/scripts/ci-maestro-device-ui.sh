@@ -41,7 +41,7 @@ fi
 cd "$ROOT"
 export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
-mkdir -p "$ARTIFACTS/screenshots"
+mkdir -p "$ARTIFACTS/screenshots" "$ARTIFACTS/logs"
 
 if [[ "$PLATFORM" == "ios" ]]; then
   parse_ios_simulator_devices
@@ -91,6 +91,17 @@ for loc in "${LOCALES_LAYOUT[@]}"; do
     -e E2E_EMAIL="$E2E_EMAIL" \
     -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
     "$ROOT/.maestro/device-ui/main-layout.yaml"
+  echo "Maestro groups layout diagnostics assert: $loc"
+  set +e
+  maestro test \
+    -e APP_LANG="$loc" \
+    -e MAESTRO_PLATFORM="$MAESTRO_PLATFORM" \
+    -e E2E_EMAIL="$E2E_EMAIL" \
+    -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
+    "$ROOT/.maestro/device-ui/groups-layout-diagnostics-tour.yaml"
+  diag_exit=$?
+  set -e
+  echo "$diag_exit" > "${ARTIFACTS}/diagnostics-${loc}.exit" 2>/dev/null || true
   if [[ "$loc" == "he" ]]; then
     echo "Maestro profile friend breakdown (RTL): $loc"
     maestro test \

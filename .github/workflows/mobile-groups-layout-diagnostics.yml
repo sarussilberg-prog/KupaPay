@@ -1,4 +1,4 @@
-# Phase-1 layout diagnostics for Groups RTL (#680–#682). Informational; uploads probe logs.
+# Phase-1 layout diagnostics for Groups RTL (#680–#682). Informational; uploads probe logs and JSON frames.
 name: Mobile Groups layout diagnostics
 
 on:
@@ -92,7 +92,10 @@ jobs:
           api-level: 34
           arch: x86_64
           profile: pixel_6
-          script: bash cost-share-app/apps/mobile/scripts/ci-groups-layout-diagnostics.sh android
+          script: |
+            echo "JAVA_HOME=${JAVA_HOME:-unset}"
+            java -version || true
+            bash cost-share-app/apps/mobile/scripts/ci-groups-layout-diagnostics.sh android
       - uses: actions/upload-artifact@v7
         if: always()
         with:
