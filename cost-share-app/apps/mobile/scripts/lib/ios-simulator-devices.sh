@@ -87,3 +87,4 @@ run_ios_on_simulator() {
     echo "Built app bundle: ${IOS_APP_BINARY:-<not found>}"
   fi
 }
+
