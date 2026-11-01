@@ -78,6 +78,19 @@ Values match the TestFlight screenshot geometry class and are enforced by regres
 
 Native CI runs append **per-device JSON** under artifact `groups-layout-diagnostics-ios-*` when secrets are configured.
 
+### CI iteration (2026-11-01)
+
+| Issue | Fix (branch `cursor/groups-layout-diagnosis-092e`) |
+|-------|-----------------------------------------------------|
+| `IOS_SIMULATOR_DEVICES` split `"iPhone 16"` → `"iphone"` | Semicolon-separated list + `parse_ios_simulator_devices()` |
+| macOS-26 runners lack SE / 16 / 16 Pro Max | Alias map → `iPhone 16e` / `iPhone 17` / `iPhone 17 Pro Max` + UDID via `simctl` |
+| `expo run:ios` opens dev-client URL (exit 60) | `--no-bundler` on Release; Maestro `launchApp` starts the app |
+| Android script path on emulator runner | `bash cost-share-app/apps/mobile/scripts/...` from repo root |
+| Android Gradle Java 69 | `actions/setup-java@v4` Temurin 17 on Android job |
+| Three simulators × full rebuild | Reuse Release `.app` via `--binary` after first build |
+
+Latest workflow run with secrets: [41337721047](https://github.com/sarussilberg-prog/KupaPay/actions/runs/41337721047) — iOS **compiled** on `iPhone 16e` but failed **before Maestro** on dev-client deep link (pre-`--no-bundler` commit). Re-run **Mobile Groups layout diagnostics** and **Mobile device UI (Maestro)** on commit `0d7e06c8` or later for frame JSON + `he` assert failure.
+
 ### C. `I18nManager` snapshot (Hebrew, device)
 
 | Field | Expected on Hebrew device |
