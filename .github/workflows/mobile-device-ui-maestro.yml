@@ -44,7 +44,6 @@ jobs:
       js_only: ${{ steps.plan.outputs.js_only }}
       skip_native_rebuild: ${{ steps.plan.outputs.skip_native_rebuild }}
       native_fingerprint: ${{ steps.plan.outputs.native_fingerprint }}
-      flow_plan_json: ${{ steps.plan.outputs.flow_plan_json }}
       blocking: ${{ steps.blocking.outputs.blocking }}
     steps:
       - uses: actions/checkout@v7
@@ -83,7 +82,14 @@ jobs:
           MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && inputs.tier || '' }}
           MAESTRO_WORKFLOW_DISPATCH_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.tier == 'full' && 'true' || 'false' }}
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
-        run: node scripts/lib/maestro-ci-plan.mjs | tee /tmp/maestro-plan.json
+        run: |
+          node scripts/lib/maestro-ci-plan.mjs | tee /tmp/maestro-plan.json
+          jq -c '.flowRuns' /tmp/maestro-plan.json > /tmp/maestro-flow-plan.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: maestro-flow-plan
+          path: /tmp/maestro-flow-plan.json
+          retention-days: 1
       - name: Blocking gate flag
         id: blocking
         run: |
@@ -192,7 +198,6 @@ jobs:
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
       IOS_SIMULATOR_DEVICES: 'iPhone 16'
-      MAESTRO_FLOW_PLAN_JSON: ${{ needs.plan.outputs.flow_plan_json }}
       MAESTRO_IOS_APP_CACHE_DIR: ${{ runner.temp }}/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
@@ -213,10 +218,15 @@ jobs:
         with:
           name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
           path: ${{ runner.temp }}/maestro-ios-app
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-flow-plan
       - name: Install dependencies
         run: npm ci
       - name: Maestro flows (iOS)
-        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios test
+        run: |
+          export MAESTRO_FLOW_PLAN_JSON="$(cat maestro-flow-plan.json)"
+          bash apps/mobile/scripts/ci-maestro-device-ui.sh ios test
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -300,7 +310,6 @@ jobs:
     timeout-minutes: 35
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      MAESTRO_FLOW_PLAN_JSON: ${{ needs.plan.outputs.flow_plan_json }}
       MAESTRO_ANDROID_APK_CACHE_DIR: ${{ runner.temp }}/maestro-android-apk
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
@@ -321,6 +330,9 @@ jobs:
         with:
           name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
           path: ${{ runner.temp }}/maestro-android-apk
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-flow-plan
       - name: Install dependencies
         working-directory: cost-share-app
         run: npm ci
@@ -335,5 +347,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
+            export MAESTRO_FLOW_PLAN_JSON="$(cat "$GITHUB_WORKSPACE/maestro-flow-plan.json")"
+            export MAESTRO_ANDROID_APK_CACHE_DIR="${{ runner.temp }}/maestro-android-apk"
             cd cost-share-app
             bash apps/mobile/scripts/ci-maestro-device-ui.sh android test
