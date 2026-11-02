@@ -98,9 +98,6 @@ jobs:
           key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v1
           restore-keys: |
             maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v1
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v3
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-real-ui-v1
-            maestro-ios-app-
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)
