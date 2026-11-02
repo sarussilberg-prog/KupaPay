@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Text } from '../AppText';
 import { supabase } from '../../lib/supabase';
+import { acceptSessionIfAllowed } from '../../lib/acceptSessionIfAllowed';
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 
@@ -15,6 +16,8 @@ const defaultEmail =
 
 export function LoginE2EPasswordAuth() {
     const setSession = useAppStore((s) => s.setSession);
+    const setPendingDeactivationNotice = useAppStore((s) => s.setPendingDeactivationNotice);
+    const setPendingAccountRestore = useAppStore((s) => s.setPendingAccountRestore);
     const [email, setEmail] = useState(defaultEmail);
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
@@ -32,7 +35,14 @@ export function LoginE2EPasswordAuth() {
                 setError(signInError?.message ?? 'Sign-in failed');
                 return;
             }
-            setSession(data.session);
+            await acceptSessionIfAllowed(data.session, 'fresh', {
+                setSession,
+                setPendingDeactivationNotice,
+                setPendingAccountRestore,
+            });
+            if (!useAppStore.getState().session) {
+                setError('Sign-in rejected (profile check)');
+            }
         } finally {
             setBusy(false);
         }

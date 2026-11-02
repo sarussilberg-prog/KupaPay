@@ -177,7 +177,7 @@ maestro_append_supabase_host_audit() {
   {
     echo "--- ${label} ---"
     if [[ -f "$sim_log" ]]; then
-      rg '\[MAESTRO_SUPABASE_HOST\]|drxfbicunusmipdgbgdk|jfqxjjjbpxbwwvoygahu' "$sim_log" | tail -5 || echo "no_supabase_host_in_log"
+      grep -E '\[MAESTRO_SUPABASE_HOST\]|drxfbicunusmipdgbgdk|jfqxjjjbpxbwwvoygahu' "$sim_log" 2>/dev/null | tail -5 || echo "no_supabase_host_in_log"
     else
       echo "simulator_log_missing"
     fi
@@ -195,11 +195,11 @@ maestro_verify_supabase_host_in_logs() {
     echo "::warning::Supabase audit file missing"
     return 0
   fi
-  if rg -q "\[MAESTRO_SUPABASE_HOST\] ${expected_host}" "$audit_file" 2>/dev/null; then
+  if grep -q "\[MAESTRO_SUPABASE_HOST\] ${expected_host}" "$audit_file" 2>/dev/null; then
     echo "Verified simulator log reports Supabase host: $expected_host"
     return 0
   fi
-  if rg -q 'jfqxjjjbpxbwwvoygahu' "$audit_file" 2>/dev/null; then
+  if grep -q 'jfqxjjjbpxbwwvoygahu' "$audit_file" 2>/dev/null; then
     echo "::error::Simulator log indicates production Supabase (jfqxjjjbpxbwwvoygahu); E2E user is on dev"
     return 1
   fi

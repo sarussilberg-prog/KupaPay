@@ -13,7 +13,9 @@ export const KUPAPAY_PRO_ENABLED = process.env.EXPO_PUBLIC_KUPAPAY_PRO_ENABLED =
 export const EMAIL_AUTH_ENABLED = process.env.EXPO_PUBLIC_ENABLE_EMAIL_AUTH === 'true';
 
 /** Maestro device UI: show seeded email+password panel on the login screen (CI simulators only). */
-export const E2E_MAESTRO_AUTH_ENABLED = process.env.EXPO_PUBLIC_E2E_MAESTRO_AUTH === 'true';
+export const E2E_MAESTRO_AUTH_ENABLED =
+    process.env.EXPO_PUBLIC_E2E_MAESTRO_AUTH === 'true' ||
+    process.env.EXPO_PUBLIC_E2E === '1';
 
 export function isProUpsellSurfaceEnabled(): boolean {
     return KUPAPAY_PRO_ENABLED || SHOW_KUPAPAY_PRO_UPSELL;
