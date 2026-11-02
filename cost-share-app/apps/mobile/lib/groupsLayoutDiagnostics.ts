@@ -16,14 +16,14 @@ export type LayoutProbeId =
     | 'tab-favorite'
     | 'tab-groups';
 
-export type I18nRtlSnapshot = {
+type I18nRtlSnapshot = {
     isRTL: boolean;
     doLeftAndRightSwap: boolean;
     allowRTL: boolean;
     platform: string;
 };
 
-export type GroupsLayoutDiagnosticPayload = {
+type GroupsLayoutDiagnosticPayload = {
     locale: string;
     appRtl: boolean;
     windowWidth: number;
@@ -33,7 +33,7 @@ export type GroupsLayoutDiagnosticPayload = {
     capturedAt: string;
 };
 
-export type GroupsLayoutCheckResult = {
+type GroupsLayoutCheckResult = {
     id: string;
     pass: boolean;
     detail: string;
@@ -42,7 +42,7 @@ export type GroupsLayoutCheckResult = {
 const probeStore: Partial<Record<LayoutProbeId, LayoutFrame>> = {};
 let payloadListener: ((payload: GroupsLayoutDiagnosticPayload) => void) | null = null;
 
-export function resetLayoutProbes(): void {
+function resetLayoutProbes(): void {
     for (const key of Object.keys(probeStore) as LayoutProbeId[]) {
         delete probeStore[key];
     }
@@ -53,7 +53,7 @@ export function recordLayoutProbe(id: LayoutProbeId, frame: LayoutFrame): void {
     payloadListener?.(buildDiagnosticPayload());
 }
 
-export function subscribeLayoutDiagnostics(
+function subscribeLayoutDiagnostics(
     listener: (payload: GroupsLayoutDiagnosticPayload) => void,
 ): () => void {
     payloadListener = listener;
@@ -63,7 +63,7 @@ export function subscribeLayoutDiagnostics(
     };
 }
 
-export function snapshotI18nManager(): I18nRtlSnapshot {
+function snapshotI18nManager(): I18nRtlSnapshot {
     const doLeftAndRightSwap = I18nManager.doLeftAndRightSwapInRTL ?? I18nManager.isRTL;
     return {
         isRTL: I18nManager.isRTL,
@@ -154,7 +154,7 @@ export function allChecksPass(checks: GroupsLayoutCheckResult[]): boolean {
     return checks.length > 0 && checks.every(c => c.pass);
 }
 
-export function buildDiagnosticPayload(
+function buildDiagnosticPayload(
     locale = 'unknown',
     appRtl = false,
     windowWidth = 0,
@@ -172,6 +172,6 @@ export function buildDiagnosticPayload(
     };
 }
 
-export function diagnosticJson(payload: GroupsLayoutDiagnosticPayload): string {
+function diagnosticJson(payload: GroupsLayoutDiagnosticPayload): string {
     return JSON.stringify(payload, null, 0);
 }
