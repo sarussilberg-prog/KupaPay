@@ -69,3 +69,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - ci(mobile): UI quality Phase 4 — release launch smoke (#710)
 ## [2.2.0-dev.32] — 2026-11-02
 - feat(mobile): UI quality Phase 2 — RTL row guard and xx-long pseudo-locale (#709)
+## [2.2.0-dev.33] — 2026-11-02
+- fix(pro): RevenueCat webhook environment and entitlement ordering hardening (#712)
