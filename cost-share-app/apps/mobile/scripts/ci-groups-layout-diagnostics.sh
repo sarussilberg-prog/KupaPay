@@ -15,7 +15,7 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 COST_SHARE="$REPO_ROOT/cost-share-app"
 ARTIFACTS="${LAYOUT_DIAG_ARTIFACTS_DIR:-$REPO_ROOT/artifacts/groups-layout-diagnostics}"
-TOUR_FLOW="$ROOT/.maestro/device-ui/groups-layout-diagnostics-tour.yaml"
+TOUR_FLOW_BASENAME="groups-layout-diagnostics-tour"
 LOCALES=(en he)
 LAYOUT_DIAG_FAILURES=0
 
@@ -29,8 +29,8 @@ if [[ "${EXPO_PUBLIC_E2E_FIXTURES:-}" == "1" ]]; then
   LAYOUT_FIXTURE_MODE=true
 fi
 
-if [[ ! -f "$TOUR_FLOW" ]]; then
-  echo "::notice::Skipping groups layout diagnostics — $TOUR_FLOW not present (enable with Phase 1 diagnostics PR)"
+if [[ ! -f "$ROOT/.maestro/device-ui/${TOUR_FLOW_BASENAME}-en.yaml" ]]; then
+  echo "::notice::Skipping groups layout diagnostics — locale tours not present (enable with Phase 1 diagnostics PR)"
   exit 0
 fi
 
@@ -87,6 +87,12 @@ run_diag_flows() {
   layout_diag_simulator_supabase_health || true
   local loc
   for loc in "${LOCALES[@]}"; do
+    local tour_flow="$ROOT/.maestro/device-ui/${TOUR_FLOW_BASENAME}-${loc}.yaml"
+    if [[ ! -f "$tour_flow" ]]; then
+      echo "::error::Missing Maestro tour for locale $loc ($tour_flow)"
+      layout_diag_record_failure
+      continue
+    fi
     set +e
     local -a maestro_args=(
       test
@@ -96,7 +102,7 @@ run_diag_flows() {
     if [[ -n "${E2E_TEST_PASSWORD:-}" ]]; then
       maestro_args+=(-e "E2E_EMAIL=$E2E_EMAIL" -e "E2E_PASSWORD=$E2E_TEST_PASSWORD")
     fi
-    maestro_args+=("$TOUR_FLOW")
+    maestro_args+=("$tour_flow")
     maestro "${maestro_args[@]}" \
       2>&1 | tee "$ARTIFACTS/logs/${maestro_platform}_${loc}.log"
     exit_code=$?

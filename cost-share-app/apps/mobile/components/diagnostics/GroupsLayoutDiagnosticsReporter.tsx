@@ -39,23 +39,23 @@ export function GroupsLayoutDiagnosticsReporter() {
     const json = diagnosticJson(payload);
     const ok = allChecksPass(payload.checks);
 
+    // Maestro on iOS cannot see testIDs hidden from the accessibility tree (0×0 + hidden).
+    const probeStyle = {
+        position: 'absolute' as const,
+        left: 0,
+        top: 0,
+        width: 1,
+        height: 1,
+        opacity: 0.01,
+    };
+
     return (
         <>
-            <Text
-                testID="groups-layout-diagnostics-json"
-                accessibilityElementsHidden
-                importantForAccessibility="no-hide-descendants"
-                style={{ width: 0, height: 0, opacity: 0 }}
-            >
+            <Text testID="groups-layout-diagnostics-json" accessible style={probeStyle}>
                 {json}
             </Text>
             {ok ? (
-                <Text
-                    testID="groups-layout-diagnostics-ok"
-                    accessibilityElementsHidden
-                    importantForAccessibility="no-hide-descendants"
-                    style={{ width: 0, height: 0, opacity: 0 }}
-                >
+                <Text testID="groups-layout-diagnostics-ok" accessible style={probeStyle}>
                     ok
                 </Text>
             ) : null}

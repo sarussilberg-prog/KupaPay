@@ -67,6 +67,7 @@ export function E2eLayoutFixtureRoot() {
             const fromUrl = parseE2eFixtureLocaleFromUrl(initialUrl);
             if (fromUrl) {
                 await applyE2eFixtureLocale(fromUrl);
+                setFixtureLocale(fromUrl);
             } else {
                 await initializeLanguage();
                 await seedE2eLayoutFixtures(useAppStore.getState().language);

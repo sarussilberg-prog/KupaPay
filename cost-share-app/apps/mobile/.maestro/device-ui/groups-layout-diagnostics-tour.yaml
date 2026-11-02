@@ -1,15 +1,4 @@
+# Deprecated: use groups-layout-diagnostics-tour-en.yaml / -he.yaml (Maestro `when` + APP_LANG unreliable).
 appId: com.kupapay.mobile
-env:
-  APP_LANG: en
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: groups-list-title
-    timeout: 90000
-- runFlow:
-    when:
-      true: ${APP_LANG == 'he'}
-    file: set-e2e-fixture-locale-he.yaml
-- runFlow: assert-groups-layout-diagnostics.yaml
+- runFlow: groups-layout-diagnostics-tour-en.yaml

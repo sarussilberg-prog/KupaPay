@@ -1,0 +1,9 @@
+appId: com.kupapay.mobile
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 90000
+- runFlow: assert-groups-layout-diagnostics.yaml

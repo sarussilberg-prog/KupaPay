@@ -1,0 +1,10 @@
+appId: com.kupapay.mobile
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 90000
+- runFlow: set-e2e-fixture-locale-he.yaml
+- runFlow: assert-groups-layout-diagnostics.yaml
