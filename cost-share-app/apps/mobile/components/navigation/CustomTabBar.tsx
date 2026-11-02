@@ -14,16 +14,6 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { colors } from '../../theme';
 import { useRtlLayout } from '../../hooks/useRtlLayout';
 import { orderedTabBarRoutes } from '../../navigation/orderedTabBarRoutes';
-import { layoutProbeOnLayout } from '../diagnostics/layoutProbeHandlers';
-import type { LayoutProbeId } from '../../lib/groupsLayoutDiagnostics';
-import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
-
-const TAB_PROBE_ID: Record<string, LayoutProbeId> = {
-    Profile: 'tab-profile',
-    Activity: 'tab-activity',
-    FavoriteGroup: 'tab-favorite',
-    Groups: 'tab-groups',
-};
 import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
 import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
 import { AppIcon } from '../AppIcon';
