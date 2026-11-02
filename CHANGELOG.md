@@ -73,3 +73,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(pro): RevenueCat webhook environment and entitlement ordering hardening (#712)
 ## [2.2.0-dev.34] — 2026-11-02
 - ci: release launch smoke runs on iOS and Android (#715)
+## [2.2.0-dev.35] — 2026-11-02
+- fix(activity): iOS Hebrew search placeholder garbled (#716) (#719)
