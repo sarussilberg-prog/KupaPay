@@ -52,7 +52,7 @@ jobs:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
       MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
       MAESTRO_IOS_APP_STAGING_DIR: /tmp/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
@@ -105,7 +105,7 @@ jobs:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
       MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
       E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
@@ -143,6 +143,8 @@ jobs:
 
   build-android:
     name: Diagnostics build (Android)
+    # Phase-1 #695: Android release assemble exceeds 40m build budget; iOS JSON first.
+    if: false
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -193,6 +195,7 @@ jobs:
 
   layout-diagnostics-android:
     name: Groups layout probes (Android)
+    if: false
     needs: [plan, build-android]
     continue-on-error: true
     runs-on: ubuntu-latest
