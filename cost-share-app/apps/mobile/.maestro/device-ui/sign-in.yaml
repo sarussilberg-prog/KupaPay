@@ -18,7 +18,6 @@ appId: com.kupapay.mobile
 - tapOn:
     id: login-password-field
 - inputText: ${E2E_PASSWORD}
-- hideKeyboard
 - tapOn:
     id: login-password-submit
 - extendedWaitUntil:
