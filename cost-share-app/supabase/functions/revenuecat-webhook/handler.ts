@@ -8,6 +8,8 @@ export interface WebhookEnv {
     SUPABASE_URL: string;
     SUPABASE_SERVICE_ROLE_KEY: string;
     REVENUECAT_WEBHOOK_SECRET: string;
+    /** When not `true`, SANDBOX environment events are acknowledged but not applied. */
+    REVENUECAT_ALLOW_SANDBOX_EVENTS?: string;
 }
 
 export const PRO_ENTITLEMENT_ID = 'pro';
@@ -19,13 +21,16 @@ export interface RevenueCatEvent {
     type: string;
     id: string;
     app_user_id: string;
-    /** APP_STORE | PLAY_STORE | etc. — not used for entitlement logic (product ids are shared). */
+    /** SANDBOX | PRODUCTION — used to ignore sandbox in production webhook. */
+    environment?: string;
     store?: string;
     product_id?: string;
     transaction_id?: string;
     entitlement_ids?: string[];
     expiration_at_ms?: number | null;
     purchased_at_ms?: number;
+    event_timestamp_ms?: number;
+    cancel_reason?: string;
     subscriber_attributes?: Record<
         string,
         { value?: string; updated_at_ms?: number }
@@ -79,6 +84,18 @@ export function verifyAuthorization(req: Request, secret: string): boolean {
     return false;
 }
 
+export function allowSandboxEnvironment(
+    environment: string | undefined,
+    allowSandboxEvents: boolean,
+): boolean {
+    if (environment === 'SANDBOX' && !allowSandboxEvents) return false;
+    return true;
+}
+
+export function hasProEntitlement(event: RevenueCatEvent): boolean {
+    return event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID) === true;
+}
+
 export function proUntilFromEvent(event: RevenueCatEvent): string | null {
     if (event.entitlement_ids && !event.entitlement_ids.includes(PRO_ENTITLEMENT_ID)) {
         return null;
@@ -103,6 +120,47 @@ export function tripPassUntilFromEvent(event: RevenueCatEvent, now = new Date())
     return d.toISOString();
 }
 
+const GRANT_TYPES = new Set([
+    'INITIAL_PURCHASE',
+    'RENEWAL',
+    'UNCANCELLATION',
+    'NON_RENEWING_PURCHASE',
+    'PRODUCT_CHANGE',
+]);
+
+const IMMEDIATE_CANCEL_REASONS = new Set(['CUSTOMER_SUPPORT', 'DEVELOPER_INITIATED']);
+
+export function isImmediateProRevoke(event: RevenueCatEvent): boolean {
+    const type = event.type ?? '';
+    if (!hasProEntitlement(event) || isTripPassProduct(event)) return false;
+    if (type === 'REFUND') return true;
+    if (type === 'EXPIRATION') return true;
+    if (type === 'CANCELLATION') {
+        const reason = (event.cancel_reason ?? '').toUpperCase();
+        return IMMEDIATE_CANCEL_REASONS.has(reason);
+    }
+    return false;
+}
+
+export function isTripPassRevoke(event: RevenueCatEvent): boolean {
+    if (!isTripPassProduct(event)) return false;
+    const type = event.type ?? '';
+    if (type === 'REFUND' || type === 'EXPIRATION') return true;
+    if (type === 'CANCELLATION') {
+        const reason = (event.cancel_reason ?? '').toUpperCase();
+        return IMMEDIATE_CANCEL_REASONS.has(reason);
+    }
+    return false;
+}
+
+export function isCancelAtPeriodEnd(event: RevenueCatEvent): boolean {
+    const type = event.type ?? '';
+    if (type !== 'CANCELLATION') return false;
+    if (!hasProEntitlement(event) || isTripPassProduct(event)) return false;
+    if (isImmediateProRevoke(event)) return false;
+    return proUntilFromEvent(event) != null;
+}
+
 export type WebhookAction =
     | 'individual'
     | 'trip_pass'
@@ -111,7 +169,7 @@ export type WebhookAction =
     | 'ignored';
 
 export type HandleOutcome =
-    | { ok: true; action: WebhookAction; duplicate?: boolean }
+    | { ok: true; action: WebhookAction; duplicate?: boolean; sandboxIgnored?: boolean }
     | { ok: false; status: number; error: string };
 
 export async function applyWebhookEvent(
@@ -123,30 +181,30 @@ export async function applyWebhookEvent(
         return { ok: false, status: 400, error: 'missing_event' };
     }
 
+    const allowSandbox = env.REVENUECAT_ALLOW_SANDBOX_EVENTS === 'true';
+    if (!allowSandboxEnvironment(event.environment, allowSandbox)) {
+        return { ok: true, action: 'ignored', sandboxIgnored: true };
+    }
+
     const userId = parseUuid(event.app_user_id);
     if (!userId) {
         return { ok: false, status: 400, error: 'invalid_app_user_id' };
     }
 
     const type = event.type ?? '';
-    const grantTypes = new Set([
-        'INITIAL_PURCHASE',
-        'RENEWAL',
-        'UNCANCELLATION',
-        'NON_RENEWING_PURCHASE',
-        'PRODUCT_CHANGE',
-    ]);
-    const revokeTypes = new Set(['EXPIRATION', 'CANCELLATION']);
-
-    const isTripPass = isTripPassProduct(event) &&
-        (grantTypes.has(type) || type === 'NON_RENEWING_PURCHASE');
+    const isTripPassGrant = isTripPassProduct(event) &&
+        (GRANT_TYPES.has(type) || type === 'NON_RENEWING_PURCHASE');
     const proUntil = proUntilFromEvent(event);
-    const isRevoke = revokeTypes.has(type) &&
-        event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID) === true;
-    const isGrantSub = proUntil != null && grantTypes.has(type);
+    const isGrantSub = proUntil != null && GRANT_TYPES.has(type);
     const isYearly = event.product_id === PRODUCT_PRO_YEARLY && isGrantSub;
+    const tripPassRevoke = isTripPassRevoke(event);
+    const immediateProRevoke = isImmediateProRevoke(event);
+    const cancelAtEnd = isCancelAtPeriodEnd(event);
 
-    if (!isTripPass && !isGrantSub && !isRevoke) {
+    if (
+        !isTripPassGrant && !isGrantSub && !immediateProRevoke && !tripPassRevoke &&
+        !cancelAtEnd
+    ) {
         return { ok: true, action: 'ignored' };
     }
 
@@ -163,12 +221,14 @@ export async function applyWebhookEvent(
             p_user_id: userId,
             p_event_type: type,
             p_product_id: event.product_id ?? null,
-            p_pro_until: isRevoke || isGrantSub ? (proUntil ?? new Date(0).toISOString()) : null,
-            p_trip_pass_until: isTripPass ? tripPassUntilFromEvent(event) : null,
+            p_pro_until: (isGrantSub || cancelAtEnd) ? proUntil : null,
+            p_trip_pass_until: isTripPassGrant ? tripPassUntilFromEvent(event) : null,
             p_attr_group_id: parseUuid(readAttr(event, 'group_id')),
-            p_is_trip_pass: isTripPass,
+            p_is_trip_pass: isTripPassGrant,
             p_is_yearly: isYearly,
-            p_is_revoke: isRevoke,
+            p_is_immediate_pro_revoke: immediateProRevoke,
+            p_is_trip_pass_revoke: tripPassRevoke,
+            p_event_timestamp_ms: event.event_timestamp_ms ?? null,
         }),
     });
 
@@ -179,6 +239,9 @@ export async function applyWebhookEvent(
     const data = (await res.json()) as Record<string, unknown>;
     if (data.duplicate === true) {
         return { ok: true, action: 'ignored', duplicate: true };
+    }
+    if (data.stale === true) {
+        return { ok: true, action: 'ignored' };
     }
     const action = (data.action as WebhookAction) ?? 'ignored';
     return { ok: true, action };
@@ -216,5 +279,6 @@ export async function handleRequest(req: Request, env: WebhookEnv): Promise<Resp
         ok: true,
         action: outcome.action,
         duplicate: outcome.duplicate === true,
+        sandboxIgnored: outcome.sandboxIgnored === true,
     });
 }

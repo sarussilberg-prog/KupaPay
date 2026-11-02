@@ -1,7 +1,11 @@
 import { assertEquals } from '@std/assert';
 import {
+    allowSandboxEnvironment,
     applyWebhookEvent,
     handleRequest,
+    isCancelAtPeriodEnd,
+    isImmediateProRevoke,
+    isTripPassRevoke,
     proUntilFromEvent,
     tripPassUntilFromEvent,
     verifyAuthorization,
@@ -105,6 +109,98 @@ Deno.test('tripPassUntilFromEvent defaults to 30 days', () => {
     assertEquals(until, '2026-01-31T00:00:00.000Z');
 });
 
+Deno.test('allowSandboxEnvironment rejects SANDBOX when not allowed', () => {
+    assertEquals(allowSandboxEnvironment('SANDBOX', false), false);
+    assertEquals(allowSandboxEnvironment('SANDBOX', true), true);
+    assertEquals(allowSandboxEnvironment('PRODUCTION', false), true);
+});
+
+Deno.test('applyWebhookEvent ignores SANDBOX without RPC when sandbox disallowed', async () => {
+    let called = false;
+    const restore = mockRpcFetch(() => {
+        called = true;
+        return { status: 200, json: {} };
+    });
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'INITIAL_PURCHASE',
+                    id: 'evt-sandbox',
+                    app_user_id: TEST_USER_ID,
+                    environment: 'SANDBOX',
+                    product_id: PRODUCT_PRO_MONTHLY,
+                    entitlement_ids: ['pro'],
+                    expiration_at_ms: 1_800_000_000_000,
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'ignored', sandboxIgnored: true });
+        assertEquals(called, false);
+    } finally {
+        restore();
+    }
+});
+
+Deno.test('cancellation without expiration does not call RPC', async () => {
+    let called = false;
+    const restore = mockRpcFetch(() => {
+        called = true;
+        return { status: 200, json: {} };
+    });
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'CANCELLATION',
+                    id: 'evt-soft-cancel',
+                    app_user_id: TEST_USER_ID,
+                    product_id: PRODUCT_PRO_MONTHLY,
+                    entitlement_ids: ['pro'],
+                    expiration_at_ms: null,
+                    cancel_reason: 'UNSUBSCRIBE',
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'ignored' });
+        assertEquals(called, false);
+        assertEquals(isCancelAtPeriodEnd({
+            type: 'CANCELLATION',
+            id: 'x',
+            app_user_id: 'u',
+            product_id: PRODUCT_PRO_MONTHLY,
+            entitlement_ids: ['pro'],
+            expiration_at_ms: null,
+        }), false);
+    } finally {
+        restore();
+    }
+});
+
+Deno.test('refund sends immediate pro revoke and trip pass revoke flags', () => {
+    assertEquals(
+        isImmediateProRevoke({
+            type: 'REFUND',
+            id: '1',
+            app_user_id: 'u',
+            product_id: PRODUCT_PRO_MONTHLY,
+            entitlement_ids: ['pro'],
+        }),
+        true,
+    );
+    assertEquals(
+        isTripPassRevoke({
+            type: 'REFUND',
+            id: '1',
+            app_user_id: 'u',
+            product_id: PRODUCT_TRIP_PASS,
+        }),
+        true,
+    );
+});
+
 Deno.test('applyWebhookEvent rejects non-UUID app_user_id without RPC', async () => {
     const outcome = await applyWebhookEvent(
         {
@@ -146,6 +242,8 @@ Deno.test('applyWebhookEvent calls RPC for subscription purchase', async () => {
         assertEquals(captured.body?.p_event_id, 'evt-1');
         assertEquals(captured.body?.p_is_trip_pass, false);
         assertEquals(captured.body?.p_is_yearly, false);
+        assertEquals(captured.body?.p_is_immediate_pro_revoke, false);
+        assertEquals(captured.body?.p_is_trip_pass_revoke, false);
     } finally {
         restore();
     }
@@ -301,13 +399,16 @@ for (const fixture of CONTRACT_FIXTURES) {
         try {
             const outcome = await applyWebhookEvent(body, env);
             assertEquals(outcome.ok, true);
+            if (body.event.type === 'CANCELLATION' && body.event.expiration_at_ms == null) {
+                assertEquals(captured.body, undefined);
+                assertEquals(outcome.action, 'ignored');
+                return;
+            }
             assertEquals(captured.body?.p_event_id, body.event.id);
             assertEquals(captured.body?.p_user_id, body.event.app_user_id);
             assertEquals(captured.body?.p_event_type, body.event.type);
-            const revoke = body.event.type === 'CANCELLATION' || body.event.type === 'EXPIRATION';
-            assertEquals(captured.body?.p_is_revoke, revoke);
-            if (revoke) {
-                assertEquals(captured.body?.p_is_trip_pass, false);
+            if (body.event.type === 'EXPIRATION') {
+                assertEquals(captured.body?.p_is_immediate_pro_revoke, true);
             }
         } finally {
             restore();
