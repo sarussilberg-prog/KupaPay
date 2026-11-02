@@ -1,0 +1,12 @@
+appId: com.kupapay.mobile
+---
+- tapOn:
+    id: tab-Activity
+- extendedWaitUntil:
+    visible:
+      id: activity-search-input
+    timeout: 60000
+- extendedWaitUntil:
+    visible:
+      id: activity-search-placeholder-layout-ok
+    timeout: 30000

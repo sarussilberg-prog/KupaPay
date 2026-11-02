@@ -16,3 +16,4 @@ appId: com.kupapay.mobile
     id: tabbar-row
 - assertVisible:
     id: groups-list-virtualized
+- runFlow: assert-activity-search-placeholder.yaml
