@@ -5,6 +5,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# Diff lists paths from repo root (`cost-share-app/...`); git pathspecs here are under `apps/`.
+git_path_from_diff() {
+  local f="$1"
+  if [[ "$f" == cost-share-app/* ]]; then
+    echo "${f#cost-share-app/}"
+  else
+    echo "$f"
+  fi
+}
+
 BASE_REF="${GITHUB_BASE_REF:-dev}"
 HEAD_SHA="${PR_HEAD_SHA:-${GITHUB_SHA:-HEAD}}"
 SUMMARY_FILE="${GITHUB_STEP_SUMMARY:-/dev/null}"
@@ -102,7 +112,8 @@ git stash push -u -m pr-structure-gate-stash --quiet 2>/dev/null || true
 git checkout "$MERGE_BASE" --quiet
 
 for f in "$@"; do
-  git checkout "$HEAD_SHA" -- "$f" 2>/dev/null || {
+  git_path="$(git_path_from_diff "$f")"
+  git checkout "$HEAD_SHA" -- "$git_path" 2>/dev/null || {
     echo "::error::Could not overlay test file from head: $f"
     git checkout "$HEAD_SHA" --quiet 2>/dev/null || true
     exit 1

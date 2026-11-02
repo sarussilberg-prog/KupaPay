@@ -142,29 +142,17 @@ export function evaluateGroupsLayoutChecks(
             tabGroups.x + tabGroups.width,
             tabFavorite.x + tabFavorite.width,
         );
-        if (opts.appRtl) {
-            checks.push({
-                id: 'tabbar-profile-leftmost-rtl',
-                pass: Math.abs(tabProfile.x - leftmost) < 2,
-                detail: `profile.x=${tabProfile.x.toFixed(1)} leftmost=${leftmost.toFixed(1)}`,
-            });
-            checks.push({
-                id: 'tabbar-groups-rightmost-rtl',
-                pass: Math.abs(tabGroups.x + tabGroups.width - rightmost) < 2,
-                detail: `groups.right=${(tabGroups.x + tabGroups.width).toFixed(1)} rightmost=${rightmost.toFixed(1)}`,
-            });
-        } else {
-            checks.push({
-                id: 'tabbar-profile-leftmost-ltr',
-                pass: Math.abs(tabProfile.x - leftmost) < 2,
-                detail: `profile.x=${tabProfile.x.toFixed(1)} leftmost=${leftmost.toFixed(1)}`,
-            });
-            checks.push({
-                id: 'tabbar-groups-rightmost-ltr',
-                pass: Math.abs(tabGroups.x + tabGroups.width - rightmost) < 2,
-                detail: `groups.right=${(tabGroups.x + tabGroups.width).toFixed(1)} rightmost=${rightmost.toFixed(1)}`,
-            });
-        }
+        const tabSideSuffix = opts.appRtl ? 'rtl' : 'ltr';
+        checks.push({
+            id: `tabbar-profile-leftmost-${tabSideSuffix}`,
+            pass: Math.abs(tabProfile.x - leftmost) < 2,
+            detail: `profile.x=${tabProfile.x.toFixed(1)} leftmost=${leftmost.toFixed(1)}`,
+        });
+        checks.push({
+            id: `tabbar-groups-rightmost-${tabSideSuffix}`,
+            pass: Math.abs(tabGroups.x + tabGroups.width - rightmost) < 2,
+            detail: `groups.right=${(tabGroups.x + tabGroups.width).toFixed(1)} rightmost=${rightmost.toFixed(1)}`,
+        });
     }
 
     return checks;
