@@ -1,7 +1,25 @@
 import { appendFileSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { NATIVE_TOUCH_PATTERNS, planMaestroCi } from './maestro-ci-plan.mjs';
+import { planMaestroCi } from './maestro-ci-plan.mjs';
+
+/** Same paths as maestro-ci-plan NATIVE_TOUCH_PATTERNS (keep in sync). */
+const NATIVE_TOUCH_PATTERNS = [
+  /^cost-share-app\/apps\/mobile\/ios\//,
+  /^cost-share-app\/apps\/mobile\/android\//,
+  /^cost-share-app\/apps\/mobile\/app\.json$/,
+  /^cost-share-app\/apps\/mobile\/app\.config\./,
+  /^cost-share-app\/apps\/mobile\/plugins\//,
+  /^cost-share-app\/apps\/mobile\/modules\//,
+  /^cost-share-app\/apps\/mobile\/package\.json$/,
+  /^cost-share-app\/package-lock\.json$/,
+  /^cost-share-app\/package\.json$/,
+  /^cost-share-app\/apps\/mobile\/Podfile/,
+  /^cost-share-app\/apps\/mobile\/.*\.podspec$/,
+  /^cost-share-app\/apps\/mobile\/.*\.gradle/,
+  /^cost-share-app\/apps\/mobile\/gradle\//,
+  /^cost-share-app\/apps\/mobile\/eas\.json$/,
+];
 
 /** Boot entrypoints — launch smoke on dev when these change (with native paths). */
 export const LAUNCH_SMOKE_BOOT_PATTERNS = [

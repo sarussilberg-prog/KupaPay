@@ -8,7 +8,7 @@ import {
 } from './maestro-screen-flow-map.mjs';
 
 /** Paths that force a native rebuild (not JS-only). */
-export const NATIVE_TOUCH_PATTERNS = [
+const NATIVE_TOUCH_PATTERNS = [
   /^cost-share-app\/apps\/mobile\/ios\//,
   /^cost-share-app\/apps\/mobile\/android\//,
   /^cost-share-app\/apps\/mobile\/app\.json$/,
