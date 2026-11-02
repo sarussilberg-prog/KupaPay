@@ -7,4 +7,4 @@ appId: com.kupapay.mobile
       id: groups-list-title
     timeout: 90000
 - runFlow: set-e2e-fixture-locale-he.yaml
-- runFlow: assert-groups-layout-diagnostics.yaml
+- runFlow: assert-groups-layout-diagnostics-he.yaml

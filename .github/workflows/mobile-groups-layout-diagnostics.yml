@@ -101,10 +101,10 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v3
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v5
           restore-keys: |
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v3
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v2
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v5
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v4
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)
@@ -120,14 +120,14 @@ jobs:
     name: Groups layout probes (iOS)
     needs: [plan, build-ios]
     runs-on: macos-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     defaults:
       run:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_FIXTURES: '1'
       EXPO_PUBLIC_E2E: '1'
-      IOS_SIMULATOR_DEVICES: 'iPhone 16'
+      IOS_SIMULATOR_DEVICES: 'iPhone 17'
       MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}

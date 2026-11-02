@@ -108,11 +108,24 @@ run_diag_flows() {
     exit_code=$?
     set -e
     echo "$exit_code" > "$ARTIFACTS/logs/${maestro_platform}_${loc}.exit"
-    grep -o '\[LAYOUT_DIAG_JSON\].*' "$ARTIFACTS/logs/${maestro_platform}_${loc}.log" \
-      | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
-      > "$ARTIFACTS/json/${maestro_platform}_${loc}.json" 2>/dev/null || true
-
     maestro_collect_ios_simulator_logs "$ARTIFACTS" "${maestro_platform}_${loc}"
+    layout_diag_extract_json() {
+      local dest="$1"
+      local maestro_log="$2"
+      local sim_log="$3"
+      grep -o '\[LAYOUT_DIAG_JSON\].*' "$maestro_log" \
+        | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
+        | tail -1 > "$dest" 2>/dev/null || true
+      if [[ ! -s "$dest" && -f "$sim_log" ]]; then
+        grep -o '\[LAYOUT_DIAG_JSON\].*' "$sim_log" \
+          | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
+          | tail -1 > "$dest" 2>/dev/null || true
+      fi
+    }
+    layout_diag_extract_json \
+      "$ARTIFACTS/json/${maestro_platform}_${loc}.json" \
+      "$ARTIFACTS/logs/${maestro_platform}_${loc}.log" \
+      "$ARTIFACTS/debug/${maestro_platform}_${loc}-simulator.log"
     maestro_append_supabase_host_audit "$MAESTRO_SUPABASE_AUDIT_FILE" \
       "$ARTIFACTS/debug/${maestro_platform}_${loc}-simulator.log" "${maestro_platform}_${loc}"
     if [[ "$exit_code" -ne 0 ]]; then

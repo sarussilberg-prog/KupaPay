@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRtlLayout } from '../../hooks/useRtlLayout';
 import { useLayoutWindowWidth } from '../../hooks/useLayoutWindowWidth';
@@ -39,25 +39,39 @@ export function GroupsLayoutDiagnosticsReporter() {
     const json = diagnosticJson(payload);
     const ok = allChecksPass(payload.checks);
 
-    // Maestro on iOS cannot see testIDs hidden from the accessibility tree (0×0 + hidden).
+    // Maestro iOS matches testID on native views in the a11y tree — use a small labeled View, not hidden Text.
     const probeStyle = {
         position: 'absolute' as const,
         left: 0,
         top: 0,
-        width: 1,
-        height: 1,
-        opacity: 0.01,
+        width: 4,
+        height: 4,
+        opacity: 0.02,
     };
 
     return (
         <>
-            <Text testID="groups-layout-diagnostics-json" accessible style={probeStyle}>
-                {json}
-            </Text>
+            <View
+                testID="groups-layout-diagnostics-json"
+                accessible
+                accessibilityLabel={json}
+                importantForAccessibility="yes"
+                collapsable={false}
+                style={probeStyle}
+            >
+                <Text accessible={false}>{json}</Text>
+            </View>
             {ok ? (
-                <Text testID="groups-layout-diagnostics-ok" accessible style={probeStyle}>
-                    ok
-                </Text>
+                <View
+                    testID="groups-layout-diagnostics-ok"
+                    accessible
+                    accessibilityLabel="groups-layout-diagnostics-ok"
+                    importantForAccessibility="yes"
+                    collapsable={false}
+                    style={probeStyle}
+                >
+                    <Text accessible={false}>ok</Text>
+                </View>
             ) : null}
         </>
     );
