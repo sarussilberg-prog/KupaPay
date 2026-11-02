@@ -4,6 +4,11 @@
 -- M3 — Support messages via RPC (rate limit + length); drop open INSERT policy.
 -- ---------------------------------------------------------------------------
 ALTER TABLE public.support_messages
+    DROP CONSTRAINT IF EXISTS support_messages_message_len,
+    DROP CONSTRAINT IF EXISTS support_messages_name_len,
+    DROP CONSTRAINT IF EXISTS support_messages_email_len;
+
+ALTER TABLE public.support_messages
     ADD CONSTRAINT support_messages_message_len CHECK (char_length(message) <= 5000),
     ADD CONSTRAINT support_messages_name_len CHECK (char_length(name) <= 200),
     ADD CONSTRAINT support_messages_email_len CHECK (char_length(email) <= 320);
