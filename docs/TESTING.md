@@ -45,6 +45,7 @@ Document new tests in the PR body: *what each test asserts* and *which bug it wo
 | Screen → flow map | `cost-share-app/scripts/lib/maestro-screen-flow-map.mjs` | Path-based extra flows on dev PRs |
 | Maestro workflow lint | `cost-share-app/scripts/__tests__/github-maestro-workflows.test.mjs` | Job-level env / Sentry / ccache invariants for Maestro YAML |
 | Release launch smoke | `apps/mobile/scripts/ci-release-launch-smoke.sh`, Maestro workflow jobs `launch-smoke-ios` / `launch-smoke-android` | Cached Release `.app`/APK launches and stays alive 30s; see [release-launch-smoke spec](./superpowers/specs/2026-11-02-release-launch-smoke.md) |
+| AWS Device Farm (manual) | `.github/workflows/device-farm-real-devices.yml` | `workflow_dispatch` only; gated on `DEVICE_FARM_ENABLED`; see [AWS Device Farm setup](./superpowers/specs/2026-11-02-aws-device-farm-setup.md) |
 
 ### Layout probes (Maestro)
 
