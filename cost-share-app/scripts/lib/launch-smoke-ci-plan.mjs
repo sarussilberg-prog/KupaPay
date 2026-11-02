@@ -34,6 +34,7 @@ export const LAUNCH_SMOKE_INFRA_PATTERNS = [
   /^cost-share-app\/scripts\/lib\/launch-smoke-ci-plan\.mjs$/,
   /^cost-share-app\/scripts\/__tests__\/launch-smoke-ci-plan\.test\.mjs$/,
   /^cost-share-app\/apps\/mobile\/scripts\/ci-release-launch-smoke\.sh$/,
+  /^cost-share-app\/apps\/mobile\/scripts\/ci-maestro-device-ui\.sh$/,
   /^cost-share-app\/apps\/mobile\/__tests__\/guards\/releaseLaunchSmoke\.guard\.test\.ts$/,
   /^docs\/superpowers\/specs\/2026-11-02-release-launch-smoke\.md$/,
 ];

@@ -18,6 +18,7 @@ on:
       - 'cost-share-app/scripts/lib/maestro-*.mjs'
       - 'cost-share-app/scripts/lib/launch-smoke-ci-plan.mjs'
       - 'cost-share-app/apps/mobile/scripts/ci-release-launch-smoke.sh'
+      - 'cost-share-app/apps/mobile/scripts/ci-maestro-device-ui.sh'
       - '.github/workflows/mobile-device-ui-maestro.yml'
   pull_request:
     types: [opened, synchronize, reopened, labeled]
@@ -29,6 +30,7 @@ on:
       - 'cost-share-app/scripts/lib/maestro-*.mjs'
       - 'cost-share-app/scripts/lib/launch-smoke-ci-plan.mjs'
       - 'cost-share-app/apps/mobile/scripts/ci-release-launch-smoke.sh'
+      - 'cost-share-app/apps/mobile/scripts/ci-maestro-device-ui.sh'
       - '.github/workflows/mobile-device-ui-maestro.yml'
 
 concurrency:
@@ -126,9 +128,9 @@ jobs:
   build-ios:
     name: Maestro build (iOS)
     needs: plan
-    if: needs.plan.outputs.run_ios == 'true'
+    if: needs.plan.outputs.run_ios == 'true' || needs.plan.outputs.run_launch_smoke_ios == 'true'
     runs-on: macos-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: cost-share-app
@@ -248,7 +250,7 @@ jobs:
     needs: plan
     if: needs.plan.outputs.run_android == 'true' || needs.plan.outputs.run_launch_smoke_android == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: cost-share-app
