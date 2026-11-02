@@ -17,7 +17,6 @@ import { LoginScreen } from './screens/auth/LoginScreen';
 import { PublicSupportScreen } from './screens/auth/PublicSupportScreen';
 import { OnboardingPreAuthFlow } from './screens/onboarding/OnboardingPreAuthFlow';
 import { hasCompletedPreLoginOnboarding } from './lib/onboardingStorage';
-import { E2E_MAESTRO_AUTH_ENABLED } from './lib/featureFlags';
 import { initializeLanguage } from './i18n';
 import {
   clearStaleAuthSession,
@@ -314,9 +313,7 @@ function App() {
 
         configureNativeGoogleSignIn();
         await configureRewardedAdsSdk();
-        const preDone = E2E_MAESTRO_AUTH_ENABLED
-          ? true
-          : await hasCompletedPreLoginOnboarding();
+        const preDone = await hasCompletedPreLoginOnboarding();
         if (mounted) setPreOnboardingDone(preDone);
 
         if (Platform.OS === 'web' && typeof globalThis.location !== 'undefined') {

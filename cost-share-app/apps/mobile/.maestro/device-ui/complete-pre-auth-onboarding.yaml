@@ -1,6 +1,5 @@
 appId: com.kupapay.mobile
 ---
-# Boot can show AppGateSkeleton before onboarding or login.
 - extendedWaitUntil:
     visible:
       id: login-screen
@@ -8,19 +7,20 @@ appId: com.kupapay.mobile
     optional: true
 - runFlow:
     when:
-      visible:
-        id: onboarding-welcome-existing
+      notVisible:
+        id: login-screen
     commands:
       - extendedWaitUntil:
           visible:
             id: onboarding-welcome-existing
           timeout: 120000
+      - waitForAnimationToEnd:
+          timeout: 15000
       - tapOn:
           id: onboarding-welcome-existing
-- runFlow:
-    when:
-      visible:
-        id: onboarding-feature-skip
-    commands:
-      - tapOn:
-          id: onboarding-feature-skip
+      - waitForAnimationToEnd:
+          timeout: 15000
+      - extendedWaitUntil:
+          visible:
+            id: login-screen
+          timeout: 120000
