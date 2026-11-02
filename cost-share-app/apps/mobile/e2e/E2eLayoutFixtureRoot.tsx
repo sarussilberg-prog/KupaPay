@@ -76,16 +76,26 @@ export function E2eLayoutFixtureRoot() {
         })();
     }, []);
 
+    const applyFixtureLocaleFromUrl = useCallback(async (url: string | null | undefined) => {
+        const fromUrl = parseE2eFixtureLocaleFromUrl(url);
+        if (!fromUrl) return;
+        await applyE2eFixtureLocale(fromUrl);
+        setFixtureLocale(fromUrl);
+        setNavEpoch((n) => n + 1);
+    }, []);
+
     useEffect(() => {
         if (!bootReady || !incomingUrl) return;
-        const fromUrl = parseE2eFixtureLocaleFromUrl(incomingUrl);
-        if (!fromUrl) return;
-        void (async () => {
-            await applyE2eFixtureLocale(fromUrl);
-            setFixtureLocale(fromUrl);
-            setNavEpoch((n) => n + 1);
-        })();
-    }, [bootReady, incomingUrl]);
+        void applyFixtureLocaleFromUrl(incomingUrl);
+    }, [bootReady, incomingUrl, applyFixtureLocaleFromUrl]);
+
+    useEffect(() => {
+        if (!bootReady) return undefined;
+        const subscription = Linking.addEventListener('url', ({ url }) => {
+            void applyFixtureLocaleFromUrl(url);
+        });
+        return () => subscription.remove();
+    }, [bootReady, applyFixtureLocaleFromUrl]);
 
     useEffect(() => {
         if (!bootReady) return;
