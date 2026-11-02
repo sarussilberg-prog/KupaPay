@@ -108,5 +108,5 @@ export function hitsToAllowlistIds(hits: RtlRowPatternHit[]): string[] {
         seen.add(h.id);
         ids.push(h.id);
     }
-    return ids.sort();
+    return ids.sort((a, b) => a.localeCompare(b));
 }
