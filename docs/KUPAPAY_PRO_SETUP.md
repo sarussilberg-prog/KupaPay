@@ -39,6 +39,7 @@ Deploy `revenuecat-webhook` and register in RevenueCat → Integrations → Webh
 Supabase Edge Function secrets (dev + prod separately):
 
 - `REVENUECAT_WEBHOOK_SECRET` — shared with RevenueCat dashboard
+- `REVENUECAT_ALLOW_SANDBOX_EVENTS` — set to `true` only on development; omit or `false` in production so `SANDBOX` webhook events are ignored
 - `SUPABASE_SERVICE_ROLE_KEY` — already available to functions; used for `profiles.pro_until` and `group_passes` writes
 
 ## Database
