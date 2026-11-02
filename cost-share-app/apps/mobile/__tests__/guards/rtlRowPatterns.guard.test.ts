@@ -16,6 +16,7 @@ function readAllowlist(): AllowlistFile {
     return JSON.parse(fs.readFileSync(ALLOWLIST_PATH, 'utf8')) as AllowlistFile;
 }
 
+/** Guard: shrink-only allowlist for row-reverse / hardcoded direction (Phase 2). */
 describe('RTL row pattern guard (UI quality Phase 2)', () => {
     it('reports allowlist size for CI metrics (monotonic decrease target)', () => {
         const { allowlist } = readAllowlist();
