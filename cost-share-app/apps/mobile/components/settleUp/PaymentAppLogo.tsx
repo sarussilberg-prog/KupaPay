@@ -1,66 +1,64 @@
-import { Image, ImageSourcePropType, View } from 'react-native';
+import { useColorScheme } from 'react-native';
+import { View } from 'react-native';
 import type { IsraeliPaymentApp } from '../../lib/israeliPaymentLinks';
 import { Text } from '../AppText';
+import {
+    PAYMENT_APP_BRAND,
+    PAYMENT_APP_TILE_RADIUS,
+    PAYMENT_APP_TILE_SIZE,
+} from './paymentAppBrand';
 
-const BIT_LOGO: ImageSourcePropType = require('../../assets/payment-apps/bit-logo.png');
-
-/** PayBox brand sky — official app icon background. */
-const PAYBOX_BRAND_BG = '#5BC8F5';
+export { PAYMENT_APP_TILE_SIZE } from './paymentAppBrand';
 
 interface PaymentAppLogoProps {
     app: IsraeliPaymentApp;
     size?: number;
+    accessibilityLabel: string;
 }
 
-export function PaymentAppLogo({ app, size = 52 }: PaymentAppLogoProps) {
-    if (app === 'paybox') {
-        return (
-            <View
-                style={{
-                    flex: 1,
-                    alignSelf: 'stretch',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: PAYBOX_BRAND_BG,
-                    paddingHorizontal: 6,
-                }}
-            >
-                <Text
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                    style={{
-                        color: '#FFFFFF',
-                        fontSize: 15,
-                        fontWeight: '800',
-                        textAlign: 'center',
-                        writingDirection: 'ltr',
-                        alignSelf: 'stretch',
-                    }}
-                >
-                    PayBox
-                </Text>
-            </View>
-        );
-    }
+export function PaymentAppLogo({
+    app,
+    size = PAYMENT_APP_TILE_SIZE,
+    accessibilityLabel,
+}: PaymentAppLogoProps) {
+    const scheme = useColorScheme();
+    const brand = PAYMENT_APP_BRAND[app];
+    const backgroundColor =
+        scheme === 'dark' ? brand.backgroundColorDark : brand.backgroundColor;
+    const scale = size / PAYMENT_APP_TILE_SIZE;
+    const borderRadius = PAYMENT_APP_TILE_RADIUS * scale;
+    const fontSize = app === 'paybox' ? 18 * scale : 16 * scale;
 
     return (
         <View
+            testID={`payment-app-logo-${app}`}
+            accessibilityRole="image"
+            accessibilityLabel={accessibilityLabel}
             style={{
                 width: size,
                 height: size,
-                borderRadius: 12,
-                overflow: 'hidden',
+                borderRadius,
+                backgroundColor,
                 alignItems: 'center',
                 justifyContent: 'center',
+                padding: 8 * scale,
             }}
         >
-            <Image
-                source={BIT_LOGO}
-                accessibilityIgnoresInvertColors
-                style={{ width: size, height: size }}
-                resizeMode="cover"
-            />
+            <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+                style={{
+                    color: '#FFFFFF',
+                    fontSize,
+                    fontWeight: '800',
+                    textAlign: 'center',
+                    writingDirection: 'ltr',
+                    letterSpacing: app === 'paybox' ? 0.5 : 0,
+                }}
+            >
+                {brand.monogram}
+            </Text>
         </View>
     );
 }
