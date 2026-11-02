@@ -359,6 +359,23 @@ export function GroupsListScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-50 dark:bg-gray-900" edges={['top']}>
             <GroupsLayoutDiagnosticsReporter />
+            {isE2eLayoutProbeEnabled() && isRtl ? (
+                <View
+                    testID="groups-layout-app-rtl"
+                    accessible
+                    accessibilityLabel="groups-layout-app-rtl"
+                    importantForAccessibility="yes"
+                    collapsable={false}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        width: 4,
+                        height: 4,
+                        opacity: 0.02,
+                    }}
+                />
+            ) : null}
             <ProTrialLifecycleBanner />
             <GroupsListHeader
                 searchQuery={searchQuery}

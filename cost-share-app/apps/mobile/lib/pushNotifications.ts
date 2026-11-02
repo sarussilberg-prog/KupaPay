@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Application from 'expo-application';
 import Constants from 'expo-constants';
+import { deferNonCriticalNativeTask } from './safeNativeModule';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -73,11 +74,24 @@ export function appVersion(): string | undefined {
     return Application.nativeApplicationVersion ?? undefined;
 }
 
-export async function setBadgeCount(count: number): Promise<void> {
+async function setBadgeCountWhenPermitted(count: number): Promise<void> {
     if (Platform.OS === 'web') return;
-    try {
-        await Notifications.setBadgeCountAsync(Math.max(0, count));
-    } catch {
-        /* badge unsupported on some Android launchers — ignore */
+    const status = await getPermissionStatus();
+    if (status !== 'granted') {
+        return;
     }
+    await Notifications.setBadgeCountAsync(Math.max(0, count));
+}
+
+export async function setBadgeCount(count: number): Promise<void> {
+    try {
+        await setBadgeCountWhenPermitted(count);
+    } catch {
+        /* badge unsupported, permission revoked, or native module error — ignore */
+    }
+}
+
+/** Clears the home-screen badge after Activity is seen; deferred off the focus critical path. */
+export function deferClearAppIconBadge(): void {
+    deferNonCriticalNativeTask(() => setBadgeCount(0));
 }

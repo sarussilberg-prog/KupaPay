@@ -17,6 +17,10 @@ export const E2E_MAESTRO_AUTH_ENABLED =
     process.env.EXPO_PUBLIC_E2E_MAESTRO_AUTH === 'true' ||
     process.env.EXPO_PUBLIC_E2E === '1';
 
+/** E2E-only pseudo-locale `xx-long` (~40% longer strings). Never enable in store/production profiles. */
+export const E2E_XX_LONG_LOCALE_ENABLED =
+    process.env.EXPO_PUBLIC_E2E_XX_LONG_LOCALE === 'true';
+
 export function isProUpsellSurfaceEnabled(): boolean {
     return KUPAPAY_PRO_ENABLED || SHOW_KUPAPAY_PRO_UPSELL;
 }

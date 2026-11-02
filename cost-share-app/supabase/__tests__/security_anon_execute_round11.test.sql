@@ -32,7 +32,7 @@ BEGIN
 
     IF has_function_privilege(
         'authenticated',
-        'public.handle_revenuecat_webhook(text, uuid, text, text, timestamptz, timestamptz, uuid, boolean, boolean, boolean)',
+        'public.handle_revenuecat_webhook(text, uuid, text, text, timestamptz, timestamptz, uuid, boolean, boolean, boolean, boolean, bigint)',
         'EXECUTE'
     ) THEN
         RAISE EXCEPTION 'Case 2 failed: authenticated must not EXECUTE handle_revenuecat_webhook';

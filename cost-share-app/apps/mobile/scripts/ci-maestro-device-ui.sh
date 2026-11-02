@@ -104,7 +104,12 @@ elif [[ "$PLATFORM" == "android" ]]; then
   cd "$ROOT"
   if [[ "$PHASE" == "build" || "$PHASE" == "all" ]]; then
     maestro_android_prebuild "$ROOT"
-    maestro_android_assemble_release "$ROOT"
+    # CI build jobs have no emulator; assembleRelease only (expo run:android needs a device).
+    if [[ "$PHASE" == "build" ]]; then
+      (cd android && ./gradlew assembleRelease --no-daemon)
+    else
+      npx expo run:android --variant release
+    fi
     if [[ -n "${MAESTRO_ANDROID_APK_STAGING_DIR:-}" ]]; then
       maestro_stage_android_apk "$ROOT" "$MAESTRO_ANDROID_APK_STAGING_DIR"
     fi

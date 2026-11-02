@@ -59,3 +59,21 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - perf(ci): faster Maestro simulator CI — build once, tiers (#687) (#696)
 ## [2.2.0-dev.27] — 2026-11-01
 - fix(web): back-merge #701 — proxy /_expo static assets on marketing site (#703)
+## [2.2.0-dev.28] — 2026-11-02
+- fix(mobile): guard Activity focus badge clear on iOS (#698) (#707)
+## [2.2.0-dev.29] — 2026-11-02
+- fix(mobile): unify Bit and PayBox payment app tiles (#700) (#708)
+## [2.2.0-dev.30] — 2026-11-02
+- ci(mobile): UI quality Phase 5 — AWS Device Farm workflow (gated OFF) (#711)
+## [2.2.0-dev.31] — 2026-11-02
+- ci(mobile): UI quality Phase 4 — release launch smoke (#710)
+## [2.2.0-dev.32] — 2026-11-02
+- feat(mobile): UI quality Phase 2 — RTL row guard and xx-long pseudo-locale (#709)
+## [2.2.0-dev.33] — 2026-11-02
+- fix(pro): RevenueCat webhook environment and entitlement ordering hardening (#712)
+## [2.2.0-dev.34] — 2026-11-02
+- ci: release launch smoke runs on iOS and Android (#715)
+## [2.2.0-dev.35] — 2026-11-02
+- fix(activity): iOS Hebrew search placeholder garbled (#716) (#719)
+## [2.2.0-dev.36] — 2026-11-02
+- fix(tabs): swap Profile/Activity order in RTL (#699) (#720)
