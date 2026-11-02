@@ -1,0 +1,30 @@
+{
+  "allowlist": [
+    "components/AppLogoAnimated.tsx:214",
+    "components/balances/CurrencyAmountList.tsx:37",
+    "components/BalanceSummaryHeader.tsx:20",
+    "components/capture/IosCaptureStatusBar.tsx:15",
+    "components/FeedItemDetailSheet.tsx:668",
+    "components/FeedRowCard.tsx:157",
+    "components/groupDetail/SummaryFooter.tsx:121",
+    "components/GroupDetailFloatingActions.tsx:63",
+    "components/groups/GroupsListSummaryCard.tsx:44",
+    "components/NetworkOfflineBanner.tsx:34",
+    "components/NetworkOfflineBanner.tsx:43",
+    "components/onboarding/OnboardingCreateGroupHero.tsx:93",
+    "components/settings/LegalDocumentSheet.tsx:104",
+    "components/settings/LegalDocumentSheet.tsx:169",
+    "components/settings/LegalDocumentSheet.tsx:69",
+    "components/SettleUpSheet.tsx:489",
+    "components/SettleUpSheet.tsx:517",
+    "components/SettleUpSheet.tsx:681",
+    "components/share/GroupSummaryShareCard.tsx:39",
+    "components/ui/iconLabelLayout.ts:44",
+    "lib/toastConfig.tsx:39",
+    "screens/expenses/AddExpenseScreen.tsx:1417",
+    "screens/expenses/AddExpenseScreen.tsx:1439",
+    "screens/expenses/AddExpenseScreen.tsx:1481",
+    "screens/expenses/AddExpenseScreen.tsx:1496"
+  ],
+  "count": 25
+}

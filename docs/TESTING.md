@@ -40,6 +40,8 @@ Document new tests in the PR body: *what each test asserts* and *which bug it wo
 |-------|----------|---------|
 | Unit / component | `apps/mobile/__tests__/` | RNTL, style resolver, i18n keys |
 | Architecture | `apps/mobile/__tests__/architecture/` | Forbidden native RTL + flex patterns |
+| RTL row migration guard | `apps/mobile/__tests__/guards/rtlRowPatterns.guard.test.ts` | Bans new `row-reverse` / hardcoded `direction: ltr|rtl` outside `hooks/useRtlLayout.tsx`; allowlist in `rtlRowPatterns.allowlist.json` must match the repo exactly (stale or unlisted entries fail). Refresh via `npx tsx apps/mobile/scripts/lib/refreshRtlRowAllowlist.ts`. Bad fixture: `__tests__/guards/fixtures/rtlRowBadFixture.tsx`. |
+| E2E pseudo-locale guard | `apps/mobile/__tests__/guards/e2eXxLongLocaleNotInProd.guard.test.ts` | `xx-long` (`EXPO_PUBLIC_E2E_XX_LONG_LOCALE`) must not appear in `eas.json` production env. |
 | Device UI | `apps/mobile/.maestro/device-ui/` | Login, layout probes, settle flows (CI) |
 | Maestro CI planner | `cost-share-app/scripts/lib/maestro-ci-plan.mjs` | Tier + flow list for device UI workflows |
 | Screen → flow map | `cost-share-app/scripts/lib/maestro-screen-flow-map.mjs` | Path-based extra flows on dev PRs |
