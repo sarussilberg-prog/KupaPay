@@ -9,7 +9,7 @@ env:
       id: groups-list-title
     timeout: 90000
 - runFlow:
-    file: set-e2e-fixture-locale.yaml
-    env:
-      APP_LANG: ${APP_LANG}
+    when:
+      true: ${APP_LANG == 'he'}
+    file: set-e2e-fixture-locale-he.yaml
 - runFlow: assert-groups-layout-diagnostics.yaml

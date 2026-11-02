@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
+import type { Language } from '@cost-share/shared';
 import * as Linking from 'expo-linking';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -56,6 +57,7 @@ function E2eFixtureNavigationController({
 export function E2eLayoutFixtureRoot() {
     const [bootReady, setBootReady] = useState(false);
     const [navEpoch, setNavEpoch] = useState(0);
+    const [fixtureLocale, setFixtureLocale] = useState<Language | null>(null);
     const incomingUrl = Linking.useURL();
     const language = useAppStore((s) => s.language);
 
@@ -79,6 +81,7 @@ export function E2eLayoutFixtureRoot() {
         if (!fromUrl) return;
         void (async () => {
             await applyE2eFixtureLocale(fromUrl);
+            setFixtureLocale(fromUrl);
             setNavEpoch((n) => n + 1);
         })();
     }, [bootReady, incomingUrl]);
@@ -103,6 +106,14 @@ export function E2eLayoutFixtureRoot() {
                             <AppNavigator />
                         </NavigationContainer>
                         <E2eFixtureNavigationController onReady={onNavReady} navEpoch={navEpoch} />
+                        {fixtureLocale ? (
+                            <View
+                                testID="e2e-fixture-locale-ready"
+                                accessibilityElementsHidden
+                                importantForAccessibility="no-hide-descendants"
+                                style={{ width: 1, height: 1, opacity: 0 }}
+                            />
+                        ) : null}
                     </ScreenErrorBoundary>
                     <Toast config={toastConfig} topOffset={56} />
                 </RtlLayoutProvider>
