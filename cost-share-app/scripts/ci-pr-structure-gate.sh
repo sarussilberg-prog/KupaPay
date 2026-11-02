@@ -18,11 +18,20 @@ if [[ -z "$PR_BODY" && -n "${PR_BODY_FILE:-}" ]]; then
   PR_BODY="$(cat "$PR_BODY_FILE")"
 fi
 
-git fetch origin "$BASE_REF" --depth=1 2>/dev/null || true
+# Shallow fetch breaks `...` diffs when the PR branch merged an older dev tip (no merge base).
+git fetch origin "$BASE_REF" --no-tags 2>/dev/null || true
 CHANGED_LIST="$(mktemp)"
 git diff --name-only "origin/${BASE_REF}...${PR_HEAD_SHA}" 2>/dev/null >"$CHANGED_LIST" || true
 if [[ ! -s "$CHANGED_LIST" ]]; then
+  git fetch origin "$BASE_REF" --no-tags --unshallow 2>/dev/null || git fetch origin "$BASE_REF" --no-tags 2>/dev/null || true
+  git diff --name-only "origin/${BASE_REF}...${PR_HEAD_SHA}" 2>/dev/null >"$CHANGED_LIST" || true
+fi
+if [[ ! -s "$CHANGED_LIST" ]]; then
   git diff --name-only "${BASE_REF}...${PR_HEAD_SHA}" >"$CHANGED_LIST" 2>/dev/null || true
+fi
+if [[ ! -s "$CHANGED_LIST" ]]; then
+  echo "::error::Could not compute PR diff against origin/${BASE_REF} (merge base missing?)." >&2
+  exit 1
 fi
 
 BODY_FILE="$(mktemp)"
