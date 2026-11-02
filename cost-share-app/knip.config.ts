@@ -12,6 +12,8 @@ const config: KnipConfig = {
     'scripts/posthog-mau-tiles-lib.mjs',
     'scripts/posthog-ensure-mau-dashboard-tiles.mjs',
     'scripts/__tests__/posthog-mau-tiles-lib.test.mjs',
+    'scripts/lib/launch-smoke-ci-plan.mjs',
+    'scripts/__tests__/launch-smoke-ci-plan.test.mjs',
     'scripts/__tests__/device-farm-workflow.test.mjs',
   ],
   project: ['scripts/**/*.ts'],
@@ -25,6 +27,7 @@ const config: KnipConfig = {
   ignoreBinaries: ['python3', 'eas'],
   // Knip does not resolve .mjs cross-imports for this script library (#584).
   ignoreIssues: {
+    'scripts/lib/launch-smoke-ci-plan.mjs': ['exports'],
     'scripts/posthog-mau-tiles-lib.mjs': ['exports'],
     'scripts/__tests__/device-farm-workflow.test.mjs': ['files'],
     // CLI invoked only by .github/workflows/app-store-production.yml.
