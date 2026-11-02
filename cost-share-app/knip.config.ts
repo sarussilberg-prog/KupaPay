@@ -36,6 +36,7 @@ const config: KnipConfig = {
         'app.config.ts',
         'jest-setup.ts',
         'navigation/**/*.{ts,tsx}',
+        'scripts/lib/refreshRtlRowAllowlist.ts',
         '**/*.{test,spec}.{ts,tsx}',
       ],
       project: ['**/*.{ts,tsx}'],

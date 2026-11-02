@@ -2,14 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /** Whole files exempt from the row-reverse / hardcoded direction ban (canonical RTL helpers). */
-export const RTL_ROW_PATTERN_EXEMPT_FILES = new Set([
+const RTL_ROW_PATTERN_EXEMPT_FILES = new Set([
     'hooks/useRtlLayout.tsx',
     'lib/scanRtlRowPatterns.ts',
 ]);
 
 const SKIP_DIRS = new Set(['node_modules', 'assets', '.expo', '__tests__']);
 
-export type RtlRowPatternHit = {
+type RtlRowPatternHit = {
     id: string;
     rel: string;
     line: number;
