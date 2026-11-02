@@ -65,3 +65,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): unify Bit and PayBox payment app tiles (#700) (#708)
 ## [2.2.0-dev.30] — 2026-11-02
 - ci(mobile): UI quality Phase 5 — AWS Device Farm workflow (gated OFF) (#711)
+## [2.2.0-dev.31] — 2026-11-02
+- ci(mobile): UI quality Phase 4 — release launch smoke (#710)
