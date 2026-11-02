@@ -9,17 +9,17 @@ appId: com.kupapay.mobile
     timeout: 10000
 - extendedWaitUntil:
     visible:
-      id: login-password-panel
+      id: login-e2e-panel
     timeout: 60000
 - tapOn:
-    id: login-password-email
+    id: login-e2e-email
 - eraseText
 - inputText: ${E2E_EMAIL}
 - tapOn:
-    id: login-password-field
+    id: login-e2e-password
 - inputText: ${E2E_PASSWORD}
 - tapOn:
-    id: login-password-submit
+    id: login-e2e-submit
 - extendedWaitUntil:
     visible:
       id: groups-list-title

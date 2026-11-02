@@ -14,6 +14,14 @@ const supabaseAnonKey =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyeGZiaWN1bnVzbWlwZGdiZ2RrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MDAwMDAwMDB9.dev-screenshot-fallback';
 
+if (process.env.EXPO_PUBLIC_E2E_MAESTRO_AUTH === 'true') {
+  try {
+    console.log(`[MAESTRO_SUPABASE_HOST] ${new URL(supabaseUrl).hostname}`);
+  } catch {
+    console.log('[MAESTRO_SUPABASE_HOST] invalid-url');
+  }
+}
+
 export const supabase = createClient(
   supabaseUrl,
   supabaseAnonKey,

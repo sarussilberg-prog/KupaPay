@@ -5,14 +5,25 @@ set -euo pipefail
 # Expo inlines EXPO_PUBLIC_* at bundle time — shell exports alone are not enough for Release Xcode builds.
 maestro_write_mobile_e2e_env() {
   local mobile_root="$1"
+  local supabase_url="${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}"
+  local supabase_anon="${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${E2E_SUPABASE_ANON_KEY:-}}"
+  if [[ -z "$supabase_url" || -z "$supabase_anon" ]]; then
+    echo "::error::E2E_SUPABASE_URL and E2E_SUPABASE_ANON_KEY (or EXPO_PUBLIC_*) are required for Maestro iOS Release builds"
+    return 1
+  fi
+  # Avoid EAS production env files overriding dev E2E Supabase on CI simulators.
+  rm -f "$mobile_root/.env.production" "$mobile_root/.env.local"
   local env_file="$mobile_root/.env"
   cat > "$env_file" <<EOF
 EXPO_PUBLIC_E2E_MAESTRO_AUTH=true
 EXPO_PUBLIC_E2E_TEST_EMAIL=${E2E_EMAIL:-${E2E_TEST_EMAIL:-e2e-playwright@kupay-dev.test}}
-EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}
-EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${E2E_SUPABASE_ANON_KEY:-}}
+EXPO_PUBLIC_SUPABASE_URL=${supabase_url}
+EXPO_PUBLIC_SUPABASE_ANON_KEY=${supabase_anon}
 EOF
-  echo "Wrote Maestro E2E env for bundle bake: $env_file"
+  local host
+  host="$(node -e "try{console.log(new URL(process.argv[1]).hostname)}catch{console.log('invalid')}" "$supabase_url")"
+  echo "Wrote Maestro E2E env for bundle bake: $env_file (expected Supabase host: $host)"
+  echo "expected_supabase_host=$host" >> "${MAESTRO_SUPABASE_AUDIT_FILE:-/tmp/maestro-supabase-audit.txt}"
 }
 
 maestro_ensure_cli() {
@@ -158,37 +169,41 @@ maestro_collect_screenshots() {
   fi
 }
 
-# Informational only: main.jsbundle is Hermes bytecode (HBC), not plain JS — string greps are unreliable.
-maestro_audit_ios_app_e2e_bake() {
-  local app_dir="${1:-${IOS_APP_BINARY:-}}"
-  local audit_file="${2:-}"
-  if [[ -z "$app_dir" || ! -d "$app_dir" ]]; then
-    echo "::error::maestro_audit_ios_app_e2e_bake: missing .app directory"
+maestro_append_supabase_host_audit() {
+  local audit_file="$1"
+  local sim_log="$2"
+  local label="$3"
+  mkdir -p "$(dirname "$audit_file")"
+  {
+    echo "--- ${label} ---"
+    if [[ -f "$sim_log" ]]; then
+      rg '\[MAESTRO_SUPABASE_HOST\]|drxfbicunusmipdgbgdk|jfqxjjjbpxbwwvoygahu' "$sim_log" | tail -5 || echo "no_supabase_host_in_log"
+    else
+      echo "simulator_log_missing"
+    fi
+  } >> "$audit_file"
+}
+
+maestro_verify_supabase_host_in_logs() {
+  local audit_file="$1"
+  local expected_host="$2"
+  if [[ -z "$expected_host" ]]; then
+    echo "::warning::No expected Supabase host recorded for CI audit"
+    return 0
+  fi
+  if [[ ! -f "$audit_file" ]]; then
+    echo "::warning::Supabase audit file missing"
+    return 0
+  fi
+  if rg -q "\[MAESTRO_SUPABASE_HOST\] ${expected_host}" "$audit_file" 2>/dev/null; then
+    echo "Verified simulator log reports Supabase host: $expected_host"
+    return 0
+  fi
+  if rg -q 'jfqxjjjbpxbwwvoygahu' "$audit_file" 2>/dev/null; then
+    echo "::error::Simulator log indicates production Supabase (jfqxjjjbpxbwwvoygahu); E2E user is on dev"
     return 1
   fi
-  local bundle=""
-  bundle="$(find "$app_dir" -maxdepth 3 \( -name 'main.jsbundle' -o -name '*.jsbundle' \) 2>/dev/null | head -1 || true)"
-  local lines=()
-  lines+=("app_dir=$app_dir")
-  lines+=("jsbundle=${bundle:-<not found>}")
-  if [[ -n "$bundle" && -f "$bundle" ]]; then
-    lines+=("bundle_format=$(file -b "$bundle" 2>/dev/null || echo unknown)")
-    if strings "$bundle" | grep -q 'login-password-panel'; then
-      lines+=('strings_login_password_panel=yes')
-    else
-      lines+=('strings_login_password_panel=no')
-    fi
-  fi
-  local report
-  report="$(printf '%s\n' "${lines[@]}")"
-  echo "$report"
-  if [[ -n "$audit_file" ]]; then
-    mkdir -p "$(dirname "$audit_file")"
-    printf '%s\n' "$report" > "$audit_file"
-  fi
-  if [[ "$report" == *'strings_login_password_panel=no'* ]]; then
-    echo "::notice::strings(1) did not find login-password-panel (Hermes HBC often yields false negatives)"
-  fi
+  echo "::warning::Could not confirm [MAESTRO_SUPABASE_HOST] in simulator logs (see $audit_file)"
   return 0
 }
 

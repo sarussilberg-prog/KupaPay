@@ -1,5 +1,6 @@
 /**
- * Email + password sign-in (Supabase). Used by Maestro device UI and manual QA on simulators.
+ * Dev/CI-only email+password sign-in for Maestro device UI tests (seeded E2E user).
+ * Gated by EXPO_PUBLIC_E2E_MAESTRO_AUTH — never enabled in store builds.
  */
 
 import React, { useState } from 'react';
@@ -9,9 +10,12 @@ import { supabase } from '../../lib/supabase';
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 
+const defaultEmail =
+    (process.env.EXPO_PUBLIC_E2E_TEST_EMAIL ?? 'e2e-playwright@kupay-dev.test').trim();
+
 export function LoginE2EPasswordAuth() {
     const setSession = useAppStore((s) => s.setSession);
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(defaultEmail);
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -35,40 +39,38 @@ export function LoginE2EPasswordAuth() {
     };
 
     return (
-        <View testID="login-password-panel" style={styles.panel}>
-            <Text className="text-xs font-medium text-gray-500 mb-2">Email and password</Text>
+        <View testID="login-e2e-panel" style={styles.panel}>
+            <Text className="text-xs font-medium text-gray-500 mb-2">E2E sign-in (CI only)</Text>
             <TextInput
-                testID="login-password-email"
+                testID="login-e2e-email"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 autoComplete="email"
-                placeholder="Email"
                 style={styles.input}
             />
             <TextInput
-                testID="login-password-field"
+                testID="login-e2e-password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
                 autoComplete="password"
-                placeholder="Password"
                 style={styles.input}
             />
             {error ? (
-                <Text testID="login-password-error" className="text-xs text-red-600 mb-2">
+                <Text testID="login-e2e-error" className="text-xs text-red-600 mb-2">
                     {error}
                 </Text>
             ) : null}
             <TouchableOpacity
-                testID="login-password-submit"
+                testID="login-e2e-submit"
                 onPress={() => void onSubmit()}
-                disabled={busy || !email.trim() || !password}
-                style={[styles.submit, busy || !email.trim() || !password ? styles.submitDisabled : null]}
+                disabled={busy || !password}
+                style={[styles.submit, busy || !password ? styles.submitDisabled : null]}
             >
                 <Text className="text-sm font-semibold text-white">
-                    {busy ? '…' : 'Sign in'}
+                    {busy ? '…' : 'E2E sign in'}
                 </Text>
             </TouchableOpacity>
         </View>

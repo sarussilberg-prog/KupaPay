@@ -1,6 +1,8 @@
-/** Hidden Maestro layout probes (zero-size testIDs). Always on so Release CI needs no baked EXPO_PUBLIC flags. */
+import { E2E_MAESTRO_AUTH_ENABLED } from './featureFlags';
+
+/** Maestro-visible probes only in CI/E2E builds — zero UI impact in production. */
 export function isE2eLayoutProbeEnabled(): boolean {
-    return true;
+    return E2E_MAESTRO_AUTH_ENABLED;
 }
 
 /** Horizontal inset (list padding) + small tolerance for card shadow rounding. */

@@ -153,10 +153,10 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-real-ui-v1
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v2
           restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v2
             maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-real-ui-v1
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-
             maestro-ios-app-
       - name: Install dependencies
         run: npm ci
@@ -168,7 +168,7 @@ jobs:
         if: always() && steps.ios_app_cache.outputs.cache-hit != 'true'
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-real-ui-v1
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v2
       - uses: actions/upload-artifact@v7
         with:
           name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
