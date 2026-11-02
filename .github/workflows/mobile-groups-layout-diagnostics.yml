@@ -1,4 +1,4 @@
-# Phase-1 Groups layout diagnostics (#680–#682). Informational; shares Maestro build caches.
+# Phase-0 Groups layout diagnostics (#695). Informational; shares Maestro build caches.
 name: Mobile Groups layout diagnostics
 
 on:
