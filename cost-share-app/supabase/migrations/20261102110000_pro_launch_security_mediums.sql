@@ -8,7 +8,7 @@ ALTER TABLE public.support_messages
     ADD CONSTRAINT support_messages_name_len CHECK (char_length(name) <= 200),
     ADD CONSTRAINT support_messages_email_len CHECK (char_length(email) <= 320);
 
-DROP POLICY IF EXISTS "public_insert_support_messages" ON public.support_messages;
+DROP POLICY IF EXISTS "public_insert_support_messages" ON public.support_messages; -- safe-breaking: support form uses submit_support_message RPC (#712 follow-up)
 
 CREATE OR REPLACE FUNCTION public.submit_support_message(
     p_name TEXT,
