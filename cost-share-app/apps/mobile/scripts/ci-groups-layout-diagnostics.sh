@@ -39,7 +39,7 @@ export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
 maestro_ensure_cli
 if [[ -n "${E2E_SUPABASE_URL:-}" && -n "${E2E_SUPABASE_ANON_KEY:-}" ]]; then
-  if ! curl -sfI "${E2E_SUPABASE_URL}/auth/v1/health" -H "apikey: ${E2E_SUPABASE_ANON_KEY}" >/dev/null; then
+  if ! curl -sf "${E2E_SUPABASE_URL}/auth/v1/health" -H "apikey: ${E2E_SUPABASE_ANON_KEY}" >/dev/null; then
     echo "::error::Runner cannot reach dev Supabase (${E2E_SUPABASE_URL}); layout probes need network/TLS to auth"
     exit 1
   fi
