@@ -25,6 +25,7 @@ BEGIN
         END IF;
     END;
 
+    RESET ROLE;
     UPDATE auth.users SET email = 'sync141-new@test.local' WHERE id = v_user;
 
     SELECT email INTO v_email FROM public.profiles WHERE id = v_user;
