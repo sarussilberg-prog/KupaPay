@@ -215,6 +215,11 @@ jobs:
         run: |
           export MAESTRO_FLOW_PLAN_JSON="$(cat maestro-flow-plan.json)"
           bash apps/mobile/scripts/ci-maestro-device-ui.sh ios test
+      - name: Groups layout diagnostics (en/he)
+        if: always()
+        env:
+          LAYOUT_DIAG_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/groups-layout-diagnostics
+        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios test
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -234,6 +239,7 @@ jobs:
         working-directory: cost-share-app
     env:
       EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      SENTRY_DISABLE_AUTO_UPLOAD: 'true'
       MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
       MAESTRO_ANDROID_APK_STAGING_DIR: /tmp/maestro-android-apk
       E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}

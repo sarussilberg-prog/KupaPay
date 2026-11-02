@@ -84,9 +84,17 @@ jobs:
           path: ~/Library/Developer/Xcode/DerivedData
           key: maestro-derived-${{ needs.plan.outputs.native_fingerprint }}
           restore-keys: maestro-derived-
+      - name: Restore cached iOS app bundle
+        uses: actions/cache/restore@v4
+        id: ios_app_cache
+        with:
+          path: /tmp/maestro-ios-app
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-ios-app-
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)
+        if: steps.ios_app_cache.outputs.cache-hit != 'true'
         run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios build
       - uses: actions/upload-artifact@v7
         with:
