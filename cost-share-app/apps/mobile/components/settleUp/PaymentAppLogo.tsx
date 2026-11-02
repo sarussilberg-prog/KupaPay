@@ -8,7 +8,7 @@ import {
     PAYMENT_APP_TILE_SIZE,
 } from './paymentAppBrand';
 
-export { PAYMENT_APP_TILE_RADIUS, PAYMENT_APP_TILE_SIZE } from './paymentAppBrand';
+export { PAYMENT_APP_TILE_SIZE } from './paymentAppBrand';
 
 interface PaymentAppLogoProps {
     app: IsraeliPaymentApp;
