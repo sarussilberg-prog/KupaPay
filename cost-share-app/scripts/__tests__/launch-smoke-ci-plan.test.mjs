@@ -61,6 +61,12 @@ test('dev infra-only change runs launch smoke on both platforms', () => {
     ]),
     true,
   );
+  assert.equal(
+    touchesLaunchSmokeInfra([
+      'cost-share-app/apps/mobile/scripts/ci-maestro-device-ui.sh',
+    ]),
+    true,
+  );
   const plan = planReleaseLaunchSmoke({
     baseRef: 'dev',
     changedFiles: ['cost-share-app/apps/mobile/scripts/ci-release-launch-smoke.sh'],

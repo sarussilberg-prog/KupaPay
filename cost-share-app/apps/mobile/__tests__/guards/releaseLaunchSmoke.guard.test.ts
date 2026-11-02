@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
 const SCRIPT = path.join(__dirname, '../../scripts/ci-release-launch-smoke.sh');
+const MAESTRO_UI_SCRIPT = path.join(__dirname, '../../scripts/ci-maestro-device-ui.sh');
 
 describe('Release launch smoke script (Phase 4)', () => {
     it('self-test passes without inject flag', () => {
@@ -17,5 +19,11 @@ describe('Release launch smoke script (Phase 4)', () => {
         });
         expect(result.status).not.toBe(0);
         expect(result.stdout + result.stderr).toMatch(/INJECT_CRASH|simulated startup crash/i);
+    });
+
+    it('Maestro Android build phase uses assembleRelease without a connected device', () => {
+        const script = readFileSync(MAESTRO_UI_SCRIPT, 'utf8');
+        expect(script).toMatch(/PHASE" == "build"/);
+        expect(script).toMatch(/assembleRelease/);
     });
 });
