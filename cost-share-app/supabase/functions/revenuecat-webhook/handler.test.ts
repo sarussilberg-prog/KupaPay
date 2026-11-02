@@ -401,7 +401,7 @@ for (const fixture of CONTRACT_FIXTURES) {
             assertEquals(outcome.ok, true);
             if (body.event.type === 'CANCELLATION' && body.event.expiration_at_ms == null) {
                 assertEquals(captured.body, undefined);
-                assertEquals(outcome.action, 'ignored');
+                if (outcome.ok) assertEquals(outcome.action, 'ignored');
                 return;
             }
             assertEquals(captured.body?.p_event_id, body.event.id);
