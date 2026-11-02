@@ -12,7 +12,18 @@ import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { colors } from '../../theme';
-import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
+import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { orderedTabBarRoutes } from '../../navigation/orderedTabBarRoutes';
+import { layoutProbeOnLayout } from '../diagnostics/layoutProbeHandlers';
+import type { LayoutProbeId } from '../../lib/groupsLayoutDiagnostics';
+import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
+
+const TAB_PROBE_ID: Record<string, LayoutProbeId> = {
+    Profile: 'tab-profile',
+    Activity: 'tab-activity',
+    FavoriteGroup: 'tab-favorite',
+    Groups: 'tab-groups',
+};
 import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
 import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
 import { AppIcon } from '../AppIcon';
@@ -26,7 +37,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     const quickAddGroupId = useQuickAddGroupId(state);
     const { data: unreadCount = 0 } = useActivityUnreadCount();
 
-    const centerIndex = Math.floor(state.routes.length / 2);
+    const displayRoutes = orderedTabBarRoutes(state.routes, isRtl);
+    const centerIndex = Math.floor(displayRoutes.length / 2);
 
     const onQuickAdd = () => {
         // AddExpense lives on the RootStack (above the tab navigator); resolve
@@ -57,6 +69,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             }
         };
 
+        const probeId = TAB_PROBE_ID[route.name];
+
         return (
             <TouchableOpacity
                 key={route.key}
@@ -64,6 +78,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                 accessibilityState={focused ? { selected: true } : {}}
                 accessibilityLabel={label}
                 testID={`tab-${route.name}`}
+                onLayout={probeId ? layoutProbeOnLayout(probeId) : undefined}
                 onPress={onPress}
                 activeOpacity={0.7}
                 style={styles.tab}
@@ -80,17 +95,14 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         );
     };
 
-    const leading = state.routes.slice(0, centerIndex);
-    const trailing = state.routes.slice(centerIndex);
+    const leading = displayRoutes.slice(0, centerIndex);
+    const trailing = displayRoutes.slice(centerIndex);
 
     return (
         <View
             testID="tabbar-row"
-            style={[
-                styles.row,
-                rtlRowStyle(isRtl),
-                { paddingBottom: insets.bottom },
-            ]}
+            onLayout={isE2eLayoutProbeEnabled() ? layoutProbeOnLayout('tabbar-row') : undefined}
+            style={[styles.row, { paddingBottom: insets.bottom }]}
         >
             <View testID="tabbar-side-leading" style={styles.side}>
                 {leading.map((route) =>
