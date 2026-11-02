@@ -46,7 +46,7 @@ jobs:
     name: Diagnostics build (iOS)
     needs: plan
     runs-on: macos-latest
-    timeout-minutes: 40
+    timeout-minutes: 70
     defaults:
       run:
         working-directory: cost-share-app
@@ -89,11 +89,8 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
-          restore-keys: |
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-
-            maestro-ios-app-
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-ios-app-
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)

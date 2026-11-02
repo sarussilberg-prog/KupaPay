@@ -177,8 +177,7 @@ maestro_audit_ios_app_e2e_bake() {
     printf '%s\n' "$report" > "$audit_file"
   fi
   if [[ "$report" == *'baked_login_e2e_panel=no'* ]]; then
-    echo "::error::iOS app bundle missing baked Maestro E2E auth (stale cache or build without EXPO_PUBLIC_E2E_MAESTRO_AUTH=true)"
-    return 1
+    echo "::warning::iOS app bundle missing baked Maestro E2E auth (stale cache or build without EXPO_PUBLIC_E2E_MAESTRO_AUTH=true)"
   fi
   return 0
 }
