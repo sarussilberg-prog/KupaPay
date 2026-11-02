@@ -26,7 +26,9 @@ BEGIN
         END IF;
     END;
 
+    PERFORM set_config('role', 'supabase_admin', TRUE);
     UPDATE public.profiles SET pro_until = NOW() + INTERVAL '30 days' WHERE id = v_user;
+    PERFORM public.test_set_authenticated(v_user);
     PERFORM public.require_pro_for_group_export(v_group);
 
     RAISE NOTICE 'require_pro_export.test.sql — passed';
