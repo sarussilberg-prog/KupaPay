@@ -10,8 +10,15 @@ describe('pushNotifications badge guard (#698)', () => {
         jest.clearAllMocks();
         Platform.OS = 'ios';
         jest.spyOn(InteractionManager, 'runAfterInteractions').mockImplementation((task) => {
-            task();
-            return { cancel: jest.fn() };
+            if (typeof task === 'function') {
+                task();
+            }
+            return {
+                cancel: jest.fn(),
+                done: jest.fn(),
+                then: (onFulfilled?: () => void, onRejected?: () => void) =>
+                    Promise.resolve().then(onFulfilled, onRejected),
+            };
         });
         mockGetPermissionsAsync.mockResolvedValue({ status: 'granted' });
         mockSetBadgeCountAsync.mockResolvedValue(true);

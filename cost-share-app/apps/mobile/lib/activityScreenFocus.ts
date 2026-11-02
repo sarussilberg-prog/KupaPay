@@ -2,9 +2,9 @@ import type { QueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../hooks/queries/keys';
 import { deferClearAppIconBadge } from './pushNotifications';
 
-export type MarkActivitySeenResult = { error: unknown | null };
+type MarkActivitySeenResult = { error: unknown | null };
 
-export interface ActivityScreenFocusDeps {
+interface ActivityScreenFocusDeps {
     fetchWatermark: () => Promise<Date | null>;
     markSeen: () => Promise<MarkActivitySeenResult>;
     queryClient: QueryClient;

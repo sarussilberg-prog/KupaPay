@@ -269,7 +269,10 @@ export function ActivityFeedScreen() {
                 try {
                     const wm = await runActivityScreenFocusEffects({
                         fetchWatermark: fetchActivityLastSeenAt,
-                        markSeen: () => supabase.rpc('mark_activity_seen'),
+                        markSeen: async () => {
+                            const { error } = await supabase.rpc('mark_activity_seen');
+                            return { error };
+                        },
                         queryClient,
                     });
                     setFreezeWatermark(wm);
