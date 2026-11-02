@@ -4,6 +4,10 @@ env:
 ---
 - launchApp:
     clearState: true
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 90000
 - runFlow:
     file: set-app-language.yaml
     env:
