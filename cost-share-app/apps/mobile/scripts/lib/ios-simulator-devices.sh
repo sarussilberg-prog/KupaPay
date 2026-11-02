@@ -112,9 +112,13 @@ launch_ios_release_on_simulator() {
 
 layout_diag_simulator_supabase_health() {
   set +e
-  local code
-  code="$(xcrun simctl spawn booted curl -sS -o /dev/null -w '%{http_code}' \
-    https://drxfbicunusmipdgbgdk.supabase.co/auth/v1/health 2>&1 || true)"
+  local code="skipped"
+  if xcrun simctl spawn booted which curl >/dev/null 2>&1; then
+    code="$(xcrun simctl spawn booted curl -sS -o /dev/null -w '%{http_code}' \
+      https://drxfbicunusmipdgbgdk.supabase.co/auth/v1/health 2>/dev/null || echo curl_failed)"
+  else
+    code="no_curl_in_sim"
+  fi
   set -e
   echo "simulator_supabase_auth_health_http=${code} (diagnostic only, non-blocking)"
 }

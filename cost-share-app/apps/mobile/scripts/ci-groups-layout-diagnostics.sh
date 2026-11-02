@@ -88,12 +88,16 @@ run_diag_flows() {
   local loc
   for loc in "${LOCALES[@]}"; do
     set +e
-    maestro test \
-      -e APP_LANG="$loc" \
-      -e MAESTRO_PLATFORM="$maestro_platform" \
-      -e E2E_EMAIL="$E2E_EMAIL" \
-      -e E2E_PASSWORD="$E2E_TEST_PASSWORD" \
-      "$TOUR_FLOW" \
+    local -a maestro_args=(
+      test
+      -e "APP_LANG=$loc"
+      -e "MAESTRO_PLATFORM=$maestro_platform"
+    )
+    if [[ -n "${E2E_TEST_PASSWORD:-}" ]]; then
+      maestro_args+=(-e "E2E_EMAIL=$E2E_EMAIL" -e "E2E_PASSWORD=$E2E_TEST_PASSWORD")
+    fi
+    maestro_args+=("$TOUR_FLOW")
+    maestro "${maestro_args[@]}" \
       2>&1 | tee "$ARTIFACTS/logs/${maestro_platform}_${loc}.log"
     exit_code=$?
     set -e
