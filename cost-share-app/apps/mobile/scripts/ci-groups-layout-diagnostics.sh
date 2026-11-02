@@ -133,6 +133,9 @@ run_diag_flows() {
       layout_diag_record_failure
       maestro_collect_maestro_failure_debug "$ARTIFACTS" "${maestro_platform}_${loc}"
     fi
+    node "$ROOT/scripts/extract-layout-diag-json-from-debug.mjs" \
+      "$ARTIFACTS/debug" \
+      "$ARTIFACTS/json/${maestro_platform}_${loc}.json" || true
     layout_diag_assert_json_nonempty "$ARTIFACTS/json/${maestro_platform}_${loc}.json" "${maestro_platform}_${loc}" || true
   done
 }

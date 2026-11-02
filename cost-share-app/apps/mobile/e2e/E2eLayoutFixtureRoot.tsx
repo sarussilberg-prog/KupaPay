@@ -110,9 +110,18 @@ export function E2eLayoutFixtureRoot() {
                         {fixtureLocale ? (
                             <View
                                 testID="e2e-fixture-locale-ready"
-                                accessibilityElementsHidden
-                                importantForAccessibility="no-hide-descendants"
-                                style={{ width: 1, height: 1, opacity: 0 }}
+                                accessible
+                                accessibilityLabel={`e2e-fixture-locale-${fixtureLocale}`}
+                                importantForAccessibility="yes"
+                                collapsable={false}
+                                style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    width: 4,
+                                    height: 4,
+                                    opacity: 0.02,
+                                }}
                             />
                         ) : null}
                     </ScreenErrorBoundary>
