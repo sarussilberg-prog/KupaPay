@@ -39,6 +39,7 @@ Deploy `revenuecat-webhook` and register in RevenueCat → Integrations → Webh
 Supabase Edge Function secrets (dev + prod separately):
 
 - `REVENUECAT_WEBHOOK_SECRET` — shared with RevenueCat dashboard
+- `REVENUECAT_ALLOW_SANDBOX_EVENTS` — set to `true` only on development; omit or `false` in production so `SANDBOX` webhook events are ignored
 - `SUPABASE_SERVICE_ROLE_KEY` — already available to functions; used for `profiles.pro_until` and `group_passes` writes
 
 ## Database
@@ -50,6 +51,7 @@ Migrations (apply after `20261010230000_privacy_admob_google_llc.sql` and securi
 | `20261011020000` | `kupapay_pro_entitlements.sql` — `profiles.pro_until`, `group_passes`, `get_my_pro_status`, `has_pro` |
 | `20261011021000` | `pro_legal_documents.sql` — Terms §9 + RevenueCat privacy (stacks on AdMob/EU ad text) |
 | `20261011022000` | `pro_webhook_idempotency_trip_pass_intents.sql` — idempotent webhook RPC, Trip Pass intents |
+| `20261102103000` | `revenuecat_webhook_environment_ordering.sql` — sandbox filter, event ordering, refund/cancel semantics, trip-pass upsert |
 
 Apply on **development** first (`dev` branch / `drxfbicunusmipdgbgdk`). Production only when releasing Pro publicly.
 

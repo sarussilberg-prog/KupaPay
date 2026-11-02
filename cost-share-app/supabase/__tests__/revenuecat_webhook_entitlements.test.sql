@@ -24,7 +24,7 @@ BEGIN
     -- INITIAL_PURCHASE (trial-length pro window)
     SELECT public.handle_revenuecat_webhook(
         'evt-rc141-trial', v_user, 'INITIAL_PURCHASE', 'kupapay_pro_monthly',
-        v_trial, NULL, NULL, FALSE, FALSE, FALSE
+        v_trial, NULL, NULL, FALSE, FALSE, FALSE, FALSE, 1000
     ) INTO v_out;
     IF (v_out->>'duplicate')::BOOLEAN IS TRUE OR v_out->>'action' IS DISTINCT FROM 'individual' THEN
         RAISE EXCEPTION 'Case 1 failed: initial purchase action=%, out=%', v_out->>'action', v_out;
@@ -37,7 +37,7 @@ BEGIN
     -- RENEWAL extends pro
     SELECT public.handle_revenuecat_webhook(
         'evt-rc141-renew', v_user, 'RENEWAL', 'kupapay_pro_monthly',
-        v_until, NULL, NULL, FALSE, FALSE, FALSE
+        v_until, NULL, NULL, FALSE, FALSE, FALSE, FALSE, 2000
     ) INTO v_out;
     SELECT pro_until INTO v_pro FROM public.profiles WHERE id = v_user;
     IF v_pro IS DISTINCT FROM v_until THEN
@@ -47,31 +47,30 @@ BEGIN
     -- Idempotency: duplicate event id
     SELECT public.handle_revenuecat_webhook(
         'evt-rc141-renew', v_user, 'RENEWAL', 'kupapay_pro_monthly',
-        v_until, NULL, NULL, FALSE, FALSE, FALSE
+        v_until, NULL, NULL, FALSE, FALSE, FALSE, FALSE, 2000
     ) INTO v_out;
     IF (v_out->>'duplicate')::BOOLEAN IS NOT TRUE THEN
         RAISE EXCEPTION 'Case 3 failed: expected duplicate=true, got %', v_out;
     END IF;
 
-    -- CANCELLATION revoke (epoch sentinel from edge handler)
+    -- CANCELLATION at period end (expiration set)
     SELECT public.handle_revenuecat_webhook(
         'evt-rc141-cancel', v_user, 'CANCELLATION', 'kupapay_pro_monthly',
-        '1970-01-01T00:00:00Z', NULL, NULL, FALSE, FALSE, TRUE
+        v_trial, NULL, NULL, FALSE, FALSE, FALSE, FALSE, 2500
     ) INTO v_out;
     IF v_out->>'action' IS DISTINCT FROM 'individual' THEN
         RAISE EXCEPTION 'Case 4 failed: cancellation action %', v_out->>'action';
     END IF;
     SELECT pro_until INTO v_pro FROM public.profiles WHERE id = v_user;
-    IF v_pro IS DISTINCT FROM '1970-01-01T00:00:00+00:00'::timestamptz
-       AND v_pro IS DISTINCT FROM '1970-01-01T00:00:00Z'::timestamptz THEN
-        RAISE EXCEPTION 'Case 4 failed: pro_until after cancel got %', v_pro;
+    IF v_pro IS DISTINCT FROM v_trial THEN
+        RAISE EXCEPTION 'Case 4 failed: pro_until after cancel-at-end expected % got %', v_trial, v_pro;
     END IF;
 
     -- EXPIRATION after re-grant
     UPDATE public.profiles SET pro_until = v_until WHERE id = v_user;
     SELECT public.handle_revenuecat_webhook(
         'evt-rc141-expire', v_user, 'EXPIRATION', 'kupapay_pro_monthly',
-        '1970-01-01T00:00:00Z', NULL, NULL, FALSE, FALSE, TRUE
+        NULL, NULL, NULL, FALSE, FALSE, TRUE, FALSE, 3000
     ) INTO v_out;
     SELECT pro_until INTO v_pro FROM public.profiles WHERE id = v_user;
     IF v_pro > '1971-01-01'::timestamptz THEN
