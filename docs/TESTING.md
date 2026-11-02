@@ -43,6 +43,7 @@ Document new tests in the PR body: *what each test asserts* and *which bug it wo
 | Device UI | `apps/mobile/.maestro/device-ui/` | Login, layout probes, settle flows (CI) |
 | Maestro CI planner | `cost-share-app/scripts/lib/maestro-ci-plan.mjs` | Tier + flow list for device UI workflows |
 | Screen → flow map | `cost-share-app/scripts/lib/maestro-screen-flow-map.mjs` | Path-based extra flows on dev PRs |
+| Maestro workflow lint | `cost-share-app/scripts/__tests__/github-maestro-workflows.test.mjs` | Job-level env / Sentry / ccache invariants for Maestro YAML |
 
 ### Layout probes (Maestro)
 

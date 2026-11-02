@@ -35,7 +35,11 @@ jobs:
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
           E2E_EXPO_WEB_URL: ${{ secrets.E2E_EXPO_WEB_URL }}
-        run: npx playwright test
+        run: |
+          npx playwright test --project=next-site
+          if [ -n "${E2E_EXPO_WEB_URL:-}" ]; then
+            npx playwright test --project=expo-web
+          fi
       - name: Playwright flaky summary
         if: always()
         run: bash scripts/ci-playwright-flaky-summary.sh playwright-report/results.json

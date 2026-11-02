@@ -17,6 +17,7 @@ COST_SHARE="$REPO_ROOT/cost-share-app"
 ARTIFACTS="${LAYOUT_DIAG_ARTIFACTS_DIR:-$REPO_ROOT/artifacts/groups-layout-diagnostics}"
 TOUR_FLOW="$ROOT/.maestro/device-ui/groups-layout-diagnostics-tour.yaml"
 LOCALES=(en he)
+LAYOUT_DIAG_FAILURES=0
 
 export EXPO_PUBLIC_E2E_MAESTRO_AUTH=true
 export EXPO_PUBLIC_SUPABASE_URL="${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}"
@@ -38,7 +39,22 @@ export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
 maestro_ensure_cli
 maestro_seed_e2e_if_configured "$COST_SHARE"
-mkdir -p "$ARTIFACTS/json" "$ARTIFACTS/screenshots" "$ARTIFACTS/logs"
+mkdir -p "$ARTIFACTS/json" "$ARTIFACTS/screenshots" "$ARTIFACTS/logs" "$ARTIFACTS/debug"
+
+layout_diag_record_failure() {
+  LAYOUT_DIAG_FAILURES=$((LAYOUT_DIAG_FAILURES + 1))
+}
+
+layout_diag_assert_json_nonempty() {
+  local json_path="$1"
+  local label="$2"
+  if [[ ! -s "$json_path" ]]; then
+    echo "::error::Missing or empty layout diagnostics JSON for $label ($json_path)"
+    layout_diag_record_failure
+    return 1
+  fi
+  return 0
+}
 
 run_diag_flows() {
   local maestro_platform="$1"
@@ -58,6 +74,14 @@ run_diag_flows() {
     grep -o '\[LAYOUT_DIAG_JSON\].*' "$ARTIFACTS/logs/${maestro_platform}_${loc}.log" \
       | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
       > "$ARTIFACTS/json/${maestro_platform}_${loc}.json" 2>/dev/null || true
+
+    if [[ "$exit_code" -ne 0 ]]; then
+      echo "::error::Maestro layout diagnostics failed for $maestro_platform / $loc (exit $exit_code)"
+      layout_diag_record_failure
+      maestro_collect_maestro_failure_debug "$ARTIFACTS" "${maestro_platform}_${loc}"
+      maestro_collect_ios_simulator_logs "$ARTIFACTS" "${maestro_platform}_${loc}"
+    fi
+    layout_diag_assert_json_nonempty "$ARTIFACTS/json/${maestro_platform}_${loc}.json" "${maestro_platform}_${loc}" || true
   done
 }
 
@@ -73,6 +97,7 @@ run_ios() {
     fi
     if [[ -n "${MAESTRO_IOS_APP_STAGING_DIR:-}" ]]; then
       maestro_stage_ios_app_artifact "$MAESTRO_IOS_APP_STAGING_DIR"
+      maestro_audit_ios_app_e2e_bake "$MAESTRO_IOS_APP_STAGING_DIR/KupaPay.app" "$ARTIFACTS/app-env-audit.txt" || true
     fi
   fi
   if [[ "$PHASE" == "test" || "$PHASE" == "all" ]]; then
@@ -83,6 +108,7 @@ run_ios() {
       if [[ -n "${MAESTRO_IOS_APP_CACHE_DIR:-}" ]]; then
         maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR" || true
       fi
+      maestro_audit_ios_app_e2e_bake "${IOS_APP_BINARY:-}" "$ARTIFACTS/app-env-audit.txt"
       run_ios_on_simulator
       export MAESTRO_PLATFORM="ios-${IOS_SIM_NAME// /-}"
       run_diag_flows "$MAESTRO_PLATFORM"
@@ -117,3 +143,8 @@ esac
 
 maestro_collect_screenshots "$ARTIFACTS"
 echo "Diagnostics artifacts: $ARTIFACTS"
+
+if [[ "$LAYOUT_DIAG_FAILURES" -gt 0 ]]; then
+  echo "::error::Groups layout diagnostics had $LAYOUT_DIAG_FAILURES failure(s)"
+  exit 1
+fi

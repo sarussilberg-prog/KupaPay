@@ -1,5 +1,6 @@
 appId: com.kupapay.mobile
 ---
+- runFlow: skip-pre-auth-onboarding.yaml
 - extendedWaitUntil:
     visible:
       id: login-screen

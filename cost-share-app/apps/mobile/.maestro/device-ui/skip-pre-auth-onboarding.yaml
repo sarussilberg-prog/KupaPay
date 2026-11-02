@@ -1,0 +1,17 @@
+appId: com.kupapay.mobile
+---
+# Fresh installs (clearState) show pre-login onboarding before LoginScreen.
+- runFlow:
+    when:
+      visible:
+        id: onboarding-welcome-existing
+    commands:
+      - tapOn:
+          id: onboarding-welcome-existing
+- runFlow:
+    when:
+      visible:
+        id: onboarding-feature-skip
+    commands:
+      - tapOn:
+          id: onboarding-feature-skip

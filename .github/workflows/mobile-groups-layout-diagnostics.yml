@@ -89,8 +89,11 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
-          restore-keys: maestro-ios-app-
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
+          restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-
+            maestro-ios-app-
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)
@@ -105,7 +108,6 @@ jobs:
   layout-diagnostics-ios:
     name: Groups layout probes (iOS)
     needs: [plan, build-ios]
-    continue-on-error: true
     runs-on: macos-latest
     timeout-minutes: 35
     defaults:
@@ -146,6 +148,8 @@ jobs:
             artifacts/groups-layout-diagnostics/logs
             artifacts/groups-layout-diagnostics/json
             artifacts/groups-layout-diagnostics/screenshots
+            artifacts/groups-layout-diagnostics/debug
+            artifacts/groups-layout-diagnostics/app-env-audit.txt
           if-no-files-found: warn
           retention-days: 14
 

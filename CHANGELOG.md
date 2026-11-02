@@ -57,3 +57,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(ci): required PR structure gate with red/green proof (#679) (#694)
 ## [2.2.0-dev.26] — 2026-11-01
 - perf(ci): faster Maestro simulator CI — build once, tiers (#687) (#696)
+## [2.2.0-dev.27] — 2026-11-01
+- fix(web): back-merge #701 — proxy /_expo static assets on marketing site (#703)

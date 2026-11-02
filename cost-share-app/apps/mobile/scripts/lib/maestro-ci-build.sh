@@ -143,3 +143,68 @@ maestro_collect_screenshots() {
     find "$latest" -name '*.png' -exec cp {} "$artifacts_dir/screenshots/" \;
   fi
 }
+
+# Release .app must embed Maestro E2E auth UI (baked at compile time, not runtime env).
+maestro_audit_ios_app_e2e_bake() {
+  local app_dir="${1:-${IOS_APP_BINARY:-}}"
+  local audit_file="${2:-}"
+  if [[ -z "$app_dir" || ! -d "$app_dir" ]]; then
+    echo "::error::maestro_audit_ios_app_e2e_bake: missing .app directory"
+    return 1
+  fi
+  local bundle=""
+  bundle="$(find "$app_dir" -maxdepth 3 \( -name 'main.jsbundle' -o -name '*.jsbundle' \) 2>/dev/null | head -1 || true)"
+  local lines=()
+  lines+=("app_dir=$app_dir")
+  lines+=("jsbundle=${bundle:-<not found>}")
+  if [[ -n "$bundle" && -f "$bundle" ]]; then
+    if strings "$bundle" | grep -q 'login-e2e-panel'; then
+      lines+=('baked_login_e2e_panel=yes')
+    else
+      lines+=('baked_login_e2e_panel=no')
+    fi
+    if strings "$bundle" | grep -q 'E2E sign-in (CI only)'; then
+      lines+=('baked_e2e_sign_in_label=yes')
+    else
+      lines+=('baked_e2e_sign_in_label=no')
+    fi
+  fi
+  local report
+  report="$(printf '%s\n' "${lines[@]}")"
+  echo "$report"
+  if [[ -n "$audit_file" ]]; then
+    mkdir -p "$(dirname "$audit_file")"
+    printf '%s\n' "$report" > "$audit_file"
+  fi
+  if [[ "$report" == *'baked_login_e2e_panel=no'* ]]; then
+    echo "::error::iOS app bundle missing baked Maestro E2E auth (stale cache or build without EXPO_PUBLIC_E2E_MAESTRO_AUTH=true)"
+    return 1
+  fi
+  return 0
+}
+
+maestro_collect_maestro_failure_debug() {
+  local artifacts_dir="$1"
+  local label="$2"
+  mkdir -p "$artifacts_dir/debug"
+  local latest
+  latest="$(ls -td "$HOME/.maestro/tests"/* 2>/dev/null | head -1 || true)"
+  if [[ -n "${latest:-}" ]]; then
+    tar -czf "$artifacts_dir/debug/${label}-maestro-test-dir.tgz" -C "$(dirname "$latest")" "$(basename "$latest")" 2>/dev/null || true
+    find "$latest" -type f \( -name '*.png' -o -name '*.xml' -o -name '*.json' \) -exec cp {} "$artifacts_dir/debug/" \; 2>/dev/null || true
+  fi
+  if command -v maestro >/dev/null 2>&1; then
+    maestro hierarchy > "$artifacts_dir/debug/${label}-hierarchy.txt" 2>&1 || true
+  fi
+}
+
+maestro_collect_ios_simulator_logs() {
+  local artifacts_dir="$1"
+  local label="$2"
+  mkdir -p "$artifacts_dir/debug"
+  if [[ -z "${IOS_SIM_UDID:-}" ]]; then
+    return 0
+  fi
+  xcrun simctl spawn "$IOS_SIM_UDID" log show --style compact --last 8m \
+    > "$artifacts_dir/debug/${label}-simulator.log" 2>&1 || true
+}

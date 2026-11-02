@@ -25,7 +25,43 @@ const MARKETING_PREFIXES = [
 
 const PUBLIC_FILE = /\.(png|jpe?g|gif|webp|svg|ico|txt|xml|json|css|js|woff2?)$/i;
 
+/** Expo web static bundles and app entry paths — must proxy even when the path looks like a public file. */
+const APP_OWNED_EXACT = new Set(['/manifest.json', '/favicon.ico']);
+
+const APP_OWNED_PREFIXES = [
+    '/_expo/',
+    '/assets/',
+    '/login/',
+    '/sign-in/',
+    '/app/',
+    '/home/',
+    '/group/',
+    '/activity/',
+    '/auth/',
+] as const;
+
+const APP_OWNED_EXACT_PATHS = new Set([
+    '/login',
+    '/sign-in',
+    '/app',
+    '/home',
+    '/group',
+    '/activity',
+]);
+
+function isAppOwnedPath(pathname: string): boolean {
+    if (APP_OWNED_EXACT.has(pathname) || APP_OWNED_EXACT_PATHS.has(pathname)) {
+        return true;
+    }
+    return APP_OWNED_PREFIXES.some(
+        (prefix) => pathname === prefix.slice(0, -1) || pathname.startsWith(prefix),
+    );
+}
+
 export function isMarketingOwnedPath(pathname: string): boolean {
+    if (isAppOwnedPath(pathname)) {
+        return false;
+    }
     if (MARKETING_EXACT_PATHS.has(pathname)) {
         return true;
     }
@@ -67,5 +103,7 @@ export function appProxyBeforeFileRewrites(appProxyOrigin: string): {
         { source: '/auth/:path*', destination: `${origin}/auth/:path*` },
         { source: '/_expo/:path*', destination: `${origin}/_expo/:path*` },
         { source: '/assets/:path*', destination: `${origin}/assets/:path*` },
+        { source: '/manifest.json', destination: `${origin}/manifest.json` },
+        { source: '/favicon.ico', destination: `${origin}/favicon.ico` },
     ];
 }

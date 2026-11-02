@@ -153,8 +153,11 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
-          restore-keys: maestro-ios-app-
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
+          restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-
+            maestro-ios-app-
       - name: Install dependencies
         run: npm ci
       - name: Build iOS simulator app
@@ -165,7 +168,7 @@ jobs:
         if: always() && steps.ios_app_cache.outputs.cache-hit != 'true'
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-maestro-v2
       - uses: actions/upload-artifact@v7
         with:
           name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
@@ -224,7 +227,12 @@ jobs:
         if: always()
         with:
           name: maestro-device-ui-ios-${{ github.run_id }}
-          path: artifacts/maestro-device-ui/screenshots
+          path: |
+            artifacts/maestro-device-ui/screenshots
+            artifacts/groups-layout-diagnostics/json
+            artifacts/groups-layout-diagnostics/logs
+            artifacts/groups-layout-diagnostics/debug
+            artifacts/groups-layout-diagnostics/app-env-audit.txt
           if-no-files-found: warn
           retention-days: 7
 
