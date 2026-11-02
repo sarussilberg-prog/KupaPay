@@ -10,7 +10,12 @@ async function submitSupportMessage(formData: FormData) {
   if (!name?.trim() || !email?.trim() || !message?.trim()) return;
 
   const supabase = await createClient();
-  await supabase.from('support_messages').insert({ name, email, message });
+  await supabase.rpc('submit_support_message', {
+    p_name: name.trim(),
+    p_email: email.trim(),
+    p_message: message.trim(),
+    p_website: (formData.get('website') as string) ?? null,
+  });
   redirect('/support?sent=1');
 }
 
@@ -33,6 +38,7 @@ export default async function SupportPage({
           </div>
         ) : (
           <form action={submitSupportMessage} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ display: 'none' }} aria-hidden="true" />
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>Your name</label>
               <input
