@@ -49,6 +49,8 @@ jobs:
       skip_native_rebuild: ${{ steps.plan.outputs.skip_native_rebuild }}
       native_fingerprint: ${{ steps.plan.outputs.native_fingerprint }}
       run_launch_smoke: ${{ steps.launch_smoke_plan.outputs.run_launch_smoke }}
+      run_launch_smoke_ios: ${{ steps.launch_smoke_plan.outputs.run_launch_smoke_ios }}
+      run_launch_smoke_android: ${{ steps.launch_smoke_plan.outputs.run_launch_smoke_android }}
       blocking: ${{ steps.blocking.outputs.blocking }}
     steps:
       - uses: actions/checkout@v7
@@ -96,9 +98,12 @@ jobs:
         env:
           GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
           GITHUB_REF: ${{ github.ref }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
           MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier || '' }}
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
-        run: node scripts/lib/launch-smoke-ci-plan.mjs
+        run: |
+          node scripts/lib/launch-smoke-ci-plan.mjs | tee /tmp/launch-smoke-plan.json
+          echo "Launch smoke plan: $(cat /tmp/launch-smoke-plan.json)"
       - uses: actions/upload-artifact@v7
         with:
           name: maestro-flow-plan
@@ -240,7 +245,7 @@ jobs:
   build-android:
     name: Maestro build (Android)
     needs: plan
-    if: needs.plan.outputs.run_android == 'true'
+    if: needs.plan.outputs.run_android == 'true' || needs.plan.outputs.run_launch_smoke_android == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     defaults:
@@ -358,7 +363,7 @@ jobs:
   launch-smoke-ios:
     name: Release launch smoke (iOS)
     needs: [plan, build-ios]
-    if: needs.plan.outputs.run_launch_smoke == 'true' && needs.plan.outputs.run_ios == 'true'
+    if: needs.plan.outputs.run_launch_smoke_ios == 'true'
     runs-on: macos-latest
     timeout-minutes: 15
     defaults:
@@ -379,7 +384,7 @@ jobs:
   launch-smoke-android:
     name: Release launch smoke (Android)
     needs: [plan, build-android]
-    if: needs.plan.outputs.run_launch_smoke == 'true' && needs.plan.outputs.run_android == 'true'
+    if: needs.plan.outputs.run_launch_smoke_android == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

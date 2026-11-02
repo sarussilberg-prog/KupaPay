@@ -15,7 +15,9 @@ Verify the **Release** simulator `.app` / APK (same artifact as Maestro CI) laun
 | Event | Launch smoke |
 |-------|----------------|
 | `main` push / PR to `main` / Maestro `full` tier | Always (when native mobile paths trigger the workflow) |
-| `dev` PR | Only when changed files touch native/boot paths (`NATIVE_TOUCH_PATTERNS` + `App.tsx`, `index.ts`, `app/_layout.tsx`) |
+| `dev` PR | Native/boot paths (`NATIVE_TOUCH_PATTERNS` + boot entry files), **or** launch-smoke infra paths (workflow, `ci-release-launch-smoke.sh`, planner/tests), **or** PR label `launch-smoke` |
+
+When launch smoke runs on a dev PR, **both** iOS and Android smoke jobs run (Android Maestro build is enabled even in smoke tier).
 
 ### Scripts
 
