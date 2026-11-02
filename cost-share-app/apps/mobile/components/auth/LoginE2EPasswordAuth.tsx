@@ -32,17 +32,27 @@ export function LoginE2EPasswordAuth() {
                 password,
             });
             if (signInError || !data.session) {
-                setError(signInError?.message ?? 'Sign-in failed');
+                const msg = signInError?.message ?? 'Sign-in failed';
+                console.log(`[MAESTRO_E2E_AUTH] sign_in_failed ${msg}`);
+                setError(msg);
                 return;
             }
+            console.log('[MAESTRO_E2E_AUTH] sign_in_ok awaiting session commit');
             await acceptSessionIfAllowed(data.session, 'fresh', {
                 setSession,
                 setPendingDeactivationNotice,
                 setPendingAccountRestore,
             });
             if (!useAppStore.getState().session) {
+                console.log('[MAESTRO_E2E_AUTH] session_rejected_after_profile_check');
                 setError('Sign-in rejected (profile check)');
+                return;
             }
+            console.log('[MAESTRO_E2E_AUTH] session_committed');
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Sign-in error';
+            console.log(`[MAESTRO_E2E_AUTH] sign_in_exception ${msg}`);
+            setError(msg);
         } finally {
             setBusy(false);
         }

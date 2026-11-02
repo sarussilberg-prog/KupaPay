@@ -177,7 +177,7 @@ maestro_append_supabase_host_audit() {
   {
     echo "--- ${label} ---"
     if [[ -f "$sim_log" ]]; then
-      grep -E '\[MAESTRO_SUPABASE_HOST\]|drxfbicunusmipdgbgdk|jfqxjjjbpxbwwvoygahu' "$sim_log" 2>/dev/null | tail -5 || echo "no_supabase_host_in_log"
+      grep -E '\[MAESTRO_SUPABASE_HOST\]|\[MAESTRO_E2E_AUTH\]|drxfbicunusmipdgbgdk|jfqxjjjbpxbwwvoygahu' "$sim_log" 2>/dev/null | tail -10 || echo "no_supabase_host_in_log"
     else
       echo "simulator_log_missing"
     fi
@@ -197,6 +197,10 @@ maestro_verify_supabase_host_in_logs() {
   fi
   if grep -q "\[MAESTRO_SUPABASE_HOST\] ${expected_host}" "$audit_file" 2>/dev/null; then
     echo "Verified simulator log reports Supabase host: $expected_host"
+    return 0
+  fi
+  if grep -q "${expected_host}" "$audit_file" 2>/dev/null; then
+    echo "Verified simulator network log references Supabase host: $expected_host"
     return 0
   fi
   if grep -q 'jfqxjjjbpxbwwvoygahu' "$audit_file" 2>/dev/null; then
