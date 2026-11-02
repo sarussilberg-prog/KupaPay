@@ -68,7 +68,7 @@ import {
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import type { GroupDetailFocusFeedItem } from '../../lib/groupDetailFocus';
-import { setBadgeCount } from '../../lib/pushNotifications';
+import { runActivityScreenFocusEffects } from '../../lib/activityScreenFocus';
 import { usePushPermissionPrompt } from '../../hooks/usePushPermissionPrompt';
 import { EnableNotificationsBanner } from '../../components/notifications/EnableNotificationsBanner';
 
@@ -266,14 +266,15 @@ export function ActivityFeedScreen() {
             // arrived since last focus.
             setFreezeWatermark(null);
             void (async () => {
-                const wm = await fetchActivityLastSeenAt();
-                setFreezeWatermark(wm);
-                const { error } = await supabase.rpc('mark_activity_seen');
-                if (!error) {
-                    void queryClient.invalidateQueries({
-                        queryKey: queryKeys.activityUnreadCount,
+                try {
+                    const wm = await runActivityScreenFocusEffects({
+                        fetchWatermark: fetchActivityLastSeenAt,
+                        markSeen: () => supabase.rpc('mark_activity_seen'),
+                        queryClient,
                     });
-                    void setBadgeCount(0);
+                    setFreezeWatermark(wm);
+                } catch {
+                    /* RPC/network failure must not break the feed */
                 }
             })();
             if (isStale) void refetch();
