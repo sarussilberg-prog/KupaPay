@@ -12,6 +12,7 @@ const config: KnipConfig = {
     'scripts/posthog-mau-tiles-lib.mjs',
     'scripts/posthog-ensure-mau-dashboard-tiles.mjs',
     'scripts/__tests__/posthog-mau-tiles-lib.test.mjs',
+    'scripts/__tests__/device-farm-workflow.test.mjs',
   ],
   project: ['scripts/**/*.ts'],
   ignoreFiles: [
@@ -25,8 +26,11 @@ const config: KnipConfig = {
   // Knip does not resolve .mjs cross-imports for this script library (#584).
   ignoreIssues: {
     'scripts/posthog-mau-tiles-lib.mjs': ['exports'],
+    'scripts/__tests__/device-farm-workflow.test.mjs': ['files'],
     // CLI invoked only by .github/workflows/app-store-production.yml.
     'apps/mobile/scripts/asc-submit-app-for-review.mjs': ['files'],
+    'apps/mobile/scripts/ci-device-farm-maestro.sh': ['files'],
+    'apps/mobile/scripts/lib/refreshRtlRowAllowlist.ts': ['files'],
   },
   workspaces: {
     '@cost-share/mobile': {
