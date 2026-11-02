@@ -61,3 +61,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(web): back-merge #701 — proxy /_expo static assets on marketing site (#703)
 ## [2.2.0-dev.28] — 2026-11-02
 - fix(mobile): guard Activity focus badge clear on iOS (#698) (#707)
+## [2.2.0-dev.29] — 2026-11-02
+- fix(mobile): unify Bit and PayBox payment app tiles (#700) (#708)
