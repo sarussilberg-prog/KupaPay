@@ -50,6 +50,32 @@ describe('GroupCard layout (native-like style resolver)', () => {
         Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
     });
 
+    it.each(widths)('list row uses full inner width at %ipx (native flex regression)', async width => {
+        const longNameGroup = {
+            ...baseGroup,
+            id: 'g-long',
+            name: 'Extraordinarily Long Group Name For Layout Stress Testing Purposes',
+        };
+        const { getByTestId } = render(
+            <LayoutWindowWidthProvider width={width}>
+                <GroupCard group={longNameGroup} onPress={() => {}} />
+            </LayoutWindowWidthProvider>,
+        );
+        const shell = getByTestId('group-card-shell-g-long');
+        const row = getByTestId('group-card-g-long');
+        const shellW = width - 32;
+        fireEvent(shell, 'layout', {
+            nativeEvent: { layout: { width: shellW, height: 120, x: 16, y: 0 } },
+        });
+        fireEvent(row, 'layout', {
+            nativeEvent: { layout: { width: shellW - 32, height: 80, x: 16, y: 16 } },
+        });
+        await waitFor(() => {
+            const ratio = (shellW - 32) / shellW;
+            expect(ratio).toBeGreaterThanOrEqual(0.78);
+        });
+    });
+
     it.each(widths)('renders full-width layout probe at %ipx when E2E probes enabled', async width => {
         const { getByTestId } = render(
             <LayoutWindowWidthProvider width={width}>

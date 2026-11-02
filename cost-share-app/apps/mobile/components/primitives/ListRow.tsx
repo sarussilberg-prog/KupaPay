@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
-import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
+import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { listRowFlexStyle } from '../../lib/nativeRowLayoutStyle';
 import { AppPressable } from '../AppPressable';
 
 type Props = {
@@ -15,14 +16,8 @@ type Props = {
 export function ListRow({ children, onPress, testID, onLayout, style, className }: Props) {
     const isRtl = useRtlLayout();
     const rowStyle: ViewStyle = {
+        ...listRowFlexStyle(isRtl),
         alignItems: 'center',
-        minWidth: 0,
-        flex: 1,
-        flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: 0,
-        alignSelf: 'stretch',
-        ...rtlRowStyle(isRtl),
     };
 
     if (onPress) {

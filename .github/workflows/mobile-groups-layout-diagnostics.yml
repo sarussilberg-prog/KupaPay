@@ -101,10 +101,10 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v6
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v7
           restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v7
             maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v6
-            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v5
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)

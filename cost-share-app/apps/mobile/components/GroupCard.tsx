@@ -50,6 +50,7 @@ import {
 } from './groupCardLayout';
 import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
 import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
+import { groupCardOuterRowStyle, listRowFlexStyle } from '../lib/nativeRowLayoutStyle';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -265,11 +266,10 @@ function GroupCardBase({
                           : undefined
                 }
                 style={[
-                    rtlRowStyle(isRtl),
+                    groupCardOuterRowStyle(isRtl),
                     {
-                        width: '100%',
-                        alignSelf: 'stretch',
-                        alignItems: 'center',
+                        flexDirection: 'column',
+                        alignItems: 'stretch',
                         padding: GROUP_CARD_PAD,
                         gap: GROUP_CARD_STACK_GAP,
                     },
@@ -288,15 +288,14 @@ function GroupCardBase({
                     onPress={() => onPress(group.id)}
                     testID={layoutProbePrimary ? 'group-card-probe-row' : `group-card-${group.id}`}
                     onLayout={layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined}
-                    style={{
-                        flex: 1,
-                        flexGrow: 1,
-                        flexShrink: 1,
-                        flexBasis: 0,
-                        alignItems: 'center',
-                        gap: GROUP_CARD_ROW_GAP,
-                        minWidth: 0,
-                    }}
+                    style={[
+                        listRowFlexStyle(isRtl),
+                        {
+                            width: '100%',
+                            alignItems: 'center',
+                            gap: GROUP_CARD_ROW_GAP,
+                        },
+                    ]}
                 >
                     <View
                         testID={layoutProbePrimary ? 'group-card-probe-avatar' : undefined}
@@ -414,32 +413,32 @@ function GroupCardBase({
                             {balanceChipNode}
                         </View>
                     ) : null}
-                </ListRow>
 
-                <TouchableOpacity
-                    onPress={() => setMenuOpen(true)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('groups.menu.title')}
-                    testID={
-                        layoutProbePrimary ? 'group-card-probe-menu' : `group-card-menu-${group.id}`
-                    }
-                    onLayout={
-                        layoutProbePrimary ? layoutProbeOnLayout('group-card-menu') : undefined
-                    }
-                    style={{
-                        width: GROUP_CARD_MENU_HIT,
-                        height: GROUP_CARD_MENU_HIT,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                    }}
-                >
-                    <AppIcon
-                        name="ellipsis-vertical"
-                        size={GROUP_CARD_MENU_ICON}
-                        color={colors.gray400}
-                    />
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setMenuOpen(true)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('groups.menu.title')}
+                        testID={
+                            layoutProbePrimary ? 'group-card-probe-menu' : `group-card-menu-${group.id}`
+                        }
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-menu') : undefined
+                        }
+                        style={{
+                            width: GROUP_CARD_MENU_HIT,
+                            height: GROUP_CARD_MENU_HIT,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <AppIcon
+                            name="ellipsis-vertical"
+                            size={GROUP_CARD_MENU_ICON}
+                            color={colors.gray400}
+                        />
+                    </TouchableOpacity>
+                </ListRow>
             </View>
 
             <Modal
