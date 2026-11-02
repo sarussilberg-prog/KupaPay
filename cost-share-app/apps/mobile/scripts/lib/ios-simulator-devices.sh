@@ -77,7 +77,7 @@ find_ios_sim_app_bundle() {
 IOS_APP_BINARY=""
 
 run_ios_on_simulator() {
-  # Release on CI: do not start Metro or open exp+ dev-client deep links (Maestro launchApp owns startup).
+  # Release on CI: compile/install only — never start Metro or open expo-development-client URLs.
   if [[ -n "$IOS_APP_BINARY" && -d "$IOS_APP_BINARY" ]]; then
     echo "Reusing built app: $IOS_APP_BINARY"
     npx expo run:ios --device "$IOS_SIM_UDID" --configuration Release --binary "$IOS_APP_BINARY" --no-bundler
@@ -86,5 +86,36 @@ run_ios_on_simulator() {
     IOS_APP_BINARY="$(find_ios_sim_app_bundle)"
     echo "Built app bundle: ${IOS_APP_BINARY:-<not found>}"
   fi
+}
+
+# Install the Release .app and launch the production bundle (Maestro may relaunch with clearState).
+install_ios_release_on_simulator() {
+  local app="${IOS_APP_BINARY:-}"
+  if [[ -z "$app" || ! -d "$app" ]]; then
+    app="$(find_ios_sim_app_bundle)"
+  fi
+  if [[ -z "$app" || ! -d "$app" ]]; then
+    echo "::error::No KupaPay.app found to install on simulator"
+    return 1
+  fi
+  IOS_APP_BINARY="$app"
+  export IOS_APP_BINARY
+  echo "Installing Release app on ${IOS_SIM_NAME}: $app"
+  xcrun simctl install "$IOS_SIM_UDID" "$app"
+}
+
+launch_ios_release_on_simulator() {
+  install_ios_release_on_simulator || return 1
+  echo "Launching com.kupapay.mobile on ${IOS_SIM_UDID}"
+  xcrun simctl launch "$IOS_SIM_UDID" com.kupapay.mobile || true
+}
+
+layout_diag_simulator_supabase_health() {
+  set +e
+  local code
+  code="$(xcrun simctl spawn booted curl -sS -o /dev/null -w '%{http_code}' \
+    https://drxfbicunusmipdgbgdk.supabase.co/auth/v1/health 2>&1 || true)"
+  set -e
+  echo "simulator_supabase_auth_health_http=${code} (diagnostic only, non-blocking)"
 }
 

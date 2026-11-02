@@ -19,18 +19,23 @@ TOUR_FLOW="$ROOT/.maestro/device-ui/groups-layout-diagnostics-tour.yaml"
 LOCALES=(en he)
 LAYOUT_DIAG_FAILURES=0
 
-export EXPO_PUBLIC_E2E_MAESTRO_AUTH=true
+export EXPO_PUBLIC_E2E_FIXTURES="${EXPO_PUBLIC_E2E_FIXTURES:-1}"
+export EXPO_PUBLIC_E2E=1
 export EXPO_PUBLIC_SUPABASE_URL="${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}"
 export EXPO_PUBLIC_SUPABASE_ANON_KEY="${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${E2E_SUPABASE_ANON_KEY:-}}"
 export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-180000}"
+LAYOUT_FIXTURE_MODE=false
+if [[ "${EXPO_PUBLIC_E2E_FIXTURES:-}" == "1" ]]; then
+  LAYOUT_FIXTURE_MODE=true
+fi
 
 if [[ ! -f "$TOUR_FLOW" ]]; then
   echo "::notice::Skipping groups layout diagnostics — $TOUR_FLOW not present (enable with Phase 1 diagnostics PR)"
   exit 0
 fi
 
-if [[ -z "${E2E_TEST_PASSWORD:-}" ]]; then
-  echo "::error::E2E_TEST_PASSWORD is required for layout diagnostics"
+if [[ "$LAYOUT_FIXTURE_MODE" != "true" && -z "${E2E_TEST_PASSWORD:-}" ]]; then
+  echo "::error::E2E_TEST_PASSWORD is required for layout diagnostics (non-fixture mode)"
   exit 1
 fi
 
@@ -39,14 +44,20 @@ export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
 maestro_ensure_cli
 if [[ -n "${E2E_SUPABASE_URL:-}" && -n "${E2E_SUPABASE_ANON_KEY:-}" ]]; then
-  if ! curl -sf "${E2E_SUPABASE_URL}/auth/v1/health" -H "apikey: ${E2E_SUPABASE_ANON_KEY}" >/dev/null; then
-    echo "::error::Runner cannot reach dev Supabase (${E2E_SUPABASE_URL}); layout probes need network/TLS to auth"
-    exit 1
+  set +e
+  curl -sf "${E2E_SUPABASE_URL}/auth/v1/health" -H "apikey: ${E2E_SUPABASE_ANON_KEY}" >/dev/null
+  curl_rc=$?
+  set -e
+  if [[ "$curl_rc" -eq 0 ]]; then
+    echo "Dev Supabase reachable from CI runner (auth health OK, diagnostic)"
+  else
+    echo "::warning::Runner dev Supabase health check failed (rc=$curl_rc); layout fixture mode does not require it"
   fi
-  echo "Dev Supabase reachable from CI runner (auth health OK)"
 fi
 maestro_write_mobile_e2e_env "$ROOT"
-maestro_seed_e2e_if_configured "$COST_SHARE"
+if [[ "$LAYOUT_FIXTURE_MODE" != "true" ]]; then
+  maestro_seed_e2e_if_configured "$COST_SHARE"
+fi
 mkdir -p "$ARTIFACTS/json" "$ARTIFACTS/screenshots" "$ARTIFACTS/logs" "$ARTIFACTS/debug"
 export MAESTRO_SUPABASE_AUDIT_FILE="$ARTIFACTS/app-env-audit.txt"
 : > "$MAESTRO_SUPABASE_AUDIT_FILE"
@@ -73,6 +84,7 @@ layout_diag_assert_json_nonempty() {
 
 run_diag_flows() {
   local maestro_platform="$1"
+  layout_diag_simulator_supabase_health || true
   local loc
   for loc in "${LOCALES[@]}"; do
     set +e
@@ -120,7 +132,7 @@ run_ios() {
       if [[ -n "${MAESTRO_IOS_APP_CACHE_DIR:-}" ]]; then
         maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR" || true
       fi
-      run_ios_on_simulator
+      install_ios_release_on_simulator
       export MAESTRO_PLATFORM="ios-${IOS_SIM_NAME// /-}"
       run_diag_flows "$MAESTRO_PLATFORM"
     done
@@ -155,7 +167,11 @@ esac
 maestro_collect_screenshots "$ARTIFACTS"
 echo "Diagnostics artifacts: $ARTIFACTS"
 
-maestro_verify_supabase_host_in_logs "$MAESTRO_SUPABASE_AUDIT_FILE" "$EXPECTED_SUPABASE_HOST" || layout_diag_record_failure
+if [[ "$LAYOUT_FIXTURE_MODE" != "true" ]]; then
+  maestro_verify_supabase_host_in_logs "$MAESTRO_SUPABASE_AUDIT_FILE" "$EXPECTED_SUPABASE_HOST" || layout_diag_record_failure
+else
+  echo "Skipping Supabase host audit — layout fixture mode (no live Supabase in app)"
+fi
 
 if [[ "$LAYOUT_DIAG_FAILURES" -gt 0 ]]; then
   echo "::error::Groups layout diagnostics had $LAYOUT_DIAG_FAILURES failure(s)"

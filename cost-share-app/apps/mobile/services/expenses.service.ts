@@ -30,7 +30,7 @@ import {
     showSuccessToast,
 } from '../lib/appToast';
 import i18n from '../i18n';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 import { ascCaptureExpenses } from '../screenshotDemo/ascCaptureFixtures';
 
 export function resolveSplitAmounts(
@@ -46,7 +46,7 @@ export function resolveSplitAmounts(
 }
 
 export async function fetchExpenses(groupId?: string): Promise<ExpenseWithSplits[]> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         return ascCaptureExpenses(groupId);
     }
     try {

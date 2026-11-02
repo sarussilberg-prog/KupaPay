@@ -12,6 +12,7 @@ const PROD_SUPABASE_REF = 'jfqxjjjbpxbwwvoygahu';
 const E2E_ENV_KEYS = [
     'EXPO_PUBLIC_E2E_MAESTRO_AUTH',
     'EXPO_PUBLIC_E2E',
+    'EXPO_PUBLIC_E2E_FIXTURES',
     'EXPO_PUBLIC_E2E_TEST_EMAIL',
 ] as const;
 
@@ -31,6 +32,7 @@ function envEnablesE2e(env: Record<string, string> | undefined): string | null {
         if (value == null || value === '') continue;
         if (key === 'EXPO_PUBLIC_E2E' && value !== '1' && value !== 'true') continue;
         if (key === 'EXPO_PUBLIC_E2E_MAESTRO_AUTH' && value !== 'true' && value !== '1') continue;
+        if (key === 'EXPO_PUBLIC_E2E_FIXTURES' && value !== '1' && value !== 'true') continue;
         return `${key}=${value}`;
     }
     return null;
@@ -72,11 +74,12 @@ describe('E2E flags and dev Supabase — not in production builds (#695 Phase 0)
         expect(text).not.toContain(DEV_SUPABASE_REF);
     });
 
-    it('dedicated eas e2e profile targets dev Supabase and enables Maestro auth', () => {
+    it('dedicated eas e2e profile enables layout fixture mode without dev Supabase URL', () => {
         const e2e = parseEasProfiles().e2e;
         expect(e2e).toBeDefined();
+        expect(e2e?.env?.EXPO_PUBLIC_E2E_FIXTURES).toBe('1');
         expect(envEnablesE2e(e2e?.env)).toMatch(/EXPO_PUBLIC_E2E/);
-        expect(envPointsAtDevSupabase(e2e?.env)).toBe(true);
+        expect(envPointsAtDevSupabase(e2e?.env)).toBe(false);
         expect(envPointsAtDevSupabase(parseEasProfiles().production?.env)).toBe(false);
     });
 });

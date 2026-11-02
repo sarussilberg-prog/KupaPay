@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 import { ascCaptureExchangeRates } from '../screenshotDemo/ascCaptureFixtures';
 
 const CACHE_PREFIX = 'fx_rates_v2';
@@ -122,7 +122,7 @@ export async function fetchExchangeRates(
         return { date: new Date().toISOString().slice(0, 10), rates: {} };
     }
 
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         return ascCaptureExchangeRates(baseCurrency, unique);
     }
 

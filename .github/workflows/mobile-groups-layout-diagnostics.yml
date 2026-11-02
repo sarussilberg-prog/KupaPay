@@ -62,18 +62,13 @@ jobs:
       run:
         working-directory: cost-share-app
     env:
-      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      EXPO_PUBLIC_E2E_FIXTURES: '1'
+      EXPO_PUBLIC_E2E: '1'
       IOS_SIMULATOR_DEVICES: 'iPhone 16'
       MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
       MAESTRO_IOS_APP_STAGING_DIR: /tmp/maestro-ios-app
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -100,8 +95,9 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v3
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v1
           restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v1
             maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v3
             maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-real-ui-v1
             maestro-ios-app-
@@ -125,17 +121,12 @@ jobs:
       run:
         working-directory: cost-share-app
     env:
-      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      EXPO_PUBLIC_E2E_FIXTURES: '1'
+      EXPO_PUBLIC_E2E: '1'
       IOS_SIMULATOR_DEVICES: 'iPhone 16'
       MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

@@ -5,15 +5,27 @@ set -euo pipefail
 # Expo inlines EXPO_PUBLIC_* at bundle time — shell exports alone are not enough for Release Xcode builds.
 maestro_write_mobile_e2e_env() {
   local mobile_root="$1"
+  local fixtures="${EXPO_PUBLIC_E2E_FIXTURES:-1}"
+  # Avoid EAS production env files overriding CI layout fixture env on simulators.
+  rm -f "$mobile_root/.env.production" "$mobile_root/.env.local"
+  local env_file="$mobile_root/.env"
+  if [[ "$fixtures" == "1" ]]; then
+    cat > "$env_file" <<EOF
+EXPO_PUBLIC_E2E=1
+EXPO_PUBLIC_E2E_FIXTURES=1
+EXPO_PUBLIC_POSTHOG_KEY=
+EXPO_PUBLIC_WEB_APP_URL=https://kupa-pay.com
+EOF
+    echo "Wrote Maestro layout-fixture env for bundle bake: $env_file (no Supabase/PostHog network)"
+    echo "layout_fixture_mode=1" >> "${MAESTRO_SUPABASE_AUDIT_FILE:-/tmp/maestro-supabase-audit.txt}"
+    return 0
+  fi
   local supabase_url="${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}"
   local supabase_anon="${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${E2E_SUPABASE_ANON_KEY:-}}"
   if [[ -z "$supabase_url" || -z "$supabase_anon" ]]; then
     echo "::error::E2E_SUPABASE_URL and E2E_SUPABASE_ANON_KEY (or EXPO_PUBLIC_*) are required for Maestro iOS Release builds"
     return 1
   fi
-  # Avoid EAS production env files overriding dev E2E Supabase on CI simulators.
-  rm -f "$mobile_root/.env.production" "$mobile_root/.env.local"
-  local env_file="$mobile_root/.env"
   cat > "$env_file" <<EOF
 EXPO_PUBLIC_E2E_MAESTRO_AUTH=true
 EXPO_PUBLIC_E2E_TEST_EMAIL=${E2E_EMAIL:-${E2E_TEST_EMAIL:-e2e-playwright@kupay-dev.test}}

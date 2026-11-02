@@ -13,6 +13,7 @@ function readPostHogKeyEnv(): string | undefined {
 
 /** Empty env var disables analytics; unset falls back to the embedded public project key. */
 export function getPostHogApiKey(): string | null {
+    if (process.env.EXPO_PUBLIC_E2E_FIXTURES === '1') return null;
     const fromEnv = readPostHogKeyEnv();
     if (fromEnv === '') return null;
     if (fromEnv === undefined) return DEFAULT_KEY;
