@@ -21,6 +21,7 @@ const BULLET_KEYS = [
     'deleteAccount.warningBullet2',
     'deleteAccount.warningBullet3',
     'deleteAccount.warningBullet4',
+    'deleteAccount.warningBullet5',
 ];
 
 export function DeleteAccountWarningSheet({
