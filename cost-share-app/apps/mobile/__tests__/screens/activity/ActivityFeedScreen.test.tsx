@@ -56,6 +56,10 @@ jest.mock('../../../store', () => ({
     useAppStore: jest.fn(),
 }));
 
+jest.mock('../../../lib/pushNotifications', () => ({
+    deferClearAppIconBadge: jest.fn(),
+}));
+
 import { ActivityFeedScreen } from '../../../screens/activity/ActivityFeedScreen';
 import { fetchRecentActivity } from '../../../services/activity.service';
 import { fetchGroups } from '../../../services/groups.service';
@@ -63,6 +67,11 @@ import { useAppStore } from '../../../store';
 import { supabase } from '../../../lib/supabase';
 import { showAppToast } from '../../../lib/appToast';
 import { queryKeys } from '../../../hooks/queries/keys';
+import { deferClearAppIconBadge } from '../../../lib/pushNotifications';
+
+const mockDeferClearAppIconBadge = deferClearAppIconBadge as jest.MockedFunction<
+    typeof deferClearAppIconBadge
+>;
 
 const mockFetchRecentActivity = fetchRecentActivity as jest.MockedFunction<
     typeof fetchRecentActivity
@@ -92,6 +101,7 @@ beforeEach(() => {
     ] as never);
     mockSupabaseRpc.mockClear();
     mockSupabaseRpc.mockResolvedValue({ data: null, error: null } as never);
+    mockDeferClearAppIconBadge.mockClear();
     const navMock = jest.requireMock('@react-navigation/native');
     (navMock.useFocusEffect as jest.Mock).mockClear();
     const storeState = {
@@ -420,6 +430,36 @@ describe('ActivityFeedScreen', () => {
                 expect.objectContaining({ titleKey: 'activity.unavailableTitle' }),
             );
         });
+    });
+
+    it('defers badge clear on focus after mark_activity_seen succeeds', async () => {
+        mockFetchRecentActivity.mockResolvedValue({ items: [] });
+        renderWithQuery(<ActivityFeedScreen />);
+
+        const navMock = jest.requireMock('@react-navigation/native');
+        const focusCb = (navMock.useFocusEffect as jest.Mock).mock.calls[0][0];
+        focusCb();
+
+        await waitFor(() => {
+            expect(mockSupabaseRpc).toHaveBeenCalledWith('mark_activity_seen');
+        });
+        await waitFor(() => {
+            expect(mockDeferClearAppIconBadge).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('still renders the feed when badge clear throws on focus', async () => {
+        mockDeferClearAppIconBadge.mockImplementation(() => {
+            throw new Error('TurboModule NSException');
+        });
+        mockFetchRecentActivity.mockResolvedValue({ items: [] });
+
+        const { findByText } = renderWithQuery(<ActivityFeedScreen />);
+        const navMock = jest.requireMock('@react-navigation/native');
+        const focusCb = (navMock.useFocusEffect as jest.Mock).mock.calls[0][0];
+        focusCb();
+
+        expect(await findByText('activity.noActivity')).toBeTruthy();
     });
 
     it('invalidates the unread-count query with the correct queryKey on focus', async () => {

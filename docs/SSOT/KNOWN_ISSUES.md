@@ -68,6 +68,7 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 | KI-033 | resolved | supabase | **`expense-receipts` Storage bucket is public read** | Fixed 2026-10-11: private bucket + member SELECT RLS (`20261011011000`), DB URL→path migration, signed URLs in mobile + `apps/web/utils/expenseReceiptSignedUrl.ts`. Guard test: `apps/mobile/__tests__/guards/expenseReceiptsMigration.guard.test.ts`. |
 | KI-034 | partial | supabase | **Account deletion: verify `auth.refresh_tokens.user_id` type on prod** | Session revocation covered by `delete_my_account.test.sql` + [DELETE_ACCOUNT_SESSION_REVOCATION.md](./DELETE_ACCOUNT_SESSION_REVOCATION.md). **Remaining:** run prod `information_schema` check after deploy. |
 | KI-036 | in_progress | web | **Prod marketing `/login` white screen — `/_expo/*` bundles 404** | `isMarketingOwnedPath` treated `.js`/`.css` as marketing static before app prefixes; middleware skipped proxy. Fix: app-owned paths first ([#701](https://github.com/sarussilberg-prog/KupaPay/issues/701)). |
+| KI-037 | resolved | mobile | **iOS prod Activity screen crash (Sentry COPAY-MOBILE-PROD-10)** | `EXC_BAD_ACCESS` in `ObjCTurboModule::performVoidMethodInvocation` when `expo-notifications` `setBadgeCountAsync(0)` runs on Activity focus after `mark_activity_seen` (release 1.2.0+7). App fix: permission-gated badge clear, deferred via `InteractionManager`, swallowed native errors (`lib/safeNativeModule.ts`, `lib/activityScreenFocus.ts`). Upstream RN class: [facebook/react-native#56265](https://github.com/facebook/react-native/pull/56265) (re-throw NSException instead of `convertNSExceptionToJSError` on wrong thread). Expo badge API note: [expo/expo#39009](https://github.com/expo/expo/pull/39009). Fixes [#698](https://github.com/sarussilberg-prog/KupaPay/issues/698). |
 
 ---
 
@@ -116,6 +117,7 @@ Use alongside automated tests before store / production cutover:
 | KI-011 | 2026-10-27 | Toast inside `WebFrame` for auth + logged-out trees (`App.tsx`); guard `__tests__/App.webFrameToast.test.ts`. |
 | KI-012 | 2026-10-27 | `WebAlertHost` backdrop runs cancel `onPress` (`dismissViaCancel`); `__tests__/components/WebAlertHost.test.tsx`. |
 | KI-013 | 2026-10-27 | EN plural parity with HE; guard `__tests__/i18n/enPluralLocaleParity.test.ts`. |
+| KI-037 | 2026-11-02 | Activity focus badge guard + focus effect tests; fixes #698. |
 
 ---
 
