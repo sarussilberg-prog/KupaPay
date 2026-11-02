@@ -121,6 +121,12 @@ run_diag_flows() {
           | sed 's/^\[LAYOUT_DIAG_JSON\] //' \
           | tail -1 > "$dest" 2>/dev/null || true
       fi
+      if [[ ! -s "$dest" && -f "$sim_log" ]]; then
+        grep -oE "Checking '\{\"locale\"[^']+\}'" "$sim_log" \
+          | tail -1 \
+          | sed "s/^Checking '//; s/'$//" \
+          > "$dest" 2>/dev/null || true
+      fi
     }
     layout_diag_extract_json \
       "$ARTIFACTS/json/${maestro_platform}_${loc}.json" \
