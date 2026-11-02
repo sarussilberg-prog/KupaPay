@@ -2,6 +2,19 @@
 # Shared native build + Maestro flow runner for device UI CI.
 set -euo pipefail
 
+# Expo inlines EXPO_PUBLIC_* at bundle time — shell exports alone are not enough for Release Xcode builds.
+maestro_write_mobile_e2e_env() {
+  local mobile_root="$1"
+  local env_file="$mobile_root/.env"
+  cat > "$env_file" <<EOF
+EXPO_PUBLIC_E2E_MAESTRO_AUTH=true
+EXPO_PUBLIC_E2E_TEST_EMAIL=${E2E_EMAIL:-${E2E_TEST_EMAIL:-e2e-playwright@kupay-dev.test}}
+EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL:-${E2E_SUPABASE_URL:-}}
+EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY:-${E2E_SUPABASE_ANON_KEY:-}}
+EOF
+  echo "Wrote Maestro E2E env for bundle bake: $env_file"
+}
+
 maestro_ensure_cli() {
   if command -v maestro >/dev/null 2>&1; then
     return 0
@@ -23,6 +36,7 @@ maestro_seed_e2e_if_configured() {
 
 maestro_ios_prebuild_and_pods() {
   local mobile_root="$1"
+  maestro_write_mobile_e2e_env "$mobile_root"
   cd "$mobile_root"
   if [[ "${MAESTRO_SKIP_NATIVE_REBUILD:-false}" == "true" && -d ios/Pods ]]; then
     echo "::notice::Skipping expo prebuild/pod install (JS-only change; reuse native tree)"
@@ -177,7 +191,8 @@ maestro_audit_ios_app_e2e_bake() {
     printf '%s\n' "$report" > "$audit_file"
   fi
   if [[ "$report" == *'baked_login_e2e_panel=no'* ]]; then
-    echo "::warning::iOS app bundle missing baked Maestro E2E auth (stale cache or build without EXPO_PUBLIC_E2E_MAESTRO_AUTH=true)"
+    echo "::error::iOS app bundle missing baked Maestro E2E auth (build without EXPO_PUBLIC_E2E_MAESTRO_AUTH in .env)"
+    return 1
   fi
   return 0
 }

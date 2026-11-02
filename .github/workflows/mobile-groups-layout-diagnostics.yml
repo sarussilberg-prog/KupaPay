@@ -93,8 +93,15 @@ jobs:
           restore-keys: maestro-ios-app-
       - name: Install dependencies
         run: npm ci
+      - name: Validate restored iOS app (E2E bundle bake)
+        id: ios_app_e2e_audit
+        if: steps.ios_app_cache.outputs.cache-hit == 'true'
+        continue-on-error: true
+        run: |
+          source apps/mobile/scripts/lib/maestro-ci-build.sh
+          maestro_audit_ios_app_e2e_bake /tmp/maestro-ios-app/KupaPay.app "$GITHUB_WORKSPACE/artifacts/groups-layout-diagnostics/app-env-audit.txt"
       - name: Build iOS app (once)
-        if: steps.ios_app_cache.outputs.cache-hit != 'true'
+        if: steps.ios_app_cache.outputs.cache-hit != 'true' || steps.ios_app_e2e_audit.outcome == 'failure'
         run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios build
       - uses: actions/upload-artifact@v7
         with:

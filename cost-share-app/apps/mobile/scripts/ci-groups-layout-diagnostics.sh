@@ -38,6 +38,7 @@ export E2E_EMAIL="${E2E_TEST_EMAIL:-e2e-playwright@kupay-dev.test}"
 export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
 maestro_ensure_cli
+maestro_write_mobile_e2e_env "$ROOT"
 maestro_seed_e2e_if_configured "$COST_SHARE"
 mkdir -p "$ARTIFACTS/json" "$ARTIFACTS/screenshots" "$ARTIFACTS/logs" "$ARTIFACTS/debug"
 
@@ -90,7 +91,17 @@ run_ios() {
     maestro_ios_prebuild_and_pods "$ROOT"
     parse_ios_simulator_devices
     prepare_ios_simulator "${IOS_DEVICES[0]}"
-    if [[ -n "${MAESTRO_IOS_APP_CACHE_DIR:-}" ]] && maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR"; then
+    local need_ios_build=true
+    if [[ -n "${MAESTRO_IOS_APP_STAGING_DIR:-}" ]] && [[ -d "$MAESTRO_IOS_APP_STAGING_DIR/KupaPay.app" ]]; then
+      if maestro_audit_ios_app_e2e_bake "$MAESTRO_IOS_APP_STAGING_DIR/KupaPay.app" "$ARTIFACTS/app-env-audit.txt"; then
+        need_ios_build=false
+        IOS_APP_BINARY="$MAESTRO_IOS_APP_STAGING_DIR/KupaPay.app"
+        export IOS_APP_BINARY
+      else
+        rm -rf "$MAESTRO_IOS_APP_STAGING_DIR"
+      fi
+    fi
+    if [[ "$need_ios_build" == "true" ]]; then
       run_ios_on_simulator
     else
       run_ios_on_simulator
@@ -106,7 +117,13 @@ run_ios() {
       echo "=== Layout diagnostics iOS: $SIM ==="
       prepare_ios_simulator "$SIM"
       if [[ -n "${MAESTRO_IOS_APP_CACHE_DIR:-}" ]]; then
-        maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR" || true
+        if maestro_restore_ios_app_artifact "$MAESTRO_IOS_APP_CACHE_DIR"; then
+          if ! maestro_audit_ios_app_e2e_bake "${IOS_APP_BINARY:-}" "$ARTIFACTS/app-env-audit.txt"; then
+            echo "::warning::Stale iOS app cache missing E2E bake — forcing reinstall from fresh build artifact"
+            rm -rf "$MAESTRO_IOS_APP_CACHE_DIR"
+            unset IOS_APP_BINARY
+          fi
+        fi
       fi
       maestro_audit_ios_app_e2e_bake "${IOS_APP_BINARY:-}" "$ARTIFACTS/app-env-audit.txt"
       run_ios_on_simulator
