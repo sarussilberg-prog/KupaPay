@@ -44,6 +44,7 @@ Document new tests in the PR body: *what each test asserts* and *which bug it wo
 | Maestro CI planner | `cost-share-app/scripts/lib/maestro-ci-plan.mjs` | Tier + flow list for device UI workflows |
 | Screen → flow map | `cost-share-app/scripts/lib/maestro-screen-flow-map.mjs` | Path-based extra flows on dev PRs |
 | Maestro workflow lint | `cost-share-app/scripts/__tests__/github-maestro-workflows.test.mjs` | Job-level env / Sentry / ccache invariants for Maestro YAML |
+| Release launch smoke | `apps/mobile/scripts/ci-release-launch-smoke.sh`, Maestro workflow jobs `launch-smoke-ios` / `launch-smoke-android` | Cached Release `.app`/APK launches and stays alive 30s; see [release-launch-smoke spec](./superpowers/specs/2026-11-02-release-launch-smoke.md) |
 
 ### Layout probes (Maestro)
 
