@@ -20,18 +20,10 @@ appId: com.kupapay.mobile
 - inputText: ${E2E_PASSWORD}
 - tapOn:
     id: login-e2e-submit
-- extendedWaitUntil:
-    notVisible:
-      id: login-e2e-submit
-    timeout: 30000
-- runFlow:
-    when:
-      visible:
-        id: login-e2e-error
-    commands:
-      - assertTrue:
-          condition: false
-          label: "E2E sign-in failed — see login-e2e-error and [MAESTRO_E2E_AUTH] in simulator logs"
+- waitForAnimationToEnd:
+    timeout: 20000
+- assertNotVisible:
+    id: login-e2e-error
 - extendedWaitUntil:
     visible:
       id: groups-list-title

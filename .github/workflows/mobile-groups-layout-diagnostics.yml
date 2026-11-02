@@ -41,6 +41,17 @@ jobs:
           CHANGED_FILES: ''
           GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
         run: node scripts/lib/maestro-ci-plan.mjs | tee /tmp/plan.json
+      - name: Verify dev Supabase reachable (ubuntu)
+        env:
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+        run: |
+          if [[ -z "${E2E_SUPABASE_URL:-}" || -z "${E2E_SUPABASE_ANON_KEY:-}" ]]; then
+            echo "::error::E2E_SUPABASE_URL / E2E_SUPABASE_ANON_KEY secrets are required"
+            exit 1
+          fi
+          curl -sfI "${E2E_SUPABASE_URL}/auth/v1/health" -H "apikey: ${E2E_SUPABASE_ANON_KEY}"
+          echo "Dev Supabase auth health OK from ubuntu runner"
 
   build-ios:
     name: Diagnostics build (iOS)
