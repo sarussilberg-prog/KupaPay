@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
+import * as Linking from 'expo-linking';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,10 +13,18 @@ import { rootNavigationRef } from '../lib/rootNavigationRef';
 import { navigateAscCaptureScreen } from '../lib/ascCaptureNavigate';
 import { toastConfig } from '../lib/toastConfig';
 import { useAppStore } from '../store';
+import { parseE2eFixtureLocaleFromUrl } from '../lib/e2eFixtureLocaleLink';
+import { applyE2eFixtureLocale } from './applyE2eFixtureLocale';
 import { seedE2eLayoutFixtures } from './seedE2eLayoutFixtures';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
 
-function E2eFixtureNavigationController({ onReady }: { onReady: () => void }) {
+function E2eFixtureNavigationController({
+    onReady,
+    navEpoch,
+}: {
+    onReady: () => void;
+    navEpoch: number;
+}) {
     useEffect(() => {
         let cancelled = false;
         let attempts = 0;
@@ -39,22 +48,40 @@ function E2eFixtureNavigationController({ onReady }: { onReady: () => void }) {
         return () => {
             cancelled = true;
         };
-    }, [onReady]);
+    }, [onReady, navEpoch]);
 
     return null;
 }
 
 export function E2eLayoutFixtureRoot() {
     const [bootReady, setBootReady] = useState(false);
+    const [navEpoch, setNavEpoch] = useState(0);
+    const incomingUrl = Linking.useURL();
     const language = useAppStore((s) => s.language);
 
     useEffect(() => {
         void (async () => {
-            await initializeLanguage();
-            await seedE2eLayoutFixtures(useAppStore.getState().language);
+            const initialUrl = await Linking.getInitialURL();
+            const fromUrl = parseE2eFixtureLocaleFromUrl(initialUrl);
+            if (fromUrl) {
+                await applyE2eFixtureLocale(fromUrl);
+            } else {
+                await initializeLanguage();
+                await seedE2eLayoutFixtures(useAppStore.getState().language);
+            }
             setBootReady(true);
         })();
     }, []);
+
+    useEffect(() => {
+        if (!bootReady || !incomingUrl) return;
+        const fromUrl = parseE2eFixtureLocaleFromUrl(incomingUrl);
+        if (!fromUrl) return;
+        void (async () => {
+            await applyE2eFixtureLocale(fromUrl);
+            setNavEpoch((n) => n + 1);
+        })();
+    }, [bootReady, incomingUrl]);
 
     useEffect(() => {
         if (!bootReady) return;
@@ -75,7 +102,7 @@ export function E2eLayoutFixtureRoot() {
                         <NavigationContainer ref={rootNavigationRef}>
                             <AppNavigator />
                         </NavigationContainer>
-                        <E2eFixtureNavigationController onReady={onNavReady} />
+                        <E2eFixtureNavigationController onReady={onNavReady} navEpoch={navEpoch} />
                     </ScreenErrorBoundary>
                     <Toast config={toastConfig} topOffset={56} />
                 </RtlLayoutProvider>

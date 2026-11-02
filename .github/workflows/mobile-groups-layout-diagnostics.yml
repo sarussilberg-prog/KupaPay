@@ -3,6 +3,12 @@ name: Mobile Groups layout diagnostics
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - 'cursor/**'
+    paths:
+      - 'cost-share-app/apps/mobile/**'
+      - '.github/workflows/mobile-groups-layout-diagnostics.yml'
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches: [dev, main, 'cursor/**']
@@ -95,8 +101,9 @@ jobs:
         id: ios_app_cache
         with:
           path: /tmp/maestro-ios-app
-          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v1
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v2
           restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v2
             maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v1
       - name: Install dependencies
         run: npm ci
