@@ -25,18 +25,26 @@ release_launch_smoke_self_test() {
   return 0
 }
 
+ios_sim_process_running() {
+  local pid="$1"
+  if [[ -n "$pid" ]] && xcrun simctl spawn booted kill -0 "$pid" 2>/dev/null; then
+    return 0
+  fi
+  xcrun simctl spawn booted pgrep -x KupaPay >/dev/null 2>&1
+}
+
 ios_wait_for_process() {
   local pid="$1"
   local elapsed=0
   while (( elapsed < ALIVE_SECONDS )); do
-    if ! kill -0 "$pid" 2>/dev/null; then
-      echo "::error::KupaPay iOS process $pid exited before ${ALIVE_SECONDS}s"
+    if ! ios_sim_process_running "$pid"; then
+      echo "::error::KupaPay iOS process exited before ${ALIVE_SECONDS}s (last pid=$pid)"
       return 1
     fi
     sleep 1
     elapsed=$((elapsed + 1))
   done
-  echo "iOS process $pid alive for ${ALIVE_SECONDS}s"
+  echo "iOS app alive for ${ALIVE_SECONDS}s (pid=$pid)"
   return 0
 }
 
