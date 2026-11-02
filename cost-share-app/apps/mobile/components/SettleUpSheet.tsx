@@ -913,7 +913,12 @@ function PaymentAppsSection({ isRtl }: { isRtl: boolean }) {
                         })}
                         style={{ alignItems: 'center', width: 72 }}
                     >
-                        <PaymentAppLogo app={app} size={52} />
+                        <PaymentAppLogo
+                            app={app}
+                            accessibilityLabel={t('settleUp.openPaymentApp', {
+                                app: t(`settleUp.paymentAppLabels.${app}`),
+                            })}
+                        />
                         <Text
                             className="text-[10px] font-semibold text-gray-600 mt-1"
                             style={{ textAlign: 'center' }}

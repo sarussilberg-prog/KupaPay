@@ -81,6 +81,7 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 | KI-023 | resolved | mobile | **`console.log` in `initializeLanguage`** | Fixed 2026-06-02: wrapped both calls (`i18n/index.ts:118,136`) in `if (__DEV__)`. |
 | KI-024 | accepted | mobile | **No “replay onboarding” in Settings** | Documented as not v1 in onboarding spec. |
 | KI-025 | open | mobile | **RTL violations: `marginLeft`/`marginRight` and `textAlign:'left'` hardcoded in 10 component sites** | `components/CurrencyPicker.tsx:123`, `components/UnequalSplitPanel.tsx:169`, `components/AddMembersSheet.tsx:251`, `components/groupDetail/MemberStack.tsx:68`, `components/expenseV2/StackedAvatarGroup.tsx:25`, `components/FeedRowCard.tsx` (4×), `components/expenseV2/MemberPickerPopup.tsx`. Use `marginStart`/`marginEnd` and conditional `textAlign` (LegalDocumentSheet.tsx pattern). |
+| KI-038 | resolved | mobile | **Inconsistent Bit/PayBox icons in settle-up sheet** | Unified `PaymentAppLogo` monogram tiles (56×56, radius 14, light/dark brand colors). Spec: `docs/superpowers/specs/2026-11-02-payment-app-monogram-tiles.md`. Fixes [#700](https://github.com/sarussilberg-prog/KupaPay/issues/700). |
 | KI-026 | open | mobile | **`toLocaleDateString()` called without `locale` argument** | `screens/expenses/ExpenseDetailScreen.tsx` and `screens/admin/AdminDeletedUsersScreen.tsx` — dates render in OS locale, not app language. Pass `i18n.language` (or `he-IL`/`en-US`). Reference correct pattern: `screens/balances/SettleUpListScreen.tsx:285`. |
 | ~~KI-027~~ | retracted | supabase | ~~Prod auth: leaked password protection disabled~~ | **Retracted 2026-06-02:** N/A — the app uses Google OAuth exclusively (`auth.service.ts` only calls `signInWithOAuth` with provider `google`; no `signInWithPassword`/`signUpWithPassword` anywhere). Supabase advisor flags it generically but there are no passwords to protect. Revisit only if email/password sign-in is ever introduced. |
 | KI-028 | resolved | supabase | ~~iOS AASA appID malformed: `.com.kupapay.mobile`~~ | Fixed via #42 (`fix(ios): correct AASA + appleTeamId to real Apple Team HVW3H3DLRB`). Verified 2026-07-09: `https://kupa-pay.com/.well-known/apple-app-site-association` now returns `appID: "HVW3H3DLRB.com.kupapay.mobile"`. |
@@ -116,6 +117,7 @@ Use alongside automated tests before store / production cutover:
 | KI-011 | 2026-10-27 | Toast inside `WebFrame` for auth + logged-out trees (`App.tsx`); guard `__tests__/App.webFrameToast.test.ts`. |
 | KI-012 | 2026-10-27 | `WebAlertHost` backdrop runs cancel `onPress` (`dismissViaCancel`); `__tests__/components/WebAlertHost.test.tsx`. |
 | KI-013 | 2026-10-27 | EN plural parity with HE; guard `__tests__/i18n/enPluralLocaleParity.test.ts`. |
+| KI-038 | 2026-11-02 | Payment app monogram tiles; fixes #700. |
 
 ---
 
