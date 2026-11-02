@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Build (or reuse) a dev client and run Maestro device UI flows on iOS simulator or Android emulator.
+# Android PHASE=build runs ./gradlew assembleRelease (CI has no emulator).
 set -euo pipefail
 
 PLATFORM="${1:?Usage: ci-maestro-device-ui.sh ios|android [build|test|all]}"
