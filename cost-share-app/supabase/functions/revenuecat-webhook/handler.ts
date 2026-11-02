@@ -84,7 +84,7 @@ export function verifyAuthorization(req: Request, secret: string): boolean {
     return false;
 }
 
-export function allowSandboxEnvironment(
+function allowSandboxEnvironment(
     environment: string | undefined,
     allowSandboxEvents: boolean,
 ): boolean {
@@ -92,7 +92,7 @@ export function allowSandboxEnvironment(
     return true;
 }
 
-export function hasProEntitlement(event: RevenueCatEvent): boolean {
+function hasProEntitlement(event: RevenueCatEvent): boolean {
     return event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID) === true;
 }
 
@@ -130,7 +130,7 @@ const GRANT_TYPES = new Set([
 
 const IMMEDIATE_CANCEL_REASONS = new Set(['CUSTOMER_SUPPORT', 'DEVELOPER_INITIATED']);
 
-export function isImmediateProRevoke(event: RevenueCatEvent): boolean {
+function isImmediateProRevoke(event: RevenueCatEvent): boolean {
     const type = event.type ?? '';
     if (!hasProEntitlement(event) || isTripPassProduct(event)) return false;
     if (type === 'REFUND') return true;
@@ -142,7 +142,7 @@ export function isImmediateProRevoke(event: RevenueCatEvent): boolean {
     return false;
 }
 
-export function isTripPassRevoke(event: RevenueCatEvent): boolean {
+function isTripPassRevoke(event: RevenueCatEvent): boolean {
     if (!isTripPassProduct(event)) return false;
     const type = event.type ?? '';
     if (type === 'REFUND' || type === 'EXPIRATION') return true;
@@ -153,7 +153,7 @@ export function isTripPassRevoke(event: RevenueCatEvent): boolean {
     return false;
 }
 
-export function isCancelAtPeriodEnd(event: RevenueCatEvent): boolean {
+function isCancelAtPeriodEnd(event: RevenueCatEvent): boolean {
     const type = event.type ?? '';
     if (type !== 'CANCELLATION') return false;
     if (!hasProEntitlement(event) || isTripPassProduct(event)) return false;

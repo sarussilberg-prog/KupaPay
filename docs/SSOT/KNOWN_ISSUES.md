@@ -83,6 +83,7 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 | KI-024 | accepted | mobile | **No “replay onboarding” in Settings** | Documented as not v1 in onboarding spec. |
 | KI-025 | open | mobile | **RTL violations: `marginLeft`/`marginRight` and `textAlign:'left'` hardcoded in 10 component sites** | `components/CurrencyPicker.tsx:123`, `components/UnequalSplitPanel.tsx:169`, `components/AddMembersSheet.tsx:251`, `components/groupDetail/MemberStack.tsx:68`, `components/expenseV2/StackedAvatarGroup.tsx:25`, `components/FeedRowCard.tsx` (4×), `components/expenseV2/MemberPickerPopup.tsx`. Use `marginStart`/`marginEnd` and conditional `textAlign` (LegalDocumentSheet.tsx pattern). |
 | KI-038 | resolved | mobile | **Inconsistent Bit/PayBox icons in settle-up sheet** | Unified `PaymentAppLogo` monogram tiles (56×56, radius 14, light/dark brand colors). Spec: `docs/superpowers/specs/2026-11-02-payment-app-monogram-tiles.md`. Fixes [#700](https://github.com/sarussilberg-prog/KupaPay/issues/700). |
+| KI-039 | resolved | supabase | **RevenueCat webhook entitlement edge cases (sandbox replay, revoke semantics, trip-pass upsert)** | Production webhook could apply sandbox events, treat all cancellations as immediate revokes, and miss ordered/stale handling. Hardened `revenuecat-webhook` edge handler + `handle_revenuecat_webhook` RPC (migration `20261102103000`). Deno/SQL regression tests. PR [#712](https://github.com/sarussilberg-prog/KupaPay/pull/712). |
 | KI-026 | open | mobile | **`toLocaleDateString()` called without `locale` argument** | `screens/expenses/ExpenseDetailScreen.tsx` and `screens/admin/AdminDeletedUsersScreen.tsx` — dates render in OS locale, not app language. Pass `i18n.language` (or `he-IL`/`en-US`). Reference correct pattern: `screens/balances/SettleUpListScreen.tsx:285`. |
 | ~~KI-027~~ | retracted | supabase | ~~Prod auth: leaked password protection disabled~~ | **Retracted 2026-06-02:** N/A — the app uses Google OAuth exclusively (`auth.service.ts` only calls `signInWithOAuth` with provider `google`; no `signInWithPassword`/`signUpWithPassword` anywhere). Supabase advisor flags it generically but there are no passwords to protect. Revisit only if email/password sign-in is ever introduced. |
 | KI-028 | resolved | supabase | ~~iOS AASA appID malformed: `.com.kupapay.mobile`~~ | Fixed via #42 (`fix(ios): correct AASA + appleTeamId to real Apple Team HVW3H3DLRB`). Verified 2026-07-09: `https://kupa-pay.com/.well-known/apple-app-site-association` now returns `appID: "HVW3H3DLRB.com.kupapay.mobile"`. |
@@ -120,6 +121,7 @@ Use alongside automated tests before store / production cutover:
 | KI-013 | 2026-10-27 | EN plural parity with HE; guard `__tests__/i18n/enPluralLocaleParity.test.ts`. |
 | KI-037 | 2026-11-02 | Activity focus badge guard + focus effect tests; fixes #698. |
 | KI-038 | 2026-11-02 | Payment app monogram tiles; fixes #700. |
+| KI-039 | 2026-11-02 | RevenueCat webhook hardening (#712). |
 
 ---
 
@@ -136,3 +138,4 @@ Use alongside automated tests before store / production cutover:
 | 2026-10-11 | Security/CI pass: resolved KI-015, KI-019, KI-031, KI-032; partial KI-014; added KI-033–034. |
 | 2026-10-16 | Infra/test board pass: KI-010 partial — AuthenticatedAppGate + post-login paths on dev (#104). |
 | 2026-10-27 | Resolved KI-011 (WebFrame toast), KI-012 (WebAlertHost cancel), KI-013 (EN plural keys). |
+| 2026-11-02 | Resolved KI-039 (RevenueCat webhook sandbox filter, revoke/cancel semantics, event ordering). |

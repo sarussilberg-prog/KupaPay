@@ -5,7 +5,7 @@ ALTER TABLE public.profiles
 ALTER TABLE public.revenuecat_webhook_events
     ADD COLUMN IF NOT EXISTS event_timestamp_ms BIGINT;
 
-DROP FUNCTION IF EXISTS public.handle_revenuecat_webhook(
+DROP FUNCTION IF EXISTS public.handle_revenuecat_webhook( -- safe-breaking: extend RPC with event ordering + revoke flags (#712)
     TEXT, UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, UUID, BOOLEAN, BOOLEAN, BOOLEAN
 );
 
@@ -79,7 +79,7 @@ BEGIN
 
     IF p_is_immediate_pro_revoke THEN
         UPDATE public.profiles
-        SET pro_until = LEAST(COALESCE(pro_until, NOW()), NOW()),
+        SET pro_until = TIMESTAMPTZ '1970-01-01 00:00:00+00',
             revenuecat_last_event_ms = CASE
                 WHEN p_event_timestamp_ms IS NULL THEN revenuecat_last_event_ms
                 ELSE GREATEST(revenuecat_last_event_ms, p_event_timestamp_ms)

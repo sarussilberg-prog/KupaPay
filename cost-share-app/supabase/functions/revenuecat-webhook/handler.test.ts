@@ -1,11 +1,7 @@
 import { assertEquals } from '@std/assert';
 import {
-    allowSandboxEnvironment,
     applyWebhookEvent,
     handleRequest,
-    isCancelAtPeriodEnd,
-    isImmediateProRevoke,
-    isTripPassRevoke,
     proUntilFromEvent,
     tripPassUntilFromEvent,
     verifyAuthorization,
@@ -109,12 +105,6 @@ Deno.test('tripPassUntilFromEvent defaults to 30 days', () => {
     assertEquals(until, '2026-01-31T00:00:00.000Z');
 });
 
-Deno.test('allowSandboxEnvironment rejects SANDBOX when not allowed', () => {
-    assertEquals(allowSandboxEnvironment('SANDBOX', false), false);
-    assertEquals(allowSandboxEnvironment('SANDBOX', true), true);
-    assertEquals(allowSandboxEnvironment('PRODUCTION', false), true);
-});
-
 Deno.test('applyWebhookEvent ignores SANDBOX without RPC when sandbox disallowed', async () => {
     let called = false;
     const restore = mockRpcFetch(() => {
@@ -166,39 +156,63 @@ Deno.test('cancellation without expiration does not call RPC', async () => {
         );
         assertEquals(outcome, { ok: true, action: 'ignored' });
         assertEquals(called, false);
-        assertEquals(isCancelAtPeriodEnd({
-            type: 'CANCELLATION',
-            id: 'x',
-            app_user_id: 'u',
-            product_id: PRODUCT_PRO_MONTHLY,
-            entitlement_ids: ['pro'],
-            expiration_at_ms: null,
-        }), false);
     } finally {
         restore();
     }
 });
 
-Deno.test('refund sends immediate pro revoke and trip pass revoke flags', () => {
-    assertEquals(
-        isImmediateProRevoke({
-            type: 'REFUND',
-            id: '1',
-            app_user_id: 'u',
-            product_id: PRODUCT_PRO_MONTHLY,
-            entitlement_ids: ['pro'],
-        }),
-        true,
-    );
-    assertEquals(
-        isTripPassRevoke({
-            type: 'REFUND',
-            id: '1',
-            app_user_id: 'u',
-            product_id: PRODUCT_TRIP_PASS,
-        }),
-        true,
-    );
+Deno.test('applyWebhookEvent REFUND sends immediate pro revoke flags to RPC', async () => {
+    const captured: { body?: Record<string, unknown> } = {};
+    const restore = mockRpcFetch(body => {
+        captured.body = body;
+        return { status: 200, json: { duplicate: false, action: 'individual' } };
+    });
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'REFUND',
+                    id: 'evt-refund-pro',
+                    app_user_id: TEST_USER_ID,
+                    product_id: PRODUCT_PRO_MONTHLY,
+                    entitlement_ids: ['pro'],
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'individual' });
+        assertEquals(captured.body?.p_is_immediate_pro_revoke, true);
+        assertEquals(captured.body?.p_is_trip_pass_revoke, false);
+        assertEquals(captured.body?.p_pro_until, null);
+    } finally {
+        restore();
+    }
+});
+
+Deno.test('applyWebhookEvent trip pass REFUND sends trip pass revoke to RPC', async () => {
+    const captured: { body?: Record<string, unknown> } = {};
+    const restore = mockRpcFetch(body => {
+        captured.body = body;
+        return { status: 200, json: { duplicate: false, action: 'trip_pass' } };
+    });
+    try {
+        const outcome = await applyWebhookEvent(
+            {
+                event: {
+                    type: 'REFUND',
+                    id: 'evt-refund-trip',
+                    app_user_id: TEST_USER_ID,
+                    product_id: PRODUCT_TRIP_PASS,
+                },
+            },
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'trip_pass' });
+        assertEquals(captured.body?.p_is_trip_pass_revoke, true);
+        assertEquals(captured.body?.p_is_immediate_pro_revoke, false);
+    } finally {
+        restore();
+    }
 });
 
 Deno.test('applyWebhookEvent rejects non-UUID app_user_id without RPC', async () => {
