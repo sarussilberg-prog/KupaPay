@@ -83,3 +83,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - ci(ios): trigger TestFlight on dev when testflight workflow updates (#722)
 ## [2.2.0-dev.39] — 2026-11-03
 - ci(ios): TestFlight after dev PR merge (mobile release paths) (#723)
+## [2.2.0-dev.40] — 2026-11-03
+- feat(release): default Pro on for dev TestFlight and Play internal (#726)
