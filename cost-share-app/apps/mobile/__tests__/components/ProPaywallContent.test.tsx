@@ -11,6 +11,7 @@ jest.mock('react-i18next', () => ({
 }));
 
 jest.mock('../../hooks/useRtlLayout', () => ({
+    ...jest.requireActual('../../hooks/useRtlLayout'),
     useAppLanguage: () => 'en',
     useRtlLayout: () => false,
     rtlTextClassName: () => '',
