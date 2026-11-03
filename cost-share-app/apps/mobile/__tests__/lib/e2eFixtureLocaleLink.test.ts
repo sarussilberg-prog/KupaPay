@@ -1,3 +1,4 @@
+import * as Linking from 'expo-linking';
 import { parseE2eFixtureLocaleFromUrl } from '../../lib/e2eFixtureLocaleLink';
 
 describe('parseE2eFixtureLocaleFromUrl', () => {
@@ -19,5 +20,16 @@ describe('parseE2eFixtureLocaleFromUrl', () => {
     it('ignores unrelated URLs', () => {
         expect(parseE2eFixtureLocaleFromUrl('com.kupapay.mobile://auth/callback')).toBeNull();
         expect(parseE2eFixtureLocaleFromUrl(null)).toBeNull();
+    });
+
+    it('parses alternate Maestro / iOS URL shapes', () => {
+        for (const url of [
+            'com.kupapay.mobile://e2e-fixture?locale=he',
+            'com.kupapay.mobile:/e2e-fixture?locale=he',
+            'com.kupapay.mobile://e2e-fixture/?locale=he',
+        ]) {
+            Linking.parse(url);
+            expect(parseE2eFixtureLocaleFromUrl(url)).toBe('he');
+        }
     });
 });

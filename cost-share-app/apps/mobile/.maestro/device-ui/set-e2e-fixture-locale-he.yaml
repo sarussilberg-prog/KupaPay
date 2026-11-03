@@ -3,6 +3,10 @@ appId: com.kupapay.mobile
 - openLink: com.kupapay.mobile://e2e-fixture?locale=he
 - extendedWaitUntil:
     visible:
+      id: e2e-fixture-locale-ready
+    timeout: 120000
+- extendedWaitUntil:
+    visible:
       id: groups-layout-app-rtl
     timeout: 90000
 - extendedWaitUntil:

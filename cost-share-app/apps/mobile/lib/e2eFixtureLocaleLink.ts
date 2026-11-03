@@ -22,6 +22,7 @@ export function parseE2eFixtureLocaleFromUrl(url: string | null | undefined): La
     if (!url?.trim() || !isE2eLayoutFixturesEnabled()) return null;
     const direct = localeFromFixtureQuery(url);
     if (direct) return direct;
+    if (!url.includes('e2e-fixture')) return null;
     const match = url.match(/[?&](?:locale|lang)=([a-z]{2}(?:-[a-z]+)?)/i);
     if (match && isLanguage(match[1])) return match[1];
     return null;

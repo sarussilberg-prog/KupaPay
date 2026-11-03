@@ -66,12 +66,9 @@ export function subscribeLayoutDiagnostics(
 export function snapshotI18nManager(): I18nRtlSnapshot {
     let doLeftAndRightSwap = false;
     try {
-        doLeftAndRightSwap =
-            typeof I18nManager.doLeftAndRightSwap === 'function'
-                ? I18nManager.doLeftAndRightSwap()
-                : (I18nManager.doLeftAndRightSwapInRTL ?? I18nManager.isRTL);
-    } catch {
         doLeftAndRightSwap = I18nManager.doLeftAndRightSwapInRTL ?? I18nManager.isRTL;
+    } catch {
+        doLeftAndRightSwap = I18nManager.isRTL;
     }
     return {
         isRTL: I18nManager.isRTL,

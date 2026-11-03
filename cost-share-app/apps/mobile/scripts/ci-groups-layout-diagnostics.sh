@@ -142,7 +142,32 @@ run_diag_flows() {
     node "$ROOT/scripts/extract-layout-diag-json-from-debug.mjs" \
       "$ARTIFACTS/debug" \
       "$ARTIFACTS/json/${maestro_platform}_${loc}.json" || true
-    layout_diag_assert_json_nonempty "$ARTIFACTS/json/${maestro_platform}_${loc}.json" "${maestro_platform}_${loc}" || true
+    if [[ ! -s "$ARTIFACTS/json/${maestro_platform}_${loc}.json" && -f "$ARTIFACTS/debug/${maestro_platform}_${loc}-simulator.log" ]]; then
+      python3 - "$ARTIFACTS/debug/${maestro_platform}_${loc}-simulator.log" "$ARTIFACTS/json/${maestro_platform}_${loc}.json" <<'PY' || true
+import json, re, sys
+log_path, dest = sys.argv[1], sys.argv[2]
+with open(log_path, 'r', errors='ignore') as f:
+    for line in f:
+        if '"locale":' not in line or 'group-card-row' not in line:
+            continue
+        m = re.search(r"Checking '(\{.*\})'", line)
+        if not m:
+            continue
+        raw = m.group(1).encode('utf-8').decode('unicode_escape')
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        with open(dest, 'w') as out:
+            json.dump(payload, out)
+        break
+PY
+    fi
+    if [[ "$exit_code" -eq 0 ]]; then
+      layout_diag_assert_json_nonempty "$ARTIFACTS/json/${maestro_platform}_${loc}.json" "${maestro_platform}_${loc}" || true
+    else
+      layout_diag_assert_json_nonempty "$ARTIFACTS/json/${maestro_platform}_${loc}.json" "${maestro_platform}_${loc}" || true
+    fi
   done
 }
 

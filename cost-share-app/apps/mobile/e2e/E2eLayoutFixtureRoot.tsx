@@ -63,11 +63,19 @@ export function E2eLayoutFixtureRoot() {
 
     useEffect(() => {
         void (async () => {
-            const initialUrl = await Linking.getInitialURL();
+            let initialUrl = await Linking.getInitialURL();
+            if (!initialUrl) {
+                for (let i = 0; i < 30; i++) {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    initialUrl = await Linking.getInitialURL();
+                    if (initialUrl) break;
+                }
+            }
             const fromUrl = parseE2eFixtureLocaleFromUrl(initialUrl);
             if (fromUrl) {
                 await applyE2eFixtureLocale(fromUrl);
                 setFixtureLocale(fromUrl);
+                if (__DEV__) console.log(`[E2E_FIXTURE_LOCALE_APPLIED] ${fromUrl}`);
             } else {
                 await initializeLanguage();
                 await seedE2eLayoutFixtures(useAppStore.getState().language);
@@ -82,6 +90,7 @@ export function E2eLayoutFixtureRoot() {
         await applyE2eFixtureLocale(fromUrl);
         setFixtureLocale(fromUrl);
         setNavEpoch((n) => n + 1);
+        if (__DEV__) console.log(`[E2E_FIXTURE_LOCALE_APPLIED] ${fromUrl}`);
     }, []);
 
     useEffect(() => {
