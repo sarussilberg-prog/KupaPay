@@ -39,14 +39,24 @@ type Props = {
     group: GroupWithMembers;
     memberCount: number;
     language: string;
+    /** List card: member count only (no “updated” suffix). */
+    compact?: boolean;
     testID?: string;
     onLayout?: (event: LayoutChangeEvent) => void;
+};
+
+const COMPACT_MEMBER_META_STYLE: TextStyle = {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.gray500,
+    ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
 };
 
 export function GroupCardMetaLine({
     group,
     memberCount,
     language,
+    compact = false,
     testID = 'group-card-meta',
     onLayout,
 }: Props) {
@@ -65,7 +75,7 @@ export function GroupCardMetaLine({
                 : t(`groups.types.${group.groupType}`);
         const memberLabel = bindCountLabelNoBreak(memberRaw);
 
-        if (usesStaticFixtureData()) {
+        if (compact || usesStaticFixtureData()) {
             return { memberLabel, updatedWhen: null as string | null };
         }
 
@@ -83,6 +93,7 @@ export function GroupCardMetaLine({
         group.updatedAt,
         language,
         memberCount,
+        compact,
         t,
     ]);
 
@@ -93,7 +104,10 @@ export function GroupCardMetaLine({
             style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
         >
             <Text
-                style={[MEMBER_META_STYLE, { textAlign, flexShrink: 1, minWidth: 0 }]}
+                style={[
+                    compact ? COMPACT_MEMBER_META_STYLE : MEMBER_META_STYLE,
+                    { textAlign, flexShrink: 1, minWidth: 0 },
+                ]}
                 numberOfLines={1}
                 testID="group-card-meta-members"
             >

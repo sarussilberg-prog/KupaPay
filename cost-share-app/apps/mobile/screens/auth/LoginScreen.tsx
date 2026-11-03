@@ -98,7 +98,7 @@ export function LoginScreen() {
     }, [pendingAccountRestore]);
 
     const handleLanguageChange = useCallback(
-        async (lang: import('@cost-share/shared').Language) => {
+        async (lang: Parameters<typeof changeAppLanguage>[0]) => {
             setLanguagePickerVisible(false);
             await changeAppLanguage(lang);
         },

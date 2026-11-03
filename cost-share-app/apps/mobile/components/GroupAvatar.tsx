@@ -17,12 +17,13 @@ interface GroupAvatarProps {
     groupType?: GroupType;
     /** Used for initials fallback when there is no image. */
     name?: string;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'xs' | 'sm' | 'md' | 'lg';
     testID?: string;
     style?: StyleProp<ViewStyle>;
 }
 
 const sizeStyles = {
+    xs: { width: 40, height: 40, borderRadius: 10, iconSize: 18, initials: 'text-xs' },
     sm: { width: 48, height: 48, borderRadius: 12, iconSize: 22, initials: 'text-sm' },
     md: { width: 56, height: 56, borderRadius: 16, iconSize: 26, initials: 'text-base' },
     lg: { width: 96, height: 96, borderRadius: 16, iconSize: 40, initials: 'text-xl' },

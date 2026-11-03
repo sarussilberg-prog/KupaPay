@@ -44,9 +44,7 @@ import {
     GROUP_CARD_MENU_ICON,
     GROUP_CARD_PAD,
     GROUP_CARD_ROW_GAP,
-    GROUP_CARD_STACK_GAP,
     GROUP_CARD_TEXT_GAP,
-    resolveGroupCardUsesStackedBalance,
 } from './groupCardLayout';
 import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
 import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
@@ -90,7 +88,6 @@ function GroupCardBase({
     const [busy, setBusy] = useState(false);
     const windowWidth = useLayoutWindowWidth();
     const [fullWidthProbeOk, setFullWidthProbeOk] = useState(false);
-    const stackBalanceChip = resolveGroupCardUsesStackedBalance(windowWidth);
     const balanceColumnStyle = groupCardBalanceColumnStyle(windowWidth);
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
@@ -209,11 +206,12 @@ function GroupCardBase({
     }, [navigation, group.id]);
 
     const cardClass = isArchived
-        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-2xl mb-2 border border-dashed border-gray-300 dark:border-gray-600'
-        : 'bg-white dark:bg-gray-800 rounded-2xl mb-2 border border-gray-100 dark:border-gray-700';
+        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-xl mb-1.5 border border-dashed border-gray-300 dark:border-gray-600'
+        : 'bg-white dark:bg-gray-800 rounded-xl mb-1.5 border border-gray-100 dark:border-gray-700';
 
     const balanceChipNode = (
         <BalanceChip
+            compact
             rollup={rollup}
             defaultCurrency={group.defaultCurrency}
             displayCurrency={displayCurrency}
@@ -240,8 +238,8 @@ function GroupCardBase({
               });
 
     const titleClassName = isArchived
-        ? 'text-[17px] font-semibold text-gray-600 dark:text-gray-300 leading-5'
-        : 'text-[17px] font-semibold text-gray-900 dark:text-gray-50 leading-5';
+        ? 'text-[15px] font-bold text-gray-600 dark:text-gray-300 leading-5'
+        : 'text-[15px] font-bold text-gray-900 dark:text-gray-50 leading-5';
     const titleAlignClass = rtlTextClassName(isRtl, titleClassName);
 
     return (
@@ -268,10 +266,8 @@ function GroupCardBase({
                 style={[
                     groupCardOuterRowStyle(isRtl),
                     {
-                        flexDirection: 'column',
-                        alignItems: 'stretch',
                         padding: GROUP_CARD_PAD,
-                        gap: GROUP_CARD_STACK_GAP,
+                        minHeight: 64,
                     },
                     cardShadow,
                 ]}
@@ -294,6 +290,7 @@ function GroupCardBase({
                             width: '100%',
                             alignItems: 'center',
                             gap: GROUP_CARD_ROW_GAP,
+                            minHeight: 40,
                         },
                     ]}
                 >
@@ -308,7 +305,7 @@ function GroupCardBase({
                             imageUrl={group.imageUrl}
                             groupType={group.groupType}
                             name={group.name}
-                            size="sm"
+                            size="xs"
                         />
                     </View>
 
@@ -324,13 +321,13 @@ function GroupCardBase({
                             justifyContent: 'center',
                         }}
                     >
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 8, minWidth: 0 }]}>
+                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6, minWidth: 0 }]}>
                             <View style={{ flex: 1, minWidth: 0 }}>
                                 <HighlightedText
                                     className={`${titleClassName} ${titleAlignClass}`}
                                     text={group.name}
                                     query={searchQuery}
-                                    numberOfLines={2}
+                                    numberOfLines={1}
                                     ellipsizeMode="tail"
                                 />
                             </View>
@@ -351,6 +348,7 @@ function GroupCardBase({
                         </View>
 
                         <GroupCardMetaLine
+                            compact
                             group={group}
                             memberCount={memberCount}
                             language={i18n.language}
@@ -365,54 +363,29 @@ function GroupCardBase({
                                     : undefined
                             }
                         />
-                        {hasMatches && (
+                        {hasMatches ? (
                             <IconLabel
                                 label={t('groups.card.matchedMembers', {
                                     names: (matchedMemberNames ?? []).join(', '),
                                 })}
                                 tone="default"
                             />
-                        )}
-                        {stackBalanceChip ? (
-                            <View
-                                testID={
-                                    layoutProbePrimary
-                                        ? 'group-card-probe-balance'
-                                        : 'group-card-balance-column'
-                                }
-                                onLayout={
-                                    layoutProbePrimary
-                                        ? layoutProbeOnLayout('group-card-balance')
-                                        : undefined
-                                }
-                                style={{
-                                    ...balanceColumnStyle,
-                                    alignSelf: isRtl ? 'flex-start' : 'flex-end',
-                                    marginTop: 2,
-                                }}
-                            >
-                                {balanceChipNode}
-                            </View>
                         ) : null}
                     </View>
 
-                    {!stackBalanceChip ? (
-                        <View
-                            testID={
-                                layoutProbePrimary
-                                    ? 'group-card-probe-balance'
-                                    : 'group-card-balance-column'
-                            }
-                            onLayout={
-                                layoutProbePrimary
-                                    ? layoutProbeOnLayout('group-card-balance')
-                                    : undefined
-                            }
-                            style={balanceColumnStyle}
-                        >
-                            {balanceChipNode}
-                        </View>
-                    ) : null}
+                    <View
+                        testID={
+                            layoutProbePrimary
+                                ? 'group-card-probe-balance'
+                                : 'group-card-balance-column'
+                        }
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-balance') : undefined
+                        }
+                        style={balanceColumnStyle}
+                    >
+                        {balanceChipNode}
+                    </View>
 
                     <TouchableOpacity
                         onPress={() => setMenuOpen(true)}

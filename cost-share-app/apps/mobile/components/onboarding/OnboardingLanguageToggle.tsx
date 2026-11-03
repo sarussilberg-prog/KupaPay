@@ -38,7 +38,7 @@ export function OnboardingLanguageToggle({
     const [pickerVisible, setPickerVisible] = useState(false);
 
     const handleSelect = useCallback(
-        async (lang: Language) => {
+        async (lang: Parameters<typeof changeAppLanguage>[0]) => {
             setPickerVisible(false);
             await changeAppLanguage(lang);
         },

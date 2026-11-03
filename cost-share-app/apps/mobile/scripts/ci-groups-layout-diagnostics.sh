@@ -16,7 +16,7 @@ REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 COST_SHARE="$REPO_ROOT/cost-share-app"
 ARTIFACTS="${LAYOUT_DIAG_ARTIFACTS_DIR:-$REPO_ROOT/artifacts/groups-layout-diagnostics}"
 TOUR_FLOW_BASENAME="groups-layout-diagnostics-tour"
-LOCALES=(en he)
+LOCALES=(en he xx-long)
 LAYOUT_DIAG_FAILURES=0
 
 export EXPO_PUBLIC_E2E_FIXTURES="${EXPO_PUBLIC_E2E_FIXTURES:-1}"
