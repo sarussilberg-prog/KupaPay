@@ -42,7 +42,6 @@
       "env": {
         "EXPO_PUBLIC_E2E": "1",
         "EXPO_PUBLIC_E2E_FIXTURES": "1",
-        "EXPO_PUBLIC_POSTHOG_KEY": "",
         "EXPO_PUBLIC_WEB_APP_URL": "https://kupa-pay.com"
       }
     },

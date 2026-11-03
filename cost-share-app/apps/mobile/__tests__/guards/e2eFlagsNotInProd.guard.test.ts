@@ -82,4 +82,14 @@ describe('E2E flags and dev Supabase — not in production builds (#695 Phase 0)
         expect(envPointsAtDevSupabase(e2e?.env)).toBe(false);
         expect(envPointsAtDevSupabase(parseEasProfiles().production?.env)).toBe(false);
     });
+
+    it('eas.json build profile env values are never empty strings (EAS CLI rejects them)', () => {
+        const profiles = parseEasProfiles();
+        for (const [name, profile] of Object.entries(profiles)) {
+            const env = profile.env ?? {};
+            for (const [key, value] of Object.entries(env)) {
+                expect(value).not.toBe('');
+            }
+        }
+    });
 });
