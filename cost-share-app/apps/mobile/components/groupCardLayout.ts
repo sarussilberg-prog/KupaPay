@@ -5,7 +5,7 @@ import { spacing } from '../theme';
 export const GROUP_CARD_PAD = 12;
 /** Horizontal gap between avatar, text, balance pill, and menu (~12pt). */
 export const GROUP_CARD_ROW_GAP = spacing.md;
-export const GROUP_CARD_TEXT_GAP = 2;
+const GROUP_CARD_TEXT_GAP = 2;
 export const GROUP_CARD_MENU_HIT = 40;
 export const GROUP_CARD_MENU_ICON = 18;
 export const GROUP_CARD_AVATAR_WIDTH = 40;
