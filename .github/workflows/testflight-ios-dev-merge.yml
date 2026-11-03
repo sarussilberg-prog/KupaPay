@@ -41,3 +41,6 @@ jobs:
       actions: write
     uses: ./.github/workflows/testflight-ios.yml
     secrets: inherit
+    with:
+      git_ref: dev
+      pro_enabled: true
