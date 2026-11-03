@@ -28,15 +28,30 @@ const TEST_USER_ID = '00000000-0000-4000-8000-000000000001';
 
 const DEFAULT_PRO_MS = 1_800_000_000_000;
 
-function mockRpcFetch(
-    handler: (body: Record<string, unknown>) => { status: number; json: Record<string, unknown> },
-): () => void {
+type MockFetchOptions = {
+    revenueCatTestUser?: boolean;
+    onTestUserLookup?: () => void;
+    webhookHandler?: (
+        body: Record<string, unknown>,
+    ) => { status: number; json: Record<string, unknown> };
+};
+
+function mockSupabaseFetch(options: MockFetchOptions): () => void {
     const originalFetch = globalThis.fetch;
     globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
         const url = typeof input === 'string' ? input : input.toString();
-        if (url.includes('/rpc/handle_revenuecat_webhook')) {
+        if (url.includes('/rpc/is_revenuecat_test_user')) {
+            options.onTestUserLookup?.();
+            return Promise.resolve(
+                new Response(JSON.stringify(options.revenueCatTestUser === true), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                }),
+            );
+        }
+        if (url.includes('/rpc/handle_revenuecat_webhook') && options.webhookHandler) {
             const parsed = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
-            const { status, json } = handler(parsed);
+            const { status, json } = options.webhookHandler(parsed);
             return Promise.resolve(
                 new Response(JSON.stringify(json), { status, headers: { 'Content-Type': 'application/json' } }),
             );
@@ -48,17 +63,24 @@ function mockRpcFetch(
     };
 }
 
-type RpcTrack = { body?: Record<string, unknown>; called: boolean };
+type RpcTrack = { body?: Record<string, unknown>; called: boolean; testUserLookup: boolean };
 
 async function withRpc<T>(
     rpcJson: Record<string, unknown>,
     run: (track: RpcTrack) => Promise<T>,
+    options: Omit<MockFetchOptions, 'webhookHandler'> = {},
 ): Promise<T> {
-    const track: RpcTrack = { called: false };
-    const restore = mockRpcFetch(body => {
-        track.called = true;
-        track.body = body;
-        return { status: 200, json: rpcJson };
+    const track: RpcTrack = { called: false, testUserLookup: false };
+    const restore = mockSupabaseFetch({
+        revenueCatTestUser: options.revenueCatTestUser,
+        onTestUserLookup: () => {
+            track.testUserLookup = true;
+        },
+        webhookHandler: body => {
+            track.called = true;
+            track.body = body;
+            return { status: 200, json: rpcJson };
+        },
     });
     try {
         return await run(track);
@@ -180,6 +202,22 @@ for (const { name, body, expected } of NO_RPC_CASES) {
         });
     });
 }
+
+Deno.test('applyWebhookEvent stale RPC response is ignored', async () => {
+    await withRpc({ duplicate: false, action: 'ignored', stale: true }, async track => {
+        const outcome = await applyWebhookEvent(
+            eventBody({
+                type: 'RENEWAL',
+                id: 'evt-stale',
+                expiration_at_ms: DEFAULT_PRO_MS,
+                event_timestamp_ms: 1_000,
+            }),
+            env,
+        );
+        assertEquals(outcome, { ok: true, action: 'ignored' });
+        assertEquals(track.called, true);
+    });
+});
 
 type RpcApplyCase = {
     name: string;

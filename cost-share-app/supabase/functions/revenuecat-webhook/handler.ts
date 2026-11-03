@@ -4,47 +4,42 @@
  * @see docs/KUPAPAY_PRO_SETUP.md
  */
 
+import {
+    planRevenueCatWebhookRpc,
+    proUntilFromEvent,
+    shouldApplySandboxRevenueCatEvent,
+    tripPassUntilFromEvent,
+    isTripPassProduct,
+    PRODUCT_PRO_MONTHLY,
+    PRODUCT_PRO_YEARLY,
+    PRODUCT_TRIP_PASS,
+    PRO_ENTITLEMENT_ID,
+    type RevenueCatWebhookEvent,
+} from '../../../packages/shared/src/revenuecat/revenueCatWebhookLogic.ts';
+
+export {
+    proUntilFromEvent,
+    tripPassUntilFromEvent,
+    isTripPassProduct,
+    PRODUCT_PRO_MONTHLY,
+    PRODUCT_PRO_YEARLY,
+    PRODUCT_TRIP_PASS,
+    PRO_ENTITLEMENT_ID,
+};
+
 export interface WebhookEnv {
     SUPABASE_URL: string;
     SUPABASE_SERVICE_ROLE_KEY: string;
     REVENUECAT_WEBHOOK_SECRET: string;
-    /** When not `true`, SANDBOX environment events are acknowledged but not applied. */
+    /** When `true`, all SANDBOX events apply. When false, only `revenuecat_test_user` profiles on prod. */
     REVENUECAT_ALLOW_SANDBOX_EVENTS?: string;
 }
 
-export const PRO_ENTITLEMENT_ID = 'pro';
-export const PRODUCT_PRO_MONTHLY = 'kupapay_pro_monthly';
-export const PRODUCT_PRO_YEARLY = 'kupapay_pro_yearly';
-export const PRODUCT_TRIP_PASS = 'kupapay_trip_pass';
-
-export interface RevenueCatEvent {
-    type: string;
-    id: string;
-    app_user_id: string;
-    /** SANDBOX | PRODUCTION — used to ignore sandbox in production webhook. */
-    environment?: string;
-    store?: string;
-    product_id?: string;
-    transaction_id?: string;
-    entitlement_ids?: string[];
-    expiration_at_ms?: number | null;
-    purchased_at_ms?: number;
-    event_timestamp_ms?: number;
-    cancel_reason?: string;
-    subscriber_attributes?: Record<
-        string,
-        { value?: string; updated_at_ms?: number }
-    >;
-}
+export type RevenueCatEvent = RevenueCatWebhookEvent;
 
 export interface RevenueCatWebhookBody {
     api_version?: string;
     event: RevenueCatEvent;
-}
-
-function msToIso(ms: number | null | undefined): string | null {
-    if (ms == null || !Number.isFinite(ms)) return null;
-    return new Date(ms).toISOString();
 }
 
 function readAttr(event: RevenueCatEvent, key: string): string | null {
@@ -84,81 +79,20 @@ export function verifyAuthorization(req: Request, secret: string): boolean {
     return false;
 }
 
-function allowSandboxEnvironment(
-    environment: string | undefined,
-    allowSandboxEvents: boolean,
-): boolean {
-    if (environment === 'SANDBOX' && !allowSandboxEvents) return false;
-    return true;
-}
-
-function hasProEntitlement(event: RevenueCatEvent): boolean {
-    return event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID) === true;
-}
-
-export function proUntilFromEvent(event: RevenueCatEvent): string | null {
-    if (event.entitlement_ids && !event.entitlement_ids.includes(PRO_ENTITLEMENT_ID)) {
-        return null;
-    }
-    const product = event.product_id ?? '';
-    if (product === PRODUCT_TRIP_PASS) return null;
-    if (product !== PRODUCT_PRO_MONTHLY && product !== PRODUCT_PRO_YEARLY) {
-        if (!event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID)) return null;
-    }
-    return msToIso(event.expiration_at_ms ?? undefined);
-}
-
-export function isTripPassProduct(event: RevenueCatEvent): boolean {
-    return event.product_id === PRODUCT_TRIP_PASS;
-}
-
-export function tripPassUntilFromEvent(event: RevenueCatEvent, now = new Date()): string {
-    const exp = msToIso(event.expiration_at_ms ?? undefined);
-    if (exp) return exp;
-    const d = new Date(now);
-    d.setUTCDate(d.getUTCDate() + 30);
-    return d.toISOString();
-}
-
-const GRANT_TYPES = new Set([
-    'INITIAL_PURCHASE',
-    'RENEWAL',
-    'UNCANCELLATION',
-    'NON_RENEWING_PURCHASE',
-    'PRODUCT_CHANGE',
-]);
-
-const IMMEDIATE_CANCEL_REASONS = new Set(['CUSTOMER_SUPPORT', 'DEVELOPER_INITIATED']);
-
-function isImmediateProRevoke(event: RevenueCatEvent): boolean {
-    const type = event.type ?? '';
-    if (!hasProEntitlement(event) || isTripPassProduct(event)) return false;
-    if (type === 'REFUND') return true;
-    if (type === 'EXPIRATION') return true;
-    if (type === 'CANCELLATION') {
-        const reason = (event.cancel_reason ?? '').toUpperCase();
-        return IMMEDIATE_CANCEL_REASONS.has(reason);
-    }
-    return false;
-}
-
-function isTripPassRevoke(event: RevenueCatEvent): boolean {
-    if (!isTripPassProduct(event)) return false;
-    const type = event.type ?? '';
-    if (type === 'REFUND' || type === 'EXPIRATION') return true;
-    if (type === 'CANCELLATION') {
-        const reason = (event.cancel_reason ?? '').toUpperCase();
-        return IMMEDIATE_CANCEL_REASONS.has(reason);
-    }
-    return false;
-}
-
-function isCancelAtPeriodEnd(event: RevenueCatEvent): boolean {
-    const type = event.type ?? '';
-    if (type !== 'CANCELLATION') return false;
-    if (!hasProEntitlement(event) || isTripPassProduct(event)) return false;
-    if (isImmediateProRevoke(event)) return false;
-    return proUntilFromEvent(event) != null;
+async function fetchIsRevenueCatTestUser(userId: string, env: WebhookEnv): Promise<boolean> {
+    const url = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/is_revenuecat_test_user`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ p_user_id: userId }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data === true;
 }
 
 export type WebhookAction =
@@ -181,33 +115,25 @@ export async function applyWebhookEvent(
         return { ok: false, status: 400, error: 'missing_event' };
     }
 
-    const allowSandbox = env.REVENUECAT_ALLOW_SANDBOX_EVENTS === 'true';
-    if (!allowSandboxEnvironment(event.environment, allowSandbox)) {
-        return { ok: true, action: 'ignored', sandboxIgnored: true };
-    }
-
     const userId = parseUuid(event.app_user_id);
     if (!userId) {
         return { ok: false, status: 400, error: 'invalid_app_user_id' };
     }
 
-    const type = event.type ?? '';
-    const isTripPassGrant = isTripPassProduct(event) &&
-        (GRANT_TYPES.has(type) || type === 'NON_RENEWING_PURCHASE');
-    const proUntil = proUntilFromEvent(event);
-    const isGrantSub = proUntil != null && GRANT_TYPES.has(type);
-    const isYearly = event.product_id === PRODUCT_PRO_YEARLY && isGrantSub;
-    const tripPassRevoke = isTripPassRevoke(event);
-    const immediateProRevoke = isImmediateProRevoke(event);
-    const cancelAtEnd = isCancelAtPeriodEnd(event);
+    const allowSandbox = env.REVENUECAT_ALLOW_SANDBOX_EVENTS === 'true';
+    if (event.environment === 'SANDBOX' && !allowSandbox) {
+        const isTestUser = await fetchIsRevenueCatTestUser(userId, env);
+        if (!shouldApplySandboxRevenueCatEvent(event.environment, allowSandbox, isTestUser)) {
+            return { ok: true, action: 'ignored', sandboxIgnored: true };
+        }
+    }
 
-    if (
-        !isTripPassGrant && !isGrantSub && !immediateProRevoke && !tripPassRevoke &&
-        !cancelAtEnd
-    ) {
+    const plan = planRevenueCatWebhookRpc(event);
+    if (plan.kind === 'ignore') {
         return { ok: true, action: 'ignored' };
     }
 
+    const type = event.type ?? '';
     const url = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/handle_revenuecat_webhook`;
     const res = await fetch(url, {
         method: 'POST',
@@ -221,14 +147,14 @@ export async function applyWebhookEvent(
             p_user_id: userId,
             p_event_type: type,
             p_product_id: event.product_id ?? null,
-            p_pro_until: (isGrantSub || cancelAtEnd) ? proUntil : null,
-            p_trip_pass_until: isTripPassGrant ? tripPassUntilFromEvent(event) : null,
+            p_pro_until: plan.p_pro_until,
+            p_trip_pass_until: plan.p_trip_pass_until,
             p_attr_group_id: parseUuid(readAttr(event, 'group_id')),
-            p_is_trip_pass: isTripPassGrant,
-            p_is_yearly: isYearly,
-            p_is_immediate_pro_revoke: immediateProRevoke,
-            p_is_trip_pass_revoke: tripPassRevoke,
-            p_event_timestamp_ms: event.event_timestamp_ms ?? null,
+            p_is_trip_pass: plan.p_is_trip_pass,
+            p_is_yearly: plan.p_is_yearly,
+            p_is_immediate_pro_revoke: plan.p_is_immediate_pro_revoke,
+            p_is_trip_pass_revoke: plan.p_is_trip_pass_revoke,
+            p_event_timestamp_ms: plan.p_event_timestamp_ms,
         }),
     });
 
