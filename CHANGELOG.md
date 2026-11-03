@@ -93,3 +93,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - ci(ios): TestFlight dev-merge builds current dev tip (#728)
 ## [2.2.0-dev.44] — 2026-11-03
 - fix(mobile): compact GroupCard row flex on iOS New Architecture (#729)
+## [2.2.0-dev.45] — 2026-11-03
+- fix(mobile): GroupCard horizontal row on inner View (iOS New Arch) (#730)
