@@ -6,7 +6,10 @@ appId: com.kupapay.mobile
     visible:
       id: groups-list-title
     timeout: 90000
-- runFlow: set-app-language.yaml
+- runFlow:
+    file: set-app-language.yaml
+    env:
+      APP_LANG: he
 - extendedWaitUntil:
     visible:
       id: groups-layout-app-rtl

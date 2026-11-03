@@ -16,8 +16,17 @@ appId: com.kupapay.mobile
     id: settings-language-row
 - extendedWaitUntil:
     visible:
+      id: language-sheet
+    timeout: 30000
+- scrollUntilVisible:
+    element:
       id: language-option-${APP_LANG}
-    timeout: 15000
+    direction: DOWN
+    timeout: 45000
+- extendedWaitUntil:
+    visible:
+      id: language-option-${APP_LANG}
+    timeout: 30000
 - tapOn:
     id: language-option-${APP_LANG}
 - tapOn:
