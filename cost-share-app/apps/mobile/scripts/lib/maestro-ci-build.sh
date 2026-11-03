@@ -13,7 +13,7 @@ maestro_write_mobile_e2e_env() {
     cat > "$env_file" <<EOF
 EXPO_PUBLIC_E2E=1
 EXPO_PUBLIC_E2E_FIXTURES=1
-EXPO_PUBLIC_POSTHOG_KEY=
+EXPO_PUBLIC_E2E_XX_LONG_LOCALE=true
 EXPO_PUBLIC_WEB_APP_URL=https://kupa-pay.com
 EOF
     echo "Wrote Maestro layout-fixture env for bundle bake: $env_file (no Supabase/PostHog network)"

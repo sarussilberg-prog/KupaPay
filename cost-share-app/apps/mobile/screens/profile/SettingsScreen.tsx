@@ -63,7 +63,7 @@ export function SettingsScreen() {
     );
 
     const handleLanguagePick = useCallback(
-        async (lang: Language) => {
+        async (lang: Parameters<typeof changeAppLanguage>[0]) => {
             setShowLanguage(false);
             await changeAppLanguage(lang);
         },

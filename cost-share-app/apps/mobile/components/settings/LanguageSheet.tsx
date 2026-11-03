@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES, isRtlLanguage, type Language } from '@cost-share/shared';
 import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
+import { E2E_XX_LONG_LOCALE_ENABLED } from '../../lib/featureFlags';
+import { XX_LONG_LOCALE_CODE } from '../../i18n/e2ePseudoLocale';
 
 interface Props {
     visible: boolean;
     current: Language;
-    onSelect: (lang: Language) => void;
+    onSelect: (lang: Language | typeof XX_LONG_LOCALE_CODE) => void;
     onClose: () => void;
     testID?: string;
 }
@@ -17,10 +19,15 @@ interface Props {
 // Each language is labeled in its own native form (endonym), not translated
 // into the currently active app language — so "English" always reads as
 // "English" and "עברית" always reads as "עברית", regardless of UI locale.
-const OPTIONS: { code: Language; nativeLabel: string }[] = SUPPORTED_LANGUAGES.map((code) => ({
-    code,
-    nativeLabel: LANGUAGE_NATIVE_LABELS[code],
-}));
+const OPTIONS: { code: Language | typeof XX_LONG_LOCALE_CODE; nativeLabel: string }[] = [
+    ...SUPPORTED_LANGUAGES.map((code) => ({
+        code,
+        nativeLabel: LANGUAGE_NATIVE_LABELS[code],
+    })),
+    ...(E2E_XX_LONG_LOCALE_ENABLED
+        ? [{ code: XX_LONG_LOCALE_CODE, nativeLabel: 'Pseudo-long (E2E)' }]
+        : []),
+];
 
 export function LanguageSheet({ visible, current, onSelect, onClose, testID }: Props) {
     const { t } = useTranslation();

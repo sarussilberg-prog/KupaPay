@@ -30,11 +30,11 @@ describe('groups list layout regression (#633 responsive)', () => {
         });
     });
 
-    it('documents stack vs inline breakpoints for QA widths', () => {
-        expect(resolveGroupCardUsesStackedBalance(320)).toBe(true);
+    it('documents header stack vs compact card row for QA widths', () => {
+        expect(resolveGroupCardUsesStackedBalance(320)).toBe(false);
         expect(resolveGroupsListUsesStackedHeader(320)).toBe(true);
         expect(resolveGroupsListUsesStackedHeader(375)).toBe(true);
-        expect(resolveGroupCardUsesStackedBalance(375)).toBe(true);
+        expect(resolveGroupCardUsesStackedBalance(375)).toBe(false);
         expect(resolveGroupsListUsesStackedHeader(430)).toBe(false);
         expect(resolveGroupCardUsesStackedBalance(430)).toBe(false);
     });

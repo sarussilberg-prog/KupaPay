@@ -19,6 +19,8 @@ import { Text } from './AppText';
 import { GROUP_CARD_CHIP_MAX_WIDTH } from './groupCardLayout';
 
 interface BalanceChipProps {
+    /** Slim list-row chip (Groups list cards). */
+    compact?: boolean;
     rollup?: GroupRollup;
     /** Group default currency (fallback when display currency omitted). */
     defaultCurrency: string;
@@ -34,24 +36,40 @@ const toneStyles = {
     settled: {
         container:
             'rounded-xl bg-gray-100/90 dark:bg-gray-700/50 px-3 py-2 border border-gray-200/60 dark:border-gray-600',
+        compactContainer:
+            'rounded-lg bg-gray-100/90 dark:bg-gray-700/50 px-2 py-1 border border-gray-200/60 dark:border-gray-600',
         label: 'text-[11px] font-medium text-gray-500 dark:text-gray-400 leading-tight',
+        compactLabel: 'text-[10px] font-medium text-gray-500 dark:text-gray-400 leading-tight',
         amount: 'text-sm font-semibold text-gray-600 dark:text-gray-300 leading-tight',
+        compactAmount: 'text-xs font-semibold text-gray-600 dark:text-gray-300 leading-tight',
     },
     owe: {
         container: 'rounded-xl bg-red-50 dark:bg-red-950/40 px-3 py-2 border border-red-100 dark:border-red-900/60',
+        compactContainer:
+            'rounded-lg bg-red-50 dark:bg-red-950/40 px-2 py-1 border border-red-100 dark:border-red-900/60',
         label: 'text-[11px] font-medium text-red-700/90 dark:text-red-300 leading-[14px]',
+        compactLabel: 'text-[10px] font-medium text-red-700/90 dark:text-red-300 leading-[12px]',
         amount: 'text-sm font-semibold text-red-600 dark:text-red-400 leading-[18px]',
+        compactAmount: 'text-xs font-semibold text-red-600 dark:text-red-400 leading-[14px]',
     },
     owed: {
         container:
             'rounded-xl bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 border border-emerald-100 dark:border-emerald-900/60',
+        compactContainer:
+            'rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 border border-emerald-100 dark:border-emerald-900/60',
         label: 'text-[11px] font-medium text-emerald-800/90 dark:text-emerald-300 leading-[14px]',
+        compactLabel: 'text-[10px] font-medium text-emerald-800/90 dark:text-emerald-300 leading-[12px]',
         amount: 'text-sm font-semibold text-emerald-700 dark:text-emerald-400 leading-[18px]',
+        compactAmount: 'text-xs font-semibold text-emerald-700 dark:text-emerald-400 leading-[14px]',
     },
     unknown: {
         container: 'rounded-xl bg-gray-100 dark:bg-gray-700/50 px-3 py-2 border border-gray-200/60 dark:border-gray-600',
+        compactContainer:
+            'rounded-lg bg-gray-100 dark:bg-gray-700/50 px-2 py-1 border border-gray-200/60 dark:border-gray-600',
         label: 'text-[11px] font-medium text-gray-400 dark:text-gray-500 leading-tight',
+        compactLabel: 'text-[10px] font-medium text-gray-400 dark:text-gray-500 leading-tight',
         amount: 'text-sm font-medium text-gray-400 dark:text-gray-500 leading-tight',
+        compactAmount: 'text-xs font-medium text-gray-400 dark:text-gray-500 leading-tight',
     },
 } as const;
 
@@ -87,6 +105,7 @@ function ChipText({
 }
 
 export function BalanceChip({
+    compact = false,
     rollup,
     defaultCurrency,
     displayCurrency,
@@ -123,14 +142,15 @@ export function BalanceChip({
     );
 
     if (!hasRealBalance && balanceUnknown) {
+        const unknown = toneStyles.unknown;
         return (
             <View
-                className={toneStyles.unknown.container}
+                className={compact ? unknown.compactContainer : unknown.container}
                 style={columnStyle}
                 testID="balance-chip-unknown"
                 accessibilityLabel={t('groups.card.balanceUnavailable')}
             >
-                <ChipText className={toneStyles.unknown.amount}>—</ChipText>
+                <ChipText className={compact ? unknown.compactAmount : unknown.amount}>—</ChipText>
             </View>
         );
     }
@@ -139,12 +159,15 @@ export function BalanceChip({
         ? classifyUserNetBalance(displayNet!)
         : 'settled';
     const styles = toneStyles[tone === 'unknown' ? 'settled' : tone];
+    const containerClass = compact ? styles.compactContainer : styles.container;
+    const labelClass = compact ? styles.compactLabel : styles.label;
+    const amountClass = compact ? styles.compactAmount : styles.amount;
     const captionKey = balanceChipLabelKey(tone, groupHasOpenDebts);
 
     if (tone === 'settled' || tone === 'unknown') {
         return (
-            <View className={styles.container} style={columnStyle} testID="balance-chip-settled">
-                <ChipText className={styles.label} numberOfLines={2}>
+            <View className={containerClass} style={columnStyle} testID="balance-chip-settled">
+                <ChipText className={labelClass} numberOfLines={compact ? 1 : 2}>
                     {t(captionKey)}
                 </ChipText>
             </View>
@@ -163,19 +186,19 @@ export function BalanceChip({
         : null;
 
     return (
-        <View className={styles.container} style={columnStyle} testID="balance-chip-active">
-            <ChipText className={styles.label} numberOfLines={2}>
+        <View className={containerClass} style={columnStyle} testID="balance-chip-active">
+            <ChipText className={labelClass} numberOfLines={compact ? 1 : 2}>
                 {t(captionKey)}
             </ChipText>
             <ChipText
-                className={styles.amount}
+                className={amountClass}
                 testID="balance-chip-amount"
                 adjustsFontSizeToFit
                 minimumFontScale={0.75}
             >
                 {amountText}
             </ChipText>
-            {extraLabel ? (
+            {!compact && extraLabel ? (
                 onPressExtraCurrencies ? (
                     <TouchableOpacity
                         onPress={onPressExtraCurrencies}

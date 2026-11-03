@@ -6,14 +6,14 @@ import {
 
 const shellW = 358;
 
-function frame(w: number, x = 0): LayoutFrame {
-    return { x, y: 0, width: w, height: 44 };
+function frame(w: number, x = 0, height = 44): LayoutFrame {
+    return { x, y: 0, width: w, height };
 }
 
 describe('groupsLayoutDiagnostics checks', () => {
     it('passes healthy LTR tab order and full-width row', () => {
         const frames = {
-            'group-card-shell': frame(shellW),
+            'group-card-shell': frame(shellW, 0, 72),
             'group-card-row': frame(shellW - 52),
             'group-card-avatar': frame(48, 0),
             'group-card-menu': frame(44, 0),
@@ -24,11 +24,23 @@ describe('groupsLayoutDiagnostics checks', () => {
         };
         const checks = evaluateGroupsLayoutChecks(frames, { appRtl: false, windowWidth: 390 });
         expect(allChecksPass(checks)).toBe(true);
+        expect(checks.find(c => c.id === 'group-card-shell-max-height')?.pass).toBe(true);
+    });
+
+    it('fails when card shell exceeds max height', () => {
+        const frames = {
+            'group-card-shell': frame(shellW, 0, 120),
+            'group-card-row': frame(shellW - 52),
+            'group-card-avatar': frame(40, 0),
+            'group-card-menu': frame(40, 0),
+        };
+        const checks = evaluateGroupsLayoutChecks(frames, { appRtl: false, windowWidth: 390 });
+        expect(checks.find(c => c.id === 'group-card-shell-max-height')?.pass).toBe(false);
     });
 
     it('fails squished RTL card + wrong tab corners (TestFlight-class layout)', () => {
         const frames = {
-            'group-card-shell': frame(shellW),
+            'group-card-shell': frame(shellW, 0, 72),
             'group-card-row': frame(120, shellW - 128),
             'group-card-avatar': frame(48, shellW - 56),
             'group-card-menu': frame(44, shellW / 2 - 22),

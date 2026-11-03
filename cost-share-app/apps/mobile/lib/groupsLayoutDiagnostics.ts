@@ -1,4 +1,5 @@
 import { I18nManager, Platform, type LayoutRectangle } from 'react-native';
+import { GROUP_CARD_MAX_SHELL_HEIGHT } from './groupsCardLayoutLimits';
 
 export type LayoutFrame = Pick<LayoutRectangle, 'x' | 'y' | 'width' | 'height'>;
 
@@ -96,9 +97,19 @@ export function evaluateGroupsLayoutChecks(
             pass: rowWidthRatio >= 0.78,
             detail: `row.width/shell.width=${rowWidthRatio.toFixed(3)} (need ≥0.78)`,
         });
+        checks.push({
+            id: 'group-card-shell-max-height',
+            pass: shell.height <= GROUP_CARD_MAX_SHELL_HEIGHT,
+            detail: `shell.height=${shell.height.toFixed(1)} (need ≤${GROUP_CARD_MAX_SHELL_HEIGHT})`,
+        });
     } else {
         checks.push({
             id: 'group-card-row-expands',
+            pass: false,
+            detail: 'missing shell or row frame',
+        });
+        checks.push({
+            id: 'group-card-shell-max-height',
             pass: false,
             detail: 'missing shell or row frame',
         });

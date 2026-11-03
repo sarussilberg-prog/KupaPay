@@ -226,8 +226,20 @@ export const initializeLanguage = async (): Promise<void> => {
  * Change language and update RTL settings
  * Saves preference to AsyncStorage for persistence
  */
-export const changeLanguage = async (language: SupportedLanguage): Promise<void> => {
+export type ChangeableAppLanguage = SupportedLanguage | typeof XX_LONG_LOCALE_CODE;
+
+export const changeLanguage = async (language: ChangeableAppLanguage): Promise<void> => {
     try {
+        if (language === XX_LONG_LOCALE_CODE) {
+            if (!E2E_XX_LONG_LOCALE_ENABLED) {
+                throw new Error('xx-long locale is not enabled');
+            }
+            await ensureI18nReady(DEFAULT_LANGUAGE);
+            registerE2ePseudoLocaleBundle();
+            await i18n.changeLanguage(XX_LONG_LOCALE_CODE);
+            useAppStore.getState().setLanguage(DEFAULT_LANGUAGE);
+            return;
+        }
         await ensureI18nReady(language);
         await i18n.changeLanguage(language);
         await AsyncStorage.setItem(LANGUAGE_KEY, language);
