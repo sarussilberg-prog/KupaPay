@@ -130,6 +130,37 @@ run_diag_flows() {
           | sed "s/^Checking '//; s/'$//" \
           > "$dest" 2>/dev/null || true
       fi
+      if [[ ! -s "$dest" && -f "$sim_log" ]]; then
+        python3 - "$sim_log" "$dest" <<'PY' || true
+import json, re, sys
+log_path, dest = sys.argv[1], sys.argv[2]
+best = None
+with open(log_path, 'r', errors='ignore') as f:
+    for line in f:
+        if '"group-card-row"' not in line or 'Checking' not in line:
+            continue
+        m = re.search(r"Checking '(\{.*)", line)
+        if not m:
+            continue
+        raw = m.group(1).rstrip("'")
+        shell = re.search(r'"group-card-shell":\{"x":[^,]+,[^,]+,"width":(\d+)', raw)
+        row = re.search(r'"group-card-row":\{"x":[^,]+,[^,]+,"width":(\d+)', raw)
+        locale = re.search(r'"locale":"([^"]+)"', raw)
+        if shell and row:
+            payload = {
+                "locale": locale.group(1) if locale else "unknown",
+                "frames": {
+                    "group-card-shell": {"width": int(shell.group(1))},
+                    "group-card-row": {"width": int(row.group(1))},
+                },
+                "partialFromSimLog": True,
+            }
+            best = payload
+with open(dest, 'w') as out:
+    if best:
+        json.dump(best, out)
+PY
+      fi
     }
     layout_diag_extract_json \
       "$ARTIFACTS/json/${maestro_platform}_${loc}.json" \
