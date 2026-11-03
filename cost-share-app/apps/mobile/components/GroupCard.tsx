@@ -24,7 +24,7 @@ import { HighlightedText } from './HighlightedText';
 import { UnreadBadge } from './UnreadBadge';
 import { IconLabel } from './primitives/IconLabel';
 import { GroupCardMetaLine } from './GroupCardMetaLine';
-import { ListRow } from './primitives/ListRow';
+import { AppPressable } from './AppPressable';
 import { colors } from '../theme';
 import { shareGroupBalanceLink, shareGroupInvite } from '../services/invite.service';
 import {
@@ -48,7 +48,7 @@ import {
 } from './groupCardLayout';
 import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
 import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
-import { groupCardShellStyle } from '../lib/nativeRowLayoutStyle';
+import { groupCardInnerRowStyle, groupCardShellStyle } from '../lib/nativeRowLayoutStyle';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -280,16 +280,33 @@ function GroupCardBase({
                         style={{ width: 0, height: 0, opacity: 0 }}
                     />
                 ) : null}
-                <ListRow
-                    layout="contentWidth"
+                <AppPressable
                     onPress={() => onPress(group.id)}
                     testID={layoutProbePrimary ? 'group-card-probe-row' : `group-card-${group.id}`}
-                    onLayout={layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined}
-                    style={{
-                        gap: GROUP_CARD_ROW_GAP,
-                        minHeight: 40,
-                    }}
+                    style={{ width: '100%', alignSelf: 'stretch' }}
                 >
+                    <View
+                        testID={
+                            layoutProbePrimary
+                                ? 'group-card-probe-row-inner'
+                                : `group-card-row-${group.id}`
+                        }
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined
+                        }
+                        className={
+                            isRtl
+                                ? 'flex-row-reverse w-full items-center'
+                                : 'flex-row w-full items-center'
+                        }
+                        style={[
+                            groupCardInnerRowStyle(isRtl),
+                            {
+                                gap: GROUP_CARD_ROW_GAP,
+                                minHeight: 40,
+                            },
+                        ]}
+                    >
                     <View
                         testID={layoutProbePrimary ? 'group-card-probe-avatar' : undefined}
                         onLayout={
@@ -407,7 +424,8 @@ function GroupCardBase({
                             color={colors.gray400}
                         />
                     </TouchableOpacity>
-                </ListRow>
+                    </View>
+                </AppPressable>
             </View>
 
             <Modal

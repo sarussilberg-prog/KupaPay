@@ -53,7 +53,7 @@ describe('nativeRowLayoutStyle', () => {
         const row = groupCardInnerRowStyle(true);
         expect(row.width).toBe('100%');
         expect(row.flexDirection).toBe('row-reverse');
-        expect(row.direction).toBe('ltr');
+        expect(row.flexWrap).toBe('nowrap');
         expect(row.flexGrow).toBe(0);
         expect(row.flex).toBeUndefined();
         expect(isNativeRowFlexSafe(row)).toBe(true);

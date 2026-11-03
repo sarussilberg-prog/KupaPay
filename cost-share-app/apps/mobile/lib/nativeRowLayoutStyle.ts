@@ -43,15 +43,24 @@ export function groupCardShellStyle(_isRtl: boolean, platform: typeof Platform.O
  * when the shell is not a flex parent.
  */
 export function groupCardInnerRowStyle(isRtl: boolean, platform: typeof Platform.OS = Platform.OS): ViewStyle {
-    return flattenNativeRowStyles(rtlRowStyle(isRtl), {
-        width: '100%',
-        alignSelf: 'stretch',
-        alignItems: 'center',
+    const base = {
+        width: '100%' as const,
+        alignSelf: 'stretch' as const,
+        alignItems: 'center' as const,
         flexGrow: 0,
         flexShrink: 0,
-        flexBasis: 'auto',
+        flexBasis: 'auto' as const,
         minWidth: 0,
-    });
+        flexWrap: 'nowrap' as const,
+    };
+    // Match listRowContainerStyle: explicit flexDirection on native (Pressable ignores row styles on New Arch).
+    if (platform !== 'web') {
+        return {
+            ...base,
+            flexDirection: isRtl ? 'row-reverse' : 'row',
+        };
+    }
+    return flattenNativeRowStyles(rtlRowStyle(isRtl), base);
 }
 
 export function listRowFlexStyle(isRtl: boolean, platform: typeof Platform.OS = Platform.OS): ViewStyle {
