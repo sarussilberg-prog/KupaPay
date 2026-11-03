@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Language } from '@cost-share/shared';
-import { changeLanguage, type ChangeableAppLanguage } from '../i18n';
-import { XX_LONG_LOCALE_CODE } from '../i18n/e2ePseudoLocale';
+import { changeLanguage } from '../i18n';
+import type { AppLanguagePickerCode } from '../i18n/appLanguagePicker';
 import { platformAlert } from '../lib/platformAlert';
 
 /**
@@ -13,9 +12,9 @@ export function useChangeAppLanguage() {
     const { t } = useTranslation();
 
     return useCallback(
-        async (lang: Language | typeof XX_LONG_LOCALE_CODE) => {
+        async (lang: AppLanguagePickerCode) => {
             try {
-                await changeLanguage(lang as ChangeableAppLanguage);
+                await changeLanguage(lang);
             } catch {
                 platformAlert(t('common.error'), t('profile.languageChangeError'));
             }

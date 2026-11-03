@@ -7,11 +7,12 @@ import { AppIcon } from '../AppIcon';
 import { colors } from '../../theme';
 import { E2E_XX_LONG_LOCALE_ENABLED } from '../../lib/featureFlags';
 import { XX_LONG_LOCALE_CODE } from '../../i18n/e2ePseudoLocale';
+import { type AppLanguagePickerCode, isE2ePseudoLocaleCode } from '../../i18n/appLanguagePicker';
 
 interface Props {
     visible: boolean;
     current: Language;
-    onSelect: (lang: Language | typeof XX_LONG_LOCALE_CODE) => void;
+    onSelect: (lang: AppLanguagePickerCode) => void;
     onClose: () => void;
     testID?: string;
 }
@@ -19,7 +20,7 @@ interface Props {
 // Each language is labeled in its own native form (endonym), not translated
 // into the currently active app language — so "English" always reads as
 // "English" and "עברית" always reads as "עברית", regardless of UI locale.
-const OPTIONS: { code: Language | typeof XX_LONG_LOCALE_CODE; nativeLabel: string }[] = [
+const OPTIONS: { code: AppLanguagePickerCode; nativeLabel: string }[] = [
     ...SUPPORTED_LANGUAGES.map((code) => ({
         code,
         nativeLabel: LANGUAGE_NATIVE_LABELS[code],
@@ -55,7 +56,10 @@ export function LanguageSheet({ visible, current, onSelect, onClose, testID }: P
                                 className="flex-1 text-base text-gray-900"
                                 style={{
                                     textAlign: 'left',
-                                    writingDirection: isRtlLanguage(opt.code) ? 'rtl' : 'ltr',
+                                    writingDirection:
+                                        !isE2ePseudoLocaleCode(opt.code) && isRtlLanguage(opt.code)
+                                            ? 'rtl'
+                                            : 'ltr',
                                 }}
                             >
                                 {opt.nativeLabel}

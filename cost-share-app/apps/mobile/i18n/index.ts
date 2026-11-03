@@ -226,9 +226,9 @@ export const initializeLanguage = async (): Promise<void> => {
  * Change language and update RTL settings
  * Saves preference to AsyncStorage for persistence
  */
-export type ChangeableAppLanguage = SupportedLanguage | typeof XX_LONG_LOCALE_CODE;
-
-export const changeLanguage = async (language: ChangeableAppLanguage): Promise<void> => {
+export const changeLanguage = async (
+    language: SupportedLanguage | typeof XX_LONG_LOCALE_CODE,
+): Promise<void> => {
     try {
         if (language === XX_LONG_LOCALE_CODE) {
             if (!E2E_XX_LONG_LOCALE_ENABLED) {
