@@ -48,7 +48,7 @@ import {
 } from './groupCardLayout';
 import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
 import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
-import { groupCardOuterRowStyle, listRowFlexStyle } from '../lib/nativeRowLayoutStyle';
+import { groupCardShellStyle } from '../lib/nativeRowLayoutStyle';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -264,7 +264,7 @@ function GroupCardBase({
                           : undefined
                 }
                 style={[
-                    groupCardOuterRowStyle(isRtl),
+                    groupCardShellStyle(isRtl),
                     {
                         padding: GROUP_CARD_PAD,
                         minHeight: 64,
@@ -281,18 +281,14 @@ function GroupCardBase({
                     />
                 ) : null}
                 <ListRow
+                    layout="contentWidth"
                     onPress={() => onPress(group.id)}
                     testID={layoutProbePrimary ? 'group-card-probe-row' : `group-card-${group.id}`}
                     onLayout={layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined}
-                    style={[
-                        listRowFlexStyle(isRtl),
-                        {
-                            width: '100%',
-                            alignItems: 'center',
-                            gap: GROUP_CARD_ROW_GAP,
-                            minHeight: 40,
-                        },
-                    ]}
+                    style={{
+                        gap: GROUP_CARD_ROW_GAP,
+                        minHeight: 40,
+                    }}
                 >
                     <View
                         testID={layoutProbePrimary ? 'group-card-probe-avatar' : undefined}

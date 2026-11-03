@@ -1,7 +1,8 @@
 import { Platform } from 'react-native';
 import {
     flattenNativeRowStyles,
-    groupCardOuterRowStyle,
+    groupCardInnerRowStyle,
+    groupCardShellStyle,
     isNativeRowFlexSafe,
     listRowFlexStyle,
 } from '../../lib/nativeRowLayoutStyle';
@@ -35,15 +36,27 @@ describe('nativeRowLayoutStyle', () => {
         restore(os);
     });
 
-    it('group card outer row uses full width and safe rtl row on iOS', () => {
+    it('group card shell is a stretch column (not a flex row) on iOS', () => {
         const os = Platform.OS;
         ios();
-        const style = groupCardOuterRowStyle(true);
-        expect(style.width).toBe('100%');
-        expect(style.alignSelf).toBe('stretch');
-        expect(style.direction).toBe('ltr');
-        expect(style.flexDirection).toBe('row-reverse');
-        expect(isNativeRowFlexSafe(style)).toBe(true);
+        const shell = groupCardShellStyle(true);
+        expect(shell.width).toBe('100%');
+        expect(shell.alignSelf).toBe('stretch');
+        expect(shell.flexDirection).toBe('column');
+        expect(isNativeRowFlexSafe(shell)).toBe(true);
+        restore(os);
+    });
+
+    it('group card inner row is full-width horizontal flex without self flex growth', () => {
+        const os = Platform.OS;
+        ios();
+        const row = groupCardInnerRowStyle(true);
+        expect(row.width).toBe('100%');
+        expect(row.flexDirection).toBe('row-reverse');
+        expect(row.direction).toBe('ltr');
+        expect(row.flexGrow).toBe(0);
+        expect(row.flex).toBeUndefined();
+        expect(isNativeRowFlexSafe(row)).toBe(true);
         restore(os);
     });
 

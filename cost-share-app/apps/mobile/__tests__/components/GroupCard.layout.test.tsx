@@ -10,7 +10,11 @@ jest.mock('../../lib/featureFlags', () => ({
 import type { GroupWithMembers } from '@cost-share/shared';
 import { GroupCard } from '../../components/GroupCard';
 import { LayoutWindowWidthProvider } from '../../hooks/useLayoutWindowWidth';
-import { groupCardOuterRowStyle, isNativeRowFlexSafe, listRowFlexStyle } from '../../lib/nativeRowLayoutStyle';
+import {
+    groupCardInnerRowStyle,
+    groupCardShellStyle,
+    isNativeRowFlexSafe,
+} from '../../lib/nativeRowLayoutStyle';
 
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
@@ -41,10 +45,11 @@ describe('GroupCard layout (native-like style resolver)', () => {
         const os = Platform.OS;
         Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
         for (const isRtl of [false, true]) {
-            const outer = groupCardOuterRowStyle(isRtl);
-            expect(outer.width).toBe('100%');
-            expect(isNativeRowFlexSafe(outer)).toBe(true);
-            const row = listRowFlexStyle(isRtl);
+            const shell = groupCardShellStyle(isRtl);
+            expect(shell.width).toBe('100%');
+            expect(isNativeRowFlexSafe(shell)).toBe(true);
+            const row = groupCardInnerRowStyle(isRtl);
+            expect(row.width).toBe('100%');
             expect(isNativeRowFlexSafe(row)).toBe(true);
         }
         Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
