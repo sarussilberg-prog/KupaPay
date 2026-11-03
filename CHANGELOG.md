@@ -87,3 +87,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(release): default Pro on for dev TestFlight and Play internal (#726)
 ## [2.2.0-dev.41] — 2026-11-03
 - feat(mobile): compact single-row Groups list cards (#724)
+## [2.2.0-dev.42] — 2026-11-03
+- ci(ios): widen TestFlight dev-merge path filter (#727)
