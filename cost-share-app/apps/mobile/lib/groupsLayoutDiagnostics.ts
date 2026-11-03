@@ -69,7 +69,7 @@ export function subscribeLayoutDiagnostics(
 }
 
 /** Physical gap between avatar inner edge and name column start edge (pt). */
-export function measureAvatarToNameGap(
+function measureAvatarToNameGap(
     avatar: LayoutFrame,
     name: LayoutFrame,
     appRtl: boolean,
@@ -81,7 +81,7 @@ export function measureAvatarToNameGap(
 }
 
 /** Physical gap between balance pill and overflow menu (pt). */
-export function measureBalanceToMenuGap(
+function measureBalanceToMenuGap(
     balance: LayoutFrame,
     menu: LayoutFrame,
     appRtl: boolean,

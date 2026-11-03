@@ -1,8 +1,6 @@
 import {
     evaluateGroupsLayoutChecks,
     allChecksPass,
-    measureAvatarToNameGap,
-    measureBalanceToMenuGap,
     type LayoutFrame,
 } from '../../lib/groupsLayoutDiagnostics';
 
@@ -35,12 +33,8 @@ describe('groupsLayoutDiagnostics checks', () => {
         const checks = evaluateGroupsLayoutChecks(frames, { appRtl: false, windowWidth: 390 });
         expect(allChecksPass(checks)).toBe(true);
         expect(checks.find(c => c.id === 'group-card-shell-max-height')?.pass).toBe(true);
-        expect(measureAvatarToNameGap(frames['group-card-avatar']!, frames['group-card-name']!, false)).toBe(
-            gap,
-        );
-        expect(
-            measureBalanceToMenuGap(frames['group-card-balance']!, frames['group-card-menu']!, false),
-        ).toBe(gap);
+        expect(checks.find(c => c.id === 'group-card-avatar-name-gap-ltr')?.pass).toBe(true);
+        expect(checks.find(c => c.id === 'group-card-balance-menu-gap-ltr')?.pass).toBe(true);
     });
 
     it('passes healthy RTL mirror with tight avatar-to-name gap', () => {
@@ -68,9 +62,7 @@ describe('groupsLayoutDiagnostics checks', () => {
         };
         const checks = evaluateGroupsLayoutChecks(frames, { appRtl: true, windowWidth: 390 });
         expect(allChecksPass(checks)).toBe(true);
-        expect(measureAvatarToNameGap(frames['group-card-avatar']!, frames['group-card-name']!, true)).toBe(
-            gap,
-        );
+        expect(checks.find(c => c.id === 'group-card-avatar-name-gap-rtl')?.pass).toBe(true);
     });
 
     it('fails when card shell exceeds max height', () => {
