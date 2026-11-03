@@ -39,12 +39,12 @@ const GRANT_TYPES = new Set<string>(REVENUECAT_GRANT_EVENT_TYPES);
 
 const IMMEDIATE_CANCEL_REASONS = new Set(['CUSTOMER_SUPPORT', 'DEVELOPER_INITIATED']);
 
-export function msToIso(ms: number | null | undefined): string | null {
+function msToIso(ms: number | null | undefined): string | null {
     if (ms == null || !Number.isFinite(ms)) return null;
     return new Date(ms).toISOString();
 }
 
-export function hasProEntitlement(event: RevenueCatWebhookEvent): boolean {
+function hasProEntitlement(event: RevenueCatWebhookEvent): boolean {
     return event.entitlement_ids?.includes(PRO_ENTITLEMENT_ID) === true;
 }
 
@@ -95,7 +95,7 @@ export function isImmediateProRevoke(event: RevenueCatWebhookEvent): boolean {
     return false;
 }
 
-export function isTripPassRevoke(event: RevenueCatWebhookEvent): boolean {
+function isTripPassRevoke(event: RevenueCatWebhookEvent): boolean {
     if (!isTripPassProduct(event)) return false;
     const type = event.type ?? '';
     if (type === 'REFUND' || type === 'EXPIRATION') return true;
@@ -114,7 +114,7 @@ export function isCancelAtPeriodEnd(event: RevenueCatWebhookEvent): boolean {
     return proUntilFromEvent(event) != null;
 }
 
-export type RevenueCatWebhookRpcPlan =
+type RevenueCatWebhookRpcPlan =
     | { kind: 'ignore' }
     | {
           kind: 'rpc';
