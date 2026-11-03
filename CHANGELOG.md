@@ -97,3 +97,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): GroupCard horizontal row on inner View (iOS New Arch) (#730)
 ## [2.2.0-dev.46] — 2026-11-03
 - fix(mobile): RTL GroupCard text flush to avatar + layout gap diagnostics (#731)
+## [2.2.0-dev.47] — 2026-11-03
+- fix(mobile): GroupCard RTL row XOR I18nManager + physical x-order diagnostics (#732)
