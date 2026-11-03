@@ -11,6 +11,7 @@
     "components/groups/GroupsListSummaryCard.tsx:44",
     "components/NetworkOfflineBanner.tsx:34",
     "components/NetworkOfflineBanner.tsx:43",
+    "components/navigation/CustomTabBar.tsx:129",
     "components/onboarding/OnboardingCreateGroupHero.tsx:93",
     "components/settings/LegalDocumentSheet.tsx:104",
     "components/settings/LegalDocumentSheet.tsx:169",
@@ -26,5 +27,5 @@
     "screens/expenses/AddExpenseScreen.tsx:1481",
     "screens/expenses/AddExpenseScreen.tsx:1496"
   ],
-  "count": 25
+  "count": 26
 }
