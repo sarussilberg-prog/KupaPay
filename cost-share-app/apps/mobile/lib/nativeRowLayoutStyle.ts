@@ -1,4 +1,5 @@
 import { Platform, StyleSheet, type ViewStyle } from 'react-native';
+import { listRowContainerStyle } from '../components/ui/iconLabelLayout';
 import { rtlRowStyle } from '../hooks/useRtlLayout';
 
 /** Flattened styles for native row layout regression checks (Yoga-like, no snapshot). */
@@ -43,24 +44,23 @@ export function groupCardShellStyle(_isRtl: boolean, platform: typeof Platform.O
  * when the shell is not a flex parent.
  */
 export function groupCardInnerRowStyle(isRtl: boolean, platform: typeof Platform.OS = Platform.OS): ViewStyle {
-    const base = {
+    const sizing = {
         width: '100%' as const,
         alignSelf: 'stretch' as const,
-        alignItems: 'center' as const,
         flexGrow: 0,
         flexShrink: 0,
         flexBasis: 'auto' as const,
         minWidth: 0,
         flexWrap: 'nowrap' as const,
     };
-    // Match listRowContainerStyle: explicit flexDirection on native (Pressable ignores row styles on New Arch).
+    // Reuse allowlisted list row flexDirection (Pressable ignores row styles on iOS New Arch — apply on inner View).
     if (platform !== 'web') {
-        return {
-            ...base,
-            flexDirection: isRtl ? 'row-reverse' : 'row',
-        };
+        return { ...listRowContainerStyle(isRtl, 0), ...sizing };
     }
-    return flattenNativeRowStyles(rtlRowStyle(isRtl), base);
+    return flattenNativeRowStyles(rtlRowStyle(isRtl), {
+        ...sizing,
+        alignItems: 'center',
+    });
 }
 
 export function listRowFlexStyle(isRtl: boolean, platform: typeof Platform.OS = Platform.OS): ViewStyle {
