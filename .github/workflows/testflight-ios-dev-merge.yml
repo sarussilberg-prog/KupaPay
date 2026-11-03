@@ -25,7 +25,7 @@ jobs:
           run=false
           while IFS= read -r path; do
             case "$path" in
-              cost-share-app/apps/mobile/eas.json|.github/workflows/testflight-ios.yml|.github/workflows/testflight-ios-dev-merge.yml|cost-share-app/apps/mobile/components/GroupCard.tsx|cost-share-app/apps/mobile/components/groupCardLayout.ts|cost-share-app/apps/mobile/lib/groupsLayoutDiagnostics.ts|cost-share-app/apps/mobile/lib/groupsCardLayoutLimits.ts)
+              cost-share-app/apps/mobile/eas.json|.github/workflows/testflight-ios.yml|.github/workflows/testflight-ios-dev-merge.yml|cost-share-app/apps/mobile/components/GroupCard.tsx|cost-share-app/apps/mobile/components/groupCardLayout.ts|cost-share-app/apps/mobile/components/ui/iconLabelLayout.ts|cost-share-app/apps/mobile/hooks/useRtlLayout.tsx|cost-share-app/apps/mobile/lib/groupsLayoutDiagnostics.ts|cost-share-app/apps/mobile/lib/groupsCardLayoutLimits.ts)
                 run=true
                 break
                 ;;

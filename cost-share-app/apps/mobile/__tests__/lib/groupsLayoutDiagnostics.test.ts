@@ -76,6 +76,30 @@ describe('groupsLayoutDiagnostics checks', () => {
         expect(checks.find(c => c.id === 'group-card-shell-max-height')?.pass).toBe(false);
     });
 
+    it('fails Hebrew appRtl when physical row is still LTR (avatar left of name)', () => {
+        const rowW = shellW - 52;
+        const avatarW = 40;
+        const nameW = 148;
+        const balanceW = 80;
+        const menuW = 40;
+        const gap = 12;
+        const frames = {
+            'group-card-shell': frame(shellW, 0, 72),
+            'group-card-row': frame(rowW),
+            'group-card-avatar': frame(avatarW, 0),
+            'group-card-name': frame(nameW, avatarW + gap),
+            'group-card-balance': frame(balanceW, avatarW + gap + nameW + gap),
+            'group-card-menu': frame(menuW, avatarW + gap + nameW + gap + balanceW + gap),
+            'tab-profile': frame(70, 8),
+            'tab-activity': frame(70, 78),
+            'tab-favorite': frame(70, shellW - 148),
+            'tab-groups': frame(70, shellW - 78),
+        };
+        const checks = evaluateGroupsLayoutChecks(frames, { appRtl: true, windowWidth: 390 });
+        expect(checks.find(c => c.id === 'group-card-avatar-x-order-rtl')?.pass).toBe(false);
+        expect(checks.find(c => c.id === 'group-card-menu-x-order-rtl')?.pass).toBe(false);
+    });
+
     it('fails squished RTL card + wrong tab corners (TestFlight-class layout)', () => {
         const frames = {
             'group-card-shell': frame(shellW, 0, 72),

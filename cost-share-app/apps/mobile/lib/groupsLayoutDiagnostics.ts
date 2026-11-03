@@ -175,6 +175,11 @@ export function evaluateGroupsLayoutChecks(
             pass: gap >= -1 && gap <= GROUP_CARD_MAX_AVATAR_TO_NAME_GAP,
             detail: `avatar→name gap=${gap.toFixed(1)} (need 0–${GROUP_CARD_MAX_AVATAR_TO_NAME_GAP})`,
         });
+        checks.push({
+            id: `group-card-avatar-x-order-${suffix}`,
+            pass: opts.appRtl ? avatar.x > name.x : avatar.x < name.x,
+            detail: `avatar.x=${avatar.x.toFixed(1)} name.x=${name.x.toFixed(1)} (he: avatar.x > name.x)`,
+        });
     }
 
     if (balance && menu) {
@@ -184,6 +189,11 @@ export function evaluateGroupsLayoutChecks(
             id: `group-card-balance-menu-gap-${suffix}`,
             pass: gap >= -1 && gap <= GROUP_CARD_MAX_BALANCE_TO_MENU_GAP,
             detail: `balance→menu gap=${gap.toFixed(1)} (need 0–${GROUP_CARD_MAX_BALANCE_TO_MENU_GAP})`,
+        });
+        checks.push({
+            id: `group-card-menu-x-order-${suffix}`,
+            pass: opts.appRtl ? menu.x < balance.x : menu.x > balance.x,
+            detail: `menu.x=${menu.x.toFixed(1)} balance.x=${balance.x.toFixed(1)} (he: menu.x < balance.x)`,
         });
     }
 

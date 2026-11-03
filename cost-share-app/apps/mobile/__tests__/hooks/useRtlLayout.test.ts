@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import {
     centeredTextStyle,
     feedActorNameStyle,
@@ -11,9 +11,12 @@ import {
 } from '../../hooks/useRtlLayout';
 
 describe('useRtlLayout helpers', () => {
-    it('uses row-reverse + direction ltr on native for RTL rows (flex-safe)', () => {
+    it('uses row-reverse + direction ltr on native when app RTL but I18nManager is still LTR', () => {
         const os = Platform.OS;
         Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
+        const prev = i18nMgr.isRTL;
+        i18nMgr.isRTL = false;
         expect(rtlRowStyle(true)).toEqual({
             flexDirection: 'row-reverse',
             direction: 'ltr',
@@ -22,6 +25,25 @@ describe('useRtlLayout helpers', () => {
             flexDirection: 'row',
             direction: 'ltr',
         });
+        i18nMgr.isRTL = prev;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
+    });
+
+    it('uses physical row (no reverse) when app RTL matches I18nManager.isRTL', () => {
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
+        const prev = i18nMgr.isRTL;
+        i18nMgr.isRTL = true;
+        expect(rtlRowStyle(true)).toEqual({
+            flexDirection: 'row',
+            direction: 'ltr',
+        });
+        expect(rtlRowStyle(false)).toEqual({
+            flexDirection: 'row-reverse',
+            direction: 'ltr',
+        });
+        i18nMgr.isRTL = prev;
         Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
     });
 

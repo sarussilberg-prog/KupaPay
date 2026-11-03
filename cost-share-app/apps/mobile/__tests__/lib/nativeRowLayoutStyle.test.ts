@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import {
     flattenNativeRowStyles,
     groupCardInnerRowStyle,
@@ -50,6 +50,9 @@ describe('nativeRowLayoutStyle', () => {
     it('group card inner row is full-width horizontal flex without self flex growth', () => {
         const os = Platform.OS;
         ios();
+        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
+        const prev = i18nMgr.isRTL;
+        i18nMgr.isRTL = false;
         const row = groupCardInnerRowStyle(true);
         expect(row.width).toBe('100%');
         expect(row.flexDirection).toBe('row-reverse');
@@ -57,6 +60,9 @@ describe('nativeRowLayoutStyle', () => {
         expect(row.flexGrow).toBe(0);
         expect(row.flex).toBeUndefined();
         expect(isNativeRowFlexSafe(row)).toBe(true);
+        i18nMgr.isRTL = true;
+        expect(groupCardInnerRowStyle(true).flexDirection).toBe('row');
+        i18nMgr.isRTL = prev;
         restore(os);
     });
 

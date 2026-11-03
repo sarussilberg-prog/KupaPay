@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { Platform, StyleProp, TextStyle, View, ViewStyle, StyleSheet } from 'react-native';
+import { I18nManager, Platform, StyleProp, TextStyle, View, ViewStyle, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { isLanguage, isRtlLanguage, type Language } from '@cost-share/shared';
 import { useAppStore } from '../store';
@@ -30,9 +30,13 @@ export function useRtlLayout(): boolean {
 }
 
 /**
- * Horizontal flex row that mirrors for RTL without breaking flex growth on native.
+ * Horizontal flex row that mirrors for app RTL languages without breaking flex growth on native.
  * On the New Architecture, `direction: 'rtl'` on a row shrinks flex children to
- * content width (web does not). Native uses physical row-reverse + direction ltr.
+ * content width (web does not). Native rows opt out with `direction: 'ltr'`.
+ *
+ * When `I18nManager.isRTL` is already true (after forceRTL + reload), Yoga mirrors
+ * `flexDirection: 'row'` — do not also use row-reverse or the card row lands LTR-shaped
+ * (avatar left, menu right) while copy still aligns Hebrew-right.
  */
 export function rtlRowStyle(isRtl: boolean): ViewStyle {
     if (Platform.OS === 'web') {
@@ -41,8 +45,10 @@ export function rtlRowStyle(isRtl: boolean): ViewStyle {
             direction: isRtl ? 'rtl' : 'ltr',
         };
     }
+    const nativeMirrored = I18nManager.isRTL;
+    const useRowReverse = isRtl !== nativeMirrored;
     return {
-        flexDirection: isRtl ? 'row-reverse' : 'row',
+        flexDirection: useRowReverse ? 'row-reverse' : 'row',
         direction: 'ltr',
     };
 }
