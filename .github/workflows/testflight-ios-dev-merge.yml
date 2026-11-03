@@ -1,0 +1,43 @@
+# Start TestFlight after a dev PR merge touches mobile release config (GITHUB_TOKEN pushes do not fire `on: push`).
+name: TestFlight iOS (dev merge)
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+
+jobs:
+  plan:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - name: Detect mobile release paths in merged PR
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          run=false
+          while IFS= read -r path; do
+            case "$path" in
+              cost-share-app/apps/mobile/eas.json|.github/workflows/testflight-ios.yml|.github/workflows/testflight-ios-dev-merge.yml)
+                run=true
+                break
+                ;;
+            esac
+          done < <(gh pr view "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --json files --jq '.files[].path')
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+
+  testflight:
+    needs: plan
+    if: needs.plan.outputs.run == 'true'
+    permissions:
+      contents: read
+      actions: write
+    uses: ./.github/workflows/testflight-ios.yml
+    secrets: inherit
