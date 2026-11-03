@@ -95,3 +95,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): compact GroupCard row flex on iOS New Architecture (#729)
 ## [2.2.0-dev.45] — 2026-11-03
 - fix(mobile): GroupCard horizontal row on inner View (iOS New Arch) (#730)
+## [2.2.0-dev.46] — 2026-11-03
+- fix(mobile): RTL GroupCard text flush to avatar + layout gap diagnostics (#731)
