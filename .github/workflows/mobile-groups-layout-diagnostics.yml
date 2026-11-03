@@ -1,8 +1,14 @@
-# Phase-1 Groups layout diagnostics (#680–#682). Informational; shares Maestro build caches.
+# Phase-0 Groups layout diagnostics (#695). Informational; shares Maestro build caches.
 name: Mobile Groups layout diagnostics
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - 'cursor/**'
+    paths:
+      - 'cost-share-app/apps/mobile/**'
+      - '.github/workflows/mobile-groups-layout-diagnostics.yml'
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches: [dev, main, 'cursor/**']
@@ -41,28 +47,34 @@ jobs:
           CHANGED_FILES: ''
           GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
         run: node scripts/lib/maestro-ci-plan.mjs | tee /tmp/plan.json
+      - name: Verify dev Supabase reachable (ubuntu)
+        env:
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+        run: |
+          if [[ -z "${E2E_SUPABASE_URL:-}" || -z "${E2E_SUPABASE_ANON_KEY:-}" ]]; then
+            echo "::error::E2E_SUPABASE_URL / E2E_SUPABASE_ANON_KEY secrets are required"
+            exit 1
+          fi
+          curl -sf "${E2E_SUPABASE_URL}/auth/v1/health" -H "apikey: ${E2E_SUPABASE_ANON_KEY}" >/dev/null
+          echo "Dev Supabase auth health OK from ubuntu runner"
 
   build-ios:
     name: Diagnostics build (iOS)
     needs: plan
     runs-on: macos-latest
-    timeout-minutes: 40
+    timeout-minutes: 70
     defaults:
       run:
         working-directory: cost-share-app
     env:
-      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
+      EXPO_PUBLIC_E2E_FIXTURES: '1'
+      EXPO_PUBLIC_E2E: '1'
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
       MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
       MAESTRO_IOS_APP_STAGING_DIR: /tmp/maestro-ios-app
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -84,9 +96,19 @@ jobs:
           path: ~/Library/Developer/Xcode/DerivedData
           key: maestro-derived-${{ needs.plan.outputs.native_fingerprint }}
           restore-keys: maestro-derived-
+      - name: Restore cached iOS app bundle
+        uses: actions/cache/restore@v4
+        id: ios_app_cache
+        with:
+          path: /tmp/maestro-ios-app
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v11
+          restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v11
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-layout-fixtures-v10
       - name: Install dependencies
         run: npm ci
       - name: Build iOS app (once)
+        if: steps.ios_app_cache.outputs.cache-hit != 'true'
         run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios build
       - uses: actions/upload-artifact@v7
         with:
@@ -97,24 +119,18 @@ jobs:
   layout-diagnostics-ios:
     name: Groups layout probes (iOS)
     needs: [plan, build-ios]
-    continue-on-error: true
     runs-on: macos-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     defaults:
       run:
         working-directory: cost-share-app
     env:
-      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
-      IOS_SIMULATOR_DEVICES: 'iPhone SE (3rd generation);iPhone 16;iPhone 16 Pro Max'
+      EXPO_PUBLIC_E2E_FIXTURES: '1'
+      EXPO_PUBLIC_E2E: '1'
+      IOS_SIMULATOR_DEVICES: 'iPhone 17'
       MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -138,11 +154,15 @@ jobs:
             artifacts/groups-layout-diagnostics/logs
             artifacts/groups-layout-diagnostics/json
             artifacts/groups-layout-diagnostics/screenshots
+            artifacts/groups-layout-diagnostics/debug
+            artifacts/groups-layout-diagnostics/app-env-audit.txt
           if-no-files-found: warn
           retention-days: 14
 
   build-android:
     name: Diagnostics build (Android)
+    # Phase-1 #695: Android release assemble exceeds 40m build budget; iOS JSON first.
+    if: false
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -193,6 +213,7 @@ jobs:
 
   layout-diagnostics-android:
     name: Groups layout probes (Android)
+    if: false
     needs: [plan, build-android]
     continue-on-error: true
     runs-on: ubuntu-latest

@@ -6,13 +6,13 @@
 import { SimplifiedInputsPayload } from '@cost-share/shared';
 import { supabase } from '../lib/supabase';
 import { getCurrentUserId } from '../lib/auth';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 import { ascCaptureSimplifiedInputs } from '../screenshotDemo/ascCaptureFixtures';
 
 const EMPTY: SimplifiedInputsPayload = { groups: [] };
 
 export async function fetchSimplifiedInputs(): Promise<SimplifiedInputsPayload> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         return ascCaptureSimplifiedInputs();
     }
     const userId = await getCurrentUserId();

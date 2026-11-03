@@ -16,14 +16,14 @@ export type LayoutProbeId =
     | 'tab-favorite'
     | 'tab-groups';
 
-type I18nRtlSnapshot = {
+export type I18nRtlSnapshot = {
     isRTL: boolean;
     doLeftAndRightSwap: boolean;
     allowRTL: boolean;
     platform: string;
 };
 
-type GroupsLayoutDiagnosticPayload = {
+export type GroupsLayoutDiagnosticPayload = {
     locale: string;
     appRtl: boolean;
     windowWidth: number;
@@ -33,7 +33,7 @@ type GroupsLayoutDiagnosticPayload = {
     capturedAt: string;
 };
 
-type GroupsLayoutCheckResult = {
+export type GroupsLayoutCheckResult = {
     id: string;
     pass: boolean;
     detail: string;
@@ -42,7 +42,7 @@ type GroupsLayoutCheckResult = {
 const probeStore: Partial<Record<LayoutProbeId, LayoutFrame>> = {};
 let payloadListener: ((payload: GroupsLayoutDiagnosticPayload) => void) | null = null;
 
-function resetLayoutProbes(): void {
+export function resetLayoutProbes(): void {
     for (const key of Object.keys(probeStore) as LayoutProbeId[]) {
         delete probeStore[key];
     }
@@ -53,7 +53,7 @@ export function recordLayoutProbe(id: LayoutProbeId, frame: LayoutFrame): void {
     payloadListener?.(buildDiagnosticPayload());
 }
 
-function subscribeLayoutDiagnostics(
+export function subscribeLayoutDiagnostics(
     listener: (payload: GroupsLayoutDiagnosticPayload) => void,
 ): () => void {
     payloadListener = listener;
@@ -63,8 +63,13 @@ function subscribeLayoutDiagnostics(
     };
 }
 
-function snapshotI18nManager(): I18nRtlSnapshot {
-    const doLeftAndRightSwap = I18nManager.doLeftAndRightSwapInRTL ?? I18nManager.isRTL;
+export function snapshotI18nManager(): I18nRtlSnapshot {
+    let doLeftAndRightSwap = false;
+    try {
+        doLeftAndRightSwap = I18nManager.doLeftAndRightSwapInRTL ?? I18nManager.isRTL;
+    } catch {
+        doLeftAndRightSwap = I18nManager.isRTL;
+    }
     return {
         isRTL: I18nManager.isRTL,
         doLeftAndRightSwap,
@@ -154,7 +159,7 @@ export function allChecksPass(checks: GroupsLayoutCheckResult[]): boolean {
     return checks.length > 0 && checks.every(c => c.pass);
 }
 
-function buildDiagnosticPayload(
+export function buildDiagnosticPayload(
     locale = 'unknown',
     appRtl = false,
     windowWidth = 0,
@@ -172,6 +177,6 @@ function buildDiagnosticPayload(
     };
 }
 
-function diagnosticJson(payload: GroupsLayoutDiagnosticPayload): string {
+export function diagnosticJson(payload: GroupsLayoutDiagnosticPayload): string {
     return JSON.stringify(payload, null, 0);
 }

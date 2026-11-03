@@ -75,7 +75,9 @@ import {
 import type { Session } from '@supabase/supabase-js';
 import './global.css';
 import { isAscScreenshotDemo } from './lib/ascScreenshotDemo';
+import { isE2eLayoutFixturesEnabled } from './lib/e2eLayoutFixtures';
 import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCaptureRoot';
+import { E2eLayoutFixtureRoot } from './e2e/E2eLayoutFixtureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
 import { SettingsRowLayoutPreviewScreen } from './screens/dev/SettingsRowLayoutPreviewScreen';
@@ -567,6 +569,15 @@ function App() {
 }
 
 function Root() {
+  if (isE2eLayoutFixturesEnabled()) {
+    return (
+      <>
+        <AndroidSystemChrome />
+        <E2eLayoutFixtureRoot />
+      </>
+    );
+  }
+
   return (
     <PostHogAnalyticsProvider>
       <AndroidSystemChrome />

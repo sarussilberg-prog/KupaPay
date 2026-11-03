@@ -1,5 +1,5 @@
 import { hasProFromTimestamps, type ProStatusTimestamps } from '@cost-share/shared';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 import {
     mergeProStatusWithStoreEntitlement,
     readActiveProExpirationFromStore,
@@ -82,7 +82,7 @@ export async function fetchMyProStatusWithStoreSync(
 }
 
 export async function fetchMyProStatus(groupId?: string | null): Promise<MyProStatus> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         if (groupId === 'g-barcelona') {
             return {
                 ...CAPTURE_PRO_STATUS,

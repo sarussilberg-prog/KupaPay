@@ -2,18 +2,21 @@
  * CustomTabBar — replaces the default bottom-tabs bar so we can slot a raised
  * "+" FAB in the true center, with the 4 Task-3 tabs balanced 2/2 around it.
  *
- * Centering strategy (RTL-safe): the two tab groups each take flex:1 and the
- * center slot is a fixed-width column (CENTER_ADD_SIZE). This is symmetric in
- * both LTR and RTL — no directional offset math. Row direction comes from
- * useRtlLayout() so tabs mirror correctly for Hebrew.
+ * Centering strategy: two tab groups each take flex:1 and the center slot is a
+ * fixed-width column (CENTER_ADD_SIZE). The bar always lays out in physical LTR
+ * (`direction: 'ltr'`) so nested flex is not auto-flipped under app RTL; Profile
+ * stays leftmost and Groups rightmost for layout probes in en and he.
  */
 import React from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { colors } from '../../theme';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
 import { orderedTabBarRoutes } from '../../navigation/orderedTabBarRoutes';
+import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
+import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
+import { AppIcon } from '../AppIcon';
+import { useActivityUnreadCount } from '../../hooks/queries/useActivityUnreadCount';
 import { layoutProbeOnLayout } from '../diagnostics/layoutProbeHandlers';
 import type { LayoutProbeId } from '../../lib/groupsLayoutDiagnostics';
 import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
@@ -24,20 +27,15 @@ const TAB_PROBE_ID: Record<string, LayoutProbeId> = {
     FavoriteGroup: 'tab-favorite',
     Groups: 'tab-groups',
 };
-import { useQuickAddGroupId } from '../../hooks/useQuickAddGroupId';
-import { CenterAddButton, CENTER_ADD_SIZE } from './CenterAddButton';
-import { AppIcon } from '../AppIcon';
-import { useActivityUnreadCount } from '../../hooks/queries/useActivityUnreadCount';
 
 const ICON_SIZE = 24;
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-    const isRtl = useRtlLayout();
     const insets = useSafeAreaInsets();
     const quickAddGroupId = useQuickAddGroupId(state);
     const { data: unreadCount = 0 } = useActivityUnreadCount();
 
-    const displayRoutes = orderedTabBarRoutes(state.routes, isRtl);
+    const displayRoutes = orderedTabBarRoutes(state.routes, false);
     const centerIndex = Math.floor(displayRoutes.length / 2);
 
     const onQuickAdd = () => {
@@ -128,9 +126,12 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     );
 }
 
+const TAB_BAR_LTR: { direction: 'ltr' } = { direction: 'ltr' };
+
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
+        ...TAB_BAR_LTR,
         alignItems: 'center',
         backgroundColor: colors.white,
         borderTopWidth: StyleSheet.hairlineWidth,
@@ -150,6 +151,7 @@ const styles = StyleSheet.create({
     side: {
         flex: 1,
         flexDirection: 'row',
+        ...TAB_BAR_LTR,
     },
     tab: {
         flex: 1,

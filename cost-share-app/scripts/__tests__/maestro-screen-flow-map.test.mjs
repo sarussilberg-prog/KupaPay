@@ -11,12 +11,26 @@ import {
 test('flowsForChangedPath maps GroupsListScreen to layout flows', () => {
   const flows = flowsForChangedPath('cost-share-app/apps/mobile/screens/groups/GroupsListScreen.tsx');
   assert.ok(flows.includes('assert-groups-layout.yaml'));
+  assert.ok(flows.includes('groups-layout-diagnostics-tour.yaml'));
   assert.ok(flows.includes('main-layout.yaml'));
+});
+
+test('flowRunsForChangedFiles runs groups diagnostics tour for en and he', () => {
+  const runs = flowRunsForChangedFiles([
+    'cost-share-app/apps/mobile/components/GroupCard.tsx',
+  ]);
+  const diag = runs.find((r) => r.file === 'groups-layout-diagnostics-tour.yaml');
+  assert.ok(diag);
+  assert.deepEqual(diag.locales, ['en', 'he']);
 });
 
 test('flowsForChangedPath uses prefix fallback for group components', () => {
   const flows = flowsForChangedPath('cost-share-app/apps/mobile/components/groups/MonthlyBillsCycleSection.tsx');
-  assert.deepEqual(flows, ['assert-groups-layout.yaml', 'main-layout.yaml']);
+  assert.deepEqual(flows, [
+    'assert-groups-layout.yaml',
+    'groups-layout-diagnostics-tour.yaml',
+    'main-layout.yaml',
+  ]);
 });
 
 test('flowRunsForChangedFiles expands locales for login strings', () => {

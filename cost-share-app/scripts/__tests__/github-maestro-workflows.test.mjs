@@ -38,6 +38,16 @@ for (const name of maestroWorkflows) {
   });
 }
 
+test('Groups layout iOS probe job fails the workflow on Maestro errors', () => {
+  const text = readFileSync(join(workflowDir, 'mobile-groups-layout-diagnostics.yml'), 'utf8');
+  const probeJob = text.match(/layout-diagnostics-ios:[\s\S]*?(?=\n  \w|$)/);
+  assert.ok(probeJob, 'mobile-groups-layout-diagnostics.yml should define layout-diagnostics-ios');
+  assert.ok(
+    !probeJob[0].includes('continue-on-error: true'),
+    'layout-diagnostics-ios must not use continue-on-error (empty JSON was masked as green)',
+  );
+});
+
 test('Android build jobs disable Sentry upload when CI has no auth token', () => {
   for (const name of maestroWorkflows) {
     const text = readFileSync(join(workflowDir, name), 'utf8');

@@ -1,0 +1,3 @@
+appId: com.kupapay.mobile
+---
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_auth_gate_failure

@@ -3,7 +3,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Platform, View, type TextStyle } from 'react-native';
+import { Platform, View, type LayoutChangeEvent, type TextStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
     bindCountLabelNoBreak,
@@ -14,7 +14,7 @@ import { Text } from './AppText';
 import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { toDate } from '../lib/dateUtils';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 
 /** Skip "Updated now" noise on list rows (Splitwise-style). */
 export const GROUP_CARD_UPDATED_META_MIN_AGE_MS = 90_000;
@@ -40,9 +40,16 @@ type Props = {
     memberCount: number;
     language: string;
     testID?: string;
+    onLayout?: (event: LayoutChangeEvent) => void;
 };
 
-export function GroupCardMetaLine({ group, memberCount, language, testID = 'group-card-meta' }: Props) {
+export function GroupCardMetaLine({
+    group,
+    memberCount,
+    language,
+    testID = 'group-card-meta',
+    onLayout,
+}: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const textAlign = rtlTextAlign(isRtl);
@@ -58,7 +65,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
                 : t(`groups.types.${group.groupType}`);
         const memberLabel = bindCountLabelNoBreak(memberRaw);
 
-        if (isAscScreenshotDemo()) {
+        if (usesStaticFixtureData()) {
             return { memberLabel, updatedWhen: null as string | null };
         }
 
@@ -82,6 +89,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
     return (
         <View
             testID={testID}
+            onLayout={onLayout}
             style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
         >
             <Text

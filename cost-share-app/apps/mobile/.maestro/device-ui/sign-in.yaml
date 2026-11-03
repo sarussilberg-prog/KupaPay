@@ -1,13 +1,16 @@
 appId: com.kupapay.mobile
 ---
+- runFlow: complete-pre-auth-onboarding.yaml
 - extendedWaitUntil:
     visible:
       id: login-screen
     timeout: 120000
+- waitForAnimationToEnd:
+    timeout: 10000
 - extendedWaitUntil:
     visible:
       id: login-e2e-panel
-    timeout: 30000
+    timeout: 60000
 - tapOn:
     id: login-e2e-email
 - eraseText
@@ -15,9 +18,12 @@ appId: com.kupapay.mobile
 - tapOn:
     id: login-e2e-password
 - inputText: ${E2E_PASSWORD}
-- hideKeyboard
 - tapOn:
     id: login-e2e-submit
+- waitForAnimationToEnd:
+    timeout: 20000
+- assertNotVisible:
+    id: login-e2e-error
 - extendedWaitUntil:
     visible:
       id: groups-list-title

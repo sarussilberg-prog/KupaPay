@@ -178,7 +178,7 @@ describe('CustomTabBar', () => {
             ? Object.assign({}, ...row.props.style.filter(Boolean))
             : row.props.style;
         expect(flat.flexDirection).toBe('row');
-        expect(flat.direction).toBeUndefined();
+        expect(flat.direction).toBe('ltr');
     });
 
     function leadingTabOrder(leading: Parameters<typeof within>[0]) {
@@ -188,12 +188,12 @@ describe('CustomTabBar', () => {
             .filter((id: string | undefined) => id?.startsWith('tab-'));
     }
 
-    it('orders Activity before Profile on the leading side in Hebrew', () => {
+    it('keeps Profile before Activity on the leading side in Hebrew (explicit LTR tab bar)', () => {
         useAppStore.setState({ language: 'he' } as any);
         const { getByTestId } = renderTabBar(makeProps());
         expect(leadingTabOrder(getByTestId('tabbar-side-leading'))).toEqual([
-            'tab-Activity',
             'tab-Profile',
+            'tab-Activity',
         ]);
     });
 

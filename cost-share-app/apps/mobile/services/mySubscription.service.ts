@@ -5,7 +5,7 @@ import {
     type TripPassLine,
 } from '@cost-share/shared';
 import type { GroupWithMembers } from '@cost-share/shared';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 import { paywallDisplayPrice } from '../lib/paywallDisplayPrice';
 import {
     STORE_PRODUCT_PRO_MONTHLY,
@@ -95,7 +95,7 @@ async function loadTripPassLines(groups: GroupWithMembers[]): Promise<TripPassLi
 export async function fetchMySubscriptionSnapshot(
     groups: GroupWithMembers[],
 ): Promise<MySubscriptionSnapshot | null> {
-    if (isAscScreenshotDemo()) return CAPTURE_SNAPSHOT;
+    if (usesStaticFixtureData()) return CAPTURE_SNAPSHOT;
 
     const serverStatus = await fetchMyProStatus();
     const tripPasses = await loadTripPassLines(groups);

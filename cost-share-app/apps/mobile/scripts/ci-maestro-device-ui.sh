@@ -31,6 +31,7 @@ export E2E_EMAIL="${E2E_TEST_EMAIL:-e2e-playwright@kupay-dev.test}"
 export EXPO_PUBLIC_E2E_TEST_EMAIL="$E2E_EMAIL"
 
 maestro_ensure_cli
+maestro_write_mobile_e2e_env "$ROOT"
 maestro_seed_e2e_if_configured "$COST_SHARE"
 
 mkdir -p "$ARTIFACTS/screenshots"

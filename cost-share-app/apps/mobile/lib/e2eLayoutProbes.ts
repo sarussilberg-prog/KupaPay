@@ -1,8 +1,9 @@
 import { E2E_MAESTRO_AUTH_ENABLED } from './featureFlags';
+import { isE2eLayoutFixturesEnabled } from './e2eLayoutFixtures';
 
 /** Maestro-visible probes only in CI/E2E builds — zero UI impact in production. */
 export function isE2eLayoutProbeEnabled(): boolean {
-    return E2E_MAESTRO_AUTH_ENABLED;
+    return E2E_MAESTRO_AUTH_ENABLED || isE2eLayoutFixturesEnabled();
 }
 
 /** Horizontal inset (list padding) + small tolerance for card shadow rounding. */

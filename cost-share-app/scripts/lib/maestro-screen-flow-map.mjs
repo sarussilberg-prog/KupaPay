@@ -33,10 +33,24 @@ const SCREEN_TO_FLOWS = Object.freeze({
   'screens/groups/GroupsListScreen.tsx': [
     'assert-layout-probes.yaml',
     'assert-groups-layout.yaml',
+    'groups-layout-diagnostics-tour.yaml',
     'main-layout.yaml',
   ],
-  'components/groups/GroupsListHeader.tsx': ['assert-groups-layout.yaml', 'main-layout.yaml'],
-  'components/GroupCard.tsx': ['assert-groups-layout.yaml', 'assert-layout-probes.yaml'],
+  'components/groups/GroupsListHeader.tsx': [
+    'assert-groups-layout.yaml',
+    'groups-layout-diagnostics-tour.yaml',
+    'main-layout.yaml',
+  ],
+  'components/GroupCard.tsx': [
+    'assert-groups-layout.yaml',
+    'assert-layout-probes.yaml',
+    'groups-layout-diagnostics-tour.yaml',
+  ],
+  'lib/groupsLayoutDiagnostics.ts': ['groups-layout-diagnostics-tour.yaml'],
+  'components/diagnostics/GroupsLayoutDiagnosticsReporter.tsx': [
+    'groups-layout-diagnostics-tour.yaml',
+  ],
+  'components/diagnostics/layoutProbeHandlers.ts': ['groups-layout-diagnostics-tour.yaml'],
   'components/groups/CreateGroupFloatingButton.tsx': [
     'assert-layout-probes.yaml',
     'assert-groups-layout.yaml',
@@ -51,7 +65,11 @@ const SCREEN_TO_FLOWS = Object.freeze({
   ],
   'components/dashboard/FriendGroupBalancesSheet.tsx': ['profile-friend-breakdown.yaml'],
   'components/dashboard/FriendCrossGroupSettleSheet.tsx': ['profile-friend-breakdown.yaml'],
-  'components/navigation/CustomTabBar.tsx': ['visit-main-screens.yaml', 'main-layout.yaml'],
+  'components/navigation/CustomTabBar.tsx': [
+    'visit-main-screens.yaml',
+    'main-layout.yaml',
+    'groups-layout-diagnostics-tour.yaml',
+  ],
   'hooks/useRtlLayout.tsx': ['main-layout.yaml', 'profile-friend-breakdown.yaml'],
   'screens/profile/SettingsScreen.tsx': ['visit-main-screens.yaml', 'main-layout.yaml'],
 });
@@ -63,7 +81,11 @@ const PREFIX_TO_FLOWS = Object.freeze([
   { prefix: 'screens/profile/', flows: ['main-layout.yaml', 'profile-friend-breakdown.yaml'] },
   { prefix: 'screens/activity/', flows: ['visit-main-screens.yaml', 'main-layout.yaml'] },
   { prefix: 'screens/auth/', flows: ['sign-in.yaml', 'locale-strings-login.yaml'] },
-  { prefix: 'components/groups/', flows: ['assert-groups-layout.yaml', 'main-layout.yaml'] },
+  {
+    prefix: 'components/groups/',
+    flows: ['assert-groups-layout.yaml', 'groups-layout-diagnostics-tour.yaml', 'main-layout.yaml'],
+  },
+  { prefix: 'components/diagnostics/', flows: ['groups-layout-diagnostics-tour.yaml'] },
   { prefix: 'components/dashboard/', flows: ['profile-friend-breakdown.yaml', 'main-layout.yaml'] },
 ]);
 
@@ -140,7 +162,11 @@ function expandFlowNamesToRuns(flowNames) {
   for (const file of flowNames) {
     if (file === 'locale-strings-login.yaml') {
       runs.push({ file, locales: [...FULL_LOCALE_STRINGS] });
-    } else if (file === 'main-layout.yaml' || file === 'assert-groups-layout.yaml') {
+    } else if (
+      file === 'main-layout.yaml' ||
+      file === 'assert-groups-layout.yaml' ||
+      file === 'groups-layout-diagnostics-tour.yaml'
+    ) {
       runs.push({ file, locales: [...LAYOUT_LOCALES] });
     } else if (file === 'profile-friend-breakdown.yaml') {
       runs.push({ file, locales: ['he'] });
@@ -175,4 +201,5 @@ export function dedupeRuns(runs) {
 export function mergeSmokeAndAffected(affected) {
   return dedupeRuns([...smokeFlowRuns(), ...affected]);
 }
+
 

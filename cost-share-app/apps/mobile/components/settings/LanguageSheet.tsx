@@ -29,7 +29,7 @@ export function LanguageSheet({ visible, current, onSelect, onClose, testID }: P
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
             <Pressable className="flex-1 bg-black/40" onPress={onClose}>
                 <Pressable
-                    testID={testID}
+                    testID={testID ?? 'language-sheet'}
                     onPress={(e) => e.stopPropagation()}
                     className="bg-white rounded-t-2xl absolute bottom-0 inset-x-0"
                 >

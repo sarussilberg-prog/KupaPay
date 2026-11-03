@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Text } from '../AppText';
 import { supabase } from '../../lib/supabase';
+import { acceptSessionIfAllowed } from '../../lib/acceptSessionIfAllowed';
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 
@@ -15,6 +16,8 @@ const defaultEmail =
 
 export function LoginE2EPasswordAuth() {
     const setSession = useAppStore((s) => s.setSession);
+    const setPendingDeactivationNotice = useAppStore((s) => s.setPendingDeactivationNotice);
+    const setPendingAccountRestore = useAppStore((s) => s.setPendingAccountRestore);
     const [email, setEmail] = useState(defaultEmail);
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
@@ -29,10 +32,27 @@ export function LoginE2EPasswordAuth() {
                 password,
             });
             if (signInError || !data.session) {
-                setError(signInError?.message ?? 'Sign-in failed');
+                const msg = signInError?.message ?? 'Sign-in failed';
+                console.log(`[MAESTRO_E2E_AUTH] sign_in_failed ${msg}`);
+                setError(msg);
                 return;
             }
-            setSession(data.session);
+            console.log('[MAESTRO_E2E_AUTH] sign_in_ok awaiting session commit');
+            await acceptSessionIfAllowed(data.session, 'fresh', {
+                setSession,
+                setPendingDeactivationNotice,
+                setPendingAccountRestore,
+            });
+            if (!useAppStore.getState().session) {
+                console.log('[MAESTRO_E2E_AUTH] session_rejected_after_profile_check');
+                setError('Sign-in rejected (profile check)');
+                return;
+            }
+            console.log('[MAESTRO_E2E_AUTH] session_committed');
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Sign-in error';
+            console.log(`[MAESTRO_E2E_AUTH] sign_in_exception ${msg}`);
+            setError(msg);
         } finally {
             setBusy(false);
         }

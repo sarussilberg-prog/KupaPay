@@ -28,7 +28,7 @@ describe('E2E xx-long pseudo-locale must not ship in production config', () => {
         const maestro = fs.readFileSync(CI_MAESTRO, 'utf8');
         const groups = fs.readFileSync(CI_GROUPS, 'utf8');
         expect(maestro).toContain('EXPO_PUBLIC_E2E_MAESTRO_AUTH=true');
-        expect(groups).toContain('EXPO_PUBLIC_E2E_MAESTRO_AUTH=true');
+        expect(groups).toMatch(/EXPO_PUBLIC_E2E_(MAESTRO_AUTH|FIXTURES)/);
         expect(productionEnvBlock()).not.toMatch(/EXPO_PUBLIC_E2E_MAESTRO_AUTH.*true/);
     });
 
