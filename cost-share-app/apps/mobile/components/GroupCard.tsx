@@ -294,11 +294,6 @@ function GroupCardBase({
                         onLayout={
                             layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined
                         }
-                        className={
-                            isRtl
-                                ? 'flex-row-reverse w-full items-center'
-                                : 'flex-row w-full items-center'
-                        }
                         style={[
                             groupCardInnerRowStyle(isRtl),
                             {
