@@ -11,7 +11,7 @@ import {
     type GroupWithMembers,
 } from '@cost-share/shared';
 import { Text } from './AppText';
-import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
+import { rtlRowStyle, rtlTextAlign, resolveAutoTextStyle, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { toDate } from '../lib/dateUtils';
 import { usesStaticFixtureData } from '../lib/staticFixtureMode';
@@ -63,6 +63,7 @@ export function GroupCardMetaLine({
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const textAlign = rtlTextAlign(isRtl);
+    const compactAutoStyle = compact ? resolveAutoTextStyle(isRtl) : undefined;
 
     const { memberLabel, updatedWhen } = useMemo(() => {
         const activityAt = group.lastActivityAt ?? group.updatedAt;
@@ -101,12 +102,22 @@ export function GroupCardMetaLine({
         <View
             testID={testID}
             onLayout={onLayout}
-            style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
+            style={[
+                rtlRowStyle(isRtl),
+                {
+                    alignItems: 'center',
+                    minWidth: 0,
+                    flexWrap: 'nowrap',
+                    ...(compact ? { alignSelf: 'stretch' as const, width: '100%' as const } : null),
+                },
+            ]}
         >
             <Text
                 style={[
                     compact ? COMPACT_MEMBER_META_STYLE : MEMBER_META_STYLE,
-                    { textAlign, flexShrink: 1, minWidth: 0 },
+                    compact
+                        ? { ...compactAutoStyle, textAlign: 'auto', flexShrink: 1, minWidth: 0 }
+                        : { textAlign, flexShrink: 1, minWidth: 0 },
                 ]}
                 numberOfLines={1}
                 testID="group-card-meta-members"

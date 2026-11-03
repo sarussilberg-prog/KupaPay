@@ -1,5 +1,9 @@
 import { I18nManager, Platform, type LayoutRectangle } from 'react-native';
-import { GROUP_CARD_MAX_SHELL_HEIGHT } from './groupsCardLayoutLimits';
+import {
+    GROUP_CARD_MAX_AVATAR_TO_NAME_GAP,
+    GROUP_CARD_MAX_BALANCE_TO_MENU_GAP,
+    GROUP_CARD_MAX_SHELL_HEIGHT,
+} from './groupsCardLayoutLimits';
 
 export type LayoutFrame = Pick<LayoutRectangle, 'x' | 'y' | 'width' | 'height'>;
 
@@ -64,6 +68,30 @@ export function subscribeLayoutDiagnostics(
     };
 }
 
+/** Physical gap between avatar inner edge and name column start edge (pt). */
+export function measureAvatarToNameGap(
+    avatar: LayoutFrame,
+    name: LayoutFrame,
+    appRtl: boolean,
+): number {
+    if (appRtl) {
+        return avatar.x - (name.x + name.width);
+    }
+    return name.x - (avatar.x + avatar.width);
+}
+
+/** Physical gap between balance pill and overflow menu (pt). */
+export function measureBalanceToMenuGap(
+    balance: LayoutFrame,
+    menu: LayoutFrame,
+    appRtl: boolean,
+): number {
+    if (appRtl) {
+        return balance.x - (menu.x + menu.width);
+    }
+    return menu.x - (balance.x + balance.width);
+}
+
 export function snapshotI18nManager(): I18nRtlSnapshot {
     let doLeftAndRightSwap = false;
     try {
@@ -89,6 +117,8 @@ export function evaluateGroupsLayoutChecks(
     const row = frames['group-card-row'];
     const menu = frames['group-card-menu'];
     const avatar = frames['group-card-avatar'];
+    const name = frames['group-card-name'];
+    const balance = frames['group-card-balance'];
 
     if (shell && row) {
         const rowWidthRatio = row.width / shell.width;
@@ -134,6 +164,26 @@ export function evaluateGroupsLayoutChecks(
             id: 'group-card-avatar-start-half-rtl',
             pass: avatarInStartHalf,
             detail: `avatarCenterX=${avatarCenterX.toFixed(1)} shellW=${shell.width.toFixed(1)}`,
+        });
+    }
+
+    if (avatar && name) {
+        const gap = measureAvatarToNameGap(avatar, name, opts.appRtl);
+        const suffix = opts.appRtl ? 'rtl' : 'ltr';
+        checks.push({
+            id: `group-card-avatar-name-gap-${suffix}`,
+            pass: gap >= -1 && gap <= GROUP_CARD_MAX_AVATAR_TO_NAME_GAP,
+            detail: `avatar→name gap=${gap.toFixed(1)} (need 0–${GROUP_CARD_MAX_AVATAR_TO_NAME_GAP})`,
+        });
+    }
+
+    if (balance && menu) {
+        const gap = measureBalanceToMenuGap(balance, menu, opts.appRtl);
+        const suffix = opts.appRtl ? 'rtl' : 'ltr';
+        checks.push({
+            id: `group-card-balance-menu-gap-${suffix}`,
+            pass: gap >= -1 && gap <= GROUP_CARD_MAX_BALANCE_TO_MENU_GAP,
+            detail: `balance→menu gap=${gap.toFixed(1)} (need 0–${GROUP_CARD_MAX_BALANCE_TO_MENU_GAP})`,
         });
     }
 

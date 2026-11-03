@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useLayoutWindowWidth } from '../hooks/useLayoutWindowWidth';
 import { useNavigation } from '@react-navigation/native';
-import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
+import { useRtlLayout, rtlRowStyle, resolveAutoTextStyle } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
 import { GroupRollup, GroupWithMembers, type RatesFromBase } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
@@ -44,7 +44,7 @@ import {
     GROUP_CARD_MENU_ICON,
     GROUP_CARD_PAD,
     GROUP_CARD_ROW_GAP,
-    GROUP_CARD_TEXT_GAP,
+    groupCardTextColumnStyle,
 } from './groupCardLayout';
 import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
 import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
@@ -240,7 +240,10 @@ function GroupCardBase({
     const titleClassName = isArchived
         ? 'text-[15px] font-bold text-gray-600 dark:text-gray-300 leading-5'
         : 'text-[15px] font-bold text-gray-900 dark:text-gray-50 leading-5';
-    const titleAlignClass = rtlTextClassName(isRtl, titleClassName);
+    const titleAutoStyle = {
+        ...resolveAutoTextStyle(isRtl, titleClassName),
+        textAlign: 'auto' as const,
+    };
 
     return (
         <>
@@ -322,17 +325,24 @@ function GroupCardBase({
                         onLayout={
                             layoutProbePrimary ? layoutProbeOnLayout('group-card-name') : undefined
                         }
-                        style={{
-                            flex: 1,
-                            minWidth: 0,
-                            gap: GROUP_CARD_TEXT_GAP,
-                            justifyContent: 'center',
-                        }}
+                        style={groupCardTextColumnStyle(isRtl)}
                     >
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 6, minWidth: 0 }]}>
-                            <View style={{ flex: 1, minWidth: 0 }}>
+                        <View
+                            style={[
+                                rtlRowStyle(isRtl),
+                                {
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    minWidth: 0,
+                                    alignSelf: 'stretch',
+                                    width: '100%',
+                                },
+                            ]}
+                        >
+                            <View style={{ flex: 1, minWidth: 0, alignSelf: 'stretch' }}>
                                 <HighlightedText
-                                    className={`${titleClassName} ${titleAlignClass}`}
+                                    className={titleClassName}
+                                    style={titleAutoStyle}
                                     text={group.name}
                                     query={searchQuery}
                                     numberOfLines={1}
