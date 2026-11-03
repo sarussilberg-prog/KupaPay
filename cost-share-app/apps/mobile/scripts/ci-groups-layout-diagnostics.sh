@@ -109,6 +109,9 @@ run_diag_flows() {
     set -e
     echo "$exit_code" > "$ARTIFACTS/logs/${maestro_platform}_${loc}.exit"
     maestro_collect_ios_simulator_logs "$ARTIFACTS" "${maestro_platform}_${loc}"
+    if command -v maestro >/dev/null 2>&1; then
+      maestro hierarchy > "$ARTIFACTS/debug/${maestro_platform}_${loc}-hierarchy.txt" 2>&1 || true
+    fi
     layout_diag_extract_json() {
       local dest="$1"
       local maestro_log="$2"

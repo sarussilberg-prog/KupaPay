@@ -1,17 +1,14 @@
 appId: com.kupapay.mobile
 ---
-- stopApp
-- openLink: com.kupapay.mobile://e2e-fixture?locale=he
-- extendedWaitUntil:
-    visible:
-      id: e2e-fixture-locale-ready
-    timeout: 120000
+- launchApp:
+    clearState: true
 - extendedWaitUntil:
     visible:
       id: groups-list-title
     timeout: 90000
+- runFlow: set-app-language.yaml
 - extendedWaitUntil:
     visible:
       id: groups-layout-app-rtl
-    timeout: 60000
+    timeout: 90000
 - runFlow: assert-groups-layout-diagnostics-he.yaml
