@@ -6,6 +6,11 @@
 name: TestFlight iOS
 
 on:
+  # Recovery: run TestFlight after dev fixes without manual dispatch (workflow_dispatch still supported).
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/testflight-ios.yml
   workflow_dispatch:
     inputs:
       pro_enabled:
