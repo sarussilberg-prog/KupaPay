@@ -79,3 +79,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(tabs): swap Profile/Activity order in RTL (#699) (#720)
 ## [2.2.0-dev.37] — 2026-11-03
 - fix(mobile): eas.json empty PostHog key breaks TestFlight EAS validate (#721)
+## [2.2.0-dev.38] — 2026-11-03
+- ci(ios): trigger TestFlight on dev when testflight workflow updates (#722)
