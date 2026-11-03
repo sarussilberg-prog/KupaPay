@@ -7,7 +7,7 @@ const ROUTES = [
     { name: 'Groups', key: 'g' },
 ] as const;
 
-describe('orderedTabBarRoutes (#699)', () => {
+describe('orderedTabBarRoutes', () => {
     it('keeps navigator order in LTR (en)', () => {
         expect(orderedTabBarRoutes(ROUTES, false).map((r) => r.name)).toEqual([
             'Profile',
@@ -17,13 +17,16 @@ describe('orderedTabBarRoutes (#699)', () => {
         ]);
     });
 
-    it.each(['he', 'ar'] as const)('swaps Profile and Activity in RTL (%s)', (locale) => {
-        void locale;
-        expect(orderedTabBarRoutes(ROUTES, true).map((r) => r.name)).toEqual([
-            'Activity',
-            'Profile',
-            'FavoriteGroup',
-            'Groups',
-        ]);
-    });
+    it.each(['he', 'ar'] as const)(
+        'keeps the same visual order in RTL (%s) — tab bar uses explicit LTR flex',
+        (locale) => {
+            void locale;
+            expect(orderedTabBarRoutes(ROUTES, true).map((r) => r.name)).toEqual([
+                'Profile',
+                'Activity',
+                'FavoriteGroup',
+                'Groups',
+            ]);
+        },
+    );
 });
