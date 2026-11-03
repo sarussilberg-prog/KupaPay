@@ -89,3 +89,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - feat(mobile): compact single-row Groups list cards (#724)
 ## [2.2.0-dev.42] — 2026-11-03
 - ci(ios): widen TestFlight dev-merge path filter (#727)
+## [2.2.0-dev.43] — 2026-11-03
+- ci(ios): TestFlight dev-merge builds current dev tip (#728)
