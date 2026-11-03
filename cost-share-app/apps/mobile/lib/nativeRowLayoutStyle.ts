@@ -54,11 +54,6 @@ export function groupCardInnerRowStyle(isRtl: boolean, platform: typeof Platform
     });
 }
 
-/** @deprecated Use groupCardShellStyle — outer shell must not be a flex row. */
-export function groupCardOuterRowStyle(isRtl: boolean, platform: typeof Platform.OS = Platform.OS): ViewStyle {
-    return groupCardShellStyle(isRtl, platform);
-}
-
 export function listRowFlexStyle(isRtl: boolean, platform: typeof Platform.OS = Platform.OS): ViewStyle {
     return flattenNativeRowStyles(rtlRowStyle(isRtl), {
         flex: 1,
