@@ -101,3 +101,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): GroupCard RTL row XOR I18nManager + physical x-order diagnostics (#732)
 ## [2.2.0-dev.48] — 2026-11-04
 - fix(mobile): unified RTL layout — I18nManager mirroring, full-app verification (#733)
+## [2.2.0-dev.49] — 2026-11-04
+- fix(maestro): xx-long language flow tab bar (single back) (#734)
