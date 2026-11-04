@@ -3,9 +3,8 @@
  * "+" FAB in the true center, with the 4 Task-3 tabs balanced 2/2 around it.
  *
  * Centering strategy: two tab groups each take flex:1 and the center slot is a
- * fixed-width column (CENTER_ADD_SIZE). The bar always lays out in physical LTR
- * (`direction: 'ltr'`) so nested flex is not auto-flipped under app RTL; Profile
- * stays leftmost and Groups rightmost for layout probes in en and he.
+ * fixed-width column (CENTER_ADD_SIZE). Row mirroring uses `rtlRowStyle` +
+ * I18nManager (Hebrew: Groups on the leading / right edge, Profile trailing / left).
  */
 import React from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -20,6 +19,7 @@ import { useActivityUnreadCount } from '../../hooks/queries/useActivityUnreadCou
 import { layoutProbeOnLayout } from '../diagnostics/layoutProbeHandlers';
 import type { LayoutProbeId } from '../../lib/groupsLayoutDiagnostics';
 import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
+import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 
 const TAB_PROBE_ID: Record<string, LayoutProbeId> = {
     Profile: 'tab-profile',
@@ -31,6 +31,7 @@ const TAB_PROBE_ID: Record<string, LayoutProbeId> = {
 const ICON_SIZE = 24;
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+    const isRtl = useRtlLayout();
     const insets = useSafeAreaInsets();
     const quickAddGroupId = useQuickAddGroupId(state);
     const { data: unreadCount = 0 } = useActivityUnreadCount();
@@ -100,9 +101,9 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         <View
             testID="tabbar-row"
             onLayout={isE2eLayoutProbeEnabled() ? layoutProbeOnLayout('tabbar-row') : undefined}
-            style={[styles.row, { paddingBottom: insets.bottom }]}
+            style={[styles.row, rtlRowStyle(isRtl), { paddingBottom: insets.bottom }]}
         >
-            <View testID="tabbar-side-leading" style={styles.side}>
+            <View testID="tabbar-side-leading" style={[styles.side, rtlRowStyle(isRtl)]}>
                 {leading.map((route) =>
                     renderTab(route, state.routes.indexOf(route)),
                 )}
@@ -112,7 +113,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                 <CenterAddButton onPress={onQuickAdd} />
             </View>
 
-            <View testID="tabbar-side-trailing" style={styles.side}>
+            <View testID="tabbar-side-trailing" style={[styles.side, rtlRowStyle(isRtl)]}>
                 {trailing.map((route) =>
                     renderTab(route, state.routes.indexOf(route)),
                 )}
@@ -126,12 +127,9 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     );
 }
 
-const TAB_BAR_LTR: { direction: 'ltr' } = { direction: 'ltr' };
-
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
-        ...TAB_BAR_LTR,
         alignItems: 'center',
         backgroundColor: colors.white,
         borderTopWidth: StyleSheet.hairlineWidth,
@@ -151,7 +149,6 @@ const styles = StyleSheet.create({
     side: {
         flex: 1,
         flexDirection: 'row',
-        ...TAB_BAR_LTR,
     },
     tab: {
         flex: 1,

@@ -5,7 +5,7 @@ import { AppIcon, AppIconName } from '../AppIcon';
 import { colors } from '../../theme';
 import { IconLabel } from '../ui/IconLabel';
 import { ListRow } from '../ui/ListRow';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlForwardChevronIcon, useRtlLayout } from '../../hooks/useRtlLayout';
 import {
     settingsRowValueClusterStyle,
     settingsRowValueTextStyle,
@@ -67,7 +67,7 @@ export function SettingsRow(props: Props) {
                 />
             )}
             <AppIcon
-                name={isRtl ? 'chevron-back' : 'chevron-forward'}
+                name={rtlForwardChevronIcon(isRtl)}
                 size={18}
                 color={colors.gray400}
             />

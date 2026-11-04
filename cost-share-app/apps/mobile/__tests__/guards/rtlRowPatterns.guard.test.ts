@@ -20,7 +20,7 @@ function readAllowlist(): AllowlistFile {
 describe('RTL row pattern guard (UI quality Phase 2)', () => {
     it('reports allowlist size for CI metrics (monotonic decrease target)', () => {
         const { allowlist } = readAllowlist();
-        expect(allowlist.length).toBeGreaterThan(0);
+        expect(allowlist.length).toBe(0);
         // eslint-disable-next-line no-console -- intentional CI metric
         console.info(`rtlRowPatterns allowlist entries: ${allowlist.length}`);
     });

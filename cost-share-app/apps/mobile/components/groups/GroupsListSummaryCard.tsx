@@ -41,7 +41,7 @@ export function GroupsListSummaryCard({
     const isRtl = useRtlLayout();
     const windowWidth = useLayoutWindowWidth();
     const align = rtlTextAlign(isRtl);
-    const direction: 'rtl' | 'ltr' = isRtl ? 'rtl' : 'ltr';
+    const writingDir = isRtl ? 'rtl' : 'ltr';
     const summaryAmountFit = windowWidth < 400;
 
     const parts = useMemo(
@@ -90,7 +90,7 @@ export function GroupsListSummaryCard({
         >
             <Text
                 className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2"
-                style={{ textAlign: align, writingDirection: direction }}
+                style={{ textAlign: align, writingDirection: writingDir }}
             >
                 {t(labelKey)}
             </Text>
@@ -100,7 +100,7 @@ export function GroupsListSummaryCard({
                 <Text
                     testID="groups-list-summary-amount"
                     className={toneAmountClass[tone] ?? toneAmountClass.unknown}
-                    style={{ textAlign: align, writingDirection: direction, minWidth: 0 }}
+                    style={{ textAlign: align, writingDirection: writingDir, minWidth: 0 }}
                     numberOfLines={1}
                     adjustsFontSizeToFit={summaryAmountFit}
                     minimumFontScale={
@@ -114,7 +114,7 @@ export function GroupsListSummaryCard({
                 <Text
                     testID="groups-list-summary-foreign-hint"
                     className="text-[11px] text-slate-400 dark:text-slate-500 mt-2"
-                    style={{ textAlign: align, writingDirection: direction, minWidth: 0 }}
+                    style={{ textAlign: align, writingDirection: writingDir, minWidth: 0 }}
                     numberOfLines={2}
                 >
                     {foreignHintLine}

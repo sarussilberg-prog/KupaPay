@@ -69,8 +69,15 @@ const SCREEN_TO_FLOWS = Object.freeze({
     'visit-main-screens.yaml',
     'main-layout.yaml',
     'groups-layout-diagnostics-tour.yaml',
+    'rtl-main-screens-tour-en.yaml',
+    'rtl-main-screens-tour-he.yaml',
   ],
-  'hooks/useRtlLayout.tsx': ['main-layout.yaml', 'profile-friend-breakdown.yaml'],
+  'hooks/useRtlLayout.tsx': [
+    'main-layout.yaml',
+    'profile-friend-breakdown.yaml',
+    'rtl-main-screens-tour-en.yaml',
+    'rtl-main-screens-tour-he.yaml',
+  ],
   'screens/profile/SettingsScreen.tsx': ['visit-main-screens.yaml', 'main-layout.yaml'],
 });
 
@@ -108,6 +115,8 @@ export function fullFlowRuns() {
     { file: 'assert-layout-probes.yaml', locales: null },
     { file: 'locale-strings-login.yaml', locales: [...FULL_LOCALE_STRINGS] },
     { file: 'main-layout.yaml', locales: [...LAYOUT_LOCALES] },
+    { file: 'rtl-main-screens-tour-en.yaml', locales: ['en'] },
+    { file: 'rtl-main-screens-tour-he.yaml', locales: ['he'] },
     { file: 'profile-friend-breakdown.yaml', locales: ['he'] },
   ];
   return runs;
@@ -172,6 +181,10 @@ function expandFlowNamesToRuns(flowNames) {
       runs.push({ file, locales: ['he'] });
     } else if (file === 'visit-main-screens.yaml') {
       runs.push({ file, locales: ['en', 'he'] });
+    } else if (file === 'rtl-main-screens-tour-en.yaml') {
+      runs.push({ file, locales: ['en'] });
+    } else if (file === 'rtl-main-screens-tour-he.yaml') {
+      runs.push({ file, locales: ['he'] });
     } else {
       runs.push({ file, locales: null });
     }

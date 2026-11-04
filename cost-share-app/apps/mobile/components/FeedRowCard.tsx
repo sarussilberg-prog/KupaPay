@@ -6,7 +6,14 @@
 import React from 'react';
 import { View, TouchableOpacity, TextStyle } from 'react-native';
 import { Text } from './AppText';
-import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
+import {
+    ltrAmountColumnStyle,
+    ltrAmountCellTextAlign,
+    ltrNumericTextStyle,
+    rtlTextAlign,
+    useRtlLayout,
+    rtlRowStyle,
+} from '../hooks/useRtlLayout';
 import {
     FEED_AMOUNT_COLUMN_MIN_WIDTH,
     FEED_AMOUNT_CURRENCY_WIDTH,
@@ -18,10 +25,7 @@ export {
     FEED_AMOUNT_CURRENCY_WIDTH,
 } from '../lib/feedAmountLayout';
 
-const LTR_AMOUNT_STYLE: TextStyle = {
-    writingDirection: 'ltr',
-    fontVariant: ['tabular-nums'],
-};
+const LTR_AMOUNT_STYLE: TextStyle = ltrNumericTextStyle;
 
 function splitAmountString(amount: string): { currency: string; value: string } {
     const space = amount.indexOf(' ');
@@ -61,7 +65,7 @@ export function FeedAmountLine({
                     LTR_AMOUNT_STYLE,
                     {
                         width: FEED_AMOUNT_CURRENCY_WIDTH,
-                        textAlign: 'left',
+                        textAlign: ltrAmountCellTextAlign,
                         flexShrink: 0,
                     },
                 ]}
@@ -78,7 +82,7 @@ export function FeedAmountLine({
                     {
                         flex: 1,
                         minWidth: 0,
-                        textAlign: 'left',
+                        textAlign: ltrAmountCellTextAlign,
                         fontSize: valueFontSize,
                         flexShrink: 1,
                     },
@@ -98,7 +102,7 @@ export function FeedInvolvementLabel({ label }: { label: string }) {
             className="text-[11px] font-medium text-gray-500"
             style={{
                 width: '100%',
-                textAlign: 'left',
+                textAlign: rtlTextAlign(isRtl),
                 paddingStart: FEED_AMOUNT_CURRENCY_WIDTH,
                 writingDirection: isRtl ? 'rtl' : 'ltr',
             }}
@@ -151,11 +155,13 @@ export function FeedRowCard({
                 </Text>
             </View>
             <View
-                style={{
-                    flexShrink: 0,
-                    minWidth: FEED_AMOUNT_COLUMN_MIN_WIDTH,
-                    direction: 'ltr',
-                }}
+                style={[
+                    {
+                        flexShrink: 0,
+                        minWidth: FEED_AMOUNT_COLUMN_MIN_WIDTH,
+                    },
+                    ltrAmountColumnStyle(isRtl),
+                ]}
             >
                 <FeedAmountLine
                     amount={amount}
@@ -167,7 +173,7 @@ export function FeedRowCard({
                             className="text-[11px] font-medium text-gray-500 mt-0.5"
                             style={[
                                 LTR_AMOUNT_STYLE,
-                                { width: '100%', textAlign: 'left' },
+                                { width: '100%', textAlign: ltrAmountCellTextAlign },
                             ]}
                         >
                             {subLine}

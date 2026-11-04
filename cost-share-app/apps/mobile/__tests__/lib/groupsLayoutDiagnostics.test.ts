@@ -55,10 +55,10 @@ describe('groupsLayoutDiagnostics checks', () => {
             'group-card-name': frame(nameW, nameX),
             'group-card-balance': frame(balanceW, balanceX),
             'group-card-menu': frame(menuW, menuX),
-            'tab-profile': frame(70, 8),
-            'tab-activity': frame(70, 78),
-            'tab-favorite': frame(70, shellW - 148),
-            'tab-groups': frame(70, shellW - 78),
+            'tab-groups': frame(70, 8),
+            'tab-favorite': frame(70, 78),
+            'tab-activity': frame(70, shellW - 148),
+            'tab-profile': frame(70, shellW - 78),
         };
         const checks = evaluateGroupsLayoutChecks(frames, { appRtl: true, windowWidth: 390 });
         expect(allChecksPass(checks)).toBe(true);
@@ -120,8 +120,8 @@ describe('groupsLayoutDiagnostics checks', () => {
                 'group-card-row-expands',
                 'group-card-menu-not-centered-rtl',
                 'group-card-avatar-name-gap-rtl',
-                'tabbar-profile-leftmost-rtl',
-                'tabbar-groups-rightmost-rtl',
+                'tabbar-groups-leftmost-rtl',
+                'tabbar-profile-rightmost-rtl',
             ]),
         );
     });

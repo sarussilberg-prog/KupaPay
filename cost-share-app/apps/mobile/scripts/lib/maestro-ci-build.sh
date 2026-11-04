@@ -84,8 +84,9 @@ maestro_android_assemble_release() {
   if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
     export SENTRY_DISABLE_AUTO_UPLOAD="${SENTRY_DISABLE_AUTO_UPLOAD:-true}"
   fi
+  export GRADLE_OPTS="${GRADLE_OPTS:-} -XX:MaxMetaspaceSize=1g -Xmx4g"
   cd "$mobile_root/android"
-  ./gradlew assembleRelease -x lint -x test
+  ./gradlew assembleRelease -x lint -x test --no-daemon
 }
 
 maestro_stage_ios_app_artifact() {

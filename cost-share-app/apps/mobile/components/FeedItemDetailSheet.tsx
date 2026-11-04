@@ -37,7 +37,7 @@ import {
 } from '../lib/feedExpensePerspective';
 import { buildSettlementFeedCopy } from '../lib/feedSettlementPerspective';
 import { formatAmountDecimal } from '../lib/currencyDisplay';
-import { useAppLanguage, useRtlLayout } from '../hooks/useRtlLayout';
+import { rtlRowStyle, useAppLanguage, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { shadows } from '../theme/shadows';
 import { useExpenseReceiptDisplayUrl } from '../hooks/useExpenseReceiptDisplayUrl';
@@ -654,19 +654,13 @@ function FlowHeroRow({
     end: React.ReactNode;
     paddingTop?: number;
 }) {
-    // Force the visual side from the app language. We can't rely on the
-    // implicit `flexDirection: 'row'` auto-flip because `I18nManager.isRTL`
-    // can lag behind the app language on iOS (it only updates on restart).
-    // Setting `direction` explicitly keeps payer on the leading edge and
-    // splits/recipient on the trailing edge regardless of `I18nManager` state.
     const isRtl = useRtlLayout();
     return (
         <View
             style={{
                 flex: 1,
-                flexDirection: 'row',
-                direction: isRtl ? 'rtl' : 'ltr',
                 alignItems: 'center',
+                ...rtlRowStyle(isRtl),
                 paddingHorizontal: 14,
                 paddingTop,
                 zIndex: 2,

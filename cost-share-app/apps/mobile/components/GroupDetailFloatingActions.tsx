@@ -2,8 +2,7 @@
  * Floating message action pinned above the tab bar.
  * Expense creation uses the center tab "+" (derived group context).
  *
- * Anchored to the physical START side (left in LTR layout coords) in both
- * Hebrew and English — do not flip with RTL.
+ * Anchored to the layout start edge (mirrors with app RTL).
  */
 
 import React from 'react';
@@ -11,6 +10,7 @@ import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native
 import { useTranslation } from 'react-i18next';
 import { AppIcon } from './AppIcon';
 import { colors } from '../theme';
+import { rtlRowStyle, useRtlLayout } from '../hooks/useRtlLayout';
 
 /** Gap between FAB row and tab bar (px). */
 export const FAB_BOTTOM_GAP = 6;
@@ -29,11 +29,12 @@ export function GroupDetailFloatingActions({
     onMessage,
 }: GroupDetailFloatingActionsProps) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
 
     return (
         <View
             pointerEvents="box-none"
-            style={[styles.container, { bottom: FAB_BOTTOM_GAP }]}
+            style={[styles.container, rtlRowStyle(isRtl), { bottom: FAB_BOTTOM_GAP }]}
         >
             <TouchableOpacity
                 onPress={onMessage}
@@ -56,11 +57,8 @@ const styles = StyleSheet.create({
         start: 16,
         end: 16,
         flexDirection: 'row',
-        // Physical left in both HE and EN (message used to sit opposite the
-        // expense FAB on the right).
         justifyContent: 'flex-start',
         alignItems: 'center',
-        direction: 'ltr',
     },
     fab: {
         flexDirection: 'row',

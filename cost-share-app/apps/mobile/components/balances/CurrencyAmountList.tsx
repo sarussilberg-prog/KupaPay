@@ -34,7 +34,7 @@ export function CurrencyAmountList({
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const align = rtlTextAlign(isRtl);
-    const direction: 'rtl' | 'ltr' = isRtl ? 'rtl' : 'ltr';
+    const writingDir = isRtl ? 'rtl' : 'ltr';
 
     const filtered = amounts.filter(a => Math.abs(a.amount) >= 0.005);
 
@@ -42,7 +42,7 @@ export function CurrencyAmountList({
         return (
             <Text
                 className={emptyClassName}
-                style={{ textAlign: align, writingDirection: direction }}
+                style={{ textAlign: align, writingDirection: writingDir }}
                 testID={testID ? `${testID}-empty` : undefined}
             >
                 {emptyLabel ?? t('balances.noActivityInMode')}
@@ -56,7 +56,7 @@ export function CurrencyAmountList({
                 <Text
                     key={`${row.currency}-${idx}`}
                     className={textClassName}
-                    style={{ textAlign: align, writingDirection: direction }}
+                    style={{ textAlign: align, writingDirection: writingDir }}
                 >
                     {formatAmount(row.amount, row.currency)}
                 </Text>

@@ -79,11 +79,12 @@ Dev PRs run **smoke** flows plus **affected** flows derived from changed files u
 | `screens/expenses/AddExpenseScreen.tsx` (prefix `screens/expenses/`) | `visit-main-screens.yaml`, `main-layout.yaml` |
 | `screens/profile/ProfileScreen.tsx`, `components/dashboard/Friend*Sheet.tsx` | `profile-friend-breakdown.yaml`, `main-layout.yaml` |
 | `components/navigation/CustomTabBar.tsx` | `visit-main-screens.yaml`, `main-layout.yaml` |
-| `hooks/useRtlLayout.tsx` | `main-layout.yaml`, `profile-friend-breakdown.yaml` |
+| `hooks/useRtlLayout.tsx` | `main-layout.yaml`, `profile-friend-breakdown.yaml`, `rtl-main-screens-tour-en/he.yaml` |
+| `screens/profile/SettingsScreen.tsx` | `rtl-main-screens-tour-en/he.yaml`, `set-app-language.yaml` (pops Settings after language pick so `xx-long` without RTL reload still reaches tab bar) |
 
 **Smoke baseline (always on dev):** `sign-in.yaml`, `assert-layout-probes.yaml`, `visit-main-screens.yaml` (English).
 
-**Full tier (`main`, label `maestro-full`, or manual dispatch):** all flows in [`fullFlowRuns()`](../cost-share-app/scripts/lib/maestro-screen-flow-map.mjs) on **iOS and Android**.
+**Full tier (`main`, label `maestro-full`, or manual dispatch):** all flows in [`fullFlowRuns()`](../cost-share-app/scripts/lib/maestro-screen-flow-map.mjs) on **iOS and Android**, including RTL screenshot tours (`rtl-main-screens-tour-en/he`) and Playwright RTL export checks (`e2e/expo-web-rtl-layout.spec.ts`).
 
 Planner tests: [`maestro-ci-plan.test.mjs`](../cost-share-app/scripts/__tests__/maestro-ci-plan.test.mjs).
 

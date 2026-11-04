@@ -9,7 +9,7 @@ import { APP_WEB_ORIGIN } from '@cost-share/shared';
 import { Text } from '../AppText';
 import { AppLogo } from '../AppLogo';
 import { colors } from '../../theme';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlMarkdownContainerStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 
 export type GroupSummaryShareLine = {
     id: string;
@@ -36,7 +36,7 @@ export const GroupSummaryShareCard = React.forwardRef<View, Props>(function Grou
             ref={ref}
             collapsable={false}
             className="bg-white rounded-3xl p-6 border border-slate-200"
-            style={{ width: 320, direction: isRtl ? 'rtl' : 'ltr' }}
+            style={{ width: 320, ...rtlMarkdownContainerStyle(isRtl) }}
             testID="group-summary-share-card"
         >
             <View className="flex-row items-center mb-4">

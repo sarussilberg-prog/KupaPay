@@ -5,16 +5,20 @@ const MOBILE_DIR = resolve(__dirname, '../..');
 
 const SKIP_DIRS = new Set(['node_modules', 'assets', '.expo']);
 
+const CANONICAL_RTL_MODULE = resolve(MOBILE_DIR, 'hooks/useRtlLayout.tsx');
+
 /** Files where physical left/right is intentional (logo geometry, device insets in mocks). */
 const ALLOWLIST = new Set([
     resolve(MOBILE_DIR, 'components/AppLogoAnimated.tsx'),
     resolve(MOBILE_DIR, 'jest-setup.ts'),
     resolve(MOBILE_DIR, '__tests__/screens/groups/GroupPostCreateInviteScreen.test.tsx'),
-    resolve(MOBILE_DIR, '__tests__/components/CustomTabBar.test.tsx'),
+    resolve(MOBILE_DIR, 'screenshotDemo/AscStoreListingFrame.tsx'),
 ]);
 
 const MARGIN_PADDING_RE =
     /\b(marginLeft|marginRight|paddingLeft|paddingRight)\s*:/;
+
+const TEXT_ALIGN_PHYSICAL_RE = /textAlign:\s*['"](?:left|right)['"]\s*[,}]/;
 
 /** Layout positioning — not hitSlop, safe-area insets, or gradient vectors. */
 const POSITION_RE = /(?:^|[,{]\s*)(left|right)\s*:/;
@@ -41,6 +45,7 @@ function walk(dir: string, out: string[] = []): string[] {
         } else if (
             (full.endsWith('.tsx') || full.endsWith('.ts')) &&
             !ALLOWLIST.has(full) &&
+            full !== CANONICAL_RTL_MODULE &&
             !full.includes('__tests__/guards/rtlDirectionalLayout')
         ) {
             out.push(full);
@@ -63,6 +68,11 @@ function findOffenders(): { file: string; reason: string }[] {
             continue;
         }
 
+        if (TEXT_ALIGN_PHYSICAL_RE.test(src)) {
+            offenders.push({ file, reason: 'physical textAlign left/right — use rtlTextAlign or useRtlLayout helpers' });
+            continue;
+        }
+
         const lines = src.split('\n');
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
@@ -81,7 +91,7 @@ function findOffenders(): { file: string; reason: string }[] {
 }
 
 describe('RTL directional layout guard (#571)', () => {
-    it('does not introduce marginLeft/Right, paddingLeft/Right, or layout left/right in styles', () => {
+    it('does not introduce marginLeft/Right, paddingLeft/Right, physical textAlign, or layout left/right in styles', () => {
         const offenders = findOffenders();
         expect(offenders).toEqual([]);
     });

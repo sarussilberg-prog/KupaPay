@@ -23,6 +23,7 @@ import { AdGateStep } from './remind/AdGateStep';
 import { CurrencyPicker } from './CurrencyPicker';
 import { useExchangeRatesQuery } from '../hooks/queries/useExchangeRatesQuery';
 import { colors } from '../theme';
+import { ltrAmountCellTextAlign, ltrNumericTextStyle } from '../hooks/useRtlLayout';
 
 export interface ConsolidatePair {
     fromUserId: string;
@@ -354,7 +355,7 @@ export function ConsolidateCurrencySheet({
                                         <Text
                                             className="text-gray-600 text-xs"
                                             numberOfLines={1}
-                                            style={{ writingDirection: 'ltr', textAlign: 'left' }}
+                                            style={[ltrNumericTextStyle, { textAlign: ltrAmountCellTextAlign }]}
                                         >
                                             {payerName} → {receiverName}
                                         </Text>

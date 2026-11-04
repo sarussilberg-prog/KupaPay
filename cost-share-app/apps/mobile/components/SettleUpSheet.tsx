@@ -34,7 +34,14 @@ import {
 } from './expenseV2/CurrencyPickerPopup';
 import { MemberPickerPopup } from './expenseV2/MemberPickerPopup';
 import { CurrencyPicker } from './CurrencyPicker';
-import { rtlRowStyle, useRtlLayout } from '../hooks/useRtlLayout';
+import {
+    ltrAmountCellTextAlign,
+    ltrAmountRowStyle,
+    ltrNumericTextStyle,
+    rtlForwardChevronIcon,
+    rtlRowStyle,
+    useRtlLayout,
+} from '../hooks/useRtlLayout';
 import { getAvatarUrlForMember } from '../lib/userDisplay';
 
 export interface SettleUpFormValues {
@@ -486,7 +493,7 @@ function SettleUpHero({
                 </View>
 
                 <View
-                    style={[heroStyles.flowRow, { direction: isRtl ? 'rtl' : 'ltr' }]}
+                    style={[heroStyles.flowRow, rtlRowStyle(isRtl)]}
                     {...(Platform.OS === 'web'
                         ? ({ dir: isRtl ? 'rtl' : 'ltr' } as const)
                         : {})}
@@ -505,6 +512,7 @@ function SettleUpHero({
                             amountText={amountText}
                             amountLocked={amountLocked}
                             onAmountChange={onAmountChange}
+                            isRtl={isRtl}
                         />
 
                         <CurrencyChip
@@ -514,10 +522,10 @@ function SettleUpHero({
                             label={t('settleUp.currency')}
                         />
 
-                        <View style={[heroStyles.arrowRow, { direction: isRtl ? 'rtl' : 'ltr' }]}>
+                        <View style={[heroStyles.arrowRow, rtlRowStyle(isRtl)]}>
                             <View style={heroStyles.arrowLine} />
                             <AppIcon
-                                name={isRtl ? 'chevron-back' : 'chevron-forward'}
+                                name={rtlForwardChevronIcon(isRtl)}
                                 size={18}
                                 color="rgba(255,255,255,0.95)"
                             />
@@ -576,7 +584,8 @@ function SettleUpAmountField({
     amountText,
     amountLocked,
     onAmountChange,
-}: SettleUpAmountFieldProps) {
+    isRtl,
+}: SettleUpAmountFieldProps & { isRtl: boolean }) {
     const display = amountText.length > 0 ? amountText : '0';
 
     if (Platform.OS === 'web') {
@@ -617,6 +626,7 @@ function SettleUpAmountField({
         <View
             style={[
                 heroStyles.amountWrap,
+                ltrAmountRowStyle(isRtl),
                 amountLocked ? heroStyles.amountBoxLocked : heroStyles.amountBoxEditable,
             ]}
         >
@@ -678,7 +688,6 @@ const heroStyles = StyleSheet.create({
         borderRadius: 12,
         paddingHorizontal: AMOUNT_BOX_PAD_X,
         paddingVertical: 4,
-        direction: 'ltr',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -1113,7 +1122,7 @@ function ConsolidationDebtList({ debts, memberMap, currentUserId }: Consolidatio
                             <Text
                                 className="text-gray-600 text-sm flex-1 mr-3"
                                 numberOfLines={1}
-                                style={{ writingDirection: 'ltr', textAlign: 'left' }}
+                                style={[ltrNumericTextStyle, { textAlign: ltrAmountCellTextAlign }]}
                             >
                                 {payerName} → {receiverName}
                             </Text>

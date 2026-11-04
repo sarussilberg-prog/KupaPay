@@ -52,6 +52,11 @@ import { DatePickerPopup } from '../../components/expenseV2/DatePickerPopup';
 import { RecurringFrequencySheet } from '../../components/expenseV2/RecurringFrequencySheet';
 import { GroupSelectPill } from '../../components/expenseV2/GroupSelectPill';
 import { GroupPickerSheet } from '../../components/favoriteGroup/GroupPickerSheet';
+import {
+    ltrAmountRowStyle,
+    ltrAmountSymbolTextStyle,
+    useRtlLayout,
+} from '../../hooks/useRtlLayout';
 
 /** Web inherits `dir=rtl` from RtlLayoutProvider — force physical LTR for amount row. */
 const WEB_LTR_DIR = Platform.OS === 'web' ? ({ dir: 'ltr' } as const) : {};
@@ -185,6 +190,7 @@ function snapshotKey(s: {
 
 export function AddExpenseScreen() {
     const { t, i18n } = useTranslation();
+    const isRtl = useRtlLayout();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const insets = useSafeAreaInsets();
@@ -1022,6 +1028,7 @@ export function AddExpenseScreen() {
                     <Animated.View
                         style={[
                             IS_WEB ? styles.amountRowWeb : styles.amountRowNative,
+                            ltrAmountRowStyle(isRtl),
                             { transform: [{ translateX: amountShake }] },
                         ]}
                         {...WEB_LTR_DIR}
@@ -1029,7 +1036,10 @@ export function AddExpenseScreen() {
                         {IS_WEB ? (
                             <>
                                 <View style={styles.amountCenteredWeb}>
-                                    <View style={styles.amountWithSymbolWeb} {...WEB_LTR_DIR}>
+                                    <View
+                                        style={[styles.amountWithSymbolWeb, ltrAmountRowStyle(isRtl)]}
+                                        {...WEB_LTR_DIR}
+                                    >
                                         {amountCurrencySymbol ? (
                                             <Text
                                                 style={styles.currencySymbolWeb}
@@ -1086,7 +1096,7 @@ export function AddExpenseScreen() {
                                     currency={currency}
                                     onPress={() => setCurrencyPickerVisible(true)}
                                 />
-                                <View style={styles.amountWithSymbolNative}>
+                                <View style={[styles.amountWithSymbolNative, ltrAmountRowStyle(isRtl)]}>
                                     {amountCurrencySymbol ? (
                                         <Text
                                             style={styles.currencySymbolNative}
@@ -1414,7 +1424,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         overflow: 'visible',
         paddingVertical: 6,
-        direction: 'ltr',
     },
     amountCenteredWeb: {
         width: '100%',
@@ -1436,7 +1445,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 2,
-        direction: 'ltr',
         overflow: 'visible',
         minHeight: 64,
     },
@@ -1478,7 +1486,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        direction: 'ltr',
         width: '100%',
         minHeight: 80,
         paddingVertical: 12,
@@ -1493,7 +1500,6 @@ const styles = StyleSheet.create({
         // symmetric around the glyph on native text engines, so it looked off.
         alignItems: 'baseline',
         gap: 2,
-        direction: 'ltr',
         flexShrink: 1,
         minWidth: 0,
     },
@@ -1509,7 +1515,7 @@ const styles = StyleSheet.create({
         // this Text to the row's full height, top-anchoring the glyph). Setting
         // `textAlign` here opts out of that injection so `baseline` alignment on
         // the parent actually takes effect.
-        textAlign: 'left',
+        ...ltrAmountSymbolTextStyle(),
         ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
     },
     amountInputNative: {
@@ -1519,9 +1525,10 @@ const styles = StyleSheet.create({
         letterSpacing: -1.9,
         padding: 0,
         margin: 0,
-        textAlign: 'left',
+        textAlign: 'center',
         fontVariant: ['tabular-nums'],
         flexShrink: 0,
+        writingDirection: 'ltr',
         ...(Platform.OS === 'android'
             ? { textAlignVertical: 'center', includeFontPadding: false }
             : null),
