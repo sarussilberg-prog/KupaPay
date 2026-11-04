@@ -74,6 +74,33 @@ test.describe('Expo web — RTL group card physical order (B2 preview)', () => {
             expect(menuBox!.x).toBeGreaterThan(nameBox!.x);
         }
 
+        const summaryCard = page.getByTestId('groups-list-summary-card');
+        await expect(summaryCard).toBeVisible();
+        const summaryLabel = page.getByTestId('groups-list-summary-label');
+        const summaryAmount = page.getByTestId('groups-list-summary-amount');
+        const cardBox = await summaryCard.boundingBox();
+        const labelBox = await summaryLabel.boundingBox();
+        const amountBox = await summaryAmount.boundingBox();
+        expect(cardBox).toBeTruthy();
+        expect(labelBox).toBeTruthy();
+        expect(amountBox).toBeTruthy();
+
+        const cardInnerRight = cardBox!.x + cardBox!.width - 16;
+        const cardInnerLeft = cardBox!.x + 16;
+        const edgeTolerancePx = 12;
+
+        if (expectRtl) {
+            expect(Math.abs(labelBox!.x + labelBox!.width - cardInnerRight)).toBeLessThanOrEqual(
+                edgeTolerancePx,
+            );
+            expect(Math.abs(amountBox!.x + amountBox!.width - cardInnerRight)).toBeLessThanOrEqual(
+                edgeTolerancePx,
+            );
+        } else {
+            expect(Math.abs(labelBox!.x - cardInnerLeft)).toBeLessThanOrEqual(edgeTolerancePx);
+            expect(Math.abs(amountBox!.x - cardInnerLeft)).toBeLessThanOrEqual(edgeTolerancePx);
+        }
+
         await page.screenshot({
             path: path.join(SCREENSHOT_DIR, `groups-list-probe-${expectRtl ? 'he' : 'en'}.png`),
             fullPage: true,
