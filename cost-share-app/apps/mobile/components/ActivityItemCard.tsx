@@ -15,7 +15,7 @@ import {
     activityCardAmountClassForNet,
     getActivityCardVariant,
 } from '../lib/activityCardVariant';
-import { useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
+import { ltrAmountCellTextAlign, ltrNumericTextStyle, useRtlLayout, rtlRowStyle } from '../hooks/useRtlLayout';
 
 interface ResolveTitleArgs {
     actorName: string;
@@ -238,7 +238,7 @@ export function ActivityItemCard({
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.65}
-                        style={{ textAlign: 'right' }}
+                        style={[ltrNumericTextStyle, { textAlign: ltrAmountCellTextAlign }]}
                     >
                         {amountText}
                     </Text>

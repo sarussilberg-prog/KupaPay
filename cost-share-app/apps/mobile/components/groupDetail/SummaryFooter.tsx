@@ -43,7 +43,7 @@ export function SummaryFooter({
                     : t('balances.paymentsToSettle', { count: settlementCount })}
             </Text>
 
-            <View style={styles.pillGroup} testID="summary-pill-group">
+            <View style={[styles.pillGroup, rtlRowStyle(isRtl)]} testID="summary-pill-group">
                 <TouchableOpacity
                     onPress={onOpenNote}
                     activeOpacity={0.7}
@@ -116,9 +116,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         flexShrink: 0,
-        // Keep Note immediately left of Settle-up in RTL (avoid Note floating between
-        // the status copy and the settle pill when the row mirrors).
-        direction: 'ltr',
     },
     notePill: {
         backgroundColor: '#fff',

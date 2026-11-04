@@ -17,7 +17,7 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
     const align = rtlTextAlign(isRtl);
-    const direction: 'rtl' | 'ltr' = isRtl ? 'rtl' : 'ltr';
+    const writingDir = isRtl ? 'rtl' : 'ltr';
 
     const visible = rows.filter(r => r.owed >= 0.01 || r.owe >= 0.01);
     if (visible.length === 0) return null;
@@ -32,7 +32,7 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
                     {row.owed >= 0.01 && (
                         <Text
                             className="text-sm font-medium text-green-600"
-                            style={{ textAlign: align, writingDirection: direction }}
+                            style={{ textAlign: align, writingDirection: writingDir }}
                         >
                             {/* <1>…</1> markers are for the SummaryBalanceStrip <Trans> consumer; strip them here. */}
                             {t('groups.summary.youAreOwed', {
@@ -46,7 +46,7 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
                     {row.owe >= 0.01 && (
                         <Text
                             className="text-sm font-medium text-red-500 mt-0.5"
-                            style={{ textAlign: align, writingDirection: direction }}
+                            style={{ textAlign: align, writingDirection: writingDir }}
                         >
                             {t('groups.summary.youOwe', {
                                 amount: formatMoney(row.owe, row.currency, {

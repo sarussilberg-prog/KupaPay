@@ -3,7 +3,6 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { type BaseToastProps } from 'react-native-toast-message';
 import { Text } from '../components/AppText';
 import { colors } from '../theme';
-import { useRtlLayout } from '../hooks/useRtlLayout';
 
 type ToastVariant = {
     borderStartColor: string;
@@ -28,15 +27,12 @@ function KupaPayToast({
     onPress,
     variant,
 }: BaseToastProps & { variant: ToastVariant }) {
-    const isRtl = useRtlLayout();
     return (
         <TouchableOpacity
             activeOpacity={0.9}
             onPress={onPress}
             accessibilityRole="alert"
-            // `direction` only flips the accent border to the language's leading edge
-            // (borderStart). Text alignment itself is owned by <AppText>.
-            style={[styles.base, variant, { direction: isRtl ? 'rtl' : 'ltr' }]}
+            style={[styles.base, variant]}
         >
             <View style={styles.content}>
                 {text1 ? (

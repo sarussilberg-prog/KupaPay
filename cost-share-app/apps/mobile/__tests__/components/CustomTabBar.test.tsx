@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { I18nManager, Text } from 'react-native';
 import { render, fireEvent, within } from '@testing-library/react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { CustomTabBar } from '../../components/navigation/CustomTabBar';
@@ -170,15 +170,16 @@ describe('CustomTabBar', () => {
         });
     });
 
-    it('uses a single LTR row (no row-reverse) in RTL (Hebrew)', () => {
+    it('uses mirrored row style in Hebrew (no direction override)', () => {
         useAppStore.setState({ language: 'he' } as any);
+        (I18nManager as unknown as { isRTL: boolean }).isRTL = true;
         const { getByTestId } = renderTabBar(makeProps());
         const row = getByTestId('tabbar-row');
         const flat = Array.isArray(row.props.style)
             ? Object.assign({}, ...row.props.style.filter(Boolean))
             : row.props.style;
         expect(flat.flexDirection).toBe('row');
-        expect(flat.direction).toBe('ltr');
+        expect(flat.direction).toBeUndefined();
     });
 
     function leadingTabOrder(leading: Parameters<typeof within>[0]) {
@@ -188,8 +189,9 @@ describe('CustomTabBar', () => {
             .filter((id: string | undefined) => id?.startsWith('tab-'));
     }
 
-    it('keeps Profile before Activity on the leading side in Hebrew (explicit LTR tab bar)', () => {
+    it('keeps Profile before Activity on the leading side in Hebrew', () => {
         useAppStore.setState({ language: 'he' } as any);
+        (I18nManager as unknown as { isRTL: boolean }).isRTL = true;
         const { getByTestId } = renderTabBar(makeProps());
         expect(leadingTabOrder(getByTestId('tabbar-side-leading'))).toEqual([
             'tab-Profile',

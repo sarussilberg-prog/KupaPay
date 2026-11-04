@@ -76,6 +76,63 @@ export function rtlForwardChevronIcon(isRtl: boolean): 'chevron-forward' | 'chev
     return isRtl ? 'chevron-back' : 'chevron-forward';
 }
 
+/**
+ * Currency symbol + amount rows stay visually LTR under Hebrew UI.
+ * Native RTL mirroring is cancelled with row-reverse when synced.
+ */
+export function ltrAmountRowStyle(isRtl: boolean): ViewStyle {
+    if (Platform.OS === 'web') {
+        return { flexDirection: 'row', direction: 'ltr' };
+    }
+    if (isRtl && isNativeRtlSynced(isRtl)) {
+        return { flexDirection: 'row-reverse' };
+    }
+    return { flexDirection: 'row' };
+}
+
+/** Narrow column wrapper for tabular amounts in feed/settlement rows. */
+export function ltrAmountColumnStyle(isRtl: boolean): ViewStyle {
+    if (Platform.OS === 'web') {
+        return { direction: 'ltr' };
+    }
+    if (isRtl && isNativeRtlSynced(isRtl)) {
+        return { flexDirection: 'row-reverse' };
+    }
+    return {};
+}
+
+export const ltrNumericTextStyle: TextStyle = {
+    writingDirection: 'ltr',
+    fontVariant: ['tabular-nums'],
+};
+
+/** Physical left alignment for LTR amount cells (canonical — do not inline elsewhere). */
+export const ltrAmountCellTextAlign = 'left' as const;
+
+/** Opts AppText out of auto stretch on amount symbol glyphs (baseline rows). */
+export function ltrAmountSymbolTextStyle(): TextStyle {
+    return {
+        ...ltrNumericTextStyle,
+        textAlign: 'left',
+    };
+}
+
+/** Symmetric logo merge animation must not mirror with language (web only). */
+export function brandMarkAnimationWrapperStyle(): ViewStyle {
+    if (Platform.OS === 'web') {
+        return { direction: 'ltr' };
+    }
+    return {};
+}
+
+/** Markdown / rich text blocks on web need explicit CSS direction. */
+export function rtlMarkdownContainerStyle(isRtl: boolean): ViewStyle {
+    if (Platform.OS === 'web') {
+        return { direction: isRtl ? 'rtl' : 'ltr' };
+    }
+    return {};
+}
+
 export function rtlTextAlign(isRtl: boolean): 'left' | 'right' {
     return isRtl ? 'right' : 'left';
 }

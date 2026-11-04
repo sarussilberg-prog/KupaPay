@@ -13,7 +13,12 @@ import {
     resolveLegalDocumentLocale,
     type LegalSlug,
 } from '@cost-share/shared';
-import { rtlRowStyle, rtlTextAlign, rtlWritingDirection } from '../../hooks/useRtlLayout';
+import {
+    rtlMarkdownContainerStyle,
+    rtlRowStyle,
+    rtlTextAlign,
+    rtlWritingDirection,
+} from '../../hooks/useRtlLayout';
 
 interface Props {
     visible: boolean;
@@ -102,7 +107,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
                                 showsVerticalScrollIndicator={true}
                                 nestedScrollEnabled={true}
                             >
-                                <View style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+                                <View style={rtlMarkdownContainerStyle(isRtl)}>
                                     <Markdown style={styles}>{contentMd}</Markdown>
                                 </View>
                             </ScrollView>

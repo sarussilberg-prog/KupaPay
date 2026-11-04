@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Text } from '../AppText';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlRowStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 
 /** Logical height matching iOS status bar + inset (~47pt on 6.7"). */
 export const IOS_CAPTURE_STATUS_BAR_HEIGHT = 47;
@@ -12,14 +12,12 @@ export function IosCaptureStatusBar() {
 
     const isRtl = useRtlLayout();
     // iOS keeps clock on the leading edge; in RTL UI the bar still reads time → trailing icons.
-    const rowDirection = isRtl ? 'row-reverse' : 'row';
-
     return (
-        <View style={[styles.bar, { flexDirection: rowDirection }]} testID="ios-capture-status-bar">
+        <View style={[styles.bar, rtlRowStyle(isRtl)]} testID="ios-capture-status-bar">
             <Text style={styles.time} allowFontScaling={false}>
                 9:41
             </Text>
-            <View style={[styles.icons, { flexDirection: rowDirection }]}>
+            <View style={[styles.icons, rtlRowStyle(isRtl)]}>
                 <View style={styles.cellular}>
                     {[4, 7, 10, 13].map(h => (
                         <View key={h} style={[styles.cellBar, { height: h }]} />

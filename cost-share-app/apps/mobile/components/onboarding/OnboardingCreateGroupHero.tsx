@@ -13,7 +13,7 @@ import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
 import { onboardingColors } from '../../theme/onboardingColors';
 import { onboardingMotion } from '../../theme/onboardingMotion';
-import { rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlRowStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
 
 type Props = {
     hasName: boolean;
@@ -90,7 +90,7 @@ export function OnboardingCreateGroupHero({
                 </Text>
 
                 <View
-                    style={[styles.track, { direction: isRtl ? 'rtl' : 'ltr' }]}
+                    style={[styles.track, rtlRowStyle(isRtl)]}
                     testID="onboarding-create-group-hero-progress"
                 >
                     <View

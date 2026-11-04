@@ -1,49 +1,45 @@
 import React from 'react';
-import { I18nManager, Platform } from 'react-native';
+import { I18nManager } from 'react-native';
 import { render } from '@testing-library/react-native';
 import { IconLabel } from '../../../components/ui/IconLabel';
 import { ICON_LABEL_BOX_WIDTH, ICON_LABEL_GAP } from '../../../components/ui/iconLabelLayout';
+import { RtlLayoutProvider } from '../../../hooks/useRtlLayout';
+import { useAppStore } from '../../../store';
 
-jest.mock('../../../hooks/useRtlLayout', () => {
-    const actual = jest.requireActual('../../../hooks/useRtlLayout');
-    return {
-        ...actual,
-        useRtlLayout: jest.fn(() => false),
-    };
-});
-
-const { useRtlLayout } = jest.requireMock('../../../hooks/useRtlLayout') as {
-    useRtlLayout: jest.Mock;
-};
+function renderIconLabel(ui: React.ReactElement, language: 'en' | 'he' = 'en') {
+    useAppStore.setState({ language });
+    (I18nManager as unknown as { isRTL: boolean }).isRTL = language === 'he';
+    return render(<RtlLayoutProvider>{ui}</RtlLayoutProvider>);
+}
 
 describe('IconLabel', () => {
-    beforeEach(() => {
-        useRtlLayout.mockReturnValue(false);
+    afterEach(() => {
+        useAppStore.setState({ language: 'en' });
+        (I18nManager as unknown as { isRTL: boolean }).isRTL = false;
     });
 
     it('uses fixed icon box width and theme gap in LTR', () => {
-        const { getByTestId } = render(
+        const { getByTestId } = renderIconLabel(
             <IconLabel
                 iconName="globe-outline"
                 iconColor="#666"
                 label="Language"
                 testID="icon-label"
             />,
+            'en',
         );
         const row = getByTestId('icon-label');
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));
         expect(flat.gap ?? flat.columnGap).toBe(ICON_LABEL_GAP);
         expect(flat.flexDirection).toBe('row');
-        expect(flat.direction).toBeUndefined();
         const iconBox = row.children[0] as { props: { style: { width: number } } };
         expect(iconBox.props.style.width).toBe(ICON_LABEL_BOX_WIDTH);
     });
 
-    it('mirrors row direction for Hebrew (RTL)', () => {
-        useRtlLayout.mockReturnValue(true);
-        (I18nManager as unknown as { isRTL: boolean }).isRTL = true;
-        const { getByTestId } = render(
-            <IconLabel iconName="globe-outline" iconColor="#666" label="שפה" testID="icon-label-rtl" />,
+    it('mirrors row direction for Hebrew (RTL) when native is synced', () => {
+        const { getByTestId } = renderIconLabel(
+            <IconLabel iconName="globe-outline" iconColor="#666" label="Language" testID="icon-label-rtl" />,
+            'he',
         );
         const row = getByTestId('icon-label-rtl');
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));

@@ -8,6 +8,7 @@ import { colors } from '../../theme';
 import { E2E_XX_LONG_LOCALE_ENABLED } from '../../lib/featureFlags';
 import { XX_LONG_LOCALE_CODE } from '../../i18n/e2ePseudoLocale';
 import { type AppLanguagePickerCode, isE2ePseudoLocaleCode } from '../../i18n/appLanguagePicker';
+import { rtlTextAlign, useRtlLayout } from '../../hooks/useRtlLayout';
 
 interface Props {
     visible: boolean;
@@ -32,6 +33,7 @@ const OPTIONS: { code: AppLanguagePickerCode; nativeLabel: string }[] = [
 
 export function LanguageSheet({ visible, current, onSelect, onClose, testID }: Props) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     if (!visible) return null;
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -55,7 +57,7 @@ export function LanguageSheet({ visible, current, onSelect, onClose, testID }: P
                             <Text
                                 className="flex-1 text-base text-gray-900"
                                 style={{
-                                    textAlign: 'left',
+                                    textAlign: rtlTextAlign(isRtl),
                                     writingDirection:
                                         !isE2ePseudoLocaleCode(opt.code) && isRtlLanguage(opt.code)
                                             ? 'rtl'

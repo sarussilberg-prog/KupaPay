@@ -37,6 +37,7 @@ import {
     computeUnequalTotal,
     parseSplitInput,
 } from '../../lib/expenseSplitForm';
+import { rtlTextAlign, useRtlLayout } from '../../hooks/useRtlLayout';
 
 export type UiSplitMode = 'equal' | 'percent' | 'exact';
 
@@ -88,6 +89,7 @@ export function EditPayerSplitSheet({
     onDone,
 }: EditPayerSplitSheetProps) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     const [payerId, setPayerId] = useState(initial.payerId);
     const [splitMode, setSplitMode] = useState<UiSplitMode>(initial.splitMode);
     const [selectedIds, setSelectedIds] = useState<string[]>(initial.selectedMemberIds);
@@ -395,6 +397,7 @@ export function EditPayerSplitSheet({
                                 <Animated.Text
                                     style={[
                                         styles.splitErrorCaption,
+                                        { textAlign: rtlTextAlign(isRtl) },
                                         { transform: [{ translateX: errorShake }] },
                                     ]}
                                     numberOfLines={1}
@@ -476,7 +479,7 @@ export function EditPayerSplitSheet({
                                             <View style={styles.inputWrap}>
                                                 <TextInput
                                                     ref={(r) => { splitInputRefs.current[member.id] = r; }}
-                                                    style={styles.input}
+                                                    style={[styles.input, { textAlign: rtlTextAlign(isRtl) }]}
                                                     value={value}
                                                     onChangeText={text => {
                                                         const sanitized = sanitizeNumeric(text);
@@ -573,7 +576,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         fontWeight: '700',
         color: colors.error,
-        textAlign: 'right',
     },
     doneText: {
         fontSize: 14,
@@ -695,7 +697,6 @@ const styles = StyleSheet.create({
     input: {
         minWidth: 60,
         maxWidth: 80,
-        textAlign: 'right',
         fontSize: 13,
         fontWeight: '700',
         color: colors.text.primary,

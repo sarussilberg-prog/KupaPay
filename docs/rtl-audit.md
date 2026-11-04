@@ -96,19 +96,15 @@ High-traffic surfaces:
 - `useRtlLayout()` from language vs layout mirroring from `I18nManager` — must stay equal after reload; guards in `syncNativeRtl`.
 - Tests that mocked `useRtlLayout(true)` **without** `I18nManager.isRTL = true` encoded the broken “always row-reverse” expectation.
 
-### P2 — Raw directional styles (allowlisted, migrate off)
+### P2 — Former raw directional styles (resolved)
 
-Guard allowlist (**23 entries**, `rtlRowPatterns.allowlist.json`) includes:
+All **`rtlRowPatterns.allowlist.json` entries cleared** — row/direction hacks live only in `hooks/useRtlLayout.tsx` (`ltrAmountRowStyle`, `brandMarkAnimationWrapperStyle`, `rtlMarkdownContainerStyle`, etc.).
 
-- **`direction: 'ltr'` pins:** `CustomTabBar`, `AddExpenseScreen` (multiple), `SettleUpSheet`, `FeedRowCard`, `SummaryFooter`, `GroupDetailFloatingActions`, `AppLogoAnimated`
-- **Inline `flexDirection: row-reverse`:** `LegalDocumentSheet` (fixed in this PR), `NetworkOfflineBanner` (fixed), `IosCaptureStatusBar`, markdown list items
-- **Physical `textAlign: left/right`:** many feed/expense components (prefer `rtlTextAlign` or logical classes)
+### Documented exceptions (canonical module only)
 
-### P2 — Web-only / special cases (keep documented exceptions)
-
-- Tab bar LTR pin (product order).
-- Amount / LTR numeric fields (`writingDirection: 'ltr'`).
-- Logo animation wrapper LTR.
+- **LTR amount rows:** `ltrAmountRowStyle` / `ltrAmountColumnStyle` (cancel I18nManager mirror for `$ 12.00`).
+- **Brand logo animation:** `brandMarkAnimationWrapperStyle()` (web `direction: ltr`; native needs no pin after root fix).
+- **Tab bar:** mirrors with `rtlRowStyle` — Hebrew places **Groups on the leading (right) edge**, Profile on trailing (left); Maestro checks `tabbar-groups-leftmost-rtl` / `tabbar-profile-rightmost-rtl`.
 
 ### P3 — Tests that did not catch device layout
 
@@ -157,13 +153,12 @@ Guard allowlist (**23 entries**, `rtlRowPatterns.allowlist.json`) includes:
 |--------|--------|
 | Remove `direction: 'ltr'` from `rtlRowStyle` steady state | Done |
 | Native `rtlRootStyle` without `direction` | Done |
-| `isNativeRtlSynced`, `rtlForwardChevronIcon` | Done |
+| `isNativeRtlSynced`, `rtlForwardChevronIcon`, amount helpers | Done |
 | Rewrite `useRtlLayout.test.ts` | Done |
 | Fix component tests to sync `I18nManager` | Done |
-| `NetworkOfflineBanner`, `LegalDocumentSheet` → `rtlRowStyle` | Done |
-| Allowlist refresh | Done (23 entries) |
-| Remaining allowlisted `direction: 'ltr'` files | **Follow-up PRs** (shrink allowlist) |
-| Replace all raw `textAlign: 'left'/'right'` | Follow-up |
+| Migrate all former allowlist files (incl. tab bar) | Done — **allowlist empty** |
+| `rtlDirectionalLayout` guard bans physical textAlign | Done |
+| Tab bar mirrors in Hebrew (no `direction: ltr` pin) | Done — diagnostics updated |
 
 **GroupCard (72pt row):** Children order remains avatar → text → balance → menu in JSX; with synced native RTL, **`rtlRowStyle` + I18nManager** mirrors to icon far **right**, menu far **left** in Hebrew.
 
