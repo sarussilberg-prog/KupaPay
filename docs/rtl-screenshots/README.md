@@ -6,7 +6,8 @@ Captured in CI (not committed by default — binary churn). After a green **Mobi
 |----------|----------|
 | `maestro-device-ui-ios-<run_id>` | `${MAESTRO_PLATFORM}_${APP_LANG}_*.png` from `visit-main-screens`, `rtl-main-screens-tour-en/he`, layout diagnostics |
 | `maestro-device-ui-android-<run_id>` | Same flows on Android emulator when the plan enables Android |
-| Playwright `expo-web-rtl-layout` | Bounding-box assertions on `group-card-probe-*` in B2 preview (`e2e/expo-web-rtl-layout.spec.ts`) |
+| `rtl-web-screenshots-<run_id>` | CI job **Expo web RTL (Playwright)** — PNGs under `docs/rtl-screenshots/web/` (B2 probe + ASC capture screens, en/he) |
+| Playwright `expo-web-rtl-layout` | Bounding-box assertions on `group-card-probe-*` + ASC capture `dir` checks (`cost-share-app/e2e/expo-web-rtl-layout.spec.ts`) |
 
 Local capture:
 

@@ -226,6 +226,16 @@ jobs:
       - run: bash scripts/ci-restore-node-modules-from-artifact.sh
       - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-jest-run-tests.sh
+      - name: Expo web RTL (Playwright)
+        run: bash scripts/ci-expo-web-rtl-playwright.sh
+      - name: Upload RTL web screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rtl-web-screenshots-${{ github.run_id }}
+          path: docs/rtl-screenshots/web/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Upload Jest flake report
         if: always()
         uses: actions/upload-artifact@v7

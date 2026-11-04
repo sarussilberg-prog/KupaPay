@@ -2,6 +2,8 @@ import React from 'react';
 import { I18nManager, Platform } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SettingsRow } from '../../../components/settings/SettingsRow';
+import { RtlLayoutProvider } from '../../../hooks/useRtlLayout';
+import { useAppStore } from '../../../store';
 import ar from '../../../i18n/locales/ar.json';
 import de from '../../../i18n/locales/de.json';
 import en from '../../../i18n/locales/en.json';
@@ -10,17 +12,11 @@ import fr from '../../../i18n/locales/fr.json';
 import he from '../../../i18n/locales/he.json';
 import ru from '../../../i18n/locales/ru.json';
 
-jest.mock('../../../hooks/useRtlLayout', () => {
-    const actual = jest.requireActual('../../../hooks/useRtlLayout');
-    return {
-        ...actual,
-        useRtlLayout: jest.fn(() => false),
-    };
-});
-
-const { useRtlLayout } = jest.requireMock('../../../hooks/useRtlLayout') as {
-    useRtlLayout: jest.Mock;
-};
+function renderSettingsRow(ui: React.ReactElement, language: 'en' | 'he' = 'en') {
+    useAppStore.setState({ language });
+    (I18nManager as unknown as { isRTL: boolean }).isRTL = language === 'he';
+    return render(<RtlLayoutProvider>{ui}</RtlLayoutProvider>);
+}
 
 function flatStyle(style: unknown): Record<string, unknown> {
     if (Array.isArray(style)) {
@@ -30,15 +26,13 @@ function flatStyle(style: unknown): Record<string, unknown> {
 }
 
 describe('SettingsRow', () => {
-    beforeEach(() => {
-        useRtlLayout.mockReturnValue(false);
+    afterEach(() => {
+        useAppStore.setState({ language: 'en' });
+        (I18nManager as unknown as { isRTL: boolean }).isRTL = false;
     });
 
     it('uses RTL row direction when app language is Hebrew', () => {
-        useRtlLayout.mockReturnValue(true);
-        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
-        i18nMgr.isRTL = true;
-        const { getByTestId } = render(
+        const { getByTestId } = renderSettingsRow(
             <SettingsRow
                 iconName="globe-outline"
                 label="שפה"
@@ -46,6 +40,7 @@ describe('SettingsRow', () => {
                 onPress={() => {}}
                 testID="settings-row-rtl"
             />,
+            'he',
         );
         const row = getByTestId('settings-row-rtl') as { props: { style: unknown[] } };
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));
@@ -58,18 +53,22 @@ describe('SettingsRow', () => {
 
     it('chevron variant: onPress fires', () => {
         const onPress = jest.fn();
-        const { getByText } = render(<SettingsRow iconName="globe-outline" label="Language" variant="chevron" onPress={onPress} />);
+        const { getByText } = renderSettingsRow(
+            <SettingsRow iconName="globe-outline" label="Language" variant="chevron" onPress={onPress} />,
+        );
         fireEvent.press(getByText('Language'));
         expect(onPress).toHaveBeenCalled();
     });
 
     it('value variant renders text', () => {
-        const { getByText } = render(<SettingsRow iconName="globe-outline" label="Language" variant="value" valueText="English" onPress={() => {}} />);
+        const { getByText } = renderSettingsRow(
+            <SettingsRow iconName="globe-outline" label="Language" variant="value" valueText="English" onPress={() => {}} />,
+        );
         expect(getByText('English')).toBeTruthy();
     });
 
     it('value variant keeps label leading and value adjacent with chevron spacer (LTR)', () => {
-        const { getByTestId, getByText } = render(
+        const { getByTestId, getByText } = renderSettingsRow(
             <SettingsRow
                 iconName="globe-outline"
                 label="Language"
@@ -93,10 +92,7 @@ describe('SettingsRow', () => {
     });
 
     it('value variant mirrors cluster layout for Hebrew (RTL)', () => {
-        useRtlLayout.mockReturnValue(true);
-        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
-        i18nMgr.isRTL = true;
-        const { getByTestId } = render(
+        const { getByTestId } = renderSettingsRow(
             <SettingsRow
                 iconName="globe-outline"
                 label="שפה"
@@ -105,6 +101,7 @@ describe('SettingsRow', () => {
                 onPress={() => {}}
                 testID="settings-value-row-rtl"
             />,
+            'he',
         );
         const cluster = getByTestId('settings-value-row-rtl-value-cluster');
         const flat = flatStyle(cluster.props.style);
@@ -113,7 +110,9 @@ describe('SettingsRow', () => {
     });
 
     it('danger variant renders label', () => {
-        const { getByText } = render(<SettingsRow iconName="log-out-outline" label="Log out" variant="danger" onPress={() => {}} />);
+        const { getByText } = renderSettingsRow(
+            <SettingsRow iconName="log-out-outline" label="Log out" variant="danger" onPress={() => {}} />,
+        );
         expect(getByText('Log out')).toBeTruthy();
     });
 
@@ -126,7 +125,7 @@ describe('SettingsRow', () => {
         ['fr', fr.settings.language, fr.profile.english],
         ['ru', ru.settings.language, ru.profile.english],
     ] as const)('value row renders for locale %s', (_locale, label, valueText) => {
-        const { getByText } = render(
+        const { getByText } = renderSettingsRow(
             <SettingsRow iconName="globe-outline" label={label} variant="value" valueText={valueText} onPress={() => {}} />,
         );
         expect(getByText(label)).toBeTruthy();
@@ -135,7 +134,7 @@ describe('SettingsRow', () => {
 
     it('disabled: onPress does not fire', () => {
         const onPress = jest.fn();
-        const { getByText } = render(
+        const { getByText } = renderSettingsRow(
             <SettingsRow iconName="notifications-outline" label="Notifications" variant="chevron" onPress={onPress} disabled />,
         );
         fireEvent.press(getByText('Notifications'));

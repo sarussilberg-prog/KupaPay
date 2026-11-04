@@ -64,7 +64,7 @@ Related:
 |--------|------|
 | `components/ui/iconLabelLayout.ts` | `listRowContainerStyle` = `rtlRowStyle` + gap. |
 | `lib/nativeRowLayoutStyle.ts` | Group card inner row, flex safety checks. |
-| `components/navigation/CustomTabBar.tsx` | **`TAB_BAR_LTR`** — intentional `direction: 'ltr'` so tab order stays Groups→Activity→Add→Favorite→Profile. |
+| `components/navigation/CustomTabBar.tsx` | Tab bar uses **`rtlRowStyle`** — Hebrew mirrors tab order (Groups leading/right, Profile trailing/left); Maestro checks `tabbar-groups-leftmost-rtl`. |
 | `navigation/orderedTabBarRoutes.ts` | Route order; no row-reverse swap. |
 | `lib/groupsLayoutDiagnostics.ts` | Real `onLayout` frames → Maestro/CI JSON checks. |
 | `lib/scanRtlRowPatterns.ts` + guard test | Ban raw `row-reverse` / hardcoded `direction` outside allowlist. |

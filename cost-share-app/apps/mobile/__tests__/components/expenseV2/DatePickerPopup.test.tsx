@@ -30,51 +30,47 @@ jest.mock('react-native-calendars', () => {
     return { Calendar, LocaleConfig: { locales: {}, defaultLocale: 'en' } };
 });
 
-jest.mock('../../../hooks/useRtlLayout', () => ({
-    useAppLanguage: () => 'en',
-    useRtlLayout: () => false,
-    rtlTextClassName: () => '',
-    resolveAutoTextStyle: () => undefined,
-}));
-
 import { DatePickerPopup } from '../../../components/expenseV2/DatePickerPopup';
+import { RtlLayoutProvider } from '../../../hooks/useRtlLayout';
+
+function renderPopup(props: React.ComponentProps<typeof DatePickerPopup>) {
+    return render(
+        <RtlLayoutProvider>
+            <DatePickerPopup {...props} />
+        </RtlLayoutProvider>,
+    );
+}
 
 describe('DatePickerPopup', () => {
     it('renders nothing when visible=false', () => {
-        const { queryByTestId } = render(
-            <DatePickerPopup
-                visible={false}
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
-            />,
-        );
+        const { queryByTestId } = renderPopup({
+            visible: false,
+            initialDate: new Date(2026, 4, 25),
+            onCancel: jest.fn(),
+            onConfirm: jest.fn(),
+        });
         expect(queryByTestId('date-picker-popup')).toBeNull();
     });
 
     it('opens with the initial date highlighted', () => {
-        const { getByTestId } = render(
-            <DatePickerPopup
-                visible
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
-            />,
-        );
+        const { getByTestId } = renderPopup({
+            visible: true,
+            initialDate: new Date(2026, 4, 25),
+            onCancel: jest.fn(),
+            onConfirm: jest.fn(),
+        });
         expect(getByTestId('date-picker-popup')).toBeTruthy();
         expect(getByTestId('mock-calendar-current').props.children).toBe('2026-05-25');
     });
 
     it('calls onConfirm with the picked date when Done is pressed', () => {
         const onConfirm = jest.fn();
-        const { getByTestId } = render(
-            <DatePickerPopup
-                visible
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={onConfirm}
-            />,
-        );
+        const { getByTestId } = renderPopup({
+            visible: true,
+            initialDate: new Date(2026, 4, 25),
+            onCancel: jest.fn(),
+            onConfirm,
+        });
         fireEvent.press(getByTestId('mock-day-2026-06-15'));
         fireEvent.press(getByTestId('date-picker-done'));
         expect(onConfirm).toHaveBeenCalledTimes(1);
@@ -86,14 +82,12 @@ describe('DatePickerPopup', () => {
 
     it('calls onConfirm with the initial date if user taps Done without changing the day', () => {
         const onConfirm = jest.fn();
-        const { getByTestId } = render(
-            <DatePickerPopup
-                visible
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={onConfirm}
-            />,
-        );
+        const { getByTestId } = renderPopup({
+            visible: true,
+            initialDate: new Date(2026, 4, 25),
+            onCancel: jest.fn(),
+            onConfirm,
+        });
         fireEvent.press(getByTestId('date-picker-done'));
         const arg = onConfirm.mock.calls[0][0] as Date;
         expect(arg.getFullYear()).toBe(2026);
@@ -104,14 +98,12 @@ describe('DatePickerPopup', () => {
     it('calls onCancel and not onConfirm when Cancel is pressed', () => {
         const onCancel = jest.fn();
         const onConfirm = jest.fn();
-        const { getByTestId } = render(
-            <DatePickerPopup
-                visible
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={onCancel}
-                onConfirm={onConfirm}
-            />,
-        );
+        const { getByTestId } = renderPopup({
+            visible: true,
+            initialDate: new Date(2026, 4, 25),
+            onCancel,
+            onConfirm,
+        });
         fireEvent.press(getByTestId('mock-day-2026-06-15'));
         fireEvent.press(getByTestId('date-picker-cancel'));
         expect(onCancel).toHaveBeenCalledTimes(1);
@@ -119,40 +111,44 @@ describe('DatePickerPopup', () => {
     });
 
     it('resets the highlighted day when reopened with a new initialDate', () => {
-        const { getByTestId, rerender } = render(
-            <DatePickerPopup
-                visible={false}
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
-            />,
-        );
+        const { getByTestId, rerender } = renderPopup({
+            visible: false,
+            initialDate: new Date(2026, 4, 25),
+            onCancel: jest.fn(),
+            onConfirm: jest.fn(),
+        });
         rerender(
-            <DatePickerPopup
-                visible
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
-            />,
+            <RtlLayoutProvider>
+                <DatePickerPopup
+                    visible
+                    initialDate={new Date(2026, 4, 25)}
+                    onCancel={jest.fn()}
+                    onConfirm={jest.fn()}
+                />
+            </RtlLayoutProvider>,
         );
         // user picks a different day but cancels
         fireEvent.press(getByTestId('mock-day-2025-01-01'));
         rerender(
-            <DatePickerPopup
-                visible={false}
-                initialDate={new Date(2026, 4, 25)}
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
-            />,
+            <RtlLayoutProvider>
+                <DatePickerPopup
+                    visible={false}
+                    initialDate={new Date(2026, 4, 25)}
+                    onCancel={jest.fn()}
+                    onConfirm={jest.fn()}
+                />
+            </RtlLayoutProvider>,
         );
         // reopen with a different initial
         rerender(
-            <DatePickerPopup
-                visible
-                initialDate={new Date(2024, 6, 4)}
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
-            />,
+            <RtlLayoutProvider>
+                <DatePickerPopup
+                    visible
+                    initialDate={new Date(2024, 6, 4)}
+                    onCancel={jest.fn()}
+                    onConfirm={jest.fn()}
+                />
+            </RtlLayoutProvider>,
         );
         expect(getByTestId('mock-calendar-current').props.children).toBe('2024-07-04');
     });

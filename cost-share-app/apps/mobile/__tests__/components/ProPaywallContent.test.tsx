@@ -1,6 +1,11 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
+import { RtlLayoutProvider } from '../../hooks/useRtlLayout';
+
+function renderPaywall(ui: React.ReactElement) {
+    return render(<RtlLayoutProvider>{ui}</RtlLayoutProvider>);
+}
 
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({
@@ -10,13 +15,6 @@ jest.mock('react-i18next', () => ({
     }),
 }));
 
-jest.mock('../../hooks/useRtlLayout', () => ({
-    ...jest.requireActual('../../hooks/useRtlLayout'),
-    useAppLanguage: () => 'en',
-    useRtlLayout: () => false,
-    rtlTextClassName: () => '',
-    resolveAutoTextStyle: () => undefined,
-}));
 
 jest.mock('../../services/monetization.service', () => ({
     logMonetizationEvent: jest.fn(),
@@ -96,7 +94,7 @@ describe('ProPaywallContent offerings load', () => {
     it('shows error and retry when offerings load fails', async () => {
         fetchMock.mockResolvedValue({ status: 'failed', reason: 'empty' });
 
-        const { getByTestId, queryByTestId } = render(
+        const { getByTestId, queryByTestId } = renderPaywall(
             <ProPaywallContent featureKey="export_pdf" />,
         );
 
@@ -118,7 +116,7 @@ describe('ProPaywallContent offerings load', () => {
             introEligibility: {},
         });
 
-        const { findByTestId } = render(<ProPaywallContent featureKey="export_pdf" />);
+        const { findByTestId } = renderPaywall(<ProPaywallContent featureKey="export_pdf" />);
 
         expect(await findByTestId('paywall-pick-trip-pass')).toBeTruthy();
     });
@@ -143,7 +141,7 @@ describe('ProPaywallContent offerings load', () => {
             introEligibility: {},
         });
 
-        const { findByText, getByText } = render(
+        const { findByText, getByText } = renderPaywall(
             <ProPaywallContent featureKey="export_pdf" showTripPass />,
         );
 
@@ -163,7 +161,7 @@ describe('ProPaywallContent offerings load', () => {
             introEligibility: {},
         });
 
-        const { getByText, findByText } = render(
+        const { getByText, findByText } = renderPaywall(
             <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
         );
 
@@ -184,7 +182,7 @@ describe('ProPaywallContent offerings load', () => {
             },
         });
 
-        const { findByText } = render(
+        const { findByText } = renderPaywall(
             <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
         );
 
@@ -203,7 +201,7 @@ describe('ProPaywallContent offerings load', () => {
         });
         purchaseMock.mockResolvedValue({ ok: true });
 
-        const { queryByTestId, getByTestId } = render(
+        const { queryByTestId, getByTestId } = renderPaywall(
             <ProPaywallContent featureKey="export_pdf" showTripPass={false} />,
         );
 
@@ -225,7 +223,7 @@ describe('ProPaywallContent offerings load', () => {
             introEligibility: {},
         });
 
-        const { getByTestId, queryByTestId } = render(<ProPaywallContent featureKey="export_pdf" />);
+        const { getByTestId, queryByTestId } = renderPaywall(<ProPaywallContent featureKey="export_pdf" />);
 
         await waitFor(() => {
             expect(getByTestId('paywall-redeem-code')).toBeTruthy();

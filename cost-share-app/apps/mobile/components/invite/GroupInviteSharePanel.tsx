@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { IconLabel } from '../ui/IconLabel';
 import { colors } from '../../theme';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlTextAlign, useRtlLayout } from '../../hooks/useRtlLayout';
 import { useEnsureGroupInviteToken } from '../../hooks/useEnsureGroupInviteToken';
 import { useInviteLink } from '../../hooks/useInviteLink';
 import { handleError } from '../../lib/handleError';
@@ -94,13 +94,13 @@ export function GroupInviteSharePanel({
         <View className="flex-1 px-5 pt-2 pb-4" testID={testID}>
             <Text
                 className="text-2xl font-bold text-gray-900 mb-2"
-                style={{ textAlign: isRtl ? 'right' : 'left' }}
+                style={{ textAlign: rtlTextAlign(isRtl) }}
             >
                 {t('invite.postCreate.title')}
             </Text>
             <Text
                 className="text-base text-gray-600 mb-6 leading-6"
-                style={{ textAlign: isRtl ? 'right' : 'left' }}
+                style={{ textAlign: rtlTextAlign(isRtl) }}
             >
                 {t('invite.postCreate.subtitle', { groupName })}
             </Text>

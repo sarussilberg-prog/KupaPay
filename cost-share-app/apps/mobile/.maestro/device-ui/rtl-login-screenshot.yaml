@@ -1,0 +1,11 @@
+appId: com.kupapay.mobile
+---
+- launchApp:
+    clearState: true
+- runFlow: complete-pre-auth-onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: login-screen
+    timeout: 120000
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_00_login
+- runFlow: sign-in.yaml

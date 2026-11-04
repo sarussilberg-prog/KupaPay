@@ -2,9 +2,10 @@ appId: com.kupapay.mobile
 env:
   APP_LANG: en
 ---
-- runFlow: sign-in.yaml
+- runFlow: rtl-login-screenshot.yaml
 - runFlow: set-app-language.yaml
 - runFlow: visit-main-screens.yaml
+- runFlow: rtl-group-detail-settle.yaml
 - tapOn:
     id: tab-Profile
 - extendedWaitUntil:
