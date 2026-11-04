@@ -10,7 +10,12 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
 import { IconLabel } from '../ui/IconLabel';
 import { colors } from '../../theme';
-import { rtlTextAlign, useRtlLayout } from '../../hooks/useRtlLayout';
+import {
+    appLanguageEdgeTextStyle,
+    startEdgeColumnStyle,
+    startEdgeTextStyle,
+    useRtlLayout,
+} from '../../hooks/useRtlLayout';
 import { useEnsureGroupInviteToken } from '../../hooks/useEnsureGroupInviteToken';
 import { useInviteLink } from '../../hooks/useInviteLink';
 import { handleError } from '../../lib/handleError';
@@ -91,16 +96,16 @@ export function GroupInviteSharePanel({
     });
 
     return (
-        <View className="flex-1 px-5 pt-2 pb-4" testID={testID}>
+        <View className="flex-1 px-5 pt-2 pb-4" testID={testID} style={startEdgeColumnStyle}>
             <Text
                 className="text-2xl font-bold text-gray-900 mb-2"
-                style={{ textAlign: rtlTextAlign(isRtl) }}
+                style={startEdgeTextStyle(isRtl, 'text-2xl font-bold text-gray-900 mb-2')}
             >
                 {t('invite.postCreate.title')}
             </Text>
             <Text
                 className="text-base text-gray-600 mb-6 leading-6"
-                style={{ textAlign: rtlTextAlign(isRtl) }}
+                style={appLanguageEdgeTextStyle(isRtl, 'text-base text-gray-600 mb-6 leading-6')}
             >
                 {t('invite.postCreate.subtitle', { groupName })}
             </Text>

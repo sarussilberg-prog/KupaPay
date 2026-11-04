@@ -10,7 +10,7 @@ import {
     ltrAmountColumnStyle,
     ltrAmountCellTextAlign,
     ltrNumericTextStyle,
-    rtlTextAlign,
+    startEdgeTextStyle,
     useRtlLayout,
     rtlRowStyle,
 } from '../hooks/useRtlLayout';
@@ -102,9 +102,8 @@ export function FeedInvolvementLabel({ label }: { label: string }) {
             className="text-[11px] font-medium text-gray-500"
             style={{
                 width: '100%',
-                textAlign: rtlTextAlign(isRtl),
                 paddingStart: FEED_AMOUNT_CURRENCY_WIDTH,
-                writingDirection: isRtl ? 'rtl' : 'ltr',
+                ...startEdgeTextStyle(isRtl, 'text-[11px] font-medium text-gray-500'),
             }}
             numberOfLines={1}
         >

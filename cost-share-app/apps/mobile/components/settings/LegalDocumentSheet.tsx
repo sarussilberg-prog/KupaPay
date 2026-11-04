@@ -8,7 +8,6 @@ import { useLegalDocument } from '../../hooks/queries/useLegalDocument';
 import {
     APP_VERSION,
     isLanguage,
-    isRtlLanguage,
     languageToIntlLocale,
     resolveLegalDocumentLocale,
     type LegalSlug,
@@ -16,8 +15,11 @@ import {
 import {
     rtlMarkdownContainerStyle,
     rtlRowStyle,
-    rtlTextAlign,
     rtlWritingDirection,
+    startEdgeColumnStyle,
+    appLanguageEdgeTextStyle,
+    rtlTextAlign,
+    useRtlLayout,
 } from '../../hooks/useRtlLayout';
 
 interface Props {
@@ -34,7 +36,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
     const uiLanguage = isLanguage(uiLangCode) ? uiLangCode : 'en';
     const fallbackLocale = resolveLegalDocumentLocale(uiLanguage);
     const docLocale = query.data?.locale ?? fallbackLocale;
-    const isRtl = isRtlLanguage(uiLanguage);
+    const isRtl = useRtlLayout();
     const styles = useMemo(() => buildMarkdownStyles(isRtl), [isRtl]);
     const contentMd = useMemo(
         () => (isRtl && query.data ? prepareRtlMarkdown(query.data.contentMd) : query.data?.contentMd ?? ''),
@@ -51,8 +53,6 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
             day: 'numeric',
         }).format(new Date(query.data.effectiveDate));
     }
-
-    const titleAlign = rtlTextAlign(isRtl);
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -74,17 +74,17 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
                         className="px-5 pt-2 pb-3 border-b border-gray-100 items-start justify-between"
                         style={rtlRowStyle(isRtl)}
                     >
-                        <View style={{ flex: 1, paddingEnd: 12 }}>
+                        <View style={[{ flex: 1, paddingEnd: 12 }, startEdgeColumnStyle]}>
                             <Text
                                 className="text-xl font-bold text-gray-900"
-                                style={{ textAlign: titleAlign, writingDirection: rtlWritingDirection(isRtl) }}
+                                style={appLanguageEdgeTextStyle(isRtl, 'text-xl font-bold text-gray-900')}
                             >
                                 {query.data?.title ?? t(slug === 'terms' ? 'legal.termsTitle' : 'legal.privacyTitle')}
                             </Text>
                             {query.data && (
                                 <Text
                                     className="text-xs text-gray-500 mt-1"
-                                    style={{ textAlign: titleAlign, writingDirection: rtlWritingDirection(isRtl) }}
+                                    style={appLanguageEdgeTextStyle(isRtl, 'text-xs text-gray-500 mt-1')}
                                 >
                                     {t('legal.lastUpdated', { date: formattedDate })} · {t('legal.appVersion', { version: APP_VERSION })}
                                 </Text>

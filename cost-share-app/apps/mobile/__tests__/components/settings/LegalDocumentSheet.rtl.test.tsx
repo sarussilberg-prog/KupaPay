@@ -7,6 +7,10 @@ jest.mock('../../../hooks/queries/useLegalDocument', () => ({
     useLegalDocument: (...args: unknown[]) => mockUseLegalDocument(...args),
 }));
 
+jest.mock('../../../store', () => ({
+    useAppStore: (selector: (s: { language: string }) => unknown) => selector({ language: 'he' }),
+}));
+
 jest.mock('react-native-markdown-display', () => ({
     __esModule: true,
     default: ({ children }: { children: string }) => {

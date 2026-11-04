@@ -80,6 +80,7 @@ import { AscStoreListingCaptureRoot } from './screenshotDemo/AscStoreListingCapt
 import { E2eLayoutFixtureRoot } from './e2e/E2eLayoutFixtureRoot';
 import { GroupCardListPreviewScreen } from './screens/dev/GroupCardListPreviewScreen';
 import { GroupsListB2PreviewScreen } from './screens/dev/GroupsListB2PreviewScreen';
+import { ReferralProgramPreviewScreen } from './screens/dev/ReferralProgramPreviewScreen';
 import { SettingsRowLayoutPreviewScreen } from './screens/dev/SettingsRowLayoutPreviewScreen';
 import { readGroupsListPreviewParams } from './dev/groupsListPreviewParams';
 import { ScreenErrorBoundary } from './components/ScreenErrorBoundary';
@@ -97,6 +98,11 @@ function isGroupsListB2PreviewMode(): boolean {
 function isSettingsRowPreviewMode(): boolean {
   if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
   return new URLSearchParams(globalThis.location.search).get('devSettingsRowPreview') === '1';
+}
+
+function isReferralPreviewMode(): boolean {
+  if (Platform.OS !== 'web' || typeof globalThis.location === 'undefined') return false;
+  return new URLSearchParams(globalThis.location.search).get('devReferralPreview') === '1';
 }
 
 // Benign when a persisted session was revoked server-side (global sign-out, token rotation, etc.).
@@ -503,6 +509,18 @@ function App() {
         <RtlLayoutProvider>
           <WebFrame>
             <SettingsRowLayoutPreviewScreen />
+          </WebFrame>
+        </RtlLayoutProvider>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isReferralPreviewMode()) {
+    return (
+      <SafeAreaProvider>
+        <RtlLayoutProvider>
+          <WebFrame>
+            <ReferralProgramPreviewScreen />
           </WebFrame>
         </RtlLayoutProvider>
       </SafeAreaProvider>

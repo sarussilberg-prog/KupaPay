@@ -5,7 +5,7 @@ import { Text } from './AppText';
 import { useNetworkStatus } from '../lib/networkStatus';
 import { retryConnectivitySync } from '../lib/reconnectSync';
 import { queryClient } from '../lib/queryClient';
-import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
+import { rtlRowStyle, startEdgeTextStyle, useRtlLayout } from '../hooks/useRtlLayout';
 
 export function NetworkOfflineBanner() {
     const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function NetworkOfflineBanner() {
             <View style={[rtlRowStyle(isRtl), { flex: 1, alignItems: 'center', gap: 8 }]}>
                 <Text
                     className="text-xs font-semibold text-amber-100"
-                    style={{ flex: 1, textAlign: rtlTextAlign(isRtl) }}
+                    style={{ flex: 1, ...startEdgeTextStyle(isRtl, 'text-xs font-semibold text-amber-100') }}
                 >
                     {t('common.offlineBannerMessage')}
                 </Text>
