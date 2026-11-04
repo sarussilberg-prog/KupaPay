@@ -60,3 +60,4 @@ web-build/
 # Metro
 .metro-health-check*
 cost-share-app/test-results/
+playwright-report/
