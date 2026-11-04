@@ -133,6 +133,7 @@ export function SettingsScreen() {
 
     return (
         <ScrollView
+            testID="settings-screen"
             className="flex-1 bg-slate-50"
             contentContainerStyle={{ paddingBottom: insets.bottom }}
         >
