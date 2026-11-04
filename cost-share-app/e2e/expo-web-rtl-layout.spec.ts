@@ -11,8 +11,7 @@ type AscScreen =
     | 'balances'
     | 'add-expense'
     | 'simplified-debts'
-    | 'pro-paywall'
-    | 'settings-pro';
+    | 'pro-paywall';
 
 const ASC_SCREEN_READY: Record<AscScreen, string> = {
     groups: '[data-testid="groups-list-virtualized"]',
@@ -20,7 +19,6 @@ const ASC_SCREEN_READY: Record<AscScreen, string> = {
     'add-expense': '[data-testid="amount-display"]',
     'simplified-debts': '[data-testid="settle-up-list-screen"]',
     'pro-paywall': '[data-testid="paywall-purchase-btn"], [data-testid="paywall-loading"]',
-    'settings-pro': '[data-testid="settings-screen"]',
 };
 
 const SCREEN_FILE_SLUG: Record<AscScreen, string> = {
@@ -29,7 +27,6 @@ const SCREEN_FILE_SLUG: Record<AscScreen, string> = {
     'add-expense': 'add-expense',
     'simplified-debts': 'settle-up',
     'pro-paywall': 'paywall',
-    'settings-pro': 'settings',
 };
 
 async function openAscCapture(
