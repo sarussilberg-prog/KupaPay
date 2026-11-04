@@ -17,7 +17,8 @@ import {
     rtlRowStyle,
     rtlWritingDirection,
     startEdgeColumnStyle,
-    startEdgeTextStyle,
+    appLanguageEdgeTextStyle,
+    rtlTextAlign,
     useRtlLayout,
 } from '../../hooks/useRtlLayout';
 
@@ -76,14 +77,14 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
                         <View style={[{ flex: 1, paddingEnd: 12 }, startEdgeColumnStyle]}>
                             <Text
                                 className="text-xl font-bold text-gray-900"
-                                style={startEdgeTextStyle(isRtl, 'text-xl font-bold text-gray-900')}
+                                style={appLanguageEdgeTextStyle(isRtl, 'text-xl font-bold text-gray-900')}
                             >
                                 {query.data?.title ?? t(slug === 'terms' ? 'legal.termsTitle' : 'legal.privacyTitle')}
                             </Text>
                             {query.data && (
                                 <Text
                                     className="text-xs text-gray-500 mt-1"
-                                    style={startEdgeTextStyle(isRtl, 'text-xs text-gray-500 mt-1')}
+                                    style={appLanguageEdgeTextStyle(isRtl, 'text-xs text-gray-500 mt-1')}
                                 >
                                     {t('legal.lastUpdated', { date: formattedDate })} · {t('legal.appVersion', { version: APP_VERSION })}
                                 </Text>
@@ -158,7 +159,7 @@ function ErrorBody({ onRetry }: { onRetry: () => void }) {
 }
 
 function buildMarkdownStyles(isRtl: boolean) {
-    const textAlign = 'auto' as const;
+    const textAlign = rtlTextAlign(isRtl);
     const writingDirection = rtlWritingDirection(isRtl);
     return {
         body: { color: '#374151', fontSize: 16, lineHeight: 24, textAlign, writingDirection },

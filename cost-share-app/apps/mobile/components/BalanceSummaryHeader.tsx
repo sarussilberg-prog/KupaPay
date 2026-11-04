@@ -8,7 +8,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BalanceSummaryRow, formatMoney } from '@cost-share/shared';
 import { Text } from './AppText';
-import { startEdgeColumnStyle, startEdgeTextStyle, useRtlLayout } from '../hooks/useRtlLayout';
+import { appLanguageEdgeTextStyle, startEdgeColumnStyle, useRtlLayout } from '../hooks/useRtlLayout';
 
 interface BalanceSummaryHeaderProps {
     rows: BalanceSummaryRow[];
@@ -32,7 +32,7 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
                     {row.owed >= 0.01 && (
                         <Text
                             className="text-sm font-medium text-green-600"
-                            style={startEdgeTextStyle(isRtl, 'text-sm font-medium text-green-600')}
+                            style={appLanguageEdgeTextStyle(isRtl, 'text-sm font-medium text-green-600')}
                         >
                             {/* <1>…</1> markers are for the SummaryBalanceStrip <Trans> consumer; strip them here. */}
                             {t('groups.summary.youAreOwed', {
@@ -46,7 +46,7 @@ export function BalanceSummaryHeader({ rows }: BalanceSummaryHeaderProps) {
                     {row.owe >= 0.01 && (
                         <Text
                             className="text-sm font-medium text-red-500 mt-0.5"
-                            style={startEdgeTextStyle(isRtl, 'text-sm font-medium text-red-500 mt-0.5')}
+                            style={appLanguageEdgeTextStyle(isRtl, 'text-sm font-medium text-red-500 mt-0.5')}
                         >
                             {t('groups.summary.youOwe', {
                                 amount: formatMoney(row.owe, row.currency, {

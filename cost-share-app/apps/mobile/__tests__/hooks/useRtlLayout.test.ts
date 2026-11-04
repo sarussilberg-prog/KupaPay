@@ -1,5 +1,6 @@
 import { I18nManager, Platform } from 'react-native';
 import {
+    appLanguageEdgeTextStyle,
     feedActorNameStyle,
     isNativeRtlSynced,
     resolveAutoTextInputStyle,
@@ -108,15 +109,30 @@ describe('useRtlLayout helpers', () => {
         expect(rtlForwardChevronIcon(true)).toBe('chevron-back');
     });
 
-    it('startEdgeTextStyle uses textAlign auto for static copy', () => {
+    it('startEdgeTextStyle uses textAlign auto for static i18n copy', () => {
         expect(startEdgeTextStyle(true, 'text-sm')).toEqual({
             writingDirection: 'rtl',
             textAlign: 'auto',
         });
-        expect(feedActorNameStyle(true)).toEqual({
+    });
+
+    it('appLanguageEdgeTextStyle pins layout start for mixed-script copy', () => {
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(appLanguageEdgeTextStyle(true, 'text-sm')).toEqual({
+            textAlign: 'left',
             writingDirection: 'rtl',
-            textAlign: 'auto',
+        });
+        expect(feedActorNameStyle(true)).toEqual({
+            textAlign: 'left',
+            writingDirection: 'rtl',
             alignSelf: 'stretch',
+        });
+
+        setPlatform('web');
+        expect(appLanguageEdgeTextStyle(true)).toEqual({
+            textAlign: 'right',
+            writingDirection: 'rtl',
         });
     });
 });

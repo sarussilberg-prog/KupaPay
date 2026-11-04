@@ -201,7 +201,30 @@ export function resolveAutoTextStyle(
     };
 }
 
-/** Static text on the layout-start edge — safe under native RTL mirroring. */
+/**
+ * User-facing or mixed-script copy (names, URLs, amounts) — layout-start edge follows
+ * app language, not the text's natural script (unlike `textAlign: 'auto'`).
+ */
+export function appLanguageEdgeTextStyle(
+    isRtl: boolean,
+    className?: string,
+    style?: StyleProp<TextStyle>,
+): TextStyle {
+    const flat = StyleSheet.flatten(style);
+    if (flat?.textAlign) {
+        return {
+            writingDirection: rtlWritingDirection(isRtl),
+            ...flat,
+        } as TextStyle;
+    }
+    return {
+        textAlign: rtlTextAlign(isRtl),
+        writingDirection: rtlWritingDirection(isRtl),
+        ...(flat ?? {}),
+    };
+}
+
+/** Static i18n-only copy (strings match app language) — `textAlign: 'auto'` under native RTL. */
 export function startEdgeTextStyle(
     isRtl: boolean,
     className?: string,
@@ -224,7 +247,7 @@ export function startEdgeTextStyle(
 /** Feed actor label — edge-aligned by app language, not by name script. */
 export function feedActorNameStyle(isRtl: boolean): TextStyle {
     return {
-        ...startEdgeTextStyle(isRtl),
+        ...appLanguageEdgeTextStyle(isRtl),
         alignSelf: 'stretch',
     };
 }

@@ -19,6 +19,7 @@ import * as Clipboard from 'expo-clipboard';
 import { showSuccessMessage } from '../../lib/appToast';
 import { Text } from '../../components/AppText';
 import {
+    appLanguageEdgeTextStyle,
     rtlRowStyle,
     startEdgeColumnStyle,
     startEdgeTextStyle,
@@ -114,13 +115,13 @@ export function ReferralProgramContent({
                     </Text>
                     <Text
                         className="text-gray-900 font-mono mt-1"
-                        style={startEdgeTextStyle(isRtl, 'text-gray-900 font-mono mt-1')}
+                        style={appLanguageEdgeTextStyle(isRtl, 'text-gray-900 font-mono mt-1')}
                     >
                         {ambassadorStats.referralCode}
                     </Text>
                     <Text
                         className="text-gray-500 text-xs mt-3 break-all"
-                        style={startEdgeTextStyle(isRtl, 'text-gray-500 text-xs mt-3 break-all')}
+                        style={appLanguageEdgeTextStyle(isRtl, 'text-gray-500 text-xs mt-3 break-all')}
                     >
                         {buildAmbassadorReferralUrl(ambassadorStats.referralCode, language)}
                     </Text>

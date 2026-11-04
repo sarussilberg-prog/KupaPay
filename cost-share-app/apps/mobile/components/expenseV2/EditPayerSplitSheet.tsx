@@ -37,7 +37,12 @@ import {
     computeUnequalTotal,
     parseSplitInput,
 } from '../../lib/expenseSplitForm';
-import { rtlTextAlign, startEdgeTextStyle, useRtlLayout } from '../../hooks/useRtlLayout';
+import {
+    appLanguageEdgeTextStyle,
+    rtlTextAlign,
+    startEdgeTextStyle,
+    useRtlLayout,
+} from '../../hooks/useRtlLayout';
 
 export type UiSplitMode = 'equal' | 'percent' | 'exact';
 
@@ -381,7 +386,11 @@ export function EditPayerSplitSheet({
                                         </View>
                                         <Text
                                             numberOfLines={1}
-                                            style={[styles.payerName, selected && styles.payerNameSelected]}
+                                            style={[
+                                                styles.payerName,
+                                                selected && styles.payerNameSelected,
+                                                appLanguageEdgeTextStyle(isRtl),
+                                            ]}
                                         >
                                             {name}
                                         </Text>
@@ -470,7 +479,12 @@ export function EditPayerSplitSheet({
                                             avatarUrl={getAvatarUrl(member) ?? undefined}
                                             size="xs"
                                         />
-                                        <Text style={styles.memberName} numberOfLines={1}>{name}</Text>
+                                        <Text
+                                            style={[styles.memberName, appLanguageEdgeTextStyle(isRtl)]}
+                                            numberOfLines={1}
+                                        >
+                                            {name}
+                                        </Text>
                                         {splitMode === 'equal' ? (
                                             <Text style={styles.memberAmount}>
                                                 {checked ? `${currency} ${perHead.toFixed(2)}` : '—'}

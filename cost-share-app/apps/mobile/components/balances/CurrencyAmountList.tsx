@@ -10,7 +10,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CurrencyAmount } from '@cost-share/shared';
 import { Text } from '../AppText';
-import { startEdgeColumnStyle, startEdgeTextStyle, useRtlLayout } from '../../hooks/useRtlLayout';
+import { appLanguageEdgeTextStyle, startEdgeColumnStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 
 interface CurrencyAmountListProps {
     amounts: CurrencyAmount[];
@@ -40,7 +40,7 @@ export function CurrencyAmountList({
         return (
             <Text
                 className={emptyClassName}
-                style={startEdgeTextStyle(isRtl, emptyClassName)}
+                style={appLanguageEdgeTextStyle(isRtl, emptyClassName)}
                 testID={testID ? `${testID}-empty` : undefined}
             >
                 {emptyLabel ?? t('balances.noActivityInMode')}
@@ -54,7 +54,7 @@ export function CurrencyAmountList({
                 <Text
                     key={`${row.currency}-${idx}`}
                     className={textClassName}
-                    style={startEdgeTextStyle(isRtl, textClassName)}
+                    style={appLanguageEdgeTextStyle(isRtl, textClassName)}
                 >
                     {formatAmount(row.amount, row.currency)}
                 </Text>
