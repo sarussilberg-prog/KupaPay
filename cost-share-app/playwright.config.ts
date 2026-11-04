@@ -30,7 +30,7 @@ export default defineConfig({
         },
         {
             name: 'expo-web',
-            testMatch: /expo-web-smoke\.spec\.ts/,
+            testMatch: /expo-web-(smoke|rtl-layout)\.spec\.ts/,
             use: { ...devices['Desktop Chrome'], baseURL: expoWebURL },
         },
         {

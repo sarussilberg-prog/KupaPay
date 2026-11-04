@@ -47,18 +47,18 @@ describe('architecture — native RTL row + flex safety', () => {
         expect(violations).toEqual([]);
     });
 
-    it('rtlRowStyle on iOS never returns direction rtl', () => {
+    it('rtlRowStyle on iOS never sets direction (mirroring via I18nManager)', () => {
         const { rtlRowStyle } = require('../../hooks/useRtlLayout') as typeof import('../../hooks/useRtlLayout');
-        const os = require('react-native').Platform.OS;
-        Object.defineProperty(require('react-native').Platform, 'OS', {
-            configurable: true,
-            value: 'ios',
-        });
-        expect(rtlRowStyle(true).direction).toBe('ltr');
-        expect(rtlRowStyle(false).direction).toBe('ltr');
-        Object.defineProperty(require('react-native').Platform, 'OS', {
-            configurable: true,
-            value: os,
-        });
+        const { I18nManager, Platform } = require('react-native');
+        const os = Platform.OS;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+        const i18nMgr = I18nManager as { isRTL: boolean };
+        const prev = i18nMgr.isRTL;
+        i18nMgr.isRTL = true;
+        expect(rtlRowStyle(true).direction).toBeUndefined();
+        i18nMgr.isRTL = false;
+        expect(rtlRowStyle(false).direction).toBeUndefined();
+        i18nMgr.isRTL = prev;
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
     });
 });

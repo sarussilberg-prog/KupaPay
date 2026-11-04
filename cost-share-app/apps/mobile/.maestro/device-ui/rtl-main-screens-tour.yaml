@@ -1,0 +1,4 @@
+# Deprecated: use rtl-main-screens-tour-en.yaml / rtl-main-screens-tour-he.yaml
+appId: com.kupapay.mobile
+---
+- runFlow: rtl-main-screens-tour-en.yaml

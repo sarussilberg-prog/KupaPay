@@ -5,7 +5,7 @@ import { Text } from './AppText';
 import { useNetworkStatus } from '../lib/networkStatus';
 import { retryConnectivitySync } from '../lib/reconnectSync';
 import { queryClient } from '../lib/queryClient';
-import { useRtlLayout } from '../hooks/useRtlLayout';
+import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
 
 export function NetworkOfflineBanner() {
     const { t } = useTranslation();
@@ -30,18 +30,23 @@ export function NetworkOfflineBanner() {
         <View
             testID="network-offline-banner"
             accessibilityRole="alert"
-            style={{
-                flexDirection: isRtl ? 'row-reverse' : 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                backgroundColor: '#422006',
-            }}
+            style={[
+                rtlRowStyle(isRtl),
+                {
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    backgroundColor: '#422006',
+                },
+            ]}
         >
-            <View style={{ flex: 1, flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
-                <Text className="text-xs font-semibold text-amber-100" style={{ flex: 1, textAlign: isRtl ? 'right' : 'left' }}>
+            <View style={[rtlRowStyle(isRtl), { flex: 1, alignItems: 'center', gap: 8 }]}>
+                <Text
+                    className="text-xs font-semibold text-amber-100"
+                    style={{ flex: 1, textAlign: rtlTextAlign(isRtl) }}
+                >
                     {t('common.offlineBannerMessage')}
                 </Text>
             </View>

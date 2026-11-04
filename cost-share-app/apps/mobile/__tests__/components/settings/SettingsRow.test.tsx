@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SettingsRow } from '../../../components/settings/SettingsRow';
 import ar from '../../../i18n/locales/ar.json';
@@ -36,6 +36,8 @@ describe('SettingsRow', () => {
 
     it('uses RTL row direction when app language is Hebrew', () => {
         useRtlLayout.mockReturnValue(true);
+        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
+        i18nMgr.isRTL = true;
         const { getByTestId } = render(
             <SettingsRow
                 iconName="globe-outline"
@@ -48,10 +50,9 @@ describe('SettingsRow', () => {
         const row = getByTestId('settings-row-rtl') as { props: { style: unknown[] } };
         const flat = Object.assign({}, ...row.props.style.filter(Boolean));
         expect(flat.gap ?? flat.columnGap).toBe(12);
+        expect(flat.flexDirection).toBe('row');
         if (Platform.OS === 'web') {
-            expect(flat.direction).toBe('rtl');
-        } else {
-            expect(flat.flexDirection).toBe('row-reverse');
+            expect(flat.direction).toBeUndefined();
         }
     });
 
@@ -93,6 +94,8 @@ describe('SettingsRow', () => {
 
     it('value variant mirrors cluster layout for Hebrew (RTL)', () => {
         useRtlLayout.mockReturnValue(true);
+        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
+        i18nMgr.isRTL = true;
         const { getByTestId } = render(
             <SettingsRow
                 iconName="globe-outline"
@@ -105,11 +108,7 @@ describe('SettingsRow', () => {
         );
         const cluster = getByTestId('settings-value-row-rtl-value-cluster');
         const flat = flatStyle(cluster.props.style);
-        if (Platform.OS === 'web') {
-            expect(flat.direction).toBe('rtl');
-        } else {
-            expect(flat.flexDirection).toBe('row-reverse');
-        }
+        expect(flat.flexDirection).toBe('row');
         expect(getByTestId('settings-value-row-rtl-value').props.children).toBe('עברית');
     });
 

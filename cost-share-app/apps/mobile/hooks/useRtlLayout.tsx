@@ -30,34 +30,50 @@ export function useRtlLayout(): boolean {
 }
 
 /**
- * Horizontal flex row that mirrors for app RTL languages without breaking flex growth on native.
- * On the New Architecture, `direction: 'rtl'` on a row shrinks flex children to
- * content width (web does not). Native rows opt out with `direction: 'ltr'`.
+ * True when native I18nManager RTL matches app language (post-reload steady state).
+ * While false, layout may use row-reverse until syncNativeRtl reload completes.
+ */
+export function isNativeRtlSynced(isRtl: boolean): boolean {
+    if (Platform.OS === 'web') return true;
+    return I18nManager.isRTL === isRtl;
+}
+
+/**
+ * Horizontal flex row — single canonical row style for list/card/toolbar rows.
  *
- * When `I18nManager.isRTL` is already true (after forceRTL + reload), Yoga mirrors
- * `flexDirection: 'row'` — do not also use row-reverse or the card row lands LTR-shaped
- * (avatar left, menu right) while copy still aligns Hebrew-right.
+ * Native (iOS/Android): rely on I18nManager mirroring for `flexDirection: 'row'`.
+ * Never set `direction: 'ltr'` on rows — that disables mirroring while I18nManager.isRTL
+ * is true (#732: avatar left / menu right in Hebrew). Avoid `direction: 'rtl'` on flex
+ * rows with flex-growing children (New Architecture shrink bug); keep direction on the
+ * app root (web) or inherit the global I18nManager swap without per-row overrides.
+ *
+ * Pre-reload mismatch (Settings language change before reload): temporary row-reverse.
  */
 export function rtlRowStyle(isRtl: boolean): ViewStyle {
     if (Platform.OS === 'web') {
+        return { flexDirection: 'row' };
+    }
+    if (isNativeRtlSynced(isRtl)) {
+        return { flexDirection: 'row' };
+    }
+    // App language and I18nManager disagree — mirror manually until reload.
+    return { flexDirection: 'row-reverse' };
+}
+
+/** App shell — web sets CSS direction; native uses I18nManager only (no direction prop). */
+export function rtlRootStyle(isRtl: boolean): ViewStyle {
+    if (Platform.OS === 'web') {
         return {
-            flexDirection: 'row',
+            flex: 1,
             direction: isRtl ? 'rtl' : 'ltr',
         };
     }
-    const nativeMirrored = I18nManager.isRTL;
-    const useRowReverse = isRtl !== nativeMirrored;
-    return {
-        flexDirection: useRowReverse ? 'row-reverse' : 'row',
-        direction: 'ltr',
-    };
+    return { flex: 1 };
 }
 
-export function rtlRootStyle(isRtl: boolean): ViewStyle {
-    return {
-        flex: 1,
-        direction: isRtl ? 'rtl' : 'ltr',
-    };
+/** Chevron / forward navigation icons — flip by app language, not device locale. */
+export function rtlForwardChevronIcon(isRtl: boolean): 'chevron-forward' | 'chevron-back' {
+    return isRtl ? 'chevron-back' : 'chevron-forward';
 }
 
 export function rtlTextAlign(isRtl: boolean): 'left' | 'right' {
