@@ -238,7 +238,9 @@ jobs:
         run: npm ci
       - name: Maestro flows (iOS)
         run: |
-          export MAESTRO_FLOW_PLAN_JSON="$(cat maestro-flow-plan.json)"
+          PLAN="${GITHUB_WORKSPACE}/maestro-flow-plan.json"
+          if [[ ! -f "$PLAN" ]]; then PLAN="${GITHUB_WORKSPACE}/cost-share-app/maestro-flow-plan.json"; fi
+          export MAESTRO_FLOW_PLAN_JSON="$(cat "$PLAN")"
           bash apps/mobile/scripts/ci-maestro-device-ui.sh ios test
       - name: Groups layout diagnostics (en/he)
         if: always()
@@ -371,7 +373,9 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
-            export MAESTRO_FLOW_PLAN_JSON="$(cat "$GITHUB_WORKSPACE/maestro-flow-plan.json")"
+            PLAN="${GITHUB_WORKSPACE}/maestro-flow-plan.json"
+            if [[ ! -f "$PLAN" ]]; then PLAN="${GITHUB_WORKSPACE}/cost-share-app/maestro-flow-plan.json"; fi
+            export MAESTRO_FLOW_PLAN_JSON="$(cat "$PLAN")"
             export MAESTRO_ANDROID_APK_CACHE_DIR="/tmp/maestro-android-apk"
             cd cost-share-app
             bash apps/mobile/scripts/ci-maestro-device-ui.sh android test
