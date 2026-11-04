@@ -22,13 +22,21 @@ Deno.serve(async (req) => {
                     ? payload.items as import('./handler.ts').ReferralRewardItem[]
                     : [];
             },
-            async markRewarded(rewardId, ok, reason) {
-                const { error } = await sb.rpc('mark_referral_rewarded', {
+            async applyReward(rewardId) {
+                const { data, error } = await sb.rpc('apply_referral_reward', {
                     p_reward_id: rewardId,
-                    p_ok: ok,
-                    p_reason: reason ?? null,
                 });
                 if (error) throw error;
+                const row = (data ?? {}) as {
+                    ok?: boolean;
+                    referrer_id?: string;
+                    pro_until?: string;
+                    error?: string;
+                };
+                if (row.ok === true && row.referrer_id) {
+                    return { ok: true, referrer_id: row.referrer_id, pro_until: row.pro_until };
+                }
+                return { ok: false, error: row.error };
             },
         });
         return jsonOk(result);

@@ -1,6 +1,8 @@
 import {
+    APPLE_REFUND_URL,
     defaultSubscriptionSku,
     googlePlaySubscriptionManagementUrl,
+    refundRequestUrl,
 } from '../../lib/subscriptionManagementLinks';
 
 describe('subscriptionManagementLinks', () => {
@@ -14,5 +16,11 @@ describe('subscriptionManagementLinks', () => {
     it('picks default sku from plan kind', () => {
         expect(defaultSubscriptionSku('monthly')).toBe('kupapay_pro_monthly');
         expect(defaultSubscriptionSku('yearly')).toBe('kupapay_pro_yearly');
+    });
+
+    it('returns store refund URLs per platform', () => {
+        expect(refundRequestUrl('ios')).toBe(APPLE_REFUND_URL);
+        expect(refundRequestUrl('android')).toContain('google.com');
+        expect(refundRequestUrl('web')).toBeNull();
     });
 });

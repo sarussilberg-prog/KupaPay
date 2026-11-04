@@ -13,5 +13,6 @@ CI runs on every PR (see [docs/CI_CD.md](../CI_CD.md)):
 | Version prefix   | Migration |
 |------------------|-----------|
 | `20261016131000` | PR #218 `security_idor_rate_limits` (rename from `20261016130000_*` before merge) |
+| `20261104120000` | Pro subscription referral lifecycle (`apply_referral_reward`, webhook pro_until stacking) |
 
 `20261016130000` is used by `smart_payment_reminders` on `main`.

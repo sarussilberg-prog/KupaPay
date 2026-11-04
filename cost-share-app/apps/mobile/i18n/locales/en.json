@@ -1509,6 +1509,9 @@
             "tripPassSection": "Trip Pass groups",
             "tripPassUntil": "Pro for this group until {{date}}",
             "renewalDisclosureShort": "Subscriptions renew automatically until you cancel in your app store account at least 24 hours before renewal. See Terms and Privacy.",
+            "manageHelpCancel": "Canceling in the App Store or Google Play stops renewal only. You keep Pro until the date shown above.",
+            "manageHelpRefund": "Refunds are requested from Apple or Google, not in KupaPay. Approved refunds end Pro immediately.",
+            "refundRequestLink": "Request a refund from your app store",
             "status": {
                 "active": "Active",
                 "cancelled_until_expiry": "Canceled — active until expiry",
