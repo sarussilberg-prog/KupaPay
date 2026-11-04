@@ -2,6 +2,8 @@ appId: com.kupapay.mobile
 ---
 - launchApp:
     clearState: true
+- waitForAnimationToEnd:
+    timeout: 20000
 - runFlow: complete-pre-auth-onboarding.yaml
 - extendedWaitUntil:
     visible:

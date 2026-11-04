@@ -12,10 +12,14 @@ appId: com.kupapay.mobile
     commands:
       - extendedWaitUntil:
           visible:
-            id: onboarding-welcome-existing
+            id: onboarding-welcome-start
           timeout: 120000
       - waitForAnimationToEnd:
           timeout: 15000
+      - extendedWaitUntil:
+          visible:
+            id: onboarding-welcome-existing
+          timeout: 30000
       - tapOn:
           id: onboarding-welcome-existing
       - waitForAnimationToEnd:
