@@ -1,5 +1,6 @@
 import { I18nManager, Platform } from 'react-native';
 import {
+    feedActorNameStyle,
     isNativeRtlSynced,
     resolveAutoTextInputStyle,
     resolveAutoTextStyle,
@@ -7,6 +8,7 @@ import {
     rtlRowStyle,
     rtlTextAlign,
     rtlTextClassName,
+    startEdgeTextStyle,
 } from '../../hooks/useRtlLayout';
 
 describe('useRtlLayout helpers', () => {
@@ -56,9 +58,23 @@ describe('useRtlLayout helpers', () => {
         expect(rtlRowStyle(false)).toEqual({ flexDirection: 'row' });
     });
 
-    it('rtlTextAlign maps app language to physical edges', () => {
+    it('rtlTextAlign maps to layout-start on web', () => {
+        setPlatform('web');
         expect(rtlTextAlign(true)).toBe('right');
         expect(rtlTextAlign(false)).toBe('left');
+    });
+
+    it('rtlTextAlign inverts physical edge under native I18nManager RTL', () => {
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(rtlTextAlign(true)).toBe('left');
+        expect(rtlTextAlign(false)).toBe('left');
+    });
+
+    it('rtlTextAlign uses physical right before native RTL reload catches up', () => {
+        setPlatform('ios');
+        setNativeIsRtl(false);
+        expect(rtlTextAlign(true)).toBe('right');
     });
 
     it('rtlTextClassName adds edge alignment when not explicit', () => {
@@ -68,8 +84,13 @@ describe('useRtlLayout helpers', () => {
     });
 
     it('resolveAutoTextInputStyle sets textAlign only', () => {
+        setPlatform('web');
         expect(resolveAutoTextInputStyle(true)).toEqual({ textAlign: 'right' });
         expect(resolveAutoTextInputStyle(false)).toEqual({ textAlign: 'left' });
+
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(resolveAutoTextInputStyle(true)).toEqual({ textAlign: 'left' });
     });
 
     it('resolveAutoTextStyle sets writingDirection when textAlign not set', () => {
@@ -85,5 +106,17 @@ describe('useRtlLayout helpers', () => {
     it('rtlForwardChevronIcon flips for RTL', () => {
         expect(rtlForwardChevronIcon(false)).toBe('chevron-forward');
         expect(rtlForwardChevronIcon(true)).toBe('chevron-back');
+    });
+
+    it('startEdgeTextStyle uses textAlign auto for static copy', () => {
+        expect(startEdgeTextStyle(true, 'text-sm')).toEqual({
+            writingDirection: 'rtl',
+            textAlign: 'auto',
+        });
+        expect(feedActorNameStyle(true)).toEqual({
+            writingDirection: 'rtl',
+            textAlign: 'auto',
+            alignSelf: 'stretch',
+        });
     });
 });

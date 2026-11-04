@@ -37,7 +37,7 @@ import {
     computeUnequalTotal,
     parseSplitInput,
 } from '../../lib/expenseSplitForm';
-import { rtlTextAlign, useRtlLayout } from '../../hooks/useRtlLayout';
+import { rtlTextAlign, startEdgeTextStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 
 export type UiSplitMode = 'equal' | 'percent' | 'exact';
 
@@ -397,7 +397,7 @@ export function EditPayerSplitSheet({
                                 <Animated.Text
                                     style={[
                                         styles.splitErrorCaption,
-                                        { textAlign: rtlTextAlign(isRtl) },
+                                        startEdgeTextStyle(isRtl, undefined, styles.splitErrorCaption),
                                         { transform: [{ translateX: errorShake }] },
                                     ]}
                                     numberOfLines={1}

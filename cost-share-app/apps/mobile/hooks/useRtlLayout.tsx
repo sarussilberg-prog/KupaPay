@@ -133,8 +133,18 @@ export function rtlMarkdownContainerStyle(isRtl: boolean): ViewStyle {
     return {};
 }
 
+/**
+ * Physical `textAlign` that renders on the layout-start edge.
+ * Under `I18nManager.forceRTL`, RN mirrors `left`/`right` — never use `isRtl ? 'right'` on native.
+ */
 export function rtlTextAlign(isRtl: boolean): 'left' | 'right' {
-    return isRtl ? 'right' : 'left';
+    if (Platform.OS === 'web') {
+        return isRtl ? 'right' : 'left';
+    }
+    if (!isRtl) {
+        return 'left';
+    }
+    return isNativeRtlSynced(isRtl) ? 'left' : 'right';
 }
 
 export function rtlWritingDirection(isRtl: boolean): 'rtl' | 'ltr' {
@@ -145,13 +155,11 @@ export function rtlTrailingAlign(isRtl: boolean): 'flex-start' | 'flex-end' {
     return isRtl ? 'flex-start' : 'flex-end';
 }
 
-/** Feed actor label — edge-aligned by app language, not by name script. */
-export function feedActorNameStyle(isRtl: boolean): TextStyle {
-    return {
-        textAlign: rtlTextAlign(isRtl),
-        alignSelf: 'stretch',
-    };
-}
+/** Column wrapper so start-aligned text hugs the logical start edge in RTL/LTR. */
+export const startEdgeColumnStyle: ViewStyle = {
+    alignItems: 'flex-start',
+    alignSelf: 'stretch',
+};
 
 /** Reliable center alignment in LTR and RTL (className text-center alone is insufficient on native). */
 export const centeredTextStyle: TextStyle = {
@@ -190,6 +198,34 @@ export function resolveAutoTextStyle(
 
     return {
         writingDirection: rtlWritingDirection(isRtl),
+    };
+}
+
+/** Static text on the layout-start edge — safe under native RTL mirroring. */
+export function startEdgeTextStyle(
+    isRtl: boolean,
+    className?: string,
+    style?: StyleProp<TextStyle>,
+): TextStyle {
+    const flat = StyleSheet.flatten(style);
+    if (flat?.textAlign) {
+        return {
+            ...(resolveAutoTextStyle(isRtl, className, style) ?? {}),
+            ...flat,
+        } as TextStyle;
+    }
+    return {
+        ...(resolveAutoTextStyle(isRtl, className) ?? {}),
+        textAlign: 'auto',
+        ...(flat ?? {}),
+    };
+}
+
+/** Feed actor label — edge-aligned by app language, not by name script. */
+export function feedActorNameStyle(isRtl: boolean): TextStyle {
+    return {
+        ...startEdgeTextStyle(isRtl),
+        alignSelf: 'stretch',
     };
 }
 

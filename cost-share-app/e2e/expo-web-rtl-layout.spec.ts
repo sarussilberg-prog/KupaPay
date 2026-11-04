@@ -89,6 +89,40 @@ test.describe('Expo web — RTL group card physical order (B2 preview)', () => {
     });
 });
 
+test.describe('Expo web — RTL referral screen start alignment', () => {
+    test.skip(!process.env.E2E_EXPO_WEB_URL && !process.env.CI, 'Set E2E_EXPO_WEB_URL for local runs');
+
+    async function assertReferralStartEdge(page: import('@playwright/test').Page, expectRtl: boolean) {
+        await page.goto(
+            `${baseURL}/?devReferralPreview=1&lang=${expectRtl ? 'he' : 'en'}&width=390`,
+            { waitUntil: 'networkidle', timeout: 120_000 },
+        );
+        await expect(page.getByTestId('referral-preview-root')).toBeVisible({ timeout: 60_000 });
+
+        const content = page.getByTestId('referral-program-content');
+        const title = page.getByTestId('referral-program-title');
+        const contentBox = await content.boundingBox();
+        const titleBox = await title.boundingBox();
+        expect(contentBox).toBeTruthy();
+        expect(titleBox).toBeTruthy();
+
+        const midX = contentBox!.x + contentBox!.width / 2;
+        if (expectRtl) {
+            expect(titleBox!.x + titleBox!.width).toBeGreaterThan(midX);
+        } else {
+            expect(titleBox!.x).toBeLessThan(midX);
+        }
+    }
+
+    test('English LTR — referral title hugs left (start)', async ({ page }) => {
+        await assertReferralStartEdge(page, false);
+    });
+
+    test('Hebrew RTL — referral title hugs right (start)', async ({ page }) => {
+        await assertReferralStartEdge(page, true);
+    });
+});
+
 test.describe('Expo web — ASC capture RTL screenshots', () => {
     test.skip(!process.env.E2E_EXPO_WEB_URL && !process.env.CI, 'Set E2E_EXPO_WEB_URL for local runs');
 
