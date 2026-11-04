@@ -51,6 +51,12 @@ export function AscStoreListingCaptureRoot() {
 
     const onNavReady = useCallback(() => setNavReady(true), []);
 
+    useEffect(() => {
+        if (bootReady && screen === 'settings-pro') {
+            setNavReady(true);
+        }
+    }, [bootReady, screen]);
+
     if (!bootReady) {
         return <View testID="asc-demo-loading" style={{ flex: 1, backgroundColor: '#1e3a8a' }} />;
     }

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MOBILE="$ROOT/apps/mobile"
-PORT="${E2E_EXPO_WEB_PORT:-8081}"
+PORT="${E2E_EXPO_WEB_PORT:-8099}"
 DIST="$MOBILE/dist"
 
 cd "$MOBILE"

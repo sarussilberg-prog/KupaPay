@@ -15,12 +15,12 @@ type AscScreen =
     | 'settings-pro';
 
 const ASC_SCREEN_READY: Record<AscScreen, string> = {
-    groups: '[data-testid="asc-demo-screen-groups"]',
-    balances: '[data-testid="asc-demo-screen-balances"]',
-    'add-expense': '[data-testid="asc-demo-screen-add-expense"]',
-    'simplified-debts': '[data-testid="asc-demo-screen-simplified-debts"]',
-    'pro-paywall': '[data-testid="asc-demo-screen-pro-paywall"]',
-    'settings-pro': '[data-testid="asc-demo-screen-settings-pro"]',
+    groups: '[data-testid="groups-list-virtualized"]',
+    balances: '[data-testid="balances-screen-root"]',
+    'add-expense': '[data-testid="amount-display"]',
+    'simplified-debts': '[data-testid="settle-up-list-screen"]',
+    'pro-paywall': '[data-testid="paywall-purchase-btn"], [data-testid="paywall-loading"]',
+    'settings-pro': '[data-testid="settings-screen"]',
 };
 
 const SCREEN_FILE_SLUG: Record<AscScreen, string> = {
@@ -38,8 +38,9 @@ async function openAscCapture(
     locale: LocaleTag,
 ) {
     const url = `${baseURL}/?capture=1&screen=${screen}&locale=${locale}&phone=1`;
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 120_000 });
-    await expect(page.locator(ASC_SCREEN_READY[screen])).toBeVisible({ timeout: 90_000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    await expect(page.getByTestId('asc-capture-ready')).toBeVisible({ timeout: 120_000 });
+    await expect(page.locator(ASC_SCREEN_READY[screen]).first()).toBeVisible({ timeout: 60_000 });
     const lang = locale.startsWith('he') ? 'he' : 'en';
     await page.screenshot({
         path: path.join(SCREENSHOT_DIR, `${SCREEN_FILE_SLUG[screen]}-${lang}.png`),
