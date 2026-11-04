@@ -84,7 +84,7 @@ Dev PRs run **smoke** flows plus **affected** flows derived from changed files u
 
 **Smoke baseline (always on dev):** `sign-in.yaml`, `assert-layout-probes.yaml`, `visit-main-screens.yaml` (English).
 
-**Full tier (`main`, label `maestro-full`, or manual dispatch):** all flows in [`fullFlowRuns()`](../cost-share-app/scripts/lib/maestro-screen-flow-map.mjs) on **iOS and Android**, including RTL screenshot tours (`rtl-main-screens-tour-en/he`) and Playwright RTL export checks (`e2e/expo-web-rtl-layout.spec.ts`).
+**Full tier (`main`, label `maestro-full`, or manual dispatch):** all flows in [`fullFlowRuns()`](../cost-share-app/scripts/lib/maestro-screen-flow-map.mjs) on **iOS and Android**, including RTL screenshot tours (`rtl-main-screens-tour-en/he`, paywall via `rtl-paywall-screenshot.yaml` + `e2e-fixture?screen=pro-paywall`) and Playwright RTL export checks (`e2e/expo-web-rtl-layout.spec.ts`).
 
 Planner tests: [`maestro-ci-plan.test.mjs`](../cost-share-app/scripts/__tests__/maestro-ci-plan.test.mjs).
 

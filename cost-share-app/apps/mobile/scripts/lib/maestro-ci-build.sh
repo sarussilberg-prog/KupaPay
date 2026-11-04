@@ -14,6 +14,7 @@ maestro_write_mobile_e2e_env() {
 EXPO_PUBLIC_E2E=1
 EXPO_PUBLIC_E2E_FIXTURES=1
 EXPO_PUBLIC_E2E_XX_LONG_LOCALE=true
+EXPO_PUBLIC_KUPAPAY_PRO_ENABLED=true
 EXPO_PUBLIC_WEB_APP_URL=https://kupa-pay.com
 EOF
     echo "Wrote Maestro layout-fixture env for bundle bake: $env_file (no Supabase/PostHog network)"
@@ -84,8 +85,19 @@ maestro_android_assemble_release() {
   if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
     export SENTRY_DISABLE_AUTO_UPLOAD="${SENTRY_DISABLE_AUTO_UPLOAD:-true}"
   fi
-  export GRADLE_OPTS="${GRADLE_OPTS:-} -XX:MaxMetaspaceSize=1g -Xmx4g"
+  export GRADLE_OPTS="${GRADLE_OPTS:-} -XX:MaxMetaspaceSize=1536m -XX:+HeapDumpOnOutOfMemoryError -Xmx4g"
   cd "$mobile_root/android"
+  local gradle_props="$mobile_root/android/gradle.properties"
+  if [[ -f "$gradle_props" ]]; then
+    if grep -q '^org.gradle.jvmargs=' "$gradle_props"; then
+      sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1536m -XX:+HeapDumpOnOutOfMemoryError/' "$gradle_props"
+    else
+      printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1536m -XX:+HeapDumpOnOutOfMemoryError\n' >> "$gradle_props"
+    fi
+    if ! grep -q '^org.gradle.parallel=' "$gradle_props"; then
+      echo 'org.gradle.parallel=false' >> "$gradle_props"
+    fi
+  fi
   ./gradlew assembleRelease -x lint -x test --no-daemon
 }
 
