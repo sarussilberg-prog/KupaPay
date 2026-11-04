@@ -8,6 +8,7 @@ const config: KnipConfig = {
   // Intentional root deps: hoist patched markdown-it/linkify-it for react-native-markdown-display (#590).
   ignoreDependencies: ['markdown-it', 'linkify-it'],
   entry: [
+    'e2e/expo-web-rtl-layout.spec.ts',
     'scripts/group-ledger-simulation-db.integration.ts',
     'scripts/posthog-mau-tiles-lib.mjs',
     'scripts/posthog-ensure-mau-dashboard-tiles.mjs',
@@ -18,6 +19,7 @@ const config: KnipConfig = {
   ],
   project: ['scripts/**/*.ts'],
   ignoreFiles: [
+    'e2e/**',
     'scripts/**',
     'lighthouserc.cjs',
     'supabase/functions/**/index.ts',
