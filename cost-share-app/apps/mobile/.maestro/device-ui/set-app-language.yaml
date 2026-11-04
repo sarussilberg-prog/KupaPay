@@ -29,9 +29,22 @@ appId: com.kupapay.mobile
     timeout: 30000
 - tapOn:
     id: language-option-${APP_LANG}
-- tapOn:
-    id: tab-Groups
+- waitForAnimationToEnd:
+    timeout: 20000
+# Language change can reload the app (xx-long / RTL); tab bar may be absent briefly.
+- extendedWaitUntil:
+    visible:
+      id: tabbar-row
+    timeout: 120000
 - extendedWaitUntil:
     visible:
       id: groups-list-title
-    timeout: 60000
+    timeout: 120000
+    optional: true
+- tapOn:
+    id: tab-Groups
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 120000

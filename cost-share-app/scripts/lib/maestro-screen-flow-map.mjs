@@ -115,6 +115,8 @@ export function fullFlowRuns() {
     { file: 'assert-layout-probes.yaml', locales: null },
     { file: 'locale-strings-login.yaml', locales: [...FULL_LOCALE_STRINGS] },
     { file: 'main-layout.yaml', locales: [...LAYOUT_LOCALES] },
+    { file: 'rtl-main-screens-tour-en.yaml', locales: ['en'] },
+    { file: 'rtl-main-screens-tour-he.yaml', locales: ['he'] },
     { file: 'profile-friend-breakdown.yaml', locales: ['he'] },
   ];
   return runs;
