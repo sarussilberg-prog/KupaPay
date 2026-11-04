@@ -81,6 +81,15 @@ jobs:
           echo "files<<EOF" >> "$GITHUB_OUTPUT"
           cat /tmp/changed.txt >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+      - name: Refresh PR labels (event payload can be stale on synchronize)
+        if: github.event_name == 'pull_request'
+        id: pr_labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          labels="$(gh pr view "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --json labels -q '[.labels[].name] | join(",")')"
+          echo "labels=$labels" >> "$GITHUB_OUTPUT"
       - name: Compute plan
         id: plan
         working-directory: cost-share-app
@@ -88,7 +97,7 @@ jobs:
           GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_REF: ${{ github.ref }}
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          PR_LABELS: ${{ steps.pr_labels.outputs.labels || join(github.event.pull_request.labels.*.name, ',') }}
           MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier || '' }}
           MAESTRO_WORKFLOW_DISPATCH_FULL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier == 'full' && 'true' || 'false' }}
           CHANGED_FILES: ${{ steps.changed.outputs.files }}

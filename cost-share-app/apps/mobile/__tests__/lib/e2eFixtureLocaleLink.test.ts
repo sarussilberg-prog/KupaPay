@@ -1,5 +1,8 @@
 import * as Linking from 'expo-linking';
-import { parseE2eFixtureLocaleFromUrl } from '../../lib/e2eFixtureLocaleLink';
+import {
+    parseE2eFixtureLocaleFromUrl,
+    parseE2eFixtureNavigationFromUrl,
+} from '../../lib/e2eFixtureLocaleLink';
 
 describe('parseE2eFixtureLocaleFromUrl', () => {
     const prev = process.env.EXPO_PUBLIC_E2E_FIXTURES;

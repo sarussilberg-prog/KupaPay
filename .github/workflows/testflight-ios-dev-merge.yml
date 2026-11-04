@@ -1,4 +1,5 @@
 # Start TestFlight after a dev PR merge touches mobile release config (GITHUB_TOKEN pushes do not fire `on: push`).
+# Squash merges by github-actions[bot] (native auto-merge) also skip pull_request:closed workflows — CI dispatches via ADMIN_PAT.
 name: TestFlight iOS (dev merge)
 
 on:

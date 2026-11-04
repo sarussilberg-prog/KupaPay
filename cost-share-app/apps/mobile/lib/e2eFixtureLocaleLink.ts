@@ -1,6 +1,28 @@
 import * as Linking from 'expo-linking';
 import { isLanguage, type Language } from '@cost-share/shared';
+import type { AscCaptureScreen } from './ascCaptureParams';
 import { isE2eLayoutFixturesEnabled } from './e2eLayoutFixtures';
+
+const E2E_FIXTURE_SCREENS: AscCaptureScreen[] = [
+    'groups',
+    'balances',
+    'add-expense',
+    'simplified-debts',
+    'pro-currency',
+    'pro-paywall',
+    'settings-pro',
+];
+
+function screenFromFixtureQuery(url: string): AscCaptureScreen {
+    const parsed = Linking.parse(url);
+    const raw = parsed.queryParams?.screen;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (typeof value === 'string' && (E2E_FIXTURE_SCREENS as string[]).includes(value)) {
+        return value as AscCaptureScreen;
+    }
+    if (url.includes('screen=pro-paywall')) return 'pro-paywall';
+    return 'groups';
+}
 
 function localeFromFixtureQuery(url: string): Language | null {
     const parsed = Linking.parse(url);
@@ -26,4 +48,16 @@ export function parseE2eFixtureLocaleFromUrl(url: string | null | undefined): La
     const match = url.match(/[?&](?:locale|lang)=([a-z]{2}(?:-[a-z]+)?)/i);
     if (match && isLanguage(match[1])) return match[1];
     return null;
+}
+
+/** Maestro: `com.kupapay.mobile://e2e-fixture?locale=he&screen=pro-paywall` */
+export function parseE2eFixtureNavigationFromUrl(
+    url: string | null | undefined,
+): { locale: Language | null; screen: AscCaptureScreen } | null {
+    if (!url?.trim() || !isE2eLayoutFixturesEnabled()) return null;
+    if (!url.includes('e2e-fixture')) return null;
+    return {
+        locale: parseE2eFixtureLocaleFromUrl(url),
+        screen: screenFromFixtureQuery(url),
+    };
 }

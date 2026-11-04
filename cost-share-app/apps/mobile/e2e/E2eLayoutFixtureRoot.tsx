@@ -14,7 +14,11 @@ import { rootNavigationRef } from '../lib/rootNavigationRef';
 import { navigateAscCaptureScreen } from '../lib/ascCaptureNavigate';
 import { toastConfig } from '../lib/toastConfig';
 import { useAppStore } from '../store';
-import { parseE2eFixtureLocaleFromUrl } from '../lib/e2eFixtureLocaleLink';
+import {
+    parseE2eFixtureLocaleFromUrl,
+    parseE2eFixtureNavigationFromUrl,
+} from '../lib/e2eFixtureLocaleLink';
+import type { AscCaptureScreen } from '../lib/ascCaptureParams';
 import { applyE2eFixtureLocale } from './applyE2eFixtureLocale';
 import { seedE2eLayoutFixtures } from './seedE2eLayoutFixtures';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
@@ -22,9 +26,11 @@ import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
 function E2eFixtureNavigationController({
     onReady,
     navEpoch,
+    captureScreen,
 }: {
     onReady: () => void;
     navEpoch: number;
+    captureScreen: AscCaptureScreen;
 }) {
     useEffect(() => {
         let cancelled = false;
@@ -34,7 +40,7 @@ function E2eFixtureNavigationController({
             if (cancelled) return;
             attempts += 1;
             if (rootNavigationRef.isReady()) {
-                navigateAscCaptureScreen('groups');
+                navigateAscCaptureScreen(captureScreen);
                 globalThis.setTimeout(() => {
                     if (!cancelled) onReady();
                 }, 600);
@@ -49,7 +55,7 @@ function E2eFixtureNavigationController({
         return () => {
             cancelled = true;
         };
-    }, [onReady, navEpoch]);
+    }, [onReady, navEpoch, captureScreen]);
 
     return null;
 }
@@ -58,6 +64,7 @@ export function E2eLayoutFixtureRoot() {
     const [bootReady, setBootReady] = useState(false);
     const [navEpoch, setNavEpoch] = useState(0);
     const [fixtureLocale, setFixtureLocale] = useState<Language | null>(null);
+    const [fixtureScreen, setFixtureScreen] = useState<AscCaptureScreen>('groups');
     const incomingUrl = Linking.useURL();
     const language = useAppStore((s) => s.language);
 
@@ -71,7 +78,11 @@ export function E2eLayoutFixtureRoot() {
                     if (initialUrl) break;
                 }
             }
-            const fromUrl = parseE2eFixtureLocaleFromUrl(initialUrl);
+            const nav = parseE2eFixtureNavigationFromUrl(initialUrl);
+            const fromUrl = nav?.locale ?? parseE2eFixtureLocaleFromUrl(initialUrl);
+            if (nav?.screen) {
+                setFixtureScreen(nav.screen);
+            }
             if (fromUrl) {
                 await applyE2eFixtureLocale(fromUrl);
                 setFixtureLocale(fromUrl);
@@ -85,12 +96,18 @@ export function E2eLayoutFixtureRoot() {
     }, []);
 
     const applyFixtureLocaleFromUrl = useCallback(async (url: string | null | undefined) => {
-        const fromUrl = parseE2eFixtureLocaleFromUrl(url);
-        if (!fromUrl) return;
-        await applyE2eFixtureLocale(fromUrl);
-        setFixtureLocale(fromUrl);
+        const nav = parseE2eFixtureNavigationFromUrl(url);
+        const fromUrl = nav?.locale ?? parseE2eFixtureLocaleFromUrl(url);
+        if (!fromUrl && !nav?.screen) return;
+        if (nav?.screen) {
+            setFixtureScreen(nav.screen);
+        }
+        if (fromUrl) {
+            await applyE2eFixtureLocale(fromUrl);
+            setFixtureLocale(fromUrl);
+        }
         setNavEpoch((n) => n + 1);
-        if (__DEV__) console.log(`[E2E_FIXTURE_LOCALE_APPLIED] ${fromUrl}`);
+        if (__DEV__ && fromUrl) console.log(`[E2E_FIXTURE_LOCALE_APPLIED] ${fromUrl}`);
     }, []);
 
     useEffect(() => {
@@ -125,7 +142,11 @@ export function E2eLayoutFixtureRoot() {
                         <NavigationContainer ref={rootNavigationRef}>
                             <AppNavigator />
                         </NavigationContainer>
-                        <E2eFixtureNavigationController onReady={onNavReady} navEpoch={navEpoch} />
+                        <E2eFixtureNavigationController
+                            onReady={onNavReady}
+                            navEpoch={navEpoch}
+                            captureScreen={fixtureScreen}
+                        />
                         {fixtureLocale ? (
                             <View
                                 testID="e2e-fixture-locale-ready"

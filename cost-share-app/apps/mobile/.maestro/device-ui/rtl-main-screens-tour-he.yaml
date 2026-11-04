@@ -20,4 +20,5 @@ env:
       id: settings-screen
     timeout: 30000
 - takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_06_settings
+- runFlow: rtl-paywall-screenshot.yaml
 - runFlow: assert-groups-layout-diagnostics-he.yaml
