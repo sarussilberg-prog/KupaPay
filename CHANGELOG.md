@@ -99,3 +99,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): RTL GroupCard text flush to avatar + layout gap diagnostics (#731)
 ## [2.2.0-dev.47] — 2026-11-03
 - fix(mobile): GroupCard RTL row XOR I18nManager + physical x-order diagnostics (#732)
+## [2.2.0-dev.48] — 2026-11-04
+- fix(mobile): unified RTL layout — I18nManager mirroring, full-app verification (#733)
