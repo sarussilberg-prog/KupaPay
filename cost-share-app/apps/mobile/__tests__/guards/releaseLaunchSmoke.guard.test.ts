@@ -24,6 +24,6 @@ describe('Release launch smoke script (Phase 4)', () => {
     it('Maestro Android build phase uses assembleRelease without a connected device', () => {
         const script = readFileSync(MAESTRO_UI_SCRIPT, 'utf8');
         expect(script).toMatch(/PHASE" == "build"/);
-        expect(script).toMatch(/assembleRelease/);
+        expect(script).toMatch(/assembleRelease|maestro_android_assemble_release/);
     });
 });
