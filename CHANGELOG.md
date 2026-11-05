@@ -109,3 +109,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): RTL start-edge alignment — referral screen and rtlTextAlign call sites (#736)
 ## [2.2.0-dev.52] — 2026-11-05
 - fix(pro): subscription lifecycle audit — cancel, refund, referral rewards (#738)
+## [2.2.0-dev.53] — 2026-11-05
+- fix(mobile): restore transparent animated login logo on iOS 26+ (#737)
