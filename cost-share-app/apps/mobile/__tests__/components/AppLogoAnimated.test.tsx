@@ -14,7 +14,7 @@ const ARROW_BOTTOM = require('../../assets/brand/anim/arrow-bottom.png');
 function imageSources(root: ReturnType<typeof render>['UNSAFE_root']) {
     return root
         .findAllByType(Image)
-        .map((node) => node.props.source)
+        .map((node: { props: { source?: unknown } }) => node.props.source)
         .filter(Boolean);
 }
 
