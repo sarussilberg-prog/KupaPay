@@ -107,3 +107,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): groups list summary card RTL start alignment (#735)
 ## [2.2.0-dev.51] — 2026-11-04
 - fix(mobile): RTL start-edge alignment — referral screen and rtlTextAlign call sites (#736)
+## [2.2.0-dev.52] — 2026-11-05
+- fix(pro): subscription lifecycle audit — cancel, refund, referral rewards (#738)
