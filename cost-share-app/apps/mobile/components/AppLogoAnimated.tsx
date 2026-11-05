@@ -116,28 +116,6 @@ function getStageLayout(size: number): StageLayout {
 
 export function AppLogoAnimated({ size = 108, testID = 'app-logo', style }: AppLogoAnimatedProps) {
     const reduced = useReducedMotion();
-<<<<<<< HEAD
-    const useGlass = shouldUseLiquidGlassAppIcon();
-
-    if (useGlass) {
-        return (
-            <View
-                style={[styles.wrap, brandMarkAnimationWrapperStyle(), { width: size, height: size }, style]}
-                testID={testID}
-                accessibilityLabel="KupaPay"
-                accessibilityRole="image"
-            >
-                <Image
-                    source={GLASS_LOGO}
-                    style={{ width: size, height: size }}
-                    resizeMode="contain"
-                />
-            </View>
-        );
-    }
-
-=======
->>>>>>> 07a1d902 (fix(mobile): restore transparent animated login logo on iOS 26+)
     const { k, stageH, stageStyle, topSlot, botSlot } = getStageLayout(size);
 
     const topX = useRef(new Animated.Value(reduced ? 0 : TOP_ENTER * k)).current;
