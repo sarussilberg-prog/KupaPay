@@ -1511,6 +1511,9 @@
             "tripPassSection": "קבוצות Trip Pass",
             "tripPassUntil": "Pro לקבוצה עד {{date}}",
             "renewalDisclosureShort": "מנויים מתחדשים אוטומטית עד לביטול בחשבון החנות לפחות 24 שעות לפני החידוש. ראו תנאים ופרטיות.",
+            "manageHelpCancel": "ביטול ב-App Store או Google Play עוצר רק את החידוש. Pro נשאר פעיל עד התאריך שמוצג למעלה.",
+            "manageHelpRefund": "החזרים מתבקשים מ-Apple או Google, לא ב-KupaPay. החזר שאושר מסיים את Pro מיד.",
+            "refundRequestLink": "בקשת החזר מהחנות",
             "status": {
                 "active": "פעיל",
                 "cancelled_until_expiry": "בוטל — פעיל עד תום התקופה",

@@ -1612,6 +1612,9 @@
             "tripPassSection": "Grupos Trip Pass",
             "tripPassUntil": "Pro para este grupo hasta el {{date}}",
             "renewalDisclosureShort": "Las suscripciones se renuevan solas hasta que canceles en la tienda al menos 24 h antes. Ver Términos y Privacidad.",
+            "manageHelpCancel": "Cancelar en App Store o Google Play solo detiene la renovación. Mantienes Pro hasta la fecha indicada arriba.",
+            "manageHelpRefund": "Los reembolsos se solicitan a Apple o Google, no en KupaPay. Un reembolso aprobado termina Pro de inmediato.",
+            "refundRequestLink": "Solicitar reembolso en la tienda",
             "status": {
                 "active": "Activa",
                 "cancelled_until_expiry": "Cancelada — activa hasta el fin",

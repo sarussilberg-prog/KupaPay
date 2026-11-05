@@ -1610,6 +1610,9 @@
             "tripPassSection": "Trip-Pass-Gruppen",
             "tripPassUntil": "Pro für diese Gruppe bis {{date}}",
             "renewalDisclosureShort": "Abos verlängern sich automatisch, bis du im Store-Konto spätestens 24 Stunden vorher kündigst. Siehe AGB und Datenschutz.",
+            "manageHelpCancel": "Kündigung im App Store oder Google Play beendet nur die Verlängerung. Pro bleibt bis zum oben genannten Datum aktiv.",
+            "manageHelpRefund": "Erstattungen beantragst du bei Apple oder Google, nicht in KupaPay. Genehmigte Erstattungen beenden Pro sofort.",
+            "refundRequestLink": "Erstattung im App Store anfragen",
             "status": {
                 "active": "Aktiv",
                 "cancelled_until_expiry": "Gekündigt — aktiv bis Ablauf",

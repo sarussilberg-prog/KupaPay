@@ -30,3 +30,13 @@ export function iosSubscriptionManagementUrls(): string[] {
         ? [IOS_SUBSCRIPTIONS_ITMS, IOS_SUBSCRIPTIONS_URL]
         : [IOS_SUBSCRIPTIONS_URL];
 }
+
+export const APPLE_REFUND_URL = 'https://reportaproblem.apple.com/';
+export const GOOGLE_PLAY_REFUND_URL =
+    'https://support.google.com/googleplay/workflow/9813244?hl=en';
+
+export function refundRequestUrl(platformOs: typeof Platform.OS): string | null {
+    if (platformOs === 'ios') return APPLE_REFUND_URL;
+    if (platformOs === 'android') return GOOGLE_PLAY_REFUND_URL;
+    return null;
+}

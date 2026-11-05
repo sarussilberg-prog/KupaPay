@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { MySubscriptionSnapshot, SubscriptionLifecycle } from '@cost-share/shared';
 import { Text } from '../AppText';
@@ -11,6 +11,7 @@ import {
     openFixPaymentForUser,
     openSubscriptionManagementForUser,
 } from '../../lib/openSubscriptionManagement';
+import { refundRequestUrl } from '../../lib/subscriptionManagementLinks';
 import { restorePurchases, isPurchasesConfigured } from '../../services/purchases.service';
 import { showAppToast } from '../../lib/appToast';
 
@@ -112,6 +113,11 @@ export function MySubscriptionPanel({ snapshot, loading, compact, onRestoreSucce
         }
         await openFixPaymentForUser(language, snapshot);
     }, [language, snapshot]);
+
+    const openRefundHelp = useCallback(() => {
+        const url = refundRequestUrl(Platform.OS);
+        if (url) void Linking.openURL(url);
+    }, []);
 
     const restore = useCallback(async () => {
         if (busy || !storeConfigured) return;
@@ -216,6 +222,25 @@ export function MySubscriptionPanel({ snapshot, loading, compact, onRestoreSucce
 
             {!compact ? (
                 <View className="mt-4 gap-2">
+                    <View className="rounded-2xl border border-gray-200 bg-white p-4 mb-1">
+                        <Text className="text-sm text-gray-700 leading-5 mb-2">
+                            {t('pro.subscription.manageHelpCancel')}
+                        </Text>
+                        <Text className="text-sm text-gray-700 leading-5">
+                            {t('pro.subscription.manageHelpRefund')}
+                        </Text>
+                        {refundRequestUrl(Platform.OS) ? (
+                            <Pressable
+                                onPress={openRefundHelp}
+                                className="mt-3"
+                                testID="my-subscription-refund-link"
+                            >
+                                <Text className="text-primary text-sm font-semibold underline">
+                                    {t('pro.subscription.refundRequestLink')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                    </View>
                     <Button
                         title={t('pro.settings.manageSubscription')}
                         onPress={() => void manage()}

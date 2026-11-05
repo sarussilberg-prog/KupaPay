@@ -30,20 +30,29 @@ export async function grantReferralProMonth(appUserId: string): Promise<{ ok: bo
     return { ok: true };
 }
 
+export type ApplyReferralRewardResult =
+    | { ok: true; referrer_id: string; pro_until?: string }
+    | { ok: false; error?: string };
+
 export async function dispatchReferralRewards(deps: {
     fetchQueue(): Promise<ReferralRewardItem[]>;
-    markRewarded(rewardId: string, ok: boolean, reason?: string): Promise<void>;
+    applyReward(rewardId: string): Promise<ApplyReferralRewardResult>;
 }): Promise<Record<string, unknown>> {
     const items = await deps.fetchQueue();
     let granted = 0;
     let failed = 0;
+    let rcSyncFailed = 0;
 
     for (const item of items) {
-        const result = await grantReferralProMonth(item.referrer_id);
-        await deps.markRewarded(item.reward_id, result.ok, result.error);
-        if (result.ok) granted += 1;
-        else failed += 1;
+        const applied = await deps.applyReward(item.reward_id);
+        if (!applied.ok) {
+            failed += 1;
+            continue;
+        }
+        granted += 1;
+        const rc = await grantReferralProMonth(applied.referrer_id);
+        if (!rc.ok) rcSyncFailed += 1;
     }
 
-    return { ok: true, queued: items.length, granted, failed };
+    return { ok: true, queued: items.length, granted, failed, rcSyncFailed };
 }

@@ -1610,6 +1610,9 @@
             "tripPassSection": "Groupes Trip Pass",
             "tripPassUntil": "Pro pour ce groupe jusqu'au {{date}}",
             "renewalDisclosureShort": "Les abonnements se renouvellent automatiquement jusqu'à annulation dans le store au moins 24 h avant. Voir Conditions et Confidentialité.",
+            "manageHelpCancel": "Annuler dans l'App Store ou Google Play arrête seulement le renouvellement. Pro reste actif jusqu'à la date ci-dessus.",
+            "manageHelpRefund": "Les remboursements se demandent à Apple ou Google, pas dans KupaPay. Un remboursement approuvé met fin à Pro immédiatement.",
+            "refundRequestLink": "Demander un remboursement au store",
             "status": {
                 "active": "Actif",
                 "cancelled_until_expiry": "Annulé — actif jusqu'à expiration",

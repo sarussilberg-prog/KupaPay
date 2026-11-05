@@ -1692,6 +1692,9 @@
             "tripPassSection": "مجموعات Trip Pass",
             "tripPassUntil": "Pro للمجموعة حتى {{date}}",
             "renewalDisclosureShort": "تتجدد الاشتراكات تلقائيًا حتى الإلغاء من حساب المتجر قبل 24 ساعة على الأقل من التجديد. راجع الشروط والخصوصية.",
+            "manageHelpCancel": "الإلغاء في App Store أو Google Play يوقف التجديد فقط. يبقى Pro حتى التاريخ أعلاه.",
+            "manageHelpRefund": "طلبات الاسترداد تتم عبر Apple أو Google وليس داخل KupaPay. الاسترداد المعتمد ينهي Pro فورًا.",
+            "refundRequestLink": "طلب استرداد من المتجر",
             "status": {
                 "active": "نشط",
                 "cancelled_until_expiry": "ملغى — نشط حتى الانتهاء",

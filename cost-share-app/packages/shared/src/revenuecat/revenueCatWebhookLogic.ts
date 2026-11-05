@@ -148,9 +148,12 @@ export function planRevenueCatWebhookRpc(
         return { kind: 'ignore' };
     }
 
+    const expirationBoundary =
+        immediateProRevoke && type === 'EXPIRATION' ? proUntil : null;
+
     return {
         kind: 'rpc',
-        p_pro_until: (isGrantSub || cancelAtEnd) ? proUntil : null,
+        p_pro_until: (isGrantSub || cancelAtEnd) ? proUntil : expirationBoundary,
         p_trip_pass_until: isTripPassGrant ? tripPassUntilFromEvent(event, now) : null,
         p_is_trip_pass: isTripPassGrant,
         p_is_yearly: isYearly,

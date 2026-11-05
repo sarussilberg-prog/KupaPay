@@ -76,7 +76,7 @@ describe('planRevenueCatWebhookRpc — revoke and cancel semantics', () => {
         expect(plan.kind).toBe('rpc');
         if (plan.kind === 'rpc') {
             expect(plan.p_is_immediate_pro_revoke).toBe(true);
-            expect(plan.p_pro_until).toBeNull();
+            expect(plan.p_pro_until).toBe(new Date(EXP_MS).toISOString());
         }
     });
 

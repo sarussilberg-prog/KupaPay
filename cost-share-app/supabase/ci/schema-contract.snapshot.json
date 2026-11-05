@@ -653,6 +653,10 @@
       "args": ""
     },
     {
+      "name": "apply_referral_reward",
+      "args": ""
+    },
+    {
       "name": "mark_weekly_summary_sent",
       "args": ""
     },

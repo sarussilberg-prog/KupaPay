@@ -1628,6 +1628,9 @@
             "tripPassSection": "Группы Trip Pass",
             "tripPassUntil": "Pro для группы до {{date}}",
             "renewalDisclosureShort": "Подписки продлеваются автоматически, пока вы не отмените их в магазине минимум за 24 часа. См. Условия и Конфиденциальность.",
+            "manageHelpCancel": "Отмена в App Store или Google Play останавливает только продление. Pro остаётся до даты выше.",
+            "manageHelpRefund": "Возврат запрашивается у Apple или Google, не в KupaPay. Одобренный возврат сразу отключает Pro.",
+            "refundRequestLink": "Запросить возврат в магазине",
             "status": {
                 "active": "Активна",
                 "cancelled_until_expiry": "Отменена — активна до конца периода",
