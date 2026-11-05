@@ -37,6 +37,12 @@ import {
     computeUnequalTotal,
     parseSplitInput,
 } from '../../lib/expenseSplitForm';
+import {
+    appLanguageEdgeTextStyle,
+    rtlTextAlign,
+    startEdgeTextStyle,
+    useRtlLayout,
+} from '../../hooks/useRtlLayout';
 
 export type UiSplitMode = 'equal' | 'percent' | 'exact';
 
@@ -88,6 +94,7 @@ export function EditPayerSplitSheet({
     onDone,
 }: EditPayerSplitSheetProps) {
     const { t } = useTranslation();
+    const isRtl = useRtlLayout();
     const [payerId, setPayerId] = useState(initial.payerId);
     const [splitMode, setSplitMode] = useState<UiSplitMode>(initial.splitMode);
     const [selectedIds, setSelectedIds] = useState<string[]>(initial.selectedMemberIds);
@@ -379,7 +386,11 @@ export function EditPayerSplitSheet({
                                         </View>
                                         <Text
                                             numberOfLines={1}
-                                            style={[styles.payerName, selected && styles.payerNameSelected]}
+                                            style={[
+                                                styles.payerName,
+                                                selected && styles.payerNameSelected,
+                                                appLanguageEdgeTextStyle(isRtl),
+                                            ]}
                                         >
                                             {name}
                                         </Text>
@@ -395,6 +406,7 @@ export function EditPayerSplitSheet({
                                 <Animated.Text
                                     style={[
                                         styles.splitErrorCaption,
+                                        startEdgeTextStyle(isRtl, undefined, styles.splitErrorCaption),
                                         { transform: [{ translateX: errorShake }] },
                                     ]}
                                     numberOfLines={1}
@@ -467,7 +479,12 @@ export function EditPayerSplitSheet({
                                             avatarUrl={getAvatarUrl(member) ?? undefined}
                                             size="xs"
                                         />
-                                        <Text style={styles.memberName} numberOfLines={1}>{name}</Text>
+                                        <Text
+                                            style={[styles.memberName, appLanguageEdgeTextStyle(isRtl)]}
+                                            numberOfLines={1}
+                                        >
+                                            {name}
+                                        </Text>
                                         {splitMode === 'equal' ? (
                                             <Text style={styles.memberAmount}>
                                                 {checked ? `${currency} ${perHead.toFixed(2)}` : '—'}
@@ -476,7 +493,7 @@ export function EditPayerSplitSheet({
                                             <View style={styles.inputWrap}>
                                                 <TextInput
                                                     ref={(r) => { splitInputRefs.current[member.id] = r; }}
-                                                    style={styles.input}
+                                                    style={[styles.input, { textAlign: rtlTextAlign(isRtl) }]}
                                                     value={value}
                                                     onChangeText={text => {
                                                         const sanitized = sanitizeNumeric(text);
@@ -573,7 +590,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         fontWeight: '700',
         color: colors.error,
-        textAlign: 'right',
     },
     doneText: {
         fontSize: 14,
@@ -695,7 +711,6 @@ const styles = StyleSheet.create({
     input: {
         minWidth: 60,
         maxWidth: 80,
-        textAlign: 'right',
         fontSize: 13,
         fontWeight: '700',
         color: colors.text.primary,

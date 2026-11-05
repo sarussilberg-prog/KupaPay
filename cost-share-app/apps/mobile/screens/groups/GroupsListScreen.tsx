@@ -57,6 +57,9 @@ import {
 } from '../../lib/groupListQuery';
 import { AppIcon } from '../../components/AppIcon';
 import { colors } from '../../theme';
+import { GroupsLayoutDiagnosticsReporter } from '../../components/diagnostics/GroupsLayoutDiagnosticsReporter';
+import { resetLayoutProbes } from '../../lib/groupsLayoutDiagnostics';
+import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
 
 function unique<T>(values: T[]): T[] {
     return Array.from(new Set(values));
@@ -263,10 +266,17 @@ export function GroupsListScreen() {
     const balanceUnknown =
         simplified === undefined && (simplifiedLoading || simplifiedFetching) && !simplifiedError;
 
+    useEffect(() => {
+        if (isE2eLayoutProbeEnabled()) {
+            resetLayoutProbes();
+        }
+    }, []);
+
     const renderGroupRow = useCallback(
-        (item: FilteredRow) => (
+        (item: FilteredRow, layoutProbePrimary = false) => (
             <GroupCard
                 group={item.group}
+                layoutProbePrimary={layoutProbePrimary}
                 rollup={simplified?.groupRollups.get(item.group.id)}
                 displayCurrency={baseCurrency}
                 ratesFromBase={ratesQuery.data?.rates}
@@ -293,7 +303,7 @@ export function GroupsListScreen() {
     );
 
     const renderItem = useCallback<ListRenderItem<FilteredRow>>(
-        ({ item }) => renderGroupRow(item),
+        ({ item, index }) => renderGroupRow(item, index === 0),
         [renderGroupRow],
     );
 
@@ -348,6 +358,24 @@ export function GroupsListScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-slate-50 dark:bg-gray-900" edges={['top']}>
+            <GroupsLayoutDiagnosticsReporter />
+            {isE2eLayoutProbeEnabled() && isRtl ? (
+                <View
+                    testID="groups-layout-app-rtl"
+                    accessible
+                    accessibilityLabel="groups-layout-app-rtl"
+                    importantForAccessibility="yes"
+                    collapsable={false}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        width: 4,
+                        height: 4,
+                        opacity: 0.02,
+                    }}
+                />
+            ) : null}
             <ProTrialLifecycleBanner />
             <GroupsListHeader
                 searchQuery={searchQuery}

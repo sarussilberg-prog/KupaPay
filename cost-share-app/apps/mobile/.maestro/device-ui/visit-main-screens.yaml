@@ -1,0 +1,38 @@
+appId: com.kupapay.mobile
+---
+- runFlow: assert-groups-layout.yaml
+- tapOn:
+    id: tab-Activity
+- extendedWaitUntil:
+    visible:
+      id: activity-feed-virtualized
+    timeout: 60000
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_02_activity
+- tapOn:
+    id: tab-FavoriteGroup
+- extendedWaitUntil:
+    visible:
+      id: favorite-empty
+    timeout: 60000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: group-detail-feed-virtualized
+    timeout: 60000
+    optional: true
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_03_favorite_group
+- tapOn:
+    id: center-add-button
+- extendedWaitUntil:
+    visible:
+      id: add-expense-submit
+    timeout: 60000
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_04_add_expense
+- tapOn:
+    id: add-expense-cancel
+- tapOn:
+    id: tab-Groups
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 60000

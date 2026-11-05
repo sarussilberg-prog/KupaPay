@@ -8,11 +8,19 @@ import { useLegalDocument } from '../../hooks/queries/useLegalDocument';
 import {
     APP_VERSION,
     isLanguage,
-    isRtlLanguage,
     languageToIntlLocale,
     resolveLegalDocumentLocale,
     type LegalSlug,
 } from '@cost-share/shared';
+import {
+    rtlMarkdownContainerStyle,
+    rtlRowStyle,
+    rtlWritingDirection,
+    startEdgeColumnStyle,
+    appLanguageEdgeTextStyle,
+    rtlTextAlign,
+    useRtlLayout,
+} from '../../hooks/useRtlLayout';
 
 interface Props {
     visible: boolean;
@@ -28,7 +36,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
     const uiLanguage = isLanguage(uiLangCode) ? uiLangCode : 'en';
     const fallbackLocale = resolveLegalDocumentLocale(uiLanguage);
     const docLocale = query.data?.locale ?? fallbackLocale;
-    const isRtl = isRtlLanguage(uiLanguage);
+    const isRtl = useRtlLayout();
     const styles = useMemo(() => buildMarkdownStyles(isRtl), [isRtl]);
     const contentMd = useMemo(
         () => (isRtl && query.data ? prepareRtlMarkdown(query.data.contentMd) : query.data?.contentMd ?? ''),
@@ -45,8 +53,6 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
             day: 'numeric',
         }).format(new Date(query.data.effectiveDate));
     }
-
-    const titleAlign = isRtl ? 'right' : 'left';
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -66,19 +72,19 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
 
                     <View
                         className="px-5 pt-2 pb-3 border-b border-gray-100 items-start justify-between"
-                        style={{ flexDirection: isRtl ? 'row-reverse' : 'row' }}
+                        style={rtlRowStyle(isRtl)}
                     >
-                        <View style={{ flex: 1, paddingEnd: 12 }}>
+                        <View style={[{ flex: 1, paddingEnd: 12 }, startEdgeColumnStyle]}>
                             <Text
                                 className="text-xl font-bold text-gray-900"
-                                style={{ textAlign: titleAlign, writingDirection: isRtl ? 'rtl' : 'ltr' }}
+                                style={appLanguageEdgeTextStyle(isRtl, 'text-xl font-bold text-gray-900')}
                             >
                                 {query.data?.title ?? t(slug === 'terms' ? 'legal.termsTitle' : 'legal.privacyTitle')}
                             </Text>
                             {query.data && (
                                 <Text
                                     className="text-xs text-gray-500 mt-1"
-                                    style={{ textAlign: titleAlign, writingDirection: isRtl ? 'rtl' : 'ltr' }}
+                                    style={appLanguageEdgeTextStyle(isRtl, 'text-xs text-gray-500 mt-1')}
                                 >
                                     {t('legal.lastUpdated', { date: formattedDate })} · {t('legal.appVersion', { version: APP_VERSION })}
                                 </Text>
@@ -101,7 +107,7 @@ export function LegalDocumentSheet({ visible, slug, onClose }: Props) {
                                 showsVerticalScrollIndicator={true}
                                 nestedScrollEnabled={true}
                             >
-                                <View style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+                                <View style={rtlMarkdownContainerStyle(isRtl)}>
                                     <Markdown style={styles}>{contentMd}</Markdown>
                                 </View>
                             </ScrollView>
@@ -153,8 +159,8 @@ function ErrorBody({ onRetry }: { onRetry: () => void }) {
 }
 
 function buildMarkdownStyles(isRtl: boolean) {
-    const textAlign = isRtl ? ('right' as const) : ('left' as const);
-    const writingDirection = isRtl ? ('rtl' as const) : ('ltr' as const);
+    const textAlign = rtlTextAlign(isRtl);
+    const writingDirection = rtlWritingDirection(isRtl);
     return {
         body: { color: '#374151', fontSize: 16, lineHeight: 24, textAlign, writingDirection },
         paragraph: { textAlign, writingDirection, marginTop: 0, marginBottom: 10 },
@@ -166,7 +172,7 @@ function buildMarkdownStyles(isRtl: boolean) {
         link: { color: '#2563eb', textDecorationLine: 'underline' as const },
         bullet_list: { marginBottom: 8 },
         ordered_list: { marginBottom: 8 },
-        list_item: { marginBottom: 4, flexDirection: isRtl ? ('row-reverse' as const) : ('row' as const) },
+        list_item: { marginBottom: 4, ...rtlRowStyle(isRtl) },
         bullet_list_icon: { marginStart: isRtl ? 0 : 8, marginEnd: isRtl ? 8 : 8 },
         ordered_list_icon: { marginStart: isRtl ? 0 : 8, marginEnd: isRtl ? 8 : 8 },
         blockquote: {

@@ -9,7 +9,7 @@ jest.mock('../../../store', () => ({
 }));
 
 describe('DeleteAccountWarningSheet', () => {
-    it('renders title + 4 bullets when visible', () => {
+    it('renders title + 5 bullets when visible', () => {
         const { getByText } = render(
             <DeleteAccountWarningSheet visible onClose={() => {}} onContinue={() => {}} />,
         );
@@ -18,6 +18,7 @@ describe('DeleteAccountWarningSheet', () => {
         expect(getByText('deleteAccount.warningBullet2')).toBeTruthy();
         expect(getByText('deleteAccount.warningBullet3')).toBeTruthy();
         expect(getByText('deleteAccount.warningBullet4')).toBeTruthy();
+        expect(getByText('deleteAccount.warningBullet5')).toBeTruthy();
     });
 
     it('does not render content when hidden', () => {

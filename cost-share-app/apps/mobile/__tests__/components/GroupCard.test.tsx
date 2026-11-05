@@ -60,12 +60,13 @@ describe('GroupCard', () => {
         expect(getByText(/groups\.memberCount/)).toBeTruthy();
     });
 
-    it('renders meta line when timestamp exists', () => {
-        const { getByTestId } = render(
+    it('renders compact meta line (members only on list cards)', () => {
+        const { getByTestId, queryByTestId } = render(
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
         expect(getByTestId('group-card-meta')).toBeTruthy();
-        expect(getByTestId('group-card-meta-updated')).toBeTruthy();
+        expect(getByTestId('group-card-meta-members')).toBeTruthy();
+        expect(queryByTestId('group-card-meta-updated')).toBeNull();
     });
 
     it('renders a settled chip when no rollup is provided', () => {
@@ -93,7 +94,7 @@ describe('GroupCard', () => {
         expect(expected.width).toBe(GROUP_CARD_CHIP_MAX_WIDTH);
     });
 
-    it('stacks the balance chip under the title on narrow widths', () => {
+    it('keeps balance chip inline on narrow widths', () => {
         mockUseWindowDimensions.mockReturnValue({
             width: 320,
             height: 800,
@@ -103,9 +104,9 @@ describe('GroupCard', () => {
         const { getByTestId } = render(
             <GroupCard group={baseGroup} onPress={() => {}} />,
         );
-        expect(resolveGroupCardUsesStackedBalance(320)).toBe(true);
+        expect(resolveGroupCardUsesStackedBalance(320)).toBe(false);
         const column = getByTestId('group-card-balance-column');
-        expect(column.props.style.alignSelf).toBe('flex-end');
+        expect(column.props.style.alignItems).toBe('center');
     });
 
     it('renders localized owed chip when primary.net > 0', () => {
@@ -132,8 +133,8 @@ describe('GroupCard', () => {
         expect(getByTestId('balance-chip-amount')).toBeTruthy();
     });
 
-    it('shows localized multi-currency affordance', () => {
-        const { getByTestId } = render(
+    it('omits multi-currency link on compact list balance chip', () => {
+        const { queryByTestId } = render(
             <GroupCard
                 group={baseGroup}
                 rollup={rollupOf({ currency: 'EUR', net: 50 }, [
@@ -142,7 +143,7 @@ describe('GroupCard', () => {
                 onPress={() => {}}
             />,
         );
-        expect(getByTestId('balance-chip-others')).toBeTruthy();
+        expect(queryByTestId('balance-chip-others')).toBeNull();
     });
 
     it('shows matched members subtitle when matchedMemberNames is set', () => {

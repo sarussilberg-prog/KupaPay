@@ -28,7 +28,7 @@ import {
     simplifyDebts,
     UnbalancedLedgerError,
 } from '@cost-share/shared';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 import {
     ascCaptureExpenses,
     ascCaptureGroupMembers,
@@ -121,7 +121,7 @@ async function filterActiveMemberIds(memberIds: string[]): Promise<string[]> {
 }
 
 async function loadBalanceData(groupId: string, userId?: string) {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         const group = ascCaptureGroups().find(g => g.id === groupId);
         const defaultCurrency = group?.defaultCurrency ?? DEFAULT_CURRENCY;
         const captureExpenses = ascCaptureExpenses(groupId);
@@ -199,7 +199,7 @@ async function loadBalanceData(groupId: string, userId?: string) {
 let fetchGroupsInFlight: Promise<GroupWithMembers[]> | null = null;
 
 async function fetchGroupsInternal(): Promise<GroupWithMembers[]> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         return ascCaptureGroups();
     }
     const userId = await getCurrentUserId();
@@ -481,7 +481,7 @@ export async function markGroupNoteSeen(groupId: string): Promise<void> {
 }
 
 export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         return ascCaptureGroupMembers(groupId);
     }
     const { data, error } = await supabase
@@ -500,7 +500,7 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
 export async function fetchProfilesByUserIds(
     userIds: string[],
 ): Promise<Record<string, GroupMemberLite>> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         const map: Record<string, GroupMemberLite> = {};
         for (const group of ascCaptureGroups()) {
             for (const m of group.members) {
@@ -721,7 +721,7 @@ export async function removeGroupMember(groupId: string, userId: string): Promis
 export async function getGroupContributions(
     groupId: string,
 ): Promise<MemberContributionsResult> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         try {
             const { expenses, splits, userIds } = await loadBalanceData(groupId);
             return calculateMemberContributions({ userIds, expenses, splits });

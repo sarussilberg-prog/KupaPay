@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { clearStaleAuthSession } from './authSessionLifecycle';
 import { useAppStore } from '../store';
-import { isAscScreenshotDemo } from './ascScreenshotDemo';
+import { usesStaticFixtureData } from './staticFixtureMode';
 import { CAPTURE_USER_ID } from '../screenshotDemo/ascCaptureSeed';
 
 /**
@@ -15,7 +15,7 @@ import { CAPTURE_USER_ID } from '../screenshotDemo/ascCaptureSeed';
  * the server still enforces real authorization via RLS on each request.
  */
 export async function getCurrentUserId(): Promise<string | null> {
-    if (isAscScreenshotDemo()) {
+    if (usesStaticFixtureData()) {
         return useAppStore.getState().currentUser?.id ?? CAPTURE_USER_ID;
     }
     const { data: { session } } = await supabase.auth.getSession();

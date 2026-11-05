@@ -1,0 +1,13 @@
+appId: com.kupapay.mobile
+env:
+  APP_LANG: en
+---
+- launchApp:
+    clearState: true
+- runFlow: sign-in.yaml
+- runFlow:
+    file: set-app-language.yaml
+    env:
+      APP_LANG: ${APP_LANG}
+- runFlow: assert-layout-probes.yaml
+- runFlow: visit-main-screens.yaml

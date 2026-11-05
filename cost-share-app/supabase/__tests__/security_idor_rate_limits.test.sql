@@ -78,15 +78,13 @@ BEGIN
         END IF;
     END;
 
-    -- #205 support rate limit (trigger is ENABLE ALWAYS so it runs under replica role in CI)
+    -- #205 support rate limit via submit_support_message RPC
     PERFORM set_config('role', 'anon', TRUE);
     FOR i IN 1..5 LOOP
-        INSERT INTO public.support_messages (name, email, message)
-        VALUES ('Spammer', 'spam@test.local', 'msg ' || i);
+        PERFORM public.submit_support_message('Spammer', 'spam@test.local', 'msg ' || i);
     END LOOP;
     BEGIN
-        INSERT INTO public.support_messages (name, email, message)
-        VALUES ('Spammer', 'spam@test.local', 'msg 6');
+        PERFORM public.submit_support_message('Spammer', 'spam@test.local', 'msg 6');
         RAISE EXCEPTION 'Case E failed: 6th support message should be rate limited';
     EXCEPTION WHEN OTHERS THEN
         IF SQLERRM NOT LIKE '%support_rate_limit%' THEN

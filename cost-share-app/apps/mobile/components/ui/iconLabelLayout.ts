@@ -1,4 +1,4 @@
-import { Platform, type ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 import { rtlRowStyle } from '../../hooks/useRtlLayout';
 import { spacing } from '../../theme';
 
@@ -37,15 +37,9 @@ export function listRowContainerStyle(
     gap: number = ICON_LABEL_GAP,
     alignItems: 'center' | 'flex-start' = 'center',
 ): ViewStyle {
-    const base = { alignItems, gap };
-    if (Platform.OS !== 'web') {
-        return {
-            ...base,
-            flexDirection: isRtl ? 'row-reverse' : 'row',
-        };
-    }
     return {
-        ...base,
+        alignItems,
+        gap,
         ...rtlRowStyle(isRtl),
     };
 }

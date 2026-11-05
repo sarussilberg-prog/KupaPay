@@ -12,6 +12,7 @@ import { buildGroupExportExcelBase64 } from '../lib/groupExportExcel';
 import { printGroupExportPdf } from '../lib/groupExportPdf';
 import { downloadTextAsFile } from '../lib/webFileDownload';
 import { showErrorToast, showSuccessMessage } from '../lib/appToast';
+import { supabase } from '../lib/supabase';
 
 export interface GroupExportPayload {
     feed: FeedItem[];
@@ -158,6 +159,18 @@ export async function exportGroupPdf(
     payload: GroupExportPayload,
 ): Promise<boolean> {
     try {
+        const { error: proError } = await supabase.rpc('require_pro_for_group_export', {
+            p_group_id: group.id,
+        });
+        if (proError) {
+            if (proError.message?.includes('pro_required')) {
+                showErrorToast('groups.share.exportProRequired');
+            } else {
+                showErrorToast('groups.share.exportError');
+            }
+            return false;
+        }
+
         const input = buildExportInput(group, payload);
         const uri = await printGroupExportPdf(input);
         if (!uri) {

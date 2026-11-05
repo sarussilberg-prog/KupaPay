@@ -7,7 +7,8 @@ on:
     branches: [dev]
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
+  # Bump suffix when a stuck run holds an old group (hung job + failed cancel).
+  group: ci-v2-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -23,7 +24,7 @@ jobs:
       performance: ${{ steps.parse.outputs.performance }}
       docs_only: ${{ steps.parse.outputs.docs_only }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: parse
@@ -46,6 +47,47 @@ jobs:
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
           fi
 
+  pr-structure-gate:
+    name: PR structure gate
+    if: github.event_name == 'pull_request'
+    needs: [ci-paths, setup]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v7
+        if: needs.setup.result == 'success'
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v8
+        if: needs.setup.result == 'success'
+        with:
+          name: npm-node-modules
+          path: cost-share-app
+      - name: Restore node_modules for red/green proof
+        if: needs.setup.result == 'success'
+        working-directory: cost-share-app
+        run: bash scripts/ci-restore-node-modules-from-artifact.sh
+      - name: Validate PR structure (+ red/green when setup ran)
+        working-directory: cost-share-app
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          RUN_RED_GREEN: ${{ needs.setup.result == 'success' && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          PR_LABELS="$(jq -r '[.pull_request.labels[].name] | join(",")' "$GITHUB_EVENT_PATH")"
+          export PR_LABELS
+          bash scripts/ci-pr-structure-gate.sh
+
   branch-up-to-date:
     name: Branch up to date with dev
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
@@ -54,7 +96,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Sync with origin/dev when behind (update-branch)
@@ -85,14 +127,14 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
       - name: Restore Turbo cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: cost-share-app/.turbo
           key: turbo-${{ runner.os }}-${{ hashFiles('cost-share-app/package-lock.json') }}-${{ github.sha }}
@@ -103,7 +145,7 @@ jobs:
       - run: npm run audit:ci
       - name: Pack node_modules (preserve .bin symlinks for downstream jobs)
         run: bash scripts/ci-pack-node-modules-artifact.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: npm-node-modules
           path: cost-share-app/node_modules.tar.zst
@@ -123,11 +165,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -148,11 +190,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -168,24 +210,35 @@ jobs:
       (needs.ci-paths.outputs.full_suite == 'true' ||
         needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
       - run: bash scripts/ci-restore-node-modules-from-artifact.sh
       - run: bash scripts/ci-assert-install-artifact.sh jest
       - run: bash scripts/ci-jest-run-tests.sh
+      - name: Expo web RTL (Playwright)
+        run: bash scripts/ci-expo-web-rtl-playwright.sh
+      - name: Upload RTL web screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rtl-web-screenshots-${{ github.run_id }}
+          path: docs/rtl-screenshots/web/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Upload Jest flake report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jest-flaky-report-${{ github.run_id }}
           path: cost-share-app/apps/mobile/.ci-artifacts/jest/
@@ -199,15 +252,16 @@ jobs:
       (needs.ci-paths.outputs.full_suite == 'true' ||
         needs.ci-paths.outputs.mobile == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -227,11 +281,11 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -249,7 +303,7 @@ jobs:
     outputs:
       functions: ${{ steps.plan.outputs.functions }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: plan
@@ -289,7 +343,7 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
@@ -347,17 +401,17 @@ jobs:
     name: No merge conflict markers
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash scripts/ci-no-merge-conflicts.sh
 
   secret-scan:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -373,12 +427,12 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
       - name: Restore Expo cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             cost-share-app/apps/mobile/.expo
@@ -386,7 +440,7 @@ jobs:
           key: expo-${{ runner.os }}-${{ hashFiles('cost-share-app/apps/mobile/package.json', 'cost-share-app/package-lock.json') }}
           restore-keys: |
             expo-${{ runner.os }}-
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -398,7 +452,7 @@ jobs:
     name: Supabase migration guard
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Lint migration filenames
@@ -472,7 +526,7 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
@@ -509,13 +563,13 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: cost-share-app/package-lock.json
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: npm-node-modules
           path: cost-share-app
@@ -529,6 +583,7 @@ jobs:
     needs:
       [
         ci-paths,
+        pr-structure-gate,
         branch-up-to-date,
         setup,
         lint,
@@ -553,7 +608,7 @@ jobs:
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Aggregate required checks
         env:
           DOCS_ONLY: ${{ needs.ci-paths.outputs.docs_only }}
@@ -573,6 +628,10 @@ jobs:
           check no-merge-conflicts "${{ needs.no-merge-conflicts.result }}"
           check secret-scan "${{ needs.secret-scan.result }}"
           check deno-edge-gate "${{ needs.deno-edge-gate.result }}"
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            check pr-structure-gate "${{ needs.pr-structure-gate.result }}"
+          fi
 
           if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "dev" ]]; then
             check branch-up-to-date "${{ needs.branch-up-to-date.result }}"
@@ -657,7 +716,7 @@ jobs:
           echo "::error::Timed out waiting for SonarCloud"
           exit 1
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -731,7 +790,26 @@ jobs:
           echo "::warning::Timed out waiting for auto-merge; run Bump dev prerelease workflow_dispatch to reconcile version.json"
           echo "merged=false" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - name: Dispatch TestFlight iOS (github-actions merge skips pull_request workflows)
+        if: >-
+          steps.sync_dev.outputs.defer != 'true' &&
+          (steps.sync_dev.outputs.merged == 'true' ||
+            steps.sync_dev.outputs.already_merged == 'true' ||
+            steps.wait_merge.outputs.merged == 'true')
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          GH_TOKEN: ${{ secrets.ADMIN_PAT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ADMIN_PAT:-}" ]]; then
+            echo "::warning::ADMIN_PAT unset — cannot dispatch TestFlight; use workflow_dispatch TestFlight iOS on dev"
+            exit 0
+          fi
+          bash cost-share-app/scripts/dispatch-testflight-dev-merge.sh "$PR_NUMBER" "$REPO"
+
+      - uses: actions/checkout@v7
         if: >-
           steps.sync_dev.outputs.defer != 'true' &&
           (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')
@@ -740,7 +818,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.ADMIN_PAT }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: >-
           steps.sync_dev.outputs.defer != 'true' &&
           (steps.sync_dev.outputs.merged == 'true' || steps.wait_merge.outputs.merged == 'true')

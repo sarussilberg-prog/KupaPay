@@ -1,6 +1,6 @@
 {
   "description": "Offline seed (table/function names). CI compares name sets to post-bootstrap Postgres.",
-  "generated_at": "2026-10-29T07:12:04Z",
+  "generated_at": "2026-11-03T11:47:50Z",
   "tables": [
     {
       "name": "account_deletions_audit",
@@ -609,6 +609,10 @@
       "args": ""
     },
     {
+      "name": "is_revenuecat_test_user",
+      "args": ""
+    },
+    {
       "name": "list_claimable_guest_members",
       "args": ""
     },
@@ -646,6 +650,10 @@
     },
     {
       "name": "mark_referral_rewarded",
+      "args": ""
+    },
+    {
+      "name": "apply_referral_reward",
       "args": ""
     },
     {
@@ -718,6 +726,10 @@
     },
     {
       "name": "remove_friend",
+      "args": ""
+    },
+    {
+      "name": "require_pro_for_group_export",
       "args": ""
     },
     {
@@ -810,6 +822,14 @@
     },
     {
       "name": "submit_ambassador_application",
+      "args": ""
+    },
+    {
+      "name": "submit_support_message",
+      "args": ""
+    },
+    {
+      "name": "sync_profile_email_from_auth",
       "args": ""
     },
     {

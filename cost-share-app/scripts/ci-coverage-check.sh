@@ -37,6 +37,7 @@ npm test --workspace=@cost-share/mobile -- \
   --coverageReporters=json-summary \
   --passWithNoTests \
   --ci \
+  --forceExit \
   "${JEST_IGNORE[@]}"
 
 if [[ ! -f "$SUMMARY" ]]; then

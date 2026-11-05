@@ -117,9 +117,10 @@ export function GroupsListB2PreviewScreen() {
                 />
                 <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
                     <GroupsListSummaryCard summary={mockSummary} conversion={mockConversion} />
-                    {groups.map(group => (
+                    {groups.map((group, index) => (
                         <GroupCard
                             key={group.id}
+                            layoutProbePrimary={index === 0}
                             group={group}
                             rollup={rollups[group.id]}
                             displayCurrency="USD"

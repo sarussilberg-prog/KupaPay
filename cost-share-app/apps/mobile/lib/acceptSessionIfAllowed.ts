@@ -8,6 +8,7 @@ import { hydrateCurrentUserProfile } from '../services/users.service';
 import { resolveAccountDeletionGate } from './accountDeletionGate';
 import { useAppStore } from '../store';
 import { provisionalUserFromSession } from './provisionalUserFromSession';
+import { E2E_MAESTRO_AUTH_ENABLED } from './featureFlags';
 
 export type SessionAcceptMode = 'fresh' | 'hydration';
 
@@ -62,7 +63,8 @@ export async function acceptSessionIfAllowed(
 
     const status = await assertProfileActiveWithTimeout();
 
-    if (status === 'deactivated' || (status === 'unknown' && mode === 'fresh')) {
+    const failClosedOnUnknownFresh = mode === 'fresh' && status === 'unknown' && !E2E_MAESTRO_AUTH_ENABLED;
+    if (status === 'deactivated' || failClosedOnUnknownFresh) {
         if (mode === 'fresh' && status === 'deactivated') {
             const gate = await resolveAccountDeletionGate('deactivated');
             if (gate === 'restorable') {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SettleUpSheet, SettleUpFormValues } from '../../components/SettleUpSheet';
+import { PAYMENT_APP_TILE_SIZE } from '../../components/settleUp/PaymentAppLogo';
 import type { GroupMemberLite, PairwiseDebt } from '@cost-share/shared';
 
 jest.mock('expo-linear-gradient', () => ({ LinearGradient: ({ children }: any) => children }));
@@ -135,10 +136,22 @@ describe('SettleUpSheet (redesign)', () => {
         expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it('renders Bit and PayBox launcher tiles on native', () => {
+    it('renders Bit and PayBox launcher tiles with uniform logo dimensions', () => {
         const { getByTestId } = renderSheet();
-        expect(getByTestId('payment-app-tile-bit')).toBeTruthy();
-        expect(getByTestId('payment-app-tile-paybox')).toBeTruthy();
+        const bitLogo = getByTestId('payment-app-logo-bit');
+        const payboxLogo = getByTestId('payment-app-logo-paybox');
+        expect(bitLogo.props.style).toEqual(
+            expect.objectContaining({
+                width: PAYMENT_APP_TILE_SIZE,
+                height: PAYMENT_APP_TILE_SIZE,
+            }),
+        );
+        expect(payboxLogo.props.style).toEqual(
+            expect.objectContaining({
+                width: PAYMENT_APP_TILE_SIZE,
+                height: PAYMENT_APP_TILE_SIZE,
+            }),
+        );
     });
 
     it('record button shows the simple Save label', () => {

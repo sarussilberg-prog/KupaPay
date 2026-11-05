@@ -47,3 +47,67 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(store): ASC screenshot upload fileSize/checksum + replace set (#667)
 ## [2.2.0-dev.21] — 2026-10-29
 - fix(store): reuse editable ASC version for 2.2.0 (#671)
+## [2.2.0-dev.22] — 2026-10-29
+- chore: back-merge main hotfix — marketing login proxy (#675)
+## [2.2.0-dev.23] — 2026-10-29
+- chore: back-merge main — login proxy hotfix (#673, #677) (#678)
+## [2.2.0-dev.24] — 2026-10-29
+- fix(mobile): native groups layout, profile friend settle sheet, Maestro device UI (#676)
+## [2.2.0-dev.25] — 2026-11-01
+- feat(ci): required PR structure gate with red/green proof (#679) (#694)
+## [2.2.0-dev.26] — 2026-11-01
+- perf(ci): faster Maestro simulator CI — build once, tiers (#687) (#696)
+## [2.2.0-dev.27] — 2026-11-01
+- fix(web): back-merge #701 — proxy /_expo static assets on marketing site (#703)
+## [2.2.0-dev.28] — 2026-11-02
+- fix(mobile): guard Activity focus badge clear on iOS (#698) (#707)
+## [2.2.0-dev.29] — 2026-11-02
+- fix(mobile): unify Bit and PayBox payment app tiles (#700) (#708)
+## [2.2.0-dev.30] — 2026-11-02
+- ci(mobile): UI quality Phase 5 — AWS Device Farm workflow (gated OFF) (#711)
+## [2.2.0-dev.31] — 2026-11-02
+- ci(mobile): UI quality Phase 4 — release launch smoke (#710)
+## [2.2.0-dev.32] — 2026-11-02
+- feat(mobile): UI quality Phase 2 — RTL row guard and xx-long pseudo-locale (#709)
+## [2.2.0-dev.33] — 2026-11-02
+- fix(pro): RevenueCat webhook environment and entitlement ordering hardening (#712)
+## [2.2.0-dev.34] — 2026-11-02
+- ci: release launch smoke runs on iOS and Android (#715)
+## [2.2.0-dev.35] — 2026-11-02
+- fix(activity): iOS Hebrew search placeholder garbled (#716) (#719)
+## [2.2.0-dev.36] — 2026-11-02
+- fix(tabs): swap Profile/Activity order in RTL (#699) (#720)
+## [2.2.0-dev.37] — 2026-11-03
+- fix(mobile): eas.json empty PostHog key breaks TestFlight EAS validate (#721)
+## [2.2.0-dev.38] — 2026-11-03
+- ci(ios): trigger TestFlight on dev when testflight workflow updates (#722)
+## [2.2.0-dev.39] — 2026-11-03
+- ci(ios): TestFlight after dev PR merge (mobile release paths) (#723)
+## [2.2.0-dev.40] — 2026-11-03
+- feat(release): default Pro on for dev TestFlight and Play internal (#726)
+## [2.2.0-dev.41] — 2026-11-03
+- feat(mobile): compact single-row Groups list cards (#724)
+## [2.2.0-dev.42] — 2026-11-03
+- ci(ios): widen TestFlight dev-merge path filter (#727)
+## [2.2.0-dev.43] — 2026-11-03
+- ci(ios): TestFlight dev-merge builds current dev tip (#728)
+## [2.2.0-dev.44] — 2026-11-03
+- fix(mobile): compact GroupCard row flex on iOS New Architecture (#729)
+## [2.2.0-dev.45] — 2026-11-03
+- fix(mobile): GroupCard horizontal row on inner View (iOS New Arch) (#730)
+## [2.2.0-dev.46] — 2026-11-03
+- fix(mobile): RTL GroupCard text flush to avatar + layout gap diagnostics (#731)
+## [2.2.0-dev.47] — 2026-11-03
+- fix(mobile): GroupCard RTL row XOR I18nManager + physical x-order diagnostics (#732)
+## [2.2.0-dev.48] — 2026-11-04
+- fix(mobile): unified RTL layout — I18nManager mirroring, full-app verification (#733)
+## [2.2.0-dev.49] — 2026-11-04
+- fix(maestro): xx-long language flow tab bar (single back) (#734)
+## [2.2.0-dev.50] — 2026-11-04
+- fix(mobile): groups list summary card RTL start alignment (#735)
+## [2.2.0-dev.51] — 2026-11-04
+- fix(mobile): RTL start-edge alignment — referral screen and rtlTextAlign call sites (#736)
+## [2.2.0-dev.52] — 2026-11-05
+- fix(pro): subscription lifecycle audit — cancel, refund, referral rewards (#738)
+## [2.2.0-dev.53] — 2026-11-05
+- fix(mobile): restore transparent animated login logo on iOS 26+ (#737)

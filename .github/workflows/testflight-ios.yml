@@ -6,12 +6,17 @@
 name: TestFlight iOS
 
 on:
+  # Recovery: run TestFlight after dev fixes without manual dispatch (workflow_dispatch still supported).
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/testflight-ios.yml
   workflow_dispatch:
     inputs:
       pro_enabled:
         description: Enable KupaPay Pro (RevenueCat) for this TestFlight build
         type: boolean
-        default: false
+        default: true
   workflow_call:
     inputs:
       git_ref:
@@ -20,7 +25,7 @@ on:
         default: dev
       pro_enabled:
         type: boolean
-        default: false
+        default: true
       mobile_cd_sha:
         description: origin/dev SHA recorded in MOBILE_CD_BASELINE after success
         type: string
@@ -42,7 +47,7 @@ jobs:
         working-directory: cost-share-app/apps/mobile
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.git_ref || github.ref }}
           fetch-depth: 0
@@ -63,7 +68,7 @@ jobs:
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.preflight.outputs.ready == 'true'
         with:
           node-version: "20"

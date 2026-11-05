@@ -63,7 +63,7 @@ export function SettingsScreen() {
     );
 
     const handleLanguagePick = useCallback(
-        async (lang: Language) => {
+        async (lang: Parameters<typeof changeAppLanguage>[0]) => {
             setShowLanguage(false);
             await changeAppLanguage(lang);
         },
@@ -133,6 +133,7 @@ export function SettingsScreen() {
 
     return (
         <ScrollView
+            testID="settings-screen"
             className="flex-1 bg-slate-50"
             contentContainerStyle={{ paddingBottom: insets.bottom }}
         >
@@ -148,6 +149,7 @@ export function SettingsScreen() {
                         variant="value"
                         valueText={language === 'he' ? t('profile.hebrew') : t('profile.english')}
                         onPress={() => setShowLanguage(true)}
+                        testID="settings-language-row"
                     />
                     <SettingsRow
                         iconName="cash-outline"

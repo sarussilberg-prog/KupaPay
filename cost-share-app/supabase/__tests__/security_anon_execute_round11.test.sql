@@ -16,6 +16,7 @@ BEGIN
           AND has_function_privilege('anon', p.oid, 'EXECUTE')
           AND p.proname = ANY (ARRAY[
               'handle_revenuecat_webhook',
+              'is_revenuecat_test_user',
               'hard_purge_expired_deleted_accounts',
               'restore_deleted_account',
               'consume_receipt_ocr_quota_for_user',
@@ -32,7 +33,7 @@ BEGIN
 
     IF has_function_privilege(
         'authenticated',
-        'public.handle_revenuecat_webhook(text, uuid, text, text, timestamptz, timestamptz, uuid, boolean, boolean, boolean)',
+        'public.handle_revenuecat_webhook(text, uuid, text, text, timestamptz, timestamptz, uuid, boolean, boolean, boolean, boolean, bigint)',
         'EXECUTE'
     ) THEN
         RAISE EXCEPTION 'Case 2 failed: authenticated must not EXECUTE handle_revenuecat_webhook';

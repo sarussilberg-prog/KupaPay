@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '500',
         color: colors.gray600,
-        textAlign: 'left',
+        textAlign: 'center',
     },
     list: {
         maxHeight: 360,

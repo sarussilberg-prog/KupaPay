@@ -1,0 +1,4 @@
+# Deprecated: use groups-layout-diagnostics-tour-en.yaml / -he.yaml (Maestro `when` + APP_LANG unreliable).
+appId: com.kupapay.mobile
+---
+- runFlow: groups-layout-diagnostics-tour-en.yaml

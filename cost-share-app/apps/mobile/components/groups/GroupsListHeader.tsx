@@ -2,8 +2,8 @@
  * GroupsListHeader — mockup B2 title row with search, filter, and create actions.
  */
 
-import React, { useMemo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState, useCallback } from 'react';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useLayoutWindowWidth } from '../../hooks/useLayoutWindowWidth';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../AppText';
@@ -16,6 +16,7 @@ import {
     resolveGroupsListCreateShowsLabel,
     resolveGroupsListUsesStackedHeader,
 } from '../groupsListLayout';
+import { isE2eLayoutProbeEnabled, isLabelInsideButton } from '../../lib/e2eLayoutProbes';
 
 interface GroupsListHeaderProps {
     searchQuery: string;
@@ -37,6 +38,9 @@ function HeaderActions({
     createLabel,
     searchLabel,
     filterLabel,
+    createLayoutProbeOk,
+    onCreateButtonLayout,
+    onCreateLabelLayout,
 }: {
     isRtl: boolean;
     filterActive: boolean;
@@ -47,6 +51,9 @@ function HeaderActions({
     createLabel: string;
     searchLabel: string;
     filterLabel: string;
+    createLayoutProbeOk?: boolean;
+    onCreateButtonLayout?: (layout: { x: number; y: number; width: number; height: number }) => void;
+    onCreateLabelLayout?: (layout: { x: number; y: number; width: number; height: number }) => void;
 }) {
     return (
         <View
@@ -74,16 +81,35 @@ function HeaderActions({
                     accessibilityLabel={createLabel}
                     testID="groups-create-btn"
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    style={[rtlRowStyle(isRtl), { flexShrink: 0 }]}
-                    className="h-10 items-center justify-center gap-1 rounded-full bg-primary px-3"
+                    style={[styles.createPill, rtlRowStyle(isRtl)]}
+                    onLayout={
+                        onCreateButtonLayout
+                            ? (e) => onCreateButtonLayout(e.nativeEvent.layout)
+                            : undefined
+                    }
                 >
                     <AppIcon name="add" size={18} color={colors.white} />
                     <Text
-                        className="text-xs font-semibold text-white"
                         testID="groups-create-btn-label"
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.75}
+                        style={styles.createPillLabel}
+                        onLayout={
+                            onCreateLabelLayout
+                                ? (e) => onCreateLabelLayout(e.nativeEvent.layout)
+                                : undefined
+                        }
                     >
                         {createLabel}
                     </Text>
+                    {createLayoutProbeOk ? (
+                        <View
+                            testID="groups-create-btn-layout-ok"
+                            accessibilityElementsHidden
+                            style={{ width: 0, height: 0, opacity: 0 }}
+                        />
+                    ) : null}
                 </TouchableOpacity>
             ) : (
                 <TouchableOpacity
@@ -122,6 +148,35 @@ export function GroupsListHeader({
         [windowWidth],
     );
     const createLabel = t('groups.createGroup');
+    const [createButtonBox, setCreateButtonBox] = useState<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    } | null>(null);
+    const [createLabelBox, setCreateLabelBox] = useState<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    } | null>(null);
+    const createLayoutProbeOk =
+        isE2eLayoutProbeEnabled() &&
+        createButtonBox != null &&
+        createLabelBox != null &&
+        isLabelInsideButton(createButtonBox, createLabelBox);
+    const onCreateButtonLayout = useCallback(
+        (layout: { x: number; y: number; width: number; height: number }) => {
+            if (isE2eLayoutProbeEnabled()) setCreateButtonBox(layout);
+        },
+        [],
+    );
+    const onCreateLabelLayout = useCallback(
+        (layout: { x: number; y: number; width: number; height: number }) => {
+            if (isE2eLayoutProbeEnabled()) setCreateLabelBox(layout);
+        },
+        [],
+    );
 
     if (searchExpanded) {
         return (
@@ -158,6 +213,9 @@ export function GroupsListHeader({
             createLabel={createLabel}
             searchLabel={t('common.search')}
             filterLabel={t('groups.filters.title')}
+            createLayoutProbeOk={createLayoutProbeOk}
+            onCreateButtonLayout={onCreateButtonLayout}
+            onCreateLabelLayout={onCreateLabelLayout}
         />
     );
 
@@ -181,3 +239,26 @@ export function GroupsListHeader({
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    createPill: {
+        flexShrink: 0,
+        minHeight: 40,
+        maxWidth: '100%',
+        paddingHorizontal: 12,
+        paddingVertical: Platform.OS === 'android' ? 8 : 10,
+        borderRadius: 9999,
+        backgroundColor: colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+    },
+    createPillLabel: {
+        flexShrink: 1,
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.white,
+        lineHeight: 16,
+        ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+    },
+});

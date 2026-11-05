@@ -20,7 +20,7 @@ See also [docs/SSOT/SUPABASE_ENVIRONMENTS.md](SSOT/SUPABASE_ENVIRONMENTS.md).
 
 ### Concurrency
 
-- Per PR: `ci-<pr-number>` with **cancel-in-progress** so superseded pushes stop stale runs.
+- Per PR: `ci-<pr-number>` with **cancel-in-progress** so superseded pushes stop stale runs. A hung job (no step timeout) can hold this group and leave newer runs **pending with zero jobs** until the stuck run finishes or is cancelled — **Mobile tests** and **Coverage ratchet** use a **45-minute** job timeout; Jest runs with **`--forceExit`** in CI.
 - Auto-merge + dev version bump: `dev-merge-and-bump` (no cancel) to avoid `version.json` races.
 
 ### Path-scoped jobs (speed)
@@ -40,7 +40,7 @@ PRs targeting **`main`** always run the **full** suite (no path skipping).
 
 ### Required aggregate check
 
-Job **`CI gate`** is the single pass/fail summary for branch protection.
+Job **`CI gate`** is the single pass/fail summary for branch protection. It includes **PR structure gate** on pull requests (template sections, test claims vs diff, spec doc touch, and red/green proof for bug-fix PRs — see [TESTING.md](./TESTING.md)).
 
 Auto-merge to `dev` runs when **CI gate** and **Supabase migration guard** succeed and SonarCloud is green. If the PR is behind **`origin/dev`**, CI calls **`gh pr update-branch`** (merge commit) and re-runs checks instead of failing silently at merge time. If update-branch hits a transient GraphQL head-ref flake through all retries, auto-merge **defers** (CI stays green; the next run retries). If GitHub completes the squash merge before the **Auto-merge** job’s sync step (race with native auto-merge), sync treats **`MERGED`** as success, skips update-branch, and still runs the dev prerelease bump in the same job. The **Auto-merge** job enables **GitHub native squash auto-merge** (`gh pr merge --auto`). When GitHub completes that merge as **`github-actions[bot]`**, standalone `on: push` workflows on [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) do not run (that workflow is **`workflow_dispatch` only**). Instead, the **Auto-merge** job waits for the merge to finish, then runs **`bump-dev-prerelease.mjs`** in the same job (commits with **`[skip ci]`**, pushes with **`ADMIN_PAT`**). Standalone [`bump-dev-prerelease.yml`](../.github/workflows/bump-dev-prerelease.yml) is **`workflow_dispatch` only** (see [CI_ADMIN_PAT.md](SSOT/CI_ADMIN_PAT.md)).
 
@@ -72,6 +72,35 @@ PRs to **`main`** always run the **full** CI matrix (no path skipping). Optional
 | **SonarCloud Code Analysis** | Waited on in **Auto-merge to dev** |
 
 Individual job names (only if you prefer granular protection instead of **CI gate**): **CI path plan**, **Install dependencies**, **Lint**, **Typecheck**, **Mobile tests**, **Coverage ratchet**, **Legal locale parity**, **Deno edge gate**, **No merge conflict markers**, **Expo mobile config**, **CI performance**, **Supabase SQL integration**, **Deno edge bundle (all functions)**, **Branch up to date with dev**.
+
+### Mobile device UI (Maestro)
+
+When a PR touches mobile/shared paths, [`mobile-device-ui-maestro.yml`](../.github/workflows/mobile-device-ui-maestro.yml) runs Maestro on simulators/emulators. It uses concurrency group **`maestro-ui-<pr>`** with **`cancel-in-progress: false`** so rapid pushes do not throw away long macOS runs.
+
+**Build once + cache:** A **build** job produces the iOS `.app` / Android release APK once per commit (or restores from cache keyed by **`@expo/fingerprint`** native hash). A **test** job reuses that binary for all flows. Staged binaries use fixed paths under **`/tmp/maestro-ios-app`** and **`/tmp/maestro-android-apk`** (job-level `env` must not use `${{ runner.temp }}` — GitHub rejects that expression and the workflow never schedules). Caches: CocoaPods, Gradle, Xcode DerivedData, plus GitHub Actions cache for the staged app/APK when the native fingerprint is unchanged. Android **build** jobs set **`SENTRY_DISABLE_AUTO_UPLOAD=true`** when no `SENTRY_AUTH_TOKEN` is available so release assemble does not fail on Sentry upload. JS-only diffs set **`skip_native_rebuild`** (reuse native tree + cached binary when the fingerprint matches).
+
+Workflow invariants are regression-tested in [`github-maestro-workflows.test.mjs`](../cost-share-app/scripts/__tests__/github-maestro-workflows.test.mjs) (included in `npm run test:maestro-ci`).
+
+**Timeouts:** build jobs **40 min**, test jobs **35 min** (hard cap; prior single-job runs used 90–180 min).
+
+**Tiers** (planner: [`maestro-ci-plan.mjs`](../cost-share-app/scripts/lib/maestro-ci-plan.mjs)):
+
+| Trigger | Tier | Platforms |
+|---------|------|-----------|
+| PR → **`dev`** | **Smoke** + path-mapped flows for touched screens | iOS only |
+| PR → **`main`**, push **`main`**, label **`maestro-full`**, or **`workflow_dispatch` → full** | **Full** suite | iOS + Android |
+| PR → **`dev`** with label **`maestro-full`** | **Full** | iOS + Android |
+
+- **Smoke:** `sign-in.yaml`, `assert-layout-probes.yaml`, `visit-main-screens.yaml` (en), plus extra flows mapped from changed screen files (see [TESTING.md](./TESTING.md)).
+- **Full:** all locale login strings, en/he layout tours, Hebrew profile friend breakdown — same coverage as the legacy single-job workflow.
+
+**Blocking:** Failures are **non-blocking** on **`dev`** PRs (`continue-on-error`). **`main`** / manual **full** runs are **blocking** (store-release gate — run **`workflow_dispatch` → full** before App Store / Play production submit).
+
+**Groups layout diagnostics:** [`mobile-groups-layout-diagnostics.yml`](../.github/workflows/mobile-groups-layout-diagnostics.yml) uses the same build/test split and semicolon-separated **`IOS_SIMULATOR_DEVICES`** (fixes `"iPhone 16"` space-splitting). Skips cleanly until `groups-layout-diagnostics-tour.yaml` lands.
+
+Artifacts: **`maestro-device-ui-ios-<run_id>`** screenshots (7 days); iOS/Android app artifacts keyed by native fingerprint (5 days).
+
+Secrets: `E2E_TEST_PASSWORD`, `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY_DEV` (optional `E2E_TEST_EMAIL`).
 
 #### Security & supply chain (both branches)
 

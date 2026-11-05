@@ -1,76 +1,138 @@
-import { Platform } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import {
-    centeredTextStyle,
+    appLanguageEdgeTextStyle,
     feedActorNameStyle,
+    isNativeRtlSynced,
     resolveAutoTextInputStyle,
     resolveAutoTextStyle,
-    resolveCompactTextInputStyle,
+    rtlForwardChevronIcon,
+    rtlRowStyle,
     rtlTextAlign,
     rtlTextClassName,
+    startEdgeTextStyle,
 } from '../../hooks/useRtlLayout';
 
 describe('useRtlLayout helpers', () => {
-    it('returns right alignment for Hebrew', () => {
+    const setPlatform = (os: typeof Platform.OS) => {
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
+    };
+
+    const setNativeIsRtl = (value: boolean) => {
+        const i18nMgr = I18nManager as unknown as { isRTL: boolean };
+        i18nMgr.isRTL = value;
+    };
+
+    afterEach(() => {
+        setPlatform('ios');
+        setNativeIsRtl(false);
+    });
+
+    it('native synced RTL uses plain row without direction override', () => {
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(isNativeRtlSynced(true)).toBe(true);
+        expect(rtlRowStyle(true)).toEqual({ flexDirection: 'row' });
+        expect(rtlRowStyle(true).direction).toBeUndefined();
+    });
+
+    it('native synced LTR uses plain row', () => {
+        setPlatform('ios');
+        setNativeIsRtl(false);
+        expect(isNativeRtlSynced(false)).toBe(true);
+        expect(rtlRowStyle(false)).toEqual({ flexDirection: 'row' });
+    });
+
+    it('uses row-reverse only when app RTL differs from I18nManager until reload', () => {
+        setPlatform('ios');
+        setNativeIsRtl(false);
+        expect(isNativeRtlSynced(true)).toBe(false);
+        expect(rtlRowStyle(true)).toEqual({ flexDirection: 'row-reverse' });
+
+        setNativeIsRtl(true);
+        expect(isNativeRtlSynced(false)).toBe(false);
+        expect(rtlRowStyle(false)).toEqual({ flexDirection: 'row-reverse' }); // native still RTL
+    });
+
+    it('web row style does not set per-row direction (root dir handles mirroring)', () => {
+        setPlatform('web');
+        expect(rtlRowStyle(true)).toEqual({ flexDirection: 'row' });
+        expect(rtlRowStyle(false)).toEqual({ flexDirection: 'row' });
+    });
+
+    it('rtlTextAlign maps to layout-start on web', () => {
+        setPlatform('web');
         expect(rtlTextAlign(true)).toBe('right');
         expect(rtlTextAlign(false)).toBe('left');
     });
 
-    it('pins feed actor names to the app edge', () => {
-        expect(feedActorNameStyle(true)).toEqual({
-            textAlign: 'right',
-            alignSelf: 'stretch',
-        });
-        expect(feedActorNameStyle(false)).toEqual({
-            textAlign: 'left',
-            alignSelf: 'stretch',
-        });
+    it('rtlTextAlign inverts physical edge under native I18nManager RTL', () => {
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(rtlTextAlign(true)).toBe('left');
+        expect(rtlTextAlign(false)).toBe('left');
     });
 
-    it('exposes centeredTextStyle for hero and marketing copy', () => {
-        expect(centeredTextStyle).toEqual({
-            width: '100%',
-            textAlign: 'center',
-            alignSelf: 'stretch',
-        });
+    it('rtlTextAlign uses physical right before native RTL reload catches up', () => {
+        setPlatform('ios');
+        setNativeIsRtl(false);
+        expect(rtlTextAlign(true)).toBe('right');
     });
 
-    it('adds nativewind alignment classes for Hebrew', () => {
+    it('rtlTextClassName adds edge alignment when not explicit', () => {
         expect(rtlTextClassName(true, 'text-sm')).toContain('text-right');
         expect(rtlTextClassName(true, 'text-sm')).toContain('self-stretch');
         expect(rtlTextClassName(false, 'text-sm')).toContain('text-left');
     });
 
-    it('aligns a TextInput by direction WITHOUT writingDirection (iOS duplicates the placeholder when it is set)', () => {
+    it('resolveAutoTextInputStyle sets textAlign only', () => {
+        setPlatform('web');
         expect(resolveAutoTextInputStyle(true)).toEqual({ textAlign: 'right' });
         expect(resolveAutoTextInputStyle(false)).toEqual({ textAlign: 'left' });
+
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(resolveAutoTextInputStyle(true)).toEqual({ textAlign: 'left' });
     });
 
-    it('defers to an explicit textAlign passed in the TextInput style', () => {
-        expect(resolveAutoTextInputStyle(true, { textAlign: 'center' })).toBeUndefined();
-    });
-
-    it('keeps compact search inputs vertically centered on Android', () => {
-        const os = Platform.OS;
-        Object.defineProperty(Platform, 'OS', { configurable: true, value: 'android' });
-        expect(resolveCompactTextInputStyle(true)).toEqual({
-            textAlign: 'right',
-            includeFontPadding: false,
-            textAlignVertical: 'center',
-            paddingVertical: 0,
-        });
-        Object.defineProperty(Platform, 'OS', { configurable: true, value: os });
-    });
-
-    it('applies RTL text styles unless textAlign is explicit', () => {
-        expect(resolveAutoTextStyle(true, 'text-sm')).toEqual({
+    it('resolveAutoTextStyle sets writingDirection when textAlign not set', () => {
+        expect(resolveAutoTextStyle(true)).toEqual({
             writingDirection: 'rtl',
         });
-        expect(resolveAutoTextStyle(false, 'text-sm')).toEqual({
+        expect(resolveAutoTextStyle(false)).toEqual({
             writingDirection: 'ltr',
         });
-        expect(resolveAutoTextStyle(true, 'text-center')).toEqual({
+        expect(resolveAutoTextStyle(true, undefined, { textAlign: 'left' })).toBeUndefined();
+    });
+
+    it('rtlForwardChevronIcon flips for RTL', () => {
+        expect(rtlForwardChevronIcon(false)).toBe('chevron-forward');
+        expect(rtlForwardChevronIcon(true)).toBe('chevron-back');
+    });
+
+    it('startEdgeTextStyle uses textAlign auto for static i18n copy', () => {
+        expect(startEdgeTextStyle(true, 'text-sm')).toEqual({
+            writingDirection: 'rtl',
+            textAlign: 'auto',
+        });
+    });
+
+    it('appLanguageEdgeTextStyle pins layout start for mixed-script copy', () => {
+        setPlatform('ios');
+        setNativeIsRtl(true);
+        expect(appLanguageEdgeTextStyle(true, 'text-sm')).toEqual({
+            textAlign: 'left',
             writingDirection: 'rtl',
         });
-        expect(resolveAutoTextStyle(true, undefined, { textAlign: 'left' })).toBeUndefined();
+        expect(feedActorNameStyle(true)).toEqual({
+            textAlign: 'left',
+            writingDirection: 'rtl',
+            alignSelf: 'stretch',
+        });
+
+        setPlatform('web');
+        expect(appLanguageEdgeTextStyle(true)).toEqual({
+            textAlign: 'right',
+            writingDirection: 'rtl',
+        });
     });
 });

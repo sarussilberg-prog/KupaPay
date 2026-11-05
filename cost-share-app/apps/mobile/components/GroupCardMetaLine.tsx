@@ -3,7 +3,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Platform, View, type TextStyle } from 'react-native';
+import { Platform, View, type LayoutChangeEvent, type TextStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
     bindCountLabelNoBreak,
@@ -11,10 +11,10 @@ import {
     type GroupWithMembers,
 } from '@cost-share/shared';
 import { Text } from './AppText';
-import { rtlRowStyle, rtlTextAlign, useRtlLayout } from '../hooks/useRtlLayout';
+import { rtlRowStyle, rtlTextAlign, resolveAutoTextStyle, useRtlLayout } from '../hooks/useRtlLayout';
 import { colors } from '../theme';
 import { toDate } from '../lib/dateUtils';
-import { isAscScreenshotDemo } from '../lib/ascScreenshotDemo';
+import { usesStaticFixtureData } from '../lib/staticFixtureMode';
 
 /** Skip "Updated now" noise on list rows (Splitwise-style). */
 export const GROUP_CARD_UPDATED_META_MIN_AGE_MS = 90_000;
@@ -39,13 +39,31 @@ type Props = {
     group: GroupWithMembers;
     memberCount: number;
     language: string;
+    /** List card: member count only (no “updated” suffix). */
+    compact?: boolean;
     testID?: string;
+    onLayout?: (event: LayoutChangeEvent) => void;
 };
 
-export function GroupCardMetaLine({ group, memberCount, language, testID = 'group-card-meta' }: Props) {
+const COMPACT_MEMBER_META_STYLE: TextStyle = {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.gray500,
+    ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+};
+
+export function GroupCardMetaLine({
+    group,
+    memberCount,
+    language,
+    compact = false,
+    testID = 'group-card-meta',
+    onLayout,
+}: Props) {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
     const textAlign = rtlTextAlign(isRtl);
+    const compactAutoStyle = compact ? resolveAutoTextStyle(isRtl) : undefined;
 
     const { memberLabel, updatedWhen } = useMemo(() => {
         const activityAt = group.lastActivityAt ?? group.updatedAt;
@@ -58,7 +76,7 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
                 : t(`groups.types.${group.groupType}`);
         const memberLabel = bindCountLabelNoBreak(memberRaw);
 
-        if (isAscScreenshotDemo()) {
+        if (compact || usesStaticFixtureData()) {
             return { memberLabel, updatedWhen: null as string | null };
         }
 
@@ -76,16 +94,31 @@ export function GroupCardMetaLine({ group, memberCount, language, testID = 'grou
         group.updatedAt,
         language,
         memberCount,
+        compact,
         t,
     ]);
 
     return (
         <View
             testID={testID}
-            style={[rtlRowStyle(isRtl), { alignItems: 'center', minWidth: 0, flexWrap: 'nowrap' }]}
+            onLayout={onLayout}
+            style={[
+                rtlRowStyle(isRtl),
+                {
+                    alignItems: 'center',
+                    minWidth: 0,
+                    flexWrap: 'nowrap',
+                    ...(compact ? { alignSelf: 'stretch' as const, width: '100%' as const } : null),
+                },
+            ]}
         >
             <Text
-                style={[MEMBER_META_STYLE, { textAlign, flexShrink: 1, minWidth: 0 }]}
+                style={[
+                    compact ? COMPACT_MEMBER_META_STYLE : MEMBER_META_STYLE,
+                    compact
+                        ? { ...compactAutoStyle, textAlign: 'auto', flexShrink: 1, minWidth: 0 }
+                        : { textAlign, flexShrink: 1, minWidth: 0 },
+                ]}
                 numberOfLines={1}
                 testID="group-card-meta-members"
             >

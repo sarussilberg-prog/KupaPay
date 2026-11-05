@@ -1,0 +1,24 @@
+appId: com.kupapay.mobile
+env:
+  APP_LANG: he
+---
+- runFlow: rtl-login-screenshot.yaml
+- runFlow: set-app-language.yaml
+- runFlow: visit-main-screens.yaml
+- runFlow: rtl-group-detail-settle.yaml
+- tapOn:
+    id: tab-Profile
+- extendedWaitUntil:
+    visible:
+      id: profile-settings-button
+    timeout: 60000
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_05_profile
+- tapOn:
+    id: profile-settings-button
+- extendedWaitUntil:
+    visible:
+      id: settings-screen
+    timeout: 30000
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_06_settings
+- runFlow: rtl-paywall-screenshot.yaml
+- runFlow: assert-groups-layout-diagnostics-he.yaml

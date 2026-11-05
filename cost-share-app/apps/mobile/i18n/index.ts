@@ -26,6 +26,8 @@ import {
     mobileI18nResources,
     type MobileI18nLocaleCode,
 } from './localeConfig';
+import { getXxLongTranslation, XX_LONG_LOCALE_CODE } from './e2ePseudoLocale';
+import { E2E_XX_LONG_LOCALE_ENABLED } from '../lib/featureFlags';
 import { useAppStore } from '../store';
 
 type SupportedLanguage = Language;
@@ -114,6 +116,19 @@ const i18nInitOptions = {
 
 let initPromise: Promise<void> | null = null;
 
+function registerE2ePseudoLocaleBundle(): void {
+    if (!E2E_XX_LONG_LOCALE_ENABLED || !i18n.isInitialized) {
+        return;
+    }
+    i18n.addResourceBundle(
+        XX_LONG_LOCALE_CODE,
+        'translation',
+        getXxLongTranslation(),
+        true,
+        true,
+    );
+}
+
 async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
     if (!i18n.isInitialized) {
         if (!initPromise) {
@@ -124,12 +139,14 @@ async function ensureI18nReady(language: SupportedLanguage): Promise<void> {
                     resources,
                     lng: language,
                 });
+                registerE2ePseudoLocaleBundle();
             })();
         }
         await initPromise;
         return;
     }
 
+    registerE2ePseudoLocaleBundle();
     await ensureMobileLocaleBundle(language);
     if (i18n.language !== language) {
         await i18n.changeLanguage(language);
@@ -209,8 +226,20 @@ export const initializeLanguage = async (): Promise<void> => {
  * Change language and update RTL settings
  * Saves preference to AsyncStorage for persistence
  */
-export const changeLanguage = async (language: SupportedLanguage): Promise<void> => {
+export const changeLanguage = async (
+    language: SupportedLanguage | typeof XX_LONG_LOCALE_CODE,
+): Promise<void> => {
     try {
+        if (language === XX_LONG_LOCALE_CODE) {
+            if (!E2E_XX_LONG_LOCALE_ENABLED) {
+                throw new Error('xx-long locale is not enabled');
+            }
+            await ensureI18nReady(DEFAULT_LANGUAGE);
+            registerE2ePseudoLocaleBundle();
+            await i18n.changeLanguage(XX_LONG_LOCALE_CODE);
+            useAppStore.getState().setLanguage(DEFAULT_LANGUAGE);
+            return;
+        }
         await ensureI18nReady(language);
         await i18n.changeLanguage(language);
         await AsyncStorage.setItem(LANGUAGE_KEY, language);

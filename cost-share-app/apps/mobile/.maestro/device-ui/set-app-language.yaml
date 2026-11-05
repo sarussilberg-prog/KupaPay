@@ -1,0 +1,59 @@
+appId: com.kupapay.mobile
+---
+- tapOn:
+    id: tab-Profile
+- extendedWaitUntil:
+    visible:
+      id: profile-settings-button
+    timeout: 60000
+- tapOn:
+    id: profile-settings-button
+- extendedWaitUntil:
+    visible:
+      id: settings-language-row
+    timeout: 30000
+- tapOn:
+    id: settings-language-row
+- extendedWaitUntil:
+    visible:
+      id: language-sheet
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: language-option-${APP_LANG}
+    direction: DOWN
+    timeout: 45000
+- extendedWaitUntil:
+    visible:
+      id: language-option-${APP_LANG}
+    timeout: 30000
+- tapOn:
+    id: language-option-${APP_LANG}
+- waitForAnimationToEnd:
+    timeout: 20000
+- extendedWaitUntil:
+    notVisible:
+      id: language-sheet
+    timeout: 30000
+# Hebrew/RTL may reload straight to Groups; xx-long stays on Settings (no reload) — one back to Main tabs.
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 120000
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: groups-list-title
+    commands:
+      - back
+      - extendedWaitUntil:
+          visible:
+            id: tabbar-row
+          timeout: 120000
+      - tapOn:
+          id: tab-Groups
+      - extendedWaitUntil:
+          visible:
+            id: groups-list-title
+          timeout: 120000

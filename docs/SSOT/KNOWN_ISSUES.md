@@ -68,6 +68,7 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 | KI-033 | resolved | supabase | **`expense-receipts` Storage bucket is public read** | Fixed 2026-10-11: private bucket + member SELECT RLS (`20261011011000`), DB URL→path migration, signed URLs in mobile + `apps/web/utils/expenseReceiptSignedUrl.ts`. Guard test: `apps/mobile/__tests__/guards/expenseReceiptsMigration.guard.test.ts`. |
 | KI-034 | partial | supabase | **Account deletion: verify `auth.refresh_tokens.user_id` type on prod** | Session revocation covered by `delete_my_account.test.sql` + [DELETE_ACCOUNT_SESSION_REVOCATION.md](./DELETE_ACCOUNT_SESSION_REVOCATION.md). **Remaining:** run prod `information_schema` check after deploy. |
 | KI-036 | in_progress | web | **Prod marketing `/login` white screen — `/_expo/*` bundles 404** | `isMarketingOwnedPath` treated `.js`/`.css` as marketing static before app prefixes; middleware skipped proxy. Fix: app-owned paths first ([#701](https://github.com/sarussilberg-prog/KupaPay/issues/701)). |
+| KI-037 | resolved | mobile | **iOS prod Activity screen crash (Sentry COPAY-MOBILE-PROD-10)** | `EXC_BAD_ACCESS` in `ObjCTurboModule::performVoidMethodInvocation` when `expo-notifications` `setBadgeCountAsync(0)` runs on Activity focus after `mark_activity_seen` (release 1.2.0+7). App fix: permission-gated badge clear, deferred via `InteractionManager`, swallowed native errors (`lib/safeNativeModule.ts`, `lib/activityScreenFocus.ts`). Upstream RN class: [facebook/react-native#56265](https://github.com/facebook/react-native/pull/56265) (re-throw NSException instead of `convertNSExceptionToJSError` on wrong thread). Expo badge API note: [expo/expo#39009](https://github.com/expo/expo/pull/39009). Fixes [#698](https://github.com/sarussilberg-prog/KupaPay/issues/698). |
 
 ---
 
@@ -81,6 +82,9 @@ When a spec defers a feature by choice, log it in **TECHNICAL_DEBT.md**. When so
 | KI-023 | resolved | mobile | **`console.log` in `initializeLanguage`** | Fixed 2026-06-02: wrapped both calls (`i18n/index.ts:118,136`) in `if (__DEV__)`. |
 | KI-024 | accepted | mobile | **No “replay onboarding” in Settings** | Documented as not v1 in onboarding spec. |
 | KI-025 | open | mobile | **RTL violations: `marginLeft`/`marginRight` and `textAlign:'left'` hardcoded in 10 component sites** | `components/CurrencyPicker.tsx:123`, `components/UnequalSplitPanel.tsx:169`, `components/AddMembersSheet.tsx:251`, `components/groupDetail/MemberStack.tsx:68`, `components/expenseV2/StackedAvatarGroup.tsx:25`, `components/FeedRowCard.tsx` (4×), `components/expenseV2/MemberPickerPopup.tsx`. Use `marginStart`/`marginEnd` and conditional `textAlign` (LegalDocumentSheet.tsx pattern). |
+| KI-038 | resolved | mobile | **Inconsistent Bit/PayBox icons in settle-up sheet** | Unified `PaymentAppLogo` monogram tiles (56×56, radius 14, light/dark brand colors). Spec: `docs/superpowers/specs/2026-11-02-payment-app-monogram-tiles.md`. Fixes [#700](https://github.com/sarussilberg-prog/KupaPay/issues/700). |
+| KI-039 | resolved | supabase | **RevenueCat webhook entitlement edge cases (sandbox replay, revoke semantics, trip-pass upsert)** | Production webhook could apply sandbox events, treat all cancellations as immediate revokes, and miss ordered/stale handling. Hardened `revenuecat-webhook` edge handler + `handle_revenuecat_webhook` RPC (migration `20261102103000`). Deno/SQL regression tests. PR [#712](https://github.com/sarussilberg-prog/KupaPay/pull/712). |
+| KI-040 | resolved | supabase | **Pro launch follow-ups: export gate, support RPC, profile email sync** | PDF export relied on client-only Pro checks; support form allowed open `INSERT`; `profiles.email` was client-writable. Addressed in migration `20261102110000` + mobile/web callers. PR [#714](https://github.com/sarussilberg-prog/KupaPay/pull/714). |
 | KI-026 | open | mobile | **`toLocaleDateString()` called without `locale` argument** | `screens/expenses/ExpenseDetailScreen.tsx` and `screens/admin/AdminDeletedUsersScreen.tsx` — dates render in OS locale, not app language. Pass `i18n.language` (or `he-IL`/`en-US`). Reference correct pattern: `screens/balances/SettleUpListScreen.tsx:285`. |
 | ~~KI-027~~ | retracted | supabase | ~~Prod auth: leaked password protection disabled~~ | **Retracted 2026-06-02:** N/A — the app uses Google OAuth exclusively (`auth.service.ts` only calls `signInWithOAuth` with provider `google`; no `signInWithPassword`/`signUpWithPassword` anywhere). Supabase advisor flags it generically but there are no passwords to protect. Revisit only if email/password sign-in is ever introduced. |
 | KI-028 | resolved | supabase | ~~iOS AASA appID malformed: `.com.kupapay.mobile`~~ | Fixed via #42 (`fix(ios): correct AASA + appleTeamId to real Apple Team HVW3H3DLRB`). Verified 2026-07-09: `https://kupa-pay.com/.well-known/apple-app-site-association` now returns `appID: "HVW3H3DLRB.com.kupapay.mobile"`. |
@@ -116,6 +120,10 @@ Use alongside automated tests before store / production cutover:
 | KI-011 | 2026-10-27 | Toast inside `WebFrame` for auth + logged-out trees (`App.tsx`); guard `__tests__/App.webFrameToast.test.ts`. |
 | KI-012 | 2026-10-27 | `WebAlertHost` backdrop runs cancel `onPress` (`dismissViaCancel`); `__tests__/components/WebAlertHost.test.tsx`. |
 | KI-013 | 2026-10-27 | EN plural parity with HE; guard `__tests__/i18n/enPluralLocaleParity.test.ts`. |
+| KI-037 | 2026-11-02 | Activity focus badge guard + focus effect tests; fixes #698. |
+| KI-038 | 2026-11-02 | Payment app monogram tiles; fixes #700. |
+| KI-039 | 2026-11-02 | RevenueCat webhook hardening (#712). |
+| KI-040 | 2026-11-02 | Pro launch security mediums (#714). |
 
 ---
 
@@ -132,3 +140,5 @@ Use alongside automated tests before store / production cutover:
 | 2026-10-11 | Security/CI pass: resolved KI-015, KI-019, KI-031, KI-032; partial KI-014; added KI-033–034. |
 | 2026-10-16 | Infra/test board pass: KI-010 partial — AuthenticatedAppGate + post-login paths on dev (#104). |
 | 2026-10-27 | Resolved KI-011 (WebFrame toast), KI-012 (WebAlertHost cancel), KI-013 (EN plural keys). |
+| 2026-11-02 | Resolved KI-039 (RevenueCat webhook sandbox filter, revoke/cancel semantics, event ordering). |
+| 2026-11-02 | Resolved KI-040 (Pro export RPC gate, support submit RPC, profile email sync). |

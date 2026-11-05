@@ -107,6 +107,8 @@ Balance formula (authoritative): see `CalculationsService` and [DATABASE_ARCHITE
 | REQ-GROW-03 | ✅ | Splitwise CSV import | Upload Splitwise group export; preview + map members; import expenses (amount splits, currencies, dates); skipped-row report; iOS/Android/Expo web + landing mention (#396) |
 | REQ-GROW-04 | ✅ | Splitwise alternative SEO pages | Per-locale `/splitwise-alternative` on marketing web: honest feature table (dated), SEO metadata + sitemap, footer link, 7 locales + RTL (#415) |
 | REQ-GROW-05 | ✅ | Ambassador program | Web `/ambassadors` application (7 locales + RTL); manual admin approve → `profiles.pro_until` + unique `AMB-*` code; `?ref=` attribution on web/mobile (#420) |
+| REQ-GROW-06 | ✅ | Referral Pro reward | Friend or group invite attribution; qualifying expense in a 2+ member group; referrer receives one stacked free Pro month (max 12/year) via `profiles.pro_until` + optional RevenueCat promotional sync |
+| REQ-MON-01 | ✅ | Pro subscription lifecycle | RevenueCat webhook: cancel-at-period-end keeps `pro_until` until expiration; refund/support cancel revokes immediately; EXPIRATION clears only subscription time when bonus Pro remains; My Subscription shows renew vs cancel-until date and manage/refund copy (7 locales) |
 | REQ-NFR-03 | ✅ | Consistent domain types | `@cost-share/shared` types and mappers |
 | REQ-NFR-04 | ✅ | Row Level Security (Supabase) | RLS enabled; mobile uses anon key + user JWT |
 | REQ-NFR-05 | ⬜ | Offline support | Local queue + sync without screen refactor |

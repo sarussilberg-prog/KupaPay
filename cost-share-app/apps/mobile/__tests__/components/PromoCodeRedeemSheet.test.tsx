@@ -2,13 +2,10 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 import { PromoCodeRedeemSheet } from '../../components/pro/PromoCodeRedeemSheet';
+import { RtlLayoutProvider } from '../../hooks/useRtlLayout';
 
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }),
-}));
-
-jest.mock('../../hooks/useRtlLayout', () => ({
-    useRtlLayout: () => false,
 }));
 
 jest.mock('../../components/AppText', () => {
@@ -49,7 +46,9 @@ describe('PromoCodeRedeemSheet', () => {
         const prev = Platform.OS;
         Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
         const { getByTestId, queryByTestId } = render(
-            <PromoCodeRedeemSheet visible onClose={jest.fn()} />,
+            <RtlLayoutProvider>
+                <PromoCodeRedeemSheet visible onClose={jest.fn()} />
+            </RtlLayoutProvider>,
         );
         expect(getByTestId('promo-code-input')).toBeTruthy();
         expect(queryByTestId('promo-store-ios-redeem')).toBeNull();
@@ -60,7 +59,9 @@ describe('PromoCodeRedeemSheet', () => {
     it('calls redeem on save', async () => {
         const onClose = jest.fn();
         const { getByTestId, getByText } = render(
-            <PromoCodeRedeemSheet visible onClose={onClose} />,
+            <RtlLayoutProvider>
+                <PromoCodeRedeemSheet visible onClose={onClose} />
+            </RtlLayoutProvider>,
         );
         fireEvent.changeText(getByTestId('promo-code-input'), 'TEST-CODE');
         fireEvent.press(getByText('common.save'));

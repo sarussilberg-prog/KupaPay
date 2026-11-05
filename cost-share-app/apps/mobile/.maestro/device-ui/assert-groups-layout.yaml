@@ -1,0 +1,13 @@
+appId: com.kupapay.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 60000
+- assertVisible:
+    id: groups-create-btn-label
+- assertVisible:
+    id: tabbar-row
+- assertVisible:
+    id: groups-list-virtualized
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_01_groups_list

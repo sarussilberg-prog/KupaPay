@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheetShell } from '../BottomSheetShell';
 import { Text } from '../AppText';
 import { Button } from '../Button';
-import { useRtlLayout } from '../../hooks/useRtlLayout';
+import { resolveAutoTextInputStyle, useRtlLayout } from '../../hooks/useRtlLayout';
 import { redeemKupaPayPromoCode, type PromoRedeemErrorCode } from '../../services/promoCode.service';
 import { presentOfferCodeRedemption } from '../../services/purchases.service';
 import { googlePlayOfferRedeemUrl, offerRedemptionTarget } from '../../lib/storeOfferRedemption';
@@ -89,7 +89,7 @@ export function PromoCodeRedeemSheet({ visible, onClose, onRedeemSuccess }: Read
                     editable={!busy}
                     testID="promo-code-input"
                     className="border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 bg-white"
-                    style={{ writingDirection: isRtl ? 'rtl' : 'ltr', textAlign: isRtl ? 'right' : 'left' }}
+                    style={resolveAutoTextInputStyle(isRtl)}
                 />
                 {busy ? (
                     <Text className="text-xs text-gray-500 text-center">{t('pro.promoCode.redeeming')}</Text>

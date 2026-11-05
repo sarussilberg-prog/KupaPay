@@ -1,0 +1,439 @@
+# Maestro device UI — build once, tiered flows (smoke on dev PRs, full on main / manual).
+name: Mobile device UI (Maestro)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'smoke (dev default) or full (store release gate)'
+        type: choice
+        options: [smoke, full]
+        default: full
+  push:
+    branches: [main]
+    paths:
+      - 'cost-share-app/apps/mobile/**'
+      - 'cost-share-app/packages/shared/**'
+      - 'cost-share-app/scripts/seed-e2e-dev-user.ts'
+      - 'cost-share-app/scripts/lib/maestro-*.mjs'
+      - 'cost-share-app/scripts/lib/launch-smoke-ci-plan.mjs'
+      - 'cost-share-app/apps/mobile/scripts/ci-release-launch-smoke.sh'
+      - 'cost-share-app/apps/mobile/scripts/ci-maestro-device-ui.sh'
+      - '.github/workflows/mobile-device-ui-maestro.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches: [dev, main, 'cursor/**']
+    paths:
+      - 'cost-share-app/apps/mobile/**'
+      - 'cost-share-app/packages/shared/**'
+      - 'cost-share-app/scripts/seed-e2e-dev-user.ts'
+      - 'cost-share-app/scripts/lib/maestro-*.mjs'
+      - 'cost-share-app/scripts/lib/launch-smoke-ci-plan.mjs'
+      - 'cost-share-app/apps/mobile/scripts/ci-release-launch-smoke.sh'
+      - 'cost-share-app/apps/mobile/scripts/ci-maestro-device-ui.sh'
+      - '.github/workflows/mobile-device-ui-maestro.yml'
+
+concurrency:
+  # Do not cancel in-progress simulator runs on every push (macOS queue is expensive).
+  group: maestro-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Maestro CI plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      tier: ${{ steps.plan.outputs.tier }}
+      run_ios: ${{ steps.plan.outputs.run_ios }}
+      run_android: ${{ steps.plan.outputs.run_android }}
+      js_only: ${{ steps.plan.outputs.js_only }}
+      skip_native_rebuild: ${{ steps.plan.outputs.skip_native_rebuild }}
+      native_fingerprint: ${{ steps.plan.outputs.native_fingerprint }}
+      run_launch_smoke: ${{ steps.launch_smoke_plan.outputs.run_launch_smoke }}
+      run_launch_smoke_ios: ${{ steps.launch_smoke_plan.outputs.run_launch_smoke_ios }}
+      run_launch_smoke_android: ${{ steps.launch_smoke_plan.outputs.run_launch_smoke_android }}
+      blocking: ${{ steps.blocking.outputs.blocking }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Install dependencies (plan)
+        working-directory: cost-share-app
+        run: npm ci
+      - name: Changed files
+        id: changed
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.base_ref }}"
+            git fetch origin "$base"
+            merge_base="$(git merge-base "origin/${base}" HEAD)"
+            git diff --name-only "${merge_base}...HEAD" > /tmp/changed.txt
+          else
+            git show --name-only --pretty=format: HEAD > /tmp/changed.txt || true
+          fi
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          cat /tmp/changed.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+      - name: Refresh PR labels (event payload can be stale on synchronize)
+        if: github.event_name == 'pull_request'
+        id: pr_labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          labels="$(gh pr view "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --json labels -q '[.labels[].name] | join(",")')"
+          echo "labels=$labels" >> "$GITHUB_OUTPUT"
+      - name: Compute plan
+        id: plan
+        working-directory: cost-share-app
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          PR_LABELS: ${{ steps.pr_labels.outputs.labels || join(github.event.pull_request.labels.*.name, ',') }}
+          MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier || '' }}
+          MAESTRO_WORKFLOW_DISPATCH_FULL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier == 'full' && 'true' || 'false' }}
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+        run: |
+          node scripts/lib/maestro-ci-plan.mjs | tee /tmp/maestro-plan.json
+          jq -c '.flowRuns' /tmp/maestro-plan.json > /tmp/maestro-flow-plan.json
+      - name: Release launch smoke plan
+        id: launch_smoke_plan
+        working-directory: cost-share-app
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'dev' }}
+          GITHUB_REF: ${{ github.ref }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          MAESTRO_MANUAL_TIER: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tier || '' }}
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+        run: |
+          node scripts/lib/launch-smoke-ci-plan.mjs | tee /tmp/launch-smoke-plan.json
+          echo "Launch smoke plan: $(cat /tmp/launch-smoke-plan.json)"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: maestro-flow-plan
+          path: /tmp/maestro-flow-plan.json
+          retention-days: 1
+      - name: Blocking gate flag
+        id: blocking
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "blocking=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.tier }}" == "full" ]]; then
+            echo "blocking=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "main" ]]; then
+            echo "blocking=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "blocking=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-ios:
+    name: Maestro build (iOS)
+    needs: plan
+    if: needs.plan.outputs.run_ios == 'true' || needs.plan.outputs.run_launch_smoke_ios == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
+      MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
+      MAESTRO_NATIVE_FINGERPRINT: ${{ needs.plan.outputs.native_fingerprint }}
+      MAESTRO_IOS_APP_STAGING_DIR: /tmp/maestro-ios-app
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/mobile/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: maestro-pods-${{ runner.os }}-${{ hashFiles('cost-share-app/apps/mobile/ios/Podfile.lock', 'cost-share-app/apps/mobile/Podfile') }}
+          restore-keys: |
+            maestro-pods-${{ runner.os }}-
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: maestro-derived-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-derived-
+      - name: Restore cached iOS app bundle
+        uses: actions/cache/restore@v4
+        id: ios_app_cache
+        with:
+          path: /tmp/maestro-ios-app
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v3
+          restore-keys: |
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v3
+            maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-real-ui-v1
+            maestro-ios-app-
+      - name: Install dependencies
+        run: npm ci
+      - name: Build iOS simulator app
+        if: steps.ios_app_cache.outputs.cache-hit != 'true'
+        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh ios build
+      - name: Save iOS app bundle cache
+        uses: actions/cache/save@v4
+        if: always() && steps.ios_app_cache.outputs.cache-hit != 'true'
+        with:
+          path: /tmp/maestro-ios-app
+          key: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}-e2e-dev-supabase-v3
+      - uses: actions/upload-artifact@v7
+        with:
+          name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          path: /tmp/maestro-ios-app
+          if-no-files-found: error
+          retention-days: 5
+
+  test-ios:
+    name: Mobile device UI (Maestro iOS)
+    needs: [plan, build-ios]
+    if: needs.plan.outputs.run_ios == 'true'
+    continue-on-error: ${{ needs.plan.outputs.blocking != 'true' }}
+    runs-on: macos-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
+      MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          path: /tmp/maestro-ios-app
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-flow-plan
+      - name: Install dependencies
+        run: npm ci
+      - name: Maestro flows (iOS)
+        run: |
+          PLAN="${GITHUB_WORKSPACE}/maestro-flow-plan.json"
+          if [[ ! -f "$PLAN" ]]; then PLAN="${GITHUB_WORKSPACE}/cost-share-app/maestro-flow-plan.json"; fi
+          export MAESTRO_FLOW_PLAN_JSON="$(cat "$PLAN")"
+          bash apps/mobile/scripts/ci-maestro-device-ui.sh ios test
+      - name: Groups layout diagnostics (en/he)
+        if: always()
+        env:
+          LAYOUT_DIAG_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/groups-layout-diagnostics
+        run: bash apps/mobile/scripts/ci-groups-layout-diagnostics.sh ios test
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: maestro-device-ui-ios-${{ github.run_id }}
+          path: |
+            artifacts/maestro-device-ui/screenshots
+            artifacts/groups-layout-diagnostics/json
+            artifacts/groups-layout-diagnostics/logs
+            artifacts/groups-layout-diagnostics/debug
+            artifacts/groups-layout-diagnostics/app-env-audit.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+  build-android:
+    name: Maestro build (Android)
+    needs: plan
+    if: needs.plan.outputs.run_android == 'true' || needs.plan.outputs.run_launch_smoke_android == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      SENTRY_DISABLE_AUTO_UPLOAD: 'true'
+      MAESTRO_SKIP_NATIVE_REBUILD: ${{ needs.plan.outputs.skip_native_rebuild }}
+      MAESTRO_ANDROID_APK_STAGING_DIR: /tmp/maestro-android-apk
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            apps/mobile/android/.gradle
+          key: maestro-gradle-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-gradle-
+      - name: Restore cached APK
+        uses: actions/cache/restore@v4
+        id: android_apk_cache
+        with:
+          path: /tmp/maestro-android-apk
+          key: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          restore-keys: maestro-android-apk-
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Android release APK
+        if: steps.android_apk_cache.outputs.cache-hit != 'true'
+        run: bash apps/mobile/scripts/ci-maestro-device-ui.sh android build
+      - name: Save Android APK cache
+        uses: actions/cache/save@v4
+        if: always() && steps.android_apk_cache.outputs.cache-hit != 'true'
+        with:
+          path: /tmp/maestro-android-apk
+          key: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          path: /tmp/maestro-android-apk
+          if-no-files-found: error
+          retention-days: 5
+
+  test-android:
+    name: Mobile device UI (Maestro Android)
+    needs: [plan, build-android]
+    if: needs.plan.outputs.run_android == 'true'
+    continue-on-error: ${{ needs.plan.outputs.blocking != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      EXPO_PUBLIC_E2E_MAESTRO_AUTH: 'true'
+      MAESTRO_ANDROID_APK_CACHE_DIR: /tmp/maestro-android-apk
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cost-share-app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          path: /tmp/maestro-android-apk
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-flow-plan
+      - name: Install dependencies
+        working-directory: cost-share-app
+        run: npm ci
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Maestro flows (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            PLAN="${GITHUB_WORKSPACE}/maestro-flow-plan.json"
+            if [[ ! -f "$PLAN" ]]; then PLAN="${GITHUB_WORKSPACE}/cost-share-app/maestro-flow-plan.json"; fi
+            export MAESTRO_FLOW_PLAN_JSON="$(cat "$PLAN")"
+            export MAESTRO_ANDROID_APK_CACHE_DIR="/tmp/maestro-android-apk"
+            cd cost-share-app
+            bash apps/mobile/scripts/ci-maestro-device-ui.sh android test
+
+  launch-smoke-ios:
+    name: Release launch smoke (iOS)
+    needs: [plan, build-ios]
+    if: needs.plan.outputs.run_launch_smoke_ios == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: cost-share-app
+    env:
+      MAESTRO_IOS_APP_CACHE_DIR: /tmp/maestro-ios-app
+      IOS_SIMULATOR_DEVICES: 'iPhone 16'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-ios-app-${{ needs.plan.outputs.native_fingerprint }}
+          path: /tmp/maestro-ios-app
+      - name: Launch smoke (iOS sim)
+        run: bash apps/mobile/scripts/ci-release-launch-smoke.sh ios
+
+  launch-smoke-android:
+    name: Release launch smoke (Android)
+    needs: [plan, build-android]
+    if: needs.plan.outputs.run_launch_smoke_android == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MAESTRO_ANDROID_APK_CACHE_DIR: /tmp/maestro-android-apk
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v8
+        with:
+          name: maestro-android-apk-${{ needs.plan.outputs.native_fingerprint }}
+          path: /tmp/maestro-android-apk
+      - name: Launch smoke (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            cd cost-share-app
+            bash apps/mobile/scripts/ci-release-launch-smoke.sh android

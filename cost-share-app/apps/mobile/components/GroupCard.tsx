@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useLayoutWindowWidth } from '../hooks/useLayoutWindowWidth';
 import { useNavigation } from '@react-navigation/native';
-import { useRtlLayout, rtlRowStyle, rtlTextClassName } from '../hooks/useRtlLayout';
+import { useRtlLayout, rtlRowStyle, resolveAutoTextStyle } from '../hooks/useRtlLayout';
 import { useTranslation } from 'react-i18next';
 import { GroupRollup, GroupWithMembers, type RatesFromBase } from '@cost-share/shared';
 import { AppIcon } from './AppIcon';
@@ -24,7 +24,7 @@ import { HighlightedText } from './HighlightedText';
 import { UnreadBadge } from './UnreadBadge';
 import { IconLabel } from './primitives/IconLabel';
 import { GroupCardMetaLine } from './GroupCardMetaLine';
-import { ListRow } from './primitives/ListRow';
+import { AppPressable } from './AppPressable';
 import { colors } from '../theme';
 import { shareGroupBalanceLink, shareGroupInvite } from '../services/invite.service';
 import {
@@ -44,10 +44,11 @@ import {
     GROUP_CARD_MENU_ICON,
     GROUP_CARD_PAD,
     GROUP_CARD_ROW_GAP,
-    GROUP_CARD_STACK_GAP,
-    GROUP_CARD_TEXT_GAP,
-    resolveGroupCardUsesStackedBalance,
+    groupCardTextColumnStyle,
 } from './groupCardLayout';
+import { isE2eLayoutProbeEnabled, isWidthAtLeastFullBleed } from '../lib/e2eLayoutProbes';
+import { layoutProbeOnLayout } from './diagnostics/layoutProbeHandlers';
+import { groupCardInnerRowStyle, groupCardShellStyle } from '../lib/nativeRowLayoutStyle';
 
 interface GroupCardProps {
     group: GroupWithMembers;
@@ -60,6 +61,8 @@ interface GroupCardProps {
     displayCurrency?: string;
     ratesFromBase?: RatesFromBase;
     onPress: (groupId: string) => void;
+    /** First list card only — publishes layout frames for Maestro diagnostics. */
+    layoutProbePrimary?: boolean;
 }
 
 function GroupCardBase({
@@ -73,6 +76,7 @@ function GroupCardBase({
     displayCurrency,
     ratesFromBase,
     onPress,
+    layoutProbePrimary = false,
 }: GroupCardProps) {
     const { t, i18n } = useTranslation();
     const isRtl = useRtlLayout();
@@ -83,7 +87,7 @@ function GroupCardBase({
     const [menuOpen, setMenuOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const windowWidth = useLayoutWindowWidth();
-    const stackBalanceChip = resolveGroupCardUsesStackedBalance(windowWidth);
+    const [fullWidthProbeOk, setFullWidthProbeOk] = useState(false);
     const balanceColumnStyle = groupCardBalanceColumnStyle(windowWidth);
     const memberCount = group.members?.length ?? 0;
     const hasMatches = Boolean(matchedMemberNames && matchedMemberNames.length > 0);
@@ -202,11 +206,12 @@ function GroupCardBase({
     }, [navigation, group.id]);
 
     const cardClass = isArchived
-        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-2xl mb-2 border border-dashed border-gray-300 dark:border-gray-600'
-        : 'bg-white dark:bg-gray-800 rounded-2xl mb-2 border border-gray-100 dark:border-gray-700';
+        ? 'bg-slate-50 dark:bg-gray-800/60 rounded-xl mb-1.5 border border-dashed border-gray-300 dark:border-gray-600'
+        : 'bg-white dark:bg-gray-800 rounded-xl mb-1.5 border border-gray-100 dark:border-gray-700';
 
     const balanceChipNode = (
         <BalanceChip
+            compact
             rollup={rollup}
             defaultCurrency={group.defaultCurrency}
             displayCurrency={displayCurrency}
@@ -233,57 +238,114 @@ function GroupCardBase({
               });
 
     const titleClassName = isArchived
-        ? 'text-[17px] font-semibold text-gray-600 dark:text-gray-300 leading-5'
-        : 'text-[17px] font-semibold text-gray-900 dark:text-gray-50 leading-5';
-    const titleAlignClass = rtlTextClassName(isRtl, titleClassName);
+        ? 'text-[15px] font-bold text-gray-600 dark:text-gray-300 leading-5'
+        : 'text-[15px] font-bold text-gray-900 dark:text-gray-50 leading-5';
+    const titleAutoStyle = {
+        ...resolveAutoTextStyle(isRtl, titleClassName),
+        textAlign: 'auto' as const,
+    };
 
     return (
         <>
             <View
+                testID={
+                    layoutProbePrimary ? 'group-card-probe-shell' : `group-card-shell-${group.id}`
+                }
                 className={cardClass}
+                onLayout={
+                    isE2eLayoutProbeEnabled()
+                        ? (e) => {
+                              if (layoutProbePrimary) {
+                                  layoutProbeOnLayout('group-card-shell')?.(e);
+                              }
+                              setFullWidthProbeOk(
+                                  isWidthAtLeastFullBleed(e.nativeEvent.layout.width, windowWidth),
+                              );
+                          }
+                        : layoutProbePrimary
+                          ? layoutProbeOnLayout('group-card-shell')
+                          : undefined
+                }
                 style={[
-                    rtlRowStyle(isRtl),
+                    groupCardShellStyle(isRtl),
                     {
-                        alignItems: 'center',
                         padding: GROUP_CARD_PAD,
-                        gap: GROUP_CARD_STACK_GAP,
+                        minHeight: 64,
                     },
                     cardShadow,
                 ]}
             >
-                <ListRow
-                    onPress={() => onPress(group.id)}
-                    testID={`group-card-${group.id}`}
-                    style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        gap: GROUP_CARD_ROW_GAP,
-                        minWidth: 0,
-                    }}
-                >
-                    <GroupAvatar
-                        imageUrl={group.imageUrl}
-                        groupType={group.groupType}
-                        name={group.name}
-                        size="sm"
-                        style={{ flexShrink: 0 }}
+                {isE2eLayoutProbeEnabled() && fullWidthProbeOk ? (
+                    <View
+                        testID="group-card-full-width-ok"
+                        accessibilityElementsHidden
+                        importantForAccessibility="no-hide-descendants"
+                        style={{ width: 0, height: 0, opacity: 0 }}
                     />
+                ) : null}
+                <AppPressable
+                    onPress={() => onPress(group.id)}
+                    testID={layoutProbePrimary ? 'group-card-probe-row' : `group-card-${group.id}`}
+                    style={{ width: '100%', alignSelf: 'stretch' }}
+                >
+                    <View
+                        testID={
+                            layoutProbePrimary
+                                ? 'group-card-probe-row-inner'
+                                : `group-card-row-${group.id}`
+                        }
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-row') : undefined
+                        }
+                        style={[
+                            groupCardInnerRowStyle(isRtl),
+                            {
+                                gap: GROUP_CARD_ROW_GAP,
+                                minHeight: 40,
+                            },
+                        ]}
+                    >
+                    <View
+                        testID={layoutProbePrimary ? 'group-card-probe-avatar' : undefined}
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-avatar') : undefined
+                        }
+                        style={{ flexShrink: 0 }}
+                    >
+                        <GroupAvatar
+                            imageUrl={group.imageUrl}
+                            groupType={group.groupType}
+                            name={group.name}
+                            size="xs"
+                        />
+                    </View>
 
                     <View
-                        style={{
-                            flex: 1,
-                            minWidth: 0,
-                            gap: GROUP_CARD_TEXT_GAP,
-                            justifyContent: 'center',
-                        }}
+                        testID={layoutProbePrimary ? 'group-card-probe-name' : undefined}
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-name') : undefined
+                        }
+                        style={groupCardTextColumnStyle(isRtl)}
                     >
-                        <View style={[rtlRowStyle(isRtl), { alignItems: 'center', gap: 8, minWidth: 0 }]}>
-                            <View style={{ flex: 1, minWidth: 0 }}>
+                        <View
+                            style={[
+                                rtlRowStyle(isRtl),
+                                {
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    minWidth: 0,
+                                    alignSelf: 'stretch',
+                                    width: '100%',
+                                },
+                            ]}
+                        >
+                            <View style={{ flex: 1, minWidth: 0, alignSelf: 'stretch' }}>
                                 <HighlightedText
-                                    className={`${titleClassName} ${titleAlignClass}`}
+                                    className={titleClassName}
+                                    style={titleAutoStyle}
                                     text={group.name}
                                     query={searchQuery}
-                                    numberOfLines={2}
+                                    numberOfLines={1}
                                     ellipsizeMode="tail"
                                 />
                             </View>
@@ -304,58 +366,71 @@ function GroupCardBase({
                         </View>
 
                         <GroupCardMetaLine
+                            compact
                             group={group}
                             memberCount={memberCount}
                             language={i18n.language}
+                            testID={
+                                layoutProbePrimary
+                                    ? 'group-card-probe-member-count'
+                                    : 'group-card-meta'
+                            }
+                            onLayout={
+                                layoutProbePrimary
+                                    ? layoutProbeOnLayout('group-card-member-count')
+                                    : undefined
+                            }
                         />
-                        {hasMatches && (
+                        {hasMatches ? (
                             <IconLabel
                                 label={t('groups.card.matchedMembers', {
                                     names: (matchedMemberNames ?? []).join(', '),
                                 })}
                                 tone="default"
                             />
-                        )}
-                        {stackBalanceChip ? (
-                            <View
-                                testID="group-card-balance-column"
-                                style={{
-                                    ...balanceColumnStyle,
-                                    alignSelf: isRtl ? 'flex-start' : 'flex-end',
-                                    marginTop: 2,
-                                }}
-                            >
-                                {balanceChipNode}
-                            </View>
                         ) : null}
                     </View>
 
-                    {!stackBalanceChip ? (
-                        <View testID="group-card-balance-column" style={balanceColumnStyle}>
-                            {balanceChipNode}
-                        </View>
-                    ) : null}
-                </ListRow>
+                    <View
+                        testID={
+                            layoutProbePrimary
+                                ? 'group-card-probe-balance'
+                                : 'group-card-balance-column'
+                        }
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-balance') : undefined
+                        }
+                        style={balanceColumnStyle}
+                    >
+                        {balanceChipNode}
+                    </View>
 
-                <TouchableOpacity
-                    onPress={() => setMenuOpen(true)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('groups.menu.title')}
-                    testID={`group-card-menu-${group.id}`}
-                    style={{
-                        width: GROUP_CARD_MENU_HIT,
-                        height: GROUP_CARD_MENU_HIT,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                    }}
-                >
-                    <AppIcon
-                        name="ellipsis-vertical"
-                        size={GROUP_CARD_MENU_ICON}
-                        color={colors.gray400}
-                    />
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setMenuOpen(true)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('groups.menu.title')}
+                        testID={
+                            layoutProbePrimary ? 'group-card-probe-menu' : `group-card-menu-${group.id}`
+                        }
+                        onLayout={
+                            layoutProbePrimary ? layoutProbeOnLayout('group-card-menu') : undefined
+                        }
+                        style={{
+                            width: GROUP_CARD_MENU_HIT,
+                            height: GROUP_CARD_MENU_HIT,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <AppIcon
+                            name="ellipsis-vertical"
+                            size={GROUP_CARD_MENU_ICON}
+                            color={colors.gray400}
+                        />
+                    </TouchableOpacity>
+                    </View>
+                </AppPressable>
             </View>
 
             <Modal

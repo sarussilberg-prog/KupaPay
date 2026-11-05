@@ -26,9 +26,9 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: npm
@@ -38,7 +38,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Pin Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
           version: ${{ env.SUPABASE_CLI_VERSION }}
 
@@ -51,7 +51,7 @@ jobs:
           supabase --version
 
       - name: Cache Supabase Postgres Docker image
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         id: pg-image-cache
         with:
           path: /tmp/supabase-postgres-image.tar

@@ -41,7 +41,7 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # need full history to diff against github.event.before
 
@@ -59,8 +59,8 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
       - name: Run Step 1 probes (docs/PROD_MIGRATION_REPAIR.md), read-only
@@ -79,7 +79,7 @@ jobs:
           SELECT jobname, schedule FROM cron.job WHERE jobname = 'pro-trial-reminder-dispatch-daily';
           SELECT version, count(*) FROM supabase_migrations.schema_migrations GROUP BY version HAVING count(*) > 1;
           SELECT version, name FROM supabase_migrations.schema_migrations WHERE version >= '20261016300000' ORDER BY version;
-          SELECT r AS role, has_function_privilege(r, 'public.handle_revenuecat_webhook(text,uuid,text,text,timestamptz,timestamptz,uuid,boolean,boolean,boolean)', 'EXECUTE') AS can_exec
+          SELECT r AS role, has_function_privilege(r, 'public.handle_revenuecat_webhook(text,uuid,text,text,timestamptz,timestamptz,uuid,boolean,boolean,boolean,boolean,bigint)', 'EXECUTE') AS can_exec
             FROM unnest(ARRAY['anon','authenticated','service_role']) r;
           SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='profiles' ORDER BY policyname;
           SELECT has_table_privilege('authenticated','public.profiles','SELECT') AS auth_profiles_select;
@@ -97,9 +97,9 @@ jobs:
       run:
         working-directory: cost-share-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 

@@ -1,5 +1,6 @@
 import { APP_VERSION } from '@cost-share/shared';
 import { isAppVersionBelowMinimum } from '../lib/appVersionCompare';
+import { isE2eLayoutFixturesEnabled } from '../lib/e2eLayoutFixtures';
 import { supabase } from '../lib/supabase';
 
 export type AppClientConfig = {
@@ -37,6 +38,9 @@ function parseConfig(raw: unknown): AppClientConfig | null {
 
 /** Fail open on network/RPC errors so offline users are not hard-blocked. */
 export async function evaluateMinimumAppVersion(): Promise<MinimumVersionGateResult> {
+    if (isE2eLayoutFixturesEnabled()) {
+        return { status: 'unknown' };
+    }
     const { data, error } = await supabase.rpc('get_app_client_config');
     if (error) {
         console.warn('get_app_client_config failed:', error.message);

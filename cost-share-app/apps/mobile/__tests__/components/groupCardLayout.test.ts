@@ -15,16 +15,10 @@ describe('groupCardLayout responsive metrics', () => {
         expect(columnWidth).toBeLessThanOrEqual(GROUP_CARD_CHIP_MAX_WIDTH);
     });
 
-    it('stacks balance chip on narrow phones', () => {
-        expect(resolveGroupCardUsesStackedBalance(320)).toBe(true);
-        expect(resolveGroupCardUsesStackedBalance(360)).toBe(true);
-    });
-
-    it('keeps inline balance on mid and large widths', () => {
-        expect(resolveGroupCardUsesStackedBalance(375)).toBe(true);
-        expect(resolveGroupCardUsesStackedBalance(390)).toBe(true);
-        expect(resolveGroupCardUsesStackedBalance(430)).toBe(false);
-        expect(resolveGroupCardUsesStackedBalance(768)).toBe(false);
+    it('keeps balance inline on all list widths (compact single-row card)', () => {
+        for (const width of WIDTHS) {
+            expect(resolveGroupCardUsesStackedBalance(width)).toBe(false);
+        }
     });
 
     it('uses full max chip width on tablet inline layout', () => {

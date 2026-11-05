@@ -19,20 +19,15 @@ describe('settingsRowLayout', () => {
         expect(style.flexGrow).toBe(0);
         expect(style.flexShrink).toBe(1);
         expect(style.minWidth).toBe(0);
-        if (Platform.OS === 'web') {
-            expect(style.direction).toBe('ltr');
-        } else {
-            expect(style.flexDirection).toBe('row');
-        }
+        expect(style.flexDirection).toBe('row');
+        expect(style.direction).toBeUndefined();
     });
 
-    it('mirrors cluster direction for RTL', () => {
+    it('mirrors cluster direction for RTL when native is synced', () => {
+        const { I18nManager } = require('react-native');
+        (I18nManager as { isRTL: boolean }).isRTL = true;
         const style = settingsRowValueClusterStyle(true);
-        if (Platform.OS === 'web') {
-            expect(style.direction).toBe('rtl');
-        } else {
-            expect(style.flexDirection).toBe('row-reverse');
-        }
+        expect(style.flexDirection).toBe('row');
     });
 
     it('allows value text to shrink and truncate', () => {

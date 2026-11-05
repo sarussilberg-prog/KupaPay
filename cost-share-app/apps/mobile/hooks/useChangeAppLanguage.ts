@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Language } from '@cost-share/shared';
 import { changeLanguage } from '../i18n';
+import type { AppLanguagePickerCode } from '../i18n/appLanguagePicker';
 import { platformAlert } from '../lib/platformAlert';
 
 /**
@@ -12,7 +12,7 @@ export function useChangeAppLanguage() {
     const { t } = useTranslation();
 
     return useCallback(
-        async (lang: Language) => {
+        async (lang: AppLanguagePickerCode) => {
             try {
                 await changeLanguage(lang);
             } catch {

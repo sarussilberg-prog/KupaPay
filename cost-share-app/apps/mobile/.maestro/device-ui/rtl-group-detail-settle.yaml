@@ -1,0 +1,33 @@
+appId: com.kupapay.mobile
+---
+- tapOn:
+    id: tab-Groups
+- extendedWaitUntil:
+    visible:
+      id: groups-list-title
+    timeout: 60000
+- tapOn: E2E Maestro Friends
+- extendedWaitUntil:
+    visible:
+      id: group-detail-feed-virtualized
+    timeout: 60000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: group-detail-settle-up
+    timeout: 60000
+    optional: true
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_07_group_detail
+- tapOn:
+    id: group-detail-settle-up
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: settle-up-list-screen
+    timeout: 60000
+    optional: true
+- takeScreenshot: ${MAESTRO_PLATFORM}_${APP_LANG}_08_settle_up
+- back
+    optional: true
+- back
+    optional: true

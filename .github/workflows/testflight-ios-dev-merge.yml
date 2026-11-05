@@ -1,0 +1,47 @@
+# Start TestFlight after a dev PR merge touches mobile release config (GITHUB_TOKEN pushes do not fire `on: push`).
+# Squash merges by github-actions[bot] (native auto-merge) also skip pull_request:closed workflows — CI dispatches via ADMIN_PAT.
+name: TestFlight iOS (dev merge)
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+
+jobs:
+  plan:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - name: Detect mobile release paths in merged PR
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          run=false
+          while IFS= read -r path; do
+            case "$path" in
+              cost-share-app/apps/mobile/eas.json|.github/workflows/testflight-ios.yml|.github/workflows/testflight-ios-dev-merge.yml|cost-share-app/apps/mobile/components/GroupCard.tsx|cost-share-app/apps/mobile/components/groupCardLayout.ts|cost-share-app/apps/mobile/components/ui/iconLabelLayout.ts|cost-share-app/apps/mobile/hooks/useRtlLayout.tsx|cost-share-app/apps/mobile/lib/groupsLayoutDiagnostics.ts|cost-share-app/apps/mobile/lib/groupsCardLayoutLimits.ts)
+                run=true
+                break
+                ;;
+            esac
+          done < <(gh pr view "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --json files --jq '.files[].path')
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+
+  testflight:
+    needs: plan
+    if: needs.plan.outputs.run == 'true'
+    permissions:
+      contents: read
+      actions: write
+    uses: ./.github/workflows/testflight-ios.yml
+    secrets: inherit
+    with:
+      git_ref: dev
+      pro_enabled: true

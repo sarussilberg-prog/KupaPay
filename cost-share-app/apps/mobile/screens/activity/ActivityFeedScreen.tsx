@@ -45,7 +45,13 @@ import { fetchProfilesByUserIds } from '../../services/groups.service';
 import { supabase } from '../../lib/supabase';
 import { queryKeys } from '../../hooks/queries/keys';
 import { toEpochMs } from '../../lib/dateUtils';
-import { resolveCompactTextInputStyle, rtlTextClassName, useRtlLayout } from '../../hooks/useRtlLayout';
+import { useAppLanguage, useRtlLayout } from '../../hooks/useRtlLayout';
+import {
+    ACTIVITY_SEARCH_INPUT_CLASS,
+    activitySearchTextInputStyle,
+} from '../../lib/activitySearchTextInputStyle';
+import { isActivitySearchFieldTrailingAligned } from '../../lib/activitySearchLayoutProbe';
+import { isE2eLayoutProbeEnabled } from '../../lib/e2eLayoutProbes';
 import { EmptyState } from '../../components/EmptyState';
 import { HotVirtualizedList } from '../../components/lists/HotVirtualizedList';
 import { ActivityItem } from '../../components/ActivityItem';
@@ -68,7 +74,7 @@ import {
 import { useAppStore } from '../../store';
 import { colors } from '../../theme';
 import type { GroupDetailFocusFeedItem } from '../../lib/groupDetailFocus';
-import { setBadgeCount } from '../../lib/pushNotifications';
+import { runActivityScreenFocusEffects } from '../../lib/activityScreenFocus';
 import { usePushPermissionPrompt } from '../../hooks/usePushPermissionPrompt';
 import { EnableNotificationsBanner } from '../../components/notifications/EnableNotificationsBanner';
 
@@ -128,6 +134,21 @@ function ActivityFeedDivider() {
 export function ActivityFeedScreen() {
     const { t } = useTranslation();
     const isRtl = useRtlLayout();
+    const language = useAppLanguage();
+    const [searchPillWidth, setSearchPillWidth] = useState(0);
+    const [searchFieldLayout, setSearchFieldLayout] = useState<{
+        x: number;
+        width: number;
+    } | null>(null);
+    const searchLayoutProbeOk =
+        isE2eLayoutProbeEnabled() &&
+        searchFieldLayout !== null &&
+        searchPillWidth > 0 &&
+        isActivitySearchFieldTrailingAligned(
+            searchFieldLayout,
+            { width: searchPillWidth },
+            isRtl,
+        );
     const navigation = useNavigation<any>();
     const queryClient = useQueryClient();
     const currentUser = useAppStore(s => s.currentUser);
@@ -266,14 +287,18 @@ export function ActivityFeedScreen() {
             // arrived since last focus.
             setFreezeWatermark(null);
             void (async () => {
-                const wm = await fetchActivityLastSeenAt();
-                setFreezeWatermark(wm);
-                const { error } = await supabase.rpc('mark_activity_seen');
-                if (!error) {
-                    void queryClient.invalidateQueries({
-                        queryKey: queryKeys.activityUnreadCount,
+                try {
+                    const wm = await runActivityScreenFocusEffects({
+                        fetchWatermark: fetchActivityLastSeenAt,
+                        markSeen: async () => {
+                            const { error } = await supabase.rpc('mark_activity_seen');
+                            return { error };
+                        },
+                        queryClient,
                     });
-                    void setBadgeCount(0);
+                    setFreezeWatermark(wm);
+                } catch {
+                    /* RPC/network failure must not break the feed */
                 }
             })();
             if (isStale) void refetch();
@@ -885,23 +910,43 @@ export function ActivityFeedScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
             <View className="flex-row items-center px-4 py-2">
-                <View className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9">
+                <View
+                    className="flex-1 flex-row items-center rounded-full bg-gray-100 px-3 h-9"
+                    onLayout={
+                        isE2eLayoutProbeEnabled()
+                            ? (e) => setSearchPillWidth(e.nativeEvent.layout.width)
+                            : undefined
+                    }
+                >
                     <AppIcon name="search" size={18} color={colors.gray500} />
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         placeholder={t('activity.searchPlaceholder')}
                         placeholderTextColor={colors.gray400}
-                        className={[
-                            'flex-1 text-sm text-gray-900 mx-2',
-                            rtlTextClassName(isRtl),
-                        ].filter(Boolean).join(' ')}
+                        className={ACTIVITY_SEARCH_INPUT_CLASS}
                         autoCorrect={false}
                         autoCapitalize="none"
                         returnKeyType="search"
-                        style={resolveCompactTextInputStyle(isRtl)}
+                        style={activitySearchTextInputStyle(language)}
+                        onLayout={
+                            isE2eLayoutProbeEnabled()
+                                ? (e) => {
+                                      const { x, width } = e.nativeEvent.layout;
+                                      setSearchFieldLayout({ x, width });
+                                  }
+                                : undefined
+                        }
                         testID="activity-search-input"
                     />
+                    {isE2eLayoutProbeEnabled() && searchLayoutProbeOk ? (
+                        <View
+                            testID="activity-search-placeholder-layout-ok"
+                            accessibilityElementsHidden
+                            importantForAccessibility="no-hide-descendants"
+                            style={{ width: 0, height: 0, opacity: 0 }}
+                        />
+                    ) : null}
                     {searchQuery.length > 0 && (
                         <TouchableOpacity
                             onPress={() => setSearchQuery('')}

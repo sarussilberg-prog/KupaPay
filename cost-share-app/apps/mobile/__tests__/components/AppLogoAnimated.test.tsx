@@ -1,6 +1,22 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import { render } from '@testing-library/react-native';
+
+jest.mock('../../lib/appIconVariant', () => ({
+    shouldUseLiquidGlassAppIcon: jest.fn(() => true),
+}));
+
+const GLASS_LOGO = require('../../assets/icon-glass.png');
+const WALLET_BASE = require('../../assets/brand/anim/wallet-base.png');
+const ARROW_TOP = require('../../assets/brand/anim/arrow-top.png');
+const ARROW_BOTTOM = require('../../assets/brand/anim/arrow-bottom.png');
+
+function imageSources(root: ReturnType<typeof render>['UNSAFE_root']) {
+    return root
+        .findAllByType(Image)
+        .map((node: { props: { source?: unknown } }) => node.props.source)
+        .filter(Boolean);
+}
 
 // reanimated v4 needs the native worklets module; in jest we mock it so the
 // component renders statically (the project mocks reanimated-backed components
@@ -54,5 +70,14 @@ describe('AppLogoAnimated', () => {
         expect(flat.width).toBe(120);
         expect(flat.height).toBe(120);
         expect(flat.overflow).toBe('hidden');
+    });
+
+    it('always renders the transparent animated layers even when liquid-glass app icon is active', () => {
+        const view = render(<AppLogoAnimated />);
+        const sources = imageSources(view.UNSAFE_root);
+        expect(sources).toContainEqual(WALLET_BASE);
+        expect(sources).toContainEqual(ARROW_TOP);
+        expect(sources).toContainEqual(ARROW_BOTTOM);
+        expect(sources).not.toContainEqual(GLASS_LOGO);
     });
 });
