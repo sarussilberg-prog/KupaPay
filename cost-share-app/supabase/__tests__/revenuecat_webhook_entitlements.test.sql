@@ -53,17 +53,17 @@ BEGIN
         RAISE EXCEPTION 'Case 3 failed: expected duplicate=true, got %', v_out;
     END IF;
 
-    -- CANCELLATION at period end (expiration set)
+    -- CANCELLATION at period end (expiration matches renewal; must not shorten access)
     SELECT public.handle_revenuecat_webhook(
         'evt-rc141-cancel', v_user, 'CANCELLATION', 'kupapay_pro_monthly',
-        v_trial, NULL, NULL, FALSE, FALSE, FALSE, FALSE, 2500
+        v_until, NULL, NULL, FALSE, FALSE, FALSE, FALSE, 2500
     ) INTO v_out;
     IF v_out->>'action' IS DISTINCT FROM 'individual' THEN
         RAISE EXCEPTION 'Case 4 failed: cancellation action %', v_out->>'action';
     END IF;
     SELECT pro_until INTO v_pro FROM public.profiles WHERE id = v_user;
-    IF v_pro IS DISTINCT FROM v_trial THEN
-        RAISE EXCEPTION 'Case 4 failed: pro_until after cancel-at-end expected % got %', v_trial, v_pro;
+    IF v_pro IS DISTINCT FROM v_until THEN
+        RAISE EXCEPTION 'Case 4 failed: pro_until after cancel-at-end expected % got %', v_until, v_pro;
     END IF;
 
     -- EXPIRATION after re-grant
