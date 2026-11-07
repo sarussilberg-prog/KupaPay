@@ -113,3 +113,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): restore transparent animated login logo on iOS 26+ (#737)
 ## [2.2.0-dev.54] — 2026-11-07
 - fix(mobile): center button labels and specific restore purchase toasts (#741)
+## [2.2.0-dev.55] — 2026-11-07
+- fix(mobile): subscription price, cancel state, Trip Pass, and restore UX (#742)
