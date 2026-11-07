@@ -24,7 +24,10 @@ import {
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
 import { supabase } from '../lib/supabase';
+import { interpretRestorePurchases, type RestorePurchasesResult } from '@cost-share/shared';
 import { useAppStore } from '../store';
+
+export type { RestorePurchasesResult };
 
 export type { PaywallPackages, PurchasesPackageLike };
 export type { IntroEligibilityMap };
@@ -357,11 +360,25 @@ export async function purchasePackage(
     }
 }
 
-export async function restorePurchases(featureKey: string, groupId?: string): Promise<boolean> {
+export async function restorePurchases(
+    featureKey: string,
+    groupId?: string,
+): Promise<RestorePurchasesResult> {
     const Purchases = await getPurchases();
-    if (!Purchases) return false;
+    if (!Purchases) {
+        return { status: 'none' };
+    }
     try {
         await trackPurchaseEvent('purchase_started', featureKey, { action: 'restore' });
+        let hadProBeforeRestore = false;
+        try {
+            const before = await Purchases.default.getCustomerInfo();
+            hadProBeforeRestore = Boolean(
+                before.entitlements.active[REVENUECAT_ENTITLEMENT_PRO],
+            );
+        } catch {
+            /* best-effort — restore still proceeds */
+        }
         const info = await Purchases.default.restorePurchases();
         const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
         if (active) {
@@ -375,13 +392,25 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
                 individualUntil: active.expirationDate ?? undefined,
             });
             await refreshProStatusQueries(groupId);
-            return true;
+            return interpretRestorePurchases({
+                hadProBeforeRestore,
+                proActiveAfterRestore: true,
+            });
         }
         await trackPurchaseEvent('restore_failed', featureKey);
-        return false;
-    } catch {
+        return interpretRestorePurchases({
+            hadProBeforeRestore,
+            proActiveAfterRestore: false,
+        });
+    } catch (e: unknown) {
         await trackPurchaseEvent('restore_failed', featureKey);
-        return false;
+        const message =
+            e instanceof Error ? e.message : typeof e === 'string' ? e : 'restore_failed';
+        return interpretRestorePurchases({
+            hadProBeforeRestore: false,
+            proActiveAfterRestore: false,
+            errorMessage: message,
+        });
     }
 }
 

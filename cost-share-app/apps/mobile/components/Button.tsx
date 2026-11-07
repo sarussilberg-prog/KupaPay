@@ -7,7 +7,7 @@
 import { Text } from './AppText';
 import { AppIcon, type AppIconName } from './AppIcon';
 import React from 'react';
-import { ActivityIndicator, Platform, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { colors } from '../theme';
 import { centeredTextStyle } from '../hooks/useRtlLayout';
 import { AppPressable } from './AppPressable';
@@ -51,6 +51,24 @@ const variantClasses: Record<ButtonVariant, { container: string; text: string }>
     },
 };
 
+const buttonLayoutStyles = StyleSheet.create({
+    pressable: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    labelRow: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    labelOnly: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});
+
 export function Button({
     title,
     onPress,
@@ -78,7 +96,7 @@ export function Button({
             disabled={isDisabled}
             testID={testID}
             androidRipple={Platform.OS === 'android' ? ripple : null}
-            style={isDisabled ? { opacity: 0.5 } : undefined}
+            style={[buttonLayoutStyles.pressable, isDisabled ? { opacity: 0.5 } : undefined]}
             className={`${styles.container} ${fullWidth ? 'w-full' : ''} ${className}`}
         >
             {loading ? (
@@ -86,20 +104,24 @@ export function Button({
                     size="small"
                     color={variant === 'outline' || variant === 'secondary' ? colors.primary : colors.white}
                 />
+            ) : icon ? (
+                <View style={buttonLayoutStyles.labelRow} className="gap-2">
+                    <AppIcon
+                        name={icon}
+                        size={20}
+                        color={
+                            iconColor ??
+                            (variant === 'outline' || variant === 'secondary'
+                                ? colors.primary
+                                : colors.white)
+                        }
+                    />
+                    <Text className={styles.text} style={centeredTextStyle}>
+                        {title}
+                    </Text>
+                </View>
             ) : (
-                <View className="w-full flex-row items-center justify-center gap-2">
-                    {icon ? (
-                        <AppIcon
-                            name={icon}
-                            size={20}
-                            color={
-                                iconColor ??
-                                (variant === 'outline' || variant === 'secondary'
-                                    ? colors.primary
-                                    : colors.white)
-                            }
-                        />
-                    ) : null}
+                <View style={buttonLayoutStyles.labelOnly}>
                     <Text className={styles.text} style={centeredTextStyle}>
                         {title}
                     </Text>
