@@ -91,6 +91,18 @@ export function deriveSubscriptionLifecycle(
     return 'none';
 }
 
+/** True when the user still has an individual Pro subscription (incl. grace / billing issue). */
+export function hasActiveProSubscription(
+    snapshot: MySubscriptionSnapshot | null | undefined,
+): boolean {
+    if (!snapshot) return false;
+    return (
+        snapshot.lifecycle === 'active' ||
+        snapshot.lifecycle === 'cancelled_until_expiry' ||
+        snapshot.lifecycle === 'billing_issue'
+    );
+}
+
 export function buildSubscriptionSnapshot(input: {
     entitlement: EntitlementWireSlice | null;
     priceString: string | null;

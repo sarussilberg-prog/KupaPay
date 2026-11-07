@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View, Pressable } from 'react-native';
+import { hasActiveProSubscription } from '@cost-share/shared';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 import { APP_WEB_ORIGIN, buildLegalPageUrl } from '@cost-share/shared';
 import { Text } from '../../components/AppText';
+import { Button } from '../../components/Button';
 import { MySubscriptionPanel } from '../../components/pro/MySubscriptionPanel';
 import { ProBadge } from '../../components/pro/ProBadge';
 import { useMySubscription } from '../../hooks/useMySubscription';
@@ -33,6 +35,7 @@ export function MySubscriptionScreen() {
         route.params?.purchaseSuccess === true,
     );
     const proMemberTheme = hasPro || (data != null && data.lifecycle !== 'none');
+    const showUpgradeCta = showUpsell && !hasPro && !hasActiveProSubscription(data);
 
     useEffect(() => {
         if (route.params?.purchaseSuccess !== true) return;
@@ -96,14 +99,15 @@ export function MySubscriptionScreen() {
                 onRestoreSuccess={() => void refetch()}
             />
 
-            {showUpsell ? (
-                <Pressable
-                    className="mx-4 mt-4 py-3 items-center rounded-2xl bg-primary"
-                    onPress={() => navigation.navigate('Paywall', { featureKey: 'settings' })}
-                    testID="my-subscription-go-pro"
-                >
-                    <Text className="text-white font-semibold">{t('monetization.goProButton')}</Text>
-                </Pressable>
+            {showUpgradeCta ? (
+                <View className="mx-4 mt-4">
+                    <Button
+                        title={t('monetization.goProButton')}
+                        onPress={() => navigation.navigate('Paywall', { featureKey: 'settings' })}
+                        variant="pro"
+                        testID="my-subscription-go-pro"
+                    />
+                </View>
             ) : null}
 
             <View className="flex-row flex-wrap justify-center gap-4 mt-6 px-4">

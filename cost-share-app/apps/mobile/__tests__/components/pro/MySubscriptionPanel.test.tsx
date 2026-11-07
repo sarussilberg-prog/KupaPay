@@ -1,12 +1,33 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { MySubscriptionPanel } from '../../../components/pro/MySubscriptionPanel';
 import type { MySubscriptionSnapshot } from '@cost-share/shared';
+import { restorePurchases } from '../../../services/purchases.service';
+import { showAppToast } from '../../../lib/appToast';
 
 jest.mock('../../../services/purchases.service', () => ({
     isPurchasesConfigured: () => true,
     restorePurchases: jest.fn(),
 }));
+
+jest.mock('../../../lib/appToast', () => ({
+    showAppToast: jest.fn(),
+}));
+
+jest.mock('react-i18next', () => ({
+    useTranslation: () => ({
+        t: (key: string) => key,
+        i18n: { language: 'en' },
+    }),
+}));
+
+jest.mock('../../../store', () => ({
+    useAppStore: (selector: (state: { language: 'en' }) => unknown) =>
+        selector({ language: 'en' }),
+}));
+
+const restoreMock = restorePurchases as jest.MockedFunction<typeof restorePurchases>;
+const showAppToastMock = showAppToast as jest.MockedFunction<typeof showAppToast>;
 
 const activeSnapshot: MySubscriptionSnapshot = {
     lifecycle: 'active',
@@ -38,5 +59,26 @@ describe('MySubscriptionPanel', () => {
         const snap = { ...activeSnapshot, lifecycle: 'billing_issue' as const };
         const { getByTestId } = render(<MySubscriptionPanel snapshot={snap} />);
         expect(getByTestId('my-subscription-fix-payment')).toBeTruthy();
+    });
+
+    it('shows restore hint under the restore link', () => {
+        const { getByText } = render(<MySubscriptionPanel snapshot={activeSnapshot} />);
+        expect(getByText('pro.paywall.restoreHint')).toBeTruthy();
+    });
+
+    it('toasts pro restored when restore finds a subscription', async () => {
+        restoreMock.mockResolvedValue({ status: 'pro_restored' });
+        const onRestoreSuccess = jest.fn();
+        const { getByTestId } = render(
+            <MySubscriptionPanel snapshot={activeSnapshot} onRestoreSuccess={onRestoreSuccess} />,
+        );
+        fireEvent.press(getByTestId('my-subscription-restore'));
+        await waitFor(() => {
+            expect(showAppToastMock).toHaveBeenCalledWith({
+                type: 'success',
+                titleKey: 'pro.paywall.restoreProRestored',
+            });
+        });
+        expect(onRestoreSuccess).toHaveBeenCalled();
     });
 });

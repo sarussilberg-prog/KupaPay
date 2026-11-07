@@ -13,7 +13,10 @@ import {
 } from '../../lib/openSubscriptionManagement';
 import { refundRequestUrl } from '../../lib/subscriptionManagementLinks';
 import { restorePurchases, isPurchasesConfigured } from '../../services/purchases.service';
-import { showAppToast } from '../../lib/appToast';
+import {
+    shouldRefetchAfterRestore,
+    showRestorePurchasesToast,
+} from '../../lib/restorePurchasesFeedback';
 
 type Props = Readonly<{
     snapshot: MySubscriptionSnapshot | null | undefined;
@@ -122,13 +125,11 @@ export function MySubscriptionPanel({ snapshot, loading, compact, onRestoreSucce
     const restore = useCallback(async () => {
         if (busy || !storeConfigured) return;
         setBusy(true);
-        const ok = await restorePurchases('settings');
+        const result = await restorePurchases('settings');
         setBusy(false);
-        if (ok) {
-            showAppToast({ type: 'success', titleKey: 'pro.paywall.restoreSuccess' });
+        showRestorePurchasesToast(result);
+        if (shouldRefetchAfterRestore(result)) {
             onRestoreSuccess?.();
-        } else {
-            showAppToast({ type: 'info', titleKey: 'pro.paywall.restoreNone' });
         }
     }, [busy, onRestoreSuccess, storeConfigured]);
 
@@ -249,14 +250,19 @@ export function MySubscriptionPanel({ snapshot, loading, compact, onRestoreSucce
                         testID="my-subscription-manage"
                     />
                     {storeConfigured ? (
-                        <Pressable
-                            onPress={() => void restore()}
-                            disabled={busy}
-                            className="py-3 items-center"
-                            testID="my-subscription-restore"
-                        >
-                            <Text className="text-primary font-semibold">{t('pro.paywall.restore')}</Text>
-                        </Pressable>
+                        <View className="items-center">
+                            <Pressable
+                                onPress={() => void restore()}
+                                disabled={busy}
+                                className="py-3 items-center"
+                                testID="my-subscription-restore"
+                            >
+                                <Text className="text-primary font-semibold">{t('pro.paywall.restore')}</Text>
+                            </Pressable>
+                            <Text className="text-xs text-gray-500 text-center px-4 leading-5">
+                                {t('pro.paywall.restoreHint')}
+                            </Text>
+                        </View>
                     ) : null}
                 </View>
             ) : null}
