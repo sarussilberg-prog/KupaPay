@@ -28,6 +28,25 @@ export function pickPaywallSlotPackage(
     return null;
 }
 
+/** Store product ids to try with StoreKit / Play Billing getProducts (entitlement + base-plan variants). */
+export function subscriptionStoreProductIdCandidates(
+    storeProductId: string,
+    productPlanIdentifier?: string | null,
+): string[] {
+    const ordered: string[] = [];
+    const push = (id: string | undefined | null) => {
+        const trimmed = id?.trim();
+        if (trimmed && !ordered.includes(trimmed)) ordered.push(trimmed);
+    };
+    push(storeProductId);
+    push(productPlanIdentifier);
+    const base = storeProductId.split(':')[0];
+    if (base) push(base);
+    const afterColon = storeProductId.includes(':') ? storeProductId.split(':').slice(1).join(':') : '';
+    if (afterColon) push(afterColon);
+    return ordered;
+}
+
 export function resolveSubscriptionPriceFromOffering(
     storeProductId: string,
     offeringPackages: SubscriptionPricePackage[],

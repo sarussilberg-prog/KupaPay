@@ -254,10 +254,15 @@ export function MySubscriptionPanel({ snapshot, loading, compact, onRestoreSucce
                             <Pressable
                                 onPress={() => void restore()}
                                 disabled={busy}
-                                className="py-3 items-center"
+                                className="py-3 items-center flex-row justify-center gap-2"
                                 testID="my-subscription-restore"
                             >
-                                <Text className="text-primary font-semibold">{t('pro.paywall.restore')}</Text>
+                                {busy ? <ActivityIndicator size="small" /> : null}
+                                <Text
+                                    className={`text-primary font-semibold ${busy ? 'opacity-50' : ''}`}
+                                >
+                                    {t('pro.paywall.restore')}
+                                </Text>
                             </Pressable>
                             <Text className="text-xs text-gray-500 text-center px-4 leading-5">
                                 {t('pro.paywall.restoreHint')}

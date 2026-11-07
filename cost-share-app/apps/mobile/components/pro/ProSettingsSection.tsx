@@ -11,7 +11,10 @@ import { useProStatus } from '../../hooks/useProStatus';
 import { useMySubscription } from '../../hooks/useMySubscription';
 import { useShowProUpsell } from '../../hooks/useShowProUpsell';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
-import { isPurchasesConfigured } from '../../services/purchases.service';
+import {
+    isPurchasesConfigured,
+    refreshPurchasesCustomerInfo,
+} from '../../services/purchases.service';
 
 export function ProSettingsSection() {
     const { t } = useTranslation();
@@ -24,9 +27,12 @@ export function ProSettingsSection() {
 
     useFocusEffect(
         useCallback(() => {
-            void queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
-            void queryClient.invalidateQueries({ queryKey: queryKeys.mySubscription() });
-            void refetch();
+            void (async () => {
+                await refreshPurchasesCustomerInfo();
+                await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
+                await queryClient.invalidateQueries({ queryKey: queryKeys.mySubscription() });
+                await refetch();
+            })();
         }, [queryClient, refetch]),
     );
 

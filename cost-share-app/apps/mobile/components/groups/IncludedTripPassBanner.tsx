@@ -24,14 +24,11 @@ function includedTripPassErrorKey(
 
 export function IncludedTripPassBanner({ groupId }: IncludedTripPassBannerProps) {
     const { t } = useTranslation();
-    const { data: proStatus, isLoading } = useProStatusQuery(groupId);
+    const { data: proStatus, isLoading, hasPro } = useProStatusQuery(groupId);
     const [busy, setBusy] = useState(false);
 
     const credits = proStatus?.includedTripPassCredits ?? 0;
-    const subActive =
-        proStatus?.individualProUntil != null &&
-        new Date(proStatus.individualProUntil).getTime() > Date.now();
-    const show = KUPAPAY_PRO_ENABLED && !isLoading && credits > 0 && subActive;
+    const show = KUPAPAY_PRO_ENABLED && !isLoading && credits > 0 && hasPro;
 
     const onRedeem = useCallback(async () => {
         setBusy(true);

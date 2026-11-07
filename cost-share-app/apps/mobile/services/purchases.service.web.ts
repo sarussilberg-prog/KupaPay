@@ -73,9 +73,12 @@ export async function loadOfferingAllPackages(): Promise<PurchasesPackageLike[]>
 
 export async function fetchLocalizedProductPriceString(
     _storeProductId: string,
+    _productPlanIdentifier?: string | null,
 ): Promise<string | null> {
     return null;
 }
+
+export async function refreshPurchasesCustomerInfo(): Promise<void> {}
 
 export async function checkIntroductoryPriceEligibility(): Promise<
     Record<string, { status: number }>

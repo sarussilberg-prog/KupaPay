@@ -1,6 +1,5 @@
 import {
     buildSubscriptionSnapshot,
-    resolveSubscriptionPriceFromOffering,
     type EntitlementWireSlice,
     type MySubscriptionSnapshot,
     type TripPassLine,
@@ -13,8 +12,6 @@ import {
     isPurchasesConfigured,
     fetchLocalizedProductPriceString,
     fetchPurchasesCustomerInfo,
-    loadOfferingAllPackages,
-    loadOfferingPackages,
     waitForPurchasesReady,
 } from './purchases.service';
 
@@ -47,17 +44,18 @@ const CAPTURE_SNAPSHOT: MySubscriptionSnapshot = {
 
 function entitlementFromRc(ent: Record<string, unknown> | undefined): EntitlementWireSlice | null {
     if (!ent) return null;
+    const unsubscribeDetectedAt = toIsoString(
+        ent.unsubscribeDetectedAt as string | Date | null | undefined,
+    );
     return {
         isActive: ent.isActive === true,
-        willRenew: ent.willRenew !== false,
+        willRenew: unsubscribeDetectedAt ? false : ent.willRenew === true,
         expirationDate: toIsoString(ent.expirationDate as string | Date | null | undefined),
         productIdentifier: String(ent.productIdentifier ?? ''),
         productPlanIdentifier: (ent.productPlanIdentifier as string | null) ?? null,
         store: (ent.store as string | null) ?? null,
         periodType: (ent.periodType as string | null) ?? null,
-        unsubscribeDetectedAt: toIsoString(
-            ent.unsubscribeDetectedAt as string | Date | null | undefined,
-        ),
+        unsubscribeDetectedAt,
         billingIssueDetectedAt: toIsoString(
             ent.billingIssueDetectedAt as string | Date | null | undefined,
         ),
@@ -66,12 +64,9 @@ function entitlementFromRc(ent: Record<string, unknown> | undefined): Entitlemen
 
 async function priceForProduct(
     productId: string,
-    packages: Awaited<ReturnType<typeof loadOfferingPackages>>,
-    offeringPackages: Awaited<ReturnType<typeof loadOfferingAllPackages>>,
+    productPlanIdentifier: string | null | undefined,
 ): Promise<string | null> {
-    const fromStoreKit = await fetchLocalizedProductPriceString(productId);
-    if (fromStoreKit) return fromStoreKit;
-    return resolveSubscriptionPriceFromOffering(productId, offeringPackages, packages);
+    return fetchLocalizedProductPriceString(productId, productPlanIdentifier);
 }
 
 async function loadTripPassLines(groups: GroupWithMembers[]): Promise<TripPassLine[]> {
@@ -118,11 +113,7 @@ export async function fetchMySubscriptionSnapshot(
     }
 
     try {
-        const [info, packages, offeringPackages] = await Promise.all([
-            fetchPurchasesCustomerInfo(),
-            loadOfferingPackages(),
-            loadOfferingAllPackages(),
-        ]);
+        const info = await fetchPurchasesCustomerInfo();
         if (!info) {
             if (!serverStatus.hasPro && tripPasses.length === 0) return null;
             return buildSubscriptionSnapshot({
@@ -135,7 +126,7 @@ export async function fetchMySubscriptionSnapshot(
         const entRaw = info.entitlements.active.pro ?? info.entitlements.all.pro;
         const ent = entitlementFromRc(entRaw as unknown as Record<string, unknown> | undefined);
         const priceString = ent?.productIdentifier
-            ? await priceForProduct(ent.productIdentifier, packages, offeringPackages)
+            ? await priceForProduct(ent.productIdentifier, ent.productPlanIdentifier)
             : null;
 
         const snap = buildSubscriptionSnapshot({

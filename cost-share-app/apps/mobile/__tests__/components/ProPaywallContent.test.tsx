@@ -31,16 +31,25 @@ jest.mock('../../lib/paywallOfferingsLoad', () => ({
     reportPaywallLoadFailed: jest.fn(),
 }));
 
+const mockUseProStatus = jest.fn(() => ({
+    hasPro: false,
+    proPerkUnlocked: false,
+    isLoading: false,
+    isError: false,
+    data: undefined,
+    adminProViewMode: 'real' as const,
+    adminProViewOverrideActive: false,
+    adminProViewExpiresAt: null,
+}));
+
 jest.mock('../../hooks/useProStatus', () => ({
-    useProStatus: jest.fn(() => ({
-        hasPro: false,
-        proPerkUnlocked: false,
+    useProStatus: (...args: unknown[]) => mockUseProStatus(...args),
+}));
+
+jest.mock('../../hooks/useMySubscription', () => ({
+    useMySubscription: jest.fn(() => ({
+        data: null,
         isLoading: false,
-        isError: false,
-        data: undefined,
-        adminProViewMode: 'real' as const,
-        adminProViewOverrideActive: false,
-        adminProViewExpiresAt: null,
     })),
 }));
 
@@ -72,6 +81,21 @@ import { purchasePackage } from '../../services/purchases.service';
 const fetchMock = fetchPaywallOfferings as jest.MockedFunction<typeof fetchPaywallOfferings>;
 const purchaseMock = purchasePackage as jest.MockedFunction<typeof purchasePackage>;
 
+const defaultProStatusMock = () => ({
+    hasPro: false,
+    proPerkUnlocked: false,
+    isLoading: false,
+    isError: false,
+    data: undefined,
+    adminProViewMode: 'real' as const,
+    adminProViewOverrideActive: false,
+    adminProViewExpiresAt: null,
+});
+
+beforeEach(() => {
+    mockUseProStatus.mockImplementation(defaultProStatusMock);
+});
+
 const mockPackage = {
     identifier: 'annual',
     product: {
@@ -89,6 +113,7 @@ const mockMonthly = {
 describe('ProPaywallContent offerings load', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockUseProStatus.mockImplementation(defaultProStatusMock);
     });
 
     it('shows error and retry when offerings load fails', async () => {
@@ -214,6 +239,48 @@ describe('ProPaywallContent offerings load', () => {
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
         });
+    });
+
+    it('hides Trip Pass when the user has an active individual Pro subscription', async () => {
+        mockUseProStatus.mockReturnValue({
+            hasPro: true,
+            proPerkUnlocked: true,
+            isLoading: false,
+            isError: false,
+            data: {
+                hasPro: true,
+                individualProUntil: '2027-01-01T00:00:00.000Z',
+                groupPassUntil: null,
+                includedTripPassCredits: 0,
+                unassignedTripPassCount: 0,
+                adminProViewMode: 'real' as const,
+                adminProViewExpiresAt: null,
+            },
+            adminProViewMode: 'real' as const,
+            adminProViewOverrideActive: false,
+            adminProViewExpiresAt: null,
+        });
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: {
+                    identifier: 'trip_pass',
+                    product: { identifier: 'kupapay_trip_pass', priceString: '₪19.90' },
+                },
+            },
+            introEligibility: {},
+        });
+
+        const { queryByTestId, getByTestId } = renderPaywall(
+            <ProPaywallContent featureKey="settings" showTripPass />,
+        );
+
+        await waitFor(() => {
+            expect(getByTestId('paywall-already-pro')).toBeTruthy();
+        });
+        expect(queryByTestId('paywall-pick-trip-pass')).toBeNull();
     });
 
     it('opens promo code sheet from Have a code link', async () => {
