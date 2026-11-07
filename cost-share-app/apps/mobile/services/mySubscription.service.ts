@@ -1,20 +1,19 @@
 import {
     buildSubscriptionSnapshot,
+    resolveSubscriptionPriceFromOffering,
     type EntitlementWireSlice,
     type MySubscriptionSnapshot,
     type TripPassLine,
 } from '@cost-share/shared';
 import type { GroupWithMembers } from '@cost-share/shared';
 import { usesStaticFixtureData } from '../lib/staticFixtureMode';
-import { paywallDisplayPrice } from '../lib/paywallDisplayPrice';
-import {
-    STORE_PRODUCT_PRO_MONTHLY,
-    STORE_PRODUCT_PRO_YEARLY,
-} from '../lib/proConstants';
+import { STORE_PRODUCT_PRO_YEARLY } from '../lib/proConstants';
 import { fetchMyProStatus } from './proEntitlements.service';
 import {
     isPurchasesConfigured,
+    fetchLocalizedProductPriceString,
     fetchPurchasesCustomerInfo,
+    loadOfferingAllPackages,
     loadOfferingPackages,
     waitForPurchasesReady,
 } from './purchases.service';
@@ -68,14 +67,11 @@ function entitlementFromRc(ent: Record<string, unknown> | undefined): Entitlemen
 async function priceForProduct(
     productId: string,
     packages: Awaited<ReturnType<typeof loadOfferingPackages>>,
+    offeringPackages: Awaited<ReturnType<typeof loadOfferingAllPackages>>,
 ): Promise<string | null> {
-    if (productId === STORE_PRODUCT_PRO_MONTHLY && packages.monthly) {
-        return paywallDisplayPrice(packages.monthly, 'monthly');
-    }
-    if (productId === STORE_PRODUCT_PRO_YEARLY && packages.annual) {
-        return paywallDisplayPrice(packages.annual, 'yearly');
-    }
-    return null;
+    const fromStoreKit = await fetchLocalizedProductPriceString(productId);
+    if (fromStoreKit) return fromStoreKit;
+    return resolveSubscriptionPriceFromOffering(productId, offeringPackages, packages);
 }
 
 async function loadTripPassLines(groups: GroupWithMembers[]): Promise<TripPassLine[]> {
@@ -122,9 +118,10 @@ export async function fetchMySubscriptionSnapshot(
     }
 
     try {
-        const [info, packages] = await Promise.all([
+        const [info, packages, offeringPackages] = await Promise.all([
             fetchPurchasesCustomerInfo(),
             loadOfferingPackages(),
+            loadOfferingAllPackages(),
         ]);
         if (!info) {
             if (!serverStatus.hasPro && tripPasses.length === 0) return null;
@@ -138,7 +135,7 @@ export async function fetchMySubscriptionSnapshot(
         const entRaw = info.entitlements.active.pro ?? info.entitlements.all.pro;
         const ent = entitlementFromRc(entRaw as unknown as Record<string, unknown> | undefined);
         const priceString = ent?.productIdentifier
-            ? await priceForProduct(ent.productIdentifier, packages)
+            ? await priceForProduct(ent.productIdentifier, packages, offeringPackages)
             : null;
 
         const snap = buildSubscriptionSnapshot({

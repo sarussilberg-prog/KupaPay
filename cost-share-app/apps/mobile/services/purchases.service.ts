@@ -9,6 +9,8 @@ import {
     REVENUECAT_PACKAGE_ANNUAL,
     REVENUECAT_PACKAGE_MONTHLY,
     REVENUECAT_PACKAGE_TRIP_PASS,
+    STORE_PRODUCT_PRO_MONTHLY,
+    STORE_PRODUCT_PRO_YEARLY,
     STORE_PRODUCT_TRIP_PASS,
 } from '../lib/proConstants';
 import { registerTripPassPurchaseIntent } from './proEntitlements.service';
@@ -24,7 +26,10 @@ import {
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
 import { supabase } from '../lib/supabase';
+import { interpretRestorePurchases, type RestorePurchasesResult } from '@cost-share/shared';
 import { useAppStore } from '../store';
+
+export type { RestorePurchasesResult };
 
 export type { PaywallPackages, PurchasesPackageLike };
 export type { IntroEligibilityMap };
@@ -241,14 +246,58 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     const packages = offering.availablePackages as PurchasesPackageLike[];
 
     return {
-        monthly: findOfferingPackage(packages, REVENUECAT_PACKAGE_MONTHLY),
-        annual: findOfferingPackage(packages, REVENUECAT_PACKAGE_ANNUAL),
+        monthly: findOfferingPackage(
+            packages,
+            REVENUECAT_PACKAGE_MONTHLY,
+            STORE_PRODUCT_PRO_MONTHLY,
+        ),
+        annual: findOfferingPackage(
+            packages,
+            REVENUECAT_PACKAGE_ANNUAL,
+            STORE_PRODUCT_PRO_YEARLY,
+        ),
         tripPass: findOfferingPackage(
             packages,
             REVENUECAT_PACKAGE_TRIP_PASS,
             STORE_PRODUCT_TRIP_PASS,
         ),
     };
+}
+
+export async function loadOfferingAllPackages(): Promise<PurchasesPackageLike[]> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return [];
+
+    const offeringId =
+        process.env.EXPO_PUBLIC_REVENUECAT_OFFERING_ID?.trim() || 'default';
+    const offerings = await Purchases.default.getOfferings();
+    const offering = offerings.all[offeringId] ?? offerings.current;
+    if (!offering) return [];
+
+    return offering.availablePackages as PurchasesPackageLike[];
+}
+
+/** StoreKit-localized price for the subscribed product (preferred for My Subscription). */
+export async function fetchLocalizedProductPriceString(
+    storeProductId: string,
+): Promise<string | null> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return null;
+    const id = storeProductId.trim();
+    if (!id) return null;
+    try {
+        const tryIds = [id];
+        const baseId = id.split(':')[0];
+        if (baseId && baseId !== id) tryIds.push(baseId);
+        for (const productId of tryIds) {
+            const products = await Purchases.default.getProducts([productId]);
+            const localized = products[0]?.priceString?.trim();
+            if (localized) return localized;
+        }
+        return null;
+    } catch {
+        return null;
+    }
 }
 
 async function trackPurchaseEvent(
@@ -357,11 +406,25 @@ export async function purchasePackage(
     }
 }
 
-export async function restorePurchases(featureKey: string, groupId?: string): Promise<boolean> {
+export async function restorePurchases(
+    featureKey: string,
+    groupId?: string,
+): Promise<RestorePurchasesResult> {
     const Purchases = await getPurchases();
-    if (!Purchases) return false;
+    if (!Purchases) {
+        return { status: 'none' };
+    }
     try {
         await trackPurchaseEvent('purchase_started', featureKey, { action: 'restore' });
+        let hadProBeforeRestore = false;
+        try {
+            const before = await Purchases.default.getCustomerInfo();
+            hadProBeforeRestore = Boolean(
+                before.entitlements.active[REVENUECAT_ENTITLEMENT_PRO],
+            );
+        } catch {
+            /* best-effort — restore still proceeds */
+        }
         const info = await Purchases.default.restorePurchases();
         const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
         if (active) {
@@ -375,13 +438,25 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
                 individualUntil: active.expirationDate ?? undefined,
             });
             await refreshProStatusQueries(groupId);
-            return true;
+            return interpretRestorePurchases({
+                hadProBeforeRestore,
+                proActiveAfterRestore: true,
+            });
         }
         await trackPurchaseEvent('restore_failed', featureKey);
-        return false;
-    } catch {
+        return interpretRestorePurchases({
+            hadProBeforeRestore,
+            proActiveAfterRestore: false,
+        });
+    } catch (e: unknown) {
         await trackPurchaseEvent('restore_failed', featureKey);
-        return false;
+        const message =
+            e instanceof Error ? e.message : typeof e === 'string' ? e : 'restore_failed';
+        return interpretRestorePurchases({
+            hadProBeforeRestore: false,
+            proActiveAfterRestore: false,
+            errorMessage: message,
+        });
     }
 }
 

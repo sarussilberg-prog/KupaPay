@@ -1,6 +1,7 @@
 import {
     buildSubscriptionSnapshot,
     deriveSubscriptionLifecycle,
+    hasActiveProSubscription,
     mapStoreKind,
 } from '../subscriptionSnapshot';
 
@@ -61,5 +62,15 @@ describe('subscriptionSnapshot', () => {
         expect(snap.lifecycle).toBe('active');
         expect(snap.planKind).toBe('yearly');
         expect(snap.tripPasses).toHaveLength(1);
+    });
+
+    it('hasActiveProSubscription is true for active, grace, and billing issue', () => {
+        expect(hasActiveProSubscription({ lifecycle: 'active' } as never)).toBe(true);
+        expect(hasActiveProSubscription({ lifecycle: 'cancelled_until_expiry' } as never)).toBe(
+            true,
+        );
+        expect(hasActiveProSubscription({ lifecycle: 'billing_issue' } as never)).toBe(true);
+        expect(hasActiveProSubscription({ lifecycle: 'expired' } as never)).toBe(false);
+        expect(hasActiveProSubscription(null)).toBe(false);
     });
 });

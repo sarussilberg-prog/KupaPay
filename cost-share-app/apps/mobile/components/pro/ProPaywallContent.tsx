@@ -41,6 +41,10 @@ import {
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
+import {
+    shouldRefetchAfterRestore,
+    showRestorePurchasesToast,
+} from '../../lib/restorePurchasesFeedback';
 import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
 import { useProStatus } from '../../hooks/useProStatus';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
@@ -188,13 +192,11 @@ export function ProPaywallContent({
     const handleRestore = useCallback(async () => {
         if (busy) return;
         setBusy(true);
-        const ok = await restorePurchases(featureKey, groupId);
+        const result = await restorePurchases(featureKey, groupId);
         setBusy(false);
-        if (ok) {
-            showAppToast({ type: 'success', titleKey: 'pro.paywall.restoreSuccess' });
+        showRestorePurchasesToast(result);
+        if (shouldRefetchAfterRestore(result)) {
             onPurchaseSuccess?.();
-        } else {
-            showAppToast({ type: 'info', titleKey: 'pro.paywall.restoreNone' });
         }
     }, [busy, featureKey, groupId, onPurchaseSuccess]);
 
@@ -445,14 +447,19 @@ export function ProPaywallContent({
                 </Pressable>
             </View>
 
-            <Pressable
-                onPress={handleRestore}
-                disabled={busy || !storeConfigured}
-                className="py-3 items-center"
-                testID="paywall-restore"
-            >
-                <Text className="text-primary font-semibold">{t('pro.paywall.restore')}</Text>
-            </Pressable>
+            <View className="items-center">
+                <Pressable
+                    onPress={handleRestore}
+                    disabled={busy || !storeConfigured}
+                    className="py-3 items-center"
+                    testID="paywall-restore"
+                >
+                    <Text className="text-primary font-semibold">{t('pro.paywall.restore')}</Text>
+                </Pressable>
+                <Text className="text-xs text-gray-500 text-center px-6 leading-5 mb-1">
+                    {t('pro.paywall.restoreHint')}
+                </Text>
+            </View>
 
             <Pressable onPress={handleManage} className="py-3 items-center" testID="paywall-manage">
                 <Text className="text-gray-600 text-sm">{t('pro.paywall.manageSubscription')}</Text>
