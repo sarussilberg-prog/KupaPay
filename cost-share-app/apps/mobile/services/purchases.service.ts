@@ -26,7 +26,11 @@ import {
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
 import { supabase } from '../lib/supabase';
-import { interpretRestorePurchases, type RestorePurchasesResult } from '@cost-share/shared';
+import {
+    interpretRestorePurchases,
+    subscriptionStoreProductIdCandidates,
+    type RestorePurchasesResult,
+} from '@cost-share/shared';
 import { useAppStore } from '../store';
 
 export type { RestorePurchasesResult };
@@ -264,39 +268,50 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     };
 }
 
-export async function loadOfferingAllPackages(): Promise<PurchasesPackageLike[]> {
-    const Purchases = await getPurchases();
-    if (!Purchases || !(await waitForPurchasesReady())) return [];
-
-    const offeringId =
-        process.env.EXPO_PUBLIC_REVENUECAT_OFFERING_ID?.trim() || 'default';
-    const offerings = await Purchases.default.getOfferings();
-    const offering = offerings.all[offeringId] ?? offerings.current;
-    if (!offering) return [];
-
-    return offering.availablePackages as PurchasesPackageLike[];
-}
-
 /** StoreKit-localized price for the subscribed product (preferred for My Subscription). */
 export async function fetchLocalizedProductPriceString(
     storeProductId: string,
+    productPlanIdentifier?: string | null,
 ): Promise<string | null> {
     const Purchases = await getPurchases();
     if (!Purchases || !(await waitForPurchasesReady())) return null;
-    const id = storeProductId.trim();
-    if (!id) return null;
+    const tryIds = subscriptionStoreProductIdCandidates(storeProductId, productPlanIdentifier);
+    if (tryIds.length === 0) return null;
     try {
-        const tryIds = [id];
-        const baseId = id.split(':')[0];
-        if (baseId && baseId !== id) tryIds.push(baseId);
+        const category = Purchases.PRODUCT_CATEGORY?.SUBSCRIPTION;
         for (const productId of tryIds) {
-            const products = await Purchases.default.getProducts([productId]);
+            const products = category
+                ? await Purchases.default.getProducts([productId], category)
+                : await Purchases.default.getProducts([productId]);
             const localized = products[0]?.priceString?.trim();
             if (localized) return localized;
+        }
+        if (tryIds.length > 1) {
+            const products = category
+                ? await Purchases.default.getProducts(tryIds, category)
+                : await Purchases.default.getProducts(tryIds);
+            for (const product of products) {
+                const localized = product?.priceString?.trim();
+                if (localized) return localized;
+            }
         }
         return null;
     } catch {
         return null;
+    }
+}
+
+/** Force RevenueCat to refetch CustomerInfo (e.g. after canceling in the store). */
+export async function refreshPurchasesCustomerInfo(): Promise<void> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return;
+    try {
+        if (typeof Purchases.default.invalidateCustomerInfoCache === 'function') {
+            await Purchases.default.invalidateCustomerInfoCache();
+        }
+        await Purchases.default.getCustomerInfo();
+    } catch {
+        // ignore — next snapshot fetch falls back to cached info
     }
 }
 

@@ -81,4 +81,22 @@ describe('MySubscriptionPanel', () => {
         });
         expect(onRestoreSuccess).toHaveBeenCalled();
     });
+
+    it('disables restore while restore is in progress', async () => {
+        let resolveRestore: (value: { status: 'none' }) => void = () => {};
+        restoreMock.mockImplementation(
+            () =>
+                new Promise(resolve => {
+                    resolveRestore = resolve;
+                }),
+        );
+        const { getByTestId, UNSAFE_getByType } = render(
+            <MySubscriptionPanel snapshot={activeSnapshot} />,
+        );
+        fireEvent.press(getByTestId('my-subscription-restore'));
+        await waitFor(() => {
+            expect(UNSAFE_getByType(require('react-native').ActivityIndicator)).toBeTruthy();
+        });
+        resolveRestore({ status: 'none' });
+    });
 });

@@ -64,18 +64,14 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     return { monthly: null, annual: null, tripPass: null };
 }
 
-export async function loadOfferingAllPackages(): Promise<PurchasesPackageLike[]> {
-    const slots = await loadOfferingPackages();
-    return [slots.monthly, slots.annual, slots.tripPass].filter(
-        (p): p is PurchasesPackageLike => p != null,
-    );
-}
-
 export async function fetchLocalizedProductPriceString(
     _storeProductId: string,
+    _productPlanIdentifier?: string | null,
 ): Promise<string | null> {
     return null;
 }
+
+export async function refreshPurchasesCustomerInfo(): Promise<void> {}
 
 export async function checkIntroductoryPriceEligibility(): Promise<
     Record<string, { status: number }>

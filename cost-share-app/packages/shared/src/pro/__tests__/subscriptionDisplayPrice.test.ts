@@ -1,4 +1,7 @@
-import { resolveSubscriptionPriceFromOffering } from '../subscriptionDisplayPrice';
+import {
+    resolveSubscriptionPriceFromOffering,
+    subscriptionStoreProductIdCandidates,
+} from '../subscriptionDisplayPrice';
 
 const monthlyPkg = {
     identifier: '$rc_monthly',
@@ -9,6 +12,14 @@ const annualPkg = {
     identifier: '$rc_annual',
     product: { identifier: 'kupapay_pro_yearly', priceString: '₪69.90' },
 };
+
+describe('subscriptionStoreProductIdCandidates', () => {
+    it('includes base plan and plan id variants', () => {
+        expect(
+            subscriptionStoreProductIdCandidates('kupapay_pro_monthly:monthly', 'monthly'),
+        ).toEqual(['kupapay_pro_monthly:monthly', 'monthly', 'kupapay_pro_monthly']);
+    });
+});
 
 describe('resolveSubscriptionPriceFromOffering', () => {
     it('uses the matching offering package localized priceString', () => {

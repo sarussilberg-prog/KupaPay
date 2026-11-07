@@ -14,6 +14,7 @@ import { useMySubscription } from '../../hooks/useMySubscription';
 import { useProStatus } from '../../hooks/useProStatus';
 import { useShowProUpsell } from '../../hooks/useShowProUpsell';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
+import { refreshPurchasesCustomerInfo } from '../../services/purchases.service';
 import { queryKeys } from '../../hooks/queries/keys';
 import { useAppLanguage } from '../../hooks/useRtlLayout';
 import { showAppToast } from '../../lib/appToast';
@@ -46,9 +47,12 @@ export function MySubscriptionScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            void queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
-            void queryClient.invalidateQueries({ queryKey: queryKeys.mySubscription() });
-            void refetch();
+            void (async () => {
+                await refreshPurchasesCustomerInfo();
+                await queryClient.invalidateQueries({ queryKey: queryKeys.proStatus() });
+                await queryClient.invalidateQueries({ queryKey: queryKeys.mySubscription() });
+                await refetch();
+            })();
         }, [queryClient, refetch]),
     );
 
