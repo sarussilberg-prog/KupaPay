@@ -28,8 +28,11 @@ import { syncProTrialReminder } from './proTrialReminder.service';
 import { supabase } from '../lib/supabase';
 import {
     interpretRestorePurchases,
+    pickStorefrontSafePriceString,
     subscriptionStoreProductIdCandidates,
     type RestorePurchasesResult,
+    type StoreProductPriceRow,
+    type StorefrontSafePriceResult,
 } from '@cost-share/shared';
 import { useAppStore } from '../store';
 
@@ -268,37 +271,101 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     };
 }
 
-/** StoreKit-localized price for the subscribed product (preferred for My Subscription). */
+type PurchasesStoreProduct = import('react-native-purchases').PurchasesStoreProduct;
+
+function mapStoreProducts(products: PurchasesStoreProduct[]): StoreProductPriceRow[] {
+    return products.map(p => ({
+        identifier: p.identifier,
+        priceString: p.priceString?.trim() || null,
+        currencyCode: p.currencyCode?.trim() || null,
+    }));
+}
+
+async function fetchStorefrontCountryCode(
+    Purchases: PurchasesModule,
+): Promise<string | null> {
+    try {
+        const getStorefront = Purchases.default.getStorefront;
+        if (typeof getStorefront !== 'function') return null;
+        const storefront = await getStorefront.call(Purchases.default);
+        const country = storefront?.countryCode?.trim();
+        return country || null;
+    } catch {
+        return null;
+    }
+}
+
+async function loadSubscriptionStoreProducts(
+    Purchases: PurchasesModule,
+    tryIds: string[],
+): Promise<PurchasesStoreProduct[]> {
+    const category = Purchases.PRODUCT_CATEGORY?.SUBSCRIPTION;
+    const collected: PurchasesStoreProduct[] = [];
+    const seen = new Set<string>();
+    const push = (list: PurchasesStoreProduct[]) => {
+        for (const product of list) {
+            if (seen.has(product.identifier)) continue;
+            seen.add(product.identifier);
+            collected.push(product);
+        }
+    };
+    try {
+        for (const productId of tryIds) {
+            const batch = category
+                ? await Purchases.default.getProducts([productId], category)
+                : await Purchases.default.getProducts([productId]);
+            push(batch);
+        }
+        if (tryIds.length > 1) {
+            const batch = category
+                ? await Purchases.default.getProducts(tryIds, category)
+                : await Purchases.default.getProducts(tryIds);
+            push(batch);
+        }
+    } catch {
+        return collected;
+    }
+    return collected;
+}
+
+/** StoreKit price for My Subscription — omitted when currency ≠ storefront (avoids RC USD fallback). */
+export async function resolveStorefrontSafeSubscriptionPrice(
+    storeProductId: string,
+    productPlanIdentifier?: string | null,
+): Promise<StorefrontSafePriceResult> {
+    const empty: StorefrontSafePriceResult = {
+        displayPriceString: null,
+        storefrontCountryCode: null,
+        storefrontCurrencyCode: null,
+        products: [],
+    };
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return empty;
+    const tryIds = subscriptionStoreProductIdCandidates(storeProductId, productPlanIdentifier);
+    if (tryIds.length === 0) return empty;
+    const storefrontCountryCode = await fetchStorefrontCountryCode(Purchases);
+    const raw = await loadSubscriptionStoreProducts(Purchases, tryIds);
+    const products = mapStoreProducts(raw);
+    return pickStorefrontSafePriceString(products, storefrontCountryCode, storeProductId);
+}
+
 export async function fetchLocalizedProductPriceString(
     storeProductId: string,
     productPlanIdentifier?: string | null,
 ): Promise<string | null> {
-    const Purchases = await getPurchases();
-    if (!Purchases || !(await waitForPurchasesReady())) return null;
-    const tryIds = subscriptionStoreProductIdCandidates(storeProductId, productPlanIdentifier);
-    if (tryIds.length === 0) return null;
-    try {
-        const category = Purchases.PRODUCT_CATEGORY?.SUBSCRIPTION;
-        for (const productId of tryIds) {
-            const products = category
-                ? await Purchases.default.getProducts([productId], category)
-                : await Purchases.default.getProducts([productId]);
-            const localized = products[0]?.priceString?.trim();
-            if (localized) return localized;
-        }
-        if (tryIds.length > 1) {
-            const products = category
-                ? await Purchases.default.getProducts(tryIds, category)
-                : await Purchases.default.getProducts(tryIds);
-            for (const product of products) {
-                const localized = product?.priceString?.trim();
-                if (localized) return localized;
-            }
-        }
-        return null;
-    } catch {
-        return null;
-    }
+    const resolved = await resolveStorefrontSafeSubscriptionPrice(
+        storeProductId,
+        productPlanIdentifier,
+    );
+    return resolved.displayPriceString;
+}
+
+/** Dev admin: raw getProducts rows + storefront country for on-device verification. */
+export async function debugStoreProductPricing(
+    storeProductId: string,
+    productPlanIdentifier?: string | null,
+): Promise<StorefrontSafePriceResult> {
+    return resolveStorefrontSafeSubscriptionPrice(storeProductId, productPlanIdentifier);
 }
 
 /** Force RevenueCat to refetch CustomerInfo (e.g. after canceling in the store). */

@@ -9,11 +9,14 @@ import { SettingsSection } from '../../components/settings/SettingsSection';
 import { SettingsRow } from '../../components/settings/SettingsRow';
 import { AdminMetricsPanel } from '../../components/admin/AdminMetricsPanel';
 import { AdminProViewModeControl } from '../../components/admin/AdminProViewModeControl';
+import { AdminStoreProductPriceDebug } from '../../components/admin/AdminStoreProductPriceDebug';
+import { useAppStore } from '../../store';
 import { useAdminPlatformMetricsQuery } from '../../hooks/queries/useAdminPlatformMetricsQuery';
 
 export function AdminPortalScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
+    const isAdmin = useAppStore(s => s.currentUser?.isAdmin === true);
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
     const [resetting, setResetting] = useState(false);
     const metricsQuery = useAdminPlatformMetricsQuery();
@@ -48,6 +51,7 @@ export function AdminPortalScreen() {
                 />
                 <SettingsSection title={t('admin.proView.sectionTitle')}>
                     <AdminProViewModeControl testIDPrefix="admin-portal-pro-view" />
+                    {isAdmin ? <AdminStoreProductPriceDebug /> : null}
                 </SettingsSection>
                 <SettingsSection title={t('admin.portal.sectionLabel')}>
                     <SettingsRow
