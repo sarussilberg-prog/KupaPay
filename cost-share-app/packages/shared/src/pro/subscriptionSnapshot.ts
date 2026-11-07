@@ -72,7 +72,7 @@ export function mapStoreKind(store: string | null | undefined): SubscriptionStor
     }
 }
 
-export function isIndividualSubscriptionPlan(planKind: SubscriptionPlanKind): boolean {
+function isIndividualSubscriptionPlan(planKind: SubscriptionPlanKind): boolean {
     return planKind === 'monthly' || planKind === 'yearly';
 }
 

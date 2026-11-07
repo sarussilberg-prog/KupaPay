@@ -268,19 +268,6 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     };
 }
 
-export async function loadOfferingAllPackages(): Promise<PurchasesPackageLike[]> {
-    const Purchases = await getPurchases();
-    if (!Purchases || !(await waitForPurchasesReady())) return [];
-
-    const offeringId =
-        process.env.EXPO_PUBLIC_REVENUECAT_OFFERING_ID?.trim() || 'default';
-    const offerings = await Purchases.default.getOfferings();
-    const offering = offerings.all[offeringId] ?? offerings.current;
-    if (!offering) return [];
-
-    return offering.availablePackages as PurchasesPackageLike[];
-}
-
 /** StoreKit-localized price for the subscribed product (preferred for My Subscription). */
 export async function fetchLocalizedProductPriceString(
     storeProductId: string,

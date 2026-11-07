@@ -1,7 +1,19 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import type { MyProStatus } from '../../services/proEntitlements.service';
 import { ProPaywallContent } from '../../components/pro/ProPaywallContent';
 import { RtlLayoutProvider } from '../../hooks/useRtlLayout';
+
+type MockProStatusHook = {
+    hasPro: boolean;
+    proPerkUnlocked: boolean;
+    isLoading: boolean;
+    isError: boolean;
+    data: MyProStatus | undefined;
+    adminProViewMode: 'real';
+    adminProViewOverrideActive: boolean;
+    adminProViewExpiresAt: string | null;
+};
 
 function renderPaywall(ui: React.ReactElement) {
     return render(<RtlLayoutProvider>{ui}</RtlLayoutProvider>);
@@ -31,7 +43,7 @@ jest.mock('../../lib/paywallOfferingsLoad', () => ({
     reportPaywallLoadFailed: jest.fn(),
 }));
 
-const mockUseProStatus = jest.fn(() => ({
+const mockUseProStatus = jest.fn((_groupId?: string | null): MockProStatusHook => ({
     hasPro: false,
     proPerkUnlocked: false,
     isLoading: false,
@@ -43,7 +55,7 @@ const mockUseProStatus = jest.fn(() => ({
 }));
 
 jest.mock('../../hooks/useProStatus', () => ({
-    useProStatus: (...args: unknown[]) => mockUseProStatus(...args),
+    useProStatus: (groupId?: string | null) => mockUseProStatus(groupId),
 }));
 
 jest.mock('../../hooks/useMySubscription', () => ({

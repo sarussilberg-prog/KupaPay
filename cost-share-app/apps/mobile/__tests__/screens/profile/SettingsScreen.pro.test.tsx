@@ -36,6 +36,7 @@ jest.mock('../../../lib/featureFlags', () => ({
 
 jest.mock('../../../services/purchases.service', () => ({
     isPurchasesConfigured: () => true,
+    refreshPurchasesCustomerInfo: jest.fn().mockResolvedValue(undefined),
     fetchProSubscriptionUiState: jest.fn().mockResolvedValue({
         isInFreeTrial: false,
         trialEndsAt: null,
