@@ -49,7 +49,7 @@ appId: com.kupapay.mobile
       - back
       - extendedWaitUntil:
           visible:
-            id: tabbar-row
+            id: tab-Groups
           timeout: 120000
       - tapOn:
           id: tab-Groups

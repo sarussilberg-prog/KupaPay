@@ -1,4 +1,4 @@
-import { findOfferingPackage } from '../revenueCatOfferingPackages';
+import { findOfferingPackage, findPackageByStoreProductId } from '../revenueCatOfferingPackages';
 import { STORE_PRODUCT_TRIP_PASS } from '../proConstants';
 import type { PurchasesPackageLike } from '../purchasesPackage.types';
 
@@ -28,5 +28,11 @@ describe('findOfferingPackage', () => {
     it('does not treat trip_pass as a store product id', () => {
         expect(STORE_PRODUCT_TRIP_PASS).toBe('kupapay_trip_pass');
         expect(findOfferingPackage(packages, 'trip_pass')).toBeNull();
+    });
+
+    it('findPackageByStoreProductId matches Play base plan suffixes', () => {
+        expect(findPackageByStoreProductId(packages, 'kupapay_pro_monthly:monthly')).toEqual(
+            packages[0],
+        );
     });
 });
