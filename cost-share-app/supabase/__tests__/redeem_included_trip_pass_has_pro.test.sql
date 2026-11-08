@@ -15,11 +15,11 @@ BEGIN
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin);
 
-    INSERT INTO public.groups (id, name, default_currency, created_by, invite_token)
-    VALUES (v_group, 'Trip', 'ILS', v_admin, 'tt_redeem_grp');
+    INSERT INTO public.groups (id, name, default_currency, is_active, last_activity_at, created_by, invite_token)
+    VALUES (v_group, 'Trip', 'ILS', TRUE, NOW(), v_admin, 'tt_redeem_grp');
 
-    INSERT INTO public.group_members (group_id, user_id, role, is_active)
-    VALUES (v_group, v_admin, 'admin', TRUE);
+    INSERT INTO public.group_members (group_id, user_id, is_active)
+    VALUES (v_group, v_admin, TRUE);
 
     SET LOCAL session_replication_role = origin;
 
