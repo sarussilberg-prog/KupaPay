@@ -2,17 +2,21 @@ import * as Linking from 'expo-linking';
 import {
     parseE2eFixtureLocaleFromUrl,
     parseE2eFixtureNavigationFromUrl,
+    parseE2eFixturePseudoLocaleFromUrl,
 } from '../../lib/e2eFixtureLocaleLink';
 
 describe('parseE2eFixtureLocaleFromUrl', () => {
-    const prev = process.env.EXPO_PUBLIC_E2E_FIXTURES;
+    const prevFixtures = process.env.EXPO_PUBLIC_E2E_FIXTURES;
+    const prevXxLong = process.env.EXPO_PUBLIC_E2E_XX_LONG_LOCALE;
 
     beforeAll(() => {
         process.env.EXPO_PUBLIC_E2E_FIXTURES = '1';
+        process.env.EXPO_PUBLIC_E2E_XX_LONG_LOCALE = 'true';
     });
 
     afterAll(() => {
-        process.env.EXPO_PUBLIC_E2E_FIXTURES = prev;
+        process.env.EXPO_PUBLIC_E2E_FIXTURES = prevFixtures;
+        process.env.EXPO_PUBLIC_E2E_XX_LONG_LOCALE = prevXxLong;
     });
 
     it('parses locale query on e2e-fixture host', () => {
@@ -34,5 +38,16 @@ describe('parseE2eFixtureLocaleFromUrl', () => {
             Linking.parse(url);
             expect(parseE2eFixtureLocaleFromUrl(url)).toBe('he');
         }
+    });
+
+    it('detects xx-long pseudo-locale deep links', () => {
+        expect(parseE2eFixturePseudoLocaleFromUrl('com.kupapay.mobile://e2e-fixture?lang=xx-long')).toBe(
+            true,
+        );
+        expect(parseE2eFixtureLocaleFromUrl('com.kupapay.mobile://e2e-fixture?lang=xx-long')).toBeNull();
+        expect(
+            parseE2eFixtureNavigationFromUrl('com.kupapay.mobile://e2e-fixture?lang=xx-long')
+                ?.pseudoLocale,
+        ).toBe(true);
     });
 });
