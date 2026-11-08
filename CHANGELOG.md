@@ -115,3 +115,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): center button labels and specific restore purchase toasts (#741)
 ## [2.2.0-dev.55] — 2026-11-07
 - fix(mobile): subscription price, cancel state, Trip Pass, and restore UX (#742)
+## [2.2.0-dev.56] — 2026-11-08
+- fix(mobile): storefront-safe My Subscription price + hide Trip Pass for Pro (#743)
