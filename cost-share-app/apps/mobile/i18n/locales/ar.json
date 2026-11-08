@@ -873,6 +873,10 @@
             "deactivateSuccess": "تم إلغاء تفعيل الرمز",
             "deactivateError": "تعذّر إلغاء التفعيل"
         },
+        "storeProductPrice": {
+            "sectionTitle": "تصحيح سعر المنتج في المتجر",
+            "refresh": "تحديث getProducts وواجهة المتجر"
+        },
         "proView": {
             "sectionTitle": "وضع عرض Pro",
             "description": "معاينة تجربة Free أو Pro لحسابك فقط (24 ساعة). لا يغيّر الاشتراك الحقيقي.",

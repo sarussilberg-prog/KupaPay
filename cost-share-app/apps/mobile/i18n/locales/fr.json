@@ -841,6 +841,10 @@
             "deactivateSuccess": "Code désactivé",
             "deactivateError": "Impossible de désactiver le code"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Debug prix produit Store",
+            "refresh": "Actualiser getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "Mode d'affichage Pro",
             "description": "Aperçu Free ou Pro pour votre compte uniquement (24 h). Ne modifie pas l'abonnement réel.",

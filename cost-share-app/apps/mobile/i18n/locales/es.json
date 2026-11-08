@@ -842,6 +842,10 @@
             "deactivateSuccess": "Código desactivado",
             "deactivateError": "No se pudo desactivar el código"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Depuración de precio en tienda",
+            "refresh": "Actualizar getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "Modo de vista Pro",
             "description": "Vista previa de Free o Pro solo para tu cuenta (24 h). No cambia la suscripción real.",

@@ -1,21 +1,29 @@
 -- redeem_included_trip_pass honors has_pro() (incl. admin force_pro).
-DO $$
+BEGIN;
+SET LOCAL session_replication_role = replica;
+
+DO $outer$
 DECLARE
-    v_admin UUID := gen_random_uuid();
-    v_group UUID := gen_random_uuid();
+    v_admin CONSTANT UUID := '00000000-0000-0000-0000-0000000ad200';
+    v_group CONSTANT UUID := '00000000-0000-0000-0000-0000000ad210';
     v_result JSONB;
 BEGIN
+    INSERT INTO auth.users (id, email) VALUES (v_admin, 'redeem-trip-admin@test.local');
+
     INSERT INTO public.profiles (id, email, name, default_currency, language, is_active, invite_token, pro_until, included_trip_pass_credits)
-    VALUES (v_admin, v_admin || '@example.test', 'Admin', 'ILS', 'en', TRUE, gen_random_uuid()::TEXT, NULL, 1);
+    VALUES (v_admin, 'redeem-trip-admin@test.local', 'Admin', 'ILS', 'en', TRUE, 'tt_redeem_trip', NULL, 1);
 
     INSERT INTO public.app_admins (user_id) VALUES (v_admin);
+
     INSERT INTO public.groups (id, name, default_currency, created_by, invite_token)
-    VALUES (v_group, 'Trip', 'ILS', v_admin, gen_random_uuid()::TEXT);
+    VALUES (v_group, 'Trip', 'ILS', v_admin, 'tt_redeem_grp');
+
     INSERT INTO public.group_members (group_id, user_id, role, is_active)
     VALUES (v_group, v_admin, 'admin', TRUE);
 
-    PERFORM set_config('request.jwt.claim.sub', v_admin::TEXT, TRUE);
-    PERFORM set_config('role', 'authenticated', TRUE);
+    SET LOCAL session_replication_role = origin;
+
+    PERFORM public.test_set_authenticated(v_admin);
 
     INSERT INTO public.admin_pro_view_overrides (user_id, mode, expires_at)
     VALUES (v_admin, 'force_pro', NOW() + INTERVAL '1 day');
@@ -27,4 +35,6 @@ BEGIN
 
     RAISE NOTICE 'redeem_included_trip_pass_has_pro.test.sql — passed';
 END;
-$$;
+$outer$;
+
+ROLLBACK;

@@ -841,6 +841,10 @@
             "deactivateSuccess": "Code deaktiviert",
             "deactivateError": "Deaktivierung fehlgeschlagen"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Store-Produktpreis (Debug)",
+            "refresh": "getProducts + Storefront aktualisieren"
+        },
         "proView": {
             "sectionTitle": "Pro-Ansichtsmodus",
             "description": "Free- oder Pro-Erfahrung nur für dein Konto testen (24 Std.). Ändert kein echtes Abo.",
