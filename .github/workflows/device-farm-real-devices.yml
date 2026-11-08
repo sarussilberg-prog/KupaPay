@@ -89,7 +89,7 @@ jobs:
 
       - name: Restore cached Android APK (Maestro Release)
         if: inputs.platform == 'android' || inputs.platform == 'both'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: /tmp/maestro-android-apk
           key: maestro-android-apk-${{ steps.fingerprint.outputs.hash }}
