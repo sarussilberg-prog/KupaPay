@@ -24,9 +24,7 @@ BEGIN
     SET LOCAL session_replication_role = origin;
 
     PERFORM public.test_set_authenticated(v_admin);
-
-    INSERT INTO public.admin_pro_view_overrides (user_id, mode, expires_at)
-    VALUES (v_admin, 'force_pro', NOW() + INTERVAL '1 day');
+    PERFORM public.set_my_admin_pro_view_mode('force_pro');
 
     v_result := public.redeem_included_trip_pass(v_group);
     IF (v_result->>'ok')::BOOLEAN IS NOT TRUE THEN
