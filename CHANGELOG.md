@@ -117,3 +117,5 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(mobile): subscription price, cancel state, Trip Pass, and restore UX (#742)
 ## [2.2.0-dev.56] — 2026-11-08
 - fix(mobile): storefront-safe My Subscription price + hide Trip Pass for Pro (#743)
+## [2.2.0-dev.57] — 2026-11-08
+- fix(ci): Maestro auth build vs layout fixtures; xx-long deep link (#745)
