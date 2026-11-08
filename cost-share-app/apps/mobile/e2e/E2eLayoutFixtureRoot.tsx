@@ -17,9 +17,10 @@ import { useAppStore } from '../store';
 import {
     parseE2eFixtureLocaleFromUrl,
     parseE2eFixtureNavigationFromUrl,
+    parseE2eFixturePseudoLocaleFromUrl,
 } from '../lib/e2eFixtureLocaleLink';
 import type { AscCaptureScreen } from '../lib/ascCaptureParams';
-import { applyE2eFixtureLocale } from './applyE2eFixtureLocale';
+import { applyE2eFixtureLocale, applyE2eFixturePseudoLocale } from './applyE2eFixtureLocale';
 import { seedE2eLayoutFixtures } from './seedE2eLayoutFixtures';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
 
@@ -64,6 +65,7 @@ export function E2eLayoutFixtureRoot() {
     const [bootReady, setBootReady] = useState(false);
     const [navEpoch, setNavEpoch] = useState(0);
     const [fixtureLocale, setFixtureLocale] = useState<Language | null>(null);
+    const [fixturePseudoLocale, setFixturePseudoLocale] = useState(false);
     const [fixtureScreen, setFixtureScreen] = useState<AscCaptureScreen>('groups');
     const incomingUrl = Linking.useURL();
     const language = useAppStore((s) => s.language);
@@ -97,17 +99,25 @@ export function E2eLayoutFixtureRoot() {
 
     const applyFixtureLocaleFromUrl = useCallback(async (url: string | null | undefined) => {
         const nav = parseE2eFixtureNavigationFromUrl(url);
+        const pseudo =
+            nav?.pseudoLocale ?? parseE2eFixturePseudoLocaleFromUrl(url);
         const fromUrl = nav?.locale ?? parseE2eFixtureLocaleFromUrl(url);
-        if (!fromUrl && !nav?.screen) return;
+        if (!fromUrl && !pseudo && !nav?.screen) return;
         if (nav?.screen) {
             setFixtureScreen(nav.screen);
         }
-        if (fromUrl) {
+        if (pseudo) {
+            await applyE2eFixturePseudoLocale();
+            setFixturePseudoLocale(true);
+            setFixtureLocale(null);
+        } else if (fromUrl) {
             await applyE2eFixtureLocale(fromUrl);
             setFixtureLocale(fromUrl);
+            setFixturePseudoLocale(false);
         }
         setNavEpoch((n) => n + 1);
         if (__DEV__ && fromUrl) console.log(`[E2E_FIXTURE_LOCALE_APPLIED] ${fromUrl}`);
+        if (__DEV__ && pseudo) console.log('[E2E_FIXTURE_PSEUDO_LOCALE_APPLIED] xx-long');
     }, []);
 
     useEffect(() => {
@@ -147,6 +157,23 @@ export function E2eLayoutFixtureRoot() {
                             navEpoch={navEpoch}
                             captureScreen={fixtureScreen}
                         />
+                        {fixturePseudoLocale ? (
+                            <View
+                                testID="e2e-fixture-pseudo-ready"
+                                accessible
+                                accessibilityLabel="e2e-fixture-locale-xx-long"
+                                importantForAccessibility="yes"
+                                collapsable={false}
+                                style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    width: 4,
+                                    height: 4,
+                                    opacity: 0.02,
+                                }}
+                            />
+                        ) : null}
                         {fixtureLocale ? (
                             <View
                                 testID="e2e-fixture-locale-ready"
