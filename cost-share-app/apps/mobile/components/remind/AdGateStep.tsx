@@ -65,7 +65,7 @@ export function AdGateStep({ active, featureKey, groupId, onCompleted }: AdGateS
         navigation.navigate('Paywall', {
             featureKey,
             groupId,
-            showTripPass: !!groupId,
+            showTripPass: !!groupId && !hasPro,
         });
     };
 

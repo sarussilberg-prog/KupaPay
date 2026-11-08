@@ -9,6 +9,8 @@ import {
     REVENUECAT_PACKAGE_ANNUAL,
     REVENUECAT_PACKAGE_MONTHLY,
     REVENUECAT_PACKAGE_TRIP_PASS,
+    STORE_PRODUCT_PRO_MONTHLY,
+    STORE_PRODUCT_PRO_YEARLY,
     STORE_PRODUCT_TRIP_PASS,
 } from '../lib/proConstants';
 import { registerTripPassPurchaseIntent } from './proEntitlements.service';
@@ -24,7 +26,17 @@ import {
 import { findOfferingPackage } from '../lib/revenueCatOfferingPackages';
 import { syncProTrialReminder } from './proTrialReminder.service';
 import { supabase } from '../lib/supabase';
+import {
+    interpretRestorePurchases,
+    pickStorefrontSafePriceString,
+    subscriptionStoreProductIdCandidates,
+    type RestorePurchasesResult,
+    type StoreProductPriceRow,
+    type StorefrontSafePriceResult,
+} from '@cost-share/shared';
 import { useAppStore } from '../store';
+
+export type { RestorePurchasesResult };
 
 export type { PaywallPackages, PurchasesPackageLike };
 export type { IntroEligibilityMap };
@@ -241,14 +253,133 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     const packages = offering.availablePackages as PurchasesPackageLike[];
 
     return {
-        monthly: findOfferingPackage(packages, REVENUECAT_PACKAGE_MONTHLY),
-        annual: findOfferingPackage(packages, REVENUECAT_PACKAGE_ANNUAL),
+        monthly: findOfferingPackage(
+            packages,
+            REVENUECAT_PACKAGE_MONTHLY,
+            STORE_PRODUCT_PRO_MONTHLY,
+        ),
+        annual: findOfferingPackage(
+            packages,
+            REVENUECAT_PACKAGE_ANNUAL,
+            STORE_PRODUCT_PRO_YEARLY,
+        ),
         tripPass: findOfferingPackage(
             packages,
             REVENUECAT_PACKAGE_TRIP_PASS,
             STORE_PRODUCT_TRIP_PASS,
         ),
     };
+}
+
+type PurchasesStoreProduct = import('react-native-purchases').PurchasesStoreProduct;
+
+function mapStoreProducts(products: PurchasesStoreProduct[]): StoreProductPriceRow[] {
+    return products.map(p => ({
+        identifier: p.identifier,
+        priceString: p.priceString?.trim() || null,
+        currencyCode: p.currencyCode?.trim() || null,
+    }));
+}
+
+async function fetchStorefrontCountryCode(
+    Purchases: PurchasesModule,
+): Promise<string | null> {
+    try {
+        const getStorefront = Purchases.default.getStorefront;
+        if (typeof getStorefront !== 'function') return null;
+        const storefront = await getStorefront.call(Purchases.default);
+        const country = storefront?.countryCode?.trim();
+        return country || null;
+    } catch {
+        return null;
+    }
+}
+
+async function loadSubscriptionStoreProducts(
+    Purchases: PurchasesModule,
+    tryIds: string[],
+): Promise<PurchasesStoreProduct[]> {
+    const category = Purchases.PRODUCT_CATEGORY?.SUBSCRIPTION;
+    const collected: PurchasesStoreProduct[] = [];
+    const seen = new Set<string>();
+    const push = (list: PurchasesStoreProduct[]) => {
+        for (const product of list) {
+            if (seen.has(product.identifier)) continue;
+            seen.add(product.identifier);
+            collected.push(product);
+        }
+    };
+    try {
+        for (const productId of tryIds) {
+            const batch = category
+                ? await Purchases.default.getProducts([productId], category)
+                : await Purchases.default.getProducts([productId]);
+            push(batch);
+        }
+        if (tryIds.length > 1) {
+            const batch = category
+                ? await Purchases.default.getProducts(tryIds, category)
+                : await Purchases.default.getProducts(tryIds);
+            push(batch);
+        }
+    } catch {
+        return collected;
+    }
+    return collected;
+}
+
+/** StoreKit price for My Subscription — omitted when currency ≠ storefront (avoids RC USD fallback). */
+export async function resolveStorefrontSafeSubscriptionPrice(
+    storeProductId: string,
+    productPlanIdentifier?: string | null,
+): Promise<StorefrontSafePriceResult> {
+    const empty: StorefrontSafePriceResult = {
+        displayPriceString: null,
+        storefrontCountryCode: null,
+        storefrontCurrencyCode: null,
+        products: [],
+    };
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return empty;
+    const tryIds = subscriptionStoreProductIdCandidates(storeProductId, productPlanIdentifier);
+    if (tryIds.length === 0) return empty;
+    const storefrontCountryCode = await fetchStorefrontCountryCode(Purchases);
+    const raw = await loadSubscriptionStoreProducts(Purchases, tryIds);
+    const products = mapStoreProducts(raw);
+    return pickStorefrontSafePriceString(products, storefrontCountryCode, storeProductId);
+}
+
+export async function fetchLocalizedProductPriceString(
+    storeProductId: string,
+    productPlanIdentifier?: string | null,
+): Promise<string | null> {
+    const resolved = await resolveStorefrontSafeSubscriptionPrice(
+        storeProductId,
+        productPlanIdentifier,
+    );
+    return resolved.displayPriceString;
+}
+
+/** Dev admin: raw getProducts rows + storefront country for on-device verification. */
+export async function debugStoreProductPricing(
+    storeProductId: string,
+    productPlanIdentifier?: string | null,
+): Promise<StorefrontSafePriceResult> {
+    return resolveStorefrontSafeSubscriptionPrice(storeProductId, productPlanIdentifier);
+}
+
+/** Force RevenueCat to refetch CustomerInfo (e.g. after canceling in the store). */
+export async function refreshPurchasesCustomerInfo(): Promise<void> {
+    const Purchases = await getPurchases();
+    if (!Purchases || !(await waitForPurchasesReady())) return;
+    try {
+        if (typeof Purchases.default.invalidateCustomerInfoCache === 'function') {
+            await Purchases.default.invalidateCustomerInfoCache();
+        }
+        await Purchases.default.getCustomerInfo();
+    } catch {
+        // ignore — next snapshot fetch falls back to cached info
+    }
 }
 
 async function trackPurchaseEvent(
@@ -357,11 +488,25 @@ export async function purchasePackage(
     }
 }
 
-export async function restorePurchases(featureKey: string, groupId?: string): Promise<boolean> {
+export async function restorePurchases(
+    featureKey: string,
+    groupId?: string,
+): Promise<RestorePurchasesResult> {
     const Purchases = await getPurchases();
-    if (!Purchases) return false;
+    if (!Purchases) {
+        return { status: 'none' };
+    }
     try {
         await trackPurchaseEvent('purchase_started', featureKey, { action: 'restore' });
+        let hadProBeforeRestore = false;
+        try {
+            const before = await Purchases.default.getCustomerInfo();
+            hadProBeforeRestore = Boolean(
+                before.entitlements.active[REVENUECAT_ENTITLEMENT_PRO],
+            );
+        } catch {
+            /* best-effort — restore still proceeds */
+        }
         const info = await Purchases.default.restorePurchases();
         const active = info.entitlements.active[REVENUECAT_ENTITLEMENT_PRO];
         if (active) {
@@ -375,13 +520,25 @@ export async function restorePurchases(featureKey: string, groupId?: string): Pr
                 individualUntil: active.expirationDate ?? undefined,
             });
             await refreshProStatusQueries(groupId);
-            return true;
+            return interpretRestorePurchases({
+                hadProBeforeRestore,
+                proActiveAfterRestore: true,
+            });
         }
         await trackPurchaseEvent('restore_failed', featureKey);
-        return false;
-    } catch {
+        return interpretRestorePurchases({
+            hadProBeforeRestore,
+            proActiveAfterRestore: false,
+        });
+    } catch (e: unknown) {
         await trackPurchaseEvent('restore_failed', featureKey);
-        return false;
+        const message =
+            e instanceof Error ? e.message : typeof e === 'string' ? e : 'restore_failed';
+        return interpretRestorePurchases({
+            hadProBeforeRestore: false,
+            proActiveAfterRestore: false,
+            errorMessage: message,
+        });
     }
 }
 

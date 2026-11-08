@@ -873,6 +873,10 @@
             "deactivateSuccess": "تم إلغاء تفعيل الرمز",
             "deactivateError": "تعذّر إلغاء التفعيل"
         },
+        "storeProductPrice": {
+            "sectionTitle": "تصحيح سعر المنتج في المتجر",
+            "refresh": "تحديث getProducts وواجهة المتجر"
+        },
         "proView": {
             "sectionTitle": "وضع عرض Pro",
             "description": "معاينة تجربة Free أو Pro لحسابك فقط (24 ساعة). لا يغيّر الاشتراك الحقيقي.",
@@ -1625,6 +1629,10 @@
             "subscribeAtPrice": "اشترك — {{price}}",
             "buyTripPass": "شراء Trip Pass — {{price}}",
             "restore": "استعادة المشتريات",
+            "restoreHint": "استخدمه بعد إعادة تثبيت التطبيق أو تسجيل الدخول على جهاز جديد.",
+            "restoreProActive": "Pro مفعّل",
+            "restoreProRestored": "تم استعادة Pro",
+            "restoreError": "تعذّر استعادة المشتريات",
             "redeemOfferCode": "استرداد رمز العرض",
             "manageSubscription": "إدارة الاشتراك",
             "storeNotConfigured": "المشتريات غير متاحة في هذا الإصدار.",

@@ -172,10 +172,10 @@ export function AppLogoAnimated({ size = 108, testID = 'app-logo', style }: AppL
                 />
                 <View style={styles.fill} pointerEvents="none">
                     <Animated.View style={[topSlot, { transform: [{ translateX: topX }] }]}>
-                        <Image source={ARROW_TOP} style={styles.full} resizeMode="contain" />
+                        <Image source={ARROW_BOTTOM} style={styles.full} resizeMode="contain" />
                     </Animated.View>
                     <Animated.View style={[botSlot, { transform: [{ translateX: botX }] }]}>
-                        <Image source={ARROW_BOTTOM} style={styles.full} resizeMode="contain" />
+                        <Image source={ARROW_TOP} style={styles.full} resizeMode="contain" />
                     </Animated.View>
                 </View>
             </View>

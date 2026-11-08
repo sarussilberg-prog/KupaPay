@@ -843,6 +843,10 @@
             "deactivateSuccess": "הקוד הושבת",
             "deactivateError": "לא ניתן להשבית את הקוד"
         },
+        "storeProductPrice": {
+            "sectionTitle": "דיבוג מחיר מוצר מהחנות",
+            "refresh": "רענון getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "מצב תצוגת Pro",
             "description": "תצוגה מקדימה של חוויית Free או Pro לחשבון שלך בלבד (24 שעות). לא משנה מנוי אמיתי.",
@@ -1444,6 +1448,10 @@
             "subscribeAtPrice": "הצטרפות — {{price}}",
             "buyTripPass": "רכישת Trip Pass — {{price}}",
             "restore": "שחזור רכישות",
+            "restoreHint": "לשימוש אחרי התקנה מחדש של האפליקציה או כניסה במכשיר חדש.",
+            "restoreProActive": "Pro פעיל",
+            "restoreProRestored": "Pro שוחזר",
+            "restoreError": "לא ניתן לשחזר רכישות",
             "redeemOfferCode": "מימוש קוד הטבה",
             "manageSubscription": "ניהול מנוי",
             "storeNotConfigured": "רכישות לא זמינות בגרסה זו.",
@@ -1452,7 +1460,7 @@
             "purchaseSuccess": "ברוכים הבאים ל-Pro!",
             "purchaseError": "לא ניתן להשלים את הרכישה.",
             "restoreSuccess": "הרכישות שוחזרו.",
-            "restoreNone": "לא נמצאו רכישות פעילות.",
+            "restoreNone": "אין רכישות לשחזור",
             "tripPassNeedsGroup": "פתח/י קבוצה כדי לרכוש Trip Pass עבורה.",
             "tryFreeTrialCta": "נסו {{trialDays}} ימים בחינם",
             "trialFreePeriodHeading": "ניסיון חינם ל-{{trialDays}} ימים",

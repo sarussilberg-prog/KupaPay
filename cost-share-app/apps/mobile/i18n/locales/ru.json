@@ -851,6 +851,10 @@
             "deactivateSuccess": "Код деактивирован",
             "deactivateError": "Не удалось деактивировать код"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Отладка цены Store",
+            "refresh": "Обновить getProducts и storefront"
+        },
         "proView": {
             "sectionTitle": "Режим просмотра Pro",
             "description": "Предпросмотр Free или Pro только для вашего аккаунта (24 ч). Не меняет реальную подписку.",
@@ -1561,6 +1565,10 @@
             "subscribeAtPrice": "Подписаться — {{price}}",
             "buyTripPass": "Купить Trip Pass — {{price}}",
             "restore": "Восстановить покупки",
+            "restoreHint": "Используйте после переустановки приложения или входа на новом устройстве.",
+            "restoreProActive": "Pro активен",
+            "restoreProRestored": "Pro восстановлен",
+            "restoreError": "Не удалось восстановить покупки",
             "redeemOfferCode": "Активировать промокод",
             "manageSubscription": "Управление подпиской",
             "storeNotConfigured": "Покупки недоступны в этой сборке.",

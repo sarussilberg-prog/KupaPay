@@ -3,10 +3,11 @@
  * Pro IAP is not offered on Expo web; paywall shows store-not-configured.
  */
 
+import type { RestorePurchasesResult } from '@cost-share/shared';
 import type { PaywallPackages, PurchasesPackageLike } from '../lib/purchasesPackage.types';
 import { KUPAPAY_PRO_ENABLED } from '../lib/featureFlags';
 
-export type { PaywallPackages, PurchasesPackageLike };
+export type { PaywallPackages, PurchasesPackageLike, RestorePurchasesResult };
 
 function captureMode(): boolean {
     if (process.env.EXPO_PUBLIC_ASC_SCREENSHOT_DEMO === 'true') return true;
@@ -62,6 +63,15 @@ export async function loadOfferingPackages(): Promise<PaywallPackages> {
     if (CAPTURE || KUPAPAY_PRO_ENABLED) return capturePackages();
     return { monthly: null, annual: null, tripPass: null };
 }
+
+export async function fetchLocalizedProductPriceString(
+    _storeProductId: string,
+    _productPlanIdentifier?: string | null,
+): Promise<string | null> {
+    return null;
+}
+
+export async function refreshPurchasesCustomerInfo(): Promise<void> {}
 
 export async function checkIntroductoryPriceEligibility(): Promise<
     Record<string, { status: number }>
@@ -125,8 +135,11 @@ export async function purchasePackage(
     return { ok: false };
 }
 
-export async function restorePurchases(_featureKey: string, _groupId?: string): Promise<boolean> {
-    return false;
+export async function restorePurchases(
+    _featureKey: string,
+    _groupId?: string,
+): Promise<RestorePurchasesResult> {
+    return { status: 'none' };
 }
 
 export async function openSubscriptionManagement(): Promise<void> {}

@@ -14,7 +14,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
-import { APP_WEB_ORIGIN, buildLegalPageUrl, paywallTitleKeyForVariant } from '@cost-share/shared';
+import {
+    APP_WEB_ORIGIN,
+    buildLegalPageUrl,
+    paywallTitleKeyForVariant,
+    shouldShowProMemberPaywall,
+    shouldShowTripPassPurchaseOption,
+} from '@cost-share/shared';
 import { useGrowthExperimentFlags } from '../../hooks/useGrowthExperiment';
 import { Text } from '../AppText';
 import { AppIcon } from '../AppIcon';
@@ -41,8 +47,13 @@ import {
 import { logMonetizationEvent } from '../../services/monetization.service';
 import { captureProductEvent } from '../../lib/productAnalytics';
 import { showAppToast } from '../../lib/appToast';
+import {
+    shouldRefetchAfterRestore,
+    showRestorePurchasesToast,
+} from '../../lib/restorePurchasesFeedback';
 import { paywallDisplayPrice } from '../../lib/paywallDisplayPrice';
 import { useProStatus } from '../../hooks/useProStatus';
+import { useMySubscription } from '../../hooks/useMySubscription';
 import { KUPAPAY_PRO_ENABLED } from '../../lib/featureFlags';
 import { ProMemberPaywallPanel } from './ProMemberPaywallPanel';
 import { PromoCodeRedeemSheet } from './PromoCodeRedeemSheet';
@@ -85,8 +96,15 @@ export function ProPaywallContent({
     const paywallTitleKey = paywallTitleKeyForVariant(paywallHeadlineVariant);
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
-    const { hasPro } = useProStatus(groupId);
-    const showMemberPanel = KUPAPAY_PRO_ENABLED && hasPro;
+    const { hasPro, isLoading: proLoading } = useProStatus(groupId);
+    const { data: subscription, isLoading: subscriptionLoading } = useMySubscription();
+    const showTripPassForPurchase = shouldShowTripPassPurchaseOption({
+        showTripPass,
+        effectiveHasPro: hasPro,
+        subscription,
+    });
+    const showMemberPanel =
+        KUPAPAY_PRO_ENABLED && shouldShowProMemberPaywall({ effectiveHasPro: hasPro, subscription });
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [selected, setSelected] = useState<PlanKey>('yearly');
@@ -139,6 +157,12 @@ export function ProPaywallContent({
         void loadOfferings();
     }, [loadOfferings, loadAttempt]);
 
+    useEffect(() => {
+        if (!showTripPassForPurchase && selected === 'trip_pass') {
+            setSelected('yearly');
+        }
+    }, [showTripPassForPurchase, selected]);
+
     const retryLoad = useCallback(() => {
         setLoadAttempt(n => n + 1);
     }, []);
@@ -168,9 +192,15 @@ export function ProPaywallContent({
     const handlePurchase = useCallback(async () => {
         const pkg = selectedPackage;
         if (!pkg || busy) return;
-        if (selected === 'trip_pass' && !groupId) {
-            showAppToast({ type: 'info', titleKey: 'pro.paywall.tripPassNeedsGroup' });
-            return;
+        if (selected === 'trip_pass') {
+            if (hasPro || !showTripPassForPurchase) {
+                showAppToast({ type: 'info', titleKey: 'pro.paywall.alreadyProTitle' });
+                return;
+            }
+            if (!groupId) {
+                showAppToast({ type: 'info', titleKey: 'pro.paywall.tripPassNeedsGroup' });
+                return;
+            }
         }
         setBusy(true);
         const result = await purchasePackage(pkg, { featureKey, groupId });
@@ -181,20 +211,18 @@ export function ProPaywallContent({
         } else if (!result.userCancelled) {
             showAppToast({ type: 'error', titleKey: 'pro.paywall.purchaseError' });
         }
-    }, [busy, featureKey, groupId, onPurchaseSuccess, selected, selectedPackage]);
+    }, [busy, featureKey, groupId, hasPro, onPurchaseSuccess, selected, selectedPackage, showTripPassForPurchase]);
 
     const storeConfigured = isPurchasesConfigured();
 
     const handleRestore = useCallback(async () => {
         if (busy) return;
         setBusy(true);
-        const ok = await restorePurchases(featureKey, groupId);
+        const result = await restorePurchases(featureKey, groupId);
         setBusy(false);
-        if (ok) {
-            showAppToast({ type: 'success', titleKey: 'pro.paywall.restoreSuccess' });
+        showRestorePurchasesToast(result);
+        if (shouldRefetchAfterRestore(result)) {
             onPurchaseSuccess?.();
-        } else {
-            showAppToast({ type: 'info', titleKey: 'pro.paywall.restoreNone' });
         }
     }, [busy, featureKey, groupId, onPurchaseSuccess]);
 
@@ -273,7 +301,7 @@ export function ProPaywallContent({
                 <View className="gap-2 mb-3" testID="paywall-loading">
                     <PlanPickerSkeleton />
                     <PlanPickerSkeleton />
-                    {showTripPass ? <PlanPickerSkeleton /> : null}
+                    {showTripPassForPurchase ? <PlanPickerSkeleton /> : null}
                 </View>
             );
         }
@@ -318,7 +346,7 @@ export function ProPaywallContent({
                         testID="paywall-pick-yearly"
                         hint={t('pro.paywall.yearlyIncludesTripPass')}
                     />
-                    {showTripPass ? (
+                    {showTripPassForPurchase ? (
                         <PlanPicker
                             label={t('pro.paywall.planTripPass')}
                             price={tripPassPrice}
@@ -329,14 +357,36 @@ export function ProPaywallContent({
                     ) : null}
                 </View>
 
-                {showTripPass && tripPassPrice ? (
+                {showTripPassForPurchase && tripPassPrice ? (
                     <Text className="text-sm text-gray-600 text-center mb-4 leading-5">
                         {t('pro.paywall.tripPassLine', { price: tripPassPrice })}
                     </Text>
                 ) : null}
             </>
         );
-    }, [loadFailedReason, loading, packages, retryLoad, selected, showTripPass, storeConfigured, t, tripPassPrice]);
+    }, [
+        loadFailedReason,
+        loading,
+        packages,
+        retryLoad,
+        selected,
+        showTripPassForPurchase,
+        storeConfigured,
+        t,
+        tripPassPrice,
+    ]);
+
+    if (proLoading && subscriptionLoading && !subscription && !hasPro) {
+        return (
+            <View
+                className="flex-1 bg-slate-50 items-center justify-center"
+                style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }}
+                testID="paywall-pro-status-loading"
+            >
+                <ActivityIndicator size="large" />
+            </View>
+        );
+    }
 
     if (showMemberPanel) {
         return (
@@ -445,14 +495,22 @@ export function ProPaywallContent({
                 </Pressable>
             </View>
 
+            <View className="items-center">
             <Pressable
                 onPress={handleRestore}
                 disabled={busy || !storeConfigured}
-                className="py-3 items-center"
+                className="py-3 items-center flex-row justify-center gap-2"
                 testID="paywall-restore"
             >
-                <Text className="text-primary font-semibold">{t('pro.paywall.restore')}</Text>
+                {busy ? <ActivityIndicator size="small" /> : null}
+                <Text className={`text-primary font-semibold ${busy ? 'opacity-50' : ''}`}>
+                    {t('pro.paywall.restore')}
+                </Text>
             </Pressable>
+                <Text className="text-xs text-gray-500 text-center px-6 leading-5 mb-1">
+                    {t('pro.paywall.restoreHint')}
+                </Text>
+            </View>
 
             <Pressable onPress={handleManage} className="py-3 items-center" testID="paywall-manage">
                 <Text className="text-gray-600 text-sm">{t('pro.paywall.manageSubscription')}</Text>

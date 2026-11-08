@@ -5,7 +5,7 @@ set -euo pipefail
 # Expo inlines EXPO_PUBLIC_* at bundle time — shell exports alone are not enough for Release Xcode builds.
 maestro_write_mobile_e2e_env() {
   local mobile_root="$1"
-  local fixtures="${EXPO_PUBLIC_E2E_FIXTURES:-1}"
+  local fixtures="${EXPO_PUBLIC_E2E_FIXTURES:-0}"
   # Avoid EAS production env files overriding CI layout fixture env on simulators.
   rm -f "$mobile_root/.env.production" "$mobile_root/.env.local"
   local env_file="$mobile_root/.env"

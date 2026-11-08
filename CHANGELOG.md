@@ -111,3 +111,11 @@ Internal dev builds use `packages/shared/version.json` (`2.x.y-dev.N`). Store re
 - fix(pro): subscription lifecycle audit — cancel, refund, referral rewards (#738)
 ## [2.2.0-dev.53] — 2026-11-05
 - fix(mobile): restore transparent animated login logo on iOS 26+ (#737)
+## [2.2.0-dev.54] — 2026-11-07
+- fix(mobile): center button labels and specific restore purchase toasts (#741)
+## [2.2.0-dev.55] — 2026-11-07
+- fix(mobile): subscription price, cancel state, Trip Pass, and restore UX (#742)
+## [2.2.0-dev.56] — 2026-11-08
+- fix(mobile): storefront-safe My Subscription price + hide Trip Pass for Pro (#743)
+## [2.2.0-dev.57] — 2026-11-08
+- fix(ci): Maestro auth build vs layout fixtures; xx-long deep link (#745)

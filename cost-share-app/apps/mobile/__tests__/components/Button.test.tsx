@@ -1,6 +1,19 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { Button } from '../../components/Button';
+import { RtlLayoutProvider } from '../../hooks/useRtlLayout';
+
+jest.mock('react-i18next', () => ({
+    useTranslation: () => ({
+        t: (key: string) => key,
+        i18n: { language: 'he' },
+    }),
+}));
+
+jest.mock('../../store', () => ({
+    useAppStore: (selector: (state: { language: 'he' | 'en' }) => unknown) =>
+        selector({ language: 'he' }),
+}));
 
 describe('Button', () => {
     it('renders with the provided title', () => {
@@ -50,4 +63,18 @@ describe('Button', () => {
             expect(getByText(`Variant ${variant}`)).toBeTruthy();
         }
     );
+
+    it('centers label text in Hebrew RTL', () => {
+        const { getByText } = render(
+            <RtlLayoutProvider>
+                <Button title="שדרג ל-Pro" onPress={() => {}} variant="pro" />
+            </RtlLayoutProvider>,
+        );
+        const label = getByText('שדרג ל-Pro');
+        const flat = Array.isArray(label.props.style)
+            ? Object.assign({}, ...label.props.style.filter(Boolean))
+            : label.props.style;
+        expect(flat).toEqual(expect.objectContaining({ textAlign: 'center' }));
+        expect(label.props.className).toContain('text-center');
+    });
 });

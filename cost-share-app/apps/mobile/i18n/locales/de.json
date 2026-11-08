@@ -841,6 +841,10 @@
             "deactivateSuccess": "Code deaktiviert",
             "deactivateError": "Deaktivierung fehlgeschlagen"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Store-Produktpreis (Debug)",
+            "refresh": "getProducts + Storefront aktualisieren"
+        },
         "proView": {
             "sectionTitle": "Pro-Ansichtsmodus",
             "description": "Free- oder Pro-Erfahrung nur für dein Konto testen (24 Std.). Ändert kein echtes Abo.",
@@ -1543,6 +1547,10 @@
             "subscribeAtPrice": "Abonnieren — {{price}}",
             "buyTripPass": "Trip Pass kaufen — {{price}}",
             "restore": "Käufe wiederherstellen",
+            "restoreHint": "Nach Neuinstallation der App oder Anmeldung auf einem neuen Gerät.",
+            "restoreProActive": "Pro ist aktiv",
+            "restoreProRestored": "Pro wiederhergestellt",
+            "restoreError": "Käufe konnten nicht wiederhergestellt werden",
             "redeemOfferCode": "Angebotscode einlösen",
             "manageSubscription": "Abo verwalten",
             "storeNotConfigured": "Käufe sind in diesem Build nicht verfügbar.",

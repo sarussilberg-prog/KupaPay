@@ -46,10 +46,15 @@ appId: com.kupapay.mobile
       notVisible:
         id: groups-list-title
     commands:
-      - back
+      - repeat:
+          times: 3
+          commands:
+            - back
+            - waitForAnimationToEnd:
+                timeout: 3000
       - extendedWaitUntil:
           visible:
-            id: tabbar-row
+            id: tab-Groups
           timeout: 120000
       - tapOn:
           id: tab-Groups

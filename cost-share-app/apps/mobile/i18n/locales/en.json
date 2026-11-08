@@ -841,6 +841,10 @@
             "deactivateSuccess": "Code deactivated",
             "deactivateError": "Could not deactivate code"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Store product price debug",
+            "refresh": "Refresh getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "Pro view mode",
             "description": "Preview Free or Pro UX for your account only (24h). Does not change real subscriptions.",
@@ -1442,6 +1446,10 @@
             "subscribeAtPrice": "Subscribe — {{price}}",
             "buyTripPass": "Buy Trip Pass — {{price}}",
             "restore": "Restore Purchases",
+            "restoreHint": "Use this after reinstalling the app or signing in on a new device.",
+            "restoreProActive": "Pro is active",
+            "restoreProRestored": "Pro restored",
+            "restoreError": "Could not restore purchases",
             "redeemOfferCode": "Redeem offer code",
             "manageSubscription": "Manage subscription",
             "storeNotConfigured": "Purchases are not available in this build.",
@@ -1450,7 +1458,7 @@
             "purchaseSuccess": "Welcome to Pro!",
             "purchaseError": "Purchase could not be completed.",
             "restoreSuccess": "Purchases restored.",
-            "restoreNone": "No active purchases found.",
+            "restoreNone": "No purchases to restore",
             "tripPassNeedsGroup": "Open a group first to buy a Trip Pass for that group.",
             "tryFreeTrialCta": "Try {{trialDays}} days free",
             "trialFreePeriodHeading": "{{trialDays}}-day free trial",

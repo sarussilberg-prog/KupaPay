@@ -842,6 +842,10 @@
             "deactivateSuccess": "Código desactivado",
             "deactivateError": "No se pudo desactivar el código"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Depuración de precio en tienda",
+            "refresh": "Actualizar getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "Modo de vista Pro",
             "description": "Vista previa de Free o Pro solo para tu cuenta (24 h). No cambia la suscripción real.",
@@ -1545,6 +1549,10 @@
             "subscribeAtPrice": "Suscribirse — {{price}}",
             "buyTripPass": "Comprar Trip Pass — {{price}}",
             "restore": "Restaurar compras",
+            "restoreHint": "Úsalo tras reinstalar la app o iniciar sesión en un dispositivo nuevo.",
+            "restoreProActive": "Pro está activo",
+            "restoreProRestored": "Pro restaurado",
+            "restoreError": "No se pudieron restaurar las compras",
             "redeemOfferCode": "Canjear código promocional",
             "manageSubscription": "Gestionar suscripción",
             "storeNotConfigured": "Las compras no están disponibles en esta compilación.",

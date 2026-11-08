@@ -72,6 +72,18 @@ export function mapStoreKind(store: string | null | undefined): SubscriptionStor
     }
 }
 
+function isIndividualSubscriptionPlan(planKind: SubscriptionPlanKind): boolean {
+    return planKind === 'monthly' || planKind === 'yearly';
+}
+
+export function hasActiveIndividualSubscriptionPlan(
+    snapshot: Pick<MySubscriptionSnapshot, 'lifecycle' | 'planKind'> | null | undefined,
+): boolean {
+    if (!snapshot) return false;
+    if (snapshot.lifecycle === 'none' || snapshot.lifecycle === 'expired') return false;
+    return isIndividualSubscriptionPlan(snapshot.planKind);
+}
+
 export function deriveSubscriptionLifecycle(
     ent: EntitlementWireSlice | null | undefined,
     serverIndividualUntil: string | null | undefined,
@@ -80,7 +92,7 @@ export function deriveSubscriptionLifecycle(
     const nowMs = now.getTime();
     if (ent?.isActive) {
         if (ent.billingIssueDetectedAt) return 'billing_issue';
-        if (ent.willRenew === false) return 'cancelled_until_expiry';
+        if (ent.willRenew === false || ent.unsubscribeDetectedAt) return 'cancelled_until_expiry';
         return 'active';
     }
     if (ent && !ent.isActive) return 'expired';
@@ -89,6 +101,18 @@ export function deriveSubscriptionLifecycle(
         if (Number.isFinite(ms) && ms > nowMs) return 'active';
     }
     return 'none';
+}
+
+/** True when the user still has an individual Pro subscription (incl. grace / billing issue). */
+export function hasActiveProSubscription(
+    snapshot: MySubscriptionSnapshot | null | undefined,
+): boolean {
+    if (!snapshot) return false;
+    return (
+        snapshot.lifecycle === 'active' ||
+        snapshot.lifecycle === 'cancelled_until_expiry' ||
+        snapshot.lifecycle === 'billing_issue'
+    );
 }
 
 export function buildSubscriptionSnapshot(input: {
@@ -112,7 +136,11 @@ export function buildSubscriptionSnapshot(input: {
             input.serverIndividualUntil ??
             input.tripPasses[0]?.expiresAt ??
             null,
-        autoRenew: ent?.isActive ? ent.willRenew : null,
+        autoRenew: ent?.isActive
+            ? ent.unsubscribeDetectedAt
+                ? false
+                : ent.willRenew === true
+            : null,
         store: mapStoreKind(ent?.store),
         storeProductId: ent?.productIdentifier ?? null,
         storePlanId: ent?.productPlanIdentifier ?? null,
