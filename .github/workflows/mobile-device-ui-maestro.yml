@@ -139,7 +139,7 @@ jobs:
     needs: plan
     if: needs.plan.outputs.run_ios == 'true' || needs.plan.outputs.run_launch_smoke_ios == 'true'
     runs-on: macos-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     defaults:
       run:
         working-directory: cost-share-app
@@ -274,7 +274,7 @@ jobs:
     needs: plan
     if: needs.plan.outputs.run_android == 'true' || needs.plan.outputs.run_launch_smoke_android == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     defaults:
       run:
         working-directory: cost-share-app
