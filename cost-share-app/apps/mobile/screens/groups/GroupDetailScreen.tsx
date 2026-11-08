@@ -1404,7 +1404,7 @@ export function GroupDetailScreen({
                     navigation.navigate('Paywall', {
                         featureKey: 'group_export',
                         groupId,
-                        showTripPass: true,
+                        showTripPass: !hasPro,
                     });
                 }}
                 onSelect={format => void runExport(format)}

@@ -843,6 +843,10 @@
             "deactivateSuccess": "הקוד הושבת",
             "deactivateError": "לא ניתן להשבית את הקוד"
         },
+        "storeProductPrice": {
+            "sectionTitle": "דיבוג מחיר מוצר מהחנות",
+            "refresh": "רענון getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "מצב תצוגת Pro",
             "description": "תצוגה מקדימה של חוויית Free או Pro לחשבון שלך בלבד (24 שעות). לא משנה מנוי אמיתי.",

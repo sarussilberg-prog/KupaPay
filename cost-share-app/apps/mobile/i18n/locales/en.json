@@ -841,6 +841,10 @@
             "deactivateSuccess": "Code deactivated",
             "deactivateError": "Could not deactivate code"
         },
+        "storeProductPrice": {
+            "sectionTitle": "Store product price debug",
+            "refresh": "Refresh getProducts + storefront"
+        },
         "proView": {
             "sectionTitle": "Pro view mode",
             "description": "Preview Free or Pro UX for your account only (24h). Does not change real subscriptions.",

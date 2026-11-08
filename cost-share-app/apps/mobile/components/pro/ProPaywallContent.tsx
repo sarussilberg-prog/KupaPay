@@ -17,8 +17,9 @@ import type { PurchasesPackageLike } from '../../lib/purchasesPackage.types';
 import {
     APP_WEB_ORIGIN,
     buildLegalPageUrl,
-    hasActiveIndividualSubscriptionPlan,
     paywallTitleKeyForVariant,
+    shouldShowProMemberPaywall,
+    shouldShowTripPassPurchaseOption,
 } from '@cost-share/shared';
 import { useGrowthExperimentFlags } from '../../hooks/useGrowthExperiment';
 import { Text } from '../AppText';
@@ -95,16 +96,15 @@ export function ProPaywallContent({
     const paywallTitleKey = paywallTitleKeyForVariant(paywallHeadlineVariant);
     const language = useAppLanguage();
     const insets = useSafeAreaInsets();
-    const { hasPro, isLoading: proLoading, data: proStatus } = useProStatus(groupId);
+    const { hasPro, isLoading: proLoading } = useProStatus(groupId);
     const { data: subscription, isLoading: subscriptionLoading } = useMySubscription();
-    const individualSubActive =
-        hasActiveIndividualSubscriptionPlan(subscription) ||
-        (proStatus?.individualProUntil != null &&
-            new Date(proStatus.individualProUntil).getTime() > Date.now());
-    const showTripPassForPurchase = showTripPass && !individualSubActive;
+    const showTripPassForPurchase = shouldShowTripPassPurchaseOption({
+        showTripPass,
+        effectiveHasPro: hasPro,
+        subscription,
+    });
     const showMemberPanel =
-        KUPAPAY_PRO_ENABLED &&
-        (hasPro || hasActiveIndividualSubscriptionPlan(subscription));
+        KUPAPAY_PRO_ENABLED && shouldShowProMemberPaywall({ effectiveHasPro: hasPro, subscription });
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [selected, setSelected] = useState<PlanKey>('yearly');
@@ -158,10 +158,10 @@ export function ProPaywallContent({
     }, [loadOfferings, loadAttempt]);
 
     useEffect(() => {
-        if (individualSubActive && selected === 'trip_pass') {
+        if (!showTripPassForPurchase && selected === 'trip_pass') {
             setSelected('yearly');
         }
-    }, [individualSubActive, selected]);
+    }, [showTripPassForPurchase, selected]);
 
     const retryLoad = useCallback(() => {
         setLoadAttempt(n => n + 1);
@@ -192,9 +192,15 @@ export function ProPaywallContent({
     const handlePurchase = useCallback(async () => {
         const pkg = selectedPackage;
         if (!pkg || busy) return;
-        if (selected === 'trip_pass' && !groupId) {
-            showAppToast({ type: 'info', titleKey: 'pro.paywall.tripPassNeedsGroup' });
-            return;
+        if (selected === 'trip_pass') {
+            if (hasPro || !showTripPassForPurchase) {
+                showAppToast({ type: 'info', titleKey: 'pro.paywall.alreadyProTitle' });
+                return;
+            }
+            if (!groupId) {
+                showAppToast({ type: 'info', titleKey: 'pro.paywall.tripPassNeedsGroup' });
+                return;
+            }
         }
         setBusy(true);
         const result = await purchasePackage(pkg, { featureKey, groupId });
@@ -205,7 +211,7 @@ export function ProPaywallContent({
         } else if (!result.userCancelled) {
             showAppToast({ type: 'error', titleKey: 'pro.paywall.purchaseError' });
         }
-    }, [busy, featureKey, groupId, onPurchaseSuccess, selected, selectedPackage]);
+    }, [busy, featureKey, groupId, hasPro, onPurchaseSuccess, selected, selectedPackage, showTripPassForPurchase]);
 
     const storeConfigured = isPurchasesConfigured();
 

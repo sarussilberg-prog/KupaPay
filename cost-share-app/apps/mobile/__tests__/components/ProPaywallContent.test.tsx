@@ -10,7 +10,7 @@ type MockProStatusHook = {
     isLoading: boolean;
     isError: boolean;
     data: MyProStatus | undefined;
-    adminProViewMode: 'real';
+    adminProViewMode: MyProStatus['adminProViewMode'];
     adminProViewOverrideActive: boolean;
     adminProViewExpiresAt: string | null;
 };
@@ -251,6 +251,48 @@ describe('ProPaywallContent offerings load', () => {
         await waitFor(() => {
             expect(purchaseMock).toHaveBeenCalled();
         });
+    });
+
+    it('hides Trip Pass when hasPro is true without a subscription snapshot (admin force / store sync)', async () => {
+        mockUseProStatus.mockReturnValue({
+            hasPro: true,
+            proPerkUnlocked: true,
+            isLoading: false,
+            isError: false,
+            data: {
+                hasPro: true,
+                individualProUntil: null,
+                groupPassUntil: null,
+                includedTripPassCredits: 0,
+                unassignedTripPassCount: 0,
+                adminProViewMode: 'force_pro' as const,
+                adminProViewExpiresAt: '2027-01-01T00:00:00.000Z',
+            },
+            adminProViewMode: 'force_pro' as const,
+            adminProViewOverrideActive: true,
+            adminProViewExpiresAt: '2027-01-01T00:00:00.000Z',
+        });
+        fetchMock.mockResolvedValue({
+            status: 'ready',
+            packages: {
+                monthly: mockMonthly,
+                annual: mockPackage,
+                tripPass: {
+                    identifier: 'trip_pass',
+                    product: { identifier: 'kupapay_trip_pass', priceString: '₪19.90' },
+                },
+            },
+            introEligibility: {},
+        });
+
+        const { queryByTestId, getByTestId } = renderPaywall(
+            <ProPaywallContent featureKey="settings" showTripPass groupId="g1" />,
+        );
+
+        await waitFor(() => {
+            expect(getByTestId('paywall-already-pro')).toBeTruthy();
+        });
+        expect(queryByTestId('paywall-pick-trip-pass')).toBeNull();
     });
 
     it('hides Trip Pass when the user has an active individual Pro subscription', async () => {
